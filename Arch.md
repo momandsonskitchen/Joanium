@@ -1,7 +1,14 @@
+# About
 * Project: Joanium
 * Codename: Project Joana
 * Author: Joel Jolly
 * Tag: AI, Agent, Personal AI, Digital Companion, Personal Assistant, AI Companion, AI Assistant
+
+# Tech Stack
+* Node.js
+* Electron.js
+* CSS
+* JavaScript
 
 # System Files Structure:
 * Assets: only for images, audios, videos only.
@@ -15,6 +22,17 @@
 * Personas: markdown files that contains the personas of the AI agent (Joana is the default set persona).
 * Packages: that contains the features.
 
+# Flow
+## First time interaction:
+* Greet the user and ask the user to accept our terms and conditions and privacy policy.
+* Ask for the user's name.
+* Ask for the user's age.
+* take them to the AI model selection screen (where they can select the AI model they want to use API models, local models).
+* then in the next page  say "congrats you have setup your AI assistant" and then take them to the chat screen.
+
+## After setup and the next time the user opens the app, they should be taken directly to the chat screen.
+* 
+
 # Folder Structure:
 * Core: Backend logic
 * UI: Frontend logic and view (includes css and js)
@@ -27,6 +45,11 @@
 # Design language
 * All buttons should have rounded corners (20px).
 * Should follow material 3 expressive design.
+* I need a clean and very premium looking UI.
+
+# Data Storage
+* To store user data we use Data folder. 
 
 # DO NOT
 * Inside packages all are individual so no one package should import or use from another package. (if there is something that is common then keep it in Shared)
+* Do not add any html related attributes to any of the elements. (like data-attribute like that will reveal to the user that this is a html page and not a native app)
