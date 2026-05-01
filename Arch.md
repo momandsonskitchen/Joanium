@@ -24,5 +24,9 @@
 * In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
     * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
 
+# Design language
+* All buttons should have rounded corners (20px).
+* Should follow material 3 expressive design.
+
 # DO NOT
 * Inside packages all are individual so no one package should import or use from another package. (if there is something that is common then keep it in Shared)
