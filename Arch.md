@@ -17,7 +17,8 @@
 * Shared: for files/features/functions that are used across packages.
 * Build: only for build scripts only.
 * Config: only for configuration files only (files that the AI agent requires but cannot or should not be exposed to the user).
-* Memories: markdown files that should be updated based on user's interactions with the AI.
+* Data/Memories: markdown files that should be updated based on user's interactions with the AI.
+* Data/Models: AI models (ollama models, api models, etc) related information.
 * Skills: markdown files that contains the skills of the AI agent.
 * Personas: markdown files that contains the personas of the AI agent (Joana is the default set persona).
 * Packages: that contains the features.
