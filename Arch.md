@@ -19,6 +19,7 @@
 * Config: only for configuration files only (files that the AI agent requires but cannot or should not be exposed to the user).
 * Data/Memories: markdown files that should be updated based on user's interactions with the AI.
 * Data/Models: AI models (ollama models, api models, etc) related information.
+* Packages/Boot: for files related to auto discovery of packages (the Index.js files that are kept in every package).
 * Skills: markdown files that contains the skills of the AI agent.
 * Personas: markdown files that contains the personas of the AI agent (Joana is the default set persona).
 * Packages: that contains the features.
@@ -32,7 +33,6 @@
 * then in the next page  say "congrats you have setup your AI assistant" and then take them to the chat screen.
 
 ## After setup and the next time the user opens the app, they should be taken directly to the chat screen.
-* 
 
 # Folder Structure:
 * Core: Backend logic
@@ -51,6 +51,12 @@
 # Data Storage
 * To store user data we use Data folder. 
 
-# DO NOT
+# Must Follow
+* Keep your code clean and organized.
+* Dont keep unused code.
 * Inside packages all are individual so no one package should import or use from another package. (if there is something that is common then keep it in Shared)
 * Do not add any html related attributes to any of the elements. (like data-attribute like that will reveal to the user that this is a html page and not a native app)
+* Dont take shortcuts.
+* I need scalable architecture and maintainable, upgradable, easy to debug.
+* Documentation should be updated when you make any changes.
+* Since we are having Index.js for every sub packages there should be a discovery code that should auto discover those packages without hardcoding anything.
