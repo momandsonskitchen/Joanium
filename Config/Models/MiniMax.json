@@ -1,0 +1,57 @@
+{
+  "provider": "minimax",
+  "label": "MiniMax",
+  "endpoint": "https://api.minimax.io/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "MiniMax-M2.7": {
+      "name": "MiniMax M2.7",
+      "description": "Latest flagship — advanced reasoning and coding with long context",
+      "context_window": 204800,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      }
+    },
+    "MiniMax-M2.5": {
+      "name": "MiniMax M2.5",
+      "description": "Balanced flagship for reasoning and coding tasks",
+      "context_window": 204800,
+      "max_output": 8192,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      }
+    },
+    "MiniMax-M2.5-highspeed": {
+      "name": "MiniMax M2.5 High-Speed",
+      "description": "Faster M2.5 variant for lower-latency workloads",
+      "context_window": 204800,
+      "max_output": 8192,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.6,
+        "output": 2.4
+      }
+    }
+  }
+}

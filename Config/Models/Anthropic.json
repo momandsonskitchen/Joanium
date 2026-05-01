@@ -1,0 +1,88 @@
+{
+  "provider": "anthropic",
+  "label": "Claude",
+  "endpoint": "https://api.anthropic.com/v1/messages",
+  "auth_header": "x-api-key",
+  "models": {
+    "claude-opus-4-7": {
+      "name": "Claude Opus 4.7",
+      "description": "Latest flagship — best coding, vision (2576px), and self-checking on complex multi-step tasks",
+      "context_window": 1000000,
+      "max_output": 32000,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": true,
+        "docx": false
+      },
+      "pricing": {
+        "input": 5,
+        "output": 25
+      }
+    },
+    "claude-opus-4-6": {
+      "name": "Claude Opus 4.6",
+      "description": "Previous flagship with 1M context — still highly capable for complex reasoning and coding",
+      "context_window": 1000000,
+      "max_output": 32000,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": true,
+        "docx": false
+      },
+      "pricing": {
+        "input": 5,
+        "output": 25
+      }
+    },
+    "claude-sonnet-4-6": {
+      "name": "Claude Sonnet 4.6",
+      "description": "Balanced model with 1M context — fast, affordable, strong across most tasks",
+      "context_window": 1000000,
+      "max_output": 64000,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": true,
+        "docx": false
+      },
+      "pricing": {
+        "input": 3,
+        "output": 15
+      }
+    },
+    "claude-haiku-4-5-20251001": {
+      "name": "Claude Haiku 4.5",
+      "description": "Fast and compact model for everyday tasks",
+      "context_window": 200000,
+      "max_output": 16000,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": true,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.25,
+        "output": 1.25
+      }
+    },
+    "claude-sonnet-4-5": {
+      "name": "Claude Sonnet 4.5",
+      "description": "Previous balanced model — solid performance at a competitive price",
+      "context_window": 200000,
+      "max_output": 64000,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": true,
+        "docx": false
+      },
+      "pricing": {
+        "input": 3,
+        "output": 15
+      }
+    }
+  }
+}
