@@ -7,6 +7,7 @@
 * Assets: only for images, audios, videos only.
 * Docs: only for markdown documents only (about the system and it workings).
 * Data: only for user data and model data only.
+* Shared: for files/features/functions that are used across packages.
 * Build: only for build scripts only.
 * Config: only for configuration files only (files that the AI agent requires but cannot or should not be exposed to the user).
 * Memories: markdown files that should be updated based on user's interactions with the AI.
@@ -22,3 +23,6 @@
 # Expected working
 * In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
     * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
+
+# DO NOT
+* Inside packages all are individual so no one package should import or use from another package. (if there is something that is common then keep it in Shared)
