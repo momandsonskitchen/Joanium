@@ -1,9 +1,9 @@
-Project: Joanium
-Codename: Project Joana
-Author: Joel Jolly
-Tag: AI, Agent, Personal AI, Digital Companion, Personal Assistant, AI Companion, AI Assistant
+* Project: Joanium
+* Codename: Project Joana
+* Author: Joel Jolly
+* Tag: AI, Agent, Personal AI, Digital Companion, Personal Assistant, AI Companion, AI Assistant
 
-Arch
+# System Files Structure:
 * Assets: only for images, audios, videos only.
 * Docs: only for markdown documents only (about the system and it workings).
 * Data: only for user data and model data only.
@@ -14,7 +14,11 @@ Arch
 * Personas: markdown files that contains the personas of the AI agent (Joana is the default set persona).
 * Packages: that contains the features.
 
-Folder Structure:
+# Folder Structure:
 * Core: Backend logic
-* UI: frontend logic and view (includes css and js)
+* UI: Frontend logic and view (includes css and js)
 * IPC: Inter-Process Communication
+
+# Expected working
+* In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
+    * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
