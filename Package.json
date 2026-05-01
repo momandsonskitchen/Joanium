@@ -1,0 +1,44 @@
+{
+  "name": "Joanium",
+  "version": "2026.430.1",
+  "description": "Local-first AI desktop assistant with multi-model chat, automations, agents, MCP, and real integrations. Works with Anthropic, OpenAI, Gemini, Ollama and more.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "main": "App.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "joanium",
+    "ai-assistant",
+    "local-first",
+    "desktop-app",
+    "electron",
+    "electron-app",
+    "ai-desktop",
+    "ai-agent",
+    "automation",
+    "mcp",
+    "model-context-protocol",
+    "multi-model",
+    "ollama",
+    "anthropic",
+    "openai",
+    "gemini",
+    "agentic-ai",
+    "productivity",
+    "chatbot",
+    "ai-workflow",
+    "github-integration",
+    "gmail-integration",
+    "scheduled-agents",
+    "personas",
+    "skills",
+    "offline-ai",
+    "privacy-first"
+  ],
+  "author": "Joel Jolly",
+  "license": "Apache-2.0"
+}
