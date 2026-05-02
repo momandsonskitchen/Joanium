@@ -73,12 +73,11 @@
   transform: rotate(180deg);
 }
 
+/* Panel is portalled to document.body so it is never clipped by ancestor
+   overflow. position:fixed lets us place it via getBoundingClientRect(). */
 .joanium-dropdown__panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  z-index: 100;
+  position: fixed;
+  z-index: 9999;
   border-radius: var(--radius-md);
   padding: 8px;
   background:
@@ -105,7 +104,8 @@
   display: none;
 }
 
-.is-open .joanium-dropdown__panel {
+/* Open state targets the panel directly (it's no longer a child of wrapper) */
+.joanium-dropdown__panel.is-open {
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;

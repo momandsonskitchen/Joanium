@@ -30,9 +30,12 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
 
   trigger.append(triggerText, chevron);
 
+  // Panel is portalled to document.body so it is never clipped by any
+  // ancestor's overflow or z-index stacking context (e.g. inside a modal).
   const panel = document.createElement('div');
   panel.className = 'joanium-dropdown__panel';
   panel.setAttribute('role', 'listbox');
+  document.body.append(panel);
 
   let currentValue = selectedValue ?? '';
 
@@ -64,13 +67,24 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
     }
   }
 
+  // Position the portalled panel directly below the trigger using fixed coords.
+  function positionPanel() {
+    const rect = trigger.getBoundingClientRect();
+    panel.style.left  = `${rect.left}px`;
+    panel.style.top   = `${rect.bottom + 8}px`;
+    panel.style.width = `${rect.width}px`;
+  }
+
   function open() {
+    positionPanel();
     wrapper.classList.add('is-open');
+    panel.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
   }
 
   function close() {
     wrapper.classList.remove('is-open');
+    panel.classList.remove('is-open');
     trigger.setAttribute('aria-expanded', 'false');
   }
 
@@ -80,26 +94,36 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
   });
 
   function onDocumentClick(event) {
-    if (!wrapper.contains(event.target)) close();
+    if (!wrapper.contains(event.target) && !panel.contains(event.target)) close();
   }
 
   function onDocumentKeydown(event) {
     if (event.key === 'Escape') close();
   }
 
+  // Keep panel aligned if the page scrolls or the window resizes while open.
+  function onScrollOrResize() {
+    if (wrapper.classList.contains('is-open')) positionPanel();
+  }
+
   document.addEventListener('click', onDocumentClick);
   document.addEventListener('keydown', onDocumentKeydown);
+  window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
+  window.addEventListener('resize', onScrollOrResize, { passive: true });
 
   updateTriggerText();
   buildOptions();
 
-  wrapper.append(trigger, panel);
+  wrapper.append(trigger);
 
   return {
     element: wrapper,
     dispose() {
       document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onDocumentKeydown);
+      window.removeEventListener('scroll', onScrollOrResize, { capture: true });
+      window.removeEventListener('resize', onScrollOrResize);
+      panel.remove();
     }
   };
 }
