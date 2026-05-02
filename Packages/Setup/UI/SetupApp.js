@@ -160,9 +160,9 @@ function createMonthPicker({ strings, selectedValue, onSelect }) {
   function openList() {
     isOpen = true;
     const rect = trigger.getBoundingClientRect();
-    listbox.style.top    = `${rect.bottom + 8}px`;
-    listbox.style.left   = `${rect.left}px`;
-    listbox.style.width  = `${rect.width}px`;
+    listbox.style.top = `${rect.bottom + 8}px`;
+    listbox.style.left = `${rect.left}px`;
+    listbox.style.width = `${rect.width}px`;
     listbox.classList.add('is-open');
     trigger.classList.add('is-open');
     triggerChevron.style.transform = 'rotate(180deg)';
@@ -620,7 +620,7 @@ async function bootstrap() {
           } else {
             draft.usageModes = draft.usageModes.filter((item) => item !== optionId);
           }
-        });
+        }, { rerender: false });
       }
     });
 
@@ -652,9 +652,9 @@ async function bootstrap() {
     for (const feature of strings.welcome.features) {
       const card = createElement('article', 'setup-feature-card');
       card.append(
-        createElement('span',  'setup-feature-card__icon',  feature.icon),
-        createElement('strong','setup-feature-card__title', feature.title),
-        createElement('p',     'setup-feature-card__body',  feature.body)
+        createElement('span', 'setup-feature-card__icon', feature.icon),
+        createElement('strong', 'setup-feature-card__title', feature.title),
+        createElement('p', 'setup-feature-card__body', feature.body)
       );
       featureGrid.append(card);
     }
