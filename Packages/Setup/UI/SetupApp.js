@@ -347,7 +347,11 @@ async function bootstrap() {
       onChange: (nextChecked) => {
         patchState((draft) => {
           draft.consentAccepted = nextChecked;
-        });
+        }, { rerender: false });
+        const startButton = root.querySelector('.setup-stage__actions .joanium-button');
+        if (startButton) {
+          startButton.disabled = !nextChecked;
+        }
       }
     });
 
