@@ -35,8 +35,7 @@ async function createMainWindow(entryPackage) {
     height: 960,
     minWidth: 1160,
     minHeight: 780,
-    show: true,
-    center: true,
+    show: false,
     frame: false,
     autoHideMenuBar: true,
     backgroundColor: '#f4ebe5',
@@ -59,7 +58,6 @@ async function createMainWindow(entryPackage) {
       browserWindow.restore();
     }
 
-    browserWindow.center();
     browserWindow.maximize();
     browserWindow.show();
     browserWindow.focus();
