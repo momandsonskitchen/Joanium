@@ -3,7 +3,7 @@
 .joanium-modal {
   position: fixed;
   inset: 0;
-  background: rgba(58, 35, 24, 0.22);
+  background: rgba(45, 15, 65, 0.22);
   backdrop-filter: blur(22px);
   display: none;
   align-items: center;
@@ -19,10 +19,10 @@
 .joanium-modal__panel {
   /* width and maxHeight are set via JS (createModal options) */
   border-radius: 30px;
-  background: rgba(255, 250, 247, 0.92);
+  background: rgba(249, 244, 254, 0.92);
   box-shadow:
-    inset 0 0 0 1px rgba(121, 89, 71, 0.08),
-    0 32px 80px rgba(76, 50, 35, 0.16);
+    inset 0 0 0 1px rgba(108, 50, 132, 0.08),
+    0 32px 80px rgba(60, 22, 85, 0.16);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -34,21 +34,21 @@
   align-items: center;
   justify-content: space-between;
   padding: 24px 26px 20px;
-  border-bottom: 1px solid rgba(121, 89, 71, 0.08);
+  border-bottom: 1px solid rgba(108, 50, 132, 0.08);
 }
 
 .joanium-modal__title {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #24150d;
+  color: #1e0d28;
 }
 
 .joanium-modal__close {
   border: 0;
   border-radius: 16px;
-  background: rgba(255, 241, 234, 0.9);
-  color: #51382c;
+  background: rgba(242, 224, 252, 0.9);
+  color: #401860;
   font: inherit;
   font-size: 13px;
   font-weight: 700;
