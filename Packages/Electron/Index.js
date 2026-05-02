@@ -1,23 +1,12 @@
 import path from 'node:path';
-import { appendFileSync, mkdirSync } from 'node:fs';
 import { app, BrowserWindow, ipcMain } from 'electron';
+import { createBootLogger } from '../Boot/Index.js';
 
 let mainWindow = null;
 
-function writeBootLog(message, details = '') {
-  try {
-    const logDirectory = path.join(process.cwd(), 'Build', 'Logs');
-    mkdirSync(logDirectory, { recursive: true });
-    const suffix = details ? ` ${details}` : '';
-    appendFileSync(
-      path.join(logDirectory, 'electron-boot.log'),
-      `[${new Date().toISOString()}] ${message}${suffix}\n`,
-      'utf8'
-    );
-  } catch {
-    // Ignore logging failures during boot diagnostics.
-  }
-}
+const writeBootLog = createBootLogger(
+  path.join(process.cwd(), 'Build', 'Logs', 'electron-boot.log')
+);
 
 function registerIpcHandlers(handlerDefinitions = []) {
   writeBootLog('registerIpcHandlers:start', String(handlerDefinitions.length));

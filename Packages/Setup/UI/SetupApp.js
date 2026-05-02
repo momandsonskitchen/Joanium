@@ -248,7 +248,9 @@ async function bootstrap() {
       onChange: (nextChecked) => {
         patchState((draft) => {
           draft.consentAccepted = nextChecked;
-        });
+        }, { rerender: false });
+        const actionButton = root.querySelector('.setup-stage__actions .joanium-button');
+        if (actionButton) actionButton.disabled = !nextChecked;
       }
     });
 

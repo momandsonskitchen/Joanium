@@ -1,25 +1,13 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { appendFileSync, mkdirSync } from 'node:fs';
-import { discoverPackages, loadPackageModule } from './Boot/Index.js';
+import { discoverPackages, loadPackageModule, createBootLogger } from './Boot/Index.js';
 
 const packagesDirectory = path.dirname(fileURLToPath(import.meta.url));
 const rootDirectory = path.resolve(packagesDirectory, '..');
 
-function writeBootLog(message, details = '') {
-  try {
-    const logDirectory = path.join(rootDirectory, 'Build', 'Logs');
-    mkdirSync(logDirectory, { recursive: true });
-    const suffix = details ? ` ${details}` : '';
-    appendFileSync(
-      path.join(logDirectory, 'electron-boot.log'),
-      `[${new Date().toISOString()}] ${message}${suffix}\n`,
-      'utf8'
-    );
-  } catch {
-    // Ignore logging failures during boot diagnostics.
-  }
-}
+const writeBootLog = createBootLogger(
+  path.join(rootDirectory, 'Build', 'Logs', 'electron-boot.log')
+);
 
 export async function bootstrapApplication() {
   writeBootLog('bootstrapApplication:start');

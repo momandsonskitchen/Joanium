@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { access, readdir } from 'node:fs/promises';
+import { appendFileSync, mkdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 async function hasEntryFile(entryPath) {
@@ -43,4 +44,20 @@ export async function loadPackageModule(registry, packageName) {
   }
 
   return import(pathToFileURL(packageRecord.entryPath).href);
+}
+
+export function createBootLogger(logFilePath) {
+  return function writeBootLog(message, details = '') {
+    try {
+      mkdirSync(path.dirname(logFilePath), { recursive: true });
+      const suffix = details ? ` ${details}` : '';
+      appendFileSync(
+        logFilePath,
+        `[${new Date().toISOString()}] ${message}${suffix}\n`,
+        'utf8'
+      );
+    } catch {
+      // Ignore logging failures during boot diagnostics.
+    }
+  };
 }
