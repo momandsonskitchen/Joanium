@@ -61,3 +61,6 @@
 * I need scalable architecture and maintainable, upgradable, easy to debug.
 * Documentation should be updated when you make any changes.
 * Since we are having Index.js for every sub packages there should be a discovery code that should auto discover those packages without hardcoding anything.
+* do not use commonJS modules use ES modules only.
+* i need a highly scalable architecture so that i can add new features (packages) easily without breaking the existing ones.
+* Do not hard code text in js or in html they all must come from i18n files only (English is the fallback and the default language).
