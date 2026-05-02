@@ -532,6 +532,45 @@ async function bootstrap() {
     return card;
   }
 
+  function syncProviderDetailSection(stage) {
+    const DETAIL_SLOT = 'setup-provider-detail-slot';
+
+    const existing = stage.querySelector(`.${DETAIL_SLOT}`);
+    if (existing) {
+      existing.remove();
+    }
+
+    if (state.providers.selected.length === 0) {
+      return;
+    }
+
+    const slot = createElement('div', DETAIL_SLOT);
+
+    slot.append(
+      createElement(
+        'span',
+        'setup-provider-config__label setup-provider-config__label--selected',
+        strings.providers.selectedProvidersLabel
+      )
+    );
+
+    const detailGrid = createElement('div', 'setup-provider-detail-grid');
+
+    for (const providerId of state.providers.selected) {
+      const provider = providersById.get(providerId);
+
+      if (provider) {
+        detailGrid.append(renderProviderConfig(provider));
+      }
+    }
+
+    slot.append(detailGrid);
+
+    // Insert right before the security card so layout order is preserved
+    const securityCard = stage.querySelector('.setup-security-card');
+    stage.insertBefore(slot, securityCard);
+  }
+
   function renderProvidersScene() {
     const stage = createElement('section', 'setup-stage setup-stage--providers');
     stage.append(
@@ -546,32 +585,11 @@ async function bootstrap() {
       onToggle: (_providerId, selectedProviderIds) => {
         patchState((draft) => {
           draft.providers.selected = selectedProviderIds;
-        });
+        }, { rerender: false });
+        syncProviderDetailSection(stage);
       }
     });
     stage.append(providerScroller);
-
-    if (state.providers.selected.length > 0) {
-      stage.append(
-        createElement(
-          'span',
-          'setup-provider-config__label setup-provider-config__label--selected',
-          strings.providers.selectedProvidersLabel
-        )
-      );
-
-      const detailGrid = createElement('div', 'setup-provider-detail-grid');
-
-      for (const providerId of state.providers.selected) {
-        const provider = providersById.get(providerId);
-
-        if (provider) {
-          detailGrid.append(renderProviderConfig(provider));
-        }
-      }
-
-      stage.append(detailGrid);
-    }
 
     const securityCard = createElement('div', 'setup-security-card');
     securityCard.append(
@@ -579,6 +597,8 @@ async function bootstrap() {
       createElement('p', 'setup-security-card__body', strings.providers.securityBody)
     );
     stage.append(securityCard);
+
+    syncProviderDetailSection(stage);
 
     return stage;
   }
