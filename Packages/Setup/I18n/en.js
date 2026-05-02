@@ -98,32 +98,32 @@ const en = {
     options: [
       {
         id: 'coding',
-        label: 'Coding',
+        label: '💻 Coding',
         description: 'Ship features, debug code, explain errors, and move through technical work faster.'
       },
       {
         id: 'designing',
-        label: 'Designing',
+        label: '🎨 Designing',
         description: 'Explore UI directions, refine layouts, and turn rough ideas into polished screens.'
       },
       {
         id: 'writing',
-        label: 'Writing',
+        label: '✍️ Writing',
         description: 'Draft posts, emails, documents, scripts, and clearer everyday communication.'
       },
       {
         id: 'research',
-        label: 'Research',
+        label: '🔍 Research',
         description: 'Compare sources, summarize topics, and collect grounded answers quickly.'
       },
       {
         id: 'learning',
-        label: 'Learning',
+        label: '📚 Learning',
         description: 'Understand new skills step by step without losing context or momentum.'
       },
       {
         id: 'productivity',
-        label: 'Productivity',
+        label: '⚡ Productivity',
         description: 'Plan tasks, automate routine work, and keep moving without juggling tools.'
       }
     ]
