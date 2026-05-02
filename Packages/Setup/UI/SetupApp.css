@@ -132,7 +132,7 @@ body::after {
 
 .setup-stage__title {
   margin: 0;
-  font-size: clamp(30px, 4.4vw, 52px);
+  font-size: clamp(30px, 4.4vw, 50px);
   line-height: 1.04;
   font-weight: 720;
   letter-spacing: -0.04em;
