@@ -47,26 +47,14 @@ function providerHasRequirements(provider, details) {
 }
 
 function buildProviderDetails(providers, persistedDetails = {}) {
-  const details = { ...persistedDetails };
+  const details = {};
 
   for (const provider of providers) {
-    details[provider.id] ??= {
-      selectedModels: [],
-      customModel: ''
-    };
+    const existing = persistedDetails[provider.id] ?? {};
+    details[provider.id] = {};
 
     for (const requirement of provider.requirements) {
-      if (!details[provider.id][requirement.key]) {
-        details[provider.id][requirement.key] = requirement.defaultValue;
-      }
-    }
-
-    if (!Array.isArray(details[provider.id].selectedModels)) {
-      details[provider.id].selectedModels = [];
-    }
-
-    if (typeof details[provider.id].customModel !== 'string') {
-      details[provider.id].customModel = '';
+      details[provider.id][requirement.key] = existing[requirement.key] || requirement.defaultValue;
     }
   }
 

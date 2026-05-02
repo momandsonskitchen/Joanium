@@ -69,12 +69,15 @@ function sanitizeDetails(details) {
       continue;
     }
 
-    nextDetails[providerId] = {
-      apiKey: sanitizeString(providerDetails.apiKey),
-      endpoint: sanitizeString(providerDetails.endpoint),
-      customModel: sanitizeString(providerDetails.customModel),
-      selectedModels: sanitizeArray(providerDetails.selectedModels)
-    };
+    nextDetails[providerId] = {};
+
+    if (typeof providerDetails.apiKey === 'string') {
+      nextDetails[providerId].apiKey = providerDetails.apiKey.trim();
+    }
+
+    if (typeof providerDetails.endpoint === 'string') {
+      nextDetails[providerId].endpoint = providerDetails.endpoint.trim();
+    }
   }
 
   return nextDetails;
