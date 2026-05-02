@@ -131,10 +131,39 @@ const en = {
   welcome: {
     title: 'Hey! {name}, welcome to {appName}!',
     description:
-      '{appName} is now tuned for {usageSummary}. Your providers are ready, your details are saved locally, and the workspace can open without redoing setup.',
-    providerSummaryLabel: 'Active providers',
-    usageSummaryLabel: 'Configured for',
-    localStorageLabel: 'Saved locally'
+      'You\'re all set. {appName} is ready to think alongside you — here\'s what makes it different.',
+    features: [
+      {
+        icon: '🧠',
+        title: 'Thinks with you, not for you',
+        body: 'Joanium doesn\'t just answer questions. It reasons through problems with you, adapts to your style, and gets sharper the more you use it.'
+      },
+      {
+        icon: '🔀',
+        title: 'Any model, your choice',
+        body: 'Switch between Claude, GPT, Gemini, Mistral and more without losing context. Use the best model for the job — not just the one that\'s trendy.'
+      },
+      {
+        icon: '🔒',
+        title: 'Private by design',
+        body: 'Your setup, keys, and history live on your device. Nothing is sent anywhere unless you initiate it. No telemetry, no cloud sync unless you want it.'
+      },
+      {
+        icon: '⚡',
+        title: 'Built for real work',
+        body: 'Joanium is tuned for the work you actually do — coding, writing, research, designing — not generic chat. Your workspace adapts to your goals.'
+      },
+      {
+        icon: '🧩',
+        title: 'Grows with you',
+        body: 'Add providers, switch models, and expand capabilities over time. Joanium is modular — new packages plug straight in without redoing setup.'
+      },
+      {
+        icon: '🎯',
+        title: 'No noise, just signal',
+        body: 'No feeds, no distractions, no upsells. Just a focused workspace that helps you think clearly and ship faster.'
+      }
+    ]
   },
   documents: {
     terms: {

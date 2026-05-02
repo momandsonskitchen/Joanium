@@ -585,7 +585,6 @@ async function bootstrap() {
 
   function renderWelcomeScene() {
     const stage = createElement('section', 'setup-stage setup-stage--welcome');
-    const usageSummary = getUsageSummary(state.usageModes, strings);
     stage.append(
       createElement(
         'h1',
@@ -599,47 +598,24 @@ async function bootstrap() {
         'p',
         'setup-stage__description',
         formatText(strings.welcome.description, {
-          appName: strings.appName,
-          usageSummary
+          appName: strings.appName
         })
       )
     );
 
-    const summaryGrid = createElement('div', 'setup-summary-grid');
-    const providerCard = createElement('article', 'setup-summary-card');
-    providerCard.append(
-      createElement('span', 'setup-summary-card__label', strings.welcome.providerSummaryLabel),
-      createElement(
-        'strong',
-        'setup-summary-card__value',
-        state.providers.selected
-          .map((providerId) => providersById.get(providerId)?.label)
-          .filter(Boolean)
-          .join(', ')
-      )
-    );
+    const featureGrid = createElement('div', 'setup-feature-grid');
 
-    const usageCard = createElement('article', 'setup-summary-card');
-    usageCard.append(
-      createElement('span', 'setup-summary-card__label', strings.welcome.usageSummaryLabel),
-      createElement(
-        'strong',
-        'setup-summary-card__value',
-        strings.usage.options
-          .filter((option) => state.usageModes.includes(option.id))
-          .map((option) => option.label)
-          .join(', ')
-      )
-    );
+    for (const feature of strings.welcome.features) {
+      const card = createElement('article', 'setup-feature-card');
+      card.append(
+        createElement('span', 'setup-feature-card__icon', feature.icon),
+        createElement('strong', 'setup-feature-card__title', feature.title),
+        createElement('p', 'setup-feature-card__body', feature.body)
+      );
+      featureGrid.append(card);
+    }
 
-    const localCard = createElement('article', 'setup-summary-card');
-    localCard.append(
-      createElement('span', 'setup-summary-card__label', strings.welcome.localStorageLabel),
-      createElement('strong', 'setup-summary-card__value', strings.paths.localDataFile)
-    );
-
-    summaryGrid.append(providerCard, usageCard, localCard);
-    stage.append(summaryGrid);
+    stage.append(featureGrid);
     return stage;
   }
 
