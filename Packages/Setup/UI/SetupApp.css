@@ -159,7 +159,7 @@ body::after {
 
 .setup-date-grid {
   display: grid;
-  grid-template-columns: 0.8fr 1.4fr 1fr;
+  grid-template-columns: 0.8fr 1fr 1fr;
   gap: 16px;
 }
 
@@ -175,40 +175,121 @@ body::after {
   color: rgba(44, 27, 17, 0.82);
 }
 
-.setup-month-picker__grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+.setup-month-dropdown {
+  position: relative;
 }
 
-.setup-month-picker__chip {
-  min-height: 52px;
+.setup-month-dropdown__trigger {
+  width: 100%;
+  min-height: 62px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 20px;
   background: rgba(255, 250, 247, 0.82);
   box-shadow:
     inset 0 0 0 1px rgba(112, 84, 66, 0.08),
-    0 10px 24px rgba(96, 67, 47, 0.06);
+    0 16px 32px rgba(96, 67, 47, 0.08);
   color: #24150d;
   font: inherit;
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
+  text-align: left;
   transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease;
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease;
 }
 
-.setup-month-picker__chip:hover {
+.setup-month-dropdown__trigger:focus,
+.setup-month-dropdown__trigger.is-open {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 168, 128, 0.34),
+    0 22px 40px rgba(238, 168, 127, 0.14);
+  background: rgba(255, 250, 247, 0.96);
   transform: translateY(-1px);
 }
 
-.setup-month-picker__chip.is-selected {
-  background: linear-gradient(180deg, rgba(255, 241, 234, 0.96), rgba(255, 249, 245, 0.94));
+.setup-month-dropdown__trigger-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setup-month-dropdown__trigger-label.is-placeholder {
+  color: rgba(101, 79, 66, 0.45);
+  font-weight: 400;
+}
+
+.setup-month-dropdown__chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: rgba(44, 27, 17, 0.45);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.setup-month-dropdown__listbox {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 18px;
+  background: rgba(255, 252, 249, 0.96);
   box-shadow:
-    inset 0 0 0 1px rgba(244, 170, 129, 0.28),
-    0 16px 30px rgba(239, 168, 129, 0.14);
+    inset 0 0 0 1px rgba(112, 84, 66, 0.08),
+    0 20px 48px rgba(96, 67, 47, 0.14),
+    0 4px 12px rgba(96, 67, 47, 0.06);
+  backdrop-filter: blur(12px);
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 120, 100, 0.2) transparent;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  transform-origin: top center;
+  pointer-events: none;
+  transition:
+    opacity 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.setup-month-dropdown__listbox.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.setup-month-dropdown__option {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #24150d;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.setup-month-dropdown__option:hover {
+  background: rgba(255, 236, 223, 0.72);
+}
+
+.setup-month-dropdown__option.is-selected {
+  background: linear-gradient(180deg, rgba(255, 233, 218, 0.9), rgba(255, 243, 236, 0.88));
+  color: #7a3e25;
+  font-weight: 700;
 }
 
 .setup-provider-detail-grid {
@@ -566,9 +647,6 @@ body::after {
     grid-template-columns: 1fr;
   }
 
-  .setup-month-picker__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 780px) {

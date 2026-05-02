@@ -96,23 +96,90 @@ function createDocumentNodes(documentDefinition) {
 }
 
 function createMonthPicker({ strings, selectedValue, onSelect }) {
+  const months = strings.dob.months.filter((item) => item.value);
+  const placeholderText = strings.dob.monthPlaceholder ?? 'Month';
+
   const wrapper = createElement('section', 'setup-month-picker');
   wrapper.append(createElement('span', 'setup-month-picker__label', strings.dob.monthLabel));
 
-  const grid = createElement('div', 'setup-month-picker__grid');
+  const dropdownRoot = createElement('div', 'setup-month-dropdown');
 
-  for (const month of strings.dob.months.filter((item) => item.value)) {
-    const monthButton = createElement('button', 'setup-month-picker__chip', month.label);
-    monthButton.type = 'button';
-    monthButton.__focusKey = `profile.dob.month.${month.value}`;
-    monthButton.classList.toggle('is-selected', month.value === selectedValue);
-    monthButton.addEventListener('click', () => {
+  const trigger = createElement('button', 'setup-month-dropdown__trigger');
+  trigger.type = 'button';
+  trigger.__focusKey = 'profile.dob.month';
+
+  const triggerLabel = createElement('span', 'setup-month-dropdown__trigger-label',
+    selectedValue
+      ? (months.find((m) => m.value === selectedValue)?.label ?? placeholderText)
+      : placeholderText
+  );
+  triggerLabel.classList.toggle('is-placeholder', !selectedValue);
+
+  const triggerChevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  triggerChevron.setAttribute('class', 'setup-month-dropdown__chevron');
+  triggerChevron.setAttribute('viewBox', '0 0 16 16');
+  triggerChevron.setAttribute('fill', 'none');
+  triggerChevron.setAttribute('aria-hidden', 'true');
+  const chevronPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  chevronPath.setAttribute('d', 'M3 5.5L8 10.5L13 5.5');
+  chevronPath.setAttribute('stroke', 'currentColor');
+  chevronPath.setAttribute('stroke-width', '1.75');
+  chevronPath.setAttribute('stroke-linecap', 'round');
+  chevronPath.setAttribute('stroke-linejoin', 'round');
+  triggerChevron.append(chevronPath);
+  trigger.append(triggerLabel, triggerChevron);
+
+  const listbox = createElement('ul', 'setup-month-dropdown__listbox');
+  listbox.setAttribute('role', 'listbox');
+
+  let isOpen = false;
+
+  for (const month of months) {
+    const item = createElement('li', 'setup-month-dropdown__option', month.label);
+    item.setAttribute('role', 'option');
+    item.dataset.value = month.value;
+    item.classList.toggle('is-selected', month.value === selectedValue);
+    item.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      triggerLabel.textContent = month.label;
+      triggerLabel.classList.remove('is-placeholder');
+      listbox.querySelectorAll('.setup-month-dropdown__option').forEach((el) => {
+        el.classList.toggle('is-selected', el.dataset.value === month.value);
+      });
+      closeList();
       onSelect(month.value);
     });
-    grid.append(monthButton);
+    listbox.append(item);
   }
 
-  wrapper.append(grid);
+  function openList() {
+    isOpen = true;
+    listbox.classList.add('is-open');
+    trigger.classList.add('is-open');
+    triggerChevron.style.transform = 'rotate(180deg)';
+  }
+
+  function closeList() {
+    isOpen = false;
+    listbox.classList.remove('is-open');
+    trigger.classList.remove('is-open');
+    triggerChevron.style.transform = '';
+  }
+
+  trigger.addEventListener('click', () => {
+    isOpen ? closeList() : openList();
+  });
+
+  trigger.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (!dropdownRoot.contains(document.activeElement)) {
+        closeList();
+      }
+    }, 100);
+  });
+
+  dropdownRoot.append(trigger, listbox);
+  wrapper.append(dropdownRoot);
   return wrapper;
 }
 
