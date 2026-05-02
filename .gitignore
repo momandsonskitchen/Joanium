@@ -1,2 +1,7 @@
 node_modules/
 .env
+Data/Agents/
+Data/Channels/
+Data/Chats/
+Data/Memories/
+Data/User.json

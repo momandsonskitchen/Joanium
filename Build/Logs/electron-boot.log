@@ -675,3 +675,30 @@
 [2026-05-02T10:37:43.283Z] browserWindow:focus
 [2026-05-02T10:37:44.465Z] webContents:did-start-loading
 [2026-05-02T10:37:44.875Z] webContents:did-finish-load
+[2026-05-02T10:38:58.958Z] bootstrapApplication:start
+[2026-05-02T10:38:58.962Z] bootstrapApplication:registry-ready 15
+[2026-05-02T10:38:58.965Z] bootstrapApplication:electron-loaded
+[2026-05-02T10:38:58.970Z] bootstrapApplication:setup-loaded
+[2026-05-02T10:38:58.970Z] bootstrapApplication:setup-package-created
+[2026-05-02T10:38:58.971Z] bootElectron:start
+[2026-05-02T10:38:58.972Z] bootElectron:process-type browser
+[2026-05-02T10:38:58.972Z] bootElectron:app-isReady-initial false
+[2026-05-02T10:38:58.973Z] registerIpcHandlers:start 3
+[2026-05-02T10:38:58.973Z] registerIpcHandlers:channel setup:bootstrap
+[2026-05-02T10:38:58.974Z] registerIpcHandlers:channel setup:save-draft
+[2026-05-02T10:38:58.974Z] registerIpcHandlers:channel setup:complete
+[2026-05-02T10:38:58.974Z] bootElectron:waiting-for-ready-event
+[2026-05-02T10:38:58.975Z] bootstrapApplication:bootElectron-resolved
+[2026-05-02T10:38:59.112Z] app:ready-event
+[2026-05-02T10:38:59.112Z] launchMainWindow:start
+[2026-05-02T10:38:59.113Z] createMainWindow:start D:\Projects\Joanium\v2\Packages\Setup\UI\Index.html
+[2026-05-02T10:39:01.090Z] app:web-contents-created
+[2026-05-02T10:39:01.142Z] app:browser-window-created
+[2026-05-02T10:39:03.805Z] webContents:did-start-loading
+[2026-05-02T10:39:05.420Z] browserWindow:focus
+[2026-05-02T10:39:09.636Z] browserWindow:show
+[2026-05-02T10:39:09.684Z] webContents:did-finish-load
+[2026-05-02T10:39:09.685Z] createMainWindow:loadFile-resolved
+[2026-05-02T10:39:09.687Z] browserWindow:show
+[2026-05-02T10:39:09.689Z] launchMainWindow:complete
+[2026-05-02T10:39:09.699Z] browserWindow:show
