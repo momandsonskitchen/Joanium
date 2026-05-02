@@ -9,6 +9,7 @@
 * Electron.js
 * CSS
 * JavaScript
+* No react, no frameworks, no libraries other than the ones that are mentioned above. ( Vanilla JS )
 
 # System Files Structure:
 * Assets: only for images, audios, videos only.
