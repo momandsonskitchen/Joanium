@@ -1,3 +1,5 @@
+@import "../CustomScrollbar/CustomScrollbar.css";
+
 .joanium-modal {
   position: fixed;
   inset: 0;
@@ -15,9 +17,7 @@
 }
 
 .joanium-modal__panel {
-  width: min(720px, 100%);
-  max-height: min(82vh, 860px);
-  overflow: hidden;
+  /* width and maxHeight are set via JS (createModal options) */
   border-radius: 30px;
   background: rgba(255, 250, 247, 0.92);
   box-shadow:
@@ -25,9 +25,11 @@
     0 32px 80px rgba(76, 50, 35, 0.16);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .joanium-modal__header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,7 +56,17 @@
   cursor: pointer;
 }
 
+/* Relative container scopes the custom scrollbar track to the body area */
+.joanium-modal__body-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .joanium-modal__body {
-  overflow: auto;
+  height: 100%;
+  overflow-y: hidden;
+  overflow-x: hidden;
   padding: 12px 26px 26px;
 }

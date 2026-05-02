@@ -1,6 +1,10 @@
+// Languages
 import en from '../I18n/en.js';
 import de from '../I18n/de.js';
 import fr from '../I18n/fr.js';
+
+// Shared Components
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createButton } from '../../Shared/Button/Button.js';
 import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
 import { createInputBox } from '../../Shared/InputBox/InputBox.js';
@@ -154,6 +158,10 @@ function createMonthPicker({ strings, selectedValue, onSelect }) {
 
   function openList() {
     isOpen = true;
+    const rect = trigger.getBoundingClientRect();
+    listbox.style.top    = `${rect.bottom + 8}px`;
+    listbox.style.left   = `${rect.left}px`;
+    listbox.style.width  = `${rect.width}px`;
     listbox.classList.add('is-open');
     trigger.classList.add('is-open');
     triggerChevron.style.transform = 'rotate(180deg)';
@@ -221,6 +229,7 @@ async function bootstrap() {
   let runtimeError = '';
   let autoSaveTimer = 0;
   let providerScroller = null;
+  let currentScrollbar = null;
 
   const root = document.getElementById('app');
   const modal = createModal({ closeLabel: strings.common.close });
@@ -759,56 +768,6 @@ async function bootstrap() {
     stage.append(actions);
   }
 
-  function attachCustomScrollbar(wrapper, scroller) {
-    const scrollbar = createElement('div', 'setup-custom-scrollbar');
-    const thumb = createElement('div', 'setup-custom-scrollbar__thumb');
-    scrollbar.append(thumb);
-    wrapper.append(scrollbar);
-
-    function updateThumb() {
-      const scrollable = scroller.scrollHeight - scroller.clientHeight;
-      if (scrollable <= 0) {
-        scrollbar.style.display = 'none';
-        return;
-      }
-      scrollbar.style.display = '';
-      const trackHeight = scrollbar.clientHeight;
-      const thumbHeight = Math.max((scroller.clientHeight / scroller.scrollHeight) * trackHeight, 32);
-      const maxTop = trackHeight - thumbHeight;
-      const progress = scroller.scrollTop / scrollable;
-      thumb.style.height = `${thumbHeight}px`;
-      thumb.style.top = `${progress * maxTop}px`;
-    }
-
-    let dragging = false;
-    let dragStartY = 0;
-    let dragStartScrollTop = 0;
-
-    thumb.addEventListener('pointerdown', (e) => {
-      e.stopPropagation();
-      dragging = true;
-      dragStartY = e.clientY;
-      dragStartScrollTop = scroller.scrollTop;
-      thumb.setPointerCapture(e.pointerId);
-    });
-
-    thumb.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const scrollable = scroller.scrollHeight - scroller.clientHeight;
-      const trackHeight = scrollbar.clientHeight;
-      const thumbHeight = thumb.offsetHeight;
-      const maxTop = trackHeight - thumbHeight;
-      const delta = e.clientY - dragStartY;
-      scroller.scrollTop = dragStartScrollTop + (delta / maxTop) * scrollable;
-    });
-
-    thumb.addEventListener('pointerup', () => { dragging = false; });
-    thumb.addEventListener('pointercancel', () => { dragging = false; });
-
-    scroller.addEventListener('scroll', updateThumb);
-    requestAnimationFrame(updateThumb);
-  }
-
   function render() {
     const focusState = captureFocusState(root);
     const shell = createElement('main', 'setup-shell');
@@ -821,12 +780,18 @@ async function bootstrap() {
 
     const stageWrapper = createElement('div', 'setup-stage-wrapper');
     stageWrapper.append(stage);
-    attachCustomScrollbar(stageWrapper, stage);
-
     body.append(stageWrapper);
     shell.append(body);
+
+    // Dispose previous scrollbar before wiping the DOM
+    currentScrollbar?.dispose();
+    currentScrollbar = null;
+
     root.replaceChildren(shell);
     restoreFocusState(root, focusState);
+
+    // Attach AFTER elements are in the DOM so the first measurement is accurate
+    currentScrollbar = attachCustomScrollbar(stageWrapper, stage, { top: 34, bottom: 34, right: 12 });
   }
 
   render();
