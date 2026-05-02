@@ -140,10 +140,6 @@ export function calculateLastCompletedStep(state, providersById) {
 }
 
 export function findInitialScene(state, providersById) {
-  if (state.onboardingCompleted) {
-    return 'workspace';
-  }
-
   for (const stepId of setupStepIds.slice(0, -1)) {
     if (!validateStep(stepId, state, providersById)) {
       return stepId;

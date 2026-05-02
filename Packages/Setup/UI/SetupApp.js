@@ -292,10 +292,6 @@ async function bootstrap() {
         onboardingCompleted: true
       };
       await window.JoaniumSetup.complete(completedState);
-      state.onboardingCompleted = true;
-      runtimeError = '';
-      scene = 'workspace';
-      render();
     } catch {
       runtimeError = strings.paths.localDataFile;
       render();
@@ -647,84 +643,7 @@ async function bootstrap() {
     return stage;
   }
 
-  function renderWorkspaceScene() {
-    const workspace = createElement('section', 'workspace-bridge');
-    workspace.append(
-      createElement('h1', 'workspace-bridge__title', strings.workspace.title),
-      createElement('p', 'workspace-bridge__subtitle', strings.workspace.subtitle)
-    );
-
-    const providerPill = createElement(
-      'div',
-      'workspace-bridge__pill',
-      `${strings.workspace.providerPillPrefix} | ${state.providers.selected
-        .slice(0, 2)
-        .map((providerId) => providersById.get(providerId)?.label)
-        .filter(Boolean)
-        .join(' + ')}`
-    );
-    workspace.append(providerPill);
-
-    workspace.append(
-      createElement(
-        'h2',
-        'workspace-bridge__greeting',
-        formatText(strings.workspace.greeting, {
-          name: state.profile.name
-        })
-      )
-    );
-
-    const composer = createElement('div', 'workspace-bridge__composer');
-    composer.append(
-      createElement(
-        'span',
-        'workspace-bridge__composer-placeholder',
-        strings.workspace.composerPlaceholder
-      )
-    );
-
-    const composerFooter = createElement('div', 'workspace-bridge__composer-footer');
-    composerFooter.append(
-      createElement('span', 'workspace-bridge__composer-action', '+'),
-      createElement('span', 'workspace-bridge__composer-action', 'O'),
-      createElement('span', 'workspace-bridge__composer-action', 'M'),
-      createElement(
-        'span',
-        'workspace-bridge__composer-provider',
-        state.providers.selected.map((providerId) => providersById.get(providerId)?.label).filter(Boolean)[0] ??
-          strings.appName
-      )
-    );
-    composer.append(composerFooter);
-    workspace.append(composer);
-
-    workspace.append(
-      createElement('span', 'workspace-bridge__quick-start-label', strings.workspace.quickStartLabel)
-    );
-
-    const quickStartGrid = createElement('div', 'workspace-bridge__quick-start-grid');
-    const selectedOptions = strings.usage.options.filter((option) => state.usageModes.includes(option.id));
-
-    for (const option of selectedOptions.slice(0, 4)) {
-      const quickStart = strings.workspace.quickStarts[option.id];
-      const card = createElement('article', 'workspace-bridge__quick-start-card');
-      card.append(
-        createElement('span', 'workspace-bridge__quick-start-title', quickStart.title),
-        createElement('p', 'workspace-bridge__quick-start-description', quickStart.description)
-      );
-      quickStartGrid.append(card);
-    }
-
-    workspace.append(quickStartGrid);
-    return workspace;
-  }
-
   function renderStage() {
-    if (scene === 'workspace') {
-      return renderWorkspaceScene();
-    }
-
     if (scene === 'consent') {
       return renderConsentScene();
     }
@@ -774,9 +693,7 @@ async function bootstrap() {
     const body = createElement('section', 'setup-shell__body');
     const stage = renderStage();
 
-    if (scene !== 'workspace') {
-      appendActionArea(stage);
-    }
+    appendActionArea(stage);
 
     const stageWrapper = createElement('div', 'setup-stage-wrapper');
     stageWrapper.append(stage);

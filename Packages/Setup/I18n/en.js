@@ -136,41 +136,6 @@ const en = {
     usageSummaryLabel: 'Configured for',
     localStorageLabel: 'Saved locally'
   },
-  workspace: {
-    title: 'Your workspace is ready',
-    subtitle:
-      'Joanium skipped setup because this device is already configured. The next package can plug straight into this bridge screen when chat is wired.',
-    greeting: 'Good day, {name}',
-    composerPlaceholder: 'How can I help you today?',
-    providerPillPrefix: 'Default stack',
-    quickStartLabel: 'Quick start',
-    quickStarts: {
-      coding: {
-        title: 'Write a feature',
-        description: 'Plan a clean implementation, then move into code with the right provider mix.'
-      },
-      designing: {
-        title: 'Refine a screen',
-        description: 'Use your setup to iterate on layouts, copy, and interface polish faster.'
-      },
-      writing: {
-        title: 'Draft something clear',
-        description: 'Turn rough notes into publishable writing without leaving your flow.'
-      },
-      research: {
-        title: 'Research a topic',
-        description: 'Start with grounded answers and keep the sources connected to the thread.'
-      },
-      learning: {
-        title: 'Learn something new',
-        description: 'Break down a topic into a practical plan with examples and follow-up help.'
-      },
-      productivity: {
-        title: 'Get organized',
-        description: 'Turn loose tasks into a clear next-action plan you can actually use.'
-      }
-    }
-  },
   documents: {
     terms: {
       title: 'Terms & Conditions',
