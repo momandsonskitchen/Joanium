@@ -118,7 +118,7 @@ body::after {
 .setup-stage__title,
 .workspace-bridge__title {
   margin: 0;
-  font-size: clamp(36px, 4.4vw, 62px);
+  font-size: clamp(30px, 4.4vw, 52px);
   line-height: 1.04;
   font-weight: 720;
   letter-spacing: -0.04em;
