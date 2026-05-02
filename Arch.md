@@ -39,6 +39,7 @@
 * Core: Backend logic
 * UI: Frontend logic and view (includes css and js)
 * IPC: Inter-Process Communication
+* I18n: For language translations.
 
 # Expected working
 * In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
@@ -64,3 +65,4 @@
 * do not use commonJS modules use ES modules only.
 * i need a highly scalable architecture so that i can add new features (packages) easily without breaking the existing ones.
 * Do not hard code text in js or in html they all must come from i18n files only (English is the fallback and the default language).
+* the app should feel like macos like app.
