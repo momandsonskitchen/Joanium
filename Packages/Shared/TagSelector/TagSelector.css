@@ -2,21 +2,19 @@
 
 .joanium-tag-selector {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .joanium-tag-selector__card {
   border: 0;
   border-radius: var(--radius-xl);
-  padding: 18px 22px;
+  padding: 16px 20px;
   background: var(--color-surface-raised);
   box-shadow: var(--shadow-surface);
   text-align: left;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 12px;
   cursor: pointer;
   font: inherit;
   transition:
@@ -39,15 +37,5 @@
   font-size: 15px;
   font-weight: 700;
   color: var(--color-text);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.joanium-tag-selector__description {
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }

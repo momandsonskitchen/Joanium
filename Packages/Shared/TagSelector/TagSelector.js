@@ -12,11 +12,7 @@ export function createTagSelector({ options, selectedValues, onToggle }) {
     label.className = 'joanium-tag-selector__label';
     label.textContent = option.label;
 
-    const description = document.createElement('span');
-    description.className = 'joanium-tag-selector__description';
-    description.textContent = option.description;
-
-    card.append(label, description);
+    card.append(label);
     card.classList.toggle('is-selected', selection.has(option.id));
 
     card.addEventListener('click', () => {

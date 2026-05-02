@@ -96,36 +96,18 @@ const en = {
     description:
       'Choose the work that matters right now so the first workspace feels relevant instead of generic.',
     options: [
-      {
-        id: 'coding',
-        label: '💻 Coding',
-        description: 'Ship features, debug code, explain errors, and move through technical work faster.'
-      },
-      {
-        id: 'designing',
-        label: '🎨 Designing',
-        description: 'Explore UI directions, refine layouts, and turn rough ideas into polished screens.'
-      },
-      {
-        id: 'writing',
-        label: '✍️ Writing',
-        description: 'Draft posts, emails, documents, scripts, and clearer everyday communication.'
-      },
-      {
-        id: 'research',
-        label: '🔍 Research',
-        description: 'Compare sources, summarize topics, and collect grounded answers quickly.'
-      },
-      {
-        id: 'learning',
-        label: '📚 Learning',
-        description: 'Understand new skills step by step without losing context or momentum.'
-      },
-      {
-        id: 'productivity',
-        label: '⚡ Productivity',
-        description: 'Plan tasks, automate routine work, and keep moving without juggling tools.'
-      }
+      { id: 'coding', label: '💻 Coding' },
+      { id: 'designing', label: '🎨 Designing' },
+      { id: 'writing', label: '✍️ Writing' },
+      { id: 'research', label: '🔍 Research' },
+      { id: 'learning', label: '📚 Learning' },
+      { id: 'productivity', label: '⚡ Productivity' },
+      { id: 'marketing', label: '📣 Marketing' },
+      { id: 'finance', label: '💰 Finance' },
+      { id: 'data', label: '📊 Data & Analytics' },
+      { id: 'legal', label: '⚖️ Legal' },
+      { id: 'healthcare', label: '🏥 Healthcare' },
+      { id: 'education', label: '🎓 Education' }
     ]
   },
   welcome: {
