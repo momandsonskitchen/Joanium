@@ -1,3 +1,5 @@
+@import "../Common/Common.css";
+
 .joanium-secret {
   width: 100%;
   display: flex;
@@ -8,7 +10,7 @@
 .joanium-secret__label {
   font-size: 14px;
   font-weight: 650;
-  color: rgba(40, 15, 55, 0.82);
+  color: var(--color-text-label);
 }
 
 .joanium-secret__field-wrap {
@@ -20,21 +22,22 @@
   min-height: 62px;
   border: 0;
   outline: 0;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   padding: 0 104px 0 18px;
   font: inherit;
   font-size: 16px;
-  color: #1e0d28;
-  background: rgba(249, 244, 254, 0.82);
-  box-shadow:
-    inset 0 0 0 1px rgba(100, 55, 120, 0.08),
-    0 16px 32px rgba(80, 35, 105, 0.08);
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-surface);
+  transition:
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
 }
 
 .joanium-secret__field:focus {
-  box-shadow:
-    inset 0 0 0 1px rgba(200, 116, 217, 0.34),
-    0 22px 40px rgba(200, 116, 217, 0.14);
+  outline: 0;
+  background: var(--color-surface-focus);
+  box-shadow: var(--shadow-focus);
 }
 
 .joanium-secret__toggle {
@@ -43,26 +46,26 @@
   top: 50%;
   transform: translateY(-50%);
   border: 0;
-  border-radius: 14px;
-  background: rgba(242, 224, 252, 0.94);
-  color: #421860;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-tinted);
+  color: var(--color-text-accent);
   padding: 10px 14px;
   font: inherit;
   font-size: 13px;
   font-weight: 650;
   cursor: pointer;
   transition:
-    transform 160ms ease,
-    box-shadow 160ms ease;
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .joanium-secret__toggle:hover {
   transform: translateY(calc(-50% - 1px));
-  box-shadow: 0 10px 20px rgba(200, 116, 217, 0.18);
+  box-shadow: 0 10px 20px rgba(var(--color-accent-rgb), 0.18);
 }
 
 .joanium-secret__description {
   font-size: 13px;
   line-height: 1.5;
-  color: rgba(58, 20, 78, 0.62);
+  color: var(--color-text-muted);
 }

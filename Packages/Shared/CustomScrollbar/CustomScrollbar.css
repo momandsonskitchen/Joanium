@@ -1,3 +1,5 @@
+@import "../Common/Common.css";
+
 /* ─── Joanium Custom Scrollbar ─────────────────────────────────────────────
    Usage: attach via attachCustomScrollbar(container, scroller).
    The container receives .joanium-custom-scrollbar-host (for hover reveal).
@@ -6,16 +8,15 @@
 
 .joanium-custom-scrollbar {
   position: absolute;
-  width: 5px;
-  border-radius: 999px;
-  background: rgba(150, 105, 80, 0.08);
+  width: var(--scrollbar-width);
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-track);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
   z-index: 10;
 }
 
-/* Show on hover of the host container */
 .joanium-custom-scrollbar-host:hover .joanium-custom-scrollbar {
   opacity: 1;
 }
@@ -24,16 +25,15 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-radius: 999px;
-  background: rgba(150, 105, 80, 0.28);
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-thumb);
   cursor: pointer;
   pointer-events: all;
-  /* GPU-composited: no layout recalculation on scroll */
   will-change: transform;
-  transition: background 180ms ease;
+  transition: background var(--transition-base);
 }
 
 .joanium-custom-scrollbar__thumb:hover,
 .joanium-custom-scrollbar__thumb.is-dragging {
-  background: rgba(150, 105, 80, 0.52);
+  background: var(--scrollbar-thumb-hover);
 }

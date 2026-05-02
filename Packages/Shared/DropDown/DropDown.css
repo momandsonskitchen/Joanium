@@ -1,3 +1,5 @@
+@import "../Common/Common.css";
+
 .joanium-dropdown {
   position: relative;
   display: flex;
@@ -8,14 +10,14 @@
 .joanium-dropdown__label {
   font-size: 14px;
   font-weight: 650;
-  color: rgba(44, 27, 17, 0.82);
+  color: var(--dropdown-color-text-label);
 }
 
 .joanium-dropdown__trigger {
   width: 100%;
   min-height: 62px;
   border: 0;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   padding: 0 18px;
   display: flex;
   align-items: center;
@@ -23,29 +25,29 @@
   gap: 12px;
   font: inherit;
   font-size: 16px;
-  color: #24150d;
-  background: rgba(255, 250, 247, 0.82);
+  color: var(--dropdown-color-text);
+  background: var(--dropdown-color-surface);
   box-shadow:
-    inset 0 0 0 1px rgba(112, 84, 66, 0.08),
-    0 16px 32px rgba(96, 67, 47, 0.08);
+    inset 0 0 0 1px var(--dropdown-color-border),
+    0 16px 32px var(--dropdown-color-shadow);
   cursor: pointer;
   text-align: left;
   transition:
-    box-shadow 180ms ease,
-    transform 180ms ease;
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
 }
 
 .joanium-dropdown__trigger:hover {
   transform: translateY(-1px);
   box-shadow:
-    inset 0 0 0 1px rgba(112, 84, 66, 0.12),
-    0 20px 38px rgba(96, 67, 47, 0.1);
+    inset 0 0 0 1px var(--dropdown-color-border-hover),
+    0 20px 38px var(--dropdown-color-shadow);
 }
 
 .is-open .joanium-dropdown__trigger {
   box-shadow:
-    inset 0 0 0 1px rgba(240, 168, 128, 0.34),
-    0 22px 40px rgba(238, 168, 127, 0.14);
+    inset 0 0 0 1px var(--dropdown-color-border-focus),
+    0 22px 40px var(--dropdown-color-shadow-focus);
 }
 
 .joanium-dropdown__trigger-text {
@@ -56,15 +58,15 @@
 }
 
 .joanium-dropdown__trigger-text--placeholder {
-  color: rgba(104, 81, 68, 0.45);
+  color: var(--dropdown-color-text-placeholder);
 }
 
 .joanium-dropdown__chevron {
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  color: rgba(104, 81, 68, 0.55);
-  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: var(--dropdown-color-chevron);
+  transition: transform var(--transition-slow) var(--transition-spring);
 }
 
 .is-open .joanium-dropdown__chevron {
@@ -77,15 +79,15 @@
   left: 0;
   right: 0;
   z-index: 100;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   padding: 8px;
   background:
     radial-gradient(circle at top right, rgba(255, 255, 255, 0.6), transparent 40%),
-    rgba(255, 250, 247, 0.96);
+    var(--dropdown-color-surface-panel);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow:
-    inset 0 0 0 1px rgba(112, 84, 66, 0.08),
+    inset 0 0 0 1px var(--dropdown-color-border),
     0 24px 56px rgba(96, 67, 47, 0.14);
   max-height: 300px;
   overflow-y: auto;
@@ -95,8 +97,8 @@
   transform: translateY(-6px) scale(0.98);
   pointer-events: none;
   transition:
-    opacity 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity 200ms var(--transition-spring),
+    transform 200ms var(--transition-spring);
 }
 
 .joanium-dropdown__panel::-webkit-scrollbar {
@@ -112,13 +114,13 @@
 .joanium-dropdown__option {
   width: 100%;
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   padding: 13px 16px;
   text-align: left;
   font: inherit;
   font-size: 15px;
   font-weight: 550;
-  color: #24150d;
+  color: var(--dropdown-color-text);
   background: transparent;
   cursor: pointer;
   transition:
@@ -127,11 +129,11 @@
 }
 
 .joanium-dropdown__option:hover {
-  background: rgba(255, 241, 232, 0.72);
+  background: var(--dropdown-color-option-hover);
 }
 
 .joanium-dropdown__option.is-selected {
-  background: linear-gradient(135deg, rgba(255, 237, 226, 0.9), rgba(255, 246, 240, 0.85));
+  background: var(--dropdown-color-option-selected);
   font-weight: 700;
-  color: #3d2215;
+  color: var(--dropdown-color-text-selected);
 }

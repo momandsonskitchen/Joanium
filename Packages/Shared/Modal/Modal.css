@@ -1,3 +1,4 @@
+@import "../Common/Common.css";
 @import "../CustomScrollbar/CustomScrollbar.css";
 
 .joanium-modal {
@@ -18,11 +19,9 @@
 
 .joanium-modal__panel {
   /* width and maxHeight are set via JS (createModal options) */
-  border-radius: 30px;
-  background: rgba(249, 244, 254, 0.92);
-  box-shadow:
-    inset 0 0 0 1px rgba(108, 50, 132, 0.08),
-    0 32px 80px rgba(60, 22, 85, 0.16);
+  border-radius: var(--radius-3xl);
+  background: var(--color-surface-focus);
+  box-shadow: var(--shadow-modal);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -34,21 +33,21 @@
   align-items: center;
   justify-content: space-between;
   padding: 24px 26px 20px;
-  border-bottom: 1px solid rgba(108, 50, 132, 0.08);
+  border-bottom: 1px solid var(--color-border-modal);
 }
 
 .joanium-modal__title {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #1e0d28;
+  color: var(--color-text);
 }
 
 .joanium-modal__close {
   border: 0;
-  border-radius: 16px;
-  background: rgba(242, 224, 252, 0.9);
-  color: #401860;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-tinted);
+  color: var(--color-text-accent);
   font: inherit;
   font-size: 13px;
   font-weight: 700;
