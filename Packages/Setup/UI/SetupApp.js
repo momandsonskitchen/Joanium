@@ -12,11 +12,11 @@ import { createInputBox } from '../../Shared/InputBox/InputBox.js';
 import { createApiKeyInput } from '../../Shared/ApiKeyInput/ApiKeyInput.js';
 import { createProviderScroller } from '../../Shared/ProviderScroller/ProviderScroller.js';
 import { createTagSelector } from '../../Shared/TagSelector/TagSelector.js';
+import { createDropDown } from '../../Shared/DropDown/DropDown.js';
 import { createModal } from '../../Shared/Modal/Modal.js';
 import {
   calculateLastCompletedStep,
   findInitialScene,
-  getUsageSummary,
   hydrateSetupState,
   serializeSetupState,
   setupStepIds,
@@ -87,98 +87,6 @@ function restoreFocusState(container, focusState) {
   ) {
     nextElement.setSelectionRange(focusState.selectionStart, focusState.selectionEnd);
   }
-}
-
-function createMonthPicker({ strings, selectedValue, onSelect }) {
-  const months = strings.dob.months.filter((item) => item.value);
-  const placeholderText = strings.dob.monthPlaceholder ?? 'Month';
-
-  const wrapper = createElement('section', 'setup-month-picker');
-  wrapper.append(createElement('span', 'setup-month-picker__label', strings.dob.monthLabel));
-
-  const dropdownRoot = createElement('div', 'setup-month-dropdown');
-
-  const trigger = createElement('button', 'setup-month-dropdown__trigger');
-  trigger.type = 'button';
-  trigger.__focusKey = 'profile.dob.month';
-
-  const triggerLabel = createElement('span', 'setup-month-dropdown__trigger-label',
-    selectedValue
-      ? (months.find((m) => m.value === selectedValue)?.label ?? placeholderText)
-      : placeholderText
-  );
-  triggerLabel.classList.toggle('is-placeholder', !selectedValue);
-
-  const triggerChevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  triggerChevron.setAttribute('class', 'setup-month-dropdown__chevron');
-  triggerChevron.setAttribute('viewBox', '0 0 16 16');
-  triggerChevron.setAttribute('fill', 'none');
-  triggerChevron.setAttribute('aria-hidden', 'true');
-  const chevronPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  chevronPath.setAttribute('d', 'M3 5.5L8 10.5L13 5.5');
-  chevronPath.setAttribute('stroke', 'currentColor');
-  chevronPath.setAttribute('stroke-width', '1.75');
-  chevronPath.setAttribute('stroke-linecap', 'round');
-  chevronPath.setAttribute('stroke-linejoin', 'round');
-  triggerChevron.append(chevronPath);
-  trigger.append(triggerLabel, triggerChevron);
-
-  const listbox = createElement('ul', 'setup-month-dropdown__listbox');
-  listbox.setAttribute('role', 'listbox');
-
-  let isOpen = false;
-
-  for (const month of months) {
-    const item = createElement('li', 'setup-month-dropdown__option', month.label);
-    item.setAttribute('role', 'option');
-    item.dataset.value = month.value;
-    item.classList.toggle('is-selected', month.value === selectedValue);
-    item.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      triggerLabel.textContent = month.label;
-      triggerLabel.classList.remove('is-placeholder');
-      listbox.querySelectorAll('.setup-month-dropdown__option').forEach((el) => {
-        el.classList.toggle('is-selected', el.dataset.value === month.value);
-      });
-      closeList();
-      onSelect(month.value);
-    });
-    listbox.append(item);
-  }
-
-  function openList() {
-    isOpen = true;
-    const rect = trigger.getBoundingClientRect();
-    listbox.style.top = `${rect.bottom + 8}px`;
-    listbox.style.left = `${rect.left}px`;
-    listbox.style.width = `${rect.width}px`;
-    listbox.classList.add('is-open');
-    trigger.classList.add('is-open');
-    triggerChevron.style.transform = 'rotate(180deg)';
-  }
-
-  function closeList() {
-    isOpen = false;
-    listbox.classList.remove('is-open');
-    trigger.classList.remove('is-open');
-    triggerChevron.style.transform = '';
-  }
-
-  trigger.addEventListener('click', () => {
-    isOpen ? closeList() : openList();
-  });
-
-  trigger.addEventListener('blur', () => {
-    setTimeout(() => {
-      if (!dropdownRoot.contains(document.activeElement)) {
-        closeList();
-      }
-    }, 100);
-  });
-
-  dropdownRoot.append(trigger, listbox);
-  wrapper.append(dropdownRoot);
-  return wrapper;
 }
 
 function createProviderIdentity(provider, strings) {
@@ -454,15 +362,18 @@ async function bootstrap() {
 
     grid.append(
       dayInput.element,
-      createMonthPicker({
-        strings,
+      createDropDown({
+        label: strings.dob.monthLabel,
+        options: strings.dob.months.filter((m) => m.value),
         selectedValue: state.profile.dateOfBirth.month,
-        onSelect: (value) => {
+        placeholder: strings.dob.months[0].label,
+        focusKey: 'profile.dob.month',
+        onChange: (value) => {
           patchState((draft) => {
             draft.profile.dateOfBirth.month = value;
           }, { rerender: false });
         }
-      }),
+      }).element,
       yearInput.element
     );
     stage.append(grid);

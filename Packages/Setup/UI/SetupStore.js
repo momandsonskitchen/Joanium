@@ -61,22 +61,6 @@ function buildProviderDetails(providers, persistedDetails = {}) {
   return details;
 }
 
-export function getUsageSummary(usageModes, strings) {
-  const selectedLabels = strings.usage.options
-    .filter((option) => usageModes.includes(option.id))
-    .map((option) => option.label.toLowerCase());
-
-  if (selectedLabels.length === 0) {
-    return strings.appName;
-  }
-
-  if (selectedLabels.length === 1) {
-    return selectedLabels[0];
-  }
-
-  return `${selectedLabels.slice(0, -1).join(', ')} and ${selectedLabels.at(-1)}`;
-}
-
 export function validateStep(stepId, state, providersById) {
   if (stepId === 'consent') {
     return state.consentAccepted;
