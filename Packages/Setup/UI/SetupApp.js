@@ -127,6 +127,7 @@ async function bootstrap() {
   let runtimeError = '';
   let autoSaveTimer = 0;
   let providerScroller = null;
+  let currentDobDropDown = null;
   let currentScrollbar = null;
 
   const root = document.getElementById('app');
@@ -356,22 +357,20 @@ async function bootstrap() {
       }
     });
 
-    grid.append(
-      dayInput.element,
-      createDropDown({
-        label: strings.dob.monthLabel,
-        options: strings.dob.months.filter((m) => m.value),
-        selectedValue: state.profile.dateOfBirth.month,
-        placeholder: strings.dob.months[0].label,
-        focusKey: 'profile.dob.month',
-        onChange: (value) => {
-          patchState((draft) => {
-            draft.profile.dateOfBirth.month = value;
-          }, { rerender: false });
-        }
-      }).element,
-      yearInput.element
-    );
+    currentDobDropDown = createDropDown({
+      label: strings.dob.monthLabel,
+      options: strings.dob.months.filter((m) => m.value),
+      selectedValue: state.profile.dateOfBirth.month,
+      placeholder: strings.dob.months[0].label,
+      focusKey: 'profile.dob.month',
+      onChange: (value) => {
+        patchState((draft) => {
+          draft.profile.dateOfBirth.month = value;
+        }, { rerender: false });
+      }
+    });
+
+    grid.append(dayInput.element, currentDobDropDown.element, yearInput.element);
     stage.append(grid);
     return stage;
   }
@@ -614,6 +613,11 @@ async function bootstrap() {
     const focusState = captureFocusState(root);
     const shell = createElement('main', 'setup-shell');
     const body = createElement('section', 'setup-shell__body');
+
+    // Dispose portalled components before renderStage creates new ones
+    currentDobDropDown?.dispose();
+    currentDobDropDown = null;
+
     const stage = renderStage();
 
     appendActionArea(stage);

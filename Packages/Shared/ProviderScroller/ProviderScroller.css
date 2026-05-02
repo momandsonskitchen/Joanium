@@ -51,7 +51,11 @@
 }
 
 .joanium-provider-tile.is-selected {
-  background: var(--color-surface-selected);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--provider-tint) 38%, rgba(250, 245, 254, 0.94)),
+    color-mix(in srgb, var(--provider-tint) 22%, rgba(247, 238, 254, 0.92))
+  );
   box-shadow: var(--shadow-selected);
 }
 
