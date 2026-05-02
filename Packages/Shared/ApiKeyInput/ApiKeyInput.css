@@ -1,0 +1,68 @@
+.joanium-secret {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.joanium-secret__label {
+  font-size: 14px;
+  font-weight: 650;
+  color: rgba(44, 27, 17, 0.82);
+}
+
+.joanium-secret__field-wrap {
+  position: relative;
+}
+
+.joanium-secret__field {
+  width: 100%;
+  min-height: 62px;
+  border: 0;
+  outline: 0;
+  border-radius: 20px;
+  padding: 0 104px 0 18px;
+  font: inherit;
+  font-size: 16px;
+  color: #24150d;
+  background: rgba(255, 250, 247, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(112, 84, 66, 0.08),
+    0 16px 32px rgba(96, 67, 47, 0.08);
+}
+
+.joanium-secret__field:focus {
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 168, 128, 0.34),
+    0 22px 40px rgba(238, 168, 127, 0.14);
+}
+
+.joanium-secret__toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 241, 234, 0.94);
+  color: #533b2f;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.joanium-secret__toggle:hover {
+  transform: translateY(calc(-50% - 1px));
+  box-shadow: 0 10px 20px rgba(232, 162, 123, 0.18);
+}
+
+.joanium-secret__description {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(70, 47, 36, 0.62);
+}

@@ -1,0 +1,50 @@
+.joanium-tag-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.joanium-tag-selector__card {
+  border: 0;
+  border-radius: 26px;
+  padding: 20px 20px 18px;
+  background: rgba(255, 251, 248, 0.74);
+  box-shadow:
+    inset 0 0 0 1px rgba(117, 90, 71, 0.08),
+    0 16px 34px rgba(103, 72, 53, 0.08);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    background-color 180ms ease;
+}
+
+.joanium-tag-selector__card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px rgba(117, 90, 71, 0.12),
+    0 22px 42px rgba(103, 72, 53, 0.12);
+}
+
+.joanium-tag-selector__card.is-selected {
+  background: linear-gradient(180deg, rgba(255, 241, 234, 0.96), rgba(255, 249, 245, 0.92));
+  box-shadow:
+    inset 0 0 0 1px rgba(244, 170, 129, 0.3),
+    0 22px 42px rgba(239, 168, 129, 0.18);
+}
+
+.joanium-tag-selector__label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #21140d;
+}
+
+.joanium-tag-selector__description {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(71, 49, 37, 0.68);
+}

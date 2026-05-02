@@ -6,6 +6,9 @@
   "engines": {
     "node": ">=24"
   },
+  "dependencies": {
+    "electron": "^35.7.5"
+  },
   "main": "App.js",
   "scripts": {
     "start": "electron ."

@@ -1,0 +1,50 @@
+.joanium-input {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.joanium-input__label {
+  font-size: 14px;
+  font-weight: 650;
+  color: rgba(44, 27, 17, 0.82);
+}
+
+.joanium-input__field {
+  width: 100%;
+  min-height: 62px;
+  border: 0;
+  outline: 0;
+  border-radius: 20px;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 16px;
+  color: #24150d;
+  background: rgba(255, 250, 247, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(112, 84, 66, 0.08),
+    0 16px 32px rgba(96, 67, 47, 0.08);
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.joanium-input__field::placeholder {
+  color: rgba(101, 79, 66, 0.45);
+}
+
+.joanium-input__field:focus {
+  background: rgba(255, 250, 247, 0.96);
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 168, 128, 0.34),
+    0 22px 40px rgba(238, 168, 127, 0.14);
+  transform: translateY(-1px);
+}
+
+.joanium-input__description {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(70, 47, 36, 0.62);
+}
