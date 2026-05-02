@@ -759,6 +759,56 @@ async function bootstrap() {
     stage.append(actions);
   }
 
+  function attachCustomScrollbar(wrapper, scroller) {
+    const scrollbar = createElement('div', 'setup-custom-scrollbar');
+    const thumb = createElement('div', 'setup-custom-scrollbar__thumb');
+    scrollbar.append(thumb);
+    wrapper.append(scrollbar);
+
+    function updateThumb() {
+      const scrollable = scroller.scrollHeight - scroller.clientHeight;
+      if (scrollable <= 0) {
+        scrollbar.style.display = 'none';
+        return;
+      }
+      scrollbar.style.display = '';
+      const trackHeight = scrollbar.clientHeight;
+      const thumbHeight = Math.max((scroller.clientHeight / scroller.scrollHeight) * trackHeight, 32);
+      const maxTop = trackHeight - thumbHeight;
+      const progress = scroller.scrollTop / scrollable;
+      thumb.style.height = `${thumbHeight}px`;
+      thumb.style.top = `${progress * maxTop}px`;
+    }
+
+    let dragging = false;
+    let dragStartY = 0;
+    let dragStartScrollTop = 0;
+
+    thumb.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      dragging = true;
+      dragStartY = e.clientY;
+      dragStartScrollTop = scroller.scrollTop;
+      thumb.setPointerCapture(e.pointerId);
+    });
+
+    thumb.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const scrollable = scroller.scrollHeight - scroller.clientHeight;
+      const trackHeight = scrollbar.clientHeight;
+      const thumbHeight = thumb.offsetHeight;
+      const maxTop = trackHeight - thumbHeight;
+      const delta = e.clientY - dragStartY;
+      scroller.scrollTop = dragStartScrollTop + (delta / maxTop) * scrollable;
+    });
+
+    thumb.addEventListener('pointerup', () => { dragging = false; });
+    thumb.addEventListener('pointercancel', () => { dragging = false; });
+
+    scroller.addEventListener('scroll', updateThumb);
+    requestAnimationFrame(updateThumb);
+  }
+
   function render() {
     const focusState = captureFocusState(root);
     const shell = createElement('main', 'setup-shell');
@@ -769,7 +819,11 @@ async function bootstrap() {
       appendActionArea(stage);
     }
 
-    body.append(stage);
+    const stageWrapper = createElement('div', 'setup-stage-wrapper');
+    stageWrapper.append(stage);
+    attachCustomScrollbar(stageWrapper, stage);
+
+    body.append(stageWrapper);
     shell.append(body);
     root.replaceChildren(shell);
     restoreFocusState(root, focusState);
