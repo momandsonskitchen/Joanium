@@ -27,14 +27,6 @@ function isValidDate({ day, month, year }) {
 }
 
 function providerHasRequirements(provider, details) {
-  const selectedModels = Array.isArray(details?.selectedModels) ? details.selectedModels : [];
-  const hasModelSelection =
-    provider.models.length > 0 ? selectedModels.length > 0 : typeof details?.customModel === 'string' && details.customModel.trim().length > 0;
-
-  if (!hasModelSelection) {
-    return false;
-  }
-
   for (const requirement of provider.requirements) {
     const value = typeof details?.[requirement.key] === 'string' ? details[requirement.key].trim() : '';
 
