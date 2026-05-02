@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { readProviderCatalog } from './ProviderCatalog.js';
 
 function createDefaultState() {
@@ -142,7 +143,8 @@ export function createSetupStateManager({ rootDirectory }) {
 
       return {
         state,
-        providers
+        providers,
+        logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href
       };
     },
     async saveDraft(draftState) {

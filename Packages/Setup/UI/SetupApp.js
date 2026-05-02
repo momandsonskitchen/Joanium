@@ -5,6 +5,7 @@ import fr from '../I18n/fr.js';
 
 // Shared Components
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { createButton } from '../../Shared/Button/Button.js';
 import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
 import { createInputBox } from '../../Shared/InputBox/InputBox.js';
@@ -235,6 +236,30 @@ async function bootstrap() {
   const modal = createModal({ closeLabel: strings.common.close });
   document.body.append(modal.element);
 
+  // ── Splash screen ──────────────────────────────────────────────────────────
+  function showSplash() {
+    const { element, done } = createLogoLoader({ logoPath: payload.logoPath, duration: 5000 });
+    root.replaceChildren(element);
+    return done;
+  }
+
+  // ── Step transition ────────────────────────────────────────────────────────
+  function transitionScene(next) {
+    return new Promise((resolve) => {
+      const wrapper = root.querySelector('.setup-stage-wrapper');
+      if (!wrapper) {
+        next();
+        resolve();
+        return;
+      }
+      wrapper.classList.add('is-leaving');
+      setTimeout(() => {
+        next();
+        resolve();
+      }, 230);
+    });
+  }
+
   function persistDraft() {
     window.clearTimeout(autoSaveTimer);
 
@@ -262,7 +287,7 @@ async function bootstrap() {
     }
   }
 
-  function goNext() {
+  async function goNext() {
     if (!validateStep(scene, state, providersById)) {
       showValidation = true;
       render();
@@ -274,7 +299,7 @@ async function bootstrap() {
 
     if (stepIndex < setupStepIds.length - 1) {
       scene = setupStepIds[stepIndex + 1];
-      render();
+      await transitionScene(() => render());
     }
   }
 
@@ -282,7 +307,7 @@ async function bootstrap() {
     if (!validateStep('usage', state, providersById)) {
       scene = 'usage';
       showValidation = true;
-      render();
+      await transitionScene(() => render());
       return;
     }
 
@@ -604,18 +629,17 @@ async function bootstrap() {
     );
 
     const featureGrid = createElement('div', 'setup-feature-grid');
-
     for (const feature of strings.welcome.features) {
       const card = createElement('article', 'setup-feature-card');
       card.append(
-        createElement('span', 'setup-feature-card__icon', feature.icon),
-        createElement('strong', 'setup-feature-card__title', feature.title),
-        createElement('p', 'setup-feature-card__body', feature.body)
+        createElement('span',  'setup-feature-card__icon',  feature.icon),
+        createElement('strong','setup-feature-card__title', feature.title),
+        createElement('p',     'setup-feature-card__body',  feature.body)
       );
       featureGrid.append(card);
     }
-
     stage.append(featureGrid);
+
     return stage;
   }
 
@@ -687,6 +711,7 @@ async function bootstrap() {
     currentScrollbar = attachCustomScrollbar(stageWrapper, stage, { top: 34, bottom: 34, right: 12 });
   }
 
+  await showSplash();
   render();
 }
 
