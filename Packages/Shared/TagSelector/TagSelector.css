@@ -1,9 +1,12 @@
 @import "../Common/Common.css";
 
 .joanium-tag-selector {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .joanium-tag-selector__card {

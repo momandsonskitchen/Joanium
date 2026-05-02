@@ -600,9 +600,12 @@ body::after {
 
 @media (max-width: 1100px) {
   .setup-feature-grid,
-  .joanium-tag-selector,
   .setup-model-grid {
     grid-template-columns: 1fr;
+  }
+
+  .joanium-tag-selector {
+    flex-direction: column;
   }
 
   .setup-date-grid {
