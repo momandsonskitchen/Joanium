@@ -4,13 +4,10 @@ function createProviderTile({ provider, selectedIds, onToggle }) {
   card.className = 'joanium-provider-tile';
   card.style.setProperty('--provider-tint', provider.palette.tint);
 
-  const iconWrap = document.createElement('span');
-  iconWrap.className = 'joanium-provider-tile__icon';
   const iconImage = document.createElement('img');
   iconImage.className = 'joanium-provider-tile__icon-image';
   iconImage.src = provider.iconPath;
   iconImage.alt = `${provider.label} icon`;
-  iconWrap.append(iconImage);
 
   const name = document.createElement('span');
   name.className = 'joanium-provider-tile__name';
@@ -19,7 +16,7 @@ function createProviderTile({ provider, selectedIds, onToggle }) {
   const tick = document.createElement('span');
   tick.className = 'joanium-provider-tile__tick';
 
-  card.append(iconWrap, name, tick);
+  card.append(iconImage, name, tick);
   card.classList.toggle('is-selected', selectedIds.has(provider.id));
   card.providerId = provider.id;
 
@@ -33,15 +30,12 @@ function createProviderTile({ provider, selectedIds, onToggle }) {
 }
 
 export function createProviderScroller({ providers, selectedProviderIds, onToggle }) {
-  const root = document.createElement('section');
-  root.className = 'joanium-provider-picker';
-
   const viewport = document.createElement('div');
   viewport.className = 'joanium-provider-picker__viewport';
+
   const track = document.createElement('div');
   track.className = 'joanium-provider-picker__track';
   viewport.append(track);
-  root.append(viewport);
 
   const renderedCards = [];
   const selectedIds = new Set(selectedProviderIds);
@@ -130,14 +124,17 @@ export function createProviderScroller({ providers, selectedProviderIds, onToggl
   });
 
   viewport.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+
     isDragging = true;
     dragDistance = 0;
     dragStartX = event.clientX;
     dragStartScrollLeft = viewport.scrollLeft;
-    viewport.setPointerCapture(event.pointerId);
   });
 
-  viewport.addEventListener('pointermove', (event) => {
+  function handleWindowPointerMove(event) {
     if (!isDragging) {
       return;
     }
@@ -146,9 +143,9 @@ export function createProviderScroller({ providers, selectedProviderIds, onToggl
     dragDistance = Math.max(dragDistance, Math.abs(delta));
     viewport.scrollLeft = dragStartScrollLeft - delta;
     normalizeScrollPosition();
-  });
+  }
 
-  function stopDragging(event) {
+  function stopDragging() {
     if (!isDragging) {
       return;
     }
@@ -156,21 +153,21 @@ export function createProviderScroller({ providers, selectedProviderIds, onToggl
     isDragging = false;
     ignoreNextTap = dragDistance > 8;
 
-    if (event) {
-      viewport.releasePointerCapture(event.pointerId);
-    }
-
     window.setTimeout(() => {
       ignoreNextTap = false;
     }, 0);
   }
 
-  viewport.addEventListener('pointerup', stopDragging);
-  viewport.addEventListener('pointercancel', stopDragging);
+  window.addEventListener('pointermove', handleWindowPointerMove);
+  window.addEventListener('pointerup', stopDragging);
+  window.addEventListener('pointercancel', stopDragging);
 
-  root.dispose = () => {
+  viewport.dispose = () => {
     cancelAnimationFrame(animationFrameId);
+    window.removeEventListener('pointermove', handleWindowPointerMove);
+    window.removeEventListener('pointerup', stopDragging);
+    window.removeEventListener('pointercancel', stopDragging);
   };
 
-  return root;
+  return viewport;
 }

@@ -1,8 +1,5 @@
-.joanium-provider-picker {
-  margin-top: 18px;
-}
-
 .joanium-provider-picker__viewport {
+  margin-top: 18px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -62,22 +59,9 @@
     0 22px 42px rgba(239, 168, 129, 0.16);
 }
 
-.joanium-provider-tile__icon {
-  width: 62px;
-  height: 62px;
-  border-radius: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: color-mix(in srgb, var(--provider-tint) 18%, white);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    0 14px 28px color-mix(in srgb, var(--provider-tint) 20%, transparent);
-}
-
 .joanium-provider-tile__icon-image {
-  width: 34px;
-  height: 34px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
 }
 

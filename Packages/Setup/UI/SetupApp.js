@@ -183,33 +183,6 @@ function createMonthPicker({ strings, selectedValue, onSelect }) {
   return wrapper;
 }
 
-function createProviderModelGrid({ provider, providerDetails, strings, onToggleModel }) {
-  const section = createElement('section', 'setup-provider-config__section');
-  section.append(
-    createElement('span', 'setup-provider-config__label', strings.providers.chooseModelLabel)
-  );
-
-  const modelGrid = createElement('div', 'setup-model-grid');
-  const selectedModels = new Set(providerDetails.selectedModels ?? []);
-
-  for (const model of provider.models) {
-    const modelButton = createElement('button', 'setup-model-chip');
-    modelButton.type = 'button';
-    modelButton.classList.toggle('is-selected', selectedModels.has(model.id));
-    modelButton.append(
-      createElement('span', 'setup-model-chip__name', model.name),
-      createElement('span', 'setup-model-chip__description', model.description)
-    );
-    modelButton.addEventListener('click', () => {
-      onToggleModel(model.id);
-    });
-    modelGrid.append(modelButton);
-  }
-
-  section.append(modelGrid);
-  return section;
-}
-
 function createProviderIdentity(provider, strings) {
   const identity = createElement('div', 'setup-provider-detail-card__identity');
   const iconWrap = createElement('span', 'setup-provider-detail-card__icon');
@@ -474,44 +447,6 @@ async function bootstrap() {
     const providerDetails = state.providers.details[provider.id];
     const card = createElement('section', 'setup-provider-detail-card');
     card.append(createProviderIdentity(provider, strings));
-
-    if (provider.models.length > 0) {
-      card.append(
-        createProviderModelGrid({
-          provider,
-          providerDetails,
-          strings,
-          onToggleModel: (modelId) => {
-            patchState((draft) => {
-              const currentModels = new Set(draft.providers.details[provider.id].selectedModels);
-
-              if (currentModels.has(modelId)) {
-                currentModels.delete(modelId);
-              } else {
-                currentModels.add(modelId);
-              }
-
-              draft.providers.details[provider.id].selectedModels = Array.from(currentModels);
-            });
-          }
-        })
-      );
-    } else {
-      const customModelInput = createInputBox({
-        label: formatText(strings.providers.customModelLabel, { provider: provider.label }),
-        value: providerDetails.customModel ?? '',
-        placeholder: strings.providers.customModelPlaceholder,
-        description: strings.providers.customModelHelper,
-        focusKey: `providers.${provider.id}.customModel`,
-        onInput: (value) => {
-          patchState((draft) => {
-            draft.providers.details[provider.id].customModel = value;
-            draft.providers.details[provider.id].selectedModels = value.trim() ? [value.trim()] : [];
-          }, { rerender: false });
-        }
-      });
-      card.append(customModelInput.element);
-    }
 
     const setupSection = createElement('section', 'setup-provider-config__section');
     setupSection.append(
