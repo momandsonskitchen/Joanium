@@ -79,18 +79,27 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
     wrapper.classList.contains('is-open') ? close() : open();
   });
 
-  document.addEventListener('click', (event) => {
+  function onDocumentClick(event) {
     if (!wrapper.contains(event.target)) close();
-  });
+  }
 
-  document.addEventListener('keydown', (event) => {
+  function onDocumentKeydown(event) {
     if (event.key === 'Escape') close();
-  });
+  }
+
+  document.addEventListener('click', onDocumentClick);
+  document.addEventListener('keydown', onDocumentKeydown);
 
   updateTriggerText();
   buildOptions();
 
   wrapper.append(trigger, panel);
 
-  return { element: wrapper };
+  return {
+    element: wrapper,
+    dispose() {
+      document.removeEventListener('click', onDocumentClick);
+      document.removeEventListener('keydown', onDocumentKeydown);
+    }
+  };
 }

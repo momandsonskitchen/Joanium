@@ -1,6 +1,5 @@
 const en = {
   appName: 'Joanium',
-  tagline: 'think once, ship more',
   common: {
     next: 'Continue',
     start: 'Start',
@@ -9,9 +8,7 @@ const en = {
     show: 'Show',
     hide: 'Hide',
     cloudBadge: 'Cloud',
-    localBadge: 'Local',
-    localProviderReady: 'Runs on your machine',
-    modelCount: '{count} models'
+    localBadge: 'Local'
   },
   flow: {
     validation: {
@@ -77,10 +74,6 @@ const en = {
     securityBody:
       'Joanium saves the values below into your local data folder so you do not need to repeat setup every time.',
     selectedProvidersLabel: 'Selected providers',
-    chooseModelLabel: 'Choose model',
-    customModelLabel: '{provider} model',
-    customModelPlaceholder: 'Enter the model name you plan to use',
-    customModelHelper: 'Use the exact local model name exposed by your local runtime.',
     apiKeyLabel: '{provider} API key',
     apiKeyPlaceholder: 'Paste your API key',
     localEndpointLabel: '{provider} endpoint',

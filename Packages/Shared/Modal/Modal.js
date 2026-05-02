@@ -51,9 +51,10 @@ export function createModal({ closeLabel, width = '720px', height = '100vh' }) {
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) close();
   });
-  window.addEventListener('keydown', (event) => {
+  function onWindowKeydown(event) {
     if (event.key === 'Escape') close();
-  });
+  }
+  window.addEventListener('keydown', onWindowKeydown);
 
   return {
     element: overlay,
@@ -65,9 +66,9 @@ export function createModal({ closeLabel, width = '720px', height = '100vh' }) {
       body.scrollTop = 0;
     },
     close,
-    /** Call if the modal element is removed from the DOM entirely. */
     destroy() {
       scrollbar.dispose();
+      window.removeEventListener('keydown', onWindowKeydown);
     },
   };
 }

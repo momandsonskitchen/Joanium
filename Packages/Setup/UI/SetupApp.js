@@ -225,7 +225,7 @@ async function bootstrap() {
       return `Could not update ${runtimeError}.`;
     }
 
-    if (showValidation && scene !== 'workspace') {
+    if (showValidation && scene !== 'welcome') {
       return strings.flow.validation[scene] ?? '';
     }
 
@@ -247,11 +247,7 @@ async function bootstrap() {
       onChange: (nextChecked) => {
         patchState((draft) => {
           draft.consentAccepted = nextChecked;
-        }, { rerender: false });
-        const startButton = root.querySelector('.setup-stage__actions .joanium-button');
-        if (startButton) {
-          startButton.disabled = !nextChecked;
-        }
+        });
       }
     });
 

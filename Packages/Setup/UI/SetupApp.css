@@ -493,80 +493,6 @@ body::after {
   justify-content: center;
 }
 
-.setup-stage__made-with {
-  margin-top: 16px;
-  text-align: center;
-  font-size: 12px;
-  color: var(--color-text-muted);
-  letter-spacing: 0.01em;
-}
-
-/* ─── Legal document nodes ───────────────────────────────────────────────── */
-
-.setup-document__section + .setup-document__section {
-  margin-top: 20px;
-}
-
-.setup-document__heading {
-  margin: 0 0 8px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.setup-document__body {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--color-text-secondary);
-}
-
-/* ─── Welcome hero feature card ──────────────────────────────────────────── */
-
-.setup-feature-hero {
-  display: flex;
-  align-items: flex-start;
-  gap: 22px;
-  padding: 26px 30px;
-  margin-bottom: 14px;
-  border-radius: var(--radius-xl);
-  background: linear-gradient(
-    128deg,
-    rgba(210, 140, 234, 0.26) 0%,
-    rgba(246, 234, 254, 0.88) 100%
-  );
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.22),
-    0 22px 48px rgba(160, 60, 200, 0.1);
-}
-
-.setup-feature-hero__icon {
-  flex-shrink: 0;
-  font-size: 34px;
-  line-height: 1;
-  margin-top: 3px;
-}
-
-.setup-feature-hero__content {
-  flex: 1;
-}
-
-.setup-feature-hero__title {
-  display: block;
-  font-size: 20px;
-  font-weight: 740;
-  color: var(--color-text);
-  line-height: 1.22;
-  margin-bottom: 8px;
-}
-
-.setup-feature-hero__body {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.65;
-  color: var(--color-text-secondary);
-}
-
 /* ─── Stage enter / leave animations ────────────────────────────────────── */
 
 @keyframes setup-stage-enter {
@@ -600,8 +526,7 @@ body::after {
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 
 @media (max-width: 1100px) {
-  .setup-feature-grid,
-  .setup-model-grid {
+  .setup-feature-grid {
     grid-template-columns: 1fr;
   }
 
