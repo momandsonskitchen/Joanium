@@ -1,5 +1,6 @@
 node_modules/
 .env
+Build/
 Data/Agents/
 Data/Channels/
 Data/Chats/
