@@ -464,7 +464,7 @@ async function bootstrap() {
         onSelect: (value) => {
           patchState((draft) => {
             draft.profile.dateOfBirth.month = value;
-          });
+          }, { rerender: false });
         }
       }),
       yearInput.element
