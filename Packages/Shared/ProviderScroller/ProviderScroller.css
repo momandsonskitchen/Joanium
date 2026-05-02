@@ -23,8 +23,8 @@
 }
 
 .joanium-provider-tile {
-  width: 168px;
-  min-height: 172px;
+  width: 120px;
+  min-height: 120px;
   border: 0;
   border-radius: 26px;
   background: rgba(255, 251, 248, 0.82);
@@ -66,7 +66,7 @@
 }
 
 .joanium-provider-tile__name {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   color: #24150d;
   text-align: center;
