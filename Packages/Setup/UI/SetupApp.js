@@ -89,17 +89,6 @@ function restoreFocusState(container, focusState) {
   }
 }
 
-function createDocumentNodes(documentDefinition) {
-  return documentDefinition.sections.map((section) => {
-    const sectionElement = createElement('section', 'setup-document__section');
-    sectionElement.append(
-      createElement('h4', 'setup-document__heading', section.heading),
-      createElement('p', 'setup-document__body', section.body)
-    );
-    return sectionElement;
-  });
-}
-
 function createMonthPicker({ strings, selectedValue, onSelect }) {
   const months = strings.dob.months.filter((item) => item.value);
   const placeholderText = strings.dob.monthPlaceholder ?? 'Month';
@@ -366,21 +355,28 @@ async function bootstrap() {
         variant: 'ghost',
         size: 'compact',
         onClick: () => {
+          const { element: loader } = createLogoLoader({ 
+            logoPath: payload.logoPath,
+            infinite: true,
+            inline: true
+          });
+
+          const iframe = document.createElement('iframe');
+          iframe.src = 'https://www.joanium.com/terms';
+          iframe.style.width = '100%';
+          iframe.style.height = '600px';
+          iframe.style.border = 'none';
+          iframe.style.opacity = '0';
+          iframe.style.transition = 'opacity 0.3s ease';
+
+          iframe.onload = () => {
+            loader.remove();
+            iframe.style.opacity = '1';
+          };
+
           modal.open({
             title: strings.documents.terms.title,
-            nodes: createDocumentNodes(strings.documents.terms)
-          });
-        }
-      }),
-      createElement('span', 'setup-inline-links__joiner', strings.consent.reviewJoiner),
-      createButton({
-        label: strings.consent.privacyLink,
-        variant: 'ghost',
-        size: 'compact',
-        onClick: () => {
-          modal.open({
-            title: strings.documents.privacy.title,
-            nodes: createDocumentNodes(strings.documents.privacy)
+            nodes: [loader, iframe]
           });
         }
       })

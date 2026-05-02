@@ -10,9 +10,17 @@
  *   document.getElementById('app').replaceChildren(element);
  *   await done;
  */
-export function createLogoLoader({ logoPath, duration = 5000, size = 104 } = {}) {
+export function createLogoLoader({ logoPath, duration = 5000, size = 104, infinite = false, inline = false } = {}) {
   const root = document.createElement('div');
   root.className = 'logo-loader';
+  
+  if (inline) {
+    root.classList.add('logo-loader--inline');
+  }
+  
+  if (infinite) {
+    root.classList.add('logo-loader--infinite');
+  }
 
   const glow = document.createElement('div');
   glow.className = 'logo-loader__glow';
@@ -31,7 +39,7 @@ export function createLogoLoader({ logoPath, duration = 5000, size = 104 } = {})
   wrap.append(img);
   root.append(glow, wrap);
 
-  const done = new Promise((resolve) => setTimeout(resolve, duration));
+  const done = infinite ? new Promise(() => {}) : new Promise((resolve) => setTimeout(resolve, duration));
 
   return { element: root, done };
 }

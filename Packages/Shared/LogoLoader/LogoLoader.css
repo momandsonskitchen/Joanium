@@ -50,3 +50,17 @@
   0%, 100% { transform: scale(1);    opacity: 0.9; }
   50%       { transform: scale(1.18); opacity: 0.55; }
 }
+
+.logo-loader--inline {
+  position: absolute;
+  z-index: 0;
+}
+
+.logo-loader--infinite .logo-loader__img {
+  animation: logo-loader-spin-infinite 3s linear infinite;
+  opacity: 1;
+}
+
+@keyframes logo-loader-spin-infinite {
+  to { transform: rotate(360deg); }
+}

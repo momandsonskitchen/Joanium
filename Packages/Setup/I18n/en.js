@@ -15,7 +15,7 @@ const en = {
   },
   flow: {
     validation: {
-      consent: 'Accept the terms and privacy policy to continue.',
+      consent: 'Accept the terms to continue.',
       name: 'Enter the name you want Joanium to use.',
       dob: 'Enter a real date of birth.',
       providers: 'Choose at least one provider, pick its model, and finish its setup.',
@@ -27,13 +27,11 @@ const en = {
     title: 'Set up Joanium in a minute',
     description:
       'One smooth pass, local-first storage, and provider setup that only asks for what you actually need today.',
-    checkboxLabel: 'I accept the Terms & Conditions and Privacy Policy.',
+    checkboxLabel: 'I accept the Terms & Conditions.',
     checkboxDescription:
       'Your profile and provider credentials stay on this device unless you connect a cloud model.',
     reviewPrefix: 'Read the',
-    reviewJoiner: 'and',
-    termsLink: 'Terms & Conditions',
-    privacyLink: 'Privacy Policy'
+    termsLink: 'Terms & Conditions'
   },
   name: {
     title: 'What should Joanium call you?',
@@ -149,44 +147,7 @@ const en = {
   },
   documents: {
     terms: {
-      title: 'Terms & Conditions',
-      sections: [
-        {
-          heading: 'Local-first setup',
-          body:
-            'Joanium stores your onboarding details on this device so setup can resume cleanly and your workspace can reopen without friction.'
-        },
-        {
-          heading: 'Connected providers',
-          body:
-            "When you add a cloud provider, requests you send later will follow that provider's own terms and data handling rules."
-        },
-        {
-          heading: 'Your responsibility',
-          body:
-            'Keep your device secure, review the providers you enable, and use the assistant responsibly for the work you choose to do.'
-        }
-      ]
-    },
-    privacy: {
-      title: 'Privacy Policy',
-      sections: [
-        {
-          heading: 'What setup stores',
-          body:
-            'Joanium stores your name, date of birth, selected providers, local endpoints, and entered API keys inside the local data folder.'
-        },
-        {
-          heading: 'What stays local',
-          body:
-            'This onboarding flow does not send your personal details anywhere by itself. Network traffic only happens when you later use a connected provider.'
-        },
-        {
-          heading: 'Your control',
-          body:
-            'Because setup data is stored locally, you can inspect, edit, or remove it directly from the project data files whenever you need to.'
-        }
-      ]
+      title: 'Terms & Conditions'
     }
   },
   paths: {
