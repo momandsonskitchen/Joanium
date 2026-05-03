@@ -9,11 +9,11 @@ export async function createPackage({ rootDirectory }) {
   const usesOverlayControls = process.platform !== 'darwin';
   const overlayOptions = {
     height: 48,
-    color: '#f8f4ef'
+    color: '#ece0f8'
   };
 
   if (process.platform === 'win32') {
-    overlayOptions.symbolColor = '#4d3c2d';
+    overlayOptions.symbolColor = '#3a1450';
   }
 
   return {

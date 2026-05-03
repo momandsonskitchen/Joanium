@@ -41,7 +41,7 @@ async function createMainWindow(entryPackage) {
     show: false,
     frame: false,
     autoHideMenuBar: true,
-    backgroundColor: '#f4ebe5',
+    backgroundColor: '#f2eafa',
     webPreferences: {
       preload: entryPackage.preloadPath,
       contextIsolation: true,

@@ -258,7 +258,9 @@ textarea {
   gap: 4px;
   padding: 4px;
   border-radius: var(--radius-pill);
-  background: var(--color-chat-tab-bar-surface);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--shadow-chat-tab-bar);
   -webkit-app-region: no-drag;
 }
