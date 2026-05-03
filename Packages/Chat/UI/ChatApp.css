@@ -1,4 +1,5 @@
 @import "../../Shared/Common/Common.css";
+@import "../../Shared/CustomScrollbar/CustomScrollbar.css";
 
 :root {
   color-scheme: light;
@@ -549,9 +550,7 @@ textarea {
   min-width: 220px;
   max-width: 300px;
   max-height: 340px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(180, 140, 110, 0.28) transparent;
+  overflow-y: hidden;
   border-radius: 20px;
   padding: 8px;
   background:
@@ -570,21 +569,14 @@ textarea {
     transform 180ms ease;
 }
 
-.chat-model-picker::-webkit-scrollbar {
-  width: 4px;
+.chat-model-picker__scroller {
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
-.chat-model-picker::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chat-model-picker::-webkit-scrollbar-thumb {
-  background: rgba(180, 140, 110, 0.32);
-  border-radius: 2px;
-}
-
-.chat-model-picker::-webkit-scrollbar-thumb:hover {
-  background: rgba(180, 140, 110, 0.52);
+.chat-model-picker__scroller::-webkit-scrollbar {
+  display: none;
 }
 
 .chat-model-picker--open {

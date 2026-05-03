@@ -2,6 +2,7 @@ import en from '../I18n/en.js';
 import de from '../I18n/de.js';
 import fr from '../I18n/fr.js';
 import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 const dictionaries = { en, de, fr };
 
@@ -254,6 +255,9 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
   const panel = createElement('div', 'chat-model-picker');
   document.body.append(panel);
 
+  const scroller = createElement('div', 'chat-model-picker__scroller');
+  panel.append(scroller);
+
   const readyProviders = providers.filter((p) => {
     if (!p.models?.length) return false;
     const details = userProviderDetails?.[p.id] ?? {};
@@ -284,8 +288,10 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
       group.append(option);
     }
 
-    panel.append(group);
+    scroller.append(group);
   }
+
+  attachCustomScrollbar(panel, scroller);
 
   return panel;
 }
@@ -744,6 +750,7 @@ async function bootstrap() {
   stage.append(canvas);
   shell.append(dockArea, stage);
   root.replaceChildren(shell);
+
   syncComposer();
   renderThread();
   requestAnimationFrame(restoreDockCallout);
