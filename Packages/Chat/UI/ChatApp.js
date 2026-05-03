@@ -698,15 +698,6 @@ async function bootstrap() {
     {
       icon: 'paperclip',
       onClick: focusComposer
-    },
-    {
-      icon: 'globe',
-      onClick: () => {
-        const suggestion = quickStartCards[3];
-        if (suggestion) {
-          setDraft(suggestion.prompt, suggestion);
-        }
-      }
     }
   ];
 
