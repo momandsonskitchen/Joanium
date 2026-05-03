@@ -242,7 +242,7 @@ textarea {
   display: flex;
   justify-content: center;
   padding: 8px 0 18px;
-  background: var(--color-chat-topbar-background);
+  background: transparent;
   -webkit-app-region: drag;
   margin-inline: auto;
 }
