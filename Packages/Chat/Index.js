@@ -7,6 +7,14 @@ const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
 export async function createPackage({ rootDirectory }) {
   const chatStateManager = createChatStateManager({ rootDirectory });
   const usesOverlayControls = process.platform !== 'darwin';
+  const overlayOptions = {
+    height: 48,
+    color: '#f8f4ef'
+  };
+
+  if (process.platform === 'win32') {
+    overlayOptions.symbolColor = '#4d3c2d';
+  }
 
   return {
     id: 'Chat',
@@ -17,9 +25,7 @@ export async function createPackage({ rootDirectory }) {
       titleBarStyle: 'hidden',
       ...(usesOverlayControls
         ? {
-            titleBarOverlay: {
-              height: 48
-            }
+            titleBarOverlay: overlayOptions
           }
         : {})
     },

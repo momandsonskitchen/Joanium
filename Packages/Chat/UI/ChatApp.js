@@ -98,17 +98,6 @@ const iconMarkup = {
       <path d="M5 12h12" />
       <path d="m13 6 6 6-6 6" />
     </svg>
-  `,
-  crown: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m4 17 1.5-8L10 13l2-6 2 6 4.5-4L20 17Z" />
-      <path d="M5 20h14" />
-    </svg>
-  `,
-  chevronUp: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m7 14 5-5 5 5" />
-    </svg>
   `
 };
 
@@ -179,42 +168,6 @@ function getGreetingKey(date) {
   return 'evening';
 }
 
-function selectSuggestedRecents(strings, usageModes, count) {
-  const modeSet = new Set(usageModes.length ? usageModes : ['default']);
-  const selected = [];
-  const seen = new Set();
-
-  for (const item of strings.suggestedRecents) {
-    const matches = item.modes.some((mode) => modeSet.has(mode));
-
-    if (!matches || seen.has(item.id)) {
-      continue;
-    }
-
-    selected.push(item);
-    seen.add(item.id);
-
-    if (selected.length === count) {
-      return selected;
-    }
-  }
-
-  for (const item of strings.suggestedRecents) {
-    if (seen.has(item.id)) {
-      continue;
-    }
-
-    selected.push(item);
-    seen.add(item.id);
-
-    if (selected.length === count) {
-      break;
-    }
-  }
-
-  return selected;
-}
-
 function createDraftEntry(prompt, existingEntry) {
   const normalizedPrompt = collapseWhitespace(prompt);
 
@@ -241,10 +194,10 @@ function createDraftEntry(prompt, existingEntry) {
 }
 
 function createSidebarAction(label, iconName, onClick) {
-  const button = createElement('button', 'chat-sidebar__action');
+  const button = createElement('button', 'chat-sidebar__icon-button');
   button.type = 'button';
   button.append(createIcon(iconName, 'chat-sidebar__action-icon'));
-  button.append(createElement('span', 'chat-sidebar__action-label', label));
+  button.append(createElement('span', 'chat-sidebar__sr-only', label));
 
   if (typeof onClick === 'function') {
     button.addEventListener('click', onClick);
@@ -254,10 +207,10 @@ function createSidebarAction(label, iconName, onClick) {
 }
 
 function createNavigationItem(label, iconName) {
-  const button = createElement('button', 'chat-sidebar__nav-item');
+  const button = createElement('button', 'chat-sidebar__icon-button');
   button.type = 'button';
   button.append(createIcon(iconName, 'chat-sidebar__nav-icon'));
-  button.append(createElement('span', 'chat-sidebar__nav-label', label));
+  button.append(createElement('span', 'chat-sidebar__sr-only', label));
   return button;
 }
 
@@ -273,18 +226,12 @@ async function bootstrap() {
     payload.providers[0] ??
     null;
   const activeModelLabel = activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
-  const profileSubtitle = activeProvider
-    ? formatText(strings.profile.configured, { provider: activeProvider.label })
-    : strings.profile.local;
   const quickStartCards = strings.quickStartCards.slice(0, 4);
-  const suggestedRecents = selectSuggestedRecents(strings, payload.user.usageModes, 5);
 
   let draftValue = '';
   let lastSelectedEntry = null;
-  let recentPrompts = payload.home.recentPrompts;
   let composerField = null;
   let sendButton = null;
-  let recentsContainer = null;
 
   function syncComposer() {
     if (!composerField || !sendButton) {
@@ -311,24 +258,6 @@ async function bootstrap() {
     focusComposer();
   }
 
-  function buildRecentsList() {
-    recentsContainer.replaceChildren();
-    const entries = recentPrompts.length ? recentPrompts : suggestedRecents;
-
-    for (const entry of entries) {
-      const button = createElement('button', 'chat-sidebar__recent-item');
-      button.type = 'button';
-      button.append(
-        createElement('strong', 'chat-sidebar__recent-title', entry.title),
-        createElement('span', 'chat-sidebar__recent-summary', entry.summary)
-      );
-      button.addEventListener('click', () => {
-        setDraft(entry.prompt, entry);
-      });
-      recentsContainer.append(button);
-    }
-  }
-
   async function savePrompt() {
     const nextEntry = createDraftEntry(draftValue, lastSelectedEntry);
 
@@ -336,12 +265,10 @@ async function bootstrap() {
       return;
     }
 
-    const savedHome = await window.JoaniumChat.saveRecentPrompt(nextEntry);
-    recentPrompts = savedHome.recentPrompts;
+    await window.JoaniumChat.saveRecentPrompt(nextEntry);
     draftValue = '';
     lastSelectedEntry = null;
     syncComposer();
-    buildRecentsList();
   }
 
   const shell = createElement('main', 'chat-shell');
@@ -363,7 +290,7 @@ async function bootstrap() {
     }),
     createSidebarAction(strings.actions.search, 'search', focusComposer),
     createSidebarAction(strings.actions.customize, 'sliders', () => {
-      const suggestion = suggestedRecents[0] ?? quickStartCards[0];
+      const suggestion = quickStartCards[0];
 
       if (suggestion) {
         setDraft(suggestion.prompt, suggestion);
@@ -380,33 +307,11 @@ async function bootstrap() {
     createNavigationItem(strings.navigation.companies, 'building')
   );
 
-  const recentsSection = createElement('section', 'chat-sidebar__recents');
-  recentsSection.append(createElement('span', 'chat-sidebar__section-title', strings.sections.recents));
-  recentsContainer = createElement('div', 'chat-sidebar__recent-list');
-  recentsSection.append(recentsContainer);
-  buildRecentsList();
-
-  const profile = createElement('div', 'chat-sidebar__profile');
-  const profileIdentity = createElement('div', 'chat-sidebar__profile-identity');
+  const profile = createElement('div', 'chat-sidebar__profile chat-sidebar__profile--compact');
   const avatar = createElement('span', 'chat-sidebar__avatar', firstName.slice(0, 1).toUpperCase());
-  const profileText = createElement('div', 'chat-sidebar__profile-copy');
-  profileText.append(
-    createElement('strong', 'chat-sidebar__profile-name', firstName),
-    createElement('span', 'chat-sidebar__profile-meta', profileSubtitle)
-  );
-  profileIdentity.append(avatar, profileText);
+  profile.append(avatar);
 
-  const profileActions = createElement('div', 'chat-sidebar__profile-actions');
-  const crownButton = createElement('button', 'chat-sidebar__profile-button');
-  crownButton.type = 'button';
-  crownButton.append(createIcon('crown', 'chat-sidebar__profile-button-icon'));
-  const expandButton = createElement('button', 'chat-sidebar__profile-button');
-  expandButton.type = 'button';
-  expandButton.append(createIcon('chevronUp', 'chat-sidebar__profile-button-icon'));
-  profileActions.append(crownButton, expandButton);
-  profile.append(profileIdentity, profileActions);
-
-  sidebar.append(sidebarActions, sidebarNav, recentsSection, profile);
+  sidebar.append(sidebarActions, sidebarNav, profile);
 
   const tabs = createElement('div', 'chat-stage__tabs');
   for (const [id, label] of Object.entries(strings.tabs)) {
@@ -424,12 +329,6 @@ async function bootstrap() {
   const shellBody = createElement('div', 'chat-shell__body');
   const stage = createElement('section', 'chat-stage');
   const canvas = createElement('div', 'chat-stage__canvas');
-  const planPill = createElement('div', 'chat-stage__plan-pill');
-  planPill.append(
-    createElement('span', 'chat-stage__plan-tier', strings.plan.tier),
-    createElement('span', 'chat-stage__plan-divider'),
-    createElement('span', 'chat-stage__plan-upgrade', strings.plan.upgrade)
-  );
 
   const title = createElement(
     'h1',
@@ -508,7 +407,7 @@ async function bootstrap() {
   }
 
   quickStart.append(quickStartGrid);
-  canvas.append(planPill, title, composer, quickStart);
+  canvas.append(title, composer, quickStart);
   stage.append(canvas);
 
   shellBody.append(sidebar, stage);
