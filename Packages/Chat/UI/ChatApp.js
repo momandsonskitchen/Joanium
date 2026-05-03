@@ -113,6 +113,19 @@ const iconMarkup = {
       <path d="M9.5 2a4 4 0 0 1 4 4 4 4 0 0 1 4 4 4 4 0 0 1-2.4 3.7V15a2.5 2.5 0 0 1-5 0v-1.3A4 4 0 0 1 7.5 10a4 4 0 0 1 2-3.46V6a4 4 0 0 1 0-.5A4 4 0 0 1 9.5 2Z" />
       <path d="M9.5 15v3a2 2 0 0 0 4 0v-3" />
     </svg>
+  `,
+  volumeOn: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 5 6 9H3a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3l5 4V5Z" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    </svg>
+  `,
+  volumeStop: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 5 6 9H3a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3l5 4V5Z" />
+      <line x1="22" y1="9" x2="16" y2="15" />
+      <line x1="16" y1="9" x2="22" y2="15" />
+    </svg>
   `
 };
 
@@ -201,6 +214,97 @@ function createDraftEntry(prompt, existingEntry) {
 }
 
 // ---------------------------------------------------------------------------
+// stripMarkdown — removes code blocks, inline code, and markup symbols so
+// only plain readable prose is passed to the speech synthesiser.
+// ---------------------------------------------------------------------------
+function stripMarkdown(text) {
+  return text
+    // Fenced code blocks (``` or ~~~)
+    .replace(/^```[\s\S]*?^```/gm, '')
+    .replace(/^~~~[\s\S]*?^~~~/gm, '')
+    // Inline code
+    .replace(/`[^`\n]+`/g, '')
+    // Setext-style headings underlines
+    .replace(/^[=-]{2,}\s*$/gm, '')
+    // ATX headings (# Heading)
+    .replace(/^#{1,6}\s+/gm, '')
+    // Bold + italic combined (***text*** or ___text___)
+    .replace(/(\*{3}|_{3})(.*?)\1/g, '$2')
+    // Bold (**text** or __text__)
+    .replace(/(\*{2}|_{2})(.*?)\1/g, '$2')
+    // Italic (*text* or _text_)
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    // Strikethrough (~~text~~)
+    .replace(/~~(.*?)~~/g, '$1')
+    // Images — drop entirely
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    // Links — keep label text
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    // Blockquotes
+    .replace(/^>\s?/gm, '')
+    // Unordered list markers
+    .replace(/^[ \t]*[-*+]\s+/gm, '')
+    // Ordered list markers
+    .replace(/^[ \t]*\d+[.)]\s+/gm, '')
+    // Horizontal rules
+    .replace(/^[-*_]{3,}\s*$/gm, '')
+    // HTML tags
+    .replace(/<[^>]+>/g, '')
+    // Collapse 3+ blank lines into a single blank line
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// ---------------------------------------------------------------------------
+// TTS state — module-level so only one utterance plays at a time.
+// ---------------------------------------------------------------------------
+let activeSpeakBtn = null;
+
+function resetSpeakButton(btn) {
+  if (!btn) return;
+  btn.classList.remove('chat-message__action-button--speaking');
+  const iconEl = btn.querySelector('.chat-message__action-icon');
+  if (iconEl) iconEl.innerHTML = iconMarkup.volumeOn ?? '';
+}
+
+function speakText(rawText, btn) {
+  if (!window.speechSynthesis) return;
+
+  // Clicking the active button stops playback
+  if (activeSpeakBtn === btn) {
+    window.speechSynthesis.cancel();
+    resetSpeakButton(btn);
+    activeSpeakBtn = null;
+    return;
+  }
+
+  // Stop any other ongoing playback
+  window.speechSynthesis.cancel();
+  resetSpeakButton(activeSpeakBtn);
+  activeSpeakBtn = null;
+
+  const text = stripMarkdown(rawText ?? '');
+  if (!text) return;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  const finish = () => {
+    resetSpeakButton(btn);
+    activeSpeakBtn = null;
+  };
+
+  utterance.onend   = finish;
+  utterance.onerror = finish;
+
+  activeSpeakBtn = btn;
+  btn.classList.add('chat-message__action-button--speaking');
+  const iconEl = btn.querySelector('.chat-message__action-icon');
+  if (iconEl) iconEl.innerHTML = iconMarkup.volumeStop ?? '';
+
+  window.speechSynthesis.speak(utterance);
+}
+
+// ---------------------------------------------------------------------------
 // createDockButton — standard icon button for the side nav.
 // ---------------------------------------------------------------------------
 function createDockButton({ label, icon, active = false, emphasis = false, onClick, onHover }) {
@@ -245,9 +349,9 @@ function createProfileButton({ name, label, onHover }) {
 }
 
 // ---------------------------------------------------------------------------
-// Message action bar — copy + retry.
+// Message action bar — copy + retry + optional TTS speak.
 // ---------------------------------------------------------------------------
-function createMessageActions({ onCopy, onRetry }) {
+function createMessageActions({ onCopy, onRetry, onSpeak }) {
   const actions = createElement('div', 'chat-message__actions');
 
   const copyBtn = createElement('button', 'chat-message__action-button');
@@ -270,6 +374,16 @@ function createMessageActions({ onCopy, onRetry }) {
   retryBtn.addEventListener('click', onRetry);
 
   actions.append(copyBtn, retryBtn);
+
+  // TTS button — only rendered for assistant messages
+  if (typeof onSpeak === 'function') {
+    const speakBtn = createElement('button', 'chat-message__action-button');
+    speakBtn.type = 'button';
+    speakBtn.append(createIcon('volumeOn', 'chat-message__action-icon'));
+    speakBtn.addEventListener('click', () => onSpeak(speakBtn));
+    actions.append(speakBtn);
+  }
+
   return actions;
 }
 
@@ -321,7 +435,12 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
   }
 
   if (!message.streaming && !message.pending && typeof onCopy === 'function' && typeof onRetry === 'function') {
-    article.append(createMessageActions({ onCopy, onRetry }));
+    // TTS speak callback — only for assistant messages
+    const onSpeak = message.role === 'assistant'
+      ? (btn) => speakText(message.content, btn)
+      : undefined;
+
+    article.append(createMessageActions({ onCopy, onRetry, onSpeak }));
   }
 
   return article;
@@ -636,6 +755,12 @@ async function bootstrap() {
     lastSelectedEntry = null;
     isSending = false;
     window.JoaniumChat.removeStreamListeners();
+    // Stop any active TTS when conversation is cleared
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      resetSpeakButton(activeSpeakBtn);
+      activeSpeakBtn = null;
+    }
     syncComposer();
     renderThread();
     focusComposer();
@@ -643,6 +768,13 @@ async function bootstrap() {
 
   function renderThread() {
     if (!thread || !title || !composer || !canvas || !scroll || !bottom) return;
+
+    // Stop any active TTS when the thread is re-rendered (stale buttons)
+    if (window.speechSynthesis && activeSpeakBtn) {
+      window.speechSynthesis.cancel();
+      resetSpeakButton(activeSpeakBtn);
+      activeSpeakBtn = null;
+    }
 
     const hasMessages = messages.length > 0;
     logoEl.hidden = hasMessages;

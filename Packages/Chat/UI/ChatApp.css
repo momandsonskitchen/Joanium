@@ -520,7 +520,7 @@ textarea {
    styling needed — the content itself communicates the state. */
 
 /* -------------------------------------------------------------------------
-   Message action bar — copy + retry buttons
+   Message action bar — copy + retry + TTS speak buttons
    ------------------------------------------------------------------------- */
 
 .chat-message__actions {
@@ -536,6 +536,13 @@ textarea {
 
 .chat-message:hover .chat-message__actions,
 .chat-message:focus-within .chat-message__actions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Keep the action bar visible while speaking so the stop button stays reachable */
+.chat-message__actions:has(.chat-message__action-button--speaking) {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
@@ -565,6 +572,21 @@ textarea {
 
 .chat-message__action-button--copied {
   color: #7c3aed;
+}
+
+/* ── Speaking / active TTS state ── */
+.chat-message__action-button--speaking {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.chat-message__action-button--speaking .chat-message__action-icon {
+  animation: chat-speak-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes chat-speak-pulse {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%       { opacity: 0.55; transform: scale(0.88); }
 }
 
 .chat-message__action-icon {
