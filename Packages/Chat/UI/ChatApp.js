@@ -333,6 +333,7 @@ async function bootstrap() {
     const hasMessages = messages.length > 0;
     title.hidden = hasMessages;
     thread.hidden = !hasMessages;
+    if (subtitle) subtitle.hidden = hasMessages;
     composer.classList.toggle('chat-composer--conversation', hasMessages);
     scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
     bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
@@ -522,6 +523,7 @@ async function bootstrap() {
   const { element: logoEl } = createLogoLoader({ logoPath: payload.logoPath, infinite: true, inline: true });
   logoEl.classList.add('chat-stage__logo');
 
+  const subtitle = createElement('p', 'chat-stage__subtitle', 'You’re doing great — let’s make today count.');
   thread = createElement('section', 'chat-thread');
   thread.hidden = true;
 
@@ -595,7 +597,7 @@ async function bootstrap() {
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
 
-  scroll.append(topbar, logoEl, title, thread);
+  scroll.append(topbar, logoEl, title, subtitle, thread);
   bottom.append(composer);
   canvas.append(scroll, bottom);
   stage.append(canvas);

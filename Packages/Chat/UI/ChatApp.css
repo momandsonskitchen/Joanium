@@ -278,14 +278,29 @@ textarea {
   box-shadow: var(--shadow-chat-tab);
 }
 
+.chat-stage__logo {
+  position: relative !important;
+  inset: auto !important;
+  margin: 140px auto 0;
+}
+
 .chat-stage__title {
   width: min(920px, 100%);
-  margin: 80px 0 34px;
+  margin: 10px 0 34px;
   font-size: clamp(58px, 6vw, 84px);
   line-height: 0.98;
   font-weight: 420;
   letter-spacing: -0.07em;
   color: var(--color-chat-text-title);
+  text-align: center;
+}
+
+.chat-stage__subtitle {
+  margin: 0 0 28px;
+  font-size: 18px;
+  font-weight: 450;
+  letter-spacing: -0.02em;
+  color: var(--color-chat-text-muted);
   text-align: center;
 }
 
