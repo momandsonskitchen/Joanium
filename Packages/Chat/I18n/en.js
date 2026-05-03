@@ -31,6 +31,15 @@ const en = {
     stop: 'Stop',
     generationStopped: 'Generation stopped.'
   },
+  dock: {
+    newChat: 'New Chat',
+    projects: 'Projects',
+    skills: 'Skills',
+    personas: 'Personas',
+    marketplace: 'Marketplace',
+    theme: 'Theme',
+    profile: 'Profile'
+  },
   quickStartCards: [
     {
       id: 'write-script',

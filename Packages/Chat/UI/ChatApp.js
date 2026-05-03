@@ -7,29 +7,10 @@ import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScroll
 const dictionaries = { en, de, fr };
 
 const iconMarkup = {
-  plus: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
-      <path d="M12 6v12M6 12h12" />
-    </svg>
-  `,
   spark: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
       <path d="m13.5 3-1.2 4.5L8 8.8l4.3 1.3L13.5 15l1.2-4.9L19 8.8l-4.3-1.3Z" />
       <path d="m6 14-.7 2.2L3 17l2.3.8L6 20l.7-2.2L9 17l-2.3-.8Z" />
-    </svg>
-  `,
-  moon: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M15.2 3.8a7.8 7.8 0 1 0 5 12.6 8.3 8.3 0 0 1-5.6-7.7 8.2 8.2 0 0 1 .6-3Z" />
-      <path d="m17.8 5.2.4 1.3 1.3.4-1.3.4-.4 1.3-.4-1.3-1.3-.4 1.3-.4Z" />
-    </svg>
-  `,
-  grid: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="4.5" y="4.5" width="5" height="5" rx="1.4" />
-      <rect x="14.5" y="4.5" width="5" height="5" rx="1.4" />
-      <rect x="4.5" y="14.5" width="5" height="5" rx="1.4" />
-      <rect x="14.5" y="14.5" width="5" height="5" rx="1.4" />
     </svg>
   `,
   briefcase: `
@@ -40,16 +21,36 @@ const iconMarkup = {
       <path d="M10.5 12.5v1.3a1.5 1.5 0 0 0 3 0v-1.3" />
     </svg>
   `,
-  pen: `
+  skills: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m4 20 4.4-1 9.2-9.2a2.2 2.2 0 0 0-3.1-3.1L5.3 15.9 4 20Z" />
-      <path d="m12.8 8.4 2.8 2.8" />
+      <path d="M12 2a6 6 0 0 1 6 6c0 2.22-1.2 4.17-3 5.25V15a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 15v-1.75A6 6 0 0 1 12 2Z" />
+      <path d="M9.5 18.5h5" />
+      <path d="M10.5 21.5h3" />
     </svg>
   `,
-  mail: `
+  personas: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3.5" y="5.5" width="17" height="13" rx="3.2" />
-      <path d="m5.8 8.3 6.2 4.8 6.2-4.8" />
+      <circle cx="12" cy="7.5" r="3.5" />
+      <path d="M4.5 20.5c0-4.14 3.36-7 7.5-7s7.5 2.86 7.5 7" />
+    </svg>
+  `,
+  marketplace: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2 3 7v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-3-5Z" />
+      <path d="M3 7h18" />
+      <path d="M16 11a4 4 0 0 1-8 0" />
+    </svg>
+  `,
+  sun: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2M12 19.5v2M4.4 4.4l1.4 1.4M18.2 18.2l1.4 1.4M2.5 12h2M19.5 12h2M4.4 19.6l1.4-1.4M18.2 5.8l1.4-1.4" />
+    </svg>
+  `,
+  moon: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15.2 3.8a7.8 7.8 0 1 0 5 12.6 8.3 8.3 0 0 1-5.6-7.7 8.2 8.2 0 0 1 .6-3Z" />
+      <path d="m17.8 5.2.4 1.3 1.3.4-1.3.4-.4 1.3-.4-1.3-1.3-.4 1.3-.4Z" />
     </svg>
   `,
   paperclip: `
@@ -107,7 +108,6 @@ const iconMarkup = {
       <path d="M3 3v5h5" />
     </svg>
   `,
-  // Used for the reasoning / thinking block header
   thinking: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9.5 2a4 4 0 0 1 4 4 4 4 0 0 1 4 4 4 4 0 0 1-2.4 3.7V15a2.5 2.5 0 0 1-5 0v-1.3A4 4 0 0 1 7.5 10a4 4 0 0 1 2-3.46V6a4 4 0 0 1 0-.5A4 4 0 0 1 9.5 2Z" />
@@ -129,15 +129,8 @@ function formatText(template, replacements) {
 
 function createElement(tagName, className, text = '') {
   const element = document.createElement(tagName);
-
-  if (className) {
-    element.className = className;
-  }
-
-  if (text) {
-    element.textContent = text;
-  }
-
+  if (className) element.className = className;
+  if (text) element.textContent = text;
   return element;
 }
 
@@ -152,74 +145,77 @@ function collapseWhitespace(value) {
 }
 
 function truncate(value, maxLength) {
-  if (value.length <= maxLength) {
-    return value;
-  }
-
+  if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
 function getFirstName(name, fallback) {
-  const normalizedName = collapseWhitespace(name);
-
-  if (!normalizedName) {
-    return fallback;
-  }
-
-  return normalizedName.split(' ')[0];
+  const normalized = collapseWhitespace(name);
+  if (!normalized) return fallback;
+  return normalized.split(' ')[0];
 }
 
 function getGreetingKey(date) {
   const hour = date.getHours();
-
-  if (hour < 12) {
-    return 'morning';
-  }
-
-  if (hour < 18) {
-    return 'afternoon';
-  }
-
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
   return 'evening';
 }
 
-function createDraftEntry(prompt, existingEntry) {
-  const normalizedPrompt = collapseWhitespace(prompt);
+// ---------------------------------------------------------------------------
+// getInitials — first letter of first name + second letter of last name.
+// Single-word names use the first two letters.
+// ---------------------------------------------------------------------------
+function getInitials(name) {
+  const parts = collapseWhitespace(name).split(' ').filter(Boolean);
 
-  if (!normalizedPrompt) {
-    return null;
+  if (parts.length >= 2) {
+    const firstLetter = parts[0][0].toUpperCase();
+    const lastWord = parts[parts.length - 1];
+    const secondLetter = (lastWord[1] ?? lastWord[0]).toUpperCase();
+    return `${firstLetter}${secondLetter}`;
   }
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return '?';
+}
+
+function createDraftEntry(prompt, existingEntry) {
+  const normalized = collapseWhitespace(prompt);
+  if (!normalized) return null;
 
   if (existingEntry) {
-    return {
-      ...existingEntry,
-      prompt: normalizedPrompt,
-      updatedAt: new Date().toISOString()
-    };
+    return { ...existingEntry, prompt: normalized, updatedAt: new Date().toISOString() };
   }
 
-  const sentence = normalizedPrompt.split(/[.!?]/).find(Boolean) ?? normalizedPrompt;
-
+  const sentence = normalized.split(/[.!?]/).find(Boolean) ?? normalized;
   return {
     title: truncate(collapseWhitespace(sentence), 48),
-    summary: truncate(normalizedPrompt, 112),
-    prompt: normalizedPrompt,
+    summary: truncate(normalized, 112),
+    prompt: normalized,
     updatedAt: new Date().toISOString()
   };
 }
 
+// ---------------------------------------------------------------------------
+// createDockButton — standard icon button for the side nav.
+// ---------------------------------------------------------------------------
 function createDockButton({ label, icon, active = false, emphasis = false, onClick, onHover }) {
-  const button = createElement(
-    'button',
-    `chat-dock__button${active ? ' chat-dock__button--active' : ''}${emphasis ? ' chat-dock__button--emphasis' : ''}`
-  );
+  const classes = [
+    'chat-dock__button',
+    active     ? 'chat-dock__button--active'   : '',
+    emphasis   ? 'chat-dock__button--emphasis' : ''
+  ].filter(Boolean).join(' ');
+
+  const button = createElement('button', classes);
   button._dockLabel = label;
   button.append(createIcon(icon, 'chat-dock__icon'));
   button.append(createElement('span', 'chat-dock__sr-only', label));
 
-  if (typeof onClick === 'function') {
-    button.addEventListener('click', onClick);
-  }
+  if (typeof onClick === 'function') button.addEventListener('click', onClick);
 
   if (typeof onHover === 'function') {
     const show = () => onHover(button, label);
@@ -231,9 +227,26 @@ function createDockButton({ label, icon, active = false, emphasis = false, onCli
 }
 
 // ---------------------------------------------------------------------------
-// Message action bar — copy + retry buttons shown below each bubble.
+// createProfileButton — avatar button showing dynamically generated initials.
 // ---------------------------------------------------------------------------
+function createProfileButton({ name, label, onHover }) {
+  const button = createElement('button', 'chat-dock__button chat-dock__button--profile');
+  button._dockLabel = label;
+  button.append(createElement('span', 'chat-dock__avatar-initials', getInitials(name)));
+  button.append(createElement('span', 'chat-dock__sr-only', label));
 
+  if (typeof onHover === 'function') {
+    const show = () => onHover(button, name || label);
+    button.addEventListener('mouseenter', show);
+    button.addEventListener('focus', show);
+  }
+
+  return button;
+}
+
+// ---------------------------------------------------------------------------
+// Message action bar — copy + retry.
+// ---------------------------------------------------------------------------
 function createMessageActions({ onCopy, onRetry }) {
   const actions = createElement('div', 'chat-message__actions');
 
@@ -261,33 +274,22 @@ function createMessageActions({ onCopy, onRetry }) {
 }
 
 // ---------------------------------------------------------------------------
-// Message element builder
-// Supports pending (dots), streaming (live text + thinking), and final states.
+// createMessageElement — builds a chat bubble for any state.
 // ---------------------------------------------------------------------------
-
 function createMessageElement(message, { onCopy, onRetry } = {}) {
   const article = createElement(
     'article',
-    [
-      'chat-message',
-      `chat-message--${message.role}`,
+    ['chat-message', `chat-message--${message.role}`,
       message.streaming ? 'chat-message--streaming' : '',
-      message.error ? 'chat-message--error' : '',
-      message.stopped ? 'chat-message--stopped' : ''
-    ]
-      .filter(Boolean)
-      .join(' ')
+      message.error     ? 'chat-message--error'     : '',
+      message.stopped   ? 'chat-message--stopped'   : ''
+    ].filter(Boolean).join(' ')
   );
 
   if (message.role === 'assistant') {
-    // ------------------------------------------------------------------
-    // Thinking / reasoning block — shown as a collapsible <details>
-    // Hidden when there is no thinking content.
-    // ------------------------------------------------------------------
     const thinkingWrap = document.createElement('details');
     thinkingWrap.className = 'chat-message__thinking';
     thinkingWrap.hidden = !message.thinking;
-    // Closed by default — user clicks to expand
 
     const thinkingSummary = createElement('summary', 'chat-message__thinking-summary');
     thinkingSummary.append(
@@ -297,38 +299,27 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
     thinkingWrap.append(thinkingSummary);
 
     const thinkingBody = createElement('div', 'chat-message__thinking-body');
-    const thinkingText = createElement('p', 'chat-message__thinking-text', message.thinking ?? '');
-    thinkingBody.append(thinkingText);
+    thinkingBody.append(createElement('p', 'chat-message__thinking-text', message.thinking ?? ''));
     thinkingWrap.append(thinkingBody);
-
     article.append(thinkingWrap);
 
-    // ------------------------------------------------------------------
-    // Main reply bubble
-    // ------------------------------------------------------------------
     const bubble = createElement('div', 'chat-message__bubble');
 
     if (message.pending || (message.streaming && !message.content)) {
-      // No content yet — show animated dots
       const dots = createElement('span', 'chat-message__dots');
       dots.innerHTML = '<span></span><span></span><span></span>';
       bubble.append(dots);
     } else {
-      // Text in its own span so the stream-dot sibling stays alive during updates
       const textSpan = createElement('span', 'chat-message__text', (message.content ?? '').trimStart());
       bubble.append(textSpan);
-      if (message.streaming) {
-        bubble.append(createElement('span', 'chat-message__stream-dot'));
-      }
+      if (message.streaming) bubble.append(createElement('span', 'chat-message__stream-dot'));
     }
 
     article.append(bubble);
   } else {
-    const bubble = createElement('div', 'chat-message__bubble', message.content);
-    article.append(bubble);
+    article.append(createElement('div', 'chat-message__bubble', message.content));
   }
 
-  // Action buttons — hidden while streaming/pending, shown on completed messages.
   if (!message.streaming && !message.pending && typeof onCopy === 'function' && typeof onRetry === 'function') {
     article.append(createMessageActions({ onCopy, onRetry }));
   }
@@ -337,34 +328,23 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Direct DOM update for the currently-streaming message.
-// Called on every chunk so we never rebuild the whole thread while streaming.
+// updateLastStreamingMessage — patches the live bubble token-by-token.
 // ---------------------------------------------------------------------------
-
 function updateLastStreamingMessage(threadEl, { content, thinking }) {
   const lastEl = threadEl?.lastElementChild;
   if (!lastEl || !lastEl.classList.contains('chat-message--assistant')) return;
 
-  // --- Thinking block -------------------------------------------------
   const thinkingWrap = lastEl.querySelector('.chat-message__thinking');
   const thinkingText = lastEl.querySelector('.chat-message__thinking-text');
-
-  if (thinkingWrap && thinkingText) {
-    if (thinking) {
-      thinkingText.textContent = thinking;
-      thinkingWrap.hidden = false;
-      // Stay closed — user opens manually
-    }
+  if (thinkingWrap && thinkingText && thinking) {
+    thinkingText.textContent = thinking;
+    thinkingWrap.hidden = false;
   }
 
-  // --- Content bubble -------------------------------------------------
   const bubble = lastEl.querySelector('.chat-message__bubble');
   if (bubble && content) {
-    // First chunk: swap out loading dots
-    const dots = bubble.querySelector('.chat-message__dots');
-    if (dots) dots.remove();
+    bubble.querySelector('.chat-message__dots')?.remove();
 
-    // Update text span (preserves stream-dot sibling)
     let textSpan = bubble.querySelector('.chat-message__text');
     if (!textSpan) {
       textSpan = createElement('span', 'chat-message__text');
@@ -372,42 +352,40 @@ function updateLastStreamingMessage(threadEl, { content, thinking }) {
     }
     textSpan.textContent = content.trimStart();
 
-    // Ensure the moving dot is present while streaming
     if (!bubble.querySelector('.chat-message__stream-dot')) {
       bubble.append(createElement('span', 'chat-message__stream-dot'));
     }
   }
 
-  // Keep the new content visible
   lastEl.scrollIntoView({ block: 'end', behavior: 'smooth' });
 }
 
 function getPreferredProvider(payload) {
-  const selectedProviderIds = payload.user?.providers?.selected ?? [];
-  const providersById = new Map(payload.providers.map((provider) => [provider.id, provider]));
-  const orderedProviders = [
-    ...selectedProviderIds.map((providerId) => providersById.get(providerId)).filter(Boolean),
-    ...payload.providers.filter((provider) => !selectedProviderIds.includes(provider.id))
+  const selectedIds = payload.user?.providers?.selected ?? [];
+  const byId = new Map(payload.providers.map((p) => [p.id, p]));
+  const ordered = [
+    ...selectedIds.map((id) => byId.get(id)).filter(Boolean),
+    ...payload.providers.filter((p) => !selectedIds.includes(p.id))
   ];
 
   return (
-    orderedProviders.find((provider) => {
-      const details = payload.user?.providers?.details?.[provider.id] ?? {};
-      const hasModel = Boolean(provider.models?.[0]?.id);
-      const hasEndpoint = Boolean(collapseWhitespace(details.endpoint) || collapseWhitespace(provider.endpoint));
-      const hasCredential = provider.requiresApiKey ? Boolean(collapseWhitespace(details.apiKey)) : true;
-      return hasModel && hasEndpoint && hasCredential;
+    ordered.find((p) => {
+      const details = payload.user?.providers?.details?.[p.id] ?? {};
+      return (
+        Boolean(p.models?.[0]?.id) &&
+        Boolean(collapseWhitespace(details.endpoint) || collapseWhitespace(p.endpoint)) &&
+        (p.requiresApiKey ? Boolean(collapseWhitespace(details.apiKey)) : true)
+      );
     }) ??
-    orderedProviders.find((provider) => provider.models?.length > 0) ??
+    ordered.find((p) => p.models?.length > 0) ??
     payload.providers[0] ??
     null
   );
 }
 
 // ---------------------------------------------------------------------------
-// Model picker — a compact portal panel for switching provider + model
+// createModelPickerPanel — floating portal for switching provider + model.
 // ---------------------------------------------------------------------------
-
 function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
   const panel = createElement('div', 'chat-model-picker');
   document.body.append(panel);
@@ -426,22 +404,14 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
 
   for (const provider of readyProviders) {
     const group = createElement('div', 'chat-model-picker__group');
-
-    const groupHeader = createElement('div', 'chat-model-picker__group-header', provider.label);
-    group.append(groupHeader);
+    group.append(createElement('div', 'chat-model-picker__group-header', provider.label));
 
     for (const model of provider.models) {
       const option = createElement('button', 'chat-model-picker__option');
       option._pickerProviderId = provider.id;
       option._pickerModelId = model.id;
-
       option.append(createElement('span', 'chat-model-picker__option-label', model.name ?? model.id));
-
-      option.addEventListener('click', (event) => {
-        event.stopPropagation();
-        onSelect(provider, model);
-      });
-
+      option.addEventListener('click', (e) => { e.stopPropagation(); onSelect(provider, model); });
       group.append(option);
     }
 
@@ -449,16 +419,19 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
   }
 
   attachCustomScrollbar(panel, scroller);
-
   return panel;
 }
 
+// ---------------------------------------------------------------------------
+// bootstrap — entry point; builds the full UI tree.
+// ---------------------------------------------------------------------------
 async function bootstrap() {
   const payload = await window.JoaniumChat.bootstrap();
   const strings = getDictionary(payload.user.locale);
   const root = document.getElementById('app');
   const firstName = getFirstName(payload.user.profile.name, strings.appName);
   const greetingKey = getGreetingKey(new Date());
+
   let activeProvider = getPreferredProvider(payload);
   let activeModel = activeProvider?.models?.[0] ?? null;
   let activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
@@ -468,53 +441,71 @@ async function bootstrap() {
   let isSending = false;
   let accText = '';
   let accThinking = '';
+  let isDarkTheme = false;
+
+  // DOM refs set during build
   let composerField = null;
   let sendButton = null;
   let thread = null;
   let title = null;
+  let subtitle = null;
+  let logoEl = null;
   let composer = null;
   let canvas = null;
   let scroll = null;
   let bottom = null;
   let dockCallout = null;
-  let pinnedDockButton = null;
+  let dockArea = null;
+  let themeButton = null;
   let messages = [];
 
   // Model picker state
   let modelPickerPanel = null;
   let modelPickerOpen = false;
+  let modelButton = null;
+
+  // ---------------------------------------------------------------------------
+  // Dock callout — uses getBoundingClientRect for reliable positioning
+  // regardless of scroll position or intermediate layout containers.
+  // ---------------------------------------------------------------------------
+
+  function positionDockCallout(button, label) {
+    if (!dockCallout || !button || !dockArea) return;
+    const btnRect = button.getBoundingClientRect();
+    const areaRect = dockArea.getBoundingClientRect();
+    dockCallout.textContent = label;
+    dockCallout.style.top = `${btnRect.top - areaRect.top + btnRect.height / 2}px`;
+    dockCallout.hidden = false;
+  }
+
+  function hideDockCallout() {
+    if (dockCallout) dockCallout.hidden = true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Model picker
+  // ---------------------------------------------------------------------------
 
   function closeModelPicker() {
-    if (modelPickerPanel) {
-      modelPickerPanel.classList.remove('chat-model-picker--open');
-    }
+    modelPickerPanel?.classList.remove('chat-model-picker--open');
     modelButton?.classList.remove('chat-composer__model--open');
     modelPickerOpen = false;
   }
 
   function syncPickerActiveStates() {
     if (!modelPickerPanel) return;
-
     for (const option of modelPickerPanel.querySelectorAll('.chat-model-picker__option')) {
       const isActive = option._pickerProviderId === activeProvider?.id
         && option._pickerModelId === activeModel?.id;
-
       option.classList.toggle('chat-model-picker__option--active', isActive);
-
-      const existingCheck = option.querySelector('.chat-model-picker__check');
-      if (isActive && !existingCheck) {
-        option.append(createIcon('check', 'chat-model-picker__check'));
-      } else if (!isActive && existingCheck) {
-        existingCheck.remove();
-      }
+      const existing = option.querySelector('.chat-model-picker__check');
+      if (isActive && !existing) option.append(createIcon('check', 'chat-model-picker__check'));
+      else if (!isActive && existing) existing.remove();
     }
   }
 
   function openModelPicker(triggerButton) {
-    if (modelPickerOpen) {
-      closeModelPicker();
-      return;
-    }
+    if (modelPickerOpen) { closeModelPicker(); return; }
 
     if (!modelPickerPanel) {
       modelPickerPanel = createModelPickerPanel({
@@ -524,10 +515,8 @@ async function bootstrap() {
           activeProvider = provider;
           activeModel = model;
           activeModelLabel = model.name ?? model.id;
-
           const labelEl = triggerButton.querySelector('.chat-composer__model-label');
           if (labelEl) labelEl.textContent = activeModelLabel;
-
           syncPickerActiveStates();
           closeModelPicker();
         }
@@ -541,59 +530,41 @@ async function bootstrap() {
     modelPickerPanel.style.left = `${rect.left}px`;
     modelPickerPanel.style.bottom = `${window.innerHeight - rect.top + 8}px`;
 
-    // Animate in
-    requestAnimationFrame(() => {
-      modelPickerPanel?.classList.add('chat-model-picker--open');
-    });
+    requestAnimationFrame(() => modelPickerPanel?.classList.add('chat-model-picker--open'));
 
-    // Click-outside to close
-    const onDocumentClick = (event) => {
-      if (!modelPickerPanel?.contains(event.target) && !triggerButton.contains(event.target)) {
+    const onDocClick = (e) => {
+      if (!modelPickerPanel?.contains(e.target) && !triggerButton.contains(e.target)) {
         closeModelPicker();
-        document.removeEventListener('click', onDocumentClick, { capture: true });
-        document.removeEventListener('keydown', onDocumentKeydown);
+        document.removeEventListener('click', onDocClick, { capture: true });
+        document.removeEventListener('keydown', onDocKey);
       }
     };
-
-    const onDocumentKeydown = (event) => {
-      if (event.key === 'Escape') {
+    const onDocKey = (e) => {
+      if (e.key === 'Escape') {
         closeModelPicker();
-        document.removeEventListener('click', onDocumentClick, { capture: true });
-        document.removeEventListener('keydown', onDocumentKeydown);
+        document.removeEventListener('click', onDocClick, { capture: true });
+        document.removeEventListener('keydown', onDocKey);
       }
     };
-
     setTimeout(() => {
-      document.addEventListener('click', onDocumentClick, { capture: true });
-      document.addEventListener('keydown', onDocumentKeydown);
+      document.addEventListener('click', onDocClick, { capture: true });
+      document.addEventListener('keydown', onDocKey);
     }, 0);
   }
 
-  function positionDockCallout(button, label) {
-    if (!dockCallout || !button) {
-      return;
-    }
+  // ---------------------------------------------------------------------------
+  // Theme toggle — switches sun ↔ moon icon and applies theme-dark to <html>.
+  // ---------------------------------------------------------------------------
 
-    dockCallout.textContent = label.toLowerCase();
-    dockCallout.style.top = `${button.offsetTop + button.offsetHeight / 2}px`;
-    dockCallout.hidden = false;
-  }
-
-  function restoreDockCallout() {
-    if (pinnedDockButton) {
-      positionDockCallout(pinnedDockButton, pinnedDockButton._dockLabel);
-      return;
-    }
-
-    if (dockCallout) {
-      dockCallout.hidden = true;
-    }
+  function toggleTheme() {
+    isDarkTheme = !isDarkTheme;
+    document.documentElement.classList.toggle('theme-dark', isDarkTheme);
+    const iconEl = themeButton?.querySelector('.chat-dock__icon');
+    if (iconEl) iconEl.innerHTML = isDarkTheme ? iconMarkup.moon : iconMarkup.sun;
   }
 
   // ---------------------------------------------------------------------------
-  // stopStream — cancels the in-flight stream and finalises the message.
-  // Appends the localised "Generation stopped." note so the user always knows
-  // the response was cut short.
+  // Stream control
   // ---------------------------------------------------------------------------
 
   function stopStream() {
@@ -601,9 +572,7 @@ async function bootstrap() {
     const stoppedNote = strings.composer.generationStopped;
     messages = messages.map((message, index) => {
       if (index !== messages.length - 1) return message;
-      const content = accText
-        ? `${accText}\n\n${stoppedNote}`
-        : stoppedNote;
+      const content = accText ? `${accText}\n\n${stoppedNote}` : stoppedNote;
       return {
         role: 'assistant',
         content,
@@ -621,16 +590,8 @@ async function bootstrap() {
     renderThread();
   }
 
-  // ---------------------------------------------------------------------------
-  // syncComposer — keeps the send button and textarea in sync with app state.
-  // When streaming, the button becomes a labelled "Stop" pill.
-  // ---------------------------------------------------------------------------
-
   function syncComposer() {
-    if (!composerField || !sendButton) {
-      return;
-    }
-
+    if (!composerField || !sendButton) return;
     composerField.value = draftValue;
 
     const iconEl = sendButton.querySelector('.chat-composer__send-icon');
@@ -639,29 +600,18 @@ async function bootstrap() {
     if (isSending) {
       sendButton.disabled = false;
       sendButton.classList.add('chat-composer__send--stop');
-      sendButton.classList.remove('chat-composer__send--busy');
       if (iconEl) iconEl.innerHTML = iconMarkup.stop;
-      if (labelEl) {
-        labelEl.textContent = strings.composer.stop;
-        labelEl.hidden = false;
-      }
+      if (labelEl) { labelEl.textContent = strings.composer.stop; labelEl.hidden = false; }
     } else {
       sendButton.disabled = !draftValue.trim();
       sendButton.classList.remove('chat-composer__send--stop');
-      sendButton.classList.remove('chat-composer__send--busy');
       if (iconEl) iconEl.innerHTML = iconMarkup.send;
-      if (labelEl) {
-        labelEl.textContent = '';
-        labelEl.hidden = true;
-      }
+      if (labelEl) { labelEl.textContent = ''; labelEl.hidden = true; }
     }
   }
 
   function focusComposer() {
-    if (!composerField) {
-      return;
-    }
-
+    if (!composerField) return;
     composerField.focus();
     composerField.setSelectionRange(draftValue.length, draftValue.length);
   }
@@ -685,9 +635,7 @@ async function bootstrap() {
   }
 
   function renderThread() {
-    if (!thread || !title || !composer || !canvas || !scroll || !bottom) {
-      return;
-    }
+    if (!thread || !title || !composer || !canvas || !scroll || !bottom) return;
 
     const hasMessages = messages.length > 0;
     logoEl.hidden = hasMessages;
@@ -698,19 +646,12 @@ async function bootstrap() {
     scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
     bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
 
-    if (!hasMessages) {
-      thread.replaceChildren();
-      return;
-    }
+    if (!hasMessages) { thread.replaceChildren(); return; }
 
     thread.replaceChildren(...messages.map((message, index) => {
-      const onCopy = () => {
-        navigator.clipboard.writeText(message.content ?? '').catch(() => {});
-      };
-
+      const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
       const onRetry = () => {
         if (isSending) return;
-        // For user messages retry from that message; for assistant messages retry the preceding user message.
         const userIndex = message.role === 'user' ? index : index - 1;
         if (userIndex < 0) return;
         const userMessage = messages[userIndex];
@@ -720,84 +661,58 @@ async function bootstrap() {
         renderThread();
         void submitPrompt();
       };
-
       return createMessageElement(message, { onCopy, onRetry });
     }));
+
     requestAnimationFrame(() => {
       thread.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
     });
   }
 
   // ---------------------------------------------------------------------------
-  // submitPrompt — streams the response, updating the DOM token-by-token.
+  // submitPrompt — fire-and-forget stream.
   // ---------------------------------------------------------------------------
-
   async function submitPrompt() {
     const prompt = draftValue.trim();
-
-    if (!prompt || isSending) {
-      return;
-    }
+    if (!prompt || isSending) return;
 
     const draftEntry = createDraftEntry(prompt, lastSelectedEntry);
-    if (draftEntry) {
-      void window.JoaniumChat.saveRecentPrompt(draftEntry);
-    }
+    if (draftEntry) void window.JoaniumChat.saveRecentPrompt(draftEntry);
 
-    // Append user message + streaming placeholder for the assistant reply
     messages = [
       ...messages,
       { role: 'user', content: prompt },
-      {
-        role: 'assistant',
-        content: '',
-        thinking: '',
-        streaming: true,
-        providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
-      }
+      { role: 'assistant', content: '', thinking: '', streaming: true,
+        providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
     ];
 
     draftValue = '';
     lastSelectedEntry = null;
     isSending = true;
+    accText = '';
+    accThinking = '';
     syncComposer();
     renderThread();
     focusComposer();
 
-    // Reset accumulators for the current stream
-    accText = '';
-    accThinking = '';
-
-    // Remove any leftover listeners from a previous turn
     window.JoaniumChat.removeStreamListeners();
 
     window.JoaniumChat.onStreamChunk((chunk) => {
-      if (chunk?.type === 'text' && chunk.text) {
-        accText += chunk.text;
-      } else if (chunk?.type === 'thinking' && chunk.text) {
-        accThinking += chunk.text;
-      }
-
+      if (chunk?.type === 'text'    && chunk.text) accText    += chunk.text;
+      if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
       updateLastStreamingMessage(thread, { content: accText, thinking: accThinking });
     });
 
     window.JoaniumChat.onStreamDone((meta) => {
       window.JoaniumChat.removeStreamListeners();
-
-      messages = messages.map((message, index) => {
-        if (index !== messages.length - 1) return message;
-
-        return {
-          role: 'assistant',
-          content: accText || 'No response received.',
-          thinking: accThinking,
-          streaming: false,
-          providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-          modelLabel: meta?.modelLabel ?? activeModelLabel
-        };
+      messages = messages.map((m, i) => i !== messages.length - 1 ? m : {
+        role: 'assistant',
+        content: accText || 'No response received.',
+        thinking: accThinking,
+        streaming: false,
+        providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+        modelLabel: meta?.modelLabel ?? activeModelLabel
       });
-
       isSending = false;
       syncComposer();
       renderThread();
@@ -805,32 +720,21 @@ async function bootstrap() {
 
     window.JoaniumChat.onStreamError((err) => {
       window.JoaniumChat.removeStreamListeners();
-
-      messages = messages.map((message, index) => {
-        if (index !== messages.length - 1) return message;
-
-        return {
-          role: 'assistant',
-          content: err?.message || 'Unable to get a response right now.',
-          thinking: accThinking,
-          streaming: false,
-          error: true,
-          providerLabel: activeProvider?.label ?? 'AI',
-          modelLabel: activeModelLabel
-        };
+      messages = messages.map((m, i) => i !== messages.length - 1 ? m : {
+        role: 'assistant',
+        content: err?.message || 'Unable to get a response right now.',
+        thinking: accThinking,
+        streaming: false,
+        error: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel
       });
-
       isSending = false;
       syncComposer();
       renderThread();
     });
 
-    // Build the conversation history to send (all completed messages, no streaming placeholder)
-    const historyToSend = messages
-      .slice(0, -1) // Remove the current streaming placeholder
-      .map(({ role, content }) => ({ role, content }));
-
-    // Kick off the stream — fire-and-forget; results arrive via the event listeners above
+    const historyToSend = messages.slice(0, -1).map(({ role, content }) => ({ role, content }));
     void window.JoaniumChat.streamMessage({
       messages: historyToSend,
       providerId: activeProvider?.id ?? null,
@@ -838,83 +742,69 @@ async function bootstrap() {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DOM construction
+  // ═══════════════════════════════════════════════════════════════════════════
+
   const shell = createElement('main', 'chat-shell');
-  const dockArea = createElement('aside', 'chat-dock-area');
+
+  // ── Dock ──────────────────────────────────────────────────────────────────
+  dockArea = createElement('aside', 'chat-dock-area');
   const dock = createElement('div', 'chat-dock');
-  const dockUtilities = createElement('div', 'chat-dock__stack');
-  const dockPrimary = createElement('div', 'chat-dock__stack');
-  dockCallout = createElement('div', 'chat-dock__callout', 'projects');
+  dockCallout = createElement('div', 'chat-dock__callout');
   dockCallout.hidden = true;
 
-  const dockButtonDefinitions = [
-    {
-      label: 'New Chat',
-      icon: 'spark',
-      emphasis: true,
-      onClick: clearConversation
-    },
-    {
-      label: 'Focus Input',
-      icon: 'moon',
-      onClick: focusComposer
-    }
-  ];
+  // Top group: New Chat (emphasis)
+  const dockTopStack = createElement('div', 'chat-dock__stack');
+  const newChatBtn = createDockButton({
+    label: strings.dock.newChat,
+    icon: 'spark',
+    emphasis: true,
+    onClick: clearConversation,
+    onHover: positionDockCallout
+  });
+  dockTopStack.append(newChatBtn);
 
-  const dockPrimaryDefinitions = [
-    {
-      label: 'Workspace',
-      icon: 'grid',
-      onClick: () => {
-        const suggestion = quickStartCards[0];
-        if (suggestion) {
-          setDraft(suggestion.prompt, suggestion);
-        }
-      }
-    },
-    {
-      label: 'Projects',
-      icon: 'briefcase',
-      active: true,
-      onClick: focusComposer
-    },
-    {
-      label: 'Compose',
-      icon: 'pen',
-      onClick: focusComposer
-    },
-    {
-      label: 'Inbox',
-      icon: 'mail',
-      onClick: focusComposer
-    }
+  // Middle group: nav items
+  const dockNavStack = createElement('div', 'chat-dock__stack');
+  const navItems = [
+    { label: strings.dock.projects,    icon: 'briefcase',   onClick: focusComposer },
+    { label: strings.dock.skills,      icon: 'skills',                    onClick: focusComposer },
+    { label: strings.dock.personas,    icon: 'personas',                  onClick: focusComposer },
+    { label: strings.dock.marketplace, icon: 'marketplace',               onClick: focusComposer }
   ];
-
-  for (const definition of dockButtonDefinitions) {
-    dockUtilities.append(
-      createDockButton({
-        ...definition,
-        onHover: positionDockCallout
-      })
-    );
+  for (const item of navItems) {
+    dockNavStack.append(createDockButton({ ...item, onHover: positionDockCallout }));
   }
 
-  for (const definition of dockPrimaryDefinitions) {
-    const button = createDockButton({
-      ...definition,
-      onHover: positionDockCallout
-    });
+  // Bottom group: theme toggle + profile avatar
+  const dockBottomStack = createElement('div', 'chat-dock__stack');
 
-    if (definition.active) {
-      pinnedDockButton = button;
-    }
+  themeButton = createDockButton({
+    label: strings.dock.theme,
+    icon: 'sun',
+    onClick: toggleTheme,
+    onHover: positionDockCallout
+  });
 
-    dockPrimary.append(button);
-  }
+  const profileBtn = createProfileButton({
+    name: payload.user.profile.name,
+    label: strings.dock.profile,
+    onHover: positionDockCallout
+  });
 
-  dock.addEventListener('mouseleave', restoreDockCallout);
-  dock.append(dockUtilities, createElement('div', 'chat-dock__divider'), dockPrimary);
+  dockBottomStack.append(themeButton, profileBtn);
+
+  dock.addEventListener('mouseleave', hideDockCallout);
+  dock.append(
+    dockTopStack,
+    dockNavStack,
+    createElement('div', 'chat-dock__divider'),
+    dockBottomStack
+  );
   dockArea.append(dock, dockCallout);
 
+  // ── Stage ─────────────────────────────────────────────────────────────────
   const stage = createElement('section', 'chat-stage');
   canvas = createElement('div', 'chat-stage__canvas');
 
@@ -932,79 +822,57 @@ async function bootstrap() {
   topbar.append(tabs);
 
   title = createElement(
-    'h1',
-    'chat-stage__title',
+    'h1', 'chat-stage__title',
     formatText(strings.greeting[greetingKey], { name: firstName })
   );
 
-  const { element: logoEl } = createLogoLoader({ logoPath: payload.logoPath, infinite: true, inline: true });
+  const logoResult = createLogoLoader({ logoPath: payload.logoPath, infinite: true, inline: true });
+  logoEl = logoResult.element;
   logoEl.classList.add('chat-stage__logo');
 
-  const subtitle = createElement('p', 'chat-stage__subtitle', "You\u2019re doing great \u2014 let\u2019s make today count.");
+  subtitle = createElement('p', 'chat-stage__subtitle', "You\u2019re doing great \u2014 let\u2019s make today count.");
   thread = createElement('section', 'chat-thread');
   thread.hidden = true;
 
+  // ── Composer ──────────────────────────────────────────────────────────────
   composer = createElement('section', 'chat-composer');
   composerField = document.createElement('textarea');
   composerField.className = 'chat-composer__field';
   composerField.placeholder = strings.composer.placeholder;
   composerField.rows = 3;
-  composerField.addEventListener('input', (event) => {
-    draftValue = event.target.value;
+  composerField.addEventListener('input', (e) => {
+    draftValue = e.target.value;
     lastSelectedEntry = null;
     syncComposer();
   });
-  composerField.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      void submitPrompt();
-    }
+  composerField.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void submitPrompt(); }
   });
 
   const composerFooter = createElement('div', 'chat-composer__footer');
   const composerActions = createElement('div', 'chat-composer__actions');
-  const composerActionDefinitions = [
-    {
-      icon: 'paperclip',
-      onClick: focusComposer
-    }
-  ];
-
-  for (const action of composerActionDefinitions) {
-    const actionButton = createElement('button', 'chat-composer__icon-button');
-    actionButton.type = 'button';
-    actionButton.append(createIcon(action.icon, 'chat-composer__icon'));
-    actionButton.addEventListener('click', action.onClick);
-    composerActions.append(actionButton);
-  }
+  const attachBtn = createElement('button', 'chat-composer__icon-button');
+  attachBtn.type = 'button';
+  attachBtn.append(createIcon('paperclip', 'chat-composer__icon'));
+  attachBtn.addEventListener('click', focusComposer);
+  composerActions.append(attachBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
-  const modelButton = createElement('button', 'chat-composer__model');
+  modelButton = createElement('button', 'chat-composer__model');
   modelButton.type = 'button';
   modelButton.append(
     createElement('span', 'chat-composer__model-label', activeModelLabel),
     createIcon('chevronDown', 'chat-composer__model-icon')
   );
-  modelButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    openModelPicker(modelButton);
-  });
+  modelButton.addEventListener('click', (e) => { e.stopPropagation(); openModelPicker(modelButton); });
 
-  // Send / Stop button — icon + hidden label (label shown only in stop state)
   sendButton = createElement('button', 'chat-composer__send');
   sendButton.type = 'button';
   const sendLabel = createElement('span', 'chat-composer__send-label');
   sendLabel.hidden = true;
-  sendButton.append(
-    createIcon('send', 'chat-composer__send-icon'),
-    sendLabel
-  );
+  sendButton.append(createIcon('send', 'chat-composer__send-icon'), sendLabel);
   sendButton.addEventListener('click', () => {
-    if (isSending) {
-      stopStream();
-    } else {
-      void submitPrompt();
-    }
+    if (isSending) stopStream(); else void submitPrompt();
   });
 
   composerSubmit.append(modelButton, sendButton);
@@ -1018,12 +886,11 @@ async function bootstrap() {
   bottom.append(composer);
   canvas.append(scroll, bottom);
   stage.append(canvas);
-  shell.append(dockArea, stage);
+  shell.append(stage);
   root.replaceChildren(shell);
 
   syncComposer();
   renderThread();
-  requestAnimationFrame(restoreDockCallout);
 }
 
 bootstrap();
