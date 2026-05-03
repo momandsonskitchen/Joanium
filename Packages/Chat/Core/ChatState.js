@@ -5,6 +5,7 @@ import https from 'node:https';
 import http from 'node:http';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { readUserState } from '../../Shared/UserData/UserData.js';
+import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
 
 const openAiCompatibleProviders = new Set([
   'cerebras',
@@ -23,18 +24,6 @@ const openAiCompatibleProviders = new Set([
   'together',
   'xai'
 ]);
-
-function collapseWhitespace(value) {
-  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
-}
-
-function truncate(value, maxLength) {
-  if (value.length <= maxLength) {
-    return value;
-  }
-
-  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
-}
 
 function sanitizeRecentPrompt(candidate) {
   const prompt = collapseWhitespace(candidate?.prompt);
@@ -332,224 +321,6 @@ async function* parseSSE(nodeResponse) {
       }
     }
   }
-}
-
-// ---------------------------------------------------------------------------
-// Non-streaming providers (kept for reference / fallback)
-// ---------------------------------------------------------------------------
-
-async function sendGoogleMessage({ endpoint, provider, providerDetails, model, messages }) {
-  const apiKey = resolveCredential(provider, providerDetails);
-
-  if (!apiKey) {
-    throw new Error('Google API key is missing.');
-  }
-
-  const bodyStr = JSON.stringify({
-    contents: messages.map((message) => ({
-      role: message.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: message.content }]
-    })),
-    generationConfig: { temperature: 0.7 }
-  });
-
-  const response = await nodeRequest(endpoint, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'content-length': Buffer.byteLength(bodyStr),
-      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
-    },
-    body: bodyStr
-  });
-
-  const { data, rawText } = await parseResponse(response);
-
-  if (!response.ok) {
-    throw new Error(formatProviderError(response, data, rawText));
-  }
-
-  const reply =
-    data?.candidates
-      ?.flatMap((candidate) => candidate?.content?.parts ?? [])
-      .map((part) => extractText(part))
-      .filter(Boolean)
-      .join('\n')
-      .trim() ?? '';
-
-  if (!reply) {
-    throw new Error('Google returned an empty response.');
-  }
-
-  return {
-    message: reply,
-    providerId: provider.id,
-    providerLabel: provider.label,
-    modelId: model.id,
-    modelLabel: model.name
-  };
-}
-
-async function sendAnthropicMessage({ endpoint, provider, providerDetails, model, messages }) {
-  const apiKey = resolveCredential(provider, providerDetails);
-
-  if (!apiKey) {
-    throw new Error('Anthropic API key is missing.');
-  }
-
-  const anthropicBodyStr = JSON.stringify({
-    model: model.id,
-    max_tokens: Math.min(model.max_output ?? 4096, 4096),
-    messages: messages.map((message) => ({
-      role: message.role,
-      content: [{ type: 'text', text: message.content }]
-    }))
-  });
-
-  const response = await nodeRequest(endpoint, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'content-length': Buffer.byteLength(anthropicBodyStr),
-      'anthropic-version': '2023-06-01',
-      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
-    },
-    body: anthropicBodyStr
-  });
-
-  const { data, rawText } = await parseResponse(response);
-
-  if (!response.ok) {
-    throw new Error(formatProviderError(response, data, rawText));
-  }
-
-  const reply = extractText(data?.content);
-
-  if (!reply) {
-    throw new Error('Anthropic returned an empty response.');
-  }
-
-  return {
-    message: reply,
-    providerId: provider.id,
-    providerLabel: provider.label,
-    modelId: model.id,
-    modelLabel: model.name
-  };
-}
-
-async function sendOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages }) {
-  const headers = {
-    'content-type': 'application/json'
-  };
-
-  if (provider.requiresApiKey) {
-    const apiKey = resolveCredential(provider, providerDetails);
-
-    if (!apiKey) {
-      throw new Error(`${provider.label} API key is missing.`);
-    }
-
-    headers[provider.authHeader] = `${provider.authPrefix ?? ''}${apiKey}`;
-  }
-
-  const oaiBodyStr = JSON.stringify({
-    model: model.id,
-    messages: messages.map((message) => ({
-      role: message.role,
-      content: message.content
-    })),
-    temperature: 0.7
-  });
-
-  const response = await nodeRequest(endpoint, {
-    method: 'POST',
-    headers: {
-      ...headers,
-      'content-length': Buffer.byteLength(oaiBodyStr)
-    },
-    body: oaiBodyStr
-  });
-
-  const { data, rawText } = await parseResponse(response);
-
-  if (!response.ok) {
-    throw new Error(formatProviderError(response, data, rawText));
-  }
-
-  const reply = extractText(data?.choices?.[0]?.message?.content) || extractText(data?.output);
-
-  if (!reply) {
-    throw new Error(`${provider.label} returned an empty response.`);
-  }
-
-  return {
-    message: reply,
-    providerId: provider.id,
-    providerLabel: provider.label,
-    modelId: model.id,
-    modelLabel: model.name
-  };
-}
-
-async function requestChatCompletion({ user, providers, request }) {
-  const messages = sanitizeConversationMessages(request?.messages);
-
-  if (messages.length === 0) {
-    throw new Error('A message is required to start the chat.');
-  }
-
-  // Honour an explicit provider + model selection from the UI.
-  // Falls back to automatic resolution when the IDs are absent or stale.
-  let provider = null;
-  let model = null;
-
-  if (request?.providerId && request?.modelId) {
-    const requestedProvider = providers.find((p) => p.id === request.providerId) ?? null;
-    const requestedModel = requestedProvider?.models?.find((m) => m.id === request.modelId) ?? null;
-
-    if (requestedProvider && requestedModel) {
-      provider = requestedProvider;
-      model = requestedModel;
-    }
-  }
-
-  if (!provider) {
-    provider = resolveActiveProvider(user, providers);
-  }
-
-  if (!provider) {
-    throw new Error('No AI providers are available yet. Complete provider setup first.');
-  }
-
-  const providerDetails = resolveProviderDetails(user, provider);
-  if (!model) {
-    model = provider.models?.[0] ?? null;
-  }
-
-  if (!model?.id) {
-    throw new Error(`No model is configured for ${provider.label}.`);
-  }
-
-  const endpoint = resolveProviderEndpoint(provider, providerDetails, model.id);
-
-  if (!endpoint) {
-    throw new Error(`No endpoint is configured for ${provider.label}.`);
-  }
-
-  if (provider.id === 'google') {
-    return sendGoogleMessage({ endpoint, provider, providerDetails, model, messages });
-  }
-
-  if (provider.id === 'anthropic') {
-    return sendAnthropicMessage({ endpoint, provider, providerDetails, model, messages });
-  }
-
-  if (openAiCompatibleProviders.has(provider.id)) {
-    return sendOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages });
-  }
-
-  throw new Error(`${provider.label} chat is not wired up yet.`);
 }
 
 // ---------------------------------------------------------------------------
@@ -853,18 +624,6 @@ export function createChatStateManager({ rootDirectory }) {
       };
 
       return writeHomeState(nextState);
-    },
-    async sendMessage(request) {
-      const [user, providers] = await Promise.all([
-        readUserState(rootDirectory),
-        readProviderCatalog(rootDirectory)
-      ]);
-
-      return requestChatCompletion({
-        user,
-        providers,
-        request
-      });
     },
     // Streaming entry point — resolves once the stream ends (or rejects on error).
     // onChunk({ type: 'text'|'thinking', text }) is called for every token.

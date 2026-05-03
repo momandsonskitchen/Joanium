@@ -39,10 +39,6 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, promptEntry) => chatStateManager.saveRecentPrompt(promptEntry)
       },
       {
-        channel: 'chat:send-message',
-        handler: async (_event, request) => chatStateManager.sendMessage(request)
-      },
-      {
         // Fire-and-forget: returns null immediately, then pushes
         // chat:stream-chunk / chat:stream-done / chat:stream-error events
         // back to the renderer via webContents.send.

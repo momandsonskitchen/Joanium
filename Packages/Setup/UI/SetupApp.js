@@ -4,6 +4,7 @@ import de from '../I18n/de.js';
 import fr from '../I18n/fr.js';
 
 // Shared Components
+import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { createButton } from '../../Shared/Button/Button.js';
@@ -27,27 +28,6 @@ const dictionaries = { en, de, fr };
 
 function getDictionary(locale) {
   return dictionaries[locale] ?? en;
-}
-
-function formatText(template, replacements) {
-  return Object.entries(replacements).reduce(
-    (result, [key, value]) => result.replaceAll(`{${key}}`, value),
-    template
-  );
-}
-
-function createElement(tagName, className, text = '') {
-  const element = document.createElement(tagName);
-
-  if (className) {
-    element.className = className;
-  }
-
-  if (text) {
-    element.textContent = text;
-  }
-
-  return element;
 }
 
 function captureFocusState(container) {

@@ -3,16 +3,6 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('JoaniumChat', {
   bootstrap: () => ipcRenderer.invoke('chat:bootstrap'),
   saveRecentPrompt: (promptEntry) => ipcRenderer.invoke('chat:save-recent-prompt', promptEntry),
-  sendMessage: (request) => ipcRenderer.invoke('chat:send-message', request),
-
-  // ---------------------------------------------------------------------------
-  // Streaming API
-  // Call streamMessage() to kick off a streaming response.  The main process
-  // will push individual tokens back via the three event channels below.
-  // Always call removeStreamListeners() before registering new ones so that
-  // stale handlers from a previous turn do not accumulate.
-  // ---------------------------------------------------------------------------
-
   streamMessage: (request) => ipcRenderer.invoke('chat:stream-message', request),
 
   onStreamChunk: (callback) => {

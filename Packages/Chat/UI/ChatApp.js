@@ -1,6 +1,8 @@
 import en from '../I18n/en.js';
 import de from '../I18n/de.js';
 import fr from '../I18n/fr.js';
+import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
+import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
 import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
@@ -133,33 +135,10 @@ function getDictionary(locale) {
   return dictionaries[locale] ?? en;
 }
 
-function formatText(template, replacements) {
-  return Object.entries(replacements).reduce(
-    (result, [key, value]) => result.replaceAll(`{${key}}`, value),
-    template
-  );
-}
-
-function createElement(tagName, className, text = '') {
-  const element = document.createElement(tagName);
-  if (className) element.className = className;
-  if (text) element.textContent = text;
-  return element;
-}
-
 function createIcon(name, className = '') {
   const icon = createElement('span', className || 'chat-icon');
   icon.innerHTML = iconMarkup[name] ?? '';
   return icon;
-}
-
-function collapseWhitespace(value) {
-  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
-}
-
-function truncate(value, maxLength) {
-  if (value.length <= maxLength) return value;
-  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
 function getFirstName(name, fallback) {
