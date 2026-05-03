@@ -17,16 +17,39 @@ export async function bootstrapApplication() {
   writeBootLog('bootstrapApplication:electron-loaded');
   const setupModule = await loadPackageModule(registry, 'Setup');
   writeBootLog('bootstrapApplication:setup-loaded');
-  const setupPackage = await setupModule.createPackage({
-    rootDirectory,
-    packagesDirectory,
-    registry
-  });
-  writeBootLog('bootstrapApplication:setup-package-created');
+
+  const createPackage = async (packageName) => {
+    const packageModule = await loadPackageModule(registry, packageName);
+
+    if (typeof packageModule.createPackage !== 'function') {
+      throw new Error(`Package "${packageName}" does not export createPackage().`);
+    }
+
+    return packageModule.createPackage({
+      rootDirectory,
+      packagesDirectory,
+      registry
+    });
+  };
+
+  let entryPackageName = 'Setup';
+
+  if (typeof setupModule.resolveLaunchPackage === 'function') {
+    const resolvedPackageName = await setupModule.resolveLaunchPackage({ rootDirectory });
+
+    if (registry.has(resolvedPackageName)) {
+      entryPackageName = resolvedPackageName;
+    }
+  }
+
+  writeBootLog('bootstrapApplication:entry-package', entryPackageName);
+  const entryPackage = await createPackage(entryPackageName);
+  writeBootLog('bootstrapApplication:entry-package-created', entryPackage.id);
 
   await electronModule.bootElectron({
     rootDirectory,
-    entryPackage: setupPackage
+    entryPackage,
+    loadPackage: createPackage
   });
   writeBootLog('bootstrapApplication:bootElectron-resolved');
 }

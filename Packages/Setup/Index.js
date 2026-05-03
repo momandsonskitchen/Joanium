@@ -4,6 +4,11 @@ import { createSetupStateManager } from './Core/SetupState.js';
 
 const setupDirectory = path.dirname(fileURLToPath(import.meta.url));
 
+export async function resolveLaunchPackage({ rootDirectory }) {
+  const setupStateManager = createSetupStateManager({ rootDirectory });
+  return setupStateManager.getLaunchPackageId();
+}
+
 export async function createPackage({ rootDirectory }) {
   const setupStateManager = createSetupStateManager({ rootDirectory });
 

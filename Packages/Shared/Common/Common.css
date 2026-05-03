@@ -161,4 +161,80 @@
   --scrollbar-thumb:       rgba(150, 105, 80, 0.28);
   --scrollbar-thumb-hover: rgba(150, 105, 80, 0.52);
 
+
+  /* Chat shell */
+
+  --color-chat-app-background:
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.9), transparent 24%),
+    linear-gradient(180deg, #e9e5e1 0%, #ddd7d1 100%);
+
+  --color-chat-shell-surface: rgba(255, 255, 255, 0.78);
+  --color-chat-sidebar-surface: rgba(255, 255, 255, 0.82);
+  --color-chat-divider: rgba(100, 70, 48, 0.08);
+  --color-chat-hover-surface: rgba(255, 255, 255, 0.72);
+  --color-chat-canvas-background:
+    radial-gradient(circle at 26% 8%, rgba(255, 228, 201, 0.92), transparent 32%),
+    radial-gradient(circle at 86% 88%, rgba(255, 210, 166, 0.84), transparent 28%),
+    linear-gradient(135deg, rgba(255, 250, 244, 0.98), rgba(255, 243, 229, 0.96));
+
+  --color-chat-text-title: #17130f;
+  --color-chat-text-secondary: rgba(43, 28, 17, 0.8);
+  --color-chat-text-muted: rgba(88, 64, 48, 0.64);
+  --color-chat-text-label: rgba(112, 82, 60, 0.7);
+  --color-chat-text-placeholder: rgba(128, 100, 81, 0.44);
+  --color-chat-tab-text: rgba(56, 35, 22, 0.72);
+  --color-chat-plan-text: #b06d2f;
+  --color-chat-icon: rgba(64, 45, 32, 0.7);
+
+  --color-chat-card-surface: rgba(255, 255, 255, 0.78);
+  --color-chat-card-icon-surface: rgba(255, 248, 240, 0.98);
+  --color-chat-input-surface: rgba(255, 255, 255, 0.84);
+  --color-chat-plan-surface: rgba(255, 255, 255, 0.62);
+  --color-chat-tab-active-surface: rgba(255, 255, 255, 0.86);
+  --color-chat-tab-bar-surface: rgba(240, 233, 225, 0.88);
+  --color-chat-avatar-surface: #151423;
+  --color-chat-avatar-text: rgba(255, 255, 255, 0.96);
+
+  --color-chat-send-background: rgba(233, 233, 231, 0.92);
+  --color-chat-send-background-strong: rgba(224, 224, 221, 0.98);
+  --color-chat-send-foreground: rgba(255, 255, 255, 0.96);
+  --color-chat-send-disabled-background: rgba(237, 237, 235, 0.92);
+  --color-chat-send-disabled-foreground: rgba(255, 255, 255, 0.88);
+
+  --color-chat-traffic-red: #ff5f57;
+  --color-chat-traffic-amber: #febc2e;
+  --color-chat-traffic-green: #28c840;
+
+  --shadow-chat-shell:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+    0 28px 60px rgba(91, 67, 46, 0.18);
+
+  --shadow-chat-pill:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.88),
+    0 10px 22px rgba(125, 95, 70, 0.08);
+
+  --shadow-chat-tab:
+    inset 0 0 0 1px rgba(194, 178, 160, 0.12),
+    0 8px 16px rgba(118, 90, 62, 0.08);
+
+  --shadow-chat-tab-bar:
+    inset 0 0 0 1px rgba(210, 196, 184, 0.22),
+    0 8px 18px rgba(118, 90, 62, 0.06);
+
+  --shadow-chat-input:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.08),
+    0 18px 32px rgba(130, 95, 65, 0.12);
+
+  --shadow-chat-card:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.08),
+    0 10px 24px rgba(130, 95, 65, 0.08);
+
+  --shadow-chat-card-hover:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.14),
+    0 14px 28px rgba(130, 95, 65, 0.12);
+
+  --shadow-chat-send:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+    0 10px 18px rgba(120, 120, 118, 0.12);
+
 }

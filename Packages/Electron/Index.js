@@ -3,6 +3,10 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { createBootLogger } from '../Boot/Index.js';
 
 let mainWindow = null;
+let currentPackage = null;
+let packageLoader = null;
+let registeredChannels = new Set();
+let navigationSequence = Promise.resolve();
 
 const writeBootLog = createBootLogger(
   path.join(process.cwd(), 'Build', 'Logs', 'electron-boot.log')
@@ -10,11 +14,21 @@ const writeBootLog = createBootLogger(
 
 function registerIpcHandlers(handlerDefinitions = []) {
   writeBootLog('registerIpcHandlers:start', String(handlerDefinitions.length));
+  const nextChannels = new Set(handlerDefinitions.map((definition) => definition.channel));
+
+  for (const channel of registeredChannels) {
+    if (!nextChannels.has(channel)) {
+      ipcMain.removeHandler(channel);
+    }
+  }
+
   for (const definition of handlerDefinitions) {
     ipcMain.removeHandler(definition.channel);
     ipcMain.handle(definition.channel, definition.handler);
     writeBootLog('registerIpcHandlers:channel', definition.channel);
   }
+
+  registeredChannels = nextChannels;
 }
 
 async function createMainWindow(entryPackage) {
@@ -99,16 +113,71 @@ async function createMainWindow(entryPackage) {
   return browserWindow;
 }
 
-export async function bootElectron({ entryPackage }) {
+function queueNavigation(navigate) {
+  const nextTask = navigationSequence.then(navigate, navigate);
+  navigationSequence = nextTask.catch(() => {});
+  return nextTask;
+}
+
+async function navigateToPackage(packageId) {
+  if (!packageLoader) {
+    throw new Error('Package loader is not available.');
+  }
+
+  if (currentPackage?.id === packageId) {
+    return { packageId };
+  }
+
+  writeBootLog('navigateToPackage:start', packageId);
+  const previousPackage = currentPackage;
+  const previousWindow = mainWindow;
+  const nextPackage = await packageLoader(packageId);
+  registerIpcHandlers(nextPackage.ipcHandlers);
+
+  try {
+    const nextWindow = await createMainWindow(nextPackage);
+    mainWindow = nextWindow;
+    currentPackage = nextPackage;
+
+    if (previousWindow && !previousWindow.isDestroyed()) {
+      previousWindow.destroy();
+    }
+
+    writeBootLog('navigateToPackage:complete', packageId);
+    return { packageId };
+  } catch (error) {
+    if (previousPackage) {
+      registerIpcHandlers(previousPackage.ipcHandlers);
+      currentPackage = previousPackage;
+    }
+
+    mainWindow = previousWindow;
+    writeBootLog('navigateToPackage:error', error?.stack ?? String(error));
+    throw error;
+  }
+}
+
+export async function bootElectron({ entryPackage, loadPackage }) {
   writeBootLog('bootElectron:start');
   writeBootLog('bootElectron:process-type', process.type ?? 'browser');
   writeBootLog('bootElectron:app-isReady-initial', String(app.isReady()));
+  currentPackage = entryPackage;
+  packageLoader = loadPackage;
   registerIpcHandlers(entryPackage.ipcHandlers);
+  ipcMain.removeHandler('app:navigate');
+  ipcMain.handle('app:navigate', async (_event, packageId) => {
+    if (typeof packageId !== 'string' || !packageId.trim()) {
+      throw new Error('A valid package id is required for navigation.');
+    }
+
+    return queueNavigation(() => navigateToPackage(packageId.trim()));
+  });
 
   app.on('activate', async () => {
     writeBootLog('app:activate');
     if (BrowserWindow.getAllWindows().length === 0) {
-      mainWindow = await createMainWindow(entryPackage);
+      const packageToOpen = currentPackage ?? entryPackage;
+      mainWindow = await createMainWindow(packageToOpen);
       writeBootLog('app:activate-window-recreated');
     }
   });
