@@ -1,6 +1,8 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import https from 'node:https';
+import http from 'node:http';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { readUserState } from '../../Shared/UserData/UserData.js';
 
@@ -199,26 +201,77 @@ function extractText(value) {
   return '';
 }
 
+// ---------------------------------------------------------------------------
+// Node.js HTTP helper — bypasses Electron's fetch buffering entirely.
+// Returns a fetch-like response: { ok, status, statusText, text(), body }.
+// body is the raw Node.js IncomingMessage (async-iterable, chunk by chunk).
+// ---------------------------------------------------------------------------
+
+function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {}) {
+  return new Promise((resolve, reject) => {
+    let parsed;
+
+    try {
+      parsed = new URL(urlString);
+    } catch (err) {
+      return reject(new Error(`Invalid URL: ${urlString}`));
+    }
+
+    const client = parsed.protocol === 'https:' ? https : http;
+    const defaultPort = parsed.protocol === 'https:' ? 443 : 80;
+
+    const req = client.request(
+      {
+        hostname: parsed.hostname,
+        port: parsed.port ? Number(parsed.port) : defaultPort,
+        path: parsed.pathname + parsed.search,
+        method,
+        headers
+      },
+      (res) => {
+        const status = res.statusCode ?? 0;
+        const statusText = res.statusMessage ?? '';
+
+        resolve({
+          status,
+          statusText,
+          ok: status >= 200 && status < 300,
+          // Streaming: body IS the IncomingMessage (async-iterable)
+          body: res,
+          // Non-streaming: read everything as UTF-8 text
+          text() {
+            return new Promise((rs, rj) => {
+              const parts = [];
+              res.on('data', (chunk) => parts.push(chunk));
+              res.on('end', () => rs(Buffer.concat(parts).toString('utf8')));
+              res.on('error', rj);
+            });
+          }
+        });
+      }
+    );
+
+    req.on('error', reject);
+
+    if (body) {
+      req.write(body);
+    }
+
+    req.end();
+  });
+}
+
 async function parseResponse(response) {
   const rawText = await response.text();
 
   if (!rawText.trim()) {
-    return {
-      data: null,
-      rawText: ''
-    };
+    return { data: null, rawText: '' };
   }
 
   try {
-    return {
-      data: JSON.parse(rawText),
-      rawText
-    };
+    return { data: JSON.parse(rawText), rawText };
   } catch {
-    return {
-      data: null,
-      rawText
-    };
+    return { data: null, rawText };
   }
 }
 
@@ -237,59 +290,47 @@ function formatProviderError(response, data, rawText) {
 }
 
 // ---------------------------------------------------------------------------
-// SSE streaming parser
-// Handles Anthropic, OpenAI-compatible, and Google Gemini event streams.
-// Yields { event: string, data: object } for each dispatched SSE event.
+// SSE streaming parser — reads directly from a Node.js IncomingMessage.
+// Yields { event, data } for every complete SSE event.
 // ---------------------------------------------------------------------------
 
-async function* parseSSE(response) {
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
+async function* parseSSE(nodeResponse) {
   let buffer = '';
   let eventType = 'message';
   let dataLines = [];
 
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+  for await (const rawChunk of nodeResponse) {
+    buffer += rawChunk.toString('utf8');
 
-      buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split('\n');
+    buffer = parts.pop() ?? '';
 
-      const parts = buffer.split('\n');
-      buffer = parts.pop() ?? '';
+    for (const rawLine of parts) {
+      const line = rawLine.replace(/\r$/, '');
 
-      for (const rawLine of parts) {
-        const line = rawLine.replace(/\r$/, '');
+      if (line === '') {
+        if (dataLines.length > 0) {
+          const payload = dataLines.join('\n');
 
-        if (line === '') {
-          // Empty line = dispatch accumulated event
-          if (dataLines.length > 0) {
-            const payload = dataLines.join('\n');
-
-            if (payload === '[DONE]') {
-              return;
-            }
-
-            try {
-              yield { event: eventType, data: JSON.parse(payload) };
-            } catch {
-              // Non-JSON data lines (e.g. keep-alive comments) — skip
-            }
+          if (payload === '[DONE]') {
+            return;
           }
 
-          eventType = 'message';
-          dataLines = [];
-        } else if (line.startsWith('event:')) {
-          eventType = line.slice(6).trim();
-        } else if (line.startsWith('data:')) {
-          dataLines.push(line.slice(5).trimStart());
+          try {
+            yield { event: eventType, data: JSON.parse(payload) };
+          } catch {
+            // Non-JSON keep-alive or comment line — skip
+          }
         }
-        // id: and retry: fields are intentionally ignored
+
+        eventType = 'message';
+        dataLines = [];
+      } else if (line.startsWith('event:')) {
+        eventType = line.slice(6).trim();
+      } else if (line.startsWith('data:')) {
+        dataLines.push(line.slice(5).trimStart());
       }
     }
-  } finally {
-    reader.releaseLock();
   }
 }
 
@@ -304,25 +345,22 @@ async function sendGoogleMessage({ endpoint, provider, providerDetails, model, m
     throw new Error('Google API key is missing.');
   }
 
-  const response = await fetch(endpoint, {
+  const bodyStr = JSON.stringify({
+    contents: messages.map((message) => ({
+      role: message.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: message.content }]
+    })),
+    generationConfig: { temperature: 0.7 }
+  });
+
+  const response = await nodeRequest(endpoint, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      'content-length': Buffer.byteLength(bodyStr),
       [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
     },
-    body: JSON.stringify({
-      contents: messages.map((message) => ({
-        role: message.role === 'assistant' ? 'model' : 'user',
-        parts: [
-          {
-            text: message.content
-          }
-        ]
-      })),
-      generationConfig: {
-        temperature: 0.7
-      }
-    })
+    body: bodyStr
   });
 
   const { data, rawText } = await parseResponse(response);
@@ -359,26 +397,24 @@ async function sendAnthropicMessage({ endpoint, provider, providerDetails, model
     throw new Error('Anthropic API key is missing.');
   }
 
-  const response = await fetch(endpoint, {
+  const anthropicBodyStr = JSON.stringify({
+    model: model.id,
+    max_tokens: Math.min(model.max_output ?? 4096, 4096),
+    messages: messages.map((message) => ({
+      role: message.role,
+      content: [{ type: 'text', text: message.content }]
+    }))
+  });
+
+  const response = await nodeRequest(endpoint, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      'content-length': Buffer.byteLength(anthropicBodyStr),
       'anthropic-version': '2023-06-01',
       [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
     },
-    body: JSON.stringify({
-      model: model.id,
-      max_tokens: Math.min(model.max_output ?? 4096, 4096),
-      messages: messages.map((message) => ({
-        role: message.role,
-        content: [
-          {
-            type: 'text',
-            text: message.content
-          }
-        ]
-      }))
-    })
+    body: anthropicBodyStr
   });
 
   const { data, rawText } = await parseResponse(response);
@@ -417,17 +453,22 @@ async function sendOpenAiCompatibleMessage({ endpoint, provider, providerDetails
     headers[provider.authHeader] = `${provider.authPrefix ?? ''}${apiKey}`;
   }
 
-  const response = await fetch(endpoint, {
+  const oaiBodyStr = JSON.stringify({
+    model: model.id,
+    messages: messages.map((message) => ({
+      role: message.role,
+      content: message.content
+    })),
+    temperature: 0.7
+  });
+
+  const response = await nodeRequest(endpoint, {
     method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: model.id,
-      messages: messages.map((message) => ({
-        role: message.role,
-        content: message.content
-      })),
-      temperature: 0.7
-    })
+    headers: {
+      ...headers,
+      'content-length': Buffer.byteLength(oaiBodyStr)
+    },
+    body: oaiBodyStr
   });
 
   const { data, rawText } = await parseResponse(response);
@@ -530,19 +571,22 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
     ? `${streamEndpoint}&alt=sse`
     : `${streamEndpoint}?alt=sse`;
 
-  const response = await fetch(streamUrl, {
+  const streamBodyStr = JSON.stringify({
+    contents: messages.map((message) => ({
+      role: message.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: message.content }]
+    })),
+    generationConfig: { temperature: 0.7 }
+  });
+
+  const response = await nodeRequest(streamUrl, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      'content-length': Buffer.byteLength(streamBodyStr),
       [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
     },
-    body: JSON.stringify({
-      contents: messages.map((message) => ({
-        role: message.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: message.content }]
-      })),
-      generationConfig: { temperature: 0.7 }
-    })
+    body: streamBodyStr
   });
 
   if (!response.ok) {
@@ -550,7 +594,7 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
     throw new Error(formatProviderError(response, data, rawText));
   }
 
-  for await (const { data } of parseSSE(response)) {
+  for await (const { data } of parseSSE(response.body)) {
     if (!data || typeof data !== 'object') continue;
 
     const text = (data.candidates ?? [])
@@ -591,14 +635,17 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
     requestBody.temperature = 1;
   }
 
-  const response = await fetch(endpoint, {
+  const streamReqBodyStr = JSON.stringify(requestBody);
+
+  const response = await nodeRequest(endpoint, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      'content-length': Buffer.byteLength(streamReqBodyStr),
       'anthropic-version': '2023-06-01',
       [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
     },
-    body: JSON.stringify(requestBody)
+    body: streamReqBodyStr
   });
 
   if (!response.ok) {
@@ -606,7 +653,7 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
     throw new Error(formatProviderError(response, data, rawText));
   }
 
-  for await (const { data } of parseSSE(response)) {
+  for await (const { data } of parseSSE(response.body)) {
     if (!data || typeof data !== 'object') continue;
 
     if (data.type === 'content_block_delta') {
@@ -640,18 +687,23 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
     headers[provider.authHeader] = `${provider.authPrefix ?? ''}${apiKey}`;
   }
 
-  const response = await fetch(endpoint, {
+  const streamOaiBodyStr = JSON.stringify({
+    model: model.id,
+    messages: messages.map((message) => ({
+      role: message.role,
+      content: message.content
+    })),
+    temperature: 0.7,
+    stream: true
+  });
+
+  const response = await nodeRequest(endpoint, {
     method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: model.id,
-      messages: messages.map((message) => ({
-        role: message.role,
-        content: message.content
-      })),
-      temperature: 0.7,
-      stream: true
-    })
+    headers: {
+      ...headers,
+      'content-length': Buffer.byteLength(streamOaiBodyStr)
+    },
+    body: streamOaiBodyStr
   });
 
   if (!response.ok) {
@@ -659,7 +711,7 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
     throw new Error(formatProviderError(response, data, rawText));
   }
 
-  for await (const { data } of parseSSE(response)) {
+  for await (const { data } of parseSSE(response.body)) {
     if (!data || typeof data !== 'object') continue;
 
     const delta = data.choices?.[0]?.delta;
