@@ -817,6 +817,7 @@ async function bootstrap() {
       label
     );
     tab.type = 'button';
+    if (id === 'chat') tab.addEventListener('click', clearConversation);
     tabs.append(tab);
   }
   topbar.append(tabs);
