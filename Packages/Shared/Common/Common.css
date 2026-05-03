@@ -169,9 +169,17 @@
     linear-gradient(180deg, #e9e5e1 0%, #ddd7d1 100%);
 
   --color-chat-shell-surface: #f7f3ee;
+  --color-chat-dock-area-background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)),
+    #f7f3ee;
   --color-chat-sidebar-surface: rgba(255, 255, 255, 0.84);
   --color-chat-divider: rgba(100, 70, 48, 0.08);
   --color-chat-hover-surface: rgba(255, 255, 255, 0.62);
+  --color-chat-topbar-background: linear-gradient(
+    180deg,
+    rgba(248, 243, 238, 0.95),
+    rgba(248, 243, 238, 0)
+  );
   --color-chat-canvas-background:
     radial-gradient(circle at 24% 8%, rgba(255, 228, 196, 0.6), transparent 28%),
     radial-gradient(circle at 84% 90%, rgba(255, 214, 170, 0.54), transparent 24%),
@@ -202,6 +210,20 @@
   --color-chat-nav-avatar-text: rgba(255, 255, 255, 0.96);
   --color-chat-avatar-surface: #151423;
   --color-chat-avatar-text: rgba(255, 255, 255, 0.96);
+  --color-chat-dock-surface: rgba(255, 255, 255, 0.76);
+  --color-chat-dock-divider: rgba(102, 82, 68, 0.18);
+  --color-chat-dock-icon: rgba(26, 21, 17, 0.92);
+  --color-chat-dock-active-icon: rgba(255, 255, 255, 0.98);
+  --color-chat-dock-emphasis-icon: rgba(255, 255, 255, 0.98);
+  --color-chat-dock-hover-surface: rgba(245, 240, 234, 0.94);
+  --color-chat-dock-active-surface: rgba(32, 31, 34, 0.94);
+  --color-chat-dock-emphasis-surface: rgba(12, 12, 14, 0.98);
+  --color-chat-dock-callout-surface: rgba(9, 9, 11, 0.98);
+  --color-chat-dock-callout-text: rgba(255, 255, 255, 0.98);
+  --color-chat-user-bubble-surface: rgba(31, 29, 33, 0.96);
+  --color-chat-user-bubble-text: rgba(255, 255, 255, 0.98);
+  --color-chat-error-bubble-surface: rgba(255, 243, 240, 0.98);
+  --color-chat-error-bubble-text: #6e2a21;
 
   --color-chat-send-background: rgba(233, 233, 231, 0.92);
   --color-chat-send-background-strong: rgba(224, 224, 221, 0.98);
@@ -245,6 +267,26 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 10px 16px rgba(32, 24, 17, 0.18);
 
+  --shadow-chat-dock:
+    inset 0 0 0 1px rgba(205, 191, 176, 0.55),
+    0 18px 42px rgba(108, 84, 64, 0.14);
+
+  --shadow-chat-dock-hover:
+    inset 0 0 0 1px rgba(205, 191, 176, 0.4),
+    0 12px 20px rgba(108, 84, 64, 0.08);
+
+  --shadow-chat-dock-active:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 14px 28px rgba(32, 24, 17, 0.16);
+
+  --shadow-chat-dock-emphasis:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 34px rgba(24, 21, 18, 0.22);
+
+  --shadow-chat-dock-callout:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 18px 30px rgba(12, 12, 14, 0.2);
+
   --shadow-chat-input:
     inset 0 0 0 1px rgba(170, 134, 104, 0.08),
     0 14px 30px rgba(130, 95, 65, 0.09);
@@ -256,6 +298,14 @@
   --shadow-chat-card-hover:
     inset 0 0 0 1px rgba(175, 139, 104, 0.14),
     0 12px 22px rgba(130, 95, 65, 0.1);
+
+  --shadow-chat-user-bubble:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 14px 28px rgba(34, 28, 22, 0.18);
+
+  --shadow-chat-error-bubble:
+    inset 0 0 0 1px rgba(196, 121, 109, 0.16),
+    0 10px 18px rgba(169, 90, 78, 0.08);
 
   --shadow-chat-send:
     inset 0 0 0 1px rgba(255, 255, 255, 0.8),

@@ -10,70 +10,44 @@ const iconMarkup = {
       <path d="M12 6v12M6 12h12" />
     </svg>
   `,
-  search: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="10.5" cy="10.5" r="5.5" />
-      <path d="m15 15 4 4" />
-    </svg>
-  `,
-  sliders: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M5 7h6M14 7h5M5 12h3M11 12h8M5 17h9M17 17h2" />
-      <circle cx="11" cy="7" r="1.6" />
-      <circle cx="8" cy="12" r="1.6" />
-      <circle cx="14" cy="17" r="1.6" />
-    </svg>
-  `,
-  chat: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6 6.5h12A2.5 2.5 0 0 1 20.5 9v6A2.5 2.5 0 0 1 18 17.5h-6l-4 3v-3H6A2.5 2.5 0 0 1 3.5 15V9A2.5 2.5 0 0 1 6 6.5Z" />
-    </svg>
-  `,
-  folder: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4.5 8.5A2.5 2.5 0 0 1 7 6h3l1.8 1.8c.35.35.67.52 1.2.52H17A2.5 2.5 0 0 1 19.5 10v5.5A2.5 2.5 0 0 1 17 18H7A2.5 2.5 0 0 1 4.5 15.5Z" />
-    </svg>
-  `,
-  squareCheck: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="5" y="5" width="14" height="14" rx="3" />
-      <path d="m9 12 2.2 2.2L15.5 10" />
-    </svg>
-  `,
-  robot: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9.5 5.5h5M12 5.5V3.5" />
-      <rect x="5.5" y="7.5" width="13" height="9" rx="3.5" />
-      <path d="M8.5 18v1.5M15.5 18v1.5M9.5 11.5h.01M14.5 11.5h.01M9.5 14.5h5" />
-    </svg>
-  `,
-  building: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6.5 19V6.5A1.5 1.5 0 0 1 8 5h6a1.5 1.5 0 0 1 1.5 1.5V19M4.5 19h15" />
-      <path d="M9 8h.01M12 8h.01M9 11h.01M12 11h.01M9 14h.01M12 14h.01" />
-    </svg>
-  `,
-  code: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5 10 19" />
-    </svg>
-  `,
-  document: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M8 3.5h6l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7.5 3.5Z" />
-      <path d="M14 3.5V8h4M9 12h6M9 15.5h4.5" />
-    </svg>
-  `,
   spark: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
       <path d="m13.5 3-1.2 4.5L8 8.8l4.3 1.3L13.5 15l1.2-4.9L19 8.8l-4.3-1.3Z" />
       <path d="m6 14-.7 2.2L3 17l2.3.8L6 20l.7-2.2L9 17l-2.3-.8Z" />
     </svg>
   `,
-  globe: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M3.5 12h17M12 3.5a13 13 0 0 1 0 17M12 3.5a13 13 0 0 0 0 17" />
+  moon: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15.2 3.8a7.8 7.8 0 1 0 5 12.6 8.3 8.3 0 0 1-5.6-7.7 8.2 8.2 0 0 1 .6-3Z" />
+      <path d="m17.8 5.2.4 1.3 1.3.4-1.3.4-.4 1.3-.4-1.3-1.3-.4 1.3-.4Z" />
+    </svg>
+  `,
+  grid: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4.5" y="4.5" width="5" height="5" rx="1.4" />
+      <rect x="14.5" y="4.5" width="5" height="5" rx="1.4" />
+      <rect x="4.5" y="14.5" width="5" height="5" rx="1.4" />
+      <rect x="14.5" y="14.5" width="5" height="5" rx="1.4" />
+    </svg>
+  `,
+  briefcase: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
+      <rect x="3.5" y="7" width="17" height="12.5" rx="3.5" />
+      <path d="M3.5 12.5h17" />
+      <path d="M10.5 12.5v1.3a1.5 1.5 0 0 0 3 0v-1.3" />
+    </svg>
+  `,
+  pen: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m4 20 4.4-1 9.2-9.2a2.2 2.2 0 0 0-3.1-3.1L5.3 15.9 4 20Z" />
+      <path d="m12.8 8.4 2.8 2.8" />
+    </svg>
+  `,
+  mail: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3.5" y="5.5" width="17" height="13" rx="3.2" />
+      <path d="m5.8 8.3 6.2 4.8 6.2-4.8" />
     </svg>
   `,
   paperclip: `
@@ -81,10 +55,10 @@ const iconMarkup = {
       <path d="m9.5 12.5 5.8-5.8a3.5 3.5 0 1 1 5 5l-8.2 8.2a5 5 0 1 1-7.1-7.1l8.4-8.4" />
     </svg>
   `,
-  mic: `
+  globe: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="9" y="4" width="6" height="10" rx="3" />
-      <path d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v3M9 20h6" />
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17M12 3.5a13 13 0 0 1 0 17M12 3.5a13 13 0 0 0 0 17" />
     </svg>
   `,
   chevronDown: `
@@ -96,6 +70,17 @@ const iconMarkup = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M5 12h12" />
       <path d="m13 6 6 6-6 6" />
+    </svg>
+  `,
+  code: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5 10 19" />
+    </svg>
+  `,
+  document: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 3.5h6l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7.5 3.5Z" />
+      <path d="M14 3.5V8h4M9 12h6M9 15.5h4.5" />
     </svg>
   `
 };
@@ -140,7 +125,7 @@ function truncate(value, maxLength) {
     return value;
   }
 
-  return `${value.slice(0, maxLength - 1).trimEnd()}…`;
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
 function getFirstName(name, fallback) {
@@ -192,51 +177,117 @@ function createDraftEntry(prompt, existingEntry) {
   };
 }
 
-function createSidebarAction(label, iconName, onClick, { primary = false } = {}) {
+function createDockButton({ label, icon, active = false, emphasis = false, onClick, onHover }) {
   const button = createElement(
     'button',
-    `chat-sidebar__icon-button${primary ? ' chat-sidebar__icon-button--primary' : ''}`
+    `chat-dock__button${active ? ' chat-dock__button--active' : ''}${emphasis ? ' chat-dock__button--emphasis' : ''}`
   );
   button.type = 'button';
-  button.append(createIcon(iconName, 'chat-sidebar__action-icon'));
-  button.append(createElement('span', 'chat-sidebar__sr-only', label));
+  button.dataset.label = label;
+  button.append(createIcon(icon, 'chat-dock__icon'));
+  button.append(createElement('span', 'chat-dock__sr-only', label));
 
   if (typeof onClick === 'function') {
     button.addEventListener('click', onClick);
   }
 
+  if (typeof onHover === 'function') {
+    const show = () => onHover(button, label);
+    button.addEventListener('mouseenter', show);
+    button.addEventListener('focus', show);
+  }
+
   return button;
 }
 
-function createNavigationItem(label, iconName, { active = false } = {}) {
-  const button = createElement(
-    'button',
-    `chat-sidebar__icon-button${active ? ' chat-sidebar__icon-button--active' : ''}`
+function createMessageElement(message) {
+  const article = createElement(
+    'article',
+    `chat-message chat-message--${message.role}${message.pending ? ' chat-message--pending' : ''}${
+      message.error ? ' chat-message--error' : ''
+    }`
   );
-  button.type = 'button';
-  button.append(createIcon(iconName, 'chat-sidebar__nav-icon'));
-  button.append(createElement('span', 'chat-sidebar__sr-only', label));
-  return button;
+
+  const metaText =
+    message.role === 'assistant'
+      ? [message.providerLabel, message.modelLabel].filter(Boolean).join(' - ') || 'Assistant'
+      : 'You';
+  const meta = createElement('div', 'chat-message__meta', metaText);
+  const bubble = createElement('div', 'chat-message__bubble', message.content);
+
+  article.append(meta, bubble);
+  return article;
+}
+
+function getPreferredProvider(payload) {
+  const selectedProviderIds = payload.user?.providers?.selected ?? [];
+  const providersById = new Map(payload.providers.map((provider) => [provider.id, provider]));
+  const orderedProviders = [
+    ...selectedProviderIds.map((providerId) => providersById.get(providerId)).filter(Boolean),
+    ...payload.providers.filter((provider) => !selectedProviderIds.includes(provider.id))
+  ];
+
+  return (
+    orderedProviders.find((provider) => {
+      const details = payload.user?.providers?.details?.[provider.id] ?? {};
+      const hasModel = Boolean(provider.models?.[0]?.id);
+      const hasEndpoint = Boolean(collapseWhitespace(details.endpoint) || collapseWhitespace(provider.endpoint));
+      const hasCredential = provider.requiresApiKey ? Boolean(collapseWhitespace(details.apiKey)) : true;
+      return hasModel && hasEndpoint && hasCredential;
+    }) ??
+    orderedProviders.find((provider) => provider.models?.length > 0) ??
+    payload.providers[0] ??
+    null
+  );
 }
 
 async function bootstrap() {
   const payload = await window.JoaniumChat.bootstrap();
   const strings = getDictionary(payload.user.locale);
   const root = document.getElementById('app');
-  const isMac = /mac/i.test(navigator.platform);
   const firstName = getFirstName(payload.user.profile.name, strings.appName);
   const greetingKey = getGreetingKey(new Date());
-  const activeProvider =
-    payload.providers.find((provider) => payload.user.providers.selected.includes(provider.id)) ??
-    payload.providers[0] ??
-    null;
-  const activeModelLabel = activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
+  const activeProvider = getPreferredProvider(payload);
+  const activeModel = activeProvider?.models?.[0] ?? null;
+  const activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
   const quickStartCards = strings.quickStartCards.slice(0, 4);
 
   let draftValue = '';
   let lastSelectedEntry = null;
+  let isSending = false;
   let composerField = null;
   let sendButton = null;
+  let thread = null;
+  let title = null;
+  let quickStart = null;
+  let composer = null;
+  let canvas = null;
+  let scroll = null;
+  let bottom = null;
+  let dockCallout = null;
+  let pinnedDockButton = null;
+  let messages = [];
+
+  function positionDockCallout(button, label) {
+    if (!dockCallout || !button) {
+      return;
+    }
+
+    dockCallout.textContent = label.toLowerCase();
+    dockCallout.style.top = `${button.offsetTop + button.offsetHeight / 2}px`;
+    dockCallout.hidden = false;
+  }
+
+  function restoreDockCallout() {
+    if (pinnedDockButton) {
+      positionDockCallout(pinnedDockButton, pinnedDockButton.dataset.label);
+      return;
+    }
+
+    if (dockCallout) {
+      dockCallout.hidden = true;
+    }
+  }
 
   function syncComposer() {
     if (!composerField || !sendButton) {
@@ -244,7 +295,9 @@ async function bootstrap() {
     }
 
     composerField.value = draftValue;
-    sendButton.disabled = !collapseWhitespace(draftValue);
+    sendButton.disabled = !draftValue.trim() || isSending;
+    sendButton.classList.toggle('chat-composer__send--busy', isSending);
+    sendButton.setAttribute('aria-busy', String(isSending));
   }
 
   function focusComposer() {
@@ -263,66 +316,193 @@ async function bootstrap() {
     focusComposer();
   }
 
-  async function savePrompt() {
-    const nextEntry = createDraftEntry(draftValue, lastSelectedEntry);
+  function clearConversation() {
+    messages = [];
+    draftValue = '';
+    lastSelectedEntry = null;
+    isSending = false;
+    syncComposer();
+    renderThread();
+    focusComposer();
+  }
 
-    if (!nextEntry) {
+  function renderThread() {
+    if (!thread || !title || !quickStart || !composer || !canvas || !scroll || !bottom) {
       return;
     }
 
-    await window.JoaniumChat.saveRecentPrompt(nextEntry);
+    const hasMessages = messages.length > 0;
+    title.hidden = hasMessages;
+    quickStart.hidden = hasMessages;
+    thread.hidden = !hasMessages;
+    composer.classList.toggle('chat-composer--conversation', hasMessages);
+    scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
+    bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
+
+    if (!hasMessages) {
+      thread.replaceChildren();
+      return;
+    }
+
+    thread.replaceChildren(...messages.map((message) => createMessageElement(message)));
+    requestAnimationFrame(() => {
+      thread.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    });
+  }
+
+  async function submitPrompt() {
+    const prompt = draftValue.trim();
+
+    if (!prompt || isSending) {
+      return;
+    }
+
+    const draftEntry = createDraftEntry(prompt, lastSelectedEntry);
+    if (draftEntry) {
+      void window.JoaniumChat.saveRecentPrompt(draftEntry);
+    }
+
+    messages = [
+      ...messages,
+      {
+        role: 'user',
+        content: prompt
+      },
+      {
+        role: 'assistant',
+        content: 'Thinking...',
+        pending: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel
+      }
+    ];
+
     draftValue = '';
     lastSelectedEntry = null;
+    isSending = true;
     syncComposer();
+    renderThread();
+    focusComposer();
+
+    try {
+      const reply = await window.JoaniumChat.sendMessage({
+        messages: messages.filter((message) => !message.pending).map(({ role, content }) => ({ role, content }))
+      });
+
+      messages = messages.map((message, index) => {
+        if (index !== messages.length - 1) {
+          return message;
+        }
+
+        return {
+          role: 'assistant',
+          content: reply.message,
+          providerLabel: reply.providerLabel,
+          modelLabel: reply.modelLabel
+        };
+      });
+    } catch (error) {
+      messages = messages.map((message, index) => {
+        if (index !== messages.length - 1) {
+          return message;
+        }
+
+        return {
+          role: 'assistant',
+          content: error?.message || 'Unable to get a response right now.',
+          providerLabel: activeProvider?.label ?? 'AI',
+          modelLabel: activeModelLabel,
+          error: true
+        };
+      });
+    } finally {
+      isSending = false;
+      syncComposer();
+      renderThread();
+    }
   }
 
   const shell = createElement('main', 'chat-shell');
-  shell.classList.add(isMac ? 'chat-shell--macos' : 'chat-shell--desktop');
-  const shellHeader = createElement('header', 'chat-shell__header');
-  const shellHeaderStart = createElement('div', 'chat-shell__header-side chat-shell__header-side--start');
-  const shellHeaderCenter = createElement('div', 'chat-shell__header-center');
-  const shellHeaderEnd = createElement('div', 'chat-shell__header-side chat-shell__header-side--end');
+  const dockArea = createElement('aside', 'chat-dock-area');
+  const dock = createElement('div', 'chat-dock');
+  const dockUtilities = createElement('div', 'chat-dock__stack');
+  const dockPrimary = createElement('div', 'chat-dock__stack');
+  dockCallout = createElement('div', 'chat-dock__callout', 'projects');
+  dockCallout.hidden = true;
 
-  const sidebar = createElement('aside', 'chat-sidebar');
+  const dockButtonDefinitions = [
+    {
+      label: 'New Chat',
+      icon: 'spark',
+      emphasis: true,
+      onClick: clearConversation
+    },
+    {
+      label: 'Focus Input',
+      icon: 'moon',
+      onClick: focusComposer
+    }
+  ];
 
-  const sidebarActions = createElement('div', 'chat-sidebar__actions');
-  sidebarActions.append(
-    createSidebarAction(
-      strings.actions.newChat,
-      'plus',
-      () => {
-        draftValue = '';
-        lastSelectedEntry = null;
-        syncComposer();
-        focusComposer();
-      },
-      { primary: true }
-    ),
-    createSidebarAction(strings.actions.search, 'search', focusComposer),
-    createSidebarAction(strings.actions.customize, 'sliders', () => {
-      const suggestion = quickStartCards[0];
-
-      if (suggestion) {
-        setDraft(suggestion.prompt, suggestion);
+  const dockPrimaryDefinitions = [
+    {
+      label: 'Workspace',
+      icon: 'grid',
+      onClick: () => {
+        const suggestion = quickStartCards[0];
+        if (suggestion) {
+          setDraft(suggestion.prompt, suggestion);
+        }
       }
-    })
-  );
+    },
+    {
+      label: 'Projects',
+      icon: 'briefcase',
+      active: true,
+      onClick: focusComposer
+    },
+    {
+      label: 'Compose',
+      icon: 'pen',
+      onClick: focusComposer
+    },
+    {
+      label: 'Inbox',
+      icon: 'mail',
+      onClick: focusComposer
+    }
+  ];
 
-  const sidebarNav = createElement('nav', 'chat-sidebar__nav');
-  sidebarNav.append(
-    createNavigationItem(strings.navigation.chats, 'chat', { active: true }),
-    createNavigationItem(strings.navigation.projects, 'folder'),
-    createNavigationItem(strings.navigation.tasks, 'squareCheck'),
-    createNavigationItem(strings.navigation.agents, 'robot'),
-    createNavigationItem(strings.navigation.companies, 'building')
-  );
+  for (const definition of dockButtonDefinitions) {
+    dockUtilities.append(
+      createDockButton({
+        ...definition,
+        onHover: positionDockCallout
+      })
+    );
+  }
 
-  const profile = createElement('div', 'chat-sidebar__profile chat-sidebar__profile--compact');
-  const avatar = createElement('span', 'chat-sidebar__avatar', firstName.slice(0, 1).toUpperCase());
-  profile.append(avatar);
+  for (const definition of dockPrimaryDefinitions) {
+    const button = createDockButton({
+      ...definition,
+      onHover: positionDockCallout
+    });
 
-  sidebar.append(sidebarActions, sidebarNav, profile);
+    if (definition.active) {
+      pinnedDockButton = button;
+    }
 
+    dockPrimary.append(button);
+  }
+
+  dock.addEventListener('mouseleave', restoreDockCallout);
+  dock.append(dockUtilities, createElement('div', 'chat-dock__divider'), dockPrimary);
+  dockArea.append(dock, dockCallout);
+
+  const stage = createElement('section', 'chat-stage');
+  canvas = createElement('div', 'chat-stage__canvas');
+
+  const topbar = createElement('div', 'chat-stage__topbar');
   const tabs = createElement('div', 'chat-stage__tabs');
   for (const [id, label] of Object.entries(strings.tabs)) {
     const tab = createElement(
@@ -333,20 +513,18 @@ async function bootstrap() {
     tab.type = 'button';
     tabs.append(tab);
   }
-  shellHeaderCenter.append(tabs);
-  shellHeader.append(shellHeaderStart, shellHeaderCenter, shellHeaderEnd);
+  topbar.append(tabs);
 
-  const shellBody = createElement('div', 'chat-shell__body');
-  const stage = createElement('section', 'chat-stage');
-  const canvas = createElement('div', 'chat-stage__canvas');
-
-  const title = createElement(
+  title = createElement(
     'h1',
     'chat-stage__title',
     formatText(strings.greeting[greetingKey], { name: firstName })
   );
 
-  const composer = createElement('section', 'chat-composer');
+  thread = createElement('section', 'chat-thread');
+  thread.hidden = true;
+
+  composer = createElement('section', 'chat-composer');
   composerField = document.createElement('textarea');
   composerField.className = 'chat-composer__field';
   composerField.placeholder = strings.composer.placeholder;
@@ -359,24 +537,44 @@ async function bootstrap() {
   composerField.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      void savePrompt();
+      void submitPrompt();
     }
   });
 
   const composerFooter = createElement('div', 'chat-composer__footer');
   const composerActions = createElement('div', 'chat-composer__actions');
-  const actionIcons = ['plus', 'paperclip', 'globe', 'mic'];
+  const composerActionDefinitions = [
+    {
+      icon: 'plus',
+      onClick: clearConversation
+    },
+    {
+      icon: 'paperclip',
+      onClick: focusComposer
+    },
+    {
+      icon: 'globe',
+      onClick: () => {
+        const suggestion = quickStartCards[3];
+        if (suggestion) {
+          setDraft(suggestion.prompt, suggestion);
+        }
+      }
+    }
+  ];
 
-  for (const iconName of actionIcons) {
+  for (const action of composerActionDefinitions) {
     const actionButton = createElement('button', 'chat-composer__icon-button');
     actionButton.type = 'button';
-    actionButton.append(createIcon(iconName, 'chat-composer__icon'));
+    actionButton.append(createIcon(action.icon, 'chat-composer__icon'));
+    actionButton.addEventListener('click', action.onClick);
     composerActions.append(actionButton);
   }
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   const modelButton = createElement('button', 'chat-composer__model');
   modelButton.type = 'button';
+  modelButton.title = activeProvider?.label ? `${activeProvider.label} - ${activeModelLabel}` : activeModelLabel;
   modelButton.append(
     createElement('span', 'chat-composer__model-label', activeModelLabel),
     createIcon('chevronDown', 'chat-composer__model-icon')
@@ -386,14 +584,14 @@ async function bootstrap() {
   sendButton.type = 'button';
   sendButton.append(createIcon('send', 'chat-composer__send-icon'));
   sendButton.addEventListener('click', () => {
-    void savePrompt();
+    void submitPrompt();
   });
 
   composerSubmit.append(modelButton, sendButton);
   composerFooter.append(composerActions, composerSubmit);
   composer.append(composerField, composerFooter);
 
-  const quickStart = createElement('section', 'chat-quick-start');
+  quickStart = createElement('section', 'chat-quick-start');
   quickStart.append(createElement('span', 'chat-quick-start__title', strings.sections.quickStart));
   const quickStartGrid = createElement('div', 'chat-quick-start__grid');
 
@@ -417,13 +615,18 @@ async function bootstrap() {
   }
 
   quickStart.append(quickStartGrid);
-  canvas.append(title, composer, quickStart);
-  stage.append(canvas);
+  scroll = createElement('div', 'chat-stage__scroll');
+  bottom = createElement('div', 'chat-stage__bottom');
 
-  shellBody.append(sidebar, stage);
-  shell.append(shellHeader, shellBody);
+  scroll.append(topbar, title, thread, quickStart);
+  bottom.append(composer);
+  canvas.append(scroll, bottom);
+  stage.append(canvas);
+  shell.append(dockArea, stage);
   root.replaceChildren(shell);
   syncComposer();
+  renderThread();
+  requestAnimationFrame(restoreDockCallout);
 }
 
 bootstrap();

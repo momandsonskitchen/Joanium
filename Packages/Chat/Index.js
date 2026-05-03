@@ -37,6 +37,10 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:save-recent-prompt',
         handler: async (_event, promptEntry) => chatStateManager.saveRecentPrompt(promptEntry)
+      },
+      {
+        channel: 'chat:send-message',
+        handler: async (_event, request) => chatStateManager.sendMessage(request)
       }
     ]
   };
