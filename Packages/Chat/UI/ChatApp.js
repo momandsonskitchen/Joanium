@@ -90,6 +90,18 @@ const iconMarkup = {
       <path d="M5 12l5 5 9-9" />
     </svg>
   `,
+  copy: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  `,
+  retry: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+    </svg>
+  `,
   // Used for the reasoning / thinking block header
   thinking: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -214,11 +226,43 @@ function createDockButton({ label, icon, active = false, emphasis = false, onCli
 }
 
 // ---------------------------------------------------------------------------
+// Message action bar — copy + retry buttons shown below each bubble.
+// ---------------------------------------------------------------------------
+
+function createMessageActions({ onCopy, onRetry }) {
+  const actions = createElement('div', 'chat-message__actions');
+
+  const copyBtn = createElement('button', 'chat-message__action-button');
+  copyBtn.type = 'button';
+  copyBtn.title = 'Copy';
+  copyBtn.append(createIcon('copy', 'chat-message__action-icon'));
+  copyBtn.addEventListener('click', () => {
+    onCopy();
+    copyBtn.classList.add('chat-message__action-button--copied');
+    const iconEl = copyBtn.querySelector('.chat-message__action-icon');
+    if (iconEl) iconEl.innerHTML = iconMarkup.check ?? '';
+    setTimeout(() => {
+      copyBtn.classList.remove('chat-message__action-button--copied');
+      if (iconEl) iconEl.innerHTML = iconMarkup.copy ?? '';
+    }, 1500);
+  });
+
+  const retryBtn = createElement('button', 'chat-message__action-button');
+  retryBtn.type = 'button';
+  retryBtn.title = 'Retry';
+  retryBtn.append(createIcon('retry', 'chat-message__action-icon'));
+  retryBtn.addEventListener('click', onRetry);
+
+  actions.append(copyBtn, retryBtn);
+  return actions;
+}
+
+// ---------------------------------------------------------------------------
 // Message element builder
 // Supports pending (dots), streaming (live text + thinking), and final states.
 // ---------------------------------------------------------------------------
 
-function createMessageElement(message) {
+function createMessageElement(message, { onCopy, onRetry } = {}) {
   const article = createElement(
     'article',
     [
@@ -278,6 +322,11 @@ function createMessageElement(message) {
   } else {
     const bubble = createElement('div', 'chat-message__bubble', message.content);
     article.append(bubble);
+  }
+
+  // Action buttons — hidden while streaming/pending, shown on completed messages.
+  if (!message.streaming && !message.pending && typeof onCopy === 'function' && typeof onRetry === 'function') {
+    article.append(createMessageActions({ onCopy, onRetry }));
   }
 
   return article;
@@ -591,7 +640,26 @@ async function bootstrap() {
       return;
     }
 
-    thread.replaceChildren(...messages.map((message) => createMessageElement(message)));
+    thread.replaceChildren(...messages.map((message, index) => {
+      const onCopy = () => {
+        navigator.clipboard.writeText(message.content ?? '').catch(() => {});
+      };
+
+      const onRetry = () => {
+        if (isSending) return;
+        // For user messages retry from that message; for assistant messages retry the preceding user message.
+        const userIndex = message.role === 'user' ? index : index - 1;
+        if (userIndex < 0) return;
+        const userMessage = messages[userIndex];
+        if (!userMessage?.content) return;
+        messages = messages.slice(0, userIndex);
+        draftValue = userMessage.content;
+        renderThread();
+        void submitPrompt();
+      };
+
+      return createMessageElement(message, { onCopy, onRetry });
+    }));
     requestAnimationFrame(() => {
       thread.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
     });

@@ -58,6 +58,7 @@
 * Dont keep unused code.
 * Inside packages all are individual so no one package should import or use from another package. (if there is something that is common then keep it in Shared)
 * Do not add any html related attributes to any of the elements. (like data-attribute like that will reveal to the user that this is a html page and not a native app)
+* Do not use the `title` attribute on any element — it triggers the native browser tooltip which looks out of place in a desktop app.
 * Dont take shortcuts.
 * I need scalable architecture and maintainable, upgradable, easy to debug.
 * Documentation should be updated when you make any changes.

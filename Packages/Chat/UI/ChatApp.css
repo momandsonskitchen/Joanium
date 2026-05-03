@@ -373,6 +373,66 @@ textarea {
 }
 
 /* -------------------------------------------------------------------------
+   Message action bar — copy + retry buttons
+   ------------------------------------------------------------------------- */
+
+.chat-message__actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  pointer-events: none;
+}
+
+.chat-message:hover .chat-message__actions,
+.chat-message:focus-within .chat-message__actions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.chat-message__action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  color: var(--color-chat-text-muted);
+  background: transparent;
+  transition:
+    background-color 130ms ease,
+    color 130ms ease,
+    transform 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-message__action-button:hover {
+  background: var(--color-chat-hover-surface);
+  color: var(--color-chat-text-title);
+  transform: translateY(-1px);
+}
+
+.chat-message__action-button--copied {
+  color: #7c3aed;
+}
+
+.chat-message__action-icon {
+  display: inline-flex;
+  width: 15px;
+  height: 15px;
+  color: currentColor;
+}
+
+.chat-message__action-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* -------------------------------------------------------------------------
    Thinking / reasoning block
    Shown as a collapsible <details> element above the reply bubble.
    Animates a pulsing left border while the reasoning is still streaming in,
