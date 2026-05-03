@@ -329,6 +329,7 @@ async function bootstrap() {
     if (modelPickerPanel) {
       modelPickerPanel.classList.remove('chat-model-picker--open');
     }
+    modelButton?.classList.remove('chat-composer__model--open');
     modelPickerOpen = false;
   }
 
@@ -376,8 +377,7 @@ async function bootstrap() {
 
     syncPickerActiveStates();
     modelPickerOpen = true;
-
-    // Position above the trigger button
+    modelButton.classList.add('chat-composer__model--open');
     const rect = triggerButton.getBoundingClientRect();
     modelPickerPanel.style.left = `${rect.left}px`;
     modelPickerPanel.style.bottom = `${window.innerHeight - rect.top + 8}px`;

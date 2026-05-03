@@ -407,6 +407,14 @@ textarea {
   gap: 10px;
 }
 
+.chat-composer__model-icon {
+  transition: transform var(--transition-base);
+}
+
+.chat-composer__model--open .chat-composer__model-icon {
+  transform: rotate(180deg);
+}
+
 .chat-composer__icon-button,
 .chat-composer__model,
 .chat-composer__send {
