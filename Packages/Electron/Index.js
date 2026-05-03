@@ -132,7 +132,13 @@ async function navigateToPackage(packageId) {
   const previousPackage = currentPackage;
   const previousWindow = mainWindow;
   const nextPackage = await packageLoader(packageId);
-  registerIpcHandlers(nextPackage.ipcHandlers);
+
+  // Register next handlers immediately so the new renderer can call them on boot.
+  // Old handlers are kept alive until the old window is destroyed.
+  for (const definition of nextPackage.ipcHandlers ?? []) {
+    ipcMain.removeHandler(definition.channel);
+    ipcMain.handle(definition.channel, definition.handler);
+  }
 
   try {
     const nextWindow = await createMainWindow(nextPackage);
@@ -142,6 +148,9 @@ async function navigateToPackage(packageId) {
     if (previousWindow && !previousWindow.isDestroyed()) {
       previousWindow.destroy();
     }
+
+    // Now that the old window is gone, remove any stale handlers it owned.
+    registerIpcHandlers(nextPackage.ipcHandlers);
 
     writeBootLog('navigateToPackage:complete', packageId);
     return { packageId };
