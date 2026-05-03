@@ -27,7 +27,10 @@ body {
 body {
   height: 100vh;
   overflow: hidden;
-  background: var(--color-chat-shell-surface);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(242, 220, 252, 0.94), transparent 36%),
+    radial-gradient(circle at 84% 74%, rgba(210, 150, 230, 0.54), transparent 32%),
+    linear-gradient(135deg, #f4eefa 0%, #f2e8fa 52%, #ead5f7 100%);
   color: var(--color-chat-text-title);
 }
 
@@ -57,7 +60,7 @@ textarea {
   height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  background: var(--color-chat-shell-surface);
+  background: transparent;
   overflow: hidden;
 }
 
@@ -186,13 +189,13 @@ textarea {
 
 .chat-stage {
   min-width: 0;
-  background: var(--color-chat-shell-surface);
+  background: transparent;
 }
 
 .chat-stage__canvas {
   position: relative;
   height: 100vh;
-  background: var(--color-chat-canvas-background);
+  background: transparent;
   overflow: hidden;
 }
 
