@@ -9,61 +9,9 @@ import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScroll
 const dictionaries = { en, de, fr };
 
 const iconMarkup = {
-  spark: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m13.5 3-1.2 4.5L8 8.8l4.3 1.3L13.5 15l1.2-4.9L19 8.8l-4.3-1.3Z" />
-      <path d="m6 14-.7 2.2L3 17l2.3.8L6 20l.7-2.2L9 17l-2.3-.8Z" />
-    </svg>
-  `,
-  briefcase: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
-      <rect x="3.5" y="7" width="17" height="12.5" rx="3.5" />
-      <path d="M3.5 12.5h17" />
-      <path d="M10.5 12.5v1.3a1.5 1.5 0 0 0 3 0v-1.3" />
-    </svg>
-  `,
-  skills: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 2a6 6 0 0 1 6 6c0 2.22-1.2 4.17-3 5.25V15a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 15v-1.75A6 6 0 0 1 12 2Z" />
-      <path d="M9.5 18.5h5" />
-      <path d="M10.5 21.5h3" />
-    </svg>
-  `,
-  personas: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="7.5" r="3.5" />
-      <path d="M4.5 20.5c0-4.14 3.36-7 7.5-7s7.5 2.86 7.5 7" />
-    </svg>
-  `,
-  marketplace: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6 2 3 7v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-3-5Z" />
-      <path d="M3 7h18" />
-      <path d="M16 11a4 4 0 0 1-8 0" />
-    </svg>
-  `,
-  sun: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="4.2" />
-      <path d="M12 2.5v2M12 19.5v2M4.4 4.4l1.4 1.4M18.2 18.2l1.4 1.4M2.5 12h2M19.5 12h2M4.4 19.6l1.4-1.4M18.2 5.8l1.4-1.4" />
-    </svg>
-  `,
-  moon: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M15.2 3.8a7.8 7.8 0 1 0 5 12.6 8.3 8.3 0 0 1-5.6-7.7 8.2 8.2 0 0 1 .6-3Z" />
-      <path d="m17.8 5.2.4 1.3 1.3.4-1.3.4-.4 1.3-.4-1.3-1.3-.4 1.3-.4Z" />
-    </svg>
-  `,
   paperclip: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="m9.5 12.5 5.8-5.8a3.5 3.5 0 1 1 5 5l-8.2 8.2a5 5 0 1 1-7.1-7.1l8.4-8.4" />
-    </svg>
-  `,
-  globe: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M3.5 12h17M12 3.5a13 13 0 0 1 0 17M12 3.5a13 13 0 0 0 0 17" />
     </svg>
   `,
   chevronDown: `
@@ -80,17 +28,6 @@ const iconMarkup = {
   stop: `
     <svg viewBox="0 0 24 24" fill="currentColor">
       <rect x="7" y="7" width="10" height="10" rx="2" />
-    </svg>
-  `,
-  code: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5 10 19" />
-    </svg>
-  `,
-  document: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M8 3.5h6l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7.5 3.5Z" />
-      <path d="M14 3.5V8h4M9 12h6M9 15.5h4.5" />
     </svg>
   `,
   check: `
@@ -281,50 +218,6 @@ function speakText(rawText, btn) {
   if (iconEl) iconEl.innerHTML = iconMarkup.volumeStop ?? '';
 
   window.speechSynthesis.speak(utterance);
-}
-
-// ---------------------------------------------------------------------------
-// createDockButton — standard icon button for the side nav.
-// ---------------------------------------------------------------------------
-function createDockButton({ label, icon, active = false, emphasis = false, onClick, onHover }) {
-  const classes = [
-    'chat-dock__button',
-    active     ? 'chat-dock__button--active'   : '',
-    emphasis   ? 'chat-dock__button--emphasis' : ''
-  ].filter(Boolean).join(' ');
-
-  const button = createElement('button', classes);
-  button._dockLabel = label;
-  button.append(createIcon(icon, 'chat-dock__icon'));
-  button.append(createElement('span', 'chat-dock__sr-only', label));
-
-  if (typeof onClick === 'function') button.addEventListener('click', onClick);
-
-  if (typeof onHover === 'function') {
-    const show = () => onHover(button, label);
-    button.addEventListener('mouseenter', show);
-    button.addEventListener('focus', show);
-  }
-
-  return button;
-}
-
-// ---------------------------------------------------------------------------
-// createProfileButton — avatar button showing dynamically generated initials.
-// ---------------------------------------------------------------------------
-function createProfileButton({ name, label, onHover }) {
-  const button = createElement('button', 'chat-dock__button chat-dock__button--profile');
-  button._dockLabel = label;
-  button.append(createElement('span', 'chat-dock__avatar-initials', getInitials(name)));
-  button.append(createElement('span', 'chat-dock__sr-only', label));
-
-  if (typeof onHover === 'function') {
-    const show = () => onHover(button, name || label);
-    button.addEventListener('mouseenter', show);
-    button.addEventListener('focus', show);
-  }
-
-  return button;
 }
 
 // ---------------------------------------------------------------------------
@@ -539,7 +432,6 @@ async function bootstrap() {
   let isSending = false;
   let accText = '';
   let accThinking = '';
-  let isDarkTheme = false;
 
   // DOM refs set during build
   let composerField = null;
@@ -552,9 +444,6 @@ async function bootstrap() {
   let canvas = null;
   let scroll = null;
   let bottom = null;
-  let dockCallout = null;
-  let dockArea = null;
-  let themeButton = null;
   let messages = [];
 
   // Model picker state
@@ -562,30 +451,8 @@ async function bootstrap() {
   let modelPickerOpen = false;
   let modelButton = null;
 
-  // Nav sync state — shared between dock and top tab bar
-  let activeDockNavEl = null;
-  let dockNavIndicator = null;
-  let dockNavStackEl = null;
-  const tabIdToDockBtn = new Map();
-  const tabIdToTabBtn = new Map();
-
-  // ---------------------------------------------------------------------------
-  // Dock callout — uses getBoundingClientRect for reliable positioning
-  // regardless of scroll position or intermediate layout containers.
-  // ---------------------------------------------------------------------------
-
-  function positionDockCallout(button, label) {
-    if (!dockCallout || !button || !dockArea) return;
-    const btnRect = button.getBoundingClientRect();
-    const areaRect = dockArea.getBoundingClientRect();
-    dockCallout.textContent = label;
-    dockCallout.style.top = `${btnRect.top - areaRect.top + btnRect.height / 2}px`;
-    dockCallout.hidden = false;
-  }
-
-  function hideDockCallout() {
-    if (dockCallout) dockCallout.hidden = true;
-  }
+  // Tab state
+  let activeTabEl = null;
 
   // ---------------------------------------------------------------------------
   // Model picker
@@ -655,17 +522,6 @@ async function bootstrap() {
       document.addEventListener('click', onDocClick, { capture: true });
       document.addEventListener('keydown', onDocKey);
     }, 0);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Theme toggle — switches sun ↔ moon icon and applies theme-dark to <html>.
-  // ---------------------------------------------------------------------------
-
-  function toggleTheme() {
-    isDarkTheme = !isDarkTheme;
-    document.documentElement.classList.toggle('theme-dark', isDarkTheme);
-    const iconEl = themeButton?.querySelector('.chat-dock__icon');
-    if (iconEl) iconEl.innerHTML = isDarkTheme ? iconMarkup.moon : iconMarkup.sun;
   }
 
   // ---------------------------------------------------------------------------
@@ -866,111 +722,6 @@ async function bootstrap() {
 
   const shell = createElement('main', 'chat-shell');
 
-  // ── Dock ──────────────────────────────────────────────────────────────────
-  dockArea = createElement('aside', 'chat-dock-area');
-  const dock = createElement('div', 'chat-dock');
-  dockCallout = createElement('div', 'chat-dock__callout');
-  dockCallout.hidden = true;
-
-  // Top group: New Chat (emphasis)
-  const dockTopStack = createElement('div', 'chat-dock__stack');
-  const newChatBtn = createDockButton({
-    label: strings.dock.newChat,
-    icon: 'spark',
-    emphasis: true,
-    onClick: clearConversation,
-    onHover: positionDockCallout
-  });
-  dockTopStack.append(newChatBtn);
-
-  // Middle group: nav items
-  const dockNavStack = createElement('div', 'chat-dock__stack chat-dock__nav-stack');
-  dockNavStackEl = dockNavStack;
-  dockNavIndicator = createElement('div', 'chat-dock__nav-indicator');
-  dockNavStack.append(dockNavIndicator);
-
-  function moveDockIndicator(btnEl, animate) {
-    if (!btnEl || !dockNavIndicator || !dockNavStackEl) return;
-    if (!animate) dockNavIndicator.style.transition = 'none';
-    const stackRect = dockNavStackEl.getBoundingClientRect();
-    const btnRect = btnEl.getBoundingClientRect();
-    dockNavIndicator.style.top = `${btnRect.top - stackRect.top}px`;
-    dockNavIndicator.classList.add('chat-dock__nav-indicator--visible');
-    if (!animate) {
-      dockNavIndicator.offsetHeight;
-      dockNavIndicator.style.transition = '';
-    }
-  }
-
-  function syncDockToTabId(tabId) {
-    activeDockNavEl?.classList.remove('chat-dock__button--active');
-    const dockBtn = tabIdToDockBtn.get(tabId);
-    if (dockBtn) {
-      dockBtn.classList.add('chat-dock__button--active');
-      activeDockNavEl = dockBtn;
-      moveDockIndicator(dockBtn, true);
-    } else {
-      activeDockNavEl = null;
-      dockNavIndicator?.classList.remove('chat-dock__nav-indicator--visible');
-    }
-  }
-
-  const navItems = [
-    { label: strings.dock.projects,    icon: 'briefcase',   tabId: 'projects'    },
-    { label: strings.dock.skills,      icon: 'skills',      tabId: 'skills'      },
-    { label: strings.dock.personas,    icon: 'personas',    tabId: 'personas'    },
-    { label: strings.dock.marketplace, icon: 'marketplace', tabId: 'marketplace' }
-  ];
-  for (const item of navItems) {
-    const btn = createDockButton({
-      label: item.label,
-      icon: item.icon,
-      onHover: positionDockCallout,
-      onClick: () => {
-        activeDockNavEl?.classList.remove('chat-dock__button--active');
-        btn.classList.add('chat-dock__button--active');
-        activeDockNavEl = btn;
-        moveDockIndicator(btn, true);
-        const targetTabBtn = tabIdToTabBtn.get(item.tabId);
-        if (targetTabBtn && targetTabBtn !== activeTabEl) {
-          activeTabEl?.classList.remove('chat-stage__tab--active');
-          targetTabBtn.classList.add('chat-stage__tab--active');
-          activeTabEl = targetTabBtn;
-          moveIndicatorToTab(targetTabBtn, true);
-        }
-      }
-    });
-    tabIdToDockBtn.set(item.tabId, btn);
-    dockNavStack.append(btn);
-  }
-
-  // Bottom group: theme toggle + profile avatar
-  const dockBottomStack = createElement('div', 'chat-dock__stack');
-
-  themeButton = createDockButton({
-    label: strings.dock.theme,
-    icon: 'sun',
-    onClick: toggleTheme,
-    onHover: positionDockCallout
-  });
-
-  const profileBtn = createProfileButton({
-    name: payload.user.profile.name,
-    label: strings.dock.profile,
-    onHover: positionDockCallout
-  });
-
-  dockBottomStack.append(themeButton, profileBtn);
-
-  dock.addEventListener('mouseleave', hideDockCallout);
-  dock.append(
-    dockTopStack,
-    dockNavStack,
-    createElement('div', 'chat-dock__divider'),
-    dockBottomStack
-  );
-  dockArea.append(dock, dockCallout);
-
   // ── Stage ─────────────────────────────────────────────────────────────────
   const stage = createElement('section', 'chat-stage');
   canvas = createElement('div', 'chat-stage__canvas');
@@ -979,8 +730,6 @@ async function bootstrap() {
   const tabs = createElement('div', 'chat-stage__tabs');
   const tabIndicator = createElement('div', 'chat-stage__tab-indicator');
   tabs.append(tabIndicator);
-
-  let activeTabEl = null;
 
   function moveIndicatorToTab(tabEl, animate) {
     if (!tabEl) return;
@@ -1004,7 +753,6 @@ async function bootstrap() {
     );
     tab.type = 'button';
     if (isActive) activeTabEl = tab;
-    tabIdToTabBtn.set(id, tab);
 
     tab.addEventListener('click', () => {
       if (tab === activeTabEl) {
@@ -1015,7 +763,6 @@ async function bootstrap() {
       tab.classList.add('chat-stage__tab--active');
       activeTabEl = tab;
       moveIndicatorToTab(tab, true);
-      syncDockToTabId(id);
       if (id === 'chat') clearConversation();
     });
 

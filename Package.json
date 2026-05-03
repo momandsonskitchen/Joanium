@@ -7,7 +7,7 @@
     "node": ">=24"
   },
   "dependencies": {
-    "electron": "^35.7.5"
+    "electron": "41.4.0"
   },
   "main": "App.js",
   "scripts": {

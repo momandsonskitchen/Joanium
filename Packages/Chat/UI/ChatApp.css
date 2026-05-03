@@ -66,199 +66,6 @@ textarea {
   overflow: hidden;
 }
 
-.chat-dock-area {
-  position: fixed;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.chat-dock {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: 64px;
-  padding: 12px 0;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-chat-dock);
-}
-
-.chat-dock__stack {
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  width: 100%;
-}
-
-.chat-dock__nav-stack {
-  position: relative;
-}
-
-/* ── Vertical sliding indicator for the dock nav ──────────────────── */
-
-.chat-dock__nav-indicator {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-pill);
-  background: var(--color-chat-dock-active-surface);
-  box-shadow: var(--shadow-chat-dock-active);
-  transition:
-    top 340ms cubic-bezier(0.34, 1.36, 0.64, 1),
-    opacity 220ms ease;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0;
-}
-
-.chat-dock__nav-indicator--visible {
-  opacity: 1;
-}
-
-.chat-dock__nav-stack .chat-dock__button {
-  z-index: 1;
-}
-
-.chat-dock__divider {
-  width: 24px;
-  height: 1px;
-  background: var(--color-chat-dock-divider);
-}
-
-.chat-dock__button {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-pill);
-  color: var(--color-chat-dock-icon);
-  transition:
-    transform var(--transition-base),
-    background-color var(--transition-base),
-    color var(--transition-base),
-    box-shadow var(--transition-base);
-  -webkit-app-region: no-drag;
-}
-
-.chat-dock__button:hover,
-.chat-composer__icon-button:hover,
-.chat-composer__model:hover,
-.chat-composer__send:hover,
-.chat-quick-start__card:hover {
-  transform: translateY(-1px);
-}
-
-.chat-stage__tab:hover:not(.chat-stage__tab--active) {
-  color: rgba(43, 26, 14, 0.88);
-}
-
-.chat-dock__button:hover {
-  color: var(--color-chat-text-title);
-  background: var(--color-chat-dock-hover-surface);
-  box-shadow: var(--shadow-chat-dock-hover);
-}
-
-.chat-dock__button--active {
-  color: var(--color-chat-dock-active-icon);
-  background: transparent;
-  box-shadow: none;
-}
-
-.chat-dock__button--emphasis {
-  color: var(--color-chat-dock-emphasis-icon);
-  background: var(--color-chat-dock-emphasis-surface);
-  box-shadow: var(--shadow-chat-dock-emphasis);
-}
-
-.chat-dock__button--profile {
-  background: var(--color-chat-dock-emphasis-surface);
-  color: var(--color-chat-dock-emphasis-icon);
-  box-shadow: var(--shadow-chat-dock-emphasis);
-}
-
-.chat-dock__button--profile:hover {
-  background: var(--color-chat-dock-emphasis-surface);
-  color: var(--color-chat-dock-emphasis-icon);
-  opacity: 0.90;
-}
-
-.chat-dock__avatar-initials {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1;
-  pointer-events: none;
-}
-
-.chat-dock__icon {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  color: currentColor;
-}
-
-.chat-composer__icon,
-.chat-composer__model-icon,
-.chat-composer__send-icon,
-.chat-quick-start__icon {
-  display: inline-flex;
-  width: 24px;
-  height: 24px;
-  color: currentColor;
-}
-
-.chat-dock__icon svg,
-.chat-composer__icon svg,
-.chat-composer__model-icon svg,
-.chat-composer__send-icon svg,
-.chat-quick-start__icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-
-.chat-dock__sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.chat-dock__callout {
-  position: absolute;
-  left: 78px;
-  transform: translateY(-50%);
-  padding: 9px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--color-chat-dock-callout-surface);
-  box-shadow: var(--shadow-chat-dock-callout);
-  color: var(--color-chat-dock-callout-text);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
 .chat-stage {
   min-width: 0;
   background: transparent;
@@ -388,6 +195,10 @@ textarea {
   transition: color var(--transition-base);
 }
 
+.chat-stage__tab:hover:not(.chat-stage__tab--active) {
+  color: rgba(43, 26, 14, 0.88);
+}
+
 .chat-stage__tab--active {
   background: transparent;
   color: var(--color-chat-text-title);
@@ -514,10 +325,6 @@ textarea {
   color: var(--color-chat-error-bubble-text);
   box-shadow: var(--shadow-chat-error-bubble);
 }
-
-/* Stopped messages share the same card surface but the "Generation stopped."
-   line is rendered in a muted tone via the pre-wrap whitespace. No extra
-   styling needed — the content itself communicates the state. */
 
 /* -------------------------------------------------------------------------
    Message action bar — copy + retry + TTS speak buttons
@@ -823,6 +630,27 @@ textarea {
   -webkit-app-region: no-drag;
 }
 
+.chat-composer__icon-button,
+.chat-composer__model,
+.chat-composer__send,
+.chat-quick-start__card {
+  transition:
+    width var(--transition-base),
+    padding var(--transition-base),
+    gap var(--transition-base),
+    transform var(--transition-base),
+    background-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.chat-composer__icon-button:hover,
+.chat-composer__model:hover,
+.chat-composer__send:hover,
+.chat-quick-start__card:hover {
+  transform: translateY(-1px);
+}
+
 .chat-composer__icon-button {
   width: 38px;
   height: 38px;
@@ -846,6 +674,24 @@ textarea {
 .chat-composer__model-label {
   font-size: 15px;
   font-weight: 600;
+}
+
+.chat-composer__icon,
+.chat-composer__model-icon,
+.chat-composer__send-icon,
+.chat-quick-start__icon {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  color: currentColor;
+}
+
+.chat-composer__icon svg,
+.chat-composer__model-icon svg,
+.chat-composer__send-icon svg,
+.chat-quick-start__icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* -------------------------------------------------------------------------
@@ -874,7 +720,6 @@ textarea {
 
 /* -------------------------------------------------------------------------
    Send button — stop state
-   Expands into a labelled pill with warm rose tones that match the app palette.
    ------------------------------------------------------------------------- */
 
 .chat-composer__send--stop {
@@ -895,7 +740,6 @@ textarea {
     0 12px 24px rgba(185, 72, 50, 0.14);
 }
 
-/* Label that appears next to the stop icon */
 .chat-composer__send-label {
   font-size: 14px;
   font-weight: 650;
@@ -934,10 +778,6 @@ textarea {
   box-shadow: var(--shadow-chat-card);
   color: inherit;
   text-align: left;
-  transition:
-    transform var(--transition-base),
-    box-shadow var(--transition-base),
-    background-color var(--transition-base);
   -webkit-app-region: no-drag;
 }
 
@@ -1086,50 +926,16 @@ textarea {
 }
 
 @keyframes chat-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 1180px) {
-  .chat-dock__callout {
-    left: 72px;
-    min-width: 100px;
-    padding-inline: 16px;
-    font-size: 13px;
-  }
-
-  .chat-stage__scroll,
-  .chat-stage__bottom {
-    padding-inline: 24px;
-  }
-
-  .chat-stage__title {
-    font-size: clamp(46px, 7vw, 68px);
-  }
-  .chat-thread,
-  .chat-composer--conversation {
-    width: min(100%, 820px);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 @media (max-width: 900px) {
-  .chat-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .chat-dock-area {
-    display: none;
-  }
-
   .chat-stage__scroll,
   .chat-stage__bottom {
     padding-inline: 18px;
   }
+
   .chat-stage__tab {
     min-width: 78px;
     min-height: 36px;
