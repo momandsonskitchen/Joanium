@@ -74,6 +74,11 @@ const iconMarkup = {
       <path d="m13 6 6 6-6 6" />
     </svg>
   `,
+  stop: `
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <rect x="7" y="7" width="10" height="10" rx="2" />
+    </svg>
+  `,
   code: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5 10 19" />
@@ -267,7 +272,8 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
       'chat-message',
       `chat-message--${message.role}`,
       message.streaming ? 'chat-message--streaming' : '',
-      message.error ? 'chat-message--error' : ''
+      message.error ? 'chat-message--error' : '',
+      message.stopped ? 'chat-message--stopped' : ''
     ]
       .filter(Boolean)
       .join(' ')
@@ -460,6 +466,8 @@ async function bootstrap() {
   let draftValue = '';
   let lastSelectedEntry = null;
   let isSending = false;
+  let accText = '';
+  let accThinking = '';
   let composerField = null;
   let sendButton = null;
   let thread = null;
@@ -582,14 +590,71 @@ async function bootstrap() {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // stopStream — cancels the in-flight stream and finalises the message.
+  // Appends the localised "Generation stopped." note so the user always knows
+  // the response was cut short.
+  // ---------------------------------------------------------------------------
+
+  function stopStream() {
+    window.JoaniumChat.removeStreamListeners();
+    const stoppedNote = strings.composer.generationStopped;
+    messages = messages.map((message, index) => {
+      if (index !== messages.length - 1) return message;
+      const content = accText
+        ? `${accText}\n\n${stoppedNote}`
+        : stoppedNote;
+      return {
+        role: 'assistant',
+        content,
+        thinking: accThinking,
+        streaming: false,
+        stopped: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel
+      };
+    });
+    accText = '';
+    accThinking = '';
+    isSending = false;
+    syncComposer();
+    renderThread();
+  }
+
+  // ---------------------------------------------------------------------------
+  // syncComposer — keeps the send button and textarea in sync with app state.
+  // When streaming, the button becomes a labelled "Stop" pill.
+  // ---------------------------------------------------------------------------
+
   function syncComposer() {
     if (!composerField || !sendButton) {
       return;
     }
 
     composerField.value = draftValue;
-    sendButton.disabled = !draftValue.trim() || isSending;
-    sendButton.classList.toggle('chat-composer__send--busy', isSending);
+
+    const iconEl = sendButton.querySelector('.chat-composer__send-icon');
+    const labelEl = sendButton.querySelector('.chat-composer__send-label');
+
+    if (isSending) {
+      sendButton.disabled = false;
+      sendButton.classList.add('chat-composer__send--stop');
+      sendButton.classList.remove('chat-composer__send--busy');
+      if (iconEl) iconEl.innerHTML = iconMarkup.stop;
+      if (labelEl) {
+        labelEl.textContent = strings.composer.stop;
+        labelEl.hidden = false;
+      }
+    } else {
+      sendButton.disabled = !draftValue.trim();
+      sendButton.classList.remove('chat-composer__send--stop');
+      sendButton.classList.remove('chat-composer__send--busy');
+      if (iconEl) iconEl.innerHTML = iconMarkup.send;
+      if (labelEl) {
+        labelEl.textContent = '';
+        labelEl.hidden = true;
+      }
+    }
   }
 
   function focusComposer() {
@@ -700,9 +765,9 @@ async function bootstrap() {
     renderThread();
     focusComposer();
 
-    // Accumulated content for the current stream
-    let accText = '';
-    let accThinking = '';
+    // Reset accumulators for the current stream
+    accText = '';
+    accThinking = '';
 
     // Remove any leftover listeners from a previous turn
     window.JoaniumChat.removeStreamListeners();
@@ -900,10 +965,6 @@ async function bootstrap() {
   const composerActions = createElement('div', 'chat-composer__actions');
   const composerActionDefinitions = [
     {
-      icon: 'plus',
-      onClick: clearConversation
-    },
-    {
       icon: 'paperclip',
       onClick: focusComposer
     }
@@ -929,11 +990,21 @@ async function bootstrap() {
     openModelPicker(modelButton);
   });
 
+  // Send / Stop button — icon + hidden label (label shown only in stop state)
   sendButton = createElement('button', 'chat-composer__send');
   sendButton.type = 'button';
-  sendButton.append(createIcon('send', 'chat-composer__send-icon'));
+  const sendLabel = createElement('span', 'chat-composer__send-label');
+  sendLabel.hidden = true;
+  sendButton.append(
+    createIcon('send', 'chat-composer__send-icon'),
+    sendLabel
+  );
   sendButton.addEventListener('click', () => {
-    void submitPrompt();
+    if (isSending) {
+      stopStream();
+    } else {
+      void submitPrompt();
+    }
   });
 
   composerSubmit.append(modelButton, sendButton);

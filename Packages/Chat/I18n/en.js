@@ -27,7 +27,9 @@ const en = {
   },
   composer: {
     placeholder: 'How can I help you today?',
-    modelFallback: 'Ready to chat'
+    modelFallback: 'Ready to chat',
+    stop: 'Stop',
+    generationStopped: 'Generation stopped.'
   },
   quickStartCards: [
     {
