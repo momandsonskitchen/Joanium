@@ -1,16 +1,16 @@
 {
   "recentPrompts": [
     {
+      "title": "Hello dude",
+      "summary": "Hello dude!",
+      "prompt": "Hello dude!",
+      "updatedAt": "2026-05-03T09:44:45.245Z"
+    },
+    {
       "title": "hello",
       "summary": "hello",
       "prompt": "hello",
       "updatedAt": "2026-05-03T08:02:59.622Z"
-    },
-    {
-      "title": "hello dude",
-      "summary": "hello dude!",
-      "prompt": "hello dude!",
-      "updatedAt": "2026-05-03T05:42:04.748Z"
     }
   ]
 }

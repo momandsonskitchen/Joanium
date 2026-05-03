@@ -214,14 +214,23 @@ function createMessageElement(message) {
     }`
   );
 
-  const metaText =
-    message.role === 'assistant'
-      ? [message.providerLabel, message.modelLabel].filter(Boolean).join(' - ') || 'Assistant'
-      : 'You';
-  const meta = createElement('div', 'chat-message__meta', metaText);
-  const bubble = createElement('div', 'chat-message__bubble', message.content);
+  if (message.role === 'assistant') {
+    const bubble = createElement('div', 'chat-message__bubble');
 
-  article.append(meta, bubble);
+    if (message.pending) {
+      const dots = createElement('span', 'chat-message__dots');
+      dots.innerHTML = '<span></span><span></span><span></span>';
+      bubble.append(dots);
+    } else {
+      bubble.textContent = message.content;
+    }
+
+    article.append(bubble);
+  } else {
+    const bubble = createElement('div', 'chat-message__bubble', message.content);
+    article.append(bubble);
+  }
+
   return article;
 }
 
@@ -473,6 +482,7 @@ async function bootstrap() {
     }
 
     const hasMessages = messages.length > 0;
+    logoEl.hidden = hasMessages;
     title.hidden = hasMessages;
     thread.hidden = !hasMessages;
     if (subtitle) subtitle.hidden = hasMessages;
