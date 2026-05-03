@@ -464,6 +464,13 @@ async function bootstrap() {
   let modelPickerOpen = false;
   let modelButton = null;
 
+  // Nav sync state — shared between dock and top tab bar
+  let activeDockNavEl = null;
+  let dockNavIndicator = null;
+  let dockNavStackEl = null;
+  const tabIdToDockBtn = new Map();
+  const tabIdToTabBtn = new Map();
+
   // ---------------------------------------------------------------------------
   // Dock callout — uses getBoundingClientRect for reliable positioning
   // regardless of scroll position or intermediate layout containers.
@@ -766,15 +773,64 @@ async function bootstrap() {
   dockTopStack.append(newChatBtn);
 
   // Middle group: nav items
-  const dockNavStack = createElement('div', 'chat-dock__stack');
+  const dockNavStack = createElement('div', 'chat-dock__stack chat-dock__nav-stack');
+  dockNavStackEl = dockNavStack;
+  dockNavIndicator = createElement('div', 'chat-dock__nav-indicator');
+  dockNavStack.append(dockNavIndicator);
+
+  function moveDockIndicator(btnEl, animate) {
+    if (!btnEl || !dockNavIndicator || !dockNavStackEl) return;
+    if (!animate) dockNavIndicator.style.transition = 'none';
+    const stackRect = dockNavStackEl.getBoundingClientRect();
+    const btnRect = btnEl.getBoundingClientRect();
+    dockNavIndicator.style.top = `${btnRect.top - stackRect.top}px`;
+    dockNavIndicator.classList.add('chat-dock__nav-indicator--visible');
+    if (!animate) {
+      dockNavIndicator.offsetHeight;
+      dockNavIndicator.style.transition = '';
+    }
+  }
+
+  function syncDockToTabId(tabId) {
+    activeDockNavEl?.classList.remove('chat-dock__button--active');
+    const dockBtn = tabIdToDockBtn.get(tabId);
+    if (dockBtn) {
+      dockBtn.classList.add('chat-dock__button--active');
+      activeDockNavEl = dockBtn;
+      moveDockIndicator(dockBtn, true);
+    } else {
+      activeDockNavEl = null;
+      dockNavIndicator?.classList.remove('chat-dock__nav-indicator--visible');
+    }
+  }
+
   const navItems = [
-    { label: strings.dock.projects,    icon: 'briefcase',   onClick: focusComposer },
-    { label: strings.dock.skills,      icon: 'skills',                    onClick: focusComposer },
-    { label: strings.dock.personas,    icon: 'personas',                  onClick: focusComposer },
-    { label: strings.dock.marketplace, icon: 'marketplace',               onClick: focusComposer }
+    { label: strings.dock.projects,    icon: 'briefcase',   tabId: 'projects'    },
+    { label: strings.dock.skills,      icon: 'skills',      tabId: 'skills'      },
+    { label: strings.dock.personas,    icon: 'personas',    tabId: 'personas'    },
+    { label: strings.dock.marketplace, icon: 'marketplace', tabId: 'marketplace' }
   ];
   for (const item of navItems) {
-    dockNavStack.append(createDockButton({ ...item, onHover: positionDockCallout }));
+    const btn = createDockButton({
+      label: item.label,
+      icon: item.icon,
+      onHover: positionDockCallout,
+      onClick: () => {
+        activeDockNavEl?.classList.remove('chat-dock__button--active');
+        btn.classList.add('chat-dock__button--active');
+        activeDockNavEl = btn;
+        moveDockIndicator(btn, true);
+        const targetTabBtn = tabIdToTabBtn.get(item.tabId);
+        if (targetTabBtn && targetTabBtn !== activeTabEl) {
+          activeTabEl?.classList.remove('chat-stage__tab--active');
+          targetTabBtn.classList.add('chat-stage__tab--active');
+          activeTabEl = targetTabBtn;
+          moveIndicatorToTab(targetTabBtn, true);
+        }
+      }
+    });
+    tabIdToDockBtn.set(item.tabId, btn);
+    dockNavStack.append(btn);
   }
 
   // Bottom group: theme toggle + profile avatar
@@ -810,14 +866,48 @@ async function bootstrap() {
 
   const topbar = createElement('div', 'chat-stage__topbar');
   const tabs = createElement('div', 'chat-stage__tabs');
+  const tabIndicator = createElement('div', 'chat-stage__tab-indicator');
+  tabs.append(tabIndicator);
+
+  let activeTabEl = null;
+
+  function moveIndicatorToTab(tabEl, animate) {
+    if (!tabEl) return;
+    if (!animate) tabIndicator.style.transition = 'none';
+    const tabsRect = tabs.getBoundingClientRect();
+    const tabRect = tabEl.getBoundingClientRect();
+    tabIndicator.style.left = `${tabRect.left - tabsRect.left}px`;
+    tabIndicator.style.width = `${tabRect.width}px`;
+    if (!animate) {
+      tabIndicator.offsetHeight; // force reflow before re-enabling transition
+      tabIndicator.style.transition = '';
+    }
+  }
+
   for (const [id, label] of Object.entries(strings.tabs)) {
+    const isActive = id === 'chat';
     const tab = createElement(
       'button',
-      `chat-stage__tab${id === 'chat' ? ' chat-stage__tab--active' : ''}`,
+      `chat-stage__tab${isActive ? ' chat-stage__tab--active' : ''}`,
       label
     );
     tab.type = 'button';
-    if (id === 'chat') tab.addEventListener('click', clearConversation);
+    if (isActive) activeTabEl = tab;
+    tabIdToTabBtn.set(id, tab);
+
+    tab.addEventListener('click', () => {
+      if (tab === activeTabEl) {
+        if (id === 'chat') clearConversation();
+        return;
+      }
+      activeTabEl?.classList.remove('chat-stage__tab--active');
+      tab.classList.add('chat-stage__tab--active');
+      activeTabEl = tab;
+      moveIndicatorToTab(tab, true);
+      syncDockToTabId(id);
+      if (id === 'chat') clearConversation();
+    });
+
     tabs.append(tab);
   }
   topbar.append(tabs);
@@ -895,6 +985,7 @@ async function bootstrap() {
   shell.append(stage);
   root.replaceChildren(shell);
 
+  requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
   syncComposer();
   renderThread();
 }
