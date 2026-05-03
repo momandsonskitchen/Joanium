@@ -234,7 +234,6 @@ function createMessageActions({ onCopy, onRetry }) {
 
   const copyBtn = createElement('button', 'chat-message__action-button');
   copyBtn.type = 'button';
-  copyBtn.title = 'Copy';
   copyBtn.append(createIcon('copy', 'chat-message__action-icon'));
   copyBtn.addEventListener('click', () => {
     onCopy();
@@ -249,7 +248,6 @@ function createMessageActions({ onCopy, onRetry }) {
 
   const retryBtn = createElement('button', 'chat-message__action-button');
   retryBtn.type = 'button';
-  retryBtn.title = 'Retry';
   retryBtn.append(createIcon('retry', 'chat-message__action-icon'));
   retryBtn.addEventListener('click', onRetry);
 
