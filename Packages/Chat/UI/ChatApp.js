@@ -83,6 +83,11 @@ const iconMarkup = {
       <path d="M8 3.5h6l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7.5 3.5Z" />
       <path d="M14 3.5V8h4M9 12h6M9 15.5h4.5" />
     </svg>
+  `,
+  check: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12l5 5 9-9" />
+    </svg>
   `
 };
 
@@ -183,8 +188,7 @@ function createDockButton({ label, icon, active = false, emphasis = false, onCli
     'button',
     `chat-dock__button${active ? ' chat-dock__button--active' : ''}${emphasis ? ' chat-dock__button--emphasis' : ''}`
   );
-  button.type = 'button';
-  button.dataset.label = label;
+  button._dockLabel = label;
   button.append(createIcon(icon, 'chat-dock__icon'));
   button.append(createElement('span', 'chat-dock__sr-only', label));
 
@@ -242,15 +246,59 @@ function getPreferredProvider(payload) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Model picker — a compact portal panel for switching provider + model
+// ---------------------------------------------------------------------------
+
+function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
+  const panel = createElement('div', 'chat-model-picker');
+  document.body.append(panel);
+
+  const readyProviders = providers.filter((p) => {
+    if (!p.models?.length) return false;
+    const details = userProviderDetails?.[p.id] ?? {};
+    const endpoint = collapseWhitespace(details.endpoint) || collapseWhitespace(p.endpoint);
+    if (!endpoint) return false;
+    if (p.requiresApiKey && !collapseWhitespace(details.apiKey)) return false;
+    return true;
+  });
+
+  for (const provider of readyProviders) {
+    const group = createElement('div', 'chat-model-picker__group');
+
+    const groupHeader = createElement('div', 'chat-model-picker__group-header', provider.label);
+    group.append(groupHeader);
+
+    for (const model of provider.models) {
+      const option = createElement('button', 'chat-model-picker__option');
+      option._pickerProviderId = provider.id;
+      option._pickerModelId = model.id;
+
+      option.append(createElement('span', 'chat-model-picker__option-label', model.name ?? model.id));
+
+      option.addEventListener('click', (event) => {
+        event.stopPropagation();
+        onSelect(provider, model);
+      });
+
+      group.append(option);
+    }
+
+    panel.append(group);
+  }
+
+  return panel;
+}
+
 async function bootstrap() {
   const payload = await window.JoaniumChat.bootstrap();
   const strings = getDictionary(payload.user.locale);
   const root = document.getElementById('app');
   const firstName = getFirstName(payload.user.profile.name, strings.appName);
   const greetingKey = getGreetingKey(new Date());
-  const activeProvider = getPreferredProvider(payload);
-  const activeModel = activeProvider?.models?.[0] ?? null;
-  const activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
+  let activeProvider = getPreferredProvider(payload);
+  let activeModel = activeProvider?.models?.[0] ?? null;
+  let activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
 
   let draftValue = '';
   let lastSelectedEntry = null;
@@ -267,6 +315,95 @@ async function bootstrap() {
   let pinnedDockButton = null;
   let messages = [];
 
+  // Model picker state
+  let modelPickerPanel = null;
+  let modelPickerOpen = false;
+
+  function closeModelPicker() {
+    if (modelPickerPanel) {
+      modelPickerPanel.classList.remove('chat-model-picker--open');
+    }
+    modelPickerOpen = false;
+  }
+
+  function syncPickerActiveStates() {
+    if (!modelPickerPanel) return;
+
+    for (const option of modelPickerPanel.querySelectorAll('.chat-model-picker__option')) {
+      const isActive = option._pickerProviderId === activeProvider?.id
+        && option._pickerModelId === activeModel?.id;
+
+      option.classList.toggle('chat-model-picker__option--active', isActive);
+
+      const existingCheck = option.querySelector('.chat-model-picker__check');
+      if (isActive && !existingCheck) {
+        option.append(createIcon('check', 'chat-model-picker__check'));
+      } else if (!isActive && existingCheck) {
+        existingCheck.remove();
+      }
+    }
+  }
+
+  function openModelPicker(triggerButton) {
+    if (modelPickerOpen) {
+      closeModelPicker();
+      return;
+    }
+
+    if (!modelPickerPanel) {
+      modelPickerPanel = createModelPickerPanel({
+        providers: payload.providers,
+        userProviderDetails: payload.user?.providers?.details ?? {},
+        onSelect(provider, model) {
+          activeProvider = provider;
+          activeModel = model;
+          activeModelLabel = model.name ?? model.id;
+
+          const labelEl = triggerButton.querySelector('.chat-composer__model-label');
+          if (labelEl) labelEl.textContent = activeModelLabel;
+
+          syncPickerActiveStates();
+          closeModelPicker();
+        }
+      });
+    }
+
+    syncPickerActiveStates();
+    modelPickerOpen = true;
+
+    // Position above the trigger button
+    const rect = triggerButton.getBoundingClientRect();
+    modelPickerPanel.style.left = `${rect.left}px`;
+    modelPickerPanel.style.bottom = `${window.innerHeight - rect.top + 8}px`;
+
+    // Animate in
+    requestAnimationFrame(() => {
+      modelPickerPanel?.classList.add('chat-model-picker--open');
+    });
+
+    // Click-outside to close
+    const onDocumentClick = (event) => {
+      if (!modelPickerPanel?.contains(event.target) && event.target !== triggerButton) {
+        closeModelPicker();
+        document.removeEventListener('click', onDocumentClick, { capture: true });
+        document.removeEventListener('keydown', onDocumentKeydown);
+      }
+    };
+
+    const onDocumentKeydown = (event) => {
+      if (event.key === 'Escape') {
+        closeModelPicker();
+        document.removeEventListener('click', onDocumentClick, { capture: true });
+        document.removeEventListener('keydown', onDocumentKeydown);
+      }
+    };
+
+    setTimeout(() => {
+      document.addEventListener('click', onDocumentClick, { capture: true });
+      document.addEventListener('keydown', onDocumentKeydown);
+    }, 0);
+  }
+
   function positionDockCallout(button, label) {
     if (!dockCallout || !button) {
       return;
@@ -279,7 +416,7 @@ async function bootstrap() {
 
   function restoreDockCallout() {
     if (pinnedDockButton) {
-      positionDockCallout(pinnedDockButton, pinnedDockButton.dataset.label);
+      positionDockCallout(pinnedDockButton, pinnedDockButton._dockLabel);
       return;
     }
 
@@ -296,7 +433,6 @@ async function bootstrap() {
     composerField.value = draftValue;
     sendButton.disabled = !draftValue.trim() || isSending;
     sendButton.classList.toggle('chat-composer__send--busy', isSending);
-    sendButton.setAttribute('aria-busy', String(isSending));
   }
 
   function focusComposer() {
@@ -385,7 +521,9 @@ async function bootstrap() {
 
     try {
       const reply = await window.JoaniumChat.sendMessage({
-        messages: messages.filter((message) => !message.pending).map(({ role, content }) => ({ role, content }))
+        messages: messages.filter((message) => !message.pending).map(({ role, content }) => ({ role, content })),
+        providerId: activeProvider?.id ?? null,
+        modelId: activeModel?.id ?? null
       });
 
       messages = messages.map((message, index) => {
@@ -523,7 +661,7 @@ async function bootstrap() {
   const { element: logoEl } = createLogoLoader({ logoPath: payload.logoPath, infinite: true, inline: true });
   logoEl.classList.add('chat-stage__logo');
 
-  const subtitle = createElement('p', 'chat-stage__subtitle', 'You’re doing great — let’s make today count.');
+  const subtitle = createElement('p', 'chat-stage__subtitle', "You\u2019re doing great \u2014 let\u2019s make today count.");
   thread = createElement('section', 'chat-thread');
   thread.hidden = true;
 
@@ -577,11 +715,14 @@ async function bootstrap() {
   const composerSubmit = createElement('div', 'chat-composer__submit');
   const modelButton = createElement('button', 'chat-composer__model');
   modelButton.type = 'button';
-  modelButton.title = activeProvider?.label ? `${activeProvider.label} - ${activeModelLabel}` : activeModelLabel;
   modelButton.append(
     createElement('span', 'chat-composer__model-label', activeModelLabel),
     createIcon('chevronDown', 'chat-composer__model-icon')
   );
+  modelButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    openModelPicker(modelButton);
+  });
 
   sendButton = createElement('button', 'chat-composer__send');
   sendButton.type = 'button';

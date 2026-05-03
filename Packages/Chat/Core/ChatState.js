@@ -397,14 +397,33 @@ async function requestChatCompletion({ user, providers, request }) {
     throw new Error('A message is required to start the chat.');
   }
 
-  const provider = resolveActiveProvider(user, providers);
+  // Honour an explicit provider + model selection from the UI.
+  // Falls back to automatic resolution when the IDs are absent or stale.
+  let provider = null;
+  let model = null;
+
+  if (request?.providerId && request?.modelId) {
+    const requestedProvider = providers.find((p) => p.id === request.providerId) ?? null;
+    const requestedModel = requestedProvider?.models?.find((m) => m.id === request.modelId) ?? null;
+
+    if (requestedProvider && requestedModel) {
+      provider = requestedProvider;
+      model = requestedModel;
+    }
+  }
+
+  if (!provider) {
+    provider = resolveActiveProvider(user, providers);
+  }
 
   if (!provider) {
     throw new Error('No AI providers are available yet. Complete provider setup first.');
   }
 
   const providerDetails = resolveProviderDetails(user, provider);
-  const model = provider.models?.[0] ?? null;
+  if (!model) {
+    model = provider.models?.[0] ?? null;
+  }
 
   if (!model?.id) {
     throw new Error(`No model is configured for ${provider.label}.`);
