@@ -250,7 +250,6 @@ async function bootstrap() {
   const activeProvider = getPreferredProvider(payload);
   const activeModel = activeProvider?.models?.[0] ?? null;
   const activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
-  const quickStartCards = strings.quickStartCards.slice(0, 4);
 
   let draftValue = '';
   let lastSelectedEntry = null;
@@ -259,7 +258,6 @@ async function bootstrap() {
   let sendButton = null;
   let thread = null;
   let title = null;
-  let quickStart = null;
   let composer = null;
   let canvas = null;
   let scroll = null;
@@ -327,13 +325,12 @@ async function bootstrap() {
   }
 
   function renderThread() {
-    if (!thread || !title || !quickStart || !composer || !canvas || !scroll || !bottom) {
+    if (!thread || !title || !composer || !canvas || !scroll || !bottom) {
       return;
     }
 
     const hasMessages = messages.length > 0;
     title.hidden = hasMessages;
-    quickStart.hidden = hasMessages;
     thread.hidden = !hasMessages;
     composer.classList.toggle('chat-composer--conversation', hasMessages);
     scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
@@ -591,34 +588,10 @@ async function bootstrap() {
   composerFooter.append(composerActions, composerSubmit);
   composer.append(composerField, composerFooter);
 
-  quickStart = createElement('section', 'chat-quick-start');
-  quickStart.append(createElement('span', 'chat-quick-start__title', strings.sections.quickStart));
-  const quickStartGrid = createElement('div', 'chat-quick-start__grid');
-
-  for (const entry of quickStartCards) {
-    const card = createElement('button', 'chat-quick-start__card');
-    card.type = 'button';
-    const iconBubble = createElement('span', 'chat-quick-start__icon-wrap');
-    iconBubble.append(createIcon(entry.icon, 'chat-quick-start__icon'));
-
-    const textWrap = createElement('span', 'chat-quick-start__copy');
-    textWrap.append(
-      createElement('strong', 'chat-quick-start__card-title', entry.title),
-      createElement('span', 'chat-quick-start__card-summary', entry.summary)
-    );
-
-    card.append(iconBubble, textWrap);
-    card.addEventListener('click', () => {
-      setDraft(entry.prompt, entry);
-    });
-    quickStartGrid.append(card);
-  }
-
-  quickStart.append(quickStartGrid);
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
 
-  scroll.append(topbar, title, thread, quickStart);
+  scroll.append(topbar, title, thread);
   bottom.append(composer);
   canvas.append(scroll, bottom);
   stage.append(canvas);
