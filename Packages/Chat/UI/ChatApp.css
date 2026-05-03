@@ -281,11 +281,11 @@ textarea {
   z-index: 4;
   width: 100%;
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 8px 0 18px;
   background: transparent;
   -webkit-app-region: drag;
-  margin-inline: auto;
 }
 
 .chat-stage__tabs {
@@ -318,6 +318,36 @@ textarea {
   background: var(--color-chat-tab-active-surface);
   color: var(--color-chat-text-title);
   box-shadow: var(--shadow-chat-tab);
+}
+
+.chat-stage__topbar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-chat-dock-emphasis-surface);
+  color: var(--color-chat-dock-emphasis-icon);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-chat-dock-emphasis);
+  transition: opacity var(--transition-base);
+  -webkit-app-region: no-drag;
+  margin: 0 2px 0 6px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.chat-stage__topbar-avatar:hover {
+  opacity: 0.85;
+  transform: none;
+}
+
+.chat-stage__topbar-initials {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .chat-stage__logo {

@@ -821,6 +821,11 @@ async function bootstrap() {
   }
   topbar.append(tabs);
 
+  const topbarAvatar = createElement('button', 'chat-stage__topbar-avatar');
+  topbarAvatar.type = 'button';
+  topbarAvatar.append(createElement('span', 'chat-stage__topbar-initials', getInitials(payload.user.profile.name)));
+  tabs.append(topbarAvatar);
+
   title = createElement(
     'h1', 'chat-stage__title',
     formatText(strings.greeting[greetingKey], { name: firstName })

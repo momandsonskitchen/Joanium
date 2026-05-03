@@ -2,8 +2,12 @@ const en = {
   appName: 'Joanium',
   tabs: {
     chat: 'Chat',
-    colab: 'Colab',
-    code: 'Code'
+    projects: 'Projects',
+    skills: 'Skills',
+    personas: 'Personas',
+    marketplace: 'Marketplace',
+    events: 'Events',
+    usage: 'Usage'
   },
   actions: {
     newChat: 'New chat',
