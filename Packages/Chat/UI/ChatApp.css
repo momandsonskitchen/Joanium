@@ -434,54 +434,45 @@ textarea {
 
 /* -------------------------------------------------------------------------
    Thinking / reasoning block
-   Shown as a collapsible <details> element above the reply bubble.
-   Animates a pulsing left border while the reasoning is still streaming in,
-   and collapses to a subtle header once the full reply arrives.
+   Compact pill header — expands inline when opened.
    ------------------------------------------------------------------------- */
 
 .chat-message__thinking {
-  width: 100%;
+  width: fit-content;
   max-width: min(720px, 100%);
-  border-radius: 16px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow:
-    inset 0 0 0 1px rgba(160, 100, 210, 0.18),
-    0 2px 12px rgba(120, 60, 180, 0.07);
+  background: rgba(160, 100, 210, 0.07);
   transition:
-    background-color var(--transition-base),
-    box-shadow var(--transition-base);
+    background-color 200ms ease,
+    width 180ms ease;
 }
 
-/* While streaming: pulse the left accent stripe */
+.chat-message__thinking[open] {
+  border-radius: 18px;
+  background: rgba(160, 100, 210, 0.06);
+  width: min(480px, 100%);
+}
+
+/* While streaming: subtle pulsing left accent */
 .chat-message--streaming .chat-message__thinking {
-  box-shadow:
-    inset 3px 0 0 rgba(160, 100, 210, 0.55),
-    inset 0 0 0 1px rgba(160, 100, 210, 0.18),
-    0 2px 12px rgba(120, 60, 180, 0.07);
   animation: chat-thinking-pulse 2s ease-in-out infinite;
 }
 
 @keyframes chat-thinking-pulse {
-  0%, 100% { box-shadow: inset 3px 0 0 rgba(160, 100, 210, 0.35), inset 0 0 0 1px rgba(160, 100, 210, 0.18), 0 2px 12px rgba(120, 60, 180, 0.07); }
-  50%       { box-shadow: inset 3px 0 0 rgba(160, 100, 210, 0.75), inset 0 0 0 1px rgba(160, 100, 210, 0.28), 0 2px 16px rgba(120, 60, 180, 0.13); }
+  0%, 100% { background: rgba(160, 100, 210, 0.06); }
+  50%       { background: rgba(160, 100, 210, 0.12); }
 }
 
 .chat-message__thinking-summary {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   list-style: none;
-  padding: 10px 14px;
+  padding: 6px 12px 6px 8px;
   cursor: pointer;
   -webkit-app-region: no-drag;
-  transition: background-color 120ms ease;
-}
-
-.chat-message__thinking-summary:hover {
-  background: rgba(160, 100, 210, 0.06);
+  white-space: nowrap;
 }
 
 /* Hide the native <details> triangle */
@@ -494,9 +485,9 @@ textarea {
 .chat-message__thinking-icon {
   flex-shrink: 0;
   display: inline-flex;
-  width: 16px;
-  height: 16px;
-  color: rgba(140, 80, 200, 0.75);
+  width: 13px;
+  height: 13px;
+  color: rgba(140, 80, 200, 0.7);
 }
 
 .chat-message__thinking-icon svg {
@@ -510,25 +501,25 @@ textarea {
 }
 
 .chat-message__thinking-label {
-  font-size: 12px;
-  font-weight: 680;
-  letter-spacing: 0.06em;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(120, 60, 180, 0.7);
-  flex: 1;
+  color: rgba(120, 60, 180, 0.65);
 }
 
-/* Expand/collapse chevron — rotates when open */
+/* Expand/collapse chevron */
 .chat-message__thinking-summary::after {
   content: '';
   display: inline-block;
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='rgba(120,60,180,0.55)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='rgba(120,60,180,0.5)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-size: contain;
   transition: transform 200ms ease;
+  margin-left: 2px;
 }
 
 .chat-message__thinking[open] .chat-message__thinking-summary::after {
@@ -536,26 +527,23 @@ textarea {
 }
 
 .chat-message__thinking-body {
-  padding: 0 14px 12px;
+  padding: 0 12px 10px;
+  animation: chat-thinking-body-in 200ms ease 120ms both;
+}
+
+@keyframes chat-thinking-body-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .chat-message__thinking-text {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.65;
-  color: rgba(80, 40, 130, 0.72);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: rgba(80, 40, 130, 0.65);
   white-space: pre-wrap;
   word-break: break-word;
-  /* Soft fade in as tokens arrive */
-  animation: chat-thinking-fadein 300ms ease;
 }
-
-@keyframes chat-thinking-fadein {
-  from { opacity: 0; transform: translateY(2px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Blinking cursor removed — replaced with inline stream-dot element */
 
 /* Circle dot that bounces at the end of streaming text */
 .chat-message__stream-dot {

@@ -858,7 +858,7 @@ async function bootstrap() {
   for (const [id, label] of Object.entries(strings.tabs)) {
     const tab = createElement(
       'button',
-      `chat-stage__tab${id === 'chats' ? ' chat-stage__tab--active' : ''}`,
+      `chat-stage__tab${id === 'chat' ? ' chat-stage__tab--active' : ''}`,
       label
     );
     tab.type = 'button';

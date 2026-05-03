@@ -1,7 +1,7 @@
 const en = {
   appName: 'Joanium',
   tabs: {
-    chats: 'Chats',
+    chat: 'Chat',
     colab: 'Colab',
     code: 'Code'
   },
