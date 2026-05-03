@@ -389,7 +389,7 @@ async function bootstrap() {
 
     // Click-outside to close
     const onDocumentClick = (event) => {
-      if (!modelPickerPanel?.contains(event.target) && event.target !== triggerButton) {
+      if (!modelPickerPanel?.contains(event.target) && !triggerButton.contains(event.target)) {
         closeModelPicker();
         document.removeEventListener('click', onDocumentClick, { capture: true });
         document.removeEventListener('keydown', onDocumentKeydown);
