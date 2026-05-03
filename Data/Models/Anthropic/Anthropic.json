@@ -9,6 +9,8 @@
       "description": "Latest flagship — best coding, vision (2576px), and self-checking on complex multi-step tasks",
       "context_window": 1000000,
       "max_output": 32000,
+      "thinking": true,
+      "thinking_budget": 10000,
       "inputs": {
         "text": true,
         "image": true,
@@ -25,6 +27,8 @@
       "description": "Previous flagship with 1M context — still highly capable for complex reasoning and coding",
       "context_window": 1000000,
       "max_output": 32000,
+      "thinking": true,
+      "thinking_budget": 10000,
       "inputs": {
         "text": true,
         "image": true,
@@ -41,6 +45,8 @@
       "description": "Balanced model with 1M context — fast, affordable, strong across most tasks",
       "context_window": 1000000,
       "max_output": 64000,
+      "thinking": true,
+      "thinking_budget": 8000,
       "inputs": {
         "text": true,
         "image": true,
@@ -73,6 +79,8 @@
       "description": "Previous balanced model — solid performance at a competitive price",
       "context_window": 200000,
       "max_output": 64000,
+      "thinking": true,
+      "thinking_budget": 8000,
       "inputs": {
         "text": true,
         "image": true,

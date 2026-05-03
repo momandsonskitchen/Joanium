@@ -236,6 +236,67 @@ function formatProviderError(response, data, rawText) {
   return `${response.status} ${response.statusText}`;
 }
 
+// ---------------------------------------------------------------------------
+// SSE streaming parser
+// Handles Anthropic, OpenAI-compatible, and Google Gemini event streams.
+// Yields { event: string, data: object } for each dispatched SSE event.
+// ---------------------------------------------------------------------------
+
+async function* parseSSE(response) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let eventType = 'message';
+  let dataLines = [];
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      const parts = buffer.split('\n');
+      buffer = parts.pop() ?? '';
+
+      for (const rawLine of parts) {
+        const line = rawLine.replace(/\r$/, '');
+
+        if (line === '') {
+          // Empty line = dispatch accumulated event
+          if (dataLines.length > 0) {
+            const payload = dataLines.join('\n');
+
+            if (payload === '[DONE]') {
+              return;
+            }
+
+            try {
+              yield { event: eventType, data: JSON.parse(payload) };
+            } catch {
+              // Non-JSON data lines (e.g. keep-alive comments) — skip
+            }
+          }
+
+          eventType = 'message';
+          dataLines = [];
+        } else if (line.startsWith('event:')) {
+          eventType = line.slice(6).trim();
+        } else if (line.startsWith('data:')) {
+          dataLines.push(line.slice(5).trimStart());
+        }
+        // id: and retry: fields are intentionally ignored
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Non-streaming providers (kept for reference / fallback)
+// ---------------------------------------------------------------------------
+
 async function sendGoogleMessage({ endpoint, provider, providerDetails, model, messages }) {
   const apiKey = resolveCredential(provider, providerDetails);
 
@@ -450,6 +511,241 @@ async function requestChatCompletion({ user, providers, request }) {
   throw new Error(`${provider.label} chat is not wired up yet.`);
 }
 
+// ---------------------------------------------------------------------------
+// Streaming providers
+// Each function reads the SSE stream and calls onChunk({ type, text }) for
+// every text or thinking token that arrives.
+// ---------------------------------------------------------------------------
+
+async function streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, onChunk }) {
+  const apiKey = resolveCredential(provider, providerDetails);
+
+  if (!apiKey) {
+    throw new Error('Google API key is missing.');
+  }
+
+  // Swap generateContent → streamGenerateContent and request SSE format
+  const streamEndpoint = endpoint.replace(':generateContent', ':streamGenerateContent');
+  const streamUrl = streamEndpoint.includes('?')
+    ? `${streamEndpoint}&alt=sse`
+    : `${streamEndpoint}?alt=sse`;
+
+  const response = await fetch(streamUrl, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
+    },
+    body: JSON.stringify({
+      contents: messages.map((message) => ({
+        role: message.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: message.content }]
+      })),
+      generationConfig: { temperature: 0.7 }
+    })
+  });
+
+  if (!response.ok) {
+    const { data, rawText } = await parseResponse(response);
+    throw new Error(formatProviderError(response, data, rawText));
+  }
+
+  for await (const { data } of parseSSE(response)) {
+    if (!data || typeof data !== 'object') continue;
+
+    const text = (data.candidates ?? [])
+      .flatMap((candidate) => candidate?.content?.parts ?? [])
+      .map((part) => extractText(part))
+      .filter(Boolean)
+      .join('');
+
+    if (text) {
+      onChunk({ type: 'text', text });
+    }
+  }
+}
+
+async function streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, onChunk }) {
+  const apiKey = resolveCredential(provider, providerDetails);
+
+  if (!apiKey) {
+    throw new Error('Anthropic API key is missing.');
+  }
+
+  const supportsThinking = model.thinking === true;
+  const thinkingBudget = model.thinking_budget ?? 8000;
+
+  const requestBody = {
+    model: model.id,
+    max_tokens: Math.min(model.max_output ?? 16000, 16000),
+    stream: true,
+    messages: messages.map((message) => ({
+      role: message.role,
+      content: [{ type: 'text', text: message.content }]
+    }))
+  };
+
+  if (supportsThinking) {
+    requestBody.thinking = { type: 'enabled', budget_tokens: thinkingBudget };
+    // thinking requires a higher temperature than 1 isn't permitted — use default
+    requestBody.temperature = 1;
+  }
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    const { data, rawText } = await parseResponse(response);
+    throw new Error(formatProviderError(response, data, rawText));
+  }
+
+  for await (const { data } of parseSSE(response)) {
+    if (!data || typeof data !== 'object') continue;
+
+    if (data.type === 'content_block_delta') {
+      const delta = data.delta;
+
+      // Standard text token
+      if (delta?.type === 'text_delta' && typeof delta.text === 'string') {
+        onChunk({ type: 'text', text: delta.text });
+      }
+
+      // Extended thinking token (claude-3-7-sonnet, claude-4 with thinking enabled)
+      if (delta?.type === 'thinking_delta' && typeof delta.thinking === 'string') {
+        onChunk({ type: 'thinking', text: delta.thinking });
+      }
+    } else if (data.type === 'error') {
+      throw new Error(data.error?.message ?? 'Anthropic streaming error.');
+    }
+  }
+}
+
+async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, onChunk }) {
+  const headers = { 'content-type': 'application/json' };
+
+  if (provider.requiresApiKey) {
+    const apiKey = resolveCredential(provider, providerDetails);
+
+    if (!apiKey) {
+      throw new Error(`${provider.label} API key is missing.`);
+    }
+
+    headers[provider.authHeader] = `${provider.authPrefix ?? ''}${apiKey}`;
+  }
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: model.id,
+      messages: messages.map((message) => ({
+        role: message.role,
+        content: message.content
+      })),
+      temperature: 0.7,
+      stream: true
+    })
+  });
+
+  if (!response.ok) {
+    const { data, rawText } = await parseResponse(response);
+    throw new Error(formatProviderError(response, data, rawText));
+  }
+
+  for await (const { data } of parseSSE(response)) {
+    if (!data || typeof data !== 'object') continue;
+
+    const delta = data.choices?.[0]?.delta;
+    if (!delta) continue;
+
+    // Standard response text (all OpenAI-compatible providers)
+    if (typeof delta.content === 'string' && delta.content) {
+      onChunk({ type: 'text', text: delta.content });
+    }
+
+    // DeepSeek-R1 reasoning tokens and providers that follow the same pattern
+    if (typeof delta.reasoning_content === 'string' && delta.reasoning_content) {
+      onChunk({ type: 'thinking', text: delta.reasoning_content });
+    }
+
+    // Some providers (e.g. Qwen-QwQ via OpenRouter) use a different field name
+    if (typeof delta.reasoning === 'string' && delta.reasoning) {
+      onChunk({ type: 'thinking', text: delta.reasoning });
+    }
+  }
+}
+
+async function requestChatCompletionStream({ user, providers, request, onChunk }) {
+  const messages = sanitizeConversationMessages(request?.messages);
+
+  if (messages.length === 0) {
+    throw new Error('A message is required to start the chat.');
+  }
+
+  let provider = null;
+  let model = null;
+
+  if (request?.providerId && request?.modelId) {
+    const requestedProvider = providers.find((p) => p.id === request.providerId) ?? null;
+    const requestedModel = requestedProvider?.models?.find((m) => m.id === request.modelId) ?? null;
+
+    if (requestedProvider && requestedModel) {
+      provider = requestedProvider;
+      model = requestedModel;
+    }
+  }
+
+  if (!provider) {
+    provider = resolveActiveProvider(user, providers);
+  }
+
+  if (!provider) {
+    throw new Error('No AI providers are available yet. Complete provider setup first.');
+  }
+
+  const providerDetails = resolveProviderDetails(user, provider);
+
+  if (!model) {
+    model = provider.models?.[0] ?? null;
+  }
+
+  if (!model?.id) {
+    throw new Error(`No model is configured for ${provider.label}.`);
+  }
+
+  const endpoint = resolveProviderEndpoint(provider, providerDetails, model.id);
+
+  if (!endpoint) {
+    throw new Error(`No endpoint is configured for ${provider.label}.`);
+  }
+
+  const meta = {
+    providerId: provider.id,
+    providerLabel: provider.label,
+    modelId: model.id,
+    modelLabel: model.name
+  };
+
+  if (provider.id === 'google') {
+    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, onChunk });
+  } else if (provider.id === 'anthropic') {
+    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, onChunk });
+  } else if (openAiCompatibleProviders.has(provider.id)) {
+    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, onChunk });
+  } else {
+    throw new Error(`${provider.label} chat is not wired up yet.`);
+  }
+
+  return meta;
+}
+
 export function createChatStateManager({ rootDirectory }) {
   const homeFilePath = path.join(rootDirectory, 'Data', 'Chat', 'Home.json');
 
@@ -517,6 +813,29 @@ export function createChatStateManager({ rootDirectory }) {
         providers,
         request
       });
+    },
+    // Streaming entry point — resolves once the stream ends (or rejects on error).
+    // onChunk({ type: 'text'|'thinking', text }) is called for every token.
+    // onDone(meta) is called when the stream completes successfully.
+    // onError(error) is called if anything goes wrong.
+    async streamMessage(request, { onChunk, onDone, onError }) {
+      try {
+        const [user, providers] = await Promise.all([
+          readUserState(rootDirectory),
+          readProviderCatalog(rootDirectory)
+        ]);
+
+        const meta = await requestChatCompletionStream({
+          user,
+          providers,
+          request,
+          onChunk
+        });
+
+        onDone(meta);
+      } catch (error) {
+        onError(error);
+      }
     }
   };
 }

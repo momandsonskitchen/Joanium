@@ -41,6 +41,44 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:send-message',
         handler: async (_event, request) => chatStateManager.sendMessage(request)
+      },
+      {
+        // Fire-and-forget: returns null immediately, then pushes
+        // chat:stream-chunk / chat:stream-done / chat:stream-error events
+        // back to the renderer via webContents.send.
+        channel: 'chat:stream-message',
+        handler: (event, request) => {
+          chatStateManager
+            .streamMessage(request, {
+              onChunk: (chunk) => {
+                if (!event.sender.isDestroyed()) {
+                  event.sender.send('chat:stream-chunk', chunk);
+                }
+              },
+              onDone: (meta) => {
+                if (!event.sender.isDestroyed()) {
+                  event.sender.send('chat:stream-done', meta);
+                }
+              },
+              onError: (error) => {
+                if (!event.sender.isDestroyed()) {
+                  event.sender.send('chat:stream-error', {
+                    message: error?.message ?? String(error)
+                  });
+                }
+              }
+            })
+            .catch((error) => {
+              // Safety net for unexpected throws outside the streamMessage try/catch
+              if (!event.sender.isDestroyed()) {
+                event.sender.send('chat:stream-error', {
+                  message: error?.message ?? String(error)
+                });
+              }
+            });
+
+          return null; // Resolve the invoke immediately
+        }
       }
     ]
   };

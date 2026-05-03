@@ -89,6 +89,13 @@ const iconMarkup = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M5 12l5 5 9-9" />
     </svg>
+  `,
+  // Used for the reasoning / thinking block header
+  thinking: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9.5 2a4 4 0 0 1 4 4 4 4 0 0 1 4 4 4 4 0 0 1-2.4 3.7V15a2.5 2.5 0 0 1-5 0v-1.3A4 4 0 0 1 7.5 10a4 4 0 0 1 2-3.46V6a4 4 0 0 1 0-.5A4 4 0 0 1 9.5 2Z" />
+      <path d="M9.5 15v3a2 2 0 0 0 4 0v-3" />
+    </svg>
   `
 };
 
@@ -206,23 +213,65 @@ function createDockButton({ label, icon, active = false, emphasis = false, onCli
   return button;
 }
 
+// ---------------------------------------------------------------------------
+// Message element builder
+// Supports pending (dots), streaming (live text + thinking), and final states.
+// ---------------------------------------------------------------------------
+
 function createMessageElement(message) {
   const article = createElement(
     'article',
-    `chat-message chat-message--${message.role}${message.pending ? ' chat-message--pending' : ''}${
-      message.error ? ' chat-message--error' : ''
-    }`
+    [
+      'chat-message',
+      `chat-message--${message.role}`,
+      message.streaming ? 'chat-message--streaming' : '',
+      message.error ? 'chat-message--error' : ''
+    ]
+      .filter(Boolean)
+      .join(' ')
   );
 
   if (message.role === 'assistant') {
+    // ------------------------------------------------------------------
+    // Thinking / reasoning block — shown as a collapsible <details>
+    // Hidden when there is no thinking content.
+    // ------------------------------------------------------------------
+    const thinkingWrap = document.createElement('details');
+    thinkingWrap.className = 'chat-message__thinking';
+    thinkingWrap.hidden = !message.thinking;
+    // Closed by default — user clicks to expand
+
+    const thinkingSummary = createElement('summary', 'chat-message__thinking-summary');
+    thinkingSummary.append(
+      createIcon('thinking', 'chat-message__thinking-icon'),
+      createElement('span', 'chat-message__thinking-label', 'Reasoning')
+    );
+    thinkingWrap.append(thinkingSummary);
+
+    const thinkingBody = createElement('div', 'chat-message__thinking-body');
+    const thinkingText = createElement('p', 'chat-message__thinking-text', message.thinking ?? '');
+    thinkingBody.append(thinkingText);
+    thinkingWrap.append(thinkingBody);
+
+    article.append(thinkingWrap);
+
+    // ------------------------------------------------------------------
+    // Main reply bubble
+    // ------------------------------------------------------------------
     const bubble = createElement('div', 'chat-message__bubble');
 
-    if (message.pending) {
+    if (message.pending || (message.streaming && !message.content)) {
+      // No content yet — show animated dots
       const dots = createElement('span', 'chat-message__dots');
       dots.innerHTML = '<span></span><span></span><span></span>';
       bubble.append(dots);
     } else {
-      bubble.textContent = message.content;
+      // Text in its own span so the stream-dot sibling stays alive during updates
+      const textSpan = createElement('span', 'chat-message__text', (message.content ?? '').trimStart());
+      bubble.append(textSpan);
+      if (message.streaming) {
+        bubble.append(createElement('span', 'chat-message__stream-dot'));
+      }
     }
 
     article.append(bubble);
@@ -232,6 +281,52 @@ function createMessageElement(message) {
   }
 
   return article;
+}
+
+// ---------------------------------------------------------------------------
+// Direct DOM update for the currently-streaming message.
+// Called on every chunk so we never rebuild the whole thread while streaming.
+// ---------------------------------------------------------------------------
+
+function updateLastStreamingMessage(threadEl, { content, thinking }) {
+  const lastEl = threadEl?.lastElementChild;
+  if (!lastEl || !lastEl.classList.contains('chat-message--assistant')) return;
+
+  // --- Thinking block -------------------------------------------------
+  const thinkingWrap = lastEl.querySelector('.chat-message__thinking');
+  const thinkingText = lastEl.querySelector('.chat-message__thinking-text');
+
+  if (thinkingWrap && thinkingText) {
+    if (thinking) {
+      thinkingText.textContent = thinking;
+      thinkingWrap.hidden = false;
+      // Stay closed — user opens manually
+    }
+  }
+
+  // --- Content bubble -------------------------------------------------
+  const bubble = lastEl.querySelector('.chat-message__bubble');
+  if (bubble && content) {
+    // First chunk: swap out loading dots
+    const dots = bubble.querySelector('.chat-message__dots');
+    if (dots) dots.remove();
+
+    // Update text span (preserves stream-dot sibling)
+    let textSpan = bubble.querySelector('.chat-message__text');
+    if (!textSpan) {
+      textSpan = createElement('span', 'chat-message__text');
+      bubble.prepend(textSpan);
+    }
+    textSpan.textContent = content.trimStart();
+
+    // Ensure the moving dot is present while streaming
+    if (!bubble.querySelector('.chat-message__stream-dot')) {
+      bubble.append(createElement('span', 'chat-message__stream-dot'));
+    }
+  }
+
+  // Keep the new content visible
+  lastEl.scrollIntoView({ block: 'end', behavior: 'smooth' });
 }
 
 function getPreferredProvider(payload) {
@@ -471,6 +566,7 @@ async function bootstrap() {
     draftValue = '';
     lastSelectedEntry = null;
     isSending = false;
+    window.JoaniumChat.removeStreamListeners();
     syncComposer();
     renderThread();
     focusComposer();
@@ -501,6 +597,10 @@ async function bootstrap() {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // submitPrompt — streams the response, updating the DOM token-by-token.
+  // ---------------------------------------------------------------------------
+
   async function submitPrompt() {
     const prompt = draftValue.trim();
 
@@ -513,16 +613,15 @@ async function bootstrap() {
       void window.JoaniumChat.saveRecentPrompt(draftEntry);
     }
 
+    // Append user message + streaming placeholder for the assistant reply
     messages = [
       ...messages,
-      {
-        role: 'user',
-        content: prompt
-      },
+      { role: 'user', content: prompt },
       {
         role: 'assistant',
-        content: 'Thinking...',
-        pending: true,
+        content: '',
+        thinking: '',
+        streaming: true,
         providerLabel: activeProvider?.label ?? 'AI',
         modelLabel: activeModelLabel
       }
@@ -535,44 +634,77 @@ async function bootstrap() {
     renderThread();
     focusComposer();
 
-    try {
-      const reply = await window.JoaniumChat.sendMessage({
-        messages: messages.filter((message) => !message.pending).map(({ role, content }) => ({ role, content })),
-        providerId: activeProvider?.id ?? null,
-        modelId: activeModel?.id ?? null
-      });
+    // Accumulated content for the current stream
+    let accText = '';
+    let accThinking = '';
+
+    // Remove any leftover listeners from a previous turn
+    window.JoaniumChat.removeStreamListeners();
+
+    window.JoaniumChat.onStreamChunk((chunk) => {
+      if (chunk?.type === 'text' && chunk.text) {
+        accText += chunk.text;
+      } else if (chunk?.type === 'thinking' && chunk.text) {
+        accThinking += chunk.text;
+      }
+
+      updateLastStreamingMessage(thread, { content: accText, thinking: accThinking });
+    });
+
+    window.JoaniumChat.onStreamDone((meta) => {
+      window.JoaniumChat.removeStreamListeners();
 
       messages = messages.map((message, index) => {
-        if (index !== messages.length - 1) {
-          return message;
-        }
+        if (index !== messages.length - 1) return message;
 
         return {
           role: 'assistant',
-          content: reply.message,
-          providerLabel: reply.providerLabel,
-          modelLabel: reply.modelLabel
+          content: accText || 'No response received.',
+          thinking: accThinking,
+          streaming: false,
+          providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+          modelLabel: meta?.modelLabel ?? activeModelLabel
         };
       });
-    } catch (error) {
-      messages = messages.map((message, index) => {
-        if (index !== messages.length - 1) {
-          return message;
-        }
 
-        return {
-          role: 'assistant',
-          content: error?.message || 'Unable to get a response right now.',
-          providerLabel: activeProvider?.label ?? 'AI',
-          modelLabel: activeModelLabel,
-          error: true
-        };
-      });
-    } finally {
       isSending = false;
       syncComposer();
       renderThread();
-    }
+    });
+
+    window.JoaniumChat.onStreamError((err) => {
+      window.JoaniumChat.removeStreamListeners();
+
+      messages = messages.map((message, index) => {
+        if (index !== messages.length - 1) return message;
+
+        return {
+          role: 'assistant',
+          content: err?.message || 'Unable to get a response right now.',
+          thinking: accThinking,
+          streaming: false,
+          error: true,
+          providerLabel: activeProvider?.label ?? 'AI',
+          modelLabel: activeModelLabel
+        };
+      });
+
+      isSending = false;
+      syncComposer();
+      renderThread();
+    });
+
+    // Build the conversation history to send (all completed messages, no streaming placeholder)
+    const historyToSend = messages
+      .slice(0, -1) // Remove the current streaming placeholder
+      .map(({ role, content }) => ({ role, content }));
+
+    // Kick off the stream — fire-and-forget; results arrive via the event listeners above
+    void window.JoaniumChat.streamMessage({
+      messages: historyToSend,
+      providerId: activeProvider?.id ?? null,
+      modelId: activeModel?.id ?? null
+    });
   }
 
   const shell = createElement('main', 'chat-shell');
