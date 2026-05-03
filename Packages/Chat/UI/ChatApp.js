@@ -6,52 +6,51 @@ const dictionaries = { en, de, fr };
 
 const iconMarkup = {
   plus: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-      <path d="M12 5v14M5 12h14" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+      <path d="M12 6v12M6 12h12" />
     </svg>
   `,
   search: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="m16 16 4 4" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="10.5" cy="10.5" r="5.5" />
+      <path d="m15 15 4 4" />
     </svg>
   `,
   sliders: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 6h16M4 12h16M4 18h16" />
-      <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none" />
-      <circle cx="11" cy="18" r="2" fill="currentColor" stroke="none" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 7h6M14 7h5M5 12h3M11 12h8M5 17h9M17 17h2" />
+      <circle cx="11" cy="7" r="1.6" />
+      <circle cx="8" cy="12" r="1.6" />
+      <circle cx="14" cy="17" r="1.6" />
     </svg>
   `,
   chat: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M5 6.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-4 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 6.5h12A2.5 2.5 0 0 1 20.5 9v6A2.5 2.5 0 0 1 18 17.5h-6l-4 3v-3H6A2.5 2.5 0 0 1 3.5 15V9A2.5 2.5 0 0 1 6 6.5Z" />
     </svg>
   `,
   folder: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3.5 8.5A2.5 2.5 0 0 1 6 6h3l2 2h7a2.5 2.5 0 0 1 2.5 2.5V16A2.5 2.5 0 0 1 18 18.5H6A2.5 2.5 0 0 1 3.5 16Z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4.5 8.5A2.5 2.5 0 0 1 7 6h3l1.8 1.8c.35.35.67.52 1.2.52H17A2.5 2.5 0 0 1 19.5 10v5.5A2.5 2.5 0 0 1 17 18H7A2.5 2.5 0 0 1 4.5 15.5Z" />
     </svg>
   `,
   squareCheck: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="4" y="4" width="16" height="16" rx="3" />
-      <path d="m8.5 12 2.4 2.4 4.6-5" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="5" width="14" height="14" rx="3" />
+      <path d="m9 12 2.2 2.2L15.5 10" />
     </svg>
   `,
   robot: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 4h6M12 4V2" />
-      <rect x="5" y="7" width="14" height="11" rx="4" />
-      <path d="M8 18v2M16 18v2M8.5 11.5h.01M15.5 11.5h.01M9 15h6" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9.5 5.5h5M12 5.5V3.5" />
+      <rect x="5.5" y="7.5" width="13" height="9" rx="3.5" />
+      <path d="M8.5 18v1.5M15.5 18v1.5M9.5 11.5h.01M14.5 11.5h.01M9.5 14.5h5" />
     </svg>
   `,
   building: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M5 20V6.5A1.5 1.5 0 0 1 6.5 5H14v15" />
-      <path d="M14 9h3.5A1.5 1.5 0 0 1 19 10.5V20" />
-      <path d="M9 9h1M9 12h1M9 15h1M13 12h1M13 15h1" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6.5 19V6.5A1.5 1.5 0 0 1 8 5h6a1.5 1.5 0 0 1 1.5 1.5V19M4.5 19h15" />
+      <path d="M9 8h.01M12 8h.01M9 11h.01M12 11h.01M9 14h.01M12 14h.01" />
     </svg>
   `,
   code: `
@@ -193,8 +192,11 @@ function createDraftEntry(prompt, existingEntry) {
   };
 }
 
-function createSidebarAction(label, iconName, onClick) {
-  const button = createElement('button', 'chat-sidebar__icon-button');
+function createSidebarAction(label, iconName, onClick, { primary = false } = {}) {
+  const button = createElement(
+    'button',
+    `chat-sidebar__icon-button${primary ? ' chat-sidebar__icon-button--primary' : ''}`
+  );
   button.type = 'button';
   button.append(createIcon(iconName, 'chat-sidebar__action-icon'));
   button.append(createElement('span', 'chat-sidebar__sr-only', label));
@@ -206,8 +208,11 @@ function createSidebarAction(label, iconName, onClick) {
   return button;
 }
 
-function createNavigationItem(label, iconName) {
-  const button = createElement('button', 'chat-sidebar__icon-button');
+function createNavigationItem(label, iconName, { active = false } = {}) {
+  const button = createElement(
+    'button',
+    `chat-sidebar__icon-button${active ? ' chat-sidebar__icon-button--active' : ''}`
+  );
   button.type = 'button';
   button.append(createIcon(iconName, 'chat-sidebar__nav-icon'));
   button.append(createElement('span', 'chat-sidebar__sr-only', label));
@@ -282,12 +287,17 @@ async function bootstrap() {
 
   const sidebarActions = createElement('div', 'chat-sidebar__actions');
   sidebarActions.append(
-    createSidebarAction(strings.actions.newChat, 'plus', () => {
-      draftValue = '';
-      lastSelectedEntry = null;
-      syncComposer();
-      focusComposer();
-    }),
+    createSidebarAction(
+      strings.actions.newChat,
+      'plus',
+      () => {
+        draftValue = '';
+        lastSelectedEntry = null;
+        syncComposer();
+        focusComposer();
+      },
+      { primary: true }
+    ),
     createSidebarAction(strings.actions.search, 'search', focusComposer),
     createSidebarAction(strings.actions.customize, 'sliders', () => {
       const suggestion = quickStartCards[0];
@@ -300,7 +310,7 @@ async function bootstrap() {
 
   const sidebarNav = createElement('nav', 'chat-sidebar__nav');
   sidebarNav.append(
-    createNavigationItem(strings.navigation.chats, 'chat'),
+    createNavigationItem(strings.navigation.chats, 'chat', { active: true }),
     createNavigationItem(strings.navigation.projects, 'folder'),
     createNavigationItem(strings.navigation.tasks, 'squareCheck'),
     createNavigationItem(strings.navigation.agents, 'robot'),
