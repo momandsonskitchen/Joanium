@@ -265,6 +265,7 @@ async function bootstrap() {
   const payload = await window.JoaniumChat.bootstrap();
   const strings = getDictionary(payload.user.locale);
   const root = document.getElementById('app');
+  const isMac = /mac/i.test(navigator.platform);
   const firstName = getFirstName(payload.user.profile.name, strings.appName);
   const greetingKey = getGreetingKey(new Date());
   const activeProvider =
@@ -344,15 +345,11 @@ async function bootstrap() {
   }
 
   const shell = createElement('main', 'chat-shell');
+  shell.classList.add(isMac ? 'chat-shell--macos' : 'chat-shell--desktop');
   const shellHeader = createElement('header', 'chat-shell__header');
-  const shellTraffic = createElement('div', 'chat-shell__traffic');
-  shellTraffic.append(
-    createElement('span', 'chat-shell__traffic-light chat-shell__traffic-light--red'),
-    createElement('span', 'chat-shell__traffic-light chat-shell__traffic-light--amber'),
-    createElement('span', 'chat-shell__traffic-light chat-shell__traffic-light--green')
-  );
+  const shellHeaderStart = createElement('div', 'chat-shell__header-side chat-shell__header-side--start');
   const shellHeaderCenter = createElement('div', 'chat-shell__header-center');
-  const shellHeaderSpacer = createElement('div', 'chat-shell__header-spacer');
+  const shellHeaderEnd = createElement('div', 'chat-shell__header-side chat-shell__header-side--end');
 
   const sidebar = createElement('aside', 'chat-sidebar');
 
@@ -422,7 +419,7 @@ async function bootstrap() {
     tabs.append(tab);
   }
   shellHeaderCenter.append(tabs);
-  shellHeader.append(shellTraffic, shellHeaderCenter, shellHeaderSpacer);
+  shellHeader.append(shellHeaderStart, shellHeaderCenter, shellHeaderEnd);
 
   const shellBody = createElement('div', 'chat-shell__body');
   const stage = createElement('section', 'chat-stage');

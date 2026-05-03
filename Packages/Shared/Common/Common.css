@@ -168,14 +168,15 @@
     radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.9), transparent 24%),
     linear-gradient(180deg, #e9e5e1 0%, #ddd7d1 100%);
 
-  --color-chat-shell-surface: rgba(255, 255, 255, 0.78);
-  --color-chat-sidebar-surface: rgba(255, 255, 255, 0.82);
+  --color-chat-shell-surface: #f7f3ee;
+  --color-chat-sidebar-surface: rgba(255, 255, 255, 0.84);
   --color-chat-divider: rgba(100, 70, 48, 0.08);
-  --color-chat-hover-surface: rgba(255, 255, 255, 0.72);
+  --color-chat-hover-surface: rgba(255, 255, 255, 0.62);
   --color-chat-canvas-background:
-    radial-gradient(circle at 26% 8%, rgba(255, 228, 201, 0.92), transparent 32%),
-    radial-gradient(circle at 86% 88%, rgba(255, 210, 166, 0.84), transparent 28%),
-    linear-gradient(135deg, rgba(255, 250, 244, 0.98), rgba(255, 243, 229, 0.96));
+    radial-gradient(circle at 24% 8%, rgba(255, 228, 196, 0.6), transparent 28%),
+    radial-gradient(circle at 84% 90%, rgba(255, 214, 170, 0.54), transparent 24%),
+    radial-gradient(circle at 52% 42%, rgba(255, 250, 243, 0.68), transparent 38%),
+    linear-gradient(135deg, #faf5ee 0%, #f8f0e6 100%);
 
   --color-chat-text-title: #17130f;
   --color-chat-text-secondary: rgba(43, 28, 17, 0.8);
@@ -186,12 +187,12 @@
   --color-chat-plan-text: #b06d2f;
   --color-chat-icon: rgba(64, 45, 32, 0.7);
 
-  --color-chat-card-surface: rgba(255, 255, 255, 0.78);
+  --color-chat-card-surface: rgba(255, 255, 255, 0.8);
   --color-chat-card-icon-surface: rgba(255, 248, 240, 0.98);
-  --color-chat-input-surface: rgba(255, 255, 255, 0.84);
-  --color-chat-plan-surface: rgba(255, 255, 255, 0.62);
-  --color-chat-tab-active-surface: rgba(255, 255, 255, 0.86);
-  --color-chat-tab-bar-surface: rgba(240, 233, 225, 0.88);
+  --color-chat-input-surface: rgba(255, 255, 255, 0.88);
+  --color-chat-plan-surface: rgba(255, 255, 255, 0.7);
+  --color-chat-tab-active-surface: rgba(255, 255, 255, 0.94);
+  --color-chat-tab-bar-surface: rgba(239, 232, 223, 0.9);
   --color-chat-avatar-surface: #151423;
   --color-chat-avatar-text: rgba(255, 255, 255, 0.96);
 
@@ -210,8 +211,8 @@
     0 28px 60px rgba(91, 67, 46, 0.18);
 
   --shadow-chat-pill:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.88),
-    0 10px 22px rgba(125, 95, 70, 0.08);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 8px 20px rgba(125, 95, 70, 0.06);
 
   --shadow-chat-tab:
     inset 0 0 0 1px rgba(194, 178, 160, 0.12),
@@ -219,19 +220,19 @@
 
   --shadow-chat-tab-bar:
     inset 0 0 0 1px rgba(210, 196, 184, 0.22),
-    0 8px 18px rgba(118, 90, 62, 0.06);
+    0 5px 12px rgba(118, 90, 62, 0.04);
 
   --shadow-chat-input:
     inset 0 0 0 1px rgba(170, 134, 104, 0.08),
-    0 18px 32px rgba(130, 95, 65, 0.12);
+    0 14px 30px rgba(130, 95, 65, 0.09);
 
   --shadow-chat-card:
     inset 0 0 0 1px rgba(175, 139, 104, 0.08),
-    0 10px 24px rgba(130, 95, 65, 0.08);
+    0 8px 18px rgba(130, 95, 65, 0.07);
 
   --shadow-chat-card-hover:
     inset 0 0 0 1px rgba(175, 139, 104, 0.14),
-    0 14px 28px rgba(130, 95, 65, 0.12);
+    0 12px 22px rgba(130, 95, 65, 0.1);
 
   --shadow-chat-send:
     inset 0 0 0 1px rgba(255, 255, 255, 0.8),
