@@ -52,18 +52,13 @@ textarea {
 .chat-shell {
   height: 100vh;
   display: grid;
-  grid-template-columns: 168px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   background: var(--color-chat-shell-surface);
   overflow: hidden;
 }
 
 .chat-dock-area {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 18px;
-  background: var(--color-chat-dock-area-background);
+  display: none;
 }
 
 .chat-dock {
