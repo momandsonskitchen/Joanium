@@ -1,6 +1,7 @@
 import en from '../I18n/en.js';
 import de from '../I18n/de.js';
 import fr from '../I18n/fr.js';
+import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 
 const dictionaries = { en, de, fr };
 
@@ -518,6 +519,9 @@ async function bootstrap() {
     formatText(strings.greeting[greetingKey], { name: firstName })
   );
 
+  const { element: logoEl } = createLogoLoader({ logoPath: payload.logoPath, infinite: true, inline: true });
+  logoEl.classList.add('chat-stage__logo');
+
   thread = createElement('section', 'chat-thread');
   thread.hidden = true;
 
@@ -591,7 +595,7 @@ async function bootstrap() {
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
 
-  scroll.append(topbar, title, thread);
+  scroll.append(topbar, logoEl, title, thread);
   bottom.append(composer);
   canvas.append(scroll, bottom);
   stage.append(canvas);

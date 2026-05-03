@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { readUserState } from '../../Shared/UserData/UserData.js';
@@ -464,7 +465,8 @@ export function createChatStateManager({ rootDirectory }) {
       return {
         user,
         providers,
-        home
+        home,
+        logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href
       };
     },
     async saveRecentPrompt(promptEntry) {
