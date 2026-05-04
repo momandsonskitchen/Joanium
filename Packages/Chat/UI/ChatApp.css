@@ -137,7 +137,7 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 72px;
   height: 100vh;
   padding: 24px 0;
@@ -149,6 +149,7 @@ textarea {
   position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0;
   padding: 4px;
   border-radius: 28px;
@@ -187,8 +188,51 @@ textarea {
   z-index: 0;
 }
 
-.chat-sidebar__tab {
+/* ── Sidebar tooltip (right-side, macOS-style) ───────────────────────────── */
+
+.chat-sidebar__tab,
+.chat-sidebar__avatar {
   position: relative;
+}
+
+.chat-sidebar__tab::after,
+.chat-sidebar__avatar::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  white-space: nowrap;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  color: var(--color-chat-text-title);
+  font-size: 12px;
+  font-weight: 580;
+  letter-spacing: -0.015em;
+  box-shadow: var(--shadow-chat-pill);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+  z-index: 100;
+}
+
+.chat-sidebar__tab:hover::after,
+.chat-sidebar__avatar:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Don't show tooltip for the active tab */
+.chat-sidebar__tab--active::after {
+  display: none;
+}
+
+.chat-sidebar__tab {
   z-index: 1;
   width: 48px;
   height: 48px;
@@ -221,6 +265,14 @@ textarea {
   height: 100%;
 }
 
+.chat-sidebar__avatar-divider {
+  width: calc(100% - 16px);
+  height: 1px;
+  margin: 4px auto;
+  background: rgba(180, 140, 110, 0.15);
+  pointer-events: none;
+}
+
 .chat-sidebar__avatar {
   width: 34px;
   height: 34px;
@@ -234,6 +286,7 @@ textarea {
   transition: opacity var(--transition-base);
   -webkit-app-region: no-drag;
   flex-shrink: 0;
+  margin: 3px 0;
 }
 
 .chat-sidebar__avatar:hover {

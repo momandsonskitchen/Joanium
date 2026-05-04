@@ -800,10 +800,13 @@ async function bootstrap() {
 
   const sidebarAvatar = createElement('button', 'chat-sidebar__avatar');
   sidebarAvatar.type = 'button';
-  sidebarAvatar.setAttribute('aria-label', strings.appName);
+  sidebarAvatar.setAttribute('aria-label', strings.profile);
   sidebarAvatar.append(createElement('span', 'chat-sidebar__avatar-initials', getInitials(payload.user.profile.name)));
 
-  sidebar.append(sidebarTabs, sidebarAvatar);
+  const avatarDivider = createElement('div', 'chat-sidebar__avatar-divider');
+  sidebarTabs.append(avatarDivider, sidebarAvatar);
+
+  sidebar.append(sidebarTabs);
 
   // ── Stage ─────────────────────────────────────────────────────────────────
   const stage = createElement('section', 'chat-stage');

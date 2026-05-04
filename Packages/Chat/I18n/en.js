@@ -9,6 +9,7 @@ const en = {
     events: 'Events',
     usage: 'Usage'
   },
+  profile: 'Profile',
   greeting: {
     morning: 'Good morning, {name}',
     afternoon: 'Good afternoon, {name}',
