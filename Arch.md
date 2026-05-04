@@ -52,10 +52,10 @@
 
 # Data Storage
 * To store user data we use Data folder. 
-* Project workspace records are stored in `Data/Projects` and can include user-defined context, linked folder paths, and cover image paths.
+* Project workspace records are stored in `Data/Projects` and can include user-defined context and cover image paths.
 
 # Project Workspace
-* The projects view should behave like a native workspace browser with searchable project cards, native file/folder pickers, and visually rich project previews.
+* The projects view should behave like a native workspace browser with searchable project cards, native image picking, and visually rich project previews.
 * Opening a project should make that workspace context visible to the user inside chat, not silently attach hidden state.
 
 # Must Follow

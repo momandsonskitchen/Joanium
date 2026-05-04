@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dialog, shell } from 'electron';
+import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
 
 const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -76,17 +76,6 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, id) => chatStateManager.deleteProject(id)
       },
       {
-        channel: 'chat:select-folder',
-        handler: async (event) => {
-          const window = event.sender.getOwnerBrowserWindow();
-          const result = await dialog.showOpenDialog(window, {
-            properties: ['openDirectory']
-          });
-
-          return result.canceled ? null : (result.filePaths[0] ?? null);
-        }
-      },
-      {
         channel: 'chat:select-project-cover',
         handler: async (event) => {
           const window = event.sender.getOwnerBrowserWindow();
@@ -99,22 +88,7 @@ export async function createPackage({ rootDirectory }) {
               }
             ]
           });
-
           return result.canceled ? null : (result.filePaths[0] ?? null);
-        }
-      },
-      {
-        channel: 'chat:open-project-folder',
-        handler: async (_event, folderPath) => {
-          if (typeof folderPath !== 'string' || !folderPath.trim()) {
-            return { ok: false, error: 'missing-folder-path' };
-          }
-
-          const error = await shell.openPath(folderPath);
-          return {
-            ok: error.length === 0,
-            error: error || null
-          };
         }
       },
       {

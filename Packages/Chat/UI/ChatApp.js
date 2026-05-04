@@ -679,12 +679,7 @@ async function bootstrap() {
     const lines = [
       formatText(strings.projects.systemContextName, { name: project.name ?? '' })
     ];
-    const folderPath = collapseWhitespace(project.folderPath);
     const info = collapseWhitespace(project.info);
-
-    if (folderPath) {
-      lines.push(formatText(strings.projects.systemContextFolder, { folder: folderPath }));
-    }
 
     if (info) {
       lines.push(formatText(strings.projects.systemContextInfo, { info }));
@@ -699,7 +694,6 @@ async function bootstrap() {
       name: project.name ?? '',
       icon: project.icon ?? '',
       info: project.info ?? '',
-      folderPath: project.folderPath ?? '',
       coverImagePath: project.coverImagePath ?? ''
     } : null;
 
@@ -724,8 +718,7 @@ async function bootstrap() {
       return;
     }
 
-    const meta = collapseWhitespace(activeProject.folderPath)
-      || collapseWhitespace(activeProject.info)
+    const meta = collapseWhitespace(activeProject.info)
       || strings.projects.activeHint;
 
     projectPill.hidden = false;
@@ -958,14 +951,16 @@ async function bootstrap() {
 
     const body = createElement('div', 'chat-projects__body');
     const formCol = createElement('div', 'chat-projects__form-col');
-    formCol.append(createElement('p', 'chat-projects__form-heading', strings.projects.newProjectHeading));
+    const formHeading = createElement('p', 'chat-projects__form-heading', strings.projects.newProjectHeading);
+    formCol.append(formHeading);
 
-    let draftName    = '';
-    let draftIcon    = '📁';
-    let draftInfo    = '';
-    let draftFolderPath = '';
+    let draftName = '';
+    let draftIcon = '📁';
+    let draftInfo = '';
     let draftCoverImagePath = '';
-    let pickerOpen   = false;
+    let pickerOpen = false;
+    let editingProjectId = null;
+    let editingProjectCreatedAt = null;
 
     const nameRow = createElement('div', 'chat-projects__name-row');
 
@@ -1055,30 +1050,6 @@ async function bootstrap() {
       }
     });
 
-    const folderLabel = createElement('label', 'chat-projects__info-label', strings.projects.folderLabel);
-    const folderRow = createElement('div', 'chat-projects__folder-row');
-    const folderInput = document.createElement('input');
-    folderInput.type = 'text';
-    folderInput.className = 'chat-projects__folder-input';
-    folderInput.placeholder = strings.projects.folderPlaceholder;
-    folderInput.readOnly = true;
-
-    const folderBtn = createElement('button', 'chat-projects__folder-btn');
-    folderBtn.type = 'button';
-    folderBtn.textContent = strings.projects.browseFolder;
-    folderBtn.addEventListener('click', async () => {
-      try {
-        const selectedPath = await window.JoaniumChat.selectFolder();
-        if (!selectedPath) return;
-        draftFolderPath = selectedPath;
-        folderInput.value = draftFolderPath;
-      } catch (error) {
-        console.error('[Joanium] Failed to select project folder:', error);
-      }
-    });
-
-    folderRow.append(folderInput, folderBtn);
-
     const infoLabel = createElement('label', 'chat-projects__info-label', strings.projects.infoLabel);
 
     const infoTextarea = document.createElement('textarea');
@@ -1100,24 +1071,74 @@ async function bootstrap() {
     saveBtn.type   = 'button';
     saveBtn.disabled = true;
     saveBtn.textContent = strings.projects.save;
+
+    function syncSaveBtn() {
+      saveBtn.disabled = !draftName.trim();
+    }
+
+    function syncFormChrome() {
+      formHeading.textContent = editingProjectId
+        ? strings.projects.editProjectHeading
+        : strings.projects.newProjectHeading;
+      saveBtn.textContent = editingProjectId
+        ? strings.projects.update
+        : strings.projects.save;
+    }
+
+    function resetProjectForm() {
+      editingProjectId = null;
+      editingProjectCreatedAt = null;
+      draftName = '';
+      draftIcon = '📁';
+      draftInfo = '';
+      draftCoverImagePath = '';
+      nameInput.value = '';
+      infoTextarea.value = '';
+      iconTrigger.textContent = draftIcon;
+      togglePicker(false);
+      syncCoverZone();
+      for (const opt of pickerInner.children) {
+        opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
+      }
+      syncFormChrome();
+      syncSaveBtn();
+    }
+
+    function applyProjectToForm(project) {
+      editingProjectId = project.id;
+      editingProjectCreatedAt = project.createdAt ?? null;
+      draftName = project.name ?? '';
+      draftIcon = project.icon ?? '📁';
+      draftInfo = project.info ?? '';
+      draftCoverImagePath = project.coverImagePath ?? '';
+      nameInput.value = draftName;
+      infoTextarea.value = draftInfo;
+      iconTrigger.textContent = draftIcon;
+      togglePicker(false);
+      syncCoverZone();
+      for (const opt of pickerInner.children) {
+        opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
+      }
+      syncFormChrome();
+      syncSaveBtn();
+      nameInput.focus();
+      nameInput.select();
+    }
+
     saveBtn.addEventListener('click', async () => {
       const name = draftName.trim();
       if (!name) return;
 
-      const now = new Date();
-      const p2 = (n) => String(n).padStart(2, '0');
-      const p3 = (n) => String(n).padStart(3, '0');
-      const id  = `${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}_${p2(now.getHours())}-${p2(now.getMinutes())}-${p2(now.getSeconds())}-${p3(now.getMilliseconds())}`;
+      const now = new Date().toISOString();
 
       const project = {
-        id,
+        id: editingProjectId ?? createProjectId(),
         name,
-        icon:           draftIcon,
-        info:           draftInfo.trim(),
-        folderPath:     draftFolderPath.trim(),
+        icon: draftIcon,
+        info: draftInfo.trim(),
         coverImagePath: draftCoverImagePath.trim(),
-        createdAt:      now.toISOString(),
-        updatedAt:      now.toISOString()
+        createdAt: editingProjectCreatedAt ?? now,
+        updatedAt: now
       };
 
       try {
@@ -1127,31 +1148,13 @@ async function bootstrap() {
         return;
       }
 
+      if (activeProject?.id === project.id) {
+        setActiveProject(project);
+      }
+
       resetProjectForm();
       await populateProjectsList(panel._listEl, panel._search.getValue().trim());
     });
-
-    function syncSaveBtn() {
-      saveBtn.disabled = !draftName.trim();
-    }
-
-    function resetProjectForm() {
-      draftName = '';
-      draftIcon = '📁';
-      draftInfo = '';
-      draftFolderPath = '';
-      draftCoverImagePath = '';
-      nameInput.value = '';
-      infoTextarea.value = '';
-      folderInput.value = '';
-      iconTrigger.textContent = draftIcon;
-      togglePicker(false);
-      syncCoverZone();
-      for (const opt of pickerInner.children) {
-        opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
-      }
-      syncSaveBtn();
-    }
 
     cancelBtn.addEventListener('click', resetProjectForm);
 
@@ -1162,8 +1165,6 @@ async function bootstrap() {
       iconPicker,
       coverLabel,
       coverZone,
-      folderLabel,
-      folderRow,
       infoLabel,
       infoTextarea,
       formActions
@@ -1189,6 +1190,9 @@ async function bootstrap() {
 
     panel._listEl = listContent;
     panel._search = search;
+    panel._startEdit = applyProjectToForm;
+    panel._resetForm = resetProjectForm;
+    syncFormChrome();
     syncCoverZone();
     return panel;
   }
@@ -1211,8 +1215,7 @@ async function bootstrap() {
       ? projects.filter((project) => {
           const haystack = [
             project.name,
-            project.info,
-            project.folderPath
+            project.info
           ]
             .map((value) => collapseWhitespace(value).toLowerCase())
             .join('\n');
@@ -1275,17 +1278,6 @@ async function bootstrap() {
       createElement('div', 'chat-projects__card-meta', formatText(strings.projects.created, { date: dateStr }))
     );
 
-    const folderPath = collapseWhitespace(project.folderPath);
-    if (folderPath) {
-      metaWrap.append(
-        createElement(
-          'div',
-          'chat-projects__card-folder',
-          formatText(strings.projects.folderMeta, { folder: truncate(folderPath, 68) })
-        )
-      );
-    }
-
     body.append(nameEl, metaWrap);
 
     async function openProject() {
@@ -1317,21 +1309,19 @@ async function bootstrap() {
 
     const actions   = createElement('div', 'chat-projects__card-actions');
 
-    if (folderPath) {
-      const folderBtn = createElement('button', 'chat-projects__card-btn');
-      folderBtn.type = 'button';
-      folderBtn.setAttribute('aria-label', strings.projects.openFolder);
-      folderBtn.append(createIcon('folderOpen', 'chat-projects__card-btn-icon'));
-      folderBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        try {
-          await window.JoaniumChat.openProjectFolder(folderPath);
-        } catch (error) {
-          console.error('[Joanium] Failed to open project folder:', error);
-        }
-      });
-      actions.append(folderBtn);
-    }
+    const editBtn = createElement('button', 'chat-projects__card-btn');
+    editBtn.type = 'button';
+    editBtn.setAttribute('aria-label', strings.projects.edit);
+    editBtn.append(createIcon('pencil', 'chat-projects__card-btn-icon'));
+    editBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        const fullProject = await window.JoaniumChat.loadProject(project.id);
+        projectsPanel?._startEdit(fullProject);
+      } catch (error) {
+        console.error('[Joanium] Failed to load project for editing:', error);
+      }
+    });
 
     const deleteBtn = createElement('button', 'chat-projects__card-btn chat-projects__card-btn--danger');
     deleteBtn.type  = 'button';
@@ -1349,10 +1339,14 @@ async function bootstrap() {
         clearActiveProject();
       }
 
+      if (editingProjectId === project.id) {
+        projectsPanel?._resetForm();
+      }
+
       await populateProjectsList(listEl, projectsPanel?._search.getValue().trim() ?? '');
     });
 
-    actions.append(deleteBtn);
+    actions.append(editBtn, deleteBtn);
     card.addEventListener('click', () => {
       void openProject();
     });

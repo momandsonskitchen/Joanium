@@ -706,7 +706,6 @@ export function createChatStateManager({ rootDirectory }) {
             name:           project.name,
             icon:           project.icon ?? '',
             info:           project.info ?? '',
-            folderPath:     project.folderPath ?? '',
             coverImagePath: project.coverImagePath ?? '',
             createdAt:      project.createdAt,
             updatedAt:      project.updatedAt
