@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dialog, shell } from 'electron';
+import { shell } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
 import { createSkillsStateManager } from './Core/SkillsState.js';
 import { createPersonasStateManager } from './Core/PersonasState.js';
@@ -26,7 +26,7 @@ export async function createPackage({ rootDirectory }) {
     id: 'Chat',
     // Packages whose ipcHandlers the boot layer should merge into this window.
     // This keeps cross-package coupling out of individual package modules.
-    ipcCompanions: ['Templates'],
+    ipcCompanions: ['Templates', 'Projects'],
     rendererPath: path.join(chatDirectory, 'UI', 'Index.html'),
     preloadPath: path.join(chatDirectory, 'UI', 'Preload.js'),
     window: {
@@ -66,48 +66,6 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:pin-session',
         handler: async (_event, id, pinned, projectId) => chatStateManager.pinSession(id, pinned, projectId)
-      },
-      {
-        channel: 'chat:save-project',
-        handler: async (_event, project) => chatStateManager.saveProject(project)
-      },
-      {
-        channel: 'chat:list-projects',
-        handler: async () => chatStateManager.listProjects()
-      },
-      {
-        channel: 'chat:load-project',
-        handler: async (_event, id) => chatStateManager.loadProject(id)
-      },
-      {
-        channel: 'chat:delete-project',
-        handler: async (_event, id) => chatStateManager.deleteProject(id)
-      },
-      {
-        channel: 'chat:select-project-cover',
-        handler: async (event) => {
-          const window = event.sender.getOwnerBrowserWindow();
-          const result = await dialog.showOpenDialog(window, {
-            properties: ['openFile'],
-            filters: [
-              {
-                name: 'Images',
-                extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'avif', 'svg']
-              }
-            ]
-          });
-          return result.canceled ? null : (result.filePaths[0] ?? null);
-        }
-      },
-      {
-        channel: 'chat:select-project-directory',
-        handler: async (event) => {
-          const window = event.sender.getOwnerBrowserWindow();
-          const result = await dialog.showOpenDialog(window, {
-            properties: ['openDirectory']
-          });
-          return result.canceled ? null : (result.filePaths[0] ?? null);
-        }
       },
       {
         channel: 'chat:open-external',
