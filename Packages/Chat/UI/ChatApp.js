@@ -192,38 +192,22 @@ function createDraftEntry(prompt) {
 // ---------------------------------------------------------------------------
 function stripMarkdown(text) {
   return text
-    // Fenced code blocks (``` or ~~~)
     .replace(/^```[\s\S]*?^```/gm, '')
     .replace(/^~~~[\s\S]*?^~~~/gm, '')
-    // Inline code
     .replace(/`[^`\n]+`/g, '')
-    // Setext-style headings underlines
     .replace(/^[=-]{2,}\s*$/gm, '')
-    // ATX headings (# Heading)
     .replace(/^#{1,6}\s+/gm, '')
-    // Bold + italic combined (***text*** or ___text___)
     .replace(/(\*{3}|_{3})(.*?)\1/g, '$2')
-    // Bold (**text** or __text__)
     .replace(/(\*{2}|_{2})(.*?)\1/g, '$2')
-    // Italic (*text* or _text_)
     .replace(/(\*|_)(.*?)\1/g, '$2')
-    // Strikethrough (~~text~~)
     .replace(/~~(.*?)~~/g, '$1')
-    // Images — drop entirely
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-    // Links — keep label text
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-    // Blockquotes
     .replace(/^>\s?/gm, '')
-    // Unordered list markers
     .replace(/^[ \t]*[-*+]\s+/gm, '')
-    // Ordered list markers
     .replace(/^[ \t]*\d+[.)]\s+/gm, '')
-    // Horizontal rules
     .replace(/^[-*_]{3,}\s*$/gm, '')
-    // HTML tags
     .replace(/<[^>]+>/g, '')
-    // Collapse 3+ blank lines into a single blank line
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -243,7 +227,6 @@ function resetSpeakButton(btn) {
 function speakText(rawText, btn) {
   if (!window.speechSynthesis) return;
 
-  // Clicking the active button stops playback
   if (activeSpeakBtn === btn) {
     window.speechSynthesis.cancel();
     resetSpeakButton(btn);
@@ -251,7 +234,6 @@ function speakText(rawText, btn) {
     return;
   }
 
-  // Stop any other ongoing playback
   window.speechSynthesis.cancel();
   resetSpeakButton(activeSpeakBtn);
   activeSpeakBtn = null;
@@ -304,7 +286,6 @@ function createMessageActions({ onCopy, onRetry, onSpeak }) {
 
   actions.append(copyBtn, retryBtn);
 
-  // TTS button — only rendered for assistant messages
   if (typeof onSpeak === 'function') {
     const speakBtn = createElement('button', 'chat-message__action-button');
     speakBtn.type = 'button';
@@ -364,7 +345,6 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
   }
 
   if (!message.streaming && !message.pending && typeof onCopy === 'function' && typeof onRetry === 'function') {
-    // TTS speak callback — only for assistant messages
     const onSpeak = message.role === 'assistant'
       ? (btn) => speakText(message.content, btn)
       : undefined;
@@ -471,6 +451,46 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
 }
 
 // ---------------------------------------------------------------------------
+// Session ID generation — datetime-based, safe for filenames.
+// ---------------------------------------------------------------------------
+function generateSessionId() {
+  const d = new Date();
+  const p = (n, l = 2) => String(n).padStart(l, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}-${p(d.getMilliseconds(), 3)}`;
+}
+
+// ---------------------------------------------------------------------------
+// History date helpers — groups sessions and formats display timestamps.
+// ---------------------------------------------------------------------------
+function getSessionGroup(isoString) {
+  const date = new Date(isoString);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  if (startOfDay.getTime() === startOfToday.getTime()) return 'today';
+  if (startOfDay.getTime() === startOfYesterday.getTime()) return 'yesterday';
+  return 'earlier';
+}
+
+function formatSessionTime(isoString) {
+  const date = new Date(isoString);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  if (startOfDay.getTime() >= startOfToday.getTime()) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  if (startOfDay.getTime() >= startOfYesterday.getTime()) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+// ---------------------------------------------------------------------------
 // bootstrap — entry point; builds the full UI tree.
 // ---------------------------------------------------------------------------
 async function bootstrap() {
@@ -488,6 +508,10 @@ async function bootstrap() {
   let isSending = false;
   let accText = '';
   let accThinking = '';
+
+  // Session tracking — null means this is an unsaved new conversation.
+  let sessionId = null;
+  let sessionCreatedAt = null;
 
   // DOM refs set during build
   let composerField = null;
@@ -510,6 +534,190 @@ async function bootstrap() {
 
   // Tab state
   let activeTabEl = null;
+  let lastSelectedEntry = null;
+  const tabElements = {};
+
+  // History panel — created lazily the first time the history tab is opened.
+  let historyPanel = null;
+
+  // ---------------------------------------------------------------------------
+  // Session persistence
+  // ---------------------------------------------------------------------------
+
+  async function saveCurrentSession() {
+    if (!sessionId || messages.length === 0) return;
+    const firstUser = messages.find((m) => m.role === 'user');
+    if (!firstUser) return;
+
+    const title = truncate(collapseWhitespace(firstUser.content), 60);
+    const now = new Date().toISOString();
+
+    const sessionMessages = messages
+      .filter((m) => !m.streaming && !m.pending && m.content)
+      .map(({ role, content, thinking }) => {
+        const entry = { role, content };
+        if (thinking) entry.thinking = thinking;
+        return entry;
+      });
+
+    await window.JoaniumChat.saveSession({
+      id: sessionId,
+      title,
+      createdAt: sessionCreatedAt ?? now,
+      updatedAt: now,
+      messages: sessionMessages
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // View switching — history panel replaces scroll + bottom fully.
+  // ---------------------------------------------------------------------------
+
+  function showChatView() {
+    scroll.hidden = false;
+    bottom.hidden = false;
+    if (historyPanel) historyPanel.hidden = true;
+  }
+
+  async function showHistoryView() {
+    scroll.hidden = true;
+    bottom.hidden = true;
+
+    if (!historyPanel) {
+      historyPanel = buildHistoryPanel();
+      canvas.append(historyPanel);
+    }
+
+    historyPanel.hidden = false;
+    await populateHistoryPanel(historyPanel._contentEl);
+  }
+
+  // Programmatic tab switch — updates sidebar visual without triggering side-effects.
+  function switchToTab(id) {
+    const targetTab = tabElements[id];
+    if (!targetTab || targetTab === activeTabEl) return;
+    activeTabEl?.classList.remove('chat-sidebar__tab--active');
+    targetTab.classList.add('chat-sidebar__tab--active');
+    activeTabEl = targetTab;
+    moveIndicatorToTab(targetTab, true);
+  }
+
+  // ---------------------------------------------------------------------------
+  // History panel DOM
+  // ---------------------------------------------------------------------------
+
+  function buildHistoryPanel() {
+    const panel = createElement('div', 'chat-history');
+    panel.hidden = true;
+
+    const header = createElement('div', 'chat-history__header');
+    const headerTitle = createElement('h2', 'chat-history__title', strings.history.title);
+
+    const newChatBtn = createElement('button', 'chat-history__new-btn');
+    newChatBtn.type = 'button';
+    const newIconEl = createElement('span', 'chat-history__new-icon');
+    newIconEl.innerHTML = iconMarkup.tabChat ?? '';
+    newChatBtn.append(newIconEl, createElement('span', 'chat-history__new-label', strings.history.newChat));
+    newChatBtn.addEventListener('click', () => {
+      clearConversation();
+      switchToTab('chat');
+      showChatView();
+    });
+
+    header.append(headerTitle, newChatBtn);
+
+    const contentEl = createElement('div', 'chat-history__content');
+    panel.append(header, contentEl);
+    panel._contentEl = contentEl;
+
+    return panel;
+  }
+
+  async function populateHistoryPanel(contentEl) {
+    // Show loading skeletons while fetching
+    contentEl.replaceChildren();
+    for (let i = 0; i < 3; i++) {
+      contentEl.append(createElement('div', 'chat-history__skeleton'));
+    }
+
+    const sessions = await window.JoaniumChat.listSessions();
+    contentEl.replaceChildren();
+
+    if (sessions.length === 0) {
+      const empty = createElement('div', 'chat-history__empty');
+      empty.append(
+        createElement('p', 'chat-history__empty-title', strings.history.empty),
+        createElement('p', 'chat-history__empty-hint', strings.history.emptyHint)
+      );
+      contentEl.append(empty);
+      return;
+    }
+
+    const groups = { today: [], yesterday: [], earlier: [] };
+    for (const session of sessions) {
+      const group = getSessionGroup(session.updatedAt);
+      groups[group].push(session);
+    }
+
+    const groupLabels = {
+      today: strings.history.today,
+      yesterday: strings.history.yesterday,
+      earlier: strings.history.earlier
+    };
+
+    for (const [groupKey, groupSessions] of Object.entries(groups)) {
+      if (groupSessions.length === 0) continue;
+
+      const section = createElement('div', 'chat-history__section');
+      section.append(createElement('div', 'chat-history__section-label', groupLabels[groupKey]));
+
+      for (const session of groupSessions) {
+        const card = createElement('button', 'chat-history__card');
+        card.type = 'button';
+
+        const msgCount = session.messageCount ?? 0;
+        const msgLabel = msgCount === 1
+          ? strings.history.oneMessage
+          : formatText(strings.history.messages, { count: msgCount });
+
+        card.append(
+          createElement('div', 'chat-history__card-title', session.title || strings.appName),
+          createElement('div', 'chat-history__card-meta', `${msgLabel} · ${formatSessionTime(session.updatedAt)}`)
+        );
+
+        card.addEventListener('click', () => void loadHistorySession(session.id));
+        section.append(card);
+      }
+
+      contentEl.append(section);
+    }
+  }
+
+  async function loadHistorySession(id) {
+    try {
+      const session = await window.JoaniumChat.loadSession(id);
+
+      messages = (session.messages ?? [])
+        .map((m) => ({
+          role: m.role === 'assistant' ? 'assistant' : 'user',
+          content: typeof m.content === 'string' ? m.content : '',
+          thinking: m.thinking ?? '',
+          streaming: false
+        }))
+        .filter((m) => m.content);
+
+      // Restore session context so new messages append to the same file
+      sessionId = session.id;
+      sessionCreatedAt = session.createdAt ?? new Date().toISOString();
+
+      switchToTab('chat');
+      showChatView();
+      renderThread();
+      focusComposer();
+    } catch (err) {
+      console.error('[Joanium] Failed to load session:', err);
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Model picker
@@ -606,6 +814,7 @@ async function bootstrap() {
     accText = '';
     accThinking = '';
     isSending = false;
+    void saveCurrentSession();
     syncComposer();
     renderThread();
   }
@@ -640,8 +849,9 @@ async function bootstrap() {
     messages = [];
     draftValue = '';
     isSending = false;
+    sessionId = null;
+    sessionCreatedAt = null;
     window.JoaniumChat.removeStreamListeners();
-    // Stop any active TTS when conversation is cleared
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
       resetSpeakButton(activeSpeakBtn);
@@ -655,7 +865,6 @@ async function bootstrap() {
   function renderThread() {
     if (!thread || !title || !composer || !canvas || !scroll || !bottom) return;
 
-    // Stop any active TTS when the thread is re-rendered (stale buttons)
     if (window.speechSynthesis && activeSpeakBtn) {
       window.speechSynthesis.cancel();
       resetSpeakButton(activeSpeakBtn);
@@ -701,6 +910,12 @@ async function bootstrap() {
     const prompt = draftValue.trim();
     if (!prompt || isSending) return;
 
+    // Assign a session ID on the very first message of a new conversation
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      sessionCreatedAt = new Date().toISOString();
+    }
+
     const draftEntry = createDraftEntry(prompt);
     if (draftEntry) void window.JoaniumChat.saveRecentPrompt(draftEntry);
 
@@ -715,6 +930,7 @@ async function bootstrap() {
     isSending = true;
     accText = '';
     accThinking = '';
+    lastSelectedEntry = null;
     syncComposer();
     renderThread();
     focusComposer();
@@ -722,7 +938,7 @@ async function bootstrap() {
     window.JoaniumChat.removeStreamListeners();
 
     window.JoaniumChat.onStreamChunk((chunk) => {
-      if (chunk?.type === 'text'    && chunk.text) accText    += chunk.text;
+      if (chunk?.type === 'text'     && chunk.text) accText    += chunk.text;
       if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
       updateLastStreamingMessage(thread, { content: accText, thinking: accThinking });
     });
@@ -738,6 +954,7 @@ async function bootstrap() {
         modelLabel: meta?.modelLabel ?? activeModelLabel
       });
       isSending = false;
+      void saveCurrentSession();
       syncComposer();
       renderThread();
     });
@@ -802,16 +1019,27 @@ async function bootstrap() {
     tab.append(iconEl);
     if (isActive) activeTabEl = tab;
 
+    // Store reference for programmatic switching
+    tabElements[id] = tab;
+
     tab.addEventListener('click', () => {
       if (tab === activeTabEl) {
+        // Re-clicking the active chat tab starts a new conversation
         if (id === 'chat') clearConversation();
         return;
       }
+
       activeTabEl?.classList.remove('chat-sidebar__tab--active');
       tab.classList.add('chat-sidebar__tab--active');
       activeTabEl = tab;
       moveIndicatorToTab(tab, true);
-      if (id === 'chat') clearConversation();
+
+      if (id === 'chat') {
+        // Restore chat view — preserve any conversation (including one loaded from history)
+        showChatView();
+      } else if (id === 'history') {
+        void showHistoryView();
+      }
     });
 
     sidebarTabs.append(tab);

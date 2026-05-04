@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import https from 'node:https';
 import http from 'node:http';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
@@ -571,6 +571,7 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
 
 export function createChatStateManager({ rootDirectory }) {
   const homeFilePath = path.join(rootDirectory, 'Data', 'Chat', 'Home.json');
+  const chatsDirectory = path.join(rootDirectory, 'Data', 'Chats');
 
   async function readHomeState() {
     try {
@@ -625,6 +626,52 @@ export function createChatStateManager({ rootDirectory }) {
 
       return writeHomeState(nextState);
     },
+    async saveSession(session) {
+      if (!session?.id) return null;
+      await mkdir(chatsDirectory, { recursive: true });
+      const filePath = path.join(chatsDirectory, `${session.id}.json`);
+      await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
+      return session;
+    },
+
+    async listSessions() {
+      let files;
+      try {
+        files = await readdir(chatsDirectory);
+      } catch {
+        return [];
+      }
+
+      const sessions = [];
+
+      for (const file of files) {
+        if (!file.endsWith('.json')) continue;
+        try {
+          const raw = await readFile(path.join(chatsDirectory, file), 'utf8');
+          const session = JSON.parse(raw);
+          sessions.push({
+            id: session.id,
+            title: session.title,
+            createdAt: session.createdAt,
+            updatedAt: session.updatedAt,
+            messageCount: Array.isArray(session.messages) ? session.messages.length : 0
+          });
+        } catch {
+          // Skip corrupt or unreadable files silently
+        }
+      }
+
+      return sessions.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    },
+
+    async loadSession(id) {
+      // Sanitize ID to prevent path traversal — only allow safe filename chars
+      const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      const raw = await readFile(filePath, 'utf8');
+      return JSON.parse(raw);
+    },
+
     // Streaming entry point — resolves once the stream ends (or rejects on error).
     // onChunk({ type: 'text'|'thinking', text }) is called for every token.
     // onDone(meta) is called when the stream completes successfully.

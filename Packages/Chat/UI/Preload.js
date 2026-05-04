@@ -3,6 +3,10 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('JoaniumChat', {
   bootstrap: () => ipcRenderer.invoke('chat:bootstrap'),
   saveRecentPrompt: (promptEntry) => ipcRenderer.invoke('chat:save-recent-prompt', promptEntry),
+  saveSession: (session) => ipcRenderer.invoke('chat:save-session', session),
+  listSessions: () => ipcRenderer.invoke('chat:list-sessions'),
+  loadSession: (id) => ipcRenderer.invoke('chat:load-session', id),
+
   streamMessage: (request) => ipcRenderer.invoke('chat:stream-message', request),
 
   onStreamChunk: (callback) => {

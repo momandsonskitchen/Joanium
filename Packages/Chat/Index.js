@@ -39,6 +39,18 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, promptEntry) => chatStateManager.saveRecentPrompt(promptEntry)
       },
       {
+        channel: 'chat:save-session',
+        handler: async (_event, session) => chatStateManager.saveSession(session)
+      },
+      {
+        channel: 'chat:list-sessions',
+        handler: async () => chatStateManager.listSessions()
+      },
+      {
+        channel: 'chat:load-session',
+        handler: async (_event, id) => chatStateManager.loadSession(id)
+      },
+      {
         // Fire-and-forget: returns null immediately, then pushes
         // chat:stream-chunk / chat:stream-done / chat:stream-error events
         // back to the renderer via webContents.send.

@@ -24,6 +24,17 @@ const en = {
     stop: 'Stop',
     generationStopped: 'Generation stopped.'
   },
+  history: {
+    title: 'History',
+    newChat: 'New Chat',
+    empty: 'No conversations yet',
+    emptyHint: 'Your past chats will appear here.',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    earlier: 'Earlier',
+    messages: '{count} messages',
+    oneMessage: '1 message'
+  }
 };
 
 export default en;
