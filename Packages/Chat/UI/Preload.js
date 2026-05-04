@@ -3,11 +3,11 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('JoaniumChat', {
   bootstrap: () => ipcRenderer.invoke('chat:bootstrap'),
   saveSession: (session) => ipcRenderer.invoke('chat:save-session', session),
-  listSessions: () => ipcRenderer.invoke('chat:list-sessions'),
-  loadSession: (id) => ipcRenderer.invoke('chat:load-session', id),
-  deleteSession: (id) => ipcRenderer.invoke('chat:delete-session', id),
-  renameSession: (id, newTitle) => ipcRenderer.invoke('chat:rename-session', id, newTitle),
-  pinSession: (id, pinned) => ipcRenderer.invoke('chat:pin-session', id, pinned),
+  listSessions: (projectId) => ipcRenderer.invoke('chat:list-sessions', projectId),
+  loadSession: (id, projectId) => ipcRenderer.invoke('chat:load-session', id, projectId),
+  deleteSession: (id, projectId) => ipcRenderer.invoke('chat:delete-session', id, projectId),
+  renameSession: (id, newTitle, projectId) => ipcRenderer.invoke('chat:rename-session', id, newTitle, projectId),
+  pinSession: (id, pinned, projectId) => ipcRenderer.invoke('chat:pin-session', id, pinned, projectId),
 
   saveProject:   (project) => ipcRenderer.invoke('chat:save-project', project),
   listProjects:  ()         => ipcRenderer.invoke('chat:list-projects'),

@@ -41,23 +41,23 @@ export async function createPackage({ rootDirectory }) {
       },
       {
         channel: 'chat:list-sessions',
-        handler: async () => chatStateManager.listSessions()
+        handler: async (_event, projectId) => chatStateManager.listSessions(projectId)
       },
       {
         channel: 'chat:load-session',
-        handler: async (_event, id) => chatStateManager.loadSession(id)
+        handler: async (_event, id, projectId) => chatStateManager.loadSession(id, projectId)
       },
       {
         channel: 'chat:delete-session',
-        handler: async (_event, id) => chatStateManager.deleteSession(id)
+        handler: async (_event, id, projectId) => chatStateManager.deleteSession(id, projectId)
       },
       {
         channel: 'chat:rename-session',
-        handler: async (_event, id, newTitle) => chatStateManager.renameSession(id, newTitle)
+        handler: async (_event, id, newTitle, projectId) => chatStateManager.renameSession(id, newTitle, projectId)
       },
       {
         channel: 'chat:pin-session',
-        handler: async (_event, id, pinned) => chatStateManager.pinSession(id, pinned)
+        handler: async (_event, id, pinned, projectId) => chatStateManager.pinSession(id, pinned, projectId)
       },
       {
         channel: 'chat:save-project',

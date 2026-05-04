@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import https from 'node:https';
 import http from 'node:http';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
@@ -574,16 +574,18 @@ export function createChatStateManager({ rootDirectory }) {
     },
     async saveSession(session) {
       if (!session?.id) return null;
-      await mkdir(chatsDirectory, { recursive: true });
-      const filePath = path.join(chatsDirectory, `${session.id}.json`);
+      const targetDir = getChatsDirectory(session.projectId);
+      await mkdir(targetDir, { recursive: true });
+      const filePath = path.join(targetDir, `${session.id}.json`);
       await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
       return session;
     },
 
-    async listSessions() {
+    async listSessions(projectId) {
+      const targetDir = getChatsDirectory(projectId);
       let files;
       try {
-        files = await readdir(chatsDirectory);
+        files = await readdir(targetDir);
       } catch {
         return [];
       }
@@ -593,7 +595,7 @@ export function createChatStateManager({ rootDirectory }) {
       for (const file of files) {
         if (!file.endsWith('.json')) continue;
         try {
-          const raw = await readFile(path.join(chatsDirectory, file), 'utf8');
+          const raw = await readFile(path.join(targetDir, file), 'utf8');
           const session = JSON.parse(raw);
           sessions.push({
             id: session.id,
@@ -615,23 +617,25 @@ export function createChatStateManager({ rootDirectory }) {
       });
     },
 
-    async loadSession(id) {
-      // Sanitize ID to prevent path traversal — only allow safe filename chars
+    async loadSession(id, projectId) {
       const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      const targetDir = getChatsDirectory(projectId);
+      const filePath = path.join(targetDir, `${safeId}.json`);
       const raw = await readFile(filePath, 'utf8');
       return JSON.parse(raw);
     },
 
-    async deleteSession(id) {
+    async deleteSession(id, projectId) {
       const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      const targetDir = getChatsDirectory(projectId);
+      const filePath = path.join(targetDir, `${safeId}.json`);
       await unlink(filePath);
     },
 
-    async renameSession(id, newTitle) {
+    async renameSession(id, newTitle, projectId) {
       const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      const targetDir = getChatsDirectory(projectId);
+      const filePath = path.join(targetDir, `${safeId}.json`);
       const raw = await readFile(filePath, 'utf8');
       const session = JSON.parse(raw);
       session.title = String(newTitle).trim() || session.title;
@@ -640,9 +644,10 @@ export function createChatStateManager({ rootDirectory }) {
       return session;
     },
 
-    async pinSession(id, pinned) {
+    async pinSession(id, pinned, projectId) {
       const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      const targetDir = getChatsDirectory(projectId);
+      const filePath = path.join(targetDir, `${safeId}.json`);
       const raw = await readFile(filePath, 'utf8');
       const session = JSON.parse(raw);
       session.pinned = Boolean(pinned);
@@ -680,26 +685,35 @@ export function createChatStateManager({ rootDirectory }) {
 
     async saveProject(project) {
       if (!project?.id) return null;
-      await mkdir(projectsDirectory, { recursive: true });
-      const filePath = path.join(projectsDirectory, `${project.id}.json`);
+      const projectDir = path.join(projectsDirectory, project.id);
+      await mkdir(path.join(projectDir, 'Chats'), { recursive: true });
+      const filePath = path.join(projectDir, 'Index.json');
       await writeFile(filePath, `${JSON.stringify(project, null, 2)}\n`, 'utf8');
       return project;
     },
 
     async listProjects() {
-      let files;
+      let entries;
       try {
-        files = await readdir(projectsDirectory);
+        entries = await readdir(projectsDirectory, { withFileTypes: true });
       } catch {
         return [];
       }
 
       const projects = [];
 
-      for (const file of files) {
-        if (!file.endsWith('.json')) continue;
+      for (const entry of entries) {
+        let projectPath;
+        if (entry.isDirectory()) {
+          projectPath = path.join(projectsDirectory, entry.name, 'Index.json');
+        } else if (entry.name.endsWith('.json')) {
+          projectPath = path.join(projectsDirectory, entry.name);
+        } else {
+          continue;
+        }
+
         try {
-          const raw = await readFile(path.join(projectsDirectory, file), 'utf8');
+          const raw = await readFile(projectPath, 'utf8');
           const project = JSON.parse(raw);
           projects.push({
             id:             project.id,
@@ -721,16 +735,33 @@ export function createChatStateManager({ rootDirectory }) {
     },
 
     async loadProject(id) {
-      const safeId   = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-      const filePath = path.join(projectsDirectory, `${safeId}.json`);
-      const raw      = await readFile(filePath, 'utf8');
-      return JSON.parse(raw);
+      const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const newPath = path.join(projectsDirectory, safeId, 'Index.json');
+      try {
+        const raw = await readFile(newPath, 'utf8');
+        return JSON.parse(raw);
+      } catch {
+        const oldPath = path.join(projectsDirectory, `${safeId}.json`);
+        const raw = await readFile(oldPath, 'utf8');
+        return JSON.parse(raw);
+      }
     },
 
     async deleteProject(id) {
-      const safeId   = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-      const filePath = path.join(projectsDirectory, `${safeId}.json`);
-      await unlink(filePath);
+      const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const dirPath = path.join(projectsDirectory, safeId);
+      try {
+        await rm(dirPath, { recursive: true, force: true });
+      } catch {
+        // Might be an old file-based project
+        const filePath = path.join(projectsDirectory, `${safeId}.json`);
+        await unlink(filePath).catch(() => {});
+      }
     }
   };
+
+  function getChatsDirectory(projectId) {
+    if (!projectId) return chatsDirectory;
+    return path.join(projectsDirectory, String(projectId).replace(/[^a-zA-Z0-9_\-]/g, ''), 'Chats');
+  }
 }

@@ -614,13 +614,19 @@ async function bootstrap() {
         return entry;
       });
 
-    await window.JoaniumChat.saveSession({
+    const sessionData = {
       id:        sessionId,
       title:     sessionTitle,
       createdAt: sessionCreatedAt ?? now,
       updatedAt: now,
       messages:  sessionMessages
-    });
+    };
+
+    if (activeProject?.id) {
+      sessionData.projectId = activeProject.id;
+    }
+
+    await window.JoaniumChat.saveSession(sessionData);
   }
 
   // ---------------------------------------------------------------------------
@@ -662,11 +668,14 @@ async function bootstrap() {
     await populateProjectsList(projectsPanel._listEl, projectsPanel._search.getValue().trim());
   }
 
-  function createProjectId() {
-    const now = new Date();
-    const p2 = (value) => String(value).padStart(2, '0');
-    const p3 = (value) => String(value).padStart(3, '0');
-    return `${now.getFullYear()}-${p2(now.getMonth() + 1)}-${p2(now.getDate())}_${p2(now.getHours())}-${p2(now.getMinutes())}-${p2(now.getSeconds())}-${p3(now.getMilliseconds())}`;
+  function createProjectId(name) {
+    const sanitized = (name || 'Project').trim()
+      .replace(/[^a-zA-Z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      || 'Project';
+    const unique = Math.random().toString(36).slice(2, 7).padEnd(5, '0');
+    return `${sanitized}-${unique}`;
   }
 
   function getProjectCoverUrl(coverImagePath) {
@@ -802,7 +811,7 @@ async function bootstrap() {
       contentEl.append(createElement('div', 'chat-history__skeleton'));
     }
 
-    const allSessions = await window.JoaniumChat.listSessions();
+    const allSessions = await window.JoaniumChat.listSessions(activeProject?.id);
 
     // Filter by query — title match, case-insensitive
     const q = query.toLowerCase();
@@ -893,7 +902,7 @@ async function bootstrap() {
     pinBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.pinSession(session.id, !session.pinned);
+        await window.JoaniumChat.pinSession(session.id, !session.pinned, activeProject?.id);
       } catch (err) {
         console.error('[Joanium] Failed to pin session:', err);
       }
@@ -922,7 +931,7 @@ async function bootstrap() {
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.deleteSession(session.id);
+        await window.JoaniumChat.deleteSession(session.id, activeProject?.id);
         if (session.id === sessionId) clearConversation();
       } catch (err) {
         console.error('[Joanium] Failed to delete session:', err);
@@ -1120,7 +1129,7 @@ async function bootstrap() {
       const now = new Date().toISOString();
 
       const project = {
-        id: editingProjectId ?? createProjectId(),
+        id: editingProjectId ?? createProjectId(name),
         name,
         icon: draftIcon,
         info: draftInfo.trim(),
@@ -1363,7 +1372,7 @@ async function bootstrap() {
       const newTitle = input.value.trim();
       if (save && newTitle && newTitle !== session.title) {
         try {
-          await window.JoaniumChat.renameSession(session.id, newTitle);
+          await window.JoaniumChat.renameSession(session.id, newTitle, activeProject?.id);
         } catch (err) {
           console.error('[Joanium] Failed to rename session:', err);
         }
@@ -1385,7 +1394,7 @@ async function bootstrap() {
 
   async function loadHistorySession(id) {
     try {
-      const session = await window.JoaniumChat.loadSession(id);
+      const session = await window.JoaniumChat.loadSession(id, activeProject?.id);
 
       messages = (session.messages ?? [])
         .map((m) => ({
