@@ -2,7 +2,6 @@
 @import "../../Shared/CustomScrollbar/CustomScrollbar.css";
 @import "../../Shared/LogoLoader/LogoLoader.css";
 @import "../../Shared/SearchBar/SearchBar.css";
-@import "../../Templates/UI/TemplatesPanel.css";
 
 :root {
   color-scheme: light;
