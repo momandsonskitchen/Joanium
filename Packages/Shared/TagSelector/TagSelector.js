@@ -27,5 +27,5 @@ export function createTagSelector({ options, selectedValues, onToggle }) {
     list.append(card);
   }
 
-  return list;
+  return { element: list };
 }

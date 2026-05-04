@@ -162,12 +162,12 @@ export function createProviderScroller({ providers, selectedProviderIds, onToggl
   window.addEventListener('pointerup', stopDragging);
   window.addEventListener('pointercancel', stopDragging);
 
-  viewport.dispose = () => {
+  function dispose() {
     cancelAnimationFrame(animationFrameId);
     window.removeEventListener('pointermove', handleWindowPointerMove);
     window.removeEventListener('pointerup', stopDragging);
     window.removeEventListener('pointercancel', stopDragging);
-  };
+  }
 
-  return viewport;
+  return { element: viewport, dispose };
 }

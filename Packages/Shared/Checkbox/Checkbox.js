@@ -44,5 +44,5 @@ export function createCheckbox({ label, description = '', checked = false, onCha
     }
   });
 
-  return button;
+  return { element: button };
 }

@@ -222,7 +222,7 @@ async function bootstrap() {
       createElement('p', 'setup-stage__description', strings.consent.description)
     );
 
-    const checkbox = createCheckbox({
+    const { element: checkboxEl } = createCheckbox({
       label: strings.consent.checkboxLabel,
       description: strings.consent.checkboxDescription,
       checked: state.consentAccepted,
@@ -236,9 +236,7 @@ async function bootstrap() {
     });
 
     const links = createElement('div', 'setup-inline-links');
-    links.append(
-      createElement('span', 'setup-inline-links__prefix', strings.consent.reviewPrefix),
-      createButton({
+    const { element: termsBtn } = createButton({
         label: strings.consent.termsLink,
         variant: 'ghost',
         size: 'compact',
@@ -267,10 +265,13 @@ async function bootstrap() {
             nodes: [loader, iframe]
           });
         }
-      })
+      });
+    links.append(
+      createElement('span', 'setup-inline-links__prefix', strings.consent.reviewPrefix),
+      termsBtn
     );
 
-    stage.append(checkbox, links);
+    stage.append(checkboxEl, links);
     return stage;
   }
 
@@ -474,7 +475,7 @@ async function bootstrap() {
         syncProviderDetailSection(stage);
       }
     });
-    stage.append(providerScroller);
+    stage.append(providerScroller.element);
 
     const securityCard = createElement('div', 'setup-security-card');
     securityCard.append(
@@ -495,7 +496,7 @@ async function bootstrap() {
       createElement('p', 'setup-stage__description', strings.usage.description)
     );
 
-    const selector = createTagSelector({
+    const { element: selectorEl } = createTagSelector({
       options: strings.usage.options,
       selectedValues: state.usageModes,
       onToggle: (optionId, nextIsSelected) => {
@@ -509,7 +510,7 @@ async function bootstrap() {
       }
     });
 
-    stage.append(selector);
+    stage.append(selectorEl);
     return stage;
   }
 
@@ -581,14 +582,13 @@ async function bootstrap() {
 
     const actions = createElement('div', 'setup-stage__actions');
     const isFinalStep = scene === 'welcome';
-    actions.append(
-      createButton({
-        label: scene === 'consent' ? strings.common.start : isFinalStep ? strings.common.letGo : strings.common.next,
-        variant: 'primary',
-        disabled: scene === 'consent' ? !state.consentAccepted : false,
-        onClick: isFinalStep ? completeOnboarding : goNext
-      })
-    );
+    const { element: actionBtn } = createButton({
+      label: scene === 'consent' ? strings.common.start : isFinalStep ? strings.common.letGo : strings.common.next,
+      variant: 'primary',
+      disabled: scene === 'consent' ? !state.consentAccepted : false,
+      onClick: isFinalStep ? completeOnboarding : goNext
+    });
+    actions.append(actionBtn);
     stage.append(actions);
   }
 
