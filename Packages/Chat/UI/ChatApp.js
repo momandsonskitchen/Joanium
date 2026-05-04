@@ -6,6 +6,7 @@ import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js'
 import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
+import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 
 const dictionaries = { en, de, fr };
 
@@ -594,6 +595,7 @@ async function bootstrap() {
   let historyPanel    = null;
   let projectsPanel  = null;
   let templatesPanel = null;
+  let _populateTemplatesList = null;
   let skillsPanel    = null;
   let personasPanel  = null;
   let settingsPanel  = null;
@@ -1425,308 +1427,16 @@ async function bootstrap() {
     if (personasPanel) personasPanel.hidden = true;
 
     if (!templatesPanel) {
-      templatesPanel = buildTemplatesPanel();
+      const tpl = createTemplatesPanel(strings.templates);
+      templatesPanel = tpl.build();
+      _populateTemplatesList = tpl.populateList;
       canvas.append(templatesPanel);
     }
 
     templatesPanel.hidden = false;
-    await populateTemplatesList(templatesPanel._listEl, templatesPanel._search.getValue().trim());
+    await _populateTemplatesList(templatesPanel._listEl, templatesPanel._search.getValue().trim());
   }
 
-  // Template draft state — scoped to the panel lifecycle.
-  let draftTemplateCommand = '';
-  let draftTemplateName    = '';
-  let draftTemplatePrompt  = '';
-  let editingTemplateId    = null;
-  let editingTemplateCreatedAt = null;
-
-  function createTemplateId(name) {
-    const sanitized = (name || 'Template').trim()
-      .replace(/[^a-zA-Z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      || 'Template';
-    const unique = Math.random().toString(36).slice(2, 7).padEnd(5, '0');
-    return `${sanitized}-${unique}`;
-  }
-
-  function buildTemplatesPanel() {
-    const panel = createElement('div', 'chat-templates');
-    panel.hidden = true;
-
-    // ── Header ────────────────────────────────────────────────────────────
-    const header = createElement('div', 'chat-templates__header');
-    const headerCopy = createElement('div', 'chat-templates__header-copy');
-    headerCopy.append(
-      createElement('h2', 'chat-templates__title', strings.templates.title),
-      createElement('p', 'chat-templates__subtitle', strings.templates.subtitle)
-    );
-    header.append(headerCopy);
-    panel.append(header);
-
-    // ── Body: left form col + right list col ─────────────────────────────
-    const body = createElement('div', 'chat-templates__body');
-
-    // ── Left: form ───────────────────────────────────────────────────────
-    const formCol = createElement('div', 'chat-templates__form-col');
-    const formHeading = createElement('p', 'chat-templates__form-heading', strings.templates.newTemplateHeading);
-    formCol.append(formHeading);
-
-    const formCard = createElement('div', 'chat-templates__form-card');
-
-    // Command input
-    const commandLabel = createElement('label', 'chat-templates__field-label', strings.templates.commandLabel);
-    const commandInput = document.createElement('input');
-    commandInput.type        = 'text';
-    commandInput.className   = 'chat-templates__command-input';
-    commandInput.placeholder = strings.templates.commandPlaceholder;
-    commandInput.style.webkitUserSelect = 'text';
-    commandInput.style.userSelect       = 'text';
-    commandInput.style.cursor           = 'text';
-    commandInput.addEventListener('input', (e) => {
-      draftTemplateCommand = e.target.value;
-      syncTemplateSaveBtn();
-    });
-    const commandHint = createElement('span', 'chat-templates__field-hint', strings.templates.commandHint);
-
-    // Name input
-    const nameLabel = createElement('label', 'chat-templates__field-label', strings.templates.nameLabel);
-    const nameInput = document.createElement('input');
-    nameInput.type        = 'text';
-    nameInput.className   = 'chat-templates__name-input';
-    nameInput.placeholder = strings.templates.namePlaceholder;
-    nameInput.style.webkitUserSelect = 'text';
-    nameInput.style.userSelect       = 'text';
-    nameInput.style.cursor           = 'text';
-    nameInput.addEventListener('input', (e) => {
-      draftTemplateName = e.target.value;
-      syncTemplateSaveBtn();
-    });
-
-    // Prompt textarea
-    const promptLabel = createElement('label', 'chat-templates__field-label', strings.templates.promptLabel);
-    const promptTextarea = document.createElement('textarea');
-    promptTextarea.className   = 'chat-templates__prompt-textarea';
-    promptTextarea.placeholder = strings.templates.promptPlaceholder;
-    promptTextarea.rows        = 6;
-    promptTextarea.style.webkitUserSelect = 'text';
-    promptTextarea.style.userSelect       = 'text';
-    promptTextarea.style.cursor           = 'text';
-    promptTextarea.addEventListener('input', (e) => {
-      draftTemplatePrompt = e.target.value;
-      syncTemplateSaveBtn();
-    });
-
-    // Form action buttons
-    const formActions = createElement('div', 'chat-templates__form-actions');
-
-    const cancelBtn = createElement('button', 'chat-templates__btn-cancel');
-    cancelBtn.type = 'button';
-    cancelBtn.textContent = strings.templates.cancel;
-
-    const saveBtn = createElement('button', 'chat-templates__btn-save');
-    saveBtn.type = 'button';
-    saveBtn.disabled = true;
-    saveBtn.textContent = strings.templates.save;
-
-    function syncTemplateSaveBtn() {
-      saveBtn.disabled = !draftTemplateCommand.trim() || !draftTemplateName.trim() || !draftTemplatePrompt.trim();
-    }
-
-    function syncTemplateFormChrome() {
-      formHeading.textContent = editingTemplateId
-        ? strings.templates.editTemplateHeading
-        : strings.templates.newTemplateHeading;
-      saveBtn.textContent = editingTemplateId
-        ? strings.templates.update
-        : strings.templates.save;
-    }
-
-    function resetTemplateForm() {
-      editingTemplateId      = null;
-      editingTemplateCreatedAt = null;
-      draftTemplateCommand   = '';
-      draftTemplateName      = '';
-      draftTemplatePrompt    = '';
-      commandInput.value     = '';
-      nameInput.value        = '';
-      promptTextarea.value   = '';
-      syncTemplateFormChrome();
-      syncTemplateSaveBtn();
-    }
-
-    function applyTemplateToForm(template) {
-      editingTemplateId        = template.id;
-      editingTemplateCreatedAt = template.createdAt ?? null;
-      draftTemplateCommand     = template.command ?? '';
-      draftTemplateName        = template.name ?? '';
-      draftTemplatePrompt      = template.prompt ?? '';
-      commandInput.value       = draftTemplateCommand;
-      nameInput.value          = draftTemplateName;
-      promptTextarea.value     = draftTemplatePrompt;
-      syncTemplateFormChrome();
-      syncTemplateSaveBtn();
-      commandInput.focus();
-      commandInput.select();
-    }
-
-    saveBtn.addEventListener('click', async () => {
-      const command = draftTemplateCommand.trim();
-      const name    = draftTemplateName.trim();
-      const prompt  = draftTemplatePrompt.trim();
-      if (!command || !name || !prompt) return;
-
-      const now = new Date().toISOString();
-      const template = {
-        id:        editingTemplateId ?? createTemplateId(name),
-        name,
-        command,
-        prompt,
-        createdAt: editingTemplateCreatedAt ?? now,
-        updatedAt: now
-      };
-
-      try {
-        await window.JoaniumChat.saveTemplate(template);
-      } catch (err) {
-        console.error('[Joanium] Failed to save template:', err);
-        return;
-      }
-
-      resetTemplateForm();
-      await populateTemplatesList(panel._listEl, panel._search.getValue().trim());
-    });
-
-    cancelBtn.addEventListener('click', resetTemplateForm);
-
-    formActions.append(cancelBtn, saveBtn);
-    formCard.append(
-      commandLabel,
-      commandInput,
-      commandHint,
-      nameLabel,
-      nameInput,
-      promptLabel,
-      promptTextarea,
-      formActions
-    );
-    formCol.append(formCard);
-
-    // ── Right: list ──────────────────────────────────────────────────────
-    const listCol = createElement('div', 'chat-templates__list-col');
-    listCol.append(createElement('p', 'chat-templates__list-heading', strings.templates.yourTemplates));
-
-    const searchWrap = createElement('div', 'chat-templates__list-search');
-    const search = createSearchBar({
-      placeholder: strings.templates.searchPlaceholder,
-      onChange: (value) => void populateTemplatesList(listContent, value.trim())
-    });
-    search.element.style.webkitAppRegion = 'no-drag';
-    searchWrap.append(search.element);
-
-    const listContent = createElement('div', 'chat-templates__list-content');
-    listCol.append(searchWrap, listContent);
-
-    body.append(formCol, listCol);
-    panel.append(body);
-
-    panel._listEl     = listContent;
-    panel._search     = search;
-    panel._startEdit  = applyTemplateToForm;
-    panel._resetForm  = resetTemplateForm;
-    syncTemplateFormChrome();
-    return panel;
-  }
-
-  async function populateTemplatesList(listEl, query = '') {
-    listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'chat-templates__skeleton'));
-    }
-
-    let templates;
-    try {
-      templates = await window.JoaniumChat.listTemplates();
-    } catch {
-      templates = [];
-    }
-
-    const normalizedQuery = collapseWhitespace(query).toLowerCase();
-    const filtered = normalizedQuery
-      ? templates.filter((t) => {
-          const haystack = [t.name, t.command, t.prompt]
-            .map((v) => collapseWhitespace(v).toLowerCase())
-            .join('\n');
-          return haystack.includes(normalizedQuery);
-        })
-      : templates;
-
-    listEl.replaceChildren();
-
-    if (filtered.length === 0) {
-      const empty = createElement('div', 'chat-templates__empty');
-      empty.append(
-        createElement('p', 'chat-templates__empty-title',
-          normalizedQuery ? strings.templates.noResults : strings.templates.empty),
-        createElement('p', 'chat-templates__empty-hint',
-          normalizedQuery ? strings.templates.noResultsHint : strings.templates.emptyHint)
-      );
-      listEl.append(empty);
-      return;
-    }
-
-    for (const template of filtered) {
-      listEl.append(buildTemplateCard(template, listEl));
-    }
-  }
-
-  function buildTemplateCard(template, listEl) {
-    const card = createElement('div', 'chat-templates__card');
-
-    const commandBadge = createElement('div', 'chat-templates__card-command', template.command);
-
-    const body     = createElement('div', 'chat-templates__card-body');
-    const nameEl   = createElement('div', 'chat-templates__card-name', template.name);
-    const promptEl = createElement('div', 'chat-templates__card-prompt', template.prompt);
-    body.append(nameEl, promptEl);
-
-    const actions  = createElement('div', 'chat-templates__card-actions');
-
-    const editBtn = createElement('button', 'chat-templates__card-btn');
-    editBtn.type  = 'button';
-    editBtn.setAttribute('aria-label', strings.templates.edit);
-    editBtn.append(createIcon('pencil', 'chat-templates__card-btn-icon'));
-    editBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      try {
-        const full = await window.JoaniumChat.loadTemplate(template.id);
-        templatesPanel?._startEdit(full);
-      } catch (error) {
-        console.error('[Joanium] Failed to load template for editing:', error);
-      }
-    });
-
-    const deleteBtn = createElement('button', 'chat-templates__card-btn chat-templates__card-btn--danger');
-    deleteBtn.type  = 'button';
-    deleteBtn.setAttribute('aria-label', strings.templates.delete);
-    deleteBtn.append(createIcon('trash', 'chat-templates__card-btn-icon'));
-    deleteBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      try {
-        await window.JoaniumChat.deleteTemplate(template.id);
-      } catch (error) {
-        console.error('[Joanium] Failed to delete template:', error);
-      }
-      if (editingTemplateId === template.id) {
-        templatesPanel?._resetForm();
-      }
-      await populateTemplatesList(listEl, templatesPanel?._search.getValue().trim() ?? '');
-    });
-
-    actions.append(editBtn, deleteBtn);
-    card.append(commandBadge, body, actions);
-    return card;
-  }
 
   // ---------------------------------------------------------------------------
   // Skills panel DOM
