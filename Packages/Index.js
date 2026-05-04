@@ -46,6 +46,21 @@ export async function bootstrapApplication() {
   const entryPackage = await createPackage(entryPackageName);
   writeBootLog('bootstrapApplication:entry-package-created', entryPackage.id);
 
+  // Merge IPC handlers from companion packages declared by the entry package.
+  // This keeps cross-package coupling out of individual package modules —
+  // neither Chat nor Templates import each other; the boot layer composes them.
+  const companions = entryPackage.ipcCompanions ?? [];
+  for (const companionId of companions) {
+    writeBootLog('bootstrapApplication:companion-start', companionId);
+    const companion = await createPackage(companionId);
+    entryPackage.ipcHandlers = [
+      ...(entryPackage.ipcHandlers ?? []),
+      ...(companion.ipcHandlers ?? [])
+    ];
+    writeBootLog('bootstrapApplication:companion-merged', companionId);
+  }
+  delete entryPackage.ipcCompanions;
+
   await electronModule.bootElectron({
     rootDirectory,
     entryPackage,

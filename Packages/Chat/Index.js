@@ -2,7 +2,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dialog, shell } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
-import { createTemplateIpcHandlers } from '../Templates/Index.js';
 import { createSkillsStateManager } from './Core/SkillsState.js';
 import { createPersonasStateManager } from './Core/PersonasState.js';
 import { readUserState, writeUserState, mergeUserStates } from '../Shared/UserData/UserData.js';
@@ -25,6 +24,9 @@ export async function createPackage({ rootDirectory }) {
 
   return {
     id: 'Chat',
+    // Packages whose ipcHandlers the boot layer should merge into this window.
+    // This keeps cross-package coupling out of individual package modules.
+    ipcCompanions: ['Templates'],
     rendererPath: path.join(chatDirectory, 'UI', 'Index.html'),
     preloadPath: path.join(chatDirectory, 'UI', 'Preload.js'),
     window: {
@@ -111,7 +113,6 @@ export async function createPackage({ rootDirectory }) {
         channel: 'chat:open-external',
         handler: (_event, url) => { shell.openExternal(url); return null; }
       },
-      ...createTemplateIpcHandlers({ rootDirectory }),
       {
         channel: 'chat:save-profile',
         handler: async (_event, profile) => {
