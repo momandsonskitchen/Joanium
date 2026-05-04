@@ -2,7 +2,10 @@ const en = {
   appName: 'Joanium',
   tabs: {
     chat: 'Chat',
+    history: 'History',
     projects: 'Projects',
+    templates: 'Templates',
+    agents: 'Agents',
     skills: 'Skills',
     personas: 'Personas',
     marketplace: 'Marketplace',
