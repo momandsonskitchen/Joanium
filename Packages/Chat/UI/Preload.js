@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
   loadProject:   (id)       => ipcRenderer.invoke('chat:load-project', id),
   deleteProject: (id)       => ipcRenderer.invoke('chat:delete-project', id),
   selectProjectCover: ()    => ipcRenderer.invoke('chat:select-project-cover'),
-
+  selectProjectDirectory: () => ipcRenderer.invoke('chat:select-project-directory'),
   streamMessage: (request) => ipcRenderer.invoke('chat:stream-message', request),
 
   onStreamChunk: (callback) => {

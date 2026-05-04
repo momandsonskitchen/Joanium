@@ -585,6 +585,15 @@ async function bootstrap() {
   let historyPanel  = null;
   let projectsPanel = null;
 
+  // Projects form state — shared across buildProjectsPanel and buildProjectCard
+  let draftName = '';
+  let draftIcon = '📁';
+  let draftInfo = '';
+  let draftCoverImagePath = '';
+  let draftFolderPath = '';
+  let editingProjectId = null;
+  let editingProjectCreatedAt = null;
+
   // ---------------------------------------------------------------------------
   // Session persistence
   // ---------------------------------------------------------------------------
@@ -930,12 +939,6 @@ async function bootstrap() {
   // Projects panel DOM
   // ---------------------------------------------------------------------------
 
-  const projectIconOptions = [
-    '📁','🚀','💡','🌟','🔬','🎨','🛠️','💻',
-    '📊','📝','🔍','🌍','🎓','💼','🎁','🔔',
-    '⚙️','🧠','👀','🌈','💎','🔥','⚡','❤️'
-  ];
-
   function buildProjectsPanel() {
     const panel = createElement('div', 'chat-projects');
     panel.hidden = true;
@@ -954,20 +957,9 @@ async function bootstrap() {
     const formHeading = createElement('p', 'chat-projects__form-heading', strings.projects.newProjectHeading);
     formCol.append(formHeading);
 
-    let draftName = '';
-    let draftIcon = '📁';
-    let draftInfo = '';
-    let draftCoverImagePath = '';
-    let pickerOpen = false;
-    let editingProjectId = null;
-    let editingProjectCreatedAt = null;
+
 
     const nameRow = createElement('div', 'chat-projects__name-row');
-
-    const iconTrigger = createElement('button', 'chat-projects__icon-trigger');
-    iconTrigger.type  = 'button';
-    iconTrigger.setAttribute('aria-label', strings.projects.iconLabel);
-    iconTrigger.textContent = draftIcon;
 
     const nameInput = document.createElement('input');
     nameInput.type        = 'text';
@@ -981,34 +973,36 @@ async function bootstrap() {
       syncSaveBtn();
     });
 
-    nameRow.append(iconTrigger, nameInput);
+    nameRow.append(nameInput);
 
-    const iconPicker = createElement('div', 'chat-projects__icon-picker');
-    const pickerInner = createElement('div', 'chat-projects__icon-picker-inner');
-
-    for (const emoji of projectIconOptions) {
-      const option = createElement('button', `chat-projects__icon-option${emoji === draftIcon ? ' chat-projects__icon-option--selected' : ''}`);
-      option.type        = 'button';
-      option.textContent = emoji;
-      option.addEventListener('click', () => {
-        draftIcon = emoji;
-        iconTrigger.textContent = draftIcon;
-        for (const opt of pickerInner.children) {
-          opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
+    const folderLabel = createElement('label', 'chat-projects__info-label', strings.projects.folderLabel);
+    
+    const folderRow = createElement('div', 'chat-projects__folder-row');
+    const folderInput = document.createElement('input');
+    folderInput.type = 'text';
+    folderInput.className = 'chat-projects__folder-input';
+    folderInput.placeholder = strings.projects.folderPlaceholder;
+    folderInput.readOnly = true;
+    folderInput.style.webkitUserSelect = 'text';
+    folderInput.style.userSelect = 'text';
+    folderInput.style.cursor = 'text';
+    
+    const folderBtn = createElement('button', 'chat-projects__folder-btn');
+    folderBtn.type = 'button';
+    folderBtn.textContent = strings.projects.selectFolder;
+    folderBtn.addEventListener('click', async () => {
+      try {
+        const selectedPath = await window.JoaniumChat.selectProjectDirectory();
+        if (selectedPath) {
+          draftFolderPath = selectedPath;
+          folderInput.value = draftFolderPath;
         }
-        togglePicker(false);
-      });
-      pickerInner.append(option);
-    }
-
-    iconPicker.append(pickerInner);
-
-    function togglePicker(forceState) {
-      pickerOpen = typeof forceState === 'boolean' ? forceState : !pickerOpen;
-      iconPicker.classList.toggle('chat-projects__icon-picker--open', pickerOpen);
-    }
-
-    iconTrigger.addEventListener('click', togglePicker);
+      } catch (error) {
+        console.error('[Joanium] Failed to select folder:', error);
+      }
+    });
+    
+    folderRow.append(folderInput, folderBtn);
 
     const coverLabel = createElement('label', 'chat-projects__info-label', strings.projects.coverLabel);
     const coverZone = createElement('button', 'chat-projects__cover-zone');
@@ -1092,14 +1086,11 @@ async function bootstrap() {
       draftIcon = '📁';
       draftInfo = '';
       draftCoverImagePath = '';
+      draftFolderPath = '';
       nameInput.value = '';
+      folderInput.value = '';
       infoTextarea.value = '';
-      iconTrigger.textContent = draftIcon;
-      togglePicker(false);
       syncCoverZone();
-      for (const opt of pickerInner.children) {
-        opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
-      }
       syncFormChrome();
       syncSaveBtn();
     }
@@ -1111,14 +1102,11 @@ async function bootstrap() {
       draftIcon = project.icon ?? '📁';
       draftInfo = project.info ?? '';
       draftCoverImagePath = project.coverImagePath ?? '';
+      draftFolderPath = project.folderPath ?? '';
       nameInput.value = draftName;
+      folderInput.value = draftFolderPath;
       infoTextarea.value = draftInfo;
-      iconTrigger.textContent = draftIcon;
-      togglePicker(false);
       syncCoverZone();
-      for (const opt of pickerInner.children) {
-        opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
-      }
       syncFormChrome();
       syncSaveBtn();
       nameInput.focus();
@@ -1136,6 +1124,7 @@ async function bootstrap() {
         name,
         icon: draftIcon,
         info: draftInfo.trim(),
+        folderPath: draftFolderPath.trim(),
         coverImagePath: draftCoverImagePath.trim(),
         createdAt: editingProjectCreatedAt ?? now,
         updatedAt: now
@@ -1162,7 +1151,8 @@ async function bootstrap() {
     const formCard = createElement('div', 'chat-projects__form-card');
     formCard.append(
       nameRow,
-      iconPicker,
+      folderLabel,
+      folderRow,
       coverLabel,
       coverZone,
       infoLabel,

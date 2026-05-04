@@ -92,6 +92,16 @@ export async function createPackage({ rootDirectory }) {
         }
       },
       {
+        channel: 'chat:select-project-directory',
+        handler: async (event) => {
+          const window = event.sender.getOwnerBrowserWindow();
+          const result = await dialog.showOpenDialog(window, {
+            properties: ['openDirectory']
+          });
+          return result.canceled ? null : (result.filePaths[0] ?? null);
+        }
+      },
+      {
         // Fire-and-forget: returns null immediately, then pushes
         // chat:stream-chunk / chat:stream-done / chat:stream-error events
         // back to the renderer via webContents.send.
