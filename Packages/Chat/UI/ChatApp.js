@@ -65,6 +65,49 @@ const iconMarkup = {
       <line x1="22" y1="9" x2="16" y2="15" />
       <line x1="16" y1="9" x2="22" y2="15" />
     </svg>
+  `,
+  tabChat: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  `,
+  tabProjects: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
+  `,
+  tabSkills: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+    </svg>
+  `,
+  tabPersonas: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+    </svg>
+  `,
+  tabMarketplace: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  `,
+  tabEvents: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  `,
+  tabUsage: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
   `
 };
 
@@ -710,36 +753,34 @@ async function bootstrap() {
 
   const shell = createElement('main', 'chat-shell');
 
-  // ── Stage ─────────────────────────────────────────────────────────────────
-  const stage = createElement('section', 'chat-stage');
-  canvas = createElement('div', 'chat-stage__canvas');
-
-  const topbar = createElement('div', 'chat-stage__topbar');
-  const tabs = createElement('div', 'chat-stage__tabs');
-  const tabIndicator = createElement('div', 'chat-stage__tab-indicator');
-  tabs.append(tabIndicator);
+  // ── Sidebar ────────────────────────────────────────────────────────────────
+  const sidebar = createElement('nav', 'chat-sidebar');
+  const sidebarTabs = createElement('div', 'chat-sidebar__tabs');
+  const tabIndicator = createElement('div', 'chat-sidebar__indicator');
+  sidebarTabs.append(tabIndicator);
 
   function moveIndicatorToTab(tabEl, animate) {
     if (!tabEl) return;
     if (!animate) tabIndicator.style.transition = 'none';
-    const tabsRect = tabs.getBoundingClientRect();
+    const tabsRect = sidebarTabs.getBoundingClientRect();
     const tabRect = tabEl.getBoundingClientRect();
-    tabIndicator.style.left = `${tabRect.left - tabsRect.left}px`;
-    tabIndicator.style.width = `${tabRect.width}px`;
+    tabIndicator.style.top = `${tabRect.top - tabsRect.top}px`;
+    tabIndicator.style.height = `${tabRect.height}px`;
     if (!animate) {
-      tabIndicator.offsetHeight; // force reflow before re-enabling transition
+      tabIndicator.offsetHeight;
       tabIndicator.style.transition = '';
     }
   }
 
   for (const [id, label] of Object.entries(strings.tabs)) {
     const isActive = id === 'chat';
-    const tab = createElement(
-      'button',
-      `chat-stage__tab${isActive ? ' chat-stage__tab--active' : ''}`,
-      label
-    );
+    const iconKey = `tab${id.charAt(0).toUpperCase()}${id.slice(1)}`;
+    const tab = createElement('button', `chat-sidebar__tab${isActive ? ' chat-sidebar__tab--active' : ''}`);
     tab.type = 'button';
+    tab.setAttribute('aria-label', label);
+    const iconEl = createElement('span', 'chat-sidebar__tab-icon');
+    iconEl.innerHTML = iconMarkup[iconKey] ?? '';
+    tab.append(iconEl);
     if (isActive) activeTabEl = tab;
 
     tab.addEventListener('click', () => {
@@ -747,21 +788,26 @@ async function bootstrap() {
         if (id === 'chat') clearConversation();
         return;
       }
-      activeTabEl?.classList.remove('chat-stage__tab--active');
-      tab.classList.add('chat-stage__tab--active');
+      activeTabEl?.classList.remove('chat-sidebar__tab--active');
+      tab.classList.add('chat-sidebar__tab--active');
       activeTabEl = tab;
       moveIndicatorToTab(tab, true);
       if (id === 'chat') clearConversation();
     });
 
-    tabs.append(tab);
+    sidebarTabs.append(tab);
   }
-  topbar.append(tabs);
 
-  const topbarAvatar = createElement('button', 'chat-stage__topbar-avatar');
-  topbarAvatar.type = 'button';
-  topbarAvatar.append(createElement('span', 'chat-stage__topbar-initials', getInitials(payload.user.profile.name)));
-  tabs.append(topbarAvatar);
+  const sidebarAvatar = createElement('button', 'chat-sidebar__avatar');
+  sidebarAvatar.type = 'button';
+  sidebarAvatar.setAttribute('aria-label', strings.appName);
+  sidebarAvatar.append(createElement('span', 'chat-sidebar__avatar-initials', getInitials(payload.user.profile.name)));
+
+  sidebar.append(sidebarTabs, sidebarAvatar);
+
+  // ── Stage ─────────────────────────────────────────────────────────────────
+  const stage = createElement('section', 'chat-stage');
+  canvas = createElement('div', 'chat-stage__canvas');
 
   title = createElement(
     'h1', 'chat-stage__title',
@@ -824,11 +870,11 @@ async function bootstrap() {
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
 
-  scroll.append(topbar, logoEl, title, subtitle, thread);
+  scroll.append(logoEl, title, subtitle, thread);
   bottom.append(composer);
   canvas.append(scroll, bottom);
   stage.append(canvas);
-  shell.append(stage);
+  shell.append(sidebar, stage);
   root.replaceChildren(shell);
 
   requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
