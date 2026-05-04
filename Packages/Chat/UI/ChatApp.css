@@ -3145,3 +3145,236 @@ textarea {
 
 .chat-settings__save-status--ok  { color: #5cad7a; }
 .chat-settings__save-status--err { color: #d96060; }
+/* ==========================================================================
+   Skills & Personas Panels
+   ========================================================================== */
+
+.chat-skills,
+.chat-personas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.chat-skills__header,
+.chat-personas__header {
+  padding: 60px 48px 20px;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+}
+
+.chat-skills__body,
+.chat-personas__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.chat-skills__list-col,
+.chat-personas__list-col {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0 40px;
+  border-right: 1px solid rgba(170, 134, 104, 0.09);
+  overflow: hidden;
+}
+
+.chat-skills__list-search,
+.chat-personas__list-search {
+  padding: 0 20px 14px;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+
+.chat-skills__list-content,
+.chat-personas__list-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 14px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-skills__list-content::-webkit-scrollbar,
+.chat-personas__list-content::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.chat-skills__list-content::-webkit-scrollbar-thumb,
+.chat-personas__list-content::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-thumb);
+}
+
+.chat-skills__viewer-col,
+.chat-personas__viewer-col {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 24px 48px 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  -webkit-app-region: drag;
+}
+
+.chat-skills__viewer-col::-webkit-scrollbar,
+.chat-personas__viewer-col::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.chat-skills__viewer-col::-webkit-scrollbar-thumb,
+.chat-personas__viewer-col::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-thumb);
+}
+
+.chat-skills__viewer-card,
+.chat-personas__viewer-card {
+  max-width: 800px;
+  min-height: 100%;
+  -webkit-app-region: no-drag;
+  animation: chat-fade-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.chat-skills__viewer-empty,
+.chat-personas__viewer-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--color-chat-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  border: 2px dashed rgba(170, 134, 104, 0.12);
+  border-radius: 24px;
+}
+
+.chat-skills__viewer-header,
+.chat-personas__viewer-header {
+  margin-bottom: 24px;
+}
+
+.chat-skills__viewer-namespace,
+.chat-personas__viewer-namespace {
+  font-size: 11px;
+  font-weight: 720;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-chat-text-label);
+  margin-bottom: 4px;
+}
+
+.chat-skills__viewer-title,
+.chat-personas__viewer-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 520;
+  letter-spacing: -0.04em;
+  color: var(--color-chat-text-title);
+}
+
+.chat-personas__viewer-badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(var(--color-accent-rgb), 0.1);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.chat-skills__viewer-meta,
+.chat-personas__viewer-actions {
+  margin-bottom: 32px;
+}
+
+.chat-skills__viewer-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(var(--color-accent-rgb), 0.06);
+  border-radius: 12px;
+}
+
+.chat-skills__viewer-trigger-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-chat-text-label);
+}
+
+.chat-skills__viewer-trigger-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.chat-personas__viewer-activate {
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 650;
+  background: rgba(var(--color-accent-rgb), 0.1);
+  color: var(--color-accent);
+  transition: all 140ms ease;
+}
+
+.chat-personas__viewer-activate:hover {
+  background: rgba(var(--color-accent-rgb), 0.18);
+  transform: translateY(-1px);
+}
+
+.chat-personas__viewer-activate--active {
+  background: var(--color-accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(var(--color-accent-rgb), 0.25);
+}
+
+.chat-skills__viewer-content,
+.chat-personas__viewer-content {
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(170, 134, 104, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.chat-skills__viewer-pre,
+.chat-personas__viewer-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--color-chat-text-secondary);
+}
+
+/* List Item Card Refinements */
+.chat-skills__card,
+.chat-personas__card {
+  padding: 14px 16px;
+  gap: 8px;
+}
+
+.chat-skills__card--active,
+.chat-personas__card--selected {
+  background: rgba(var(--color-accent-rgb), 0.08);
+  border-color: rgba(var(--color-accent-rgb), 0.2);
+}
+
+.chat-skills__card-name,
+.chat-personas__card-name {
+  font-size: 15px;
+}

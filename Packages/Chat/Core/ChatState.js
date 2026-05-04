@@ -490,9 +490,15 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
 
 async function requestChatCompletionStream({ user, providers, request, onChunk }) {
   const messages     = sanitizeConversationMessages(request?.messages);
-  const systemPrompt = typeof request?.projectInfo === 'string' && request.projectInfo.trim()
-    ? request.projectInfo.trim()
-    : null;
+  const parts = [];
+  if (typeof request?.persona === 'string' && request.persona.trim()) {
+    parts.push(request.persona.trim());
+  }
+  if (typeof request?.projectInfo === 'string' && request.projectInfo.trim()) {
+    parts.push(request.projectInfo.trim());
+  }
+
+  const systemPrompt = parts.length > 0 ? parts.join('\n\n') : null;
 
   if (messages.length === 0) {
     throw new Error('A message is required to start the chat.');

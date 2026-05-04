@@ -42,5 +42,13 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
   saveTemplate:   (template) => ipcRenderer.invoke('chat:save-template', template),
   listTemplates:  ()         => ipcRenderer.invoke('chat:list-templates'),
   loadTemplate:   (id)       => ipcRenderer.invoke('chat:load-template', id),
-  deleteTemplate: (id)       => ipcRenderer.invoke('chat:delete-template', id)
+  deleteTemplate: (id)       => ipcRenderer.invoke('chat:delete-template', id),
+
+  listSkills:  ()                       => ipcRenderer.invoke('chat:list-skills'),
+  loadSkill:   (namespace, filename)    => ipcRenderer.invoke('chat:load-skill', namespace, filename),
+  deleteSkill: (namespace, filename)    => ipcRenderer.invoke('chat:delete-skill', namespace, filename),
+
+  listPersonas:  ()                     => ipcRenderer.invoke('chat:list-personas'),
+  loadPersona:   (namespace, filename)  => ipcRenderer.invoke('chat:load-persona', namespace, filename),
+  deletePersona: (namespace, filename)  => ipcRenderer.invoke('chat:delete-persona', namespace, filename)
 });

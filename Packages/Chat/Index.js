@@ -3,6 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { dialog, shell } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
 import { createTemplateStateManager } from '../Templates/Core/TemplateState.js';
+import { createSkillsStateManager } from './Core/SkillsState.js';
+import { createPersonasStateManager } from './Core/PersonasState.js';
 import { readUserState, writeUserState, mergeUserStates } from '../Shared/UserData/UserData.js';
 
 const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -10,6 +12,8 @@ const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
 export async function createPackage({ rootDirectory }) {
   const chatStateManager     = createChatStateManager({ rootDirectory });
   const templateStateManager = createTemplateStateManager({ rootDirectory });
+  const skillsStateManager   = createSkillsStateManager({ rootDirectory });
+  const personasStateManager = createPersonasStateManager({ rootDirectory });
   const usesOverlayControls = process.platform !== 'darwin';
   const overlayOptions = {
     height: 48,
@@ -132,6 +136,30 @@ export async function createPackage({ rootDirectory }) {
           await writeUserState(rootDirectory, next);
           return next.profile;
         }
+      },
+      {
+        channel: 'chat:list-skills',
+        handler: async () => skillsStateManager.listSkills()
+      },
+      {
+        channel: 'chat:load-skill',
+        handler: async (_event, namespace, filename) => skillsStateManager.loadSkill(namespace, filename)
+      },
+      {
+        channel: 'chat:delete-skill',
+        handler: async (_event, namespace, filename) => skillsStateManager.deleteSkill(namespace, filename)
+      },
+      {
+        channel: 'chat:list-personas',
+        handler: async () => personasStateManager.listPersonas()
+      },
+      {
+        channel: 'chat:load-persona',
+        handler: async (_event, namespace, filename) => personasStateManager.loadPersona(namespace, filename)
+      },
+      {
+        channel: 'chat:delete-persona',
+        handler: async (_event, namespace, filename) => personasStateManager.deletePersona(namespace, filename)
       },
       {
         // Fire-and-forget: returns null immediately, then pushes
