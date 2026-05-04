@@ -9,7 +9,7 @@ export async function createPackage({ rootDirectory }) {
   const usesOverlayControls = process.platform !== 'darwin';
   const overlayOptions = {
     height: 48,
-    color: '#ece0f8'
+    color: '#00000000'
   };
 
   if (process.platform === 'win32') {
