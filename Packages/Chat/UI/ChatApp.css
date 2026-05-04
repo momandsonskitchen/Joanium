@@ -80,6 +80,21 @@ textarea {
   overflow: hidden;
 }
 
+/* ── Window drag region — fills the top of the stage so the user can grab
+   the window anywhere in the empty space to the left of the overlay
+   controls. pointer-events: none keeps CSS interactions unaffected;
+   -webkit-app-region: drag is honoured by Electron at the native level. ── */
+.chat-stage__drag-region {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  -webkit-app-region: drag;
+  z-index: 10;
+  pointer-events: none;
+}
+
 .chat-stage__scroll {
   height: 100%;
   overflow-y: auto;

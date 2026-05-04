@@ -894,7 +894,9 @@ async function bootstrap() {
 
   scroll.append(logoEl, title, subtitle, thread);
   bottom.append(composer);
-  canvas.append(scroll, bottom);
+
+  const dragRegion = createElement('div', 'chat-stage__drag-region');
+  canvas.append(dragRegion, scroll, bottom);
   stage.append(canvas);
   shell.append(sidebar, stage);
   root.replaceChildren(shell);
