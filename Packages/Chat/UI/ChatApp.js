@@ -1786,6 +1786,16 @@ async function bootstrap() {
     }
 
     view.append(nameEl, versionEl, descEl, metaCard);
+
+    const sponsorBtn = createElement('a', 'chat-profile__about-sponsor');
+    sponsorBtn.textContent = '♥ Sponsor';
+    sponsorBtn.href = '#';
+    sponsorBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.JoaniumChat.openExternal('https://github.com/sponsors/withinjoel');
+    });
+    view.append(sponsorBtn);
+
     return view;
   }
 

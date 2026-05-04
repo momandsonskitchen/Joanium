@@ -2325,6 +2325,33 @@ textarea {
   letter-spacing: -0.015em;
 }
 
+.chat-profile__about-sponsor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: #c0529a;
+  background: rgba(192, 82, 154, 0.10);
+  text-decoration: none;
+  border: 1px solid rgba(192, 82, 154, 0.18);
+  transition:
+    background-color 130ms ease,
+    border-color 130ms ease,
+    color 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-profile__about-sponsor:hover {
+  background: rgba(192, 82, 154, 0.18);
+  border-color: rgba(192, 82, 154, 0.35);
+  color: #d060ae;
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    Settings panel  (mirrors Projects layout: full-width header + two-col body)
    ════════════════════════════════════════════════════════════════════════════ */

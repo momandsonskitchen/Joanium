@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dialog } from 'electron';
+import { dialog, shell } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
 
 const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -100,6 +100,10 @@ export async function createPackage({ rootDirectory }) {
           });
           return result.canceled ? null : (result.filePaths[0] ?? null);
         }
+      },
+      {
+        channel: 'chat:open-external',
+        handler: (_event, url) => { shell.openExternal(url); return null; }
       },
       {
         // Fire-and-forget: returns null immediately, then pushes

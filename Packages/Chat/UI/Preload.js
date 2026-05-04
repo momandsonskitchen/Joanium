@@ -33,5 +33,7 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
     ipcRenderer.removeAllListeners('chat:stream-chunk');
     ipcRenderer.removeAllListeners('chat:stream-done');
     ipcRenderer.removeAllListeners('chat:stream-error');
-  }
+  },
+
+  openExternal: (url) => ipcRenderer.invoke('chat:open-external', url)
 });
