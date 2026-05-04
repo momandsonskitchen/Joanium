@@ -109,7 +109,7 @@ export function sanitizeIncomingUserState(candidateState) {
   });
 }
 
-export function getUserDataFilePath(rootDirectory) {
+function getUserDataFilePath(rootDirectory) {
   return path.join(rootDirectory, 'Data', 'User.json');
 }
 

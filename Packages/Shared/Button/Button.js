@@ -35,5 +35,5 @@ export function createButton({
     button.addEventListener('click', onClick);
   }
 
-  return button;
+  return { element: button };
 }

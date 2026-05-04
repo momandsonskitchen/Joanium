@@ -112,14 +112,9 @@ function getInitials(name) {
   return '?';
 }
 
-function createDraftEntry(prompt, existingEntry) {
+function createDraftEntry(prompt) {
   const normalized = collapseWhitespace(prompt);
   if (!normalized) return null;
-
-  if (existingEntry) {
-    return { ...existingEntry, prompt: normalized, updatedAt: new Date().toISOString() };
-  }
-
   const sentence = normalized.split(/[.!?]/).find(Boolean) ?? normalized;
   return {
     title: truncate(collapseWhitespace(sentence), 48),
@@ -409,8 +404,8 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
     scroller.append(group);
   }
 
-  attachCustomScrollbar(panel, scroller);
-  return panel;
+  const scrollbar = attachCustomScrollbar(panel, scroller);
+  return { element: panel, dispose: scrollbar.dispose };
 }
 
 // ---------------------------------------------------------------------------
@@ -428,7 +423,6 @@ async function bootstrap() {
   let activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
 
   let draftValue = '';
-  let lastSelectedEntry = null;
   let isSending = false;
   let accText = '';
   let accThinking = '';
@@ -448,6 +442,7 @@ async function bootstrap() {
 
   // Model picker state
   let modelPickerPanel = null;
+  let modelPickerScrollbar = null;
   let modelPickerOpen = false;
   let modelButton = null;
 
@@ -480,7 +475,7 @@ async function bootstrap() {
     if (modelPickerOpen) { closeModelPicker(); return; }
 
     if (!modelPickerPanel) {
-      modelPickerPanel = createModelPickerPanel({
+      const picker = createModelPickerPanel({
         providers: payload.providers,
         userProviderDetails: payload.user?.providers?.details ?? {},
         onSelect(provider, model) {
@@ -493,6 +488,8 @@ async function bootstrap() {
           closeModelPicker();
         }
       });
+      modelPickerPanel = picker.element;
+      modelPickerScrollbar = picker.dispose;
     }
 
     syncPickerActiveStates();
@@ -577,17 +574,9 @@ async function bootstrap() {
     composerField.setSelectionRange(draftValue.length, draftValue.length);
   }
 
-  function setDraft(nextDraft, selectedEntry = null) {
-    draftValue = nextDraft;
-    lastSelectedEntry = selectedEntry;
-    syncComposer();
-    focusComposer();
-  }
-
   function clearConversation() {
     messages = [];
     draftValue = '';
-    lastSelectedEntry = null;
     isSending = false;
     window.JoaniumChat.removeStreamListeners();
     // Stop any active TTS when conversation is cleared
@@ -650,7 +639,7 @@ async function bootstrap() {
     const prompt = draftValue.trim();
     if (!prompt || isSending) return;
 
-    const draftEntry = createDraftEntry(prompt, lastSelectedEntry);
+    const draftEntry = createDraftEntry(prompt);
     if (draftEntry) void window.JoaniumChat.saveRecentPrompt(draftEntry);
 
     messages = [
@@ -661,7 +650,6 @@ async function bootstrap() {
     ];
 
     draftValue = '';
-    lastSelectedEntry = null;
     isSending = true;
     accText = '';
     accThinking = '';
