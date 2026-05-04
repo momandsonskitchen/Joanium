@@ -4,6 +4,7 @@ Build/
 Data/Agents/
 Data/Channels/
 Data/Projects/
+Data/Templates/
 Data/Chats/
 Data/Memories/
 Data/User.json
