@@ -2,12 +2,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dialog, shell } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
+import { createTemplateStateManager } from '../Templates/Core/TemplateState.js';
 import { readUserState, writeUserState, mergeUserStates } from '../Shared/UserData/UserData.js';
 
 const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export async function createPackage({ rootDirectory }) {
-  const chatStateManager = createChatStateManager({ rootDirectory });
+  const chatStateManager     = createChatStateManager({ rootDirectory });
+  const templateStateManager = createTemplateStateManager({ rootDirectory });
   const usesOverlayControls = process.platform !== 'darwin';
   const overlayOptions = {
     height: 48,
@@ -105,6 +107,22 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:open-external',
         handler: (_event, url) => { shell.openExternal(url); return null; }
+      },
+      {
+        channel: 'chat:save-template',
+        handler: async (_event, template) => templateStateManager.saveTemplate(template)
+      },
+      {
+        channel: 'chat:list-templates',
+        handler: async () => templateStateManager.listTemplates()
+      },
+      {
+        channel: 'chat:load-template',
+        handler: async (_event, id) => templateStateManager.loadTemplate(id)
+      },
+      {
+        channel: 'chat:delete-template',
+        handler: async (_event, id) => templateStateManager.deleteTemplate(id)
       },
       {
         channel: 'chat:save-profile',

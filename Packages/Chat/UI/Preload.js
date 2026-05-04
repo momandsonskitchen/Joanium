@@ -37,5 +37,10 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
 
   openExternal: (url) => ipcRenderer.invoke('chat:open-external', url),
 
-  saveProfile: (profile) => ipcRenderer.invoke('chat:save-profile', profile)
+  saveProfile: (profile) => ipcRenderer.invoke('chat:save-profile', profile),
+
+  saveTemplate:   (template) => ipcRenderer.invoke('chat:save-template', template),
+  listTemplates:  ()         => ipcRenderer.invoke('chat:list-templates'),
+  loadTemplate:   (id)       => ipcRenderer.invoke('chat:load-template', id),
+  deleteTemplate: (id)       => ipcRenderer.invoke('chat:delete-template', id)
 });
