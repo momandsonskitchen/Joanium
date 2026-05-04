@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import https from 'node:https';
 import http from 'node:http';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
@@ -580,6 +580,7 @@ export function createChatStateManager({ rootDirectory }) {
           sessions.push({
             id: session.id,
             title: session.title,
+            pinned: session.pinned ?? false,
             createdAt: session.createdAt,
             updatedAt: session.updatedAt,
             messageCount: Array.isArray(session.messages) ? session.messages.length : 0
@@ -589,7 +590,11 @@ export function createChatStateManager({ rootDirectory }) {
         }
       }
 
-      return sessions.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      return sessions.sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      });
     },
 
     async loadSession(id) {
@@ -598,6 +603,33 @@ export function createChatStateManager({ rootDirectory }) {
       const filePath = path.join(chatsDirectory, `${safeId}.json`);
       const raw = await readFile(filePath, 'utf8');
       return JSON.parse(raw);
+    },
+
+    async deleteSession(id) {
+      const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      await unlink(filePath);
+    },
+
+    async renameSession(id, newTitle) {
+      const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      const raw = await readFile(filePath, 'utf8');
+      const session = JSON.parse(raw);
+      session.title = String(newTitle).trim() || session.title;
+      session.updatedAt = new Date().toISOString();
+      await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
+      return session;
+    },
+
+    async pinSession(id, pinned) {
+      const safeId = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const filePath = path.join(chatsDirectory, `${safeId}.json`);
+      const raw = await readFile(filePath, 'utf8');
+      const session = JSON.parse(raw);
+      session.pinned = Boolean(pinned);
+      await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
+      return session;
     },
 
     // Streaming entry point — resolves once the stream ends (or rejects on error).

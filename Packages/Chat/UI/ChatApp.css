@@ -1133,17 +1133,15 @@ textarea {
 
 .chat-history__card {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   width: 100%;
   max-width: 720px;
-  padding: 15px 20px;
   margin-bottom: 6px;
   border-radius: 20px;
   background: var(--color-chat-card-surface);
   box-shadow: var(--shadow-chat-card);
-  text-align: left;
-  gap: 5px;
+  overflow: hidden;
   transition:
     transform 130ms ease,
     box-shadow 130ms ease;
@@ -1153,6 +1151,106 @@ textarea {
 .chat-history__card:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-chat-card), 0 6px 20px rgba(100, 60, 140, 0.08);
+}
+
+/* Body — primary click target */
+.chat-history__card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 15px 12px 15px 20px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: inherit;
+}
+
+/* Actions — hidden until hover */
+.chat-history__card-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.chat-history__card:hover .chat-history__card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Individual action button */
+.chat-history__card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-chat-text-muted);
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.chat-history__card-btn:hover {
+  background: var(--color-chat-hover-surface);
+  color: var(--color-chat-text-title);
+  transform: translateY(-1px);
+}
+
+.chat-history__card-btn--pinned {
+  color: var(--color-accent);
+}
+
+.chat-history__card-btn--pinned:hover {
+  color: var(--color-accent);
+}
+
+.chat-history__card-btn--danger:hover {
+  background: rgba(220, 60, 40, 0.09);
+  color: #c0392b;
+}
+
+.chat-history__card-btn-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+  pointer-events: none;
+}
+
+.chat-history__card-btn-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Inline rename input */
+.chat-history__card-title-input {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-chat-text-title);
+  letter-spacing: -0.015em;
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px solid rgba(var(--color-accent-rgb), 0.45);
+  outline: none;
+  padding: 0 0 1px;
+  width: 100%;
+  border-radius: 0;
+  resize: none;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .chat-history__card-title {

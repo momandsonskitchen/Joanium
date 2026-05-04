@@ -47,6 +47,18 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, id) => chatStateManager.loadSession(id)
       },
       {
+        channel: 'chat:delete-session',
+        handler: async (_event, id) => chatStateManager.deleteSession(id)
+      },
+      {
+        channel: 'chat:rename-session',
+        handler: async (_event, id, newTitle) => chatStateManager.renameSession(id, newTitle)
+      },
+      {
+        channel: 'chat:pin-session',
+        handler: async (_event, id, pinned) => chatStateManager.pinSession(id, pinned)
+      },
+      {
         // Fire-and-forget: returns null immediately, then pushes
         // chat:stream-chunk / chat:stream-done / chat:stream-error events
         // back to the renderer via webContents.send.

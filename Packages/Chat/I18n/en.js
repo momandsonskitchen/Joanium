@@ -35,8 +35,13 @@ const en = {
     today: 'Today',
     yesterday: 'Yesterday',
     earlier: 'Earlier',
+    pinned: 'Pinned',
     messages: '{count} messages',
-    oneMessage: '1 message'
+    oneMessage: '1 message',
+    pin: 'Pin',
+    unpin: 'Unpin',
+    rename: 'Rename',
+    deleteChat: 'Delete'
   }
 };
 

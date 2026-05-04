@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
   saveSession: (session) => ipcRenderer.invoke('chat:save-session', session),
   listSessions: () => ipcRenderer.invoke('chat:list-sessions'),
   loadSession: (id) => ipcRenderer.invoke('chat:load-session', id),
+  deleteSession: (id) => ipcRenderer.invoke('chat:delete-session', id),
+  renameSession: (id, newTitle) => ipcRenderer.invoke('chat:rename-session', id, newTitle),
+  pinSession: (id, pinned) => ipcRenderer.invoke('chat:pin-session', id, pinned),
 
   streamMessage: (request) => ipcRenderer.invoke('chat:stream-message', request),
 

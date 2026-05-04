@@ -134,6 +134,30 @@ const iconMarkup = {
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
     </svg>
+  `,
+  pin: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 17v5" />
+      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v3.76z" />
+    </svg>
+  `,
+  pinFill: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 17v5" />
+      <path fill="currentColor" stroke="none" d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v3.76z" />
+    </svg>
+  `,
+  pencil: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+    </svg>
+  `,
+  trash: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </svg>
   `
 };
 
@@ -685,12 +709,18 @@ async function bootstrap() {
       return;
     }
 
-    const groups = { today: [], yesterday: [], earlier: [] };
+    // Pinned sessions go first; non-pinned are grouped by date
+    const groups = { pinned: [], today: [], yesterday: [], earlier: [] };
     for (const session of sessions) {
-      groups[getSessionGroup(session.updatedAt)].push(session);
+      if (session.pinned) {
+        groups.pinned.push(session);
+      } else {
+        groups[getSessionGroup(session.updatedAt)].push(session);
+      }
     }
 
     const groupLabels = {
+      pinned:    strings.history.pinned,
       today:     strings.history.today,
       yesterday: strings.history.yesterday,
       earlier:   strings.history.earlier
@@ -703,24 +733,122 @@ async function bootstrap() {
       section.append(createElement('div', 'chat-history__section-label', groupLabels[groupKey]));
 
       for (const session of groupSessions) {
-        const card     = createElement('button', 'chat-history__card');
-        card.type      = 'button';
-        const msgCount = session.messageCount ?? 0;
-        const msgLabel = msgCount === 1
-          ? strings.history.oneMessage
-          : formatText(strings.history.messages, { count: msgCount });
-
-        card.append(
-          createElement('div', 'chat-history__card-title', session.title || strings.appName),
-          createElement('div', 'chat-history__card-meta', `${msgLabel} · ${formatSessionTime(session.updatedAt)}`)
-        );
-
-        card.addEventListener('click', () => void loadHistorySession(session.id));
-        section.append(card);
+        section.append(buildSessionCard(session, contentEl, query));
       }
 
       contentEl.append(section);
     }
+  }
+
+  function buildSessionCard(session, contentEl, query) {
+    const card = createElement('div', 'chat-history__card');
+
+    // ── Body: main click target ──────────────────────────────────────────
+    const body = createElement('button', 'chat-history__card-body');
+    body.type = 'button';
+
+    const msgCount = session.messageCount ?? 0;
+    const msgLabel = msgCount === 1
+      ? strings.history.oneMessage
+      : formatText(strings.history.messages, { count: msgCount });
+
+    const titleEl = createElement('div', 'chat-history__card-title', session.title || strings.appName);
+    const metaEl  = createElement('div', 'chat-history__card-meta', `${msgLabel} · ${formatSessionTime(session.updatedAt)}`);
+    body.append(titleEl, metaEl);
+    body.addEventListener('click', () => void loadHistorySession(session.id));
+
+    // ── Actions ──────────────────────────────────────────────────────────
+    const actions = createElement('div', 'chat-history__card-actions');
+
+    // Pin / Unpin
+    const pinBtn  = createElement('button', `chat-history__card-btn${session.pinned ? ' chat-history__card-btn--pinned' : ''}`);
+    pinBtn.type   = 'button';
+    pinBtn.setAttribute('aria-label', session.pinned ? strings.history.unpin : strings.history.pin);
+    const pinIcon = createElement('span', 'chat-history__card-btn-icon');
+    pinIcon.innerHTML = session.pinned ? iconMarkup.pinFill : iconMarkup.pin;
+    pinBtn.append(pinIcon);
+    pinBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        await window.JoaniumChat.pinSession(session.id, !session.pinned);
+      } catch (err) {
+        console.error('[Joanium] Failed to pin session:', err);
+      }
+      await populateHistoryPanel(contentEl, query);
+    });
+
+    // Rename
+    const renameBtn  = createElement('button', 'chat-history__card-btn');
+    renameBtn.type   = 'button';
+    renameBtn.setAttribute('aria-label', strings.history.rename);
+    const renameIcon = createElement('span', 'chat-history__card-btn-icon');
+    renameIcon.innerHTML = iconMarkup.pencil;
+    renameBtn.append(renameIcon);
+    renameBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startInlineRename(session, titleEl, contentEl, query);
+    });
+
+    // Delete
+    const deleteBtn  = createElement('button', 'chat-history__card-btn chat-history__card-btn--danger');
+    deleteBtn.type   = 'button';
+    deleteBtn.setAttribute('aria-label', strings.history.deleteChat);
+    const deleteIcon = createElement('span', 'chat-history__card-btn-icon');
+    deleteIcon.innerHTML = iconMarkup.trash;
+    deleteBtn.append(deleteIcon);
+    deleteBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        await window.JoaniumChat.deleteSession(session.id);
+        if (session.id === sessionId) clearConversation();
+      } catch (err) {
+        console.error('[Joanium] Failed to delete session:', err);
+      }
+      await populateHistoryPanel(contentEl, query);
+    });
+
+    actions.append(pinBtn, renameBtn, deleteBtn);
+    card.append(body, actions);
+    return card;
+  }
+
+  function startInlineRename(session, titleEl, contentEl, query) {
+    const input = document.createElement('input');
+    input.className = 'chat-history__card-title-input';
+    input.type      = 'text';
+    input.value     = session.title || '';
+    input.style.webkitAppRegion = 'no-drag';
+    input.style.webkitUserSelect = 'text';
+    input.style.userSelect = 'text';
+    input.style.cursor = 'text';
+
+    let committed = false;
+
+    const finish = async (save) => {
+      if (committed) return;
+      committed = true;
+      input.removeEventListener('blur', blurHandler);
+      const newTitle = input.value.trim();
+      if (save && newTitle && newTitle !== session.title) {
+        try {
+          await window.JoaniumChat.renameSession(session.id, newTitle);
+        } catch (err) {
+          console.error('[Joanium] Failed to rename session:', err);
+        }
+      }
+      await populateHistoryPanel(contentEl, query);
+    };
+
+    const blurHandler = () => void finish(true);
+    input.addEventListener('blur', blurHandler);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter')  { e.preventDefault(); void finish(true); }
+      if (e.key === 'Escape') { e.preventDefault(); void finish(false); }
+    });
+
+    titleEl.replaceWith(input);
+    input.focus();
+    input.select();
   }
 
   async function loadHistorySession(id) {
