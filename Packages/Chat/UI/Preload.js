@@ -9,6 +9,14 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
   renameSession: (id, newTitle) => ipcRenderer.invoke('chat:rename-session', id, newTitle),
   pinSession: (id, pinned) => ipcRenderer.invoke('chat:pin-session', id, pinned),
 
+  saveProject:   (project) => ipcRenderer.invoke('chat:save-project', project),
+  listProjects:  ()         => ipcRenderer.invoke('chat:list-projects'),
+  loadProject:   (id)       => ipcRenderer.invoke('chat:load-project', id),
+  deleteProject: (id)       => ipcRenderer.invoke('chat:delete-project', id),
+  selectFolder:  ()         => ipcRenderer.invoke('chat:select-folder'),
+  selectProjectCover: ()    => ipcRenderer.invoke('chat:select-project-cover'),
+  openProjectFolder: (folderPath) => ipcRenderer.invoke('chat:open-project-folder', folderPath),
+
   streamMessage: (request) => ipcRenderer.invoke('chat:stream-message', request),
 
   onStreamChunk: (callback) => {

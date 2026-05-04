@@ -298,7 +298,7 @@ async function* parseSSE(nodeResponse) {
 // every text or thinking token that arrives.
 // ---------------------------------------------------------------------------
 
-async function streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, onChunk }) {
+async function streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk }) {
   const apiKey = resolveCredential(provider, providerDetails);
 
   if (!apiKey) {
@@ -311,13 +311,19 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
     ? `${streamEndpoint}&alt=sse`
     : `${streamEndpoint}?alt=sse`;
 
-  const streamBodyStr = JSON.stringify({
+  const googleBody = {
     contents: messages.map((message) => ({
       role: message.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: message.content }]
     })),
     generationConfig: { temperature: 0.7 }
-  });
+  };
+
+  if (systemPrompt) {
+    googleBody.systemInstruction = { parts: [{ text: systemPrompt }] };
+  }
+
+  const streamBodyStr = JSON.stringify(googleBody);
 
   const response = await nodeRequest(streamUrl, {
     method: 'POST',
@@ -349,7 +355,7 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
   }
 }
 
-async function streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, onChunk }) {
+async function streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk }) {
   const apiKey = resolveCredential(provider, providerDetails);
 
   if (!apiKey) {
@@ -368,6 +374,10 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
       content: [{ type: 'text', text: message.content }]
     }))
   };
+
+  if (systemPrompt) {
+    requestBody.system = systemPrompt;
+  }
 
   if (supportsThinking) {
     requestBody.thinking = { type: 'enabled', budget_tokens: thinkingBudget };
@@ -414,7 +424,7 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
   }
 }
 
-async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, onChunk }) {
+async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk }) {
   const headers = { 'content-type': 'application/json' };
 
   if (provider.requiresApiKey) {
@@ -427,9 +437,13 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
     headers[provider.authHeader] = `${provider.authPrefix ?? ''}${apiKey}`;
   }
 
+  const oaiMessages = systemPrompt
+    ? [{ role: 'system', content: systemPrompt }, ...messages]
+    : messages;
+
   const streamOaiBodyStr = JSON.stringify({
     model: model.id,
-    messages: messages.map((message) => ({
+    messages: oaiMessages.map((message) => ({
       role: message.role,
       content: message.content
     })),
@@ -475,7 +489,10 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
 }
 
 async function requestChatCompletionStream({ user, providers, request, onChunk }) {
-  const messages = sanitizeConversationMessages(request?.messages);
+  const messages     = sanitizeConversationMessages(request?.messages);
+  const systemPrompt = typeof request?.projectInfo === 'string' && request.projectInfo.trim()
+    ? request.projectInfo.trim()
+    : null;
 
   if (messages.length === 0) {
     throw new Error('A message is required to start the chat.');
@@ -526,11 +543,11 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   };
 
   if (provider.id === 'google') {
-    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, onChunk });
+    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk });
   } else if (provider.id === 'anthropic') {
-    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, onChunk });
+    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk });
   } else if (openAiCompatibleProviders.has(provider.id)) {
-    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, onChunk });
+    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk });
   } else {
     throw new Error(`${provider.label} chat is not wired up yet.`);
   }
@@ -539,7 +556,8 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
 }
 
 export function createChatStateManager({ rootDirectory }) {
-  const chatsDirectory = path.join(rootDirectory, 'Data', 'Chats');
+  const chatsDirectory    = path.join(rootDirectory, 'Data', 'Chats');
+  const projectsDirectory = path.join(rootDirectory, 'Data', 'Projects');
 
   return {
     async getBootstrapPayload() {
@@ -654,6 +672,66 @@ export function createChatStateManager({ rootDirectory }) {
       } catch (error) {
         onError(error);
       }
+    },
+
+    // -------------------------------------------------------------------------
+    // Projects
+    // -------------------------------------------------------------------------
+
+    async saveProject(project) {
+      if (!project?.id) return null;
+      await mkdir(projectsDirectory, { recursive: true });
+      const filePath = path.join(projectsDirectory, `${project.id}.json`);
+      await writeFile(filePath, `${JSON.stringify(project, null, 2)}\n`, 'utf8');
+      return project;
+    },
+
+    async listProjects() {
+      let files;
+      try {
+        files = await readdir(projectsDirectory);
+      } catch {
+        return [];
+      }
+
+      const projects = [];
+
+      for (const file of files) {
+        if (!file.endsWith('.json')) continue;
+        try {
+          const raw = await readFile(path.join(projectsDirectory, file), 'utf8');
+          const project = JSON.parse(raw);
+          projects.push({
+            id:             project.id,
+            name:           project.name,
+            icon:           project.icon ?? '',
+            info:           project.info ?? '',
+            folderPath:     project.folderPath ?? '',
+            coverImagePath: project.coverImagePath ?? '',
+            createdAt:      project.createdAt,
+            updatedAt:      project.updatedAt
+          });
+        } catch {
+          // Skip corrupt files silently
+        }
+      }
+
+      return projects.sort(
+        (a, b) => new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0)
+      );
+    },
+
+    async loadProject(id) {
+      const safeId   = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const filePath = path.join(projectsDirectory, `${safeId}.json`);
+      const raw      = await readFile(filePath, 'utf8');
+      return JSON.parse(raw);
+    },
+
+    async deleteProject(id) {
+      const safeId   = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+      const filePath = path.join(projectsDirectory, `${safeId}.json`);
+      await unlink(filePath);
     }
   };
 }

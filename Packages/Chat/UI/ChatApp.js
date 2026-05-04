@@ -158,6 +158,25 @@ const iconMarkup = {
       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
       <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     </svg>
+  `,
+  imageUpload: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" />
+      <path d="m21 15-5-5L5 21" />
+    </svg>
+  `,
+  folderOpen: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1" />
+      <path d="M3 7v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9.5" />
+    </svg>
+  `,
+  close: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
   `
 };
 
@@ -544,6 +563,9 @@ async function bootstrap() {
   let scroll        = null;
   let bottom        = null;
   let newChatBtn    = null;
+  let projectPill   = null;
+  let projectNameEl = null;
+  let projectMetaEl = null;
   let messages      = [];
 
   // Model picker state
@@ -556,8 +578,12 @@ async function bootstrap() {
   let lastSelectedEntry = null;
   const tabElements     = {};
 
+  // Active project context — injected as system prompt when set.
+  let activeProject = null;
+
   // History panel — created lazily on first open.
-  let historyPanel = null;
+  let historyPanel  = null;
+  let projectsPanel = null;
 
   // ---------------------------------------------------------------------------
   // Session persistence
@@ -595,7 +621,8 @@ async function bootstrap() {
   function showChatView() {
     scroll.hidden = false;
     bottom.hidden = false;
-    if (historyPanel) historyPanel.hidden = true;
+    if (historyPanel)  historyPanel.hidden  = true;
+    if (projectsPanel) projectsPanel.hidden = true;
   }
 
   async function showHistoryView() {
@@ -610,6 +637,100 @@ async function bootstrap() {
     historyPanel.hidden = false;
     historyPanel._search.clear();
     await populateHistoryPanel(historyPanel._contentEl);
+  }
+
+  async function showProjectsView() {
+    scroll.hidden = true;
+    bottom.hidden = true;
+    if (historyPanel) historyPanel.hidden = true;
+
+    if (!projectsPanel) {
+      projectsPanel = buildProjectsPanel();
+      canvas.append(projectsPanel);
+    }
+
+    projectsPanel.hidden = false;
+    await populateProjectsList(projectsPanel._listEl, projectsPanel._search.getValue().trim());
+  }
+
+  function createProjectId() {
+    const now = new Date();
+    const p2 = (value) => String(value).padStart(2, '0');
+    const p3 = (value) => String(value).padStart(3, '0');
+    return `${now.getFullYear()}-${p2(now.getMonth() + 1)}-${p2(now.getDate())}_${p2(now.getHours())}-${p2(now.getMinutes())}-${p2(now.getSeconds())}-${p3(now.getMilliseconds())}`;
+  }
+
+  function getProjectCoverUrl(coverImagePath) {
+    const normalizedPath = collapseWhitespace(coverImagePath);
+    if (!normalizedPath) return '';
+    if (normalizedPath.startsWith('file://')) return normalizedPath;
+
+    const slashPath = normalizedPath.replace(/\\/g, '/');
+    if (/^[a-zA-Z]:\//.test(slashPath)) {
+      return encodeURI(`file:///${slashPath}`);
+    }
+
+    return encodeURI(`file://${slashPath}`);
+  }
+
+  function buildProjectContext(project) {
+    if (!project) return '';
+
+    const lines = [
+      formatText(strings.projects.systemContextName, { name: project.name ?? '' })
+    ];
+    const folderPath = collapseWhitespace(project.folderPath);
+    const info = collapseWhitespace(project.info);
+
+    if (folderPath) {
+      lines.push(formatText(strings.projects.systemContextFolder, { folder: folderPath }));
+    }
+
+    if (info) {
+      lines.push(formatText(strings.projects.systemContextInfo, { info }));
+    }
+
+    return lines.filter(Boolean).join('\n');
+  }
+
+  function setActiveProject(project) {
+    activeProject = project ? {
+      id: project.id,
+      name: project.name ?? '',
+      icon: project.icon ?? '',
+      info: project.info ?? '',
+      folderPath: project.folderPath ?? '',
+      coverImagePath: project.coverImagePath ?? ''
+    } : null;
+
+    syncActiveProjectPill();
+
+    if (projectsPanel && !projectsPanel.hidden) {
+      void populateProjectsList(projectsPanel._listEl, projectsPanel._search.getValue().trim());
+    }
+  }
+
+  function clearActiveProject() {
+    setActiveProject(null);
+  }
+
+  function syncActiveProjectPill() {
+    if (!projectPill || !projectNameEl || !projectMetaEl) return;
+
+    if (!activeProject) {
+      projectPill.hidden = true;
+      projectNameEl.textContent = '';
+      projectMetaEl.textContent = '';
+      return;
+    }
+
+    const meta = collapseWhitespace(activeProject.folderPath)
+      || collapseWhitespace(activeProject.info)
+      || strings.projects.activeHint;
+
+    projectPill.hidden = false;
+    projectNameEl.textContent = activeProject.name;
+    projectMetaEl.textContent = meta;
   }
 
   // Programmatic tab switch — updates sidebar visual without triggering side-effects.
@@ -809,6 +930,433 @@ async function bootstrap() {
 
     actions.append(pinBtn, renameBtn, deleteBtn);
     card.append(body, actions);
+    return card;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Projects panel DOM
+  // ---------------------------------------------------------------------------
+
+  const projectIconOptions = [
+    '📁','🚀','💡','🌟','🔬','🎨','🛠️','💻',
+    '📊','📝','🔍','🌍','🎓','💼','🎁','🔔',
+    '⚙️','🧠','👀','🌈','💎','🔥','⚡','❤️'
+  ];
+
+  function buildProjectsPanel() {
+    const panel = createElement('div', 'chat-projects');
+    panel.hidden = true;
+
+    const header = createElement('div', 'chat-projects__header');
+    const headerCopy = createElement('div', 'chat-projects__header-copy');
+    headerCopy.append(
+      createElement('h2', 'chat-projects__title', strings.projects.title),
+      createElement('p', 'chat-projects__subtitle', strings.projects.subtitle)
+    );
+    header.append(headerCopy);
+    panel.append(header);
+
+    const body = createElement('div', 'chat-projects__body');
+    const formCol = createElement('div', 'chat-projects__form-col');
+    formCol.append(createElement('p', 'chat-projects__form-heading', strings.projects.newProjectHeading));
+
+    let draftName    = '';
+    let draftIcon    = '📁';
+    let draftInfo    = '';
+    let draftFolderPath = '';
+    let draftCoverImagePath = '';
+    let pickerOpen   = false;
+
+    const nameRow = createElement('div', 'chat-projects__name-row');
+
+    const iconTrigger = createElement('button', 'chat-projects__icon-trigger');
+    iconTrigger.type  = 'button';
+    iconTrigger.setAttribute('aria-label', strings.projects.iconLabel);
+    iconTrigger.textContent = draftIcon;
+
+    const nameInput = document.createElement('input');
+    nameInput.type        = 'text';
+    nameInput.className   = 'chat-projects__name-input';
+    nameInput.placeholder = strings.projects.namePlaceholder;
+    nameInput.style.webkitUserSelect = 'text';
+    nameInput.style.userSelect       = 'text';
+    nameInput.style.cursor           = 'text';
+    nameInput.addEventListener('input', (e) => {
+      draftName = e.target.value;
+      syncSaveBtn();
+    });
+
+    nameRow.append(iconTrigger, nameInput);
+
+    const iconPicker = createElement('div', 'chat-projects__icon-picker');
+    const pickerInner = createElement('div', 'chat-projects__icon-picker-inner');
+
+    for (const emoji of projectIconOptions) {
+      const option = createElement('button', `chat-projects__icon-option${emoji === draftIcon ? ' chat-projects__icon-option--selected' : ''}`);
+      option.type        = 'button';
+      option.textContent = emoji;
+      option.addEventListener('click', () => {
+        draftIcon = emoji;
+        iconTrigger.textContent = draftIcon;
+        for (const opt of pickerInner.children) {
+          opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
+        }
+        togglePicker(false);
+      });
+      pickerInner.append(option);
+    }
+
+    iconPicker.append(pickerInner);
+
+    function togglePicker(forceState) {
+      pickerOpen = typeof forceState === 'boolean' ? forceState : !pickerOpen;
+      iconPicker.classList.toggle('chat-projects__icon-picker--open', pickerOpen);
+    }
+
+    iconTrigger.addEventListener('click', togglePicker);
+
+    const coverLabel = createElement('label', 'chat-projects__info-label', strings.projects.coverLabel);
+    const coverZone = createElement('button', 'chat-projects__cover-zone');
+    coverZone.type = 'button';
+    coverZone.setAttribute('aria-label', strings.projects.coverHint);
+
+    const coverPreview = document.createElement('img');
+    coverPreview.className = 'chat-projects__cover-preview';
+    coverPreview.alt = '';
+
+    const coverPlaceholder = createElement('div', 'chat-projects__cover-placeholder');
+    coverPlaceholder.append(
+      createIcon('imageUpload', 'chat-projects__cover-icon'),
+      createElement('span', 'chat-projects__cover-hint', strings.projects.coverHint)
+    );
+
+    const coverOverlay = createElement('div', 'chat-projects__cover-overlay');
+    coverOverlay.append(
+      createIcon('imageUpload', 'chat-projects__cover-icon'),
+      createElement('span', 'chat-projects__cover-hint', strings.projects.changeCover)
+    );
+
+    coverZone.append(coverPreview, coverPlaceholder, coverOverlay);
+
+    function syncCoverZone() {
+      const coverUrl = getProjectCoverUrl(draftCoverImagePath);
+      coverZone.classList.toggle('chat-projects__cover-zone--filled', Boolean(coverUrl));
+      coverPreview.src = coverUrl;
+    }
+
+    coverZone.addEventListener('click', async () => {
+      try {
+        const selectedPath = await window.JoaniumChat.selectProjectCover();
+        if (!selectedPath) return;
+        draftCoverImagePath = selectedPath;
+        syncCoverZone();
+      } catch (error) {
+        console.error('[Joanium] Failed to select project cover:', error);
+      }
+    });
+
+    const folderLabel = createElement('label', 'chat-projects__info-label', strings.projects.folderLabel);
+    const folderRow = createElement('div', 'chat-projects__folder-row');
+    const folderInput = document.createElement('input');
+    folderInput.type = 'text';
+    folderInput.className = 'chat-projects__folder-input';
+    folderInput.placeholder = strings.projects.folderPlaceholder;
+    folderInput.readOnly = true;
+
+    const folderBtn = createElement('button', 'chat-projects__folder-btn');
+    folderBtn.type = 'button';
+    folderBtn.textContent = strings.projects.browseFolder;
+    folderBtn.addEventListener('click', async () => {
+      try {
+        const selectedPath = await window.JoaniumChat.selectFolder();
+        if (!selectedPath) return;
+        draftFolderPath = selectedPath;
+        folderInput.value = draftFolderPath;
+      } catch (error) {
+        console.error('[Joanium] Failed to select project folder:', error);
+      }
+    });
+
+    folderRow.append(folderInput, folderBtn);
+
+    const infoLabel = createElement('label', 'chat-projects__info-label', strings.projects.infoLabel);
+
+    const infoTextarea = document.createElement('textarea');
+    infoTextarea.className   = 'chat-projects__info-textarea';
+    infoTextarea.placeholder = strings.projects.infoPlaceholder;
+    infoTextarea.rows        = 5;
+    infoTextarea.style.webkitUserSelect = 'text';
+    infoTextarea.style.userSelect       = 'text';
+    infoTextarea.style.cursor           = 'text';
+    infoTextarea.addEventListener('input', (e) => { draftInfo = e.target.value; });
+
+    const formActions = createElement('div', 'chat-projects__form-actions');
+
+    const cancelBtn  = createElement('button', 'chat-projects__btn-cancel');
+    cancelBtn.type   = 'button';
+    cancelBtn.textContent = strings.projects.cancel;
+
+    const saveBtn  = createElement('button', 'chat-projects__btn-save');
+    saveBtn.type   = 'button';
+    saveBtn.disabled = true;
+    saveBtn.textContent = strings.projects.save;
+    saveBtn.addEventListener('click', async () => {
+      const name = draftName.trim();
+      if (!name) return;
+
+      const now = new Date();
+      const p2 = (n) => String(n).padStart(2, '0');
+      const p3 = (n) => String(n).padStart(3, '0');
+      const id  = `${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}_${p2(now.getHours())}-${p2(now.getMinutes())}-${p2(now.getSeconds())}-${p3(now.getMilliseconds())}`;
+
+      const project = {
+        id,
+        name,
+        icon:           draftIcon,
+        info:           draftInfo.trim(),
+        folderPath:     draftFolderPath.trim(),
+        coverImagePath: draftCoverImagePath.trim(),
+        createdAt:      now.toISOString(),
+        updatedAt:      now.toISOString()
+      };
+
+      try {
+        await window.JoaniumChat.saveProject(project);
+      } catch (err) {
+        console.error('[Joanium] Failed to save project:', err);
+        return;
+      }
+
+      resetProjectForm();
+      await populateProjectsList(panel._listEl, panel._search.getValue().trim());
+    });
+
+    function syncSaveBtn() {
+      saveBtn.disabled = !draftName.trim();
+    }
+
+    function resetProjectForm() {
+      draftName = '';
+      draftIcon = '📁';
+      draftInfo = '';
+      draftFolderPath = '';
+      draftCoverImagePath = '';
+      nameInput.value = '';
+      infoTextarea.value = '';
+      folderInput.value = '';
+      iconTrigger.textContent = draftIcon;
+      togglePicker(false);
+      syncCoverZone();
+      for (const opt of pickerInner.children) {
+        opt.classList.toggle('chat-projects__icon-option--selected', opt.textContent === draftIcon);
+      }
+      syncSaveBtn();
+    }
+
+    cancelBtn.addEventListener('click', resetProjectForm);
+
+    formActions.append(cancelBtn, saveBtn);
+    const formCard = createElement('div', 'chat-projects__form-card');
+    formCard.append(
+      nameRow,
+      iconPicker,
+      coverLabel,
+      coverZone,
+      folderLabel,
+      folderRow,
+      infoLabel,
+      infoTextarea,
+      formActions
+    );
+    formCol.append(formCard);
+
+    const listCol = createElement('div', 'chat-projects__list-col');
+    listCol.append(createElement('p', 'chat-projects__list-heading', strings.projects.yourProjects));
+
+    const searchWrap = createElement('div', 'chat-projects__list-search');
+    const search = createSearchBar({
+      placeholder: strings.projects.searchPlaceholder,
+      onChange: (value) => void populateProjectsList(listContent, value.trim())
+    });
+    search.element.style.webkitAppRegion = 'no-drag';
+    searchWrap.append(search.element);
+
+    const listContent = createElement('div', 'chat-projects__list-content');
+    listCol.append(searchWrap, listContent);
+
+    body.append(formCol, listCol);
+    panel.append(body);
+
+    panel._listEl = listContent;
+    panel._search = search;
+    syncCoverZone();
+    return panel;
+  }
+
+  async function populateProjectsList(listEl, query = '') {
+    listEl.replaceChildren();
+    for (let i = 0; i < 3; i++) {
+      listEl.append(createElement('div', 'chat-projects__skeleton'));
+    }
+
+    let projects;
+    try {
+      projects = await window.JoaniumChat.listProjects();
+    } catch {
+      projects = [];
+    }
+
+    const normalizedQuery = collapseWhitespace(query).toLowerCase();
+    const filteredProjects = normalizedQuery
+      ? projects.filter((project) => {
+          const haystack = [
+            project.name,
+            project.info,
+            project.folderPath
+          ]
+            .map((value) => collapseWhitespace(value).toLowerCase())
+            .join('\n');
+          return haystack.includes(normalizedQuery);
+        })
+      : projects;
+
+    listEl.replaceChildren();
+
+    if (filteredProjects.length === 0) {
+      const empty = createElement('div', 'chat-projects__empty');
+      empty.append(
+        createElement(
+          'p',
+          'chat-projects__empty-title',
+          normalizedQuery ? strings.projects.noResults : strings.projects.empty
+        ),
+        createElement(
+          'p',
+          'chat-projects__empty-hint',
+          normalizedQuery ? strings.projects.noResultsHint : strings.projects.emptyHint
+        )
+      );
+      listEl.append(empty);
+      return;
+    }
+
+    for (const project of filteredProjects) {
+      listEl.append(buildProjectCard(project, listEl));
+    }
+  }
+
+  function buildProjectCard(project, listEl) {
+    const isActiveProject = activeProject?.id === project.id;
+    const card = createElement(
+      'div',
+      `chat-projects__card${isActiveProject ? ' chat-projects__card--active' : ''}`
+    );
+
+    const coverUrl = getProjectCoverUrl(project.coverImagePath);
+    const iconEl = createElement(
+      'div',
+      `chat-projects__card-icon${coverUrl ? ' chat-projects__card-icon--image' : ''}`,
+      coverUrl ? '' : (project.icon || '📁')
+    );
+
+    if (coverUrl) {
+      const coverImage = document.createElement('img');
+      coverImage.className = 'chat-projects__card-cover-img';
+      coverImage.src = coverUrl;
+      coverImage.alt = '';
+      iconEl.append(coverImage);
+    }
+
+    const body    = createElement('div', 'chat-projects__card-body');
+    const nameEl  = createElement('div', 'chat-projects__card-name', project.name);
+    const dateStr = new Date(project.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    const metaWrap = createElement('div', 'chat-projects__card-meta-wrap');
+    metaWrap.append(
+      createElement('div', 'chat-projects__card-meta', formatText(strings.projects.created, { date: dateStr }))
+    );
+
+    const folderPath = collapseWhitespace(project.folderPath);
+    if (folderPath) {
+      metaWrap.append(
+        createElement(
+          'div',
+          'chat-projects__card-folder',
+          formatText(strings.projects.folderMeta, { folder: truncate(folderPath, 68) })
+        )
+      );
+    }
+
+    body.append(nameEl, metaWrap);
+
+    async function openProject() {
+      let fullProject;
+      try {
+        fullProject = await window.JoaniumChat.loadProject(project.id);
+      } catch (error) {
+        console.error('[Joanium] Failed to load project:', error);
+        return;
+      }
+
+      setActiveProject(fullProject);
+      clearConversation();
+      switchToTab('chat');
+      showChatView();
+      focusComposer();
+    }
+
+    const openBtn  = createElement(
+      'button',
+      `chat-projects__open-btn${isActiveProject ? ' chat-projects__open-btn--active' : ''}`
+    );
+    openBtn.type   = 'button';
+    openBtn.textContent = isActiveProject ? strings.projects.active : strings.projects.open;
+    openBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      void openProject();
+    });
+
+    const actions   = createElement('div', 'chat-projects__card-actions');
+
+    if (folderPath) {
+      const folderBtn = createElement('button', 'chat-projects__card-btn');
+      folderBtn.type = 'button';
+      folderBtn.setAttribute('aria-label', strings.projects.openFolder);
+      folderBtn.append(createIcon('folderOpen', 'chat-projects__card-btn-icon'));
+      folderBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          await window.JoaniumChat.openProjectFolder(folderPath);
+        } catch (error) {
+          console.error('[Joanium] Failed to open project folder:', error);
+        }
+      });
+      actions.append(folderBtn);
+    }
+
+    const deleteBtn = createElement('button', 'chat-projects__card-btn chat-projects__card-btn--danger');
+    deleteBtn.type  = 'button';
+    deleteBtn.setAttribute('aria-label', strings.projects.delete);
+    deleteBtn.append(createIcon('trash', 'chat-projects__card-btn-icon'));
+    deleteBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        await window.JoaniumChat.deleteProject(project.id);
+      } catch (error) {
+        console.error('[Joanium] Failed to delete project:', error);
+      }
+
+      if (activeProject?.id === project.id) {
+        clearActiveProject();
+      }
+
+      await populateProjectsList(listEl, projectsPanel?._search.getValue().trim() ?? '');
+    });
+
+    actions.append(deleteBtn);
+    card.addEventListener('click', () => {
+      void openProject();
+    });
+    card.append(iconEl, body, openBtn, actions);
     return card;
   }
 
@@ -1139,9 +1687,10 @@ async function bootstrap() {
 
     const historyToSend = messages.slice(0, -1).map(({ role, content }) => ({ role, content }));
     void window.JoaniumChat.streamMessage({
-      messages:   historyToSend,
-      providerId: activeProvider?.id ?? null,
-      modelId:    activeModel?.id    ?? null
+      messages:    historyToSend,
+      providerId:  activeProvider?.id ?? null,
+      modelId:     activeModel?.id    ?? null,
+      projectInfo: buildProjectContext(activeProject) || null
     });
   }
 
@@ -1198,6 +1747,8 @@ async function bootstrap() {
         showChatView();
       } else if (id === 'history') {
         void showHistoryView();
+      } else if (id === 'projects') {
+        void showProjectsView();
       }
     });
 
@@ -1227,12 +1778,29 @@ async function bootstrap() {
   logoEl = logoResult.element;
   logoEl.classList.add('chat-stage__logo');
 
-  subtitle = createElement('p', 'chat-stage__subtitle', 'You\u2019re doing great \u2014 let\u2019s make today count.');
+  subtitle = createElement('p', 'chat-stage__subtitle', strings.heroSubtitle);
   thread   = createElement('section', 'chat-thread');
   thread.hidden = true;
 
-  // ── Composer ──────────────────────────────────────────────────────────────
   composer      = createElement('section', 'chat-composer');
+  projectPill   = createElement('div', 'chat-composer__project');
+  projectPill.hidden = true;
+  const projectIconEl = createElement('span', 'chat-composer__project-icon');
+  projectIconEl.append(createIcon('tabProjects', 'chat-composer__project-icon-glyph'));
+  const projectBodyEl = createElement('div', 'chat-composer__project-body');
+  projectNameEl = createElement('div', 'chat-composer__project-name');
+  projectMetaEl = createElement('div', 'chat-composer__project-meta');
+  projectBodyEl.append(projectNameEl, projectMetaEl);
+  const projectClearBtn = createElement('button', 'chat-composer__project-clear');
+  projectClearBtn.type = 'button';
+  projectClearBtn.setAttribute('aria-label', strings.projects.removeActive);
+  projectClearBtn.append(createIcon('close', 'chat-composer__project-clear-icon'));
+  projectClearBtn.addEventListener('click', () => {
+    clearActiveProject();
+    focusComposer();
+  });
+  projectPill.append(projectIconEl, projectBodyEl, projectClearBtn);
+
   composerField = document.createElement('textarea');
   composerField.className   = 'chat-composer__field';
   composerField.placeholder = strings.composer.placeholder;
@@ -1285,7 +1853,7 @@ async function bootstrap() {
 
   composerSubmit.append(modelButton, sendButton);
   composerFooter.append(composerActions, composerSubmit);
-  composer.append(composerField, composerFooter);
+  composer.append(projectPill, composerField, composerFooter);
 
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
@@ -1300,6 +1868,7 @@ async function bootstrap() {
   root.replaceChildren(shell);
 
   requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
+  syncActiveProjectPill();
   syncComposer();
   renderThread();
 }

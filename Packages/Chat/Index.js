@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { dialog, shell } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
 
 const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -57,6 +58,64 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:pin-session',
         handler: async (_event, id, pinned) => chatStateManager.pinSession(id, pinned)
+      },
+      {
+        channel: 'chat:save-project',
+        handler: async (_event, project) => chatStateManager.saveProject(project)
+      },
+      {
+        channel: 'chat:list-projects',
+        handler: async () => chatStateManager.listProjects()
+      },
+      {
+        channel: 'chat:load-project',
+        handler: async (_event, id) => chatStateManager.loadProject(id)
+      },
+      {
+        channel: 'chat:delete-project',
+        handler: async (_event, id) => chatStateManager.deleteProject(id)
+      },
+      {
+        channel: 'chat:select-folder',
+        handler: async (event) => {
+          const window = event.sender.getOwnerBrowserWindow();
+          const result = await dialog.showOpenDialog(window, {
+            properties: ['openDirectory']
+          });
+
+          return result.canceled ? null : (result.filePaths[0] ?? null);
+        }
+      },
+      {
+        channel: 'chat:select-project-cover',
+        handler: async (event) => {
+          const window = event.sender.getOwnerBrowserWindow();
+          const result = await dialog.showOpenDialog(window, {
+            properties: ['openFile'],
+            filters: [
+              {
+                name: 'Images',
+                extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'avif', 'svg']
+              }
+            ]
+          });
+
+          return result.canceled ? null : (result.filePaths[0] ?? null);
+        }
+      },
+      {
+        channel: 'chat:open-project-folder',
+        handler: async (_event, folderPath) => {
+          if (typeof folderPath !== 'string' || !folderPath.trim()) {
+            return { ok: false, error: 'missing-folder-path' };
+          }
+
+          const error = await shell.openPath(folderPath);
+          return {
+            ok: error.length === 0,
+            error: error || null
+          };
+        }
       },
       {
         // Fire-and-forget: returns null immediately, then pushes
