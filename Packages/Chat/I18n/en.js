@@ -27,6 +27,9 @@ const en = {
   history: {
     title: 'History',
     newChat: 'New Chat',
+    search: 'Search conversations…',
+    noResults: 'No matching conversations',
+    noResultsHint: 'Try a different search term.',
     empty: 'No conversations yet',
     emptyHint: 'Your past chats will appear here.',
     today: 'Today',

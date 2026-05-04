@@ -1,0 +1,132 @@
+@import "../Common/Common.css";
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Joanium — SearchBar shared component
+   Adapts to any screen that imports Common.css.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.joanium-search {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Magnifier icon ─────────────────────────────────────────────────────── */
+
+.joanium-search__icon {
+  position: absolute;
+  left: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+  transition: color var(--transition-base);
+  z-index: 1;
+}
+
+.joanium-search__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.joanium-search:focus-within .joanium-search__icon {
+  color: var(--color-accent);
+}
+
+/* ── Input field ────────────────────────────────────────────────────────── */
+
+.joanium-search__input {
+  width: 100%;
+  height: 46px;
+  padding: 0 50px 0 44px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 480;
+  color: var(--color-text);
+  letter-spacing: -0.012em;
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 120, 210, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 4px 14px rgba(80, 35, 105, 0.07);
+  transition:
+    background-color var(--transition-base),
+    box-shadow var(--transition-base);
+  cursor: text;
+}
+
+.joanium-search__input::placeholder {
+  color: var(--color-text-placeholder);
+  font-weight: 440;
+}
+
+.joanium-search__input:focus {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-border-focus),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 6px 22px var(--color-shadow-accent);
+}
+
+/* ── Clear (×) button ───────────────────────────────────────────────────── */
+
+.joanium-search__clear {
+  position: absolute;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-tinted);
+  color: var(--color-text-muted);
+  border: none;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: scale(0.72);
+  pointer-events: none;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.joanium-search__clear--visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.joanium-search__clear:hover {
+  background: rgba(var(--color-accent-rgb), 0.16);
+  color: var(--color-text-accent);
+}
+
+.joanium-search__clear:active {
+  transform: scale(0.90);
+}
+
+.joanium-search__clear-icon {
+  display: inline-flex;
+  width: 11px;
+  height: 11px;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.joanium-search__clear-icon svg {
+  width: 100%;
+  height: 100%;
+}

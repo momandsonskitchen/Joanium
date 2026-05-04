@@ -5,6 +5,7 @@ import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
 import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 
 const dictionaries = { en, de, fr };
 
@@ -127,6 +128,12 @@ const iconMarkup = {
       <line x1="12" y1="20" x2="12" y2="4" />
       <line x1="6" y1="20" x2="6" y2="14" />
     </svg>
+  `,
+  newChat: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
   `
 };
 
@@ -172,18 +179,6 @@ function getInitials(name) {
   }
 
   return '?';
-}
-
-function createDraftEntry(prompt) {
-  const normalized = collapseWhitespace(prompt);
-  if (!normalized) return null;
-  const sentence = normalized.split(/[.!?]/).find(Boolean) ?? normalized;
-  return {
-    title: truncate(collapseWhitespace(sentence), 48),
-    summary: truncate(normalized, 112),
-    prompt: normalized,
-    updatedAt: new Date().toISOString()
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -465,11 +460,11 @@ function generateSessionId() {
 function getSessionGroup(isoString) {
   const date = new Date(isoString);
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfToday    = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startOfDay      = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-  if (startOfDay.getTime() === startOfToday.getTime()) return 'today';
+  if (startOfDay.getTime() === startOfToday.getTime())     return 'today';
   if (startOfDay.getTime() === startOfYesterday.getTime()) return 'yesterday';
   return 'earlier';
 }
@@ -477,9 +472,9 @@ function getSessionGroup(isoString) {
 function formatSessionTime(isoString) {
   const date = new Date(isoString);
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfToday    = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startOfDay      = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
   if (startOfDay.getTime() >= startOfToday.getTime()) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -494,50 +489,50 @@ function formatSessionTime(isoString) {
 // bootstrap — entry point; builds the full UI tree.
 // ---------------------------------------------------------------------------
 async function bootstrap() {
-  const payload = await window.JoaniumChat.bootstrap();
-  const strings = getDictionary(payload.user.locale);
-  const root = document.getElementById('app');
-  const firstName = getFirstName(payload.user.profile.name, strings.appName);
+  const payload    = await window.JoaniumChat.bootstrap();
+  const strings    = getDictionary(payload.user.locale);
+  const root       = document.getElementById('app');
+  const firstName  = getFirstName(payload.user.profile.name, strings.appName);
   const greetingKey = getGreetingKey(new Date());
 
-  let activeProvider = getPreferredProvider(payload);
-  let activeModel = activeProvider?.models?.[0] ?? null;
+  let activeProvider   = getPreferredProvider(payload);
+  let activeModel      = activeProvider?.models?.[0] ?? null;
   let activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
 
-  let draftValue = '';
-  let isSending = false;
-  let accText = '';
+  let draftValue  = '';
+  let isSending   = false;
+  let accText     = '';
   let accThinking = '';
 
   // Session tracking — null means this is an unsaved new conversation.
-  let sessionId = null;
-  let sessionCreatedAt = null;
+  let sessionId          = null;
+  let sessionCreatedAt   = null;
 
   // DOM refs set during build
   let composerField = null;
-  let sendButton = null;
-  let thread = null;
-  let title = null;
-  let subtitle = null;
-  let logoEl = null;
-  let composer = null;
-  let canvas = null;
-  let scroll = null;
-  let bottom = null;
-  let messages = [];
+  let sendButton    = null;
+  let thread        = null;
+  let title         = null;
+  let subtitle      = null;
+  let logoEl        = null;
+  let composer      = null;
+  let canvas        = null;
+  let scroll        = null;
+  let bottom        = null;
+  let newChatBtn    = null;
+  let messages      = [];
 
   // Model picker state
-  let modelPickerPanel = null;
-  let modelPickerScrollbar = null;
-  let modelPickerOpen = false;
-  let modelButton = null;
+  let modelPickerPanel    = null;
+  let modelPickerOpen     = false;
+  let modelButton         = null;
 
   // Tab state
-  let activeTabEl = null;
+  let activeTabEl       = null;
   let lastSelectedEntry = null;
-  const tabElements = {};
+  const tabElements     = {};
 
-  // History panel — created lazily the first time the history tab is opened.
+  // History panel — created lazily on first open.
   let historyPanel = null;
 
   // ---------------------------------------------------------------------------
@@ -549,7 +544,7 @@ async function bootstrap() {
     const firstUser = messages.find((m) => m.role === 'user');
     if (!firstUser) return;
 
-    const title = truncate(collapseWhitespace(firstUser.content), 60);
+    const sessionTitle = truncate(collapseWhitespace(firstUser.content), 60);
     const now = new Date().toISOString();
 
     const sessionMessages = messages
@@ -561,11 +556,11 @@ async function bootstrap() {
       });
 
     await window.JoaniumChat.saveSession({
-      id: sessionId,
-      title,
+      id:        sessionId,
+      title:     sessionTitle,
       createdAt: sessionCreatedAt ?? now,
       updatedAt: now,
-      messages: sessionMessages
+      messages:  sessionMessages
     });
   }
 
@@ -589,6 +584,7 @@ async function bootstrap() {
     }
 
     historyPanel.hidden = false;
+    historyPanel._search.clear();
     await populateHistoryPanel(historyPanel._contentEl);
   }
 
@@ -610,6 +606,7 @@ async function bootstrap() {
     const panel = createElement('div', 'chat-history');
     panel.hidden = true;
 
+    // ── Header row ────────────────────────────────────────────────────────
     const header = createElement('div', 'chat-history__header');
     const headerTitle = createElement('h2', 'chat-history__title', strings.history.title);
 
@@ -626,28 +623,63 @@ async function bootstrap() {
 
     header.append(headerTitle, newChatBtn);
 
+    // ── Search bar (shared component) ─────────────────────────────────────
+    const searchWrap  = createElement('div', 'chat-history__search-wrap');
+    const searchInner = createElement('div', 'chat-history__search-inner');
+
+    const search = createSearchBar({
+      placeholder: strings.history.search,
+      onChange:    (value) => void populateHistoryPanel(contentEl, value.trim())
+    });
+
+    // Prevent Electron drag-region from swallowing input events
+    search.element.style.webkitAppRegion = 'no-drag';
+
+    searchInner.append(search.element);
+    searchWrap.append(searchInner);
+
+    // ── Session list ──────────────────────────────────────────────────────
     const contentEl = createElement('div', 'chat-history__content');
-    panel.append(header, contentEl);
+
+    panel.append(header, searchWrap, contentEl);
     panel._contentEl = contentEl;
+    panel._search    = search;
 
     return panel;
   }
 
-  async function populateHistoryPanel(contentEl) {
+  async function populateHistoryPanel(contentEl, query = '') {
     // Show loading skeletons while fetching
     contentEl.replaceChildren();
     for (let i = 0; i < 3; i++) {
       contentEl.append(createElement('div', 'chat-history__skeleton'));
     }
 
-    const sessions = await window.JoaniumChat.listSessions();
+    const allSessions = await window.JoaniumChat.listSessions();
+
+    // Filter by query — title match, case-insensitive
+    const q = query.toLowerCase();
+    const sessions = q
+      ? allSessions.filter((s) => (s.title ?? '').toLowerCase().includes(q))
+      : allSessions;
+
     contentEl.replaceChildren();
+
+    if (allSessions.length === 0) {
+      const empty = createElement('div', 'chat-history__empty');
+      empty.append(
+        createElement('p', 'chat-history__empty-title', strings.history.empty),
+        createElement('p', 'chat-history__empty-hint',  strings.history.emptyHint)
+      );
+      contentEl.append(empty);
+      return;
+    }
 
     if (sessions.length === 0) {
       const empty = createElement('div', 'chat-history__empty');
       empty.append(
-        createElement('p', 'chat-history__empty-title', strings.history.empty),
-        createElement('p', 'chat-history__empty-hint', strings.history.emptyHint)
+        createElement('p', 'chat-history__empty-title', strings.history.noResults),
+        createElement('p', 'chat-history__empty-hint',  strings.history.noResultsHint)
       );
       contentEl.append(empty);
       return;
@@ -655,14 +687,13 @@ async function bootstrap() {
 
     const groups = { today: [], yesterday: [], earlier: [] };
     for (const session of sessions) {
-      const group = getSessionGroup(session.updatedAt);
-      groups[group].push(session);
+      groups[getSessionGroup(session.updatedAt)].push(session);
     }
 
     const groupLabels = {
-      today: strings.history.today,
+      today:     strings.history.today,
       yesterday: strings.history.yesterday,
-      earlier: strings.history.earlier
+      earlier:   strings.history.earlier
     };
 
     for (const [groupKey, groupSessions] of Object.entries(groups)) {
@@ -672,9 +703,8 @@ async function bootstrap() {
       section.append(createElement('div', 'chat-history__section-label', groupLabels[groupKey]));
 
       for (const session of groupSessions) {
-        const card = createElement('button', 'chat-history__card');
-        card.type = 'button';
-
+        const card     = createElement('button', 'chat-history__card');
+        card.type      = 'button';
         const msgCount = session.messageCount ?? 0;
         const msgLabel = msgCount === 1
           ? strings.history.oneMessage
@@ -699,15 +729,15 @@ async function bootstrap() {
 
       messages = (session.messages ?? [])
         .map((m) => ({
-          role: m.role === 'assistant' ? 'assistant' : 'user',
-          content: typeof m.content === 'string' ? m.content : '',
-          thinking: m.thinking ?? '',
+          role:      m.role === 'assistant' ? 'assistant' : 'user',
+          content:   typeof m.content === 'string' ? m.content : '',
+          thinking:  m.thinking ?? '',
           streaming: false
         }))
         .filter((m) => m.content);
 
       // Restore session context so new messages append to the same file
-      sessionId = session.id;
+      sessionId        = session.id;
       sessionCreatedAt = session.createdAt ?? new Date().toISOString();
 
       switchToTab('chat');
@@ -746,27 +776,26 @@ async function bootstrap() {
 
     if (!modelPickerPanel) {
       const picker = createModelPickerPanel({
-        providers: payload.providers,
+        providers:           payload.providers,
         userProviderDetails: payload.user?.providers?.details ?? {},
         onSelect(provider, model) {
-          activeProvider = provider;
-          activeModel = model;
+          activeProvider   = provider;
+          activeModel      = model;
           activeModelLabel = model.name ?? model.id;
-          const labelEl = triggerButton.querySelector('.chat-composer__model-label');
+          const labelEl    = triggerButton.querySelector('.chat-composer__model-label');
           if (labelEl) labelEl.textContent = activeModelLabel;
           syncPickerActiveStates();
           closeModelPicker();
         }
       });
       modelPickerPanel = picker.element;
-      modelPickerScrollbar = picker.dispose;
     }
 
     syncPickerActiveStates();
     modelPickerOpen = true;
     modelButton.classList.add('chat-composer__model--open');
     const rect = triggerButton.getBoundingClientRect();
-    modelPickerPanel.style.left = `${rect.left}px`;
+    modelPickerPanel.style.left   = `${rect.left}px`;
     modelPickerPanel.style.bottom = `${window.innerHeight - rect.top + 8}px`;
 
     requestAnimationFrame(() => modelPickerPanel?.classList.add('chat-model-picker--open'));
@@ -802,39 +831,46 @@ async function bootstrap() {
       if (index !== messages.length - 1) return message;
       const content = accText ? `${accText}\n\n${stoppedNote}` : stoppedNote;
       return {
-        role: 'assistant',
+        role:          'assistant',
         content,
-        thinking: accThinking,
-        streaming: false,
-        stopped: true,
+        thinking:      accThinking,
+        streaming:     false,
+        stopped:       true,
         providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
+        modelLabel:    activeModelLabel
       };
     });
-    accText = '';
+    accText     = '';
     accThinking = '';
-    isSending = false;
+    isSending   = false;
     void saveCurrentSession();
     syncComposer();
     renderThread();
   }
 
+  function syncComposerFieldHeight() {
+    if (!composerField) return;
+    composerField.style.height = 'auto';
+    composerField.style.height = `${composerField.scrollHeight}px`;
+  }
+
   function syncComposer() {
     if (!composerField || !sendButton) return;
     composerField.value = draftValue;
+    syncComposerFieldHeight();
 
-    const iconEl = sendButton.querySelector('.chat-composer__send-icon');
+    const iconEl  = sendButton.querySelector('.chat-composer__send-icon');
     const labelEl = sendButton.querySelector('.chat-composer__send-label');
 
     if (isSending) {
       sendButton.disabled = false;
       sendButton.classList.add('chat-composer__send--stop');
-      if (iconEl) iconEl.innerHTML = iconMarkup.stop;
+      if (iconEl)  iconEl.innerHTML    = iconMarkup.stop;
       if (labelEl) { labelEl.textContent = strings.composer.stop; labelEl.hidden = false; }
     } else {
       sendButton.disabled = !draftValue.trim();
       sendButton.classList.remove('chat-composer__send--stop');
-      if (iconEl) iconEl.innerHTML = iconMarkup.send;
+      if (iconEl)  iconEl.innerHTML    = iconMarkup.send;
       if (labelEl) { labelEl.textContent = ''; labelEl.hidden = true; }
     }
   }
@@ -846,10 +882,10 @@ async function bootstrap() {
   }
 
   function clearConversation() {
-    messages = [];
-    draftValue = '';
-    isSending = false;
-    sessionId = null;
+    messages         = [];
+    draftValue       = '';
+    isSending        = false;
+    sessionId        = null;
     sessionCreatedAt = null;
     window.JoaniumChat.removeStreamListeners();
     if (window.speechSynthesis) {
@@ -872,25 +908,26 @@ async function bootstrap() {
     }
 
     const hasMessages = messages.length > 0;
-    logoEl.hidden = hasMessages;
-    title.hidden = hasMessages;
-    thread.hidden = !hasMessages;
+    logoEl.hidden   = hasMessages;
+    title.hidden    = hasMessages;
+    thread.hidden   = !hasMessages;
     if (subtitle) subtitle.hidden = hasMessages;
-    composer.classList.toggle('chat-composer--conversation', hasMessages);
-    scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
-    bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
+    if (newChatBtn) newChatBtn.hidden = !hasMessages;
+    composer.classList.toggle('chat-composer--conversation',        hasMessages);
+    scroll.classList.toggle('chat-stage__scroll--conversation',     hasMessages);
+    bottom.classList.toggle('chat-stage__bottom--conversation',     hasMessages);
 
     if (!hasMessages) { thread.replaceChildren(); return; }
 
     thread.replaceChildren(...messages.map((message, index) => {
-      const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
+      const onCopy  = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
       const onRetry = () => {
         if (isSending) return;
-        const userIndex = message.role === 'user' ? index : index - 1;
+        const userIndex   = message.role === 'user' ? index : index - 1;
         if (userIndex < 0) return;
         const userMessage = messages[userIndex];
         if (!userMessage?.content) return;
-        messages = messages.slice(0, userIndex);
+        messages   = messages.slice(0, userIndex);
         draftValue = userMessage.content;
         renderThread();
         void submitPrompt();
@@ -912,12 +949,9 @@ async function bootstrap() {
 
     // Assign a session ID on the very first message of a new conversation
     if (!sessionId) {
-      sessionId = generateSessionId();
+      sessionId        = generateSessionId();
       sessionCreatedAt = new Date().toISOString();
     }
-
-    const draftEntry = createDraftEntry(prompt);
-    if (draftEntry) void window.JoaniumChat.saveRecentPrompt(draftEntry);
 
     messages = [
       ...messages,
@@ -926,10 +960,10 @@ async function bootstrap() {
         providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
     ];
 
-    draftValue = '';
-    isSending = true;
-    accText = '';
-    accThinking = '';
+    draftValue      = '';
+    isSending       = true;
+    accText         = '';
+    accThinking     = '';
     lastSelectedEntry = null;
     syncComposer();
     renderThread();
@@ -938,7 +972,7 @@ async function bootstrap() {
     window.JoaniumChat.removeStreamListeners();
 
     window.JoaniumChat.onStreamChunk((chunk) => {
-      if (chunk?.type === 'text'     && chunk.text) accText    += chunk.text;
+      if (chunk?.type === 'text'     && chunk.text) accText     += chunk.text;
       if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
       updateLastStreamingMessage(thread, { content: accText, thinking: accThinking });
     });
@@ -946,12 +980,12 @@ async function bootstrap() {
     window.JoaniumChat.onStreamDone((meta) => {
       window.JoaniumChat.removeStreamListeners();
       messages = messages.map((m, i) => i !== messages.length - 1 ? m : {
-        role: 'assistant',
-        content: accText || 'No response received.',
-        thinking: accThinking,
-        streaming: false,
+        role:          'assistant',
+        content:       accText || 'No response received.',
+        thinking:      accThinking,
+        streaming:     false,
         providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-        modelLabel: meta?.modelLabel ?? activeModelLabel
+        modelLabel:    meta?.modelLabel    ?? activeModelLabel
       });
       isSending = false;
       void saveCurrentSession();
@@ -962,13 +996,13 @@ async function bootstrap() {
     window.JoaniumChat.onStreamError((err) => {
       window.JoaniumChat.removeStreamListeners();
       messages = messages.map((m, i) => i !== messages.length - 1 ? m : {
-        role: 'assistant',
-        content: err?.message || 'Unable to get a response right now.',
-        thinking: accThinking,
-        streaming: false,
-        error: true,
+        role:          'assistant',
+        content:       err?.message || 'Unable to get a response right now.',
+        thinking:      accThinking,
+        streaming:     false,
+        error:         true,
         providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
+        modelLabel:    activeModelLabel
       });
       isSending = false;
       syncComposer();
@@ -977,9 +1011,9 @@ async function bootstrap() {
 
     const historyToSend = messages.slice(0, -1).map(({ role, content }) => ({ role, content }));
     void window.JoaniumChat.streamMessage({
-      messages: historyToSend,
+      messages:   historyToSend,
       providerId: activeProvider?.id ?? null,
-      modelId: activeModel?.id ?? null
+      modelId:    activeModel?.id    ?? null
     });
   }
 
@@ -990,7 +1024,7 @@ async function bootstrap() {
   const shell = createElement('main', 'chat-shell');
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
-  const sidebar = createElement('nav', 'chat-sidebar');
+  const sidebar     = createElement('nav', 'chat-sidebar');
   const sidebarTabs = createElement('div', 'chat-sidebar__tabs');
   const tabIndicator = createElement('div', 'chat-sidebar__indicator');
   sidebarTabs.append(tabIndicator);
@@ -999,8 +1033,8 @@ async function bootstrap() {
     if (!tabEl) return;
     if (!animate) tabIndicator.style.transition = 'none';
     const tabsRect = sidebarTabs.getBoundingClientRect();
-    const tabRect = tabEl.getBoundingClientRect();
-    tabIndicator.style.top = `${tabRect.top - tabsRect.top}px`;
+    const tabRect  = tabEl.getBoundingClientRect();
+    tabIndicator.style.top    = `${tabRect.top - tabsRect.top}px`;
     tabIndicator.style.height = `${tabRect.height}px`;
     if (!animate) {
       tabIndicator.offsetHeight;
@@ -1010,8 +1044,8 @@ async function bootstrap() {
 
   for (const [id, label] of Object.entries(strings.tabs)) {
     const isActive = id === 'chat';
-    const iconKey = `tab${id.charAt(0).toUpperCase()}${id.slice(1)}`;
-    const tab = createElement('button', `chat-sidebar__tab${isActive ? ' chat-sidebar__tab--active' : ''}`);
+    const iconKey  = `tab${id.charAt(0).toUpperCase()}${id.slice(1)}`;
+    const tab      = createElement('button', `chat-sidebar__tab${isActive ? ' chat-sidebar__tab--active' : ''}`);
     tab.type = 'button';
     tab.setAttribute('aria-label', label);
     const iconEl = createElement('span', 'chat-sidebar__tab-icon');
@@ -1019,12 +1053,10 @@ async function bootstrap() {
     tab.append(iconEl);
     if (isActive) activeTabEl = tab;
 
-    // Store reference for programmatic switching
     tabElements[id] = tab;
 
     tab.addEventListener('click', () => {
       if (tab === activeTabEl) {
-        // Re-clicking the active chat tab starts a new conversation
         if (id === 'chat') clearConversation();
         return;
       }
@@ -1035,7 +1067,6 @@ async function bootstrap() {
       moveIndicatorToTab(tab, true);
 
       if (id === 'chat') {
-        // Restore chat view — preserve any conversation (including one loaded from history)
         showChatView();
       } else if (id === 'history') {
         void showHistoryView();
@@ -1068,43 +1099,54 @@ async function bootstrap() {
   logoEl = logoResult.element;
   logoEl.classList.add('chat-stage__logo');
 
-  subtitle = createElement('p', 'chat-stage__subtitle', "You\u2019re doing great \u2014 let\u2019s make today count.");
-  thread = createElement('section', 'chat-thread');
+  subtitle = createElement('p', 'chat-stage__subtitle', 'You\u2019re doing great \u2014 let\u2019s make today count.');
+  thread   = createElement('section', 'chat-thread');
   thread.hidden = true;
 
   // ── Composer ──────────────────────────────────────────────────────────────
-  composer = createElement('section', 'chat-composer');
+  composer      = createElement('section', 'chat-composer');
   composerField = document.createElement('textarea');
-  composerField.className = 'chat-composer__field';
+  composerField.className   = 'chat-composer__field';
   composerField.placeholder = strings.composer.placeholder;
-  composerField.rows = 3;
+  composerField.rows        = 1;
   composerField.addEventListener('input', (e) => {
-    draftValue = e.target.value;
+    draftValue        = e.target.value;
     lastSelectedEntry = null;
+    syncComposerFieldHeight();
     syncComposer();
   });
   composerField.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void submitPrompt(); }
   });
 
-  const composerFooter = createElement('div', 'chat-composer__footer');
+  const composerFooter  = createElement('div', 'chat-composer__footer');
   const composerActions = createElement('div', 'chat-composer__actions');
-  const attachBtn = createElement('button', 'chat-composer__icon-button');
+  const attachBtn       = createElement('button', 'chat-composer__icon-button');
   attachBtn.type = 'button';
   attachBtn.append(createIcon('paperclip', 'chat-composer__icon'));
   attachBtn.addEventListener('click', focusComposer);
-  composerActions.append(attachBtn);
+
+  newChatBtn       = createElement('button', 'chat-composer__icon-button chat-composer__new-chat');
+  newChatBtn.type  = 'button';
+  newChatBtn.hidden = true;
+  newChatBtn.append(createIcon('newChat', 'chat-composer__icon'));
+  newChatBtn.addEventListener('click', () => {
+    clearConversation();
+    switchToTab('chat');
+  });
+
+  composerActions.append(attachBtn, newChatBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
-  modelButton = createElement('button', 'chat-composer__model');
-  modelButton.type = 'button';
+  modelButton          = createElement('button', 'chat-composer__model');
+  modelButton.type     = 'button';
   modelButton.append(
     createElement('span', 'chat-composer__model-label', activeModelLabel),
     createIcon('chevronDown', 'chat-composer__model-icon')
   );
   modelButton.addEventListener('click', (e) => { e.stopPropagation(); openModelPicker(modelButton); });
 
-  sendButton = createElement('button', 'chat-composer__send');
+  sendButton      = createElement('button', 'chat-composer__send');
   sendButton.type = 'button';
   const sendLabel = createElement('span', 'chat-composer__send-label');
   sendLabel.hidden = true;

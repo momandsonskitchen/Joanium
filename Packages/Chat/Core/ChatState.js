@@ -25,37 +25,6 @@ const openAiCompatibleProviders = new Set([
   'xai'
 ]);
 
-function sanitizeRecentPrompt(candidate) {
-  const prompt = collapseWhitespace(candidate?.prompt);
-
-  if (!prompt) {
-    return null;
-  }
-
-  const title = collapseWhitespace(candidate?.title) || truncate(prompt, 42);
-  const summary = collapseWhitespace(candidate?.summary) || truncate(prompt, 88);
-  const updatedAt = typeof candidate?.updatedAt === 'string' ? candidate.updatedAt : new Date().toISOString();
-
-  return {
-    title: truncate(title, 48),
-    summary: truncate(summary, 112),
-    prompt,
-    updatedAt
-  };
-}
-
-function sanitizeHomeState(candidateState) {
-  if (!candidateState || typeof candidateState !== 'object') {
-    return { recentPrompts: [] };
-  }
-
-  const recentPrompts = Array.isArray(candidateState.recentPrompts)
-    ? candidateState.recentPrompts.map(sanitizeRecentPrompt).filter(Boolean).slice(0, 6)
-    : [];
-
-  return { recentPrompts };
-}
-
 function sanitizeConversationMessages(candidateMessages) {
   if (!Array.isArray(candidateMessages)) {
     return [];
@@ -570,61 +539,20 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
 }
 
 export function createChatStateManager({ rootDirectory }) {
-  const homeFilePath = path.join(rootDirectory, 'Data', 'Chat', 'Home.json');
   const chatsDirectory = path.join(rootDirectory, 'Data', 'Chats');
-
-  async function readHomeState() {
-    try {
-      const fileContents = await readFile(homeFilePath, 'utf8');
-
-      if (!fileContents.trim()) {
-        return { recentPrompts: [] };
-      }
-
-      return sanitizeHomeState(JSON.parse(fileContents));
-    } catch {
-      return { recentPrompts: [] };
-    }
-  }
-
-  async function writeHomeState(nextState) {
-    await mkdir(path.dirname(homeFilePath), { recursive: true });
-    await writeFile(homeFilePath, `${JSON.stringify(nextState, null, 2)}\n`, 'utf8');
-    return nextState;
-  }
 
   return {
     async getBootstrapPayload() {
-      const [user, providers, home] = await Promise.all([
+      const [user, providers] = await Promise.all([
         readUserState(rootDirectory),
-        readProviderCatalog(rootDirectory),
-        readHomeState()
+        readProviderCatalog(rootDirectory)
       ]);
 
       return {
         user,
         providers,
-        home,
         logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href
       };
-    },
-    async saveRecentPrompt(promptEntry) {
-      const nextEntry = sanitizeRecentPrompt(promptEntry);
-      const currentState = await readHomeState();
-
-      if (!nextEntry) {
-        return currentState;
-      }
-
-      const dedupedPrompts = currentState.recentPrompts.filter((item) => {
-        return item.prompt !== nextEntry.prompt && item.title.toLowerCase() !== nextEntry.title.toLowerCase();
-      });
-
-      const nextState = {
-        recentPrompts: [nextEntry, ...dedupedPrompts].slice(0, 6)
-      };
-
-      return writeHomeState(nextState);
     },
     async saveSession(session) {
       if (!session?.id) return null;

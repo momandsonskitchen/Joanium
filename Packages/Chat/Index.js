@@ -35,10 +35,6 @@ export async function createPackage({ rootDirectory }) {
         handler: async () => chatStateManager.getBootstrapPayload()
       },
       {
-        channel: 'chat:save-recent-prompt',
-        handler: async (_event, promptEntry) => chatStateManager.saveRecentPrompt(promptEntry)
-      },
-      {
         channel: 'chat:save-session',
         handler: async (_event, session) => chatStateManager.saveSession(session)
       },
