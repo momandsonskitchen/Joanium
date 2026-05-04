@@ -8,6 +8,8 @@ import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScroll
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
+import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
+import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 
 const dictionaries = { en, de, fr };
 
@@ -598,8 +600,10 @@ async function bootstrap() {
   let _populateProjectsList  = null;
   let templatesPanel         = null;
   let _populateTemplatesList = null;
-  let skillsPanel    = null;
-  let personasPanel  = null;
+  let skillsPanel         = null;
+  let _populateSkillsList = null;
+  let personasPanel         = null;
+  let _populatePersonasList = null;
   let settingsPanel  = null;
 
   // Projects form state — shared across buildProjectsPanel and buildProjectCard
@@ -671,12 +675,14 @@ async function bootstrap() {
     if (personasPanel)  personasPanel.hidden  = true;
 
     if (!skillsPanel) {
-      skillsPanel = buildSkillsPanel();
+      const sp = createSkillsPanel(strings.skills);
+      skillsPanel = sp.build();
+      _populateSkillsList = sp.populateList;
       canvas.append(skillsPanel);
     }
 
     skillsPanel.hidden = false;
-    await populateSkillsList(skillsPanel._listEl, skillsPanel._search.getValue().trim());
+    await _populateSkillsList(skillsPanel._listEl, skillsPanel._search.getValue().trim());
   }
 
   async function showPersonasView() {
@@ -689,12 +695,17 @@ async function bootstrap() {
     if (skillsPanel)    skillsPanel.hidden    = true;
 
     if (!personasPanel) {
-      personasPanel = buildPersonasPanel();
+      const pp = createPersonasPanel(strings.personas, {
+        getActivePersona: () => activePersona,
+        onActivatePersona: (p) => { activePersona = p; }
+      });
+      personasPanel = pp.build();
+      _populatePersonasList = pp.populateList;
       canvas.append(personasPanel);
     }
 
     personasPanel.hidden = false;
-    await populatePersonasList(personasPanel._listEl, personasPanel._search.getValue().trim());
+    await _populatePersonasList(personasPanel._listEl, personasPanel._search.getValue().trim());
   }
 
   async function showHistoryView() {
@@ -1033,338 +1044,6 @@ async function bootstrap() {
   // ---------------------------------------------------------------------------
   // Skills panel DOM
   // ---------------------------------------------------------------------------
-
-  function buildSkillsPanel() {
-    const panel = createElement('div', 'chat-skills');
-    panel.hidden = true;
-
-    const header = createElement('div', 'chat-skills__header');
-    header.append(
-      createElement('h2', 'chat-skills__title', strings.skills.title),
-      createElement('p', 'chat-skills__subtitle', strings.skills.subtitle)
-    );
-    panel.append(header);
-
-    const body = createElement('div', 'chat-skills__body');
-
-    // Left column: list
-    const listCol = createElement('div', 'chat-skills__list-col');
-    const searchWrap = createElement('div', 'chat-skills__list-search');
-    const search = createSearchBar({
-      placeholder: strings.skills.searchPlaceholder,
-      onChange: (value) => void populateSkillsList(listContent, value.trim())
-    });
-    search.element.style.webkitAppRegion = 'no-drag';
-    searchWrap.append(search.element);
-
-    const listContent = createElement('div', 'chat-skills__list-content');
-    listCol.append(searchWrap, listContent);
-
-    // Right column: viewer
-    const viewerCol = createElement('div', 'chat-skills__viewer-col');
-    const viewerCard = createElement('div', 'chat-skills__viewer-card');
-    viewerCard.append(createElement('div', 'chat-skills__viewer-empty', 'Select a skill to read its content'));
-    viewerCol.append(viewerCard);
-
-    body.append(listCol, viewerCol);
-    panel.append(body);
-
-    panel._listEl = listContent;
-    panel._search = search;
-    panel._viewerEl = viewerCard;
-    return panel;
-  }
-
-  async function populateSkillsList(listEl, query = '') {
-    listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'chat-skills__skeleton'));
-    }
-
-    let skills;
-    try {
-      skills = await window.JoaniumChat.listSkills();
-    } catch {
-      skills = [];
-    }
-
-    const q = query.toLowerCase();
-    const filtered = q
-      ? skills.filter(s => 
-          s.name.toLowerCase().includes(q) || 
-          s.description.toLowerCase().includes(q) || 
-          s.namespace.toLowerCase().includes(q)
-        )
-      : skills;
-
-    listEl.replaceChildren();
-
-    if (filtered.length === 0) {
-      const empty = createElement('div', 'chat-skills__empty');
-      empty.append(
-        createElement('p', 'chat-skills__empty-title', q ? strings.skills.noResults : strings.skills.empty),
-        createElement('p', 'chat-skills__empty-hint', q ? strings.skills.noResultsHint : strings.skills.emptyHint)
-      );
-      listEl.append(empty);
-      return;
-    }
-
-    for (const skill of filtered) {
-      listEl.append(buildSkillCard(skill, listEl));
-    }
-  }
-
-  async function populateSkillViewer(skill) {
-    const viewerEl = skillsPanel?._viewerEl;
-    if (!viewerEl) return;
-
-    let fullSkill;
-    try {
-      fullSkill = await window.JoaniumChat.loadSkill(skill.namespace, skill.filename);
-    } catch (err) {
-      console.error('[Joanium] Failed to load skill for viewer:', err);
-      return;
-    }
-
-    viewerEl.replaceChildren();
-
-    const header = createElement('div', 'chat-skills__viewer-header');
-    const title = createElement('h3', 'chat-skills__viewer-title', fullSkill.name);
-    const author = createElement('div', 'chat-skills__viewer-author');
-    author.append(
-      createElement('span', 'chat-skills__viewer-author-label', 'Author'),
-      createElement('span', 'chat-skills__viewer-author-value', fullSkill.namespace)
-    );
-    header.append(title, author);
-
-    const meta = createElement('div', 'chat-skills__viewer-meta');
-    if (fullSkill.trigger) {
-      const trigger = createElement('div', 'chat-skills__viewer-trigger');
-      trigger.append(
-        createElement('span', 'chat-skills__viewer-trigger-label', strings.skills.trigger),
-        createElement('span', 'chat-skills__viewer-trigger-value', fullSkill.trigger)
-      );
-      meta.append(trigger);
-    }
-    
-    const content = createElement('div', 'chat-skills__viewer-content');
-    content.append(createElement('pre', 'chat-skills__viewer-pre', fullSkill.content));
-
-    viewerEl.append(header, meta, content);
-  }
-
-  function buildSkillCard(skill, listEl) {
-    const card = createElement('div', 'chat-skills__card');
-    card.addEventListener('click', () => {
-      listEl.querySelectorAll('.chat-skills__card--active').forEach(el => el.classList.remove('chat-skills__card--active'));
-      card.classList.add('chat-skills__card--active');
-      void populateSkillViewer(skill);
-    });
-
-    const body = createElement('div', 'chat-skills__card-body');
-    body.append(createElement('span', 'chat-skills__card-name', skill.name));
-    if (skill.description) {
-      body.append(createElement('div', 'chat-skills__card-desc', skill.description));
-    }
-
-    const actions = createElement('div', 'chat-skills__card-actions');
-    const deleteBtn = createElement('button', 'chat-skills__card-btn chat-skills__card-btn--danger');
-    deleteBtn.type = 'button';
-    deleteBtn.setAttribute('aria-label', strings.skills.delete);
-    deleteBtn.append(createIcon('trash', 'chat-skills__card-btn-icon'));
-    deleteBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      try {
-        await window.JoaniumChat.deleteSkill(skill.namespace, skill.filename);
-        await populateSkillsList(listEl, skillsPanel._search.getValue().trim());
-      } catch (err) {
-        console.error('[Joanium] Failed to delete skill:', err);
-      }
-    });
-
-    actions.append(deleteBtn);
-    card.append(body, actions);
-    return card;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Personas panel DOM
-  // ---------------------------------------------------------------------------
-
-  function buildPersonasPanel() {
-    const panel = createElement('div', 'chat-personas');
-    panel.hidden = true;
-
-    const header = createElement('div', 'chat-personas__header');
-    header.append(
-      createElement('h2', 'chat-personas__title', strings.personas.title),
-      createElement('p', 'chat-personas__subtitle', strings.personas.subtitle)
-    );
-    panel.append(header);
-
-    const body = createElement('div', 'chat-personas__body');
-
-    // Left column: list
-    const listCol = createElement('div', 'chat-personas__list-col');
-    const searchWrap = createElement('div', 'chat-personas__list-search');
-    const search = createSearchBar({
-      placeholder: strings.personas.searchPlaceholder,
-      onChange: (value) => void populatePersonasList(listContent, value.trim())
-    });
-    search.element.style.webkitAppRegion = 'no-drag';
-    searchWrap.append(search.element);
-
-    const listContent = createElement('div', 'chat-personas__list-content');
-    listCol.append(searchWrap, listContent);
-
-    // Right column: viewer
-    const viewerCol = createElement('div', 'chat-personas__viewer-col');
-    const viewerCard = createElement('div', 'chat-personas__viewer-card');
-    viewerCard.append(createElement('div', 'chat-personas__viewer-empty', 'Select a persona to read its content'));
-    viewerCol.append(viewerCard);
-
-    body.append(listCol, viewerCol);
-    panel.append(body);
-
-    panel._listEl = listContent;
-    panel._search = search;
-    panel._viewerEl = viewerCard;
-    return panel;
-  }
-
-  async function populatePersonasList(listEl, query = '') {
-    listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'chat-personas__skeleton'));
-    }
-
-    let personas;
-    try {
-      personas = await window.JoaniumChat.listPersonas();
-    } catch {
-      personas = [];
-    }
-
-    const q = query.toLowerCase();
-    const filtered = q
-      ? personas.filter(p => 
-          p.name.toLowerCase().includes(q) || 
-          p.description.toLowerCase().includes(q) || 
-          p.namespace.toLowerCase().includes(q)
-        )
-      : personas;
-
-    listEl.replaceChildren();
-
-    if (filtered.length === 0) {
-      const empty = createElement('div', 'chat-personas__empty');
-      empty.append(
-        createElement('p', 'chat-personas__empty-title', q ? strings.personas.noResults : strings.personas.empty),
-        createElement('p', 'chat-personas__empty-hint', q ? strings.personas.noResultsHint : strings.personas.emptyHint)
-      );
-      listEl.append(empty);
-      return;
-    }
-
-    for (const persona of filtered) {
-      listEl.append(buildPersonaCard(persona, listEl));
-    }
-  }
-
-  async function populatePersonaViewer(persona) {
-    const viewerEl = personasPanel?._viewerEl;
-    if (!viewerEl) return;
-
-    let fullPersona;
-    try {
-      fullPersona = await window.JoaniumChat.loadPersona(persona.namespace, persona.filename);
-    } catch (err) {
-      console.error('[Joanium] Failed to load persona for viewer:', err);
-      return;
-    }
-
-    viewerEl.replaceChildren();
-
-    const isActive = activePersona?.id === persona.id;
-
-    const header = createElement('div', 'chat-personas__viewer-header');
-    const title = createElement('h3', 'chat-personas__viewer-title', fullPersona.name);
-    const author = createElement('div', 'chat-personas__viewer-author');
-    author.append(
-      createElement('span', 'chat-personas__viewer-author-label', 'Author'),
-      createElement('span', 'chat-personas__viewer-author-value', fullPersona.namespace)
-    );
-    header.append(title, author);
-
-    if (fullPersona.protected) {
-      const badge = createElement('span', 'chat-personas__viewer-badge', strings.personas.protected);
-      header.append(badge);
-    }
-
-    const actions = createElement('div', 'chat-personas__viewer-actions');
-    const activateBtn = createElement('button', `chat-personas__viewer-activate${isActive ? ' chat-personas__viewer-activate--active' : ''}`);
-    activateBtn.type = 'button';
-    activateBtn.textContent = isActive ? strings.personas.active : strings.personas.activate;
-    activateBtn.addEventListener('click', async () => {
-      if (isActive) {
-        activePersona = null;
-      } else {
-        activePersona = fullPersona;
-      }
-      void populatePersonaViewer(persona);
-      void populatePersonasList(personasPanel._listEl, personasPanel._search.getValue().trim());
-    });
-    actions.append(activateBtn);
-    
-    const content = createElement('div', 'chat-personas__viewer-content');
-    content.append(createElement('pre', 'chat-personas__viewer-pre', fullPersona.content));
-
-    viewerEl.append(header, actions, content);
-  }
-
-  function buildPersonaCard(persona, listEl) {
-    const isActive = activePersona?.id === persona.id;
-    const card = createElement('div', `chat-personas__card${isActive ? ' chat-personas__card--active' : ''}`);
-    card.addEventListener('click', () => {
-      listEl.querySelectorAll('.chat-personas__card--selected').forEach(el => el.classList.remove('chat-personas__card--selected'));
-      card.classList.add('chat-personas__card--selected');
-      void populatePersonaViewer(persona);
-    });
-
-    const body = createElement('div', 'chat-personas__card-body');
-    const nameRow = createElement('div', 'chat-personas__card-name-row');
-    nameRow.append(createElement('span', 'chat-personas__card-name', persona.name));
-    if (persona.protected) {
-      nameRow.append(createElement('span', 'chat-personas__card-badge', strings.personas.protected));
-    }
-    body.append(nameRow);
-    if (persona.description) {
-      body.append(createElement('div', 'chat-personas__card-desc', persona.description));
-    }
-
-    const actions = createElement('div', 'chat-personas__card-actions');
-    
-    if (!persona.protected) {
-      const deleteBtn = createElement('button', 'chat-personas__card-btn chat-personas__card-btn--danger');
-      deleteBtn.type = 'button';
-      deleteBtn.setAttribute('aria-label', strings.personas.delete);
-      deleteBtn.append(createIcon('trash', 'chat-personas__card-btn-icon'));
-      deleteBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        try {
-          await window.JoaniumChat.deletePersona(persona.namespace, persona.filename);
-          if (activePersona?.id === persona.id) activePersona = null;
-          await populatePersonasList(listEl, personasPanel._search.getValue().trim());
-        } catch (err) {
-          console.error('[Joanium] Failed to delete persona:', err);
-        }
-      });
-      actions.append(deleteBtn);
-    }
-
-    card.append(body, actions);
-    return card;
-  }
 
   function startInlineRename(session, titleEl, contentEl, query) {
     const input = document.createElement('input');
