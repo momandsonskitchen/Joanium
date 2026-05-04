@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir, unlink, rm, copyFile } from 'node:fs/promises';
 import https from 'node:https';
 import http from 'node:http';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
@@ -687,6 +687,27 @@ export function createChatStateManager({ rootDirectory }) {
       if (!project?.id) return null;
       const projectDir = path.join(projectsDirectory, project.id);
       await mkdir(path.join(projectDir, 'Chats'), { recursive: true });
+
+      // Handle cover image copying — move external images into the project folder
+      if (project.coverImagePath) {
+        const isExternal = !project.coverImagePath.startsWith(projectDir);
+        if (isExternal) {
+          try {
+            const ext = path.extname(project.coverImagePath) || '.png';
+            const targetPath = path.join(projectDir, `cover${ext}`);
+            await copyFile(project.coverImagePath, targetPath);
+            project.coverImagePath = targetPath;
+          } catch (err) {
+            console.error('[Joanium] Failed to copy project cover:', err);
+          }
+        }
+      }
+
+      // If we have a cover image, the icon is redundant.
+      if (project.coverImagePath) {
+        delete project.icon;
+      }
+
       const filePath = path.join(projectDir, 'Index.json');
       await writeFile(filePath, `${JSON.stringify(project, null, 2)}\n`, 'utf8');
       return project;
@@ -718,7 +739,7 @@ export function createChatStateManager({ rootDirectory }) {
           projects.push({
             id:             project.id,
             name:           project.name,
-            icon:           project.icon ?? '',
+            icon:           project.icon || '📁',
             info:           project.info ?? '',
             coverImagePath: project.coverImagePath ?? '',
             createdAt:      project.createdAt,
