@@ -12,7 +12,7 @@ const en = {
     events: 'Events',
     usage: 'Usage'
   },
-  profile: 'Profile',
+  profile: 'Settings',
   greeting: {
     morning: 'Good morning, {name}',
     afternoon: 'Good afternoon, {name}',

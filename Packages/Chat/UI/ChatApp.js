@@ -584,6 +584,7 @@ async function bootstrap() {
   // History panel — created lazily on first open.
   let historyPanel  = null;
   let projectsPanel = null;
+  let settingsPanel = null;
 
   // Projects form state — shared across buildProjectsPanel and buildProjectCard
   let draftName = '';
@@ -638,11 +639,13 @@ async function bootstrap() {
     bottom.hidden = false;
     if (historyPanel)  historyPanel.hidden  = true;
     if (projectsPanel) projectsPanel.hidden = true;
+    if (settingsPanel)  settingsPanel.hidden  = true;
   }
 
   async function showHistoryView() {
     scroll.hidden = true;
     bottom.hidden = true;
+    if (settingsPanel) settingsPanel.hidden = true;
 
     if (!historyPanel) {
       historyPanel = buildHistoryPanel();
@@ -658,6 +661,7 @@ async function bootstrap() {
     scroll.hidden = true;
     bottom.hidden = true;
     if (historyPanel) historyPanel.hidden = true;
+    if (settingsPanel) settingsPanel.hidden = true;
 
     if (!projectsPanel) {
       projectsPanel = buildProjectsPanel();
@@ -1687,6 +1691,104 @@ async function bootstrap() {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Settings panel — shown when the user clicks their avatar.
+  // ---------------------------------------------------------------------------
+
+  function showSettingsView() {
+    scroll.hidden = true;
+    bottom.hidden = true;
+    if (historyPanel)  historyPanel.hidden  = true;
+    if (projectsPanel) projectsPanel.hidden = true;
+
+    if (!settingsPanel) {
+      settingsPanel = buildSettingsPanel();
+      canvas.append(settingsPanel);
+    }
+
+    settingsPanel.hidden = false;
+  }
+
+  function buildSettingsPanel() {
+    const panel = createElement('div', 'chat-settings');
+    panel.hidden = true;
+
+    // ── Top header (mirrors .chat-projects__header) ────────────────────────────
+    const header = createElement('div', 'chat-settings__header');
+    header.append(createElement('h2', 'chat-settings__title', 'Settings'));
+    panel.append(header);
+
+    // ── Body: left nav + right content ──────────────────────────────────
+    const body = createElement('div', 'chat-settings__body');
+
+    // Left nav column
+    const nav = createElement('nav', 'chat-settings__nav');
+    const navItems = createElement('div', 'chat-settings__nav-items');
+
+    const subMenus = [
+      {
+        id: 'about',
+        label: 'About',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`
+      }
+    ];
+
+    // Right content column
+    const main = createElement('div', 'chat-settings__main');
+
+    function activateSubMenu(id) {
+      navItems.querySelectorAll('.chat-settings__nav-item').forEach((item) => {
+        item.classList.toggle('chat-settings__nav-item--active', item.dataset.subId === id);
+      });
+      main.replaceChildren();
+      if (id === 'about') main.append(buildAboutView());
+    }
+
+    for (const menu of subMenus) {
+      const item = createElement('button', 'chat-settings__nav-item');
+      item.type = 'button';
+      item.dataset.subId = menu.id;
+      const iconEl = createElement('span', 'chat-settings__nav-item-icon');
+      iconEl.innerHTML = menu.icon;
+      item.append(iconEl, createElement('span', 'chat-settings__nav-item-label', menu.label));
+      item.addEventListener('click', () => activateSubMenu(menu.id));
+      navItems.append(item);
+    }
+
+    nav.append(navItems);
+    body.append(nav, main);
+    panel.append(body);
+
+    activateSubMenu('about');
+    return panel;
+  }
+
+  function buildAboutView() {
+    const view = createElement('div', 'chat-profile__about');
+
+    const nameEl    = createElement('h1', 'chat-profile__about-name', strings.appName);
+    const versionEl = createElement('p',  'chat-profile__about-version', 'Version 2026.430.1');
+    const descEl    = createElement('p',  'chat-profile__about-desc',
+      'Local-first AI desktop assistant with multi-model chat, automations, agents, MCP, and real integrations. Works with Anthropic, OpenAI, Gemini, Ollama and more.');
+
+    const metaCard = createElement('div', 'chat-profile__about-meta');
+    for (const { label, value } of [
+      { label: 'Author',    value: 'Joel Jolly'   },
+      { label: 'License',   value: 'Apache-2.0'   },
+      { label: 'Framework', value: 'Electron 41'  }
+    ]) {
+      const row = createElement('div', 'chat-profile__about-meta-row');
+      row.append(
+        createElement('span', 'chat-profile__about-meta-label', label),
+        createElement('span', 'chat-profile__about-meta-value', value)
+      );
+      metaCard.append(row);
+    }
+
+    view.append(nameEl, versionEl, descEl, metaCard);
+    return view;
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // DOM construction
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1752,6 +1854,14 @@ async function bootstrap() {
   sidebarAvatar.type = 'button';
   sidebarAvatar.setAttribute('aria-label', strings.profile);
   sidebarAvatar.append(createElement('span', 'chat-sidebar__avatar-initials', getInitials(payload.user.profile.name)));
+
+  sidebarAvatar.addEventListener('click', () => {
+    if (settingsPanel && !settingsPanel.hidden) {
+      showChatView();
+    } else {
+      showSettingsView();
+    }
+  });
 
   const avatarDivider = createElement('div', 'chat-sidebar__avatar-divider');
   sidebarTabs.append(avatarDivider, sidebarAvatar);

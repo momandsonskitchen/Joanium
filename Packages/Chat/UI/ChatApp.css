@@ -2112,3 +2112,358 @@ textarea {
   pointer-events: none;
   display: block;
 }
+
+/* ==========================================================================
+   Profile Panel
+   ========================================================================== */
+
+.chat-profile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Left navigation sidebar ───────────────────────────────────────────────── */
+
+.chat-profile__nav {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 0 40px;
+  border-right: 1px solid rgba(170, 134, 104, 0.09);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -webkit-app-region: drag;
+}
+
+.chat-profile__nav::-webkit-scrollbar { display: none; }
+
+.chat-profile__nav-header {
+  padding: 0 20px 24px;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+
+.chat-profile__nav-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 520;
+  letter-spacing: -0.04em;
+  color: var(--color-chat-text-title);
+}
+
+.chat-profile__nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+}
+
+.chat-profile__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-secondary);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  transition:
+    background-color 130ms ease,
+    color 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-profile__nav-item:hover:not(.chat-profile__nav-item--active) {
+  background: rgba(var(--color-accent-rgb), 0.07);
+  color: var(--color-chat-text-title);
+}
+
+.chat-profile__nav-item--active {
+  background: rgba(var(--color-accent-rgb), 0.10);
+  color: var(--color-chat-text-title);
+  font-weight: 640;
+}
+
+.chat-profile__nav-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+}
+
+.chat-profile__nav-item-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-profile__nav-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Right main content ────────────────────────────────────────────────── */
+
+.chat-profile__main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 60px 52px 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  -webkit-app-region: drag;
+}
+
+.chat-profile__main::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.chat-profile__main::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-thumb);
+}
+
+/* ── About view ────────────────────────────────────────────────────────────── */
+
+.chat-profile__about {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 560px;
+  -webkit-app-region: no-drag;
+  animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.chat-profile__about-logo {
+  margin-bottom: 28px;
+}
+
+.chat-profile__about-logo .logo-loader--inline {
+  margin: 0;
+  position: relative !important;
+  inset: auto !important;
+}
+
+.chat-profile__about-name {
+  margin: 0 0 6px;
+  font-size: 42px;
+  font-weight: 440;
+  letter-spacing: -0.065em;
+  color: var(--color-chat-text-title);
+}
+
+.chat-profile__about-version {
+  margin: 0 0 28px;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-muted);
+}
+
+.chat-profile__about-desc {
+  margin: 0 0 36px;
+  font-size: 15px;
+  font-weight: 420;
+  line-height: 1.68;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-secondary);
+  max-width: 460px;
+}
+
+.chat-profile__about-meta {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 10px 28px rgba(130, 95, 65, 0.07);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+.chat-profile__about-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(170, 134, 104, 0.07);
+}
+
+.chat-profile__about-meta-row:last-child {
+  border-bottom: 0;
+}
+
+.chat-profile__about-meta-label {
+  font-size: 13px;
+  font-weight: 520;
+  color: var(--color-chat-text-muted);
+  letter-spacing: -0.01em;
+}
+
+.chat-profile__about-meta-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-chat-text-title);
+  letter-spacing: -0.015em;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Settings panel  (mirrors Projects layout: full-width header + two-col body)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.chat-settings {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Header (full-width title bar, same as .chat-projects__header) ────────── */
+
+.chat-settings__header {
+  display: flex;
+  align-items: center;
+  padding: 60px 48px 20px;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+}
+
+.chat-settings__title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  color: var(--color-chat-text-title);
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+
+/* ── Two-column body ─────────────────────────────────────────────────────── */
+
+.chat-settings__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+/* ── Left nav column ─────────────────────────────────────────────────────── */
+
+.chat-settings__nav {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0 40px;
+  border-right: 1px solid rgba(170, 134, 104, 0.09);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -webkit-app-region: drag;
+}
+
+.chat-settings__nav::-webkit-scrollbar { display: none; }
+
+.chat-settings__nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+}
+
+.chat-settings__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-secondary);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: default;
+  transition:
+    background-color 130ms ease,
+    color 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-settings__nav-item:hover:not(.chat-settings__nav-item--active) {
+  background: rgba(var(--color-accent-rgb), 0.07);
+  color: var(--color-chat-text-title);
+}
+
+.chat-settings__nav-item--active {
+  background: rgba(var(--color-accent-rgb), 0.10);
+  color: var(--color-chat-text-title);
+  font-weight: 640;
+}
+
+.chat-settings__nav-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+}
+
+.chat-settings__nav-item-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-settings__nav-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Right main content ──────────────────────────────────────────────────── */
+
+.chat-settings__main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 24px 52px 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  -webkit-app-region: drag;
+}
+
+.chat-settings__main::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.chat-settings__main::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-thumb);
+}
