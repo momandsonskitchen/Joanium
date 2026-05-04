@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dialog, shell } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
+import { readUserState, writeUserState, mergeUserStates } from '../Shared/UserData/UserData.js';
 
 const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
 
@@ -104,6 +105,15 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:open-external',
         handler: (_event, url) => { shell.openExternal(url); return null; }
+      },
+      {
+        channel: 'chat:save-profile',
+        handler: async (_event, profile) => {
+          const current = await readUserState(rootDirectory);
+          const next = mergeUserStates(current, { profile });
+          await writeUserState(rootDirectory, next);
+          return next.profile;
+        }
       },
       {
         // Fire-and-forget: returns null immediately, then pushes

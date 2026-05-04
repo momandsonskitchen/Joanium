@@ -1727,6 +1727,11 @@ async function bootstrap() {
 
     const subMenus = [
       {
+        id: 'user',
+        label: 'User',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`
+      },
+      {
         id: 'about',
         label: 'About',
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`
@@ -1741,6 +1746,7 @@ async function bootstrap() {
         item.classList.toggle('chat-settings__nav-item--active', item.dataset.subId === id);
       });
       main.replaceChildren();
+      if (id === 'user')  main.append(buildUserView());
       if (id === 'about') main.append(buildAboutView());
     }
 
@@ -1759,8 +1765,89 @@ async function bootstrap() {
     body.append(nav, main);
     panel.append(body);
 
-    activateSubMenu('about');
+    activateSubMenu('user');
     return panel;
+  }
+
+  function buildUserView() {
+    const dob = payload.user.profile.dateOfBirth ?? {};
+    let draft = {
+      name: payload.user.profile.name ?? '',
+      day:   dob.day   ?? '',
+      month: dob.month ?? '',
+      year:  dob.year  ?? ''
+    };
+
+    const view = createElement('div', 'chat-settings__user');
+
+    // ── Name field ──────────────────────────────────────────────────────────
+    const nameLabel = createElement('label', 'chat-settings__field-label', 'Name');
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'chat-settings__field-input';
+    nameInput.value = draft.name;
+    nameInput.placeholder = 'Your full name';
+    nameInput.style.webkitUserSelect = 'text';
+    nameInput.style.userSelect = 'text';
+    nameInput.style.cursor = 'text';
+    nameInput.addEventListener('input', (e) => { draft.name = e.target.value; });
+
+    // ── Date of birth row ───────────────────────────────────────────────────
+    const dobLabel = createElement('label', 'chat-settings__field-label', 'Date of Birth');
+    const dobRow = createElement('div', 'chat-settings__dob-row');
+
+    function makeDobInput(placeholder, maxLen, currentVal, onUpdate) {
+      const el = document.createElement('input');
+      el.type = 'text';
+      el.inputMode = 'numeric';
+      el.className = 'chat-settings__dob-input';
+      el.placeholder = placeholder;
+      el.maxLength = maxLen;
+      el.value = currentVal;
+      el.style.webkitUserSelect = 'text';
+      el.style.userSelect = 'text';
+      el.style.cursor = 'text';
+      el.addEventListener('input', (e) => { onUpdate(e.target.value.replace(/\D/g, '')); e.target.value = e.target.value.replace(/\D/g, ''); });
+      return el;
+    }
+
+    const dayInput   = makeDobInput('DD',   2, draft.day,   (v) => { draft.day   = v; });
+    const monthInput = makeDobInput('MM',   2, draft.month, (v) => { draft.month = v; });
+    const yearInput  = makeDobInput('YYYY', 4, draft.year,  (v) => { draft.year  = v; });
+    dobRow.append(dayInput, monthInput, yearInput);
+
+    // ── Save button ─────────────────────────────────────────────────────────
+    const status = createElement('p', 'chat-settings__save-status', '');
+    const saveBtn = createElement('button', 'chat-settings__save-btn', 'Save Changes');
+    saveBtn.type = 'button';
+    saveBtn.addEventListener('click', async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+      status.textContent = '';
+      try {
+        await window.JoaniumChat.saveProfile({
+          name: draft.name.trim(),
+          dateOfBirth: { day: draft.day, month: draft.month, year: draft.year }
+        });
+        payload.user.profile.name = draft.name.trim();
+        payload.user.profile.dateOfBirth = { day: draft.day, month: draft.month, year: draft.year };
+        status.textContent = 'Saved!';
+        status.className = 'chat-settings__save-status chat-settings__save-status--ok';
+      } catch {
+        status.textContent = 'Failed to save.';
+        status.className = 'chat-settings__save-status chat-settings__save-status--err';
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+        setTimeout(() => { status.textContent = ''; status.className = 'chat-settings__save-status'; }, 3000);
+      }
+    });
+
+    const actions = createElement('div', 'chat-settings__user-actions');
+    actions.append(saveBtn, status);
+
+    view.append(nameLabel, nameInput, dobLabel, dobRow, actions);
+    return view;
   }
 
   function buildAboutView() {
