@@ -3,6 +3,7 @@ node_modules/
 Build/
 Data/Agents/
 Data/Channels/
+Data/Projects/
 Data/Chats/
 Data/Memories/
 Data/User.json
