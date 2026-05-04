@@ -1827,9 +1827,13 @@ async function bootstrap() {
     viewerEl.replaceChildren();
 
     const header = createElement('div', 'chat-skills__viewer-header');
-    const ns = createElement('div', 'chat-skills__viewer-namespace', fullSkill.namespace);
     const title = createElement('h3', 'chat-skills__viewer-title', fullSkill.name);
-    header.append(ns, title);
+    const author = createElement('div', 'chat-skills__viewer-author');
+    author.append(
+      createElement('span', 'chat-skills__viewer-author-label', 'Author'),
+      createElement('span', 'chat-skills__viewer-author-value', fullSkill.namespace)
+    );
+    header.append(title, author);
 
     const meta = createElement('div', 'chat-skills__viewer-meta');
     if (fullSkill.trigger) {
@@ -1856,13 +1860,7 @@ async function bootstrap() {
     });
 
     const body = createElement('div', 'chat-skills__card-body');
-    const nameWrap = createElement('div', 'chat-skills__card-name-wrap');
-    nameWrap.append(
-      createElement('span', 'chat-skills__card-namespace', skill.namespace),
-      createElement('span', 'chat-skills__card-name', skill.name)
-    );
-    
-    body.append(nameWrap);
+    body.append(createElement('span', 'chat-skills__card-name', skill.name));
     if (skill.description) {
       body.append(createElement('div', 'chat-skills__card-desc', skill.description));
     }
@@ -1988,9 +1986,13 @@ async function bootstrap() {
     const isActive = activePersona?.id === persona.id;
 
     const header = createElement('div', 'chat-personas__viewer-header');
-    const ns = createElement('div', 'chat-personas__viewer-namespace', fullPersona.namespace);
     const title = createElement('h3', 'chat-personas__viewer-title', fullPersona.name);
-    header.append(ns, title);
+    const author = createElement('div', 'chat-personas__viewer-author');
+    author.append(
+      createElement('span', 'chat-personas__viewer-author-label', 'Author'),
+      createElement('span', 'chat-personas__viewer-author-value', fullPersona.namespace)
+    );
+    header.append(title, author);
 
     if (fullPersona.protected) {
       const badge = createElement('span', 'chat-personas__viewer-badge', strings.personas.protected);
@@ -2028,18 +2030,12 @@ async function bootstrap() {
     });
 
     const body = createElement('div', 'chat-personas__card-body');
-    const nameWrap = createElement('div', 'chat-personas__card-name-wrap');
-    nameWrap.append(
-      createElement('span', 'chat-personas__card-namespace', persona.namespace),
-      createElement('span', 'chat-personas__card-name', persona.name)
-    );
-    
+    const nameRow = createElement('div', 'chat-personas__card-name-row');
+    nameRow.append(createElement('span', 'chat-personas__card-name', persona.name));
     if (persona.protected) {
-      const badge = createElement('span', 'chat-personas__card-badge', strings.personas.protected);
-      nameWrap.append(badge);
+      nameRow.append(createElement('span', 'chat-personas__card-badge', strings.personas.protected));
     }
-
-    body.append(nameWrap);
+    body.append(nameRow);
     if (persona.description) {
       body.append(createElement('div', 'chat-personas__card-desc', persona.description));
     }
