@@ -1,5 +1,4 @@
-import { createElement } from '../../Shared/Utils/DomUtils.js';
-import { formatText } from '../../Shared/Utils/DomUtils.js';
+import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 
 // ---------------------------------------------------------------------------

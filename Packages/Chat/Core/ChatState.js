@@ -4,7 +4,7 @@ import https from 'node:https';
 import http from 'node:http';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { readUserState } from '../../Shared/UserData/UserData.js';
-import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 
 const openAiCompatibleProviders = new Set([
   'cerebras',
