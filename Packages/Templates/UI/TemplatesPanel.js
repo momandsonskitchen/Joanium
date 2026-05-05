@@ -1,31 +1,8 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
+import { createIcon } from '../../Shared/Icons/Icons.js';
 
-// ---------------------------------------------------------------------------
-// Icons — only the subset needed by the Templates panel.
-// ---------------------------------------------------------------------------
-
-const iconMarkup = {
-  pencil: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-    </svg>
-  `,
-  trash: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 6h18" />
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-    </svg>
-  `
-};
-
-function createIcon(name, className = '') {
-  const icon = createElement('span', className || 'chat-icon');
-  icon.innerHTML = iconMarkup[name] ?? '';
-  return icon;
-}
 
 function createTemplateId(name) {
   const sanitized = (name || 'Template').trim()

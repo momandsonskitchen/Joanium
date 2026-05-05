@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
+import { createIcon } from '../../Shared/Icons/Icons.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -10,41 +11,6 @@ const MARKETPLACE_API_BASE = 'https://www.joanium.com/api/marketplace';
 const PAGE_LIMIT           = 30;   // items per page
 const SCROLL_THRESHOLD_PX  = 140;  // px from bottom before next page loads
 
-// ---------------------------------------------------------------------------
-// Icons
-// ---------------------------------------------------------------------------
-
-const iconMarkup = {
-  verified: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      <path d="m9 12 2 2 4-4"/>
-    </svg>
-  `,
-  download: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-      <polyline points="7 10 12 15 17 10"/>
-      <line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
-  `,
-  check: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M5 12l5 5 9-9"/>
-    </svg>
-  `,
-  star: `
-    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-    </svg>
-  `
-};
-
-function createIcon(name, className = '') {
-  const icon = createElement('span', className || 'marketplace-icon');
-  icon.innerHTML = iconMarkup[name] ?? '';
-  return icon;
-}
 
 // ---------------------------------------------------------------------------
 // API helpers — run in the renderer (Electron has no CORS restrictions)
