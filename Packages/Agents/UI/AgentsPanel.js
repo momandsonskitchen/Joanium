@@ -1,5 +1,6 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
@@ -100,7 +101,7 @@ export function createAgentsPanel(strings) {
 
   async function loadAvatars() {
     try {
-      availableAvatars = await window.JoaniumChat.listAgentAvatars();
+      availableAvatars = await invokeIpc('agents:list-avatars');
     } catch {
       availableAvatars = [];
     }
@@ -369,7 +370,7 @@ export function createAgentsPanel(strings) {
       e.stopPropagation();
       runBtn.disabled = true;
       try {
-        await window.JoaniumChat.runAgent(agent.id);
+        await invokeIpc('agents:run-agent', agent.id);
       } catch (err) {
         console.error('[Joanium] Failed to run agent:', err);
       } finally {
@@ -384,7 +385,7 @@ export function createAgentsPanel(strings) {
     editBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        const full = await window.JoaniumChat.loadAgent(agent.id);
+        const full = await invokeIpc('agents:load-agent', agent.id);
         panelRef?._startEdit(full);
       } catch (err) {
         console.error('[Joanium] Failed to load agent for editing:', err);
@@ -398,7 +399,7 @@ export function createAgentsPanel(strings) {
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.deleteAgent(agent.id);
+        await invokeIpc('agents:delete-agent', agent.id);
       } catch (err) {
         console.error('[Joanium] Failed to delete agent:', err);
       }
@@ -421,7 +422,7 @@ export function createAgentsPanel(strings) {
 
     let agents;
     try {
-      agents = await window.JoaniumChat.listAgents();
+      agents = await invokeIpc('agents:list-agents');
     } catch {
       agents = [];
     }
@@ -556,7 +557,7 @@ export function createAgentsPanel(strings) {
       };
 
       try {
-        await window.JoaniumChat.saveAgent(agent);
+        await invokeIpc('agents:save-agent', agent);
       } catch (err) {
         console.error('[Joanium] Failed to save agent:', err);
         return;

@@ -1,4 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -80,7 +81,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
 
     let personas;
     try {
-      personas = await window.JoaniumChat.listPersonas();
+      personas = await invokeIpc('personas:list-personas');
     } catch {
       personas = [];
     }
@@ -118,7 +119,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
 
     let fullPersona;
     try {
-      fullPersona = await window.JoaniumChat.loadPersona(persona.namespace, persona.filename);
+      fullPersona = await invokeIpc('personas:load-persona', persona.namespace, persona.filename);
     } catch (err) {
       console.error('[Joanium] Failed to load persona for viewer:', err);
       return;
@@ -199,7 +200,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
       deleteBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         try {
-          await window.JoaniumChat.deletePersona(persona.namespace, persona.filename);
+          await invokeIpc('personas:delete-persona', persona.namespace, persona.filename);
           const currentActive = getActivePersona();
           if (currentActive?.id === persona.id) onActivatePersona(null);
           await populateList(listEl, _search.getValue().trim());

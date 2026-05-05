@@ -18,18 +18,37 @@ export async function bootstrapApplication() {
   const setupModule = await loadPackageModule(registry, 'Setup');
   writeBootLog('bootstrapApplication:setup-loaded');
 
-  const createPackage = async (packageName) => {
+  const createPackage = async (packageName, seenPackageIds = new Set()) => {
+    if (seenPackageIds.has(packageName)) {
+      throw new Error(`Circular package companion dependency detected for "${packageName}".`);
+    }
+
+    seenPackageIds.add(packageName);
     const packageModule = await loadPackageModule(registry, packageName);
 
     if (typeof packageModule.createPackage !== 'function') {
       throw new Error(`Package "${packageName}" does not export createPackage().`);
     }
 
-    return packageModule.createPackage({
+    const packageInstance = await packageModule.createPackage({
       rootDirectory,
       packagesDirectory,
       registry
     });
+
+    const companions = packageInstance.ipcCompanions ?? [];
+    for (const companionId of companions) {
+      writeBootLog('bootstrapApplication:companion-start', companionId);
+      const companion = await createPackage(companionId, new Set(seenPackageIds));
+      packageInstance.ipcHandlers = [
+        ...(packageInstance.ipcHandlers ?? []),
+        ...(companion.ipcHandlers ?? [])
+      ];
+      writeBootLog('bootstrapApplication:companion-merged', companionId);
+    }
+    delete packageInstance.ipcCompanions;
+
+    return packageInstance;
   };
 
   let entryPackageName = 'Setup';
@@ -45,21 +64,6 @@ export async function bootstrapApplication() {
   writeBootLog('bootstrapApplication:entry-package', entryPackageName);
   const entryPackage = await createPackage(entryPackageName);
   writeBootLog('bootstrapApplication:entry-package-created', entryPackage.id);
-
-  // Merge IPC handlers from companion packages declared by the entry package.
-  // This keeps cross-package coupling out of individual package modules —
-  // neither Chat nor Templates import each other; the boot layer composes them.
-  const companions = entryPackage.ipcCompanions ?? [];
-  for (const companionId of companions) {
-    writeBootLog('bootstrapApplication:companion-start', companionId);
-    const companion = await createPackage(companionId);
-    entryPackage.ipcHandlers = [
-      ...(entryPackage.ipcHandlers ?? []),
-      ...(companion.ipcHandlers ?? [])
-    ];
-    writeBootLog('bootstrapApplication:companion-merged', companionId);
-  }
-  delete entryPackage.ipcCompanions;
 
   await electronModule.bootElectron({
     rootDirectory,

@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
+import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 
 // ---------------------------------------------------------------------------
 // createHistoryStateManager
@@ -17,18 +18,22 @@ export function createHistoryStateManager({ rootDirectory }) {
     if (!projectId) return chatsDirectory;
     return path.join(
       projectsDirectory,
-      String(projectId).replace(/[^a-zA-Z0-9_\-]/g, ''),
+      sanitizeFileStem(projectId),
       'Chats'
     );
   }
 
   async function saveSession(session) {
     if (!session?.id) return null;
+    const safeId = sanitizeFileStem(session.id);
+    if (!safeId) return null;
+
     const targetDir = getChatsDirectory(session.projectId);
     await mkdir(targetDir, { recursive: true });
-    const filePath = path.join(targetDir, `${session.id}.json`);
-    await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
-    return session;
+    const filePath = path.join(targetDir, `${safeId}.json`);
+    const record = { ...session, id: safeId };
+    await writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+    return record;
   }
 
   async function listSessions(projectId) {
@@ -68,7 +73,8 @@ export function createHistoryStateManager({ rootDirectory }) {
   }
 
   async function loadSession(id, projectId) {
-    const safeId    = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+    const safeId    = sanitizeFileStem(id);
+    if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
     const filePath  = path.join(targetDir, `${safeId}.json`);
     const raw       = await readFile(filePath, 'utf8');
@@ -76,14 +82,16 @@ export function createHistoryStateManager({ rootDirectory }) {
   }
 
   async function deleteSession(id, projectId) {
-    const safeId    = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+    const safeId    = sanitizeFileStem(id);
+    if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
     const filePath  = path.join(targetDir, `${safeId}.json`);
     await unlink(filePath);
   }
 
   async function renameSession(id, newTitle, projectId) {
-    const safeId    = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+    const safeId    = sanitizeFileStem(id);
+    if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
     const filePath  = path.join(targetDir, `${safeId}.json`);
     const raw       = await readFile(filePath, 'utf8');
@@ -95,7 +103,8 @@ export function createHistoryStateManager({ rootDirectory }) {
   }
 
   async function pinSession(id, pinned, projectId) {
-    const safeId    = String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
+    const safeId    = sanitizeFileStem(id);
+    if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
     const filePath  = path.join(targetDir, `${safeId}.json`);
     const raw       = await readFile(filePath, 'utf8');

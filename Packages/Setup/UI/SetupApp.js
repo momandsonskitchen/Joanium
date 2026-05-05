@@ -195,7 +195,7 @@ async function bootstrap() {
         onboardingCompleted: true
       };
       await window.JoaniumSetup.complete(completedState);
-      await window.JoaniumSetup.openPackage('Chat');
+      await window.JoaniumSetup.openPackage('Shell');
     } catch {
       runtimeError = strings.paths.localDataFile;
       render();

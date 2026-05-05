@@ -7,27 +7,27 @@ export async function createPackage({ rootDirectory }) {
     id: 'History',
     ipcHandlers: [
       {
-        channel: 'chat:save-session',
+        channel: 'history:save-session',
         handler: async (_event, session) => historyStateManager.saveSession(session)
       },
       {
-        channel: 'chat:list-sessions',
+        channel: 'history:list-sessions',
         handler: async (_event, projectId) => historyStateManager.listSessions(projectId)
       },
       {
-        channel: 'chat:load-session',
+        channel: 'history:load-session',
         handler: async (_event, id, projectId) => historyStateManager.loadSession(id, projectId)
       },
       {
-        channel: 'chat:delete-session',
+        channel: 'history:delete-session',
         handler: async (_event, id, projectId) => historyStateManager.deleteSession(id, projectId)
       },
       {
-        channel: 'chat:rename-session',
+        channel: 'history:rename-session',
         handler: async (_event, id, newTitle, projectId) => historyStateManager.renameSession(id, newTitle, projectId)
       },
       {
-        channel: 'chat:pin-session',
+        channel: 'history:pin-session',
         handler: async (_event, id, pinned, projectId) => historyStateManager.pinSession(id, pinned, projectId)
       }
     ]

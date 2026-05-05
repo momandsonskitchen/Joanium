@@ -3,7 +3,7 @@ import { createProjectStateManager } from './Core/ProjectState.js';
 
 // ---------------------------------------------------------------------------
 // Projects package — backend-only, no renderer.
-// The boot layer merges its ipcHandlers into the Chat window via ipcCompanions.
+// The Shell package composes these IPC handlers into the app window.
 // ---------------------------------------------------------------------------
 
 export async function createPackage({ rootDirectory }) {
@@ -13,23 +13,23 @@ export async function createPackage({ rootDirectory }) {
     id: 'Projects',
     ipcHandlers: [
       {
-        channel: 'chat:save-project',
+        channel: 'projects:save-project',
         handler: async (_event, project) => projectStateManager.saveProject(project)
       },
       {
-        channel: 'chat:list-projects',
+        channel: 'projects:list-projects',
         handler: async () => projectStateManager.listProjects()
       },
       {
-        channel: 'chat:load-project',
+        channel: 'projects:load-project',
         handler: async (_event, id) => projectStateManager.loadProject(id)
       },
       {
-        channel: 'chat:delete-project',
+        channel: 'projects:delete-project',
         handler: async (_event, id) => projectStateManager.deleteProject(id)
       },
       {
-        channel: 'chat:select-project-cover',
+        channel: 'projects:select-cover',
         handler: async (event) => {
           const window = event.sender.getOwnerBrowserWindow();
           const result = await dialog.showOpenDialog(window, {
@@ -45,7 +45,7 @@ export async function createPackage({ rootDirectory }) {
         }
       },
       {
-        channel: 'chat:select-project-directory',
+        channel: 'projects:select-directory',
         handler: async (event) => {
           const window = event.sender.getOwnerBrowserWindow();
           const result = await dialog.showOpenDialog(window, {

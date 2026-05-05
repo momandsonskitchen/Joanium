@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { readdir, mkdir, writeFile } from 'node:fs/promises';
 import { createAgentStateManager } from './Core/AgentState.js';
 import { createAgentScheduler } from './Core/AgentScheduler.js';
+import { sanitizeFileStem } from '../Shared/Storage/SafePath.js';
 
 const agentsPackageDirectory = path.dirname(fileURLToPath(import.meta.url));
 
@@ -33,7 +34,10 @@ export async function createPackage({ rootDirectory }) {
     // Write a run-log entry so we have an audit trail.
     await mkdir(runsDirectory, { recursive: true });
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const logPath   = path.join(runsDirectory, `${agent.id}-${timestamp}.json`);
+    const safeAgentId = sanitizeFileStem(agent.id);
+    if (!safeAgentId) return;
+
+    const logPath   = path.join(runsDirectory, `${safeAgentId}-${timestamp}.json`);
     await writeFile(logPath, JSON.stringify({
       agentId:   agent.id,
       agentName: agent.name,

@@ -1,5 +1,6 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
@@ -46,7 +47,7 @@ export function createTemplatesPanel(strings) {
 
     let templates;
     try {
-      templates = await window.JoaniumChat.listTemplates();
+      templates = await invokeIpc('templates:list-templates');
     } catch {
       templates = [];
     }
@@ -101,7 +102,7 @@ export function createTemplatesPanel(strings) {
     editBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        const full = await window.JoaniumChat.loadTemplate(template.id);
+        const full = await invokeIpc('templates:load-template', template.id);
         panelRef?._startEdit(full);
       } catch (error) {
         console.error('[Joanium] Failed to load template for editing:', error);
@@ -115,7 +116,7 @@ export function createTemplatesPanel(strings) {
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.deleteTemplate(template.id);
+        await invokeIpc('templates:delete-template', template.id);
       } catch (error) {
         console.error('[Joanium] Failed to delete template:', error);
       }
@@ -260,7 +261,7 @@ export function createTemplatesPanel(strings) {
       };
 
       try {
-        await window.JoaniumChat.saveTemplate(template);
+        await invokeIpc('templates:save-template', template);
       } catch (err) {
         console.error('[Joanium] Failed to save template:', err);
         return;

@@ -1,31 +1,9 @@
-import en from '../I18n/en.js';
 import { getTimeGreetings } from '../../../Datasets/messages.js';
-import de from '../I18n/de.js';
-import fr from '../I18n/fr.js';
-
-// Utils
-import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
+import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
-
-// Shared UI Components
+import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
-import { createInputBox } from '../../Shared/InputBox/InputBox.js';
-
-// Panels
-import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
-import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
-import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
-import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
-import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
-import { createHistoryPanel } from '../../History/UI/HistoryPanel.js';
-import { createAgentsPanel } from '../../Agents/UI/AgentsPanel.js';
-
-const dictionaries = { en, de, fr };
-
-function getDictionary(locale) {
-  return dictionaries[locale] ?? en;
-}
 
 function getFirstName(name, fallback) {
   const normalized = collapseWhitespace(name);
@@ -33,37 +11,11 @@ function getFirstName(name, fallback) {
   return normalized.split(' ')[0];
 }
 
-// ---------------------------------------------------------------------------
-// getInitials — first letter of first name + second letter of last name.
-// Single-word names use the first two letters.
-// ---------------------------------------------------------------------------
-function getInitials(name) {
-  const parts = collapseWhitespace(name).split(' ').filter(Boolean);
-
-  if (parts.length >= 2) {
-    const firstLetter = parts[0][0].toUpperCase();
-    const lastWord = parts[parts.length - 1];
-    const secondLetter = (lastWord[1] ?? lastWord[0]).toUpperCase();
-    return `${firstLetter}${secondLetter}`;
-  }
-
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  return '?';
-}
-
-// ---------------------------------------------------------------------------
-// stripMarkdown — removes code blocks, inline code, and markup symbols so
-// only plain readable prose is passed to the speech synthesiser.
-// ---------------------------------------------------------------------------
 function stripMarkdown(text) {
-  return text
+  return String(text ?? '')
     .replace(/^```[\s\S]*?^```/gm, '')
     .replace(/^~~~[\s\S]*?^~~~/gm, '')
     .replace(/`[^`\n]+`/g, '')
-    .replace(/^[=-]{2,}\s*$/gm, '')
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/(\*{3}|_{3})(.*?)\1/g, '$2')
     .replace(/(\*{2}|_{2})(.*?)\1/g, '$2')
@@ -80,9 +32,6 @@ function stripMarkdown(text) {
     .trim();
 }
 
-// ---------------------------------------------------------------------------
-// TTS state — module-level so only one utterance plays at a time.
-// ---------------------------------------------------------------------------
 let activeSpeakBtn = null;
 
 function resetSpeakButton(btn) {
@@ -106,30 +55,24 @@ function speakText(rawText, btn) {
   resetSpeakButton(activeSpeakBtn);
   activeSpeakBtn = null;
 
-  const text = stripMarkdown(rawText ?? '');
+  const text = stripMarkdown(rawText);
   if (!text) return;
 
   const utterance = new SpeechSynthesisUtterance(text);
-
   const finish = () => {
     resetSpeakButton(btn);
     activeSpeakBtn = null;
   };
 
-  utterance.onend   = finish;
+  utterance.onend = finish;
   utterance.onerror = finish;
-
   activeSpeakBtn = btn;
   btn.classList.add('chat-message__action-button--speaking');
   const iconEl = btn.querySelector('.chat-message__action-icon');
   if (iconEl) iconEl.innerHTML = iconMarkup.volumeStop ?? '';
-
   window.speechSynthesis.speak(utterance);
 }
 
-// ---------------------------------------------------------------------------
-// Message action bar — copy + retry + optional TTS speak.
-// ---------------------------------------------------------------------------
 function createMessageActions({ onCopy, onRetry, onSpeak }) {
   const actions = createElement('div', 'chat-message__actions');
 
@@ -151,7 +94,6 @@ function createMessageActions({ onCopy, onRetry, onSpeak }) {
   retryBtn.type = 'button';
   retryBtn.append(createIcon('retry', 'chat-message__action-icon'));
   retryBtn.addEventListener('click', onRetry);
-
   actions.append(copyBtn, retryBtn);
 
   if (typeof onSpeak === 'function') {
@@ -165,16 +107,15 @@ function createMessageActions({ onCopy, onRetry, onSpeak }) {
   return actions;
 }
 
-// ---------------------------------------------------------------------------
-// createMessageElement — builds a chat bubble for any state.
-// ---------------------------------------------------------------------------
 function createMessageElement(message, { onCopy, onRetry } = {}) {
   const article = createElement(
     'article',
-    ['chat-message', `chat-message--${message.role}`,
+    [
+      'chat-message',
+      `chat-message--${message.role}`,
       message.streaming ? 'chat-message--streaming' : '',
-      message.error     ? 'chat-message--error'     : '',
-      message.stopped   ? 'chat-message--stopped'   : ''
+      message.error ? 'chat-message--error' : '',
+      message.stopped ? 'chat-message--stopped' : ''
     ].filter(Boolean).join(' ')
   );
 
@@ -202,9 +143,10 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
       dots.innerHTML = '<span></span><span></span><span></span>';
       bubble.append(dots);
     } else {
-      const textSpan = createElement('span', 'chat-message__text', (message.content ?? '').trimStart());
-      bubble.append(textSpan);
-      if (message.streaming) bubble.append(createElement('span', 'chat-message__stream-dot'));
+      bubble.append(createElement('span', 'chat-message__text', (message.content ?? '').trimStart()));
+      if (message.streaming) {
+        bubble.append(createElement('span', 'chat-message__stream-dot'));
+      }
     }
 
     article.append(bubble);
@@ -216,16 +158,12 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
     const onSpeak = message.role === 'assistant'
       ? (btn) => speakText(message.content, btn)
       : undefined;
-
     article.append(createMessageActions({ onCopy, onRetry, onSpeak }));
   }
 
   return article;
 }
 
-// ---------------------------------------------------------------------------
-// updateLastStreamingMessage — patches the live bubble token-by-token.
-// ---------------------------------------------------------------------------
 function updateLastStreamingMessage(threadEl, { content, thinking }) {
   const lastEl = threadEl?.lastElementChild;
   if (!lastEl || !lastEl.classList.contains('chat-message--assistant')) return;
@@ -258,30 +196,27 @@ function updateLastStreamingMessage(threadEl, { content, thinking }) {
 
 function getPreferredProvider(payload) {
   const selectedIds = payload.user?.providers?.selected ?? [];
-  const byId = new Map(payload.providers.map((p) => [p.id, p]));
+  const byId = new Map(payload.providers.map((provider) => [provider.id, provider]));
   const ordered = [
     ...selectedIds.map((id) => byId.get(id)).filter(Boolean),
-    ...payload.providers.filter((p) => !selectedIds.includes(p.id))
+    ...payload.providers.filter((provider) => !selectedIds.includes(provider.id))
   ];
 
   return (
-    ordered.find((p) => {
-      const details = payload.user?.providers?.details?.[p.id] ?? {};
+    ordered.find((provider) => {
+      const details = payload.user?.providers?.details?.[provider.id] ?? {};
       return (
-        Boolean(p.models?.[0]?.id) &&
-        Boolean(collapseWhitespace(details.endpoint) || collapseWhitespace(p.endpoint)) &&
-        (p.requiresApiKey ? Boolean(collapseWhitespace(details.apiKey)) : true)
+        Boolean(provider.models?.[0]?.id) &&
+        Boolean(collapseWhitespace(details.endpoint) || collapseWhitespace(provider.endpoint)) &&
+        (provider.requiresApiKey ? Boolean(collapseWhitespace(details.apiKey)) : true)
       );
     }) ??
-    ordered.find((p) => p.models?.length > 0) ??
+    ordered.find((provider) => provider.models?.length > 0) ??
     payload.providers[0] ??
     null
   );
 }
 
-// ---------------------------------------------------------------------------
-// createModelPickerPanel — floating portal for switching provider + model.
-// ---------------------------------------------------------------------------
 function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
   const panel = createElement('div', 'chat-model-picker');
   document.body.append(panel);
@@ -289,12 +224,12 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
   const scroller = createElement('div', 'chat-model-picker__scroller');
   panel.append(scroller);
 
-  const readyProviders = providers.filter((p) => {
-    if (!p.models?.length) return false;
-    const details = userProviderDetails?.[p.id] ?? {};
-    const endpoint = collapseWhitespace(details.endpoint) || collapseWhitespace(p.endpoint);
+  const readyProviders = providers.filter((provider) => {
+    if (!provider.models?.length) return false;
+    const details = userProviderDetails?.[provider.id] ?? {};
+    const endpoint = collapseWhitespace(details.endpoint) || collapseWhitespace(provider.endpoint);
     if (!endpoint) return false;
-    if (p.requiresApiKey && !collapseWhitespace(details.apiKey)) return false;
+    if (provider.requiresApiKey && !collapseWhitespace(details.apiKey)) return false;
     return true;
   });
 
@@ -304,10 +239,14 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
 
     for (const model of provider.models) {
       const option = createElement('button', 'chat-model-picker__option');
+      option.type = 'button';
       option._pickerProviderId = provider.id;
       option._pickerModelId = model.id;
       option.append(createElement('span', 'chat-model-picker__option-label', model.name ?? model.id));
-      option.addEventListener('click', (e) => { e.stopPropagation(); onSelect(provider, model); });
+      option.addEventListener('click', (event) => {
+        event.stopPropagation();
+        onSelect(provider, model);
+      });
       group.append(option);
     }
 
@@ -318,105 +257,79 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
   return { element: panel, dispose: scrollbar.dispose };
 }
 
-// ---------------------------------------------------------------------------
-// Session ID generation — datetime-based, safe for filenames.
-// ---------------------------------------------------------------------------
 function generateSessionId() {
-  const d = new Date();
-  const p = (n, l = 2) => String(n).padStart(l, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}-${p(d.getMilliseconds(), 3)}`;
+  const date = new Date();
+  const pad = (value, length = 2) => String(value).padStart(length, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}-${pad(date.getMilliseconds(), 3)}`;
 }
 
-// ---------------------------------------------------------------------------
-// bootstrap — entry point; builds the full UI tree.
-// ---------------------------------------------------------------------------
-async function bootstrap() {
-  const payload    = await window.JoaniumChat.bootstrap();
-  const strings    = getDictionary(payload.user.locale);
-  const root       = document.getElementById('app');
-  const firstName  = getFirstName(payload.user.profile.name, strings.appName);
-  const _hour = new Date().getHours();
+export async function createChatView(strings, {
+  getActiveProject,
+  onActiveProjectChange,
+  getActivePersona,
+  onActivePersonaChange,
+  getProfile
+} = {}) {
+  const payload = await invokeIpc('chat:bootstrap');
+  const view = createElement('div', 'chat-view');
+  const profile = getProfile?.() ?? payload.user?.profile ?? {};
+  const firstName = getFirstName(profile.name, strings.appName);
+  const hour = new Date().getHours();
+  const greetings = getTimeGreetings(hour, firstName);
 
-  let activeProvider   = getPreferredProvider(payload);
-  let activeModel      = activeProvider?.models?.[0] ?? null;
+  let activeProvider = getPreferredProvider(payload);
+  let activeModel = activeProvider?.models?.[0] ?? null;
   let activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
-
-  // Active persona — system prompt prepended to every message.
-  let activePersona = null;
-  // Load Joana by default
-  try {
-    activePersona = await window.JoaniumChat.loadPersona('Joanium', 'Joana.md');
-  } catch (err) {
-    console.error('[Joanium] Failed to load default persona:', err);
-  }
-
-  let draftValue  = '';
-  let isSending   = false;
-  let accText     = '';
+  let activePersona = getActivePersona?.() ?? null;
+  let activeProject = getActiveProject?.() ?? null;
+  let draftValue = '';
+  let isSending = false;
+  let accText = '';
   let accThinking = '';
+  let sessionId = null;
+  let sessionCreatedAt = null;
+  let messages = [];
+  let streamDisposers = [];
+  let modelPickerPanel = null;
+  let modelPickerOpen = false;
 
-  // Session tracking — null means this is an unsaved new conversation.
-  let sessionId          = null;
-  let sessionCreatedAt   = null;
-
-  // DOM refs set during build
   let composerField = null;
-  let sendButton    = null;
-  let thread        = null;
-  let title         = null;
-  let composer      = null;
-  let canvas        = null;
-  let scroll        = null;
-  let bottom        = null;
-  let newChatBtn    = null;
-  let projectPill   = null;
+  let sendButton = null;
+  let thread = null;
+  let title = null;
+  let composer = null;
+  let scroll = null;
+  let bottom = null;
+  let newChatBtn = null;
+  let projectPill = null;
   let projectNameEl = null;
   let projectMetaEl = null;
-  let messages      = [];
+  let modelButton = null;
 
-  // Model picker state
-  let modelPickerPanel    = null;
-  let modelPickerOpen     = false;
-  let modelButton         = null;
+  if (!activePersona) {
+    try {
+      activePersona = await invokeIpc('personas:load-persona', 'Joanium', 'Joana.md');
+      onActivePersonaChange?.(activePersona);
+    } catch (error) {
+      console.error('[Joanium] Failed to load default persona:', error);
+    }
+  }
 
-  // Tab state
-  let activeTabEl   = null;
-  const tabElements = {};
-
-  // Active project context — injected as system prompt when set.
-  let activeProject = null;
-
-  // History panel — created lazily on first open.
-  let historyPanel          = null;
-  let _populateHistoryList  = null;
-  let projectsPanel         = null;
-  let _populateProjectsList  = null;
-  let templatesPanel         = null;
-  let _populateTemplatesList = null;
-  let skillsPanel         = null;
-  let _populateSkillsList = null;
-  let personasPanel         = null;
-  let _populatePersonasList = null;
-  let marketplacePanel         = null;
-  let _populateMarketplaceList = null;
-  let agentsPanel              = null;
-  let _populateAgentsList      = null;
-  let settingsPanel  = null;
-
-  // ---------------------------------------------------------------------------
-  // Session persistence
-  // ---------------------------------------------------------------------------
+  function removeStreamListeners() {
+    for (const dispose of streamDisposers) {
+      dispose();
+    }
+    streamDisposers = [];
+  }
 
   async function saveCurrentSession() {
     if (!sessionId || messages.length === 0) return;
-    const firstUser = messages.find((m) => m.role === 'user');
+    const firstUser = messages.find((message) => message.role === 'user');
     if (!firstUser) return;
 
-    const sessionTitle = truncate(collapseWhitespace(firstUser.content), 60);
     const now = new Date().toISOString();
-
     const sessionMessages = messages
-      .filter((m) => !m.streaming && !m.pending && m.content)
+      .filter((message) => !message.streaming && !message.pending && message.content)
       .map(({ role, content, thinking }) => {
         const entry = { role, content };
         if (thinking) entry.thinking = thinking;
@@ -424,144 +337,19 @@ async function bootstrap() {
       });
 
     const sessionData = {
-      id:        sessionId,
-      title:     sessionTitle,
+      id: sessionId,
+      title: truncate(collapseWhitespace(firstUser.content), 60),
       createdAt: sessionCreatedAt ?? now,
       updatedAt: now,
-      messages:  sessionMessages
+      messages: sessionMessages
     };
 
     if (activeProject?.id) {
       sessionData.projectId = activeProject.id;
     }
 
-    await window.JoaniumChat.saveSession(sessionData);
+    await invokeIpc('history:save-session', sessionData);
   }
-
-  // ---------------------------------------------------------------------------
-  // View switching — history panel replaces scroll + bottom fully.
-  // ---------------------------------------------------------------------------
-
-  function showChatView() {
-    scroll.hidden = false;
-    bottom.hidden = false;
-    if (historyPanel)     historyPanel.hidden     = true;
-    if (projectsPanel)   projectsPanel.hidden    = true;
-    if (templatesPanel)  templatesPanel.hidden   = true;
-    if (settingsPanel)   settingsPanel.hidden    = true;
-    if (skillsPanel)     skillsPanel.hidden      = true;
-    if (personasPanel)   personasPanel.hidden    = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-    if (agentsPanel)     agentsPanel.hidden      = true;
-  }
-
-  async function showSkillsView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (historyPanel)     historyPanel.hidden     = true;
-    if (projectsPanel)   projectsPanel.hidden    = true;
-    if (templatesPanel)  templatesPanel.hidden   = true;
-    if (settingsPanel)   settingsPanel.hidden    = true;
-    if (personasPanel)   personasPanel.hidden    = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-
-    if (!skillsPanel) {
-      const sp = createSkillsPanel(strings.skills);
-      skillsPanel = sp.build();
-      _populateSkillsList = sp.populateList;
-      canvas.append(skillsPanel);
-    }
-
-    skillsPanel.hidden = false;
-    await _populateSkillsList(skillsPanel._listEl, skillsPanel._search.getValue().trim());
-  }
-
-  async function showPersonasView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (historyPanel)     historyPanel.hidden     = true;
-    if (projectsPanel)   projectsPanel.hidden    = true;
-    if (templatesPanel)  templatesPanel.hidden   = true;
-    if (settingsPanel)   settingsPanel.hidden    = true;
-    if (skillsPanel)     skillsPanel.hidden      = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-
-    if (!personasPanel) {
-      const pp = createPersonasPanel(strings.personas, {
-        getActivePersona: () => activePersona,
-        onActivatePersona: (p) => { activePersona = p; }
-      });
-      personasPanel = pp.build();
-      _populatePersonasList = pp.populateList;
-      canvas.append(personasPanel);
-    }
-
-    personasPanel.hidden = false;
-    await _populatePersonasList(personasPanel._listEl, personasPanel._search.getValue().trim());
-  }
-
-  async function showHistoryView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (settingsPanel)    settingsPanel.hidden    = true;
-    if (skillsPanel)      skillsPanel.hidden      = true;
-    if (personasPanel)    personasPanel.hidden    = true;
-    if (projectsPanel)   projectsPanel.hidden    = true;
-    if (templatesPanel)  templatesPanel.hidden   = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-
-    if (!historyPanel) {
-      const hp = createHistoryPanel(strings.history, {
-        onNewChat:          () => { clearConversation(); switchToTab('chat'); showChatView(); },
-        onLoadSession:      (id) => void loadHistorySession(id),
-        getCurrentSessionId: () => sessionId,
-        getActiveProject:   () => activeProject
-      });
-      historyPanel = hp.build();
-      _populateHistoryList = hp.populateList;
-      canvas.append(historyPanel);
-    }
-
-    historyPanel.hidden = false;
-    historyPanel._search.clear();
-    await _populateHistoryList(historyPanel._contentEl);
-  }
-
-  async function showProjectsView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (historyPanel)     historyPanel.hidden     = true;
-    if (templatesPanel)  templatesPanel.hidden   = true;
-    if (settingsPanel)   settingsPanel.hidden    = true;
-    if (skillsPanel)     skillsPanel.hidden      = true;
-    if (personasPanel)   personasPanel.hidden    = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-
-    if (!projectsPanel) {
-      const proj = createProjectsPanel(strings.projects, {
-        onOpenProject: (project) => {
-          if (project === null) {
-            clearActiveProject();
-            return;
-          }
-          setActiveProject(project);
-          clearConversation();
-          switchToTab('chat');
-          showChatView();
-          focusComposer();
-        },
-        getActiveProject: () => activeProject
-      });
-      projectsPanel = proj.build();
-      _populateProjectsList = proj.populateList;
-      canvas.append(projectsPanel);
-    }
-
-    projectsPanel.hidden = false;
-    await _populateProjectsList(projectsPanel._listEl, projectsPanel._search.getValue().trim());
-  }
-
-
 
   function buildProjectContext(project) {
     if (!project) return '';
@@ -578,7 +366,7 @@ async function bootstrap() {
     return lines.filter(Boolean).join('\n');
   }
 
-  function setActiveProject(project) {
+  function applyActiveProject(project) {
     activeProject = project ? {
       id: project.id,
       name: project.name ?? '',
@@ -586,16 +374,12 @@ async function bootstrap() {
       info: project.info ?? '',
       coverImagePath: project.coverImagePath ?? ''
     } : null;
-
     syncActiveProjectPill();
-
-    if (projectsPanel && !projectsPanel.hidden && _populateProjectsList) {
-      void _populateProjectsList(projectsPanel._listEl, projectsPanel._search.getValue().trim());
-    }
   }
 
   function clearActiveProject() {
-    setActiveProject(null);
+    applyActiveProject(null);
+    onActiveProjectChange?.(null);
   }
 
   function syncActiveProjectPill() {
@@ -608,134 +392,31 @@ async function bootstrap() {
       return;
     }
 
-    const meta = collapseWhitespace(activeProject.info)
-      || strings.projects.activeHint;
-
     projectPill.hidden = false;
     projectNameEl.textContent = activeProject.name;
-    projectMetaEl.textContent = meta;
+    projectMetaEl.textContent = collapseWhitespace(activeProject.info) || strings.projects.activeHint;
   }
 
-  // Programmatic tab switch — updates sidebar visual without triggering side-effects.
-  function switchToTab(id) {
-    const targetTab = tabElements[id];
-    if (!targetTab || targetTab === activeTabEl) return;
-    activeTabEl?.classList.remove('chat-sidebar__tab--active');
-    targetTab.classList.add('chat-sidebar__tab--active');
-    activeTabEl = targetTab;
-    moveIndicatorToTab(targetTab, true);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Projects panel — rendered by createProjectsPanel (Projects package).
-  // (showProjectsView above builds/shows the panel via the factory)
-  // ---------------------------------------------------------------------------
-
-  // ---------------------------------------------------------------------------
-  // Templates panel DOM
-  // ---------------------------------------------------------------------------
-
-  async function showTemplatesView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (historyPanel)     historyPanel.hidden     = true;
-    if (projectsPanel)   projectsPanel.hidden    = true;
-    if (settingsPanel)   settingsPanel.hidden    = true;
-    if (skillsPanel)     skillsPanel.hidden      = true;
-    if (personasPanel)   personasPanel.hidden    = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-
-    if (!templatesPanel) {
-      const tpl = createTemplatesPanel(strings.templates);
-      templatesPanel = tpl.build();
-      _populateTemplatesList = tpl.populateList;
-      canvas.append(templatesPanel);
-    }
-
-    templatesPanel.hidden = false;
-    await _populateTemplatesList(templatesPanel._listEl, templatesPanel._search.getValue().trim());
-  }
-
-  async function showMarketplaceView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (historyPanel)    historyPanel.hidden    = true;
-    if (projectsPanel)  projectsPanel.hidden   = true;
-    if (templatesPanel) templatesPanel.hidden  = true;
-    if (settingsPanel)  settingsPanel.hidden   = true;
-    if (skillsPanel)    skillsPanel.hidden     = true;
-    if (personasPanel)  personasPanel.hidden   = true;
-
-    if (!marketplacePanel) {
-      const mp = createMarketplacePanel(strings.marketplace);
-      marketplacePanel = mp.build();
-      _populateMarketplaceList = mp.populateList;
-      canvas.append(marketplacePanel);
-    }
-
-    marketplacePanel.hidden = false;
-    await _populateMarketplaceList(
-      marketplacePanel._listEl,
-      marketplacePanel._search.getValue().trim()
-    );
-  }
-
-  async function showAgentsView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (historyPanel)    historyPanel.hidden    = true;
-    if (projectsPanel)  projectsPanel.hidden   = true;
-    if (templatesPanel) templatesPanel.hidden  = true;
-    if (settingsPanel)  settingsPanel.hidden   = true;
-    if (skillsPanel)    skillsPanel.hidden     = true;
-    if (personasPanel)  personasPanel.hidden   = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-
-    if (!agentsPanel) {
-      const ap = createAgentsPanel(strings.agents);
-      agentsPanel = ap.build();
-      _populateAgentsList = ap.populateList;
-      canvas.append(agentsPanel);
-    }
-
-    agentsPanel.hidden = false;
-    await _populateAgentsList(agentsPanel._listEl, agentsPanel._search.getValue().trim());
-  }
-
-
-  // ---------------------------------------------------------------------------
-  // Skills panel DOM
-  // ---------------------------------------------------------------------------
-
-  async function loadHistorySession(id) {
+  async function loadSession(id) {
     try {
-      const session = await window.JoaniumChat.loadSession(id, activeProject?.id);
-
+      const session = await invokeIpc('history:load-session', id, activeProject?.id);
       messages = (session.messages ?? [])
-        .map((m) => ({
-          role:      m.role === 'assistant' ? 'assistant' : 'user',
-          content:   typeof m.content === 'string' ? m.content : '',
-          thinking:  m.thinking ?? '',
+        .map((message) => ({
+          role: message.role === 'assistant' ? 'assistant' : 'user',
+          content: typeof message.content === 'string' ? message.content : '',
+          thinking: message.thinking ?? '',
           streaming: false
         }))
-        .filter((m) => m.content);
+        .filter((message) => message.content);
 
-      // Restore session context so new messages append to the same file
-      sessionId        = session.id;
+      sessionId = session.id;
       sessionCreatedAt = session.createdAt ?? new Date().toISOString();
-
-      switchToTab('chat');
-      showChatView();
       renderThread();
       focusComposer();
-    } catch (err) {
-      console.error('[Joanium] Failed to load session:', err);
+    } catch (error) {
+      console.error('[Joanium] Failed to load session:', error);
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Model picker
-  // ---------------------------------------------------------------------------
 
   function closeModelPicker() {
     modelPickerPanel?.classList.remove('chat-model-picker--open');
@@ -745,28 +426,35 @@ async function bootstrap() {
 
   function syncPickerActiveStates() {
     if (!modelPickerPanel) return;
+
     for (const option of modelPickerPanel.querySelectorAll('.chat-model-picker__option')) {
       const isActive = option._pickerProviderId === activeProvider?.id
         && option._pickerModelId === activeModel?.id;
       option.classList.toggle('chat-model-picker__option--active', isActive);
       const existing = option.querySelector('.chat-model-picker__check');
-      if (isActive && !existing) option.append(createIcon('check', 'chat-model-picker__check'));
-      else if (!isActive && existing) existing.remove();
+      if (isActive && !existing) {
+        option.append(createIcon('check', 'chat-model-picker__check'));
+      } else if (!isActive && existing) {
+        existing.remove();
+      }
     }
   }
 
   function openModelPicker(triggerButton) {
-    if (modelPickerOpen) { closeModelPicker(); return; }
+    if (modelPickerOpen) {
+      closeModelPicker();
+      return;
+    }
 
     if (!modelPickerPanel) {
       const picker = createModelPickerPanel({
-        providers:           payload.providers,
+        providers: payload.providers,
         userProviderDetails: payload.user?.providers?.details ?? {},
         onSelect(provider, model) {
-          activeProvider   = provider;
-          activeModel      = model;
+          activeProvider = provider;
+          activeModel = model;
           activeModelLabel = model.name ?? model.id;
-          const labelEl    = triggerButton.querySelector('.chat-composer__model-label');
+          const labelEl = triggerButton.querySelector('.chat-composer__model-label');
           if (labelEl) labelEl.textContent = activeModelLabel;
           syncPickerActiveStates();
           closeModelPicker();
@@ -779,54 +467,50 @@ async function bootstrap() {
     modelPickerOpen = true;
     modelButton.classList.add('chat-composer__model--open');
     const rect = triggerButton.getBoundingClientRect();
-    modelPickerPanel.style.left   = `${rect.left}px`;
+    modelPickerPanel.style.left = `${rect.left}px`;
     modelPickerPanel.style.bottom = `${window.innerHeight - rect.top + 8}px`;
-
     requestAnimationFrame(() => modelPickerPanel?.classList.add('chat-model-picker--open'));
 
-    const onDocClick = (e) => {
-      if (!modelPickerPanel?.contains(e.target) && !triggerButton.contains(e.target)) {
+    const onDocClick = (event) => {
+      if (!modelPickerPanel?.contains(event.target) && !triggerButton.contains(event.target)) {
         closeModelPicker();
         document.removeEventListener('click', onDocClick, { capture: true });
         document.removeEventListener('keydown', onDocKey);
       }
     };
-    const onDocKey = (e) => {
-      if (e.key === 'Escape') {
+    const onDocKey = (event) => {
+      if (event.key === 'Escape') {
         closeModelPicker();
         document.removeEventListener('click', onDocClick, { capture: true });
         document.removeEventListener('keydown', onDocKey);
       }
     };
+
     setTimeout(() => {
       document.addEventListener('click', onDocClick, { capture: true });
       document.addEventListener('keydown', onDocKey);
     }, 0);
   }
 
-  // ---------------------------------------------------------------------------
-  // Stream control
-  // ---------------------------------------------------------------------------
-
   function stopStream() {
-    window.JoaniumChat.removeStreamListeners();
+    removeStreamListeners();
     const stoppedNote = strings.composer.generationStopped;
     messages = messages.map((message, index) => {
       if (index !== messages.length - 1) return message;
       const content = accText ? `${accText}\n\n${stoppedNote}` : stoppedNote;
       return {
-        role:          'assistant',
+        role: 'assistant',
         content,
-        thinking:      accThinking,
-        streaming:     false,
-        stopped:       true,
+        thinking: accThinking,
+        streaming: false,
+        stopped: true,
         providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel:    activeModelLabel
+        modelLabel: activeModelLabel
       };
     });
-    accText     = '';
+    accText = '';
     accThinking = '';
-    isSending   = false;
+    isSending = false;
     void saveCurrentSession();
     syncComposer();
     renderThread();
@@ -843,19 +527,25 @@ async function bootstrap() {
     composerField.value = draftValue;
     syncComposerFieldHeight();
 
-    const iconEl  = sendButton.querySelector('.chat-composer__send-icon');
+    const iconEl = sendButton.querySelector('.chat-composer__send-icon');
     const labelEl = sendButton.querySelector('.chat-composer__send-label');
 
     if (isSending) {
       sendButton.disabled = false;
       sendButton.classList.add('chat-composer__send--stop');
-      if (iconEl)  iconEl.innerHTML    = iconMarkup.stop;
-      if (labelEl) { labelEl.textContent = strings.composer.stop; labelEl.hidden = false; }
+      if (iconEl) iconEl.innerHTML = iconMarkup.stop;
+      if (labelEl) {
+        labelEl.textContent = strings.composer.stop;
+        labelEl.hidden = false;
+      }
     } else {
       sendButton.disabled = !draftValue.trim();
       sendButton.classList.remove('chat-composer__send--stop');
-      if (iconEl)  iconEl.innerHTML    = iconMarkup.send;
-      if (labelEl) { labelEl.textContent = ''; labelEl.hidden = true; }
+      if (iconEl) iconEl.innerHTML = iconMarkup.send;
+      if (labelEl) {
+        labelEl.textContent = '';
+        labelEl.hidden = true;
+      }
     }
   }
 
@@ -866,12 +556,12 @@ async function bootstrap() {
   }
 
   function clearConversation() {
-    messages         = [];
-    draftValue       = '';
-    isSending        = false;
-    sessionId        = null;
+    messages = [];
+    draftValue = '';
+    isSending = false;
+    sessionId = null;
     sessionCreatedAt = null;
-    window.JoaniumChat.removeStreamListeners();
+    removeStreamListeners();
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
       resetSpeakButton(activeSpeakBtn);
@@ -883,7 +573,7 @@ async function bootstrap() {
   }
 
   function renderThread() {
-    if (!thread || !title || !composer || !canvas || !scroll || !bottom) return;
+    if (!thread || !title || !composer || !scroll || !bottom) return;
 
     if (window.speechSynthesis && activeSpeakBtn) {
       window.speechSynthesis.cancel();
@@ -892,24 +582,27 @@ async function bootstrap() {
     }
 
     const hasMessages = messages.length > 0;
-    title.hidden    = hasMessages;
-    thread.hidden   = !hasMessages;
+    title.hidden = hasMessages;
+    thread.hidden = !hasMessages;
     if (newChatBtn) newChatBtn.hidden = !hasMessages;
-    composer.classList.toggle('chat-composer--conversation',        hasMessages);
-    scroll.classList.toggle('chat-stage__scroll--conversation',     hasMessages);
-    bottom.classList.toggle('chat-stage__bottom--conversation',     hasMessages);
+    composer.classList.toggle('chat-composer--conversation', hasMessages);
+    scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
+    bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
 
-    if (!hasMessages) { thread.replaceChildren(); return; }
+    if (!hasMessages) {
+      thread.replaceChildren();
+      return;
+    }
 
     thread.replaceChildren(...messages.map((message, index) => {
-      const onCopy  = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
+      const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
       const onRetry = () => {
         if (isSending) return;
-        const userIndex   = message.role === 'user' ? index : index - 1;
+        const userIndex = message.role === 'user' ? index : index - 1;
         if (userIndex < 0) return;
         const userMessage = messages[userIndex];
         if (!userMessage?.content) return;
-        messages   = messages.slice(0, userIndex);
+        messages = messages.slice(0, userIndex);
         draftValue = userMessage.content;
         renderThread();
         void submitPrompt();
@@ -922,385 +615,97 @@ async function bootstrap() {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // submitPrompt — fire-and-forget stream.
-  // ---------------------------------------------------------------------------
   async function submitPrompt() {
     const prompt = draftValue.trim();
     if (!prompt || isSending) return;
 
-    // Assign a session ID on the very first message of a new conversation
     if (!sessionId) {
-      sessionId        = generateSessionId();
+      sessionId = generateSessionId();
       sessionCreatedAt = new Date().toISOString();
     }
 
     messages = [
       ...messages,
       { role: 'user', content: prompt },
-      { role: 'assistant', content: '', thinking: '', streaming: true,
-        providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
+      {
+        role: 'assistant',
+        content: '',
+        thinking: '',
+        streaming: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel
+      }
     ];
 
-    draftValue  = '';
-    isSending   = true;
-    accText     = '';
+    draftValue = '';
+    isSending = true;
+    accText = '';
     accThinking = '';
     syncComposer();
     renderThread();
     focusComposer();
+    removeStreamListeners();
 
-    window.JoaniumChat.removeStreamListeners();
-
-    window.JoaniumChat.onStreamChunk((chunk) => {
-      if (chunk?.type === 'text'     && chunk.text) accText     += chunk.text;
+    streamDisposers.push(onIpc('chat:stream-chunk', (chunk) => {
+      if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
       if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
       updateLastStreamingMessage(thread, { content: accText, thinking: accThinking });
-    });
+    }));
 
-    window.JoaniumChat.onStreamDone((meta) => {
-      window.JoaniumChat.removeStreamListeners();
-      messages = messages.map((m, i) => i !== messages.length - 1 ? m : {
-        role:          'assistant',
-        content:       accText || 'No response received.',
-        thinking:      accThinking,
-        streaming:     false,
+    streamDisposers.push(onIpc('chat:stream-done', (meta) => {
+      removeStreamListeners();
+      messages = messages.map((message, index) => index !== messages.length - 1 ? message : {
+        role: 'assistant',
+        content: accText || 'No response received.',
+        thinking: accThinking,
+        streaming: false,
         providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-        modelLabel:    meta?.modelLabel    ?? activeModelLabel
+        modelLabel: meta?.modelLabel ?? activeModelLabel
       });
       isSending = false;
       void saveCurrentSession();
       syncComposer();
       renderThread();
-    });
+    }));
 
-    window.JoaniumChat.onStreamError((err) => {
-      window.JoaniumChat.removeStreamListeners();
-      messages = messages.map((m, i) => i !== messages.length - 1 ? m : {
-        role:          'assistant',
-        content:       err?.message || 'Unable to get a response right now.',
-        thinking:      accThinking,
-        streaming:     false,
-        error:         true,
+    streamDisposers.push(onIpc('chat:stream-error', (error) => {
+      removeStreamListeners();
+      messages = messages.map((message, index) => index !== messages.length - 1 ? message : {
+        role: 'assistant',
+        content: error?.message || 'Unable to get a response right now.',
+        thinking: accThinking,
+        streaming: false,
+        error: true,
         providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel:    activeModelLabel
+        modelLabel: activeModelLabel
       });
       isSending = false;
       syncComposer();
       renderThread();
-    });
+    }));
 
     const historyToSend = messages.slice(0, -1).map(({ role, content }) => ({ role, content }));
-    void window.JoaniumChat.streamMessage({
-      messages:    historyToSend,
-      providerId:  activeProvider?.id ?? null,
-      modelId:     activeModel?.id    ?? null,
+    void invokeIpc('chat:stream-message', {
+      messages: historyToSend,
+      providerId: activeProvider?.id ?? null,
+      modelId: activeModel?.id ?? null,
       projectInfo: buildProjectContext(activeProject) || null,
-      persona:     activePersona?.content || null
+      persona: (getActivePersona?.() ?? activePersona)?.content || null
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Settings panel — shown when the user clicks their avatar.
-  // ---------------------------------------------------------------------------
-
-  function showSettingsView() {
-    scroll.hidden = true;
-    bottom.hidden = true;
-    if (historyPanel)     historyPanel.hidden     = true;
-    if (projectsPanel)   projectsPanel.hidden    = true;
-    if (templatesPanel)  templatesPanel.hidden   = true;
-    if (skillsPanel)     skillsPanel.hidden      = true;
-    if (personasPanel)   personasPanel.hidden    = true;
-    if (marketplacePanel) marketplacePanel.hidden = true;
-    if (agentsPanel)     agentsPanel.hidden      = true;
-
-    if (!settingsPanel) {
-      settingsPanel = buildSettingsPanel();
-      canvas.append(settingsPanel);
-    }
-
-    settingsPanel.hidden = false;
-  }
-
-  function buildSettingsPanel() {
-    const panel = createElement('div', 'chat-settings');
-    panel.hidden = true;
-
-    // ── Top header (mirrors .chat-projects__header) ────────────────────────────
-    const header = createElement('div', 'chat-settings__header');
-    header.append(createElement('h2', 'chat-settings__title', 'Settings'));
-    panel.append(header);
-
-    // ── Body: left nav + right content ──────────────────────────────────
-    const body = createElement('div', 'chat-settings__body');
-
-    // Left nav column
-    const nav = createElement('nav', 'chat-settings__nav');
-    const navItems = createElement('div', 'chat-settings__nav-items');
-
-    const subMenus = [
-      { id: 'user',  label: 'User',  icon: iconMarkup.tabPersonas },
-      { id: 'about', label: 'About', icon: iconMarkup.info        }
-    ];
-
-    // Right content column
-    const main = createElement('div', 'chat-settings__main');
-
-    function activateSubMenu(id) {
-      navItems.querySelectorAll('.chat-settings__nav-item').forEach((item) => {
-        item.classList.toggle('chat-settings__nav-item--active', item.dataset.subId === id);
-      });
-      main.replaceChildren();
-      if (id === 'user')  main.append(buildUserView());
-      if (id === 'about') main.append(buildAboutView());
-    }
-
-    for (const menu of subMenus) {
-      const item = createElement('button', 'chat-settings__nav-item');
-      item.type = 'button';
-      item.dataset.subId = menu.id;
-      const iconEl = createElement('span', 'chat-settings__nav-item-icon');
-      iconEl.innerHTML = menu.icon;
-      item.append(iconEl, createElement('span', 'chat-settings__nav-item-label', menu.label));
-      item.addEventListener('click', () => activateSubMenu(menu.id));
-      navItems.append(item);
-    }
-
-    nav.append(navItems);
-    body.append(nav, main);
-    panel.append(body);
-
-    activateSubMenu('user');
-    return panel;
-  }
-
-  function buildUserView() {
-    const dob = payload.user.profile.dateOfBirth ?? {};
-    let draft = {
-      name: payload.user.profile.name ?? '',
-      day:   dob.day   ?? '',
-      month: dob.month ?? '',
-      year:  dob.year  ?? ''
-    };
-
-    const view = createElement('div', 'chat-settings__user');
-
-    // ── Name field ──────────────────────────────────────────────────────────
-    const nameBox = createInputBox({
-      label:       'Name',
-      value:       draft.name,
-      placeholder: 'Your full name',
-      onInput:     (value) => { draft.name = value; }
-    });
-
-    // ── Date of birth ───────────────────────────────────────────────────────
-    const dobLabel = createElement('label', 'chat-settings__field-label', 'Date of Birth');
-    const dobRow   = createElement('div', 'chat-settings__dob-row');
-
-    const dayBox = createInputBox({
-      label: '', value: draft.day, placeholder: 'DD', inputMode: 'numeric', maxLength: 2,
-      onInput: (value) => {
-        const cleaned = value.replace(/\D/g, '').slice(0, 2);
-        draft.day = cleaned;
-        if (dayBox.input.value !== cleaned) dayBox.input.value = cleaned;
-      }
-    });
-
-    const monthBox = createInputBox({
-      label: '', value: draft.month, placeholder: 'MM', inputMode: 'numeric', maxLength: 2,
-      onInput: (value) => {
-        const cleaned = value.replace(/\D/g, '').slice(0, 2);
-        draft.month = cleaned;
-        if (monthBox.input.value !== cleaned) monthBox.input.value = cleaned;
-      }
-    });
-
-    const yearBox = createInputBox({
-      label: '', value: draft.year, placeholder: 'YYYY', inputMode: 'numeric', maxLength: 4,
-      onInput: (value) => {
-        const cleaned = value.replace(/\D/g, '').slice(0, 4);
-        draft.year = cleaned;
-        if (yearBox.input.value !== cleaned) yearBox.input.value = cleaned;
-      }
-    });
-
-    dobRow.append(dayBox.element, monthBox.element, yearBox.element);
-
-    // ── Save button ─────────────────────────────────────────────────────────
-    const status = createElement('p', 'chat-settings__save-status', '');
-    const saveBtn = createElement('button', 'chat-settings__save-btn', 'Save Changes');
-    saveBtn.type = 'button';
-    saveBtn.addEventListener('click', async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving…';
-      status.textContent = '';
-      try {
-        await window.JoaniumChat.saveProfile({
-          name: draft.name.trim(),
-          dateOfBirth: { day: draft.day, month: draft.month, year: draft.year }
-        });
-        payload.user.profile.name = draft.name.trim();
-        payload.user.profile.dateOfBirth = { day: draft.day, month: draft.month, year: draft.year };
-        status.textContent = 'Saved!';
-        status.className = 'chat-settings__save-status chat-settings__save-status--ok';
-      } catch {
-        status.textContent = 'Failed to save.';
-        status.className = 'chat-settings__save-status chat-settings__save-status--err';
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'Save Changes';
-        setTimeout(() => { status.textContent = ''; status.className = 'chat-settings__save-status'; }, 3000);
-      }
-    });
-
-    const actions = createElement('div', 'chat-settings__user-actions');
-    actions.append(saveBtn, status);
-
-    view.append(nameBox.element, dobLabel, dobRow, actions);
-    return view;
-  }
-
-  function buildAboutView() {
-    const view = createElement('div', 'chat-profile__about');
-
-    const nameEl    = createElement('h1', 'chat-profile__about-name', strings.appName);
-    const versionEl = createElement('p',  'chat-profile__about-version', 'Version 2026.430.1');
-    const descEl    = createElement('p',  'chat-profile__about-desc',
-      'Local-first AI desktop assistant with multi-model chat, automations, agents, MCP, and real integrations. Works with Anthropic, OpenAI, Gemini, Ollama and more.');
-
-    const metaCard = createElement('div', 'chat-profile__about-meta');
-    for (const { label, value } of [
-      { label: 'Author',    value: 'Joel Jolly'   },
-      { label: 'License',   value: 'Apache-2.0'   },
-      { label: 'Framework', value: 'Electron 41'  }
-    ]) {
-      const row = createElement('div', 'chat-profile__about-meta-row');
-      row.append(
-        createElement('span', 'chat-profile__about-meta-label', label),
-        createElement('span', 'chat-profile__about-meta-value', value)
-      );
-      metaCard.append(row);
-    }
-
-    view.append(nameEl, versionEl, descEl, metaCard);
-
-    const sponsorBtn = createElement('a', 'chat-profile__about-sponsor');
-    sponsorBtn.textContent = '♥ Sponsor';
-    sponsorBtn.href = '#';
-    sponsorBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.JoaniumChat.openExternal('https://github.com/sponsors/withinjoel');
-    });
-    view.append(sponsorBtn);
-
-    return view;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // DOM construction
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  const shell = createElement('main', 'chat-shell');
-
-  // ── Sidebar ────────────────────────────────────────────────────────────────
-  const sidebar     = createElement('nav', 'chat-sidebar');
-  const sidebarTabs = createElement('div', 'chat-sidebar__tabs');
-  const tabIndicator = createElement('div', 'chat-sidebar__indicator');
-  sidebarTabs.append(tabIndicator);
-
-  function moveIndicatorToTab(tabEl, animate) {
-    if (!tabEl) return;
-    if (!animate) tabIndicator.style.transition = 'none';
-    const tabsRect = sidebarTabs.getBoundingClientRect();
-    const tabRect  = tabEl.getBoundingClientRect();
-    tabIndicator.style.top    = `${tabRect.top - tabsRect.top}px`;
-    tabIndicator.style.height = `${tabRect.height}px`;
-    if (!animate) {
-      tabIndicator.offsetHeight;
-      tabIndicator.style.transition = '';
-    }
-  }
-
-  for (const [id, label] of Object.entries(strings.tabs)) {
-    const isActive = id === 'chat';
-    const iconKey  = `tab${id.charAt(0).toUpperCase()}${id.slice(1)}`;
-    const tab      = createElement('button', `chat-sidebar__tab${isActive ? ' chat-sidebar__tab--active' : ''}`);
-    tab.type = 'button';
-    tab.setAttribute('aria-label', label);
-    const iconEl = createElement('span', 'chat-sidebar__tab-icon');
-    iconEl.innerHTML = iconMarkup[iconKey] ?? '';
-    tab.append(iconEl);
-    if (isActive) activeTabEl = tab;
-
-    tabElements[id] = tab;
-
-    tab.addEventListener('click', () => {
-      if (tab === activeTabEl) {
-        if (id === 'chat') clearConversation();
-        return;
-      }
-
-      activeTabEl?.classList.remove('chat-sidebar__tab--active');
-      tab.classList.add('chat-sidebar__tab--active');
-      activeTabEl = tab;
-      moveIndicatorToTab(tab, true);
-
-      if (id === 'chat') {
-        showChatView();
-      } else if (id === 'history') {
-        void showHistoryView();
-      } else if (id === 'projects') {
-        void showProjectsView();
-      } else if (id === 'templates') {
-        void showTemplatesView();
-      } else if (id === 'skills') {
-        void showSkillsView();
-      } else if (id === 'personas') {
-        void showPersonasView();
-      } else if (id === 'marketplace') {
-        void showMarketplaceView();
-      } else if (id === 'agents') {
-        void showAgentsView();
-      }
-    });
-
-    sidebarTabs.append(tab);
-  }
-
-  const sidebarAvatar = createElement('button', 'chat-sidebar__avatar');
-  sidebarAvatar.type = 'button';
-  sidebarAvatar.setAttribute('aria-label', strings.profile);
-  sidebarAvatar.append(createElement('span', 'chat-sidebar__avatar-initials', getInitials(payload.user.profile.name)));
-
-  sidebarAvatar.addEventListener('click', () => {
-    if (settingsPanel && !settingsPanel.hidden) {
-      showChatView();
-    } else {
-      showSettingsView();
-    }
-  });
-
-  const avatarDivider = createElement('div', 'chat-sidebar__avatar-divider');
-  sidebarTabs.append(avatarDivider, sidebarAvatar);
-
-  sidebar.append(sidebarTabs);
-
-  // ── Stage ─────────────────────────────────────────────────────────────────
-  const stage = createElement('section', 'chat-stage');
-  canvas = createElement('div', 'chat-stage__canvas');
-
-  const _greetings = getTimeGreetings(_hour, firstName);
+  scroll = createElement('div', 'chat-stage__scroll');
+  bottom = createElement('div', 'chat-stage__bottom');
   title = createElement(
-    'h1', 'chat-stage__title',
-    _greetings[Math.floor(Math.random() * _greetings.length)]
+    'h1',
+    'chat-stage__title',
+    greetings[Math.floor(Math.random() * greetings.length)]
   );
-
-  thread   = createElement('section', 'chat-thread');
+  thread = createElement('section', 'chat-thread');
   thread.hidden = true;
 
-  composer      = createElement('section', 'chat-composer');
-  projectPill   = createElement('div', 'chat-composer__project');
+  composer = createElement('section', 'chat-composer');
+  projectPill = createElement('div', 'chat-composer__project');
   projectPill.hidden = true;
   const projectIconEl = createElement('span', 'chat-composer__project-icon');
   projectIconEl.append(createIcon('tabProjects', 'chat-composer__project-icon-glyph'));
@@ -1319,74 +724,82 @@ async function bootstrap() {
   projectPill.append(projectIconEl, projectBodyEl, projectClearBtn);
 
   composerField = document.createElement('textarea');
-  composerField.className   = 'chat-composer__field';
+  composerField.className = 'chat-composer__field';
   composerField.placeholder = strings.composer.placeholder;
-  composerField.rows        = 1;
-  composerField.addEventListener('input', (e) => {
-    draftValue = e.target.value;
+  composerField.rows = 1;
+  composerField.addEventListener('input', (event) => {
+    draftValue = event.target.value;
     syncComposerFieldHeight();
     syncComposer();
   });
-  composerField.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void submitPrompt(); }
+  composerField.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void submitPrompt();
+    }
   });
 
-  const composerFooter  = createElement('div', 'chat-composer__footer');
+  const composerFooter = createElement('div', 'chat-composer__footer');
   const composerActions = createElement('div', 'chat-composer__actions');
-  const attachBtn       = createElement('button', 'chat-composer__icon-button');
+  const attachBtn = createElement('button', 'chat-composer__icon-button');
   attachBtn.type = 'button';
   attachBtn.append(createIcon('paperclip', 'chat-composer__icon'));
   attachBtn.addEventListener('click', focusComposer);
 
-  newChatBtn       = createElement('button', 'chat-composer__icon-button chat-composer__new-chat');
-  newChatBtn.type  = 'button';
+  newChatBtn = createElement('button', 'chat-composer__icon-button chat-composer__new-chat');
+  newChatBtn.type = 'button';
   newChatBtn.hidden = true;
   newChatBtn.append(createIcon('newChat', 'chat-composer__icon'));
-  newChatBtn.addEventListener('click', () => {
-    clearConversation();
-    switchToTab('chat');
-  });
-
+  newChatBtn.addEventListener('click', clearConversation);
   composerActions.append(attachBtn, newChatBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
-  modelButton          = createElement('button', 'chat-composer__model');
-  modelButton.type     = 'button';
+  modelButton = createElement('button', 'chat-composer__model');
+  modelButton.type = 'button';
   modelButton.append(
     createElement('span', 'chat-composer__model-label', activeModelLabel),
     createIcon('chevronDown', 'chat-composer__model-icon')
   );
-  modelButton.addEventListener('click', (e) => { e.stopPropagation(); openModelPicker(modelButton); });
+  modelButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    openModelPicker(modelButton);
+  });
 
-  sendButton      = createElement('button', 'chat-composer__send');
+  sendButton = createElement('button', 'chat-composer__send');
   sendButton.type = 'button';
   const sendLabel = createElement('span', 'chat-composer__send-label');
   sendLabel.hidden = true;
   sendButton.append(createIcon('send', 'chat-composer__send-icon'), sendLabel);
   sendButton.addEventListener('click', () => {
-    if (isSending) stopStream(); else void submitPrompt();
+    if (isSending) {
+      stopStream();
+    } else {
+      void submitPrompt();
+    }
   });
 
   composerSubmit.append(modelButton, sendButton);
   composerFooter.append(composerActions, composerSubmit);
   composer.append(projectPill, composerField, composerFooter);
-
-  scroll = createElement('div', 'chat-stage__scroll');
-  bottom = createElement('div', 'chat-stage__bottom');
-
   scroll.append(title, thread);
   bottom.append(composer);
+  view.append(scroll, bottom);
 
-  const dragRegion = createElement('div', 'chat-stage__drag-region');
-  canvas.append(dragRegion, scroll, bottom);
-  stage.append(canvas);
-  shell.append(sidebar, stage);
-  root.replaceChildren(shell);
-
-  requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
-  syncActiveProjectPill();
+  applyActiveProject(activeProject);
   syncComposer();
   renderThread();
-}
 
-bootstrap();
+  return {
+    element: view,
+    clearConversation,
+    focusComposer,
+    loadSession,
+    setActiveProject: applyActiveProject,
+    setActivePersona(persona) {
+      activePersona = persona ?? null;
+    },
+    getCurrentSessionId() {
+      return sessionId;
+    }
+  };
+}

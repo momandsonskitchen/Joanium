@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
+import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 
 // ---------------------------------------------------------------------------
 // TemplateState — CRUD for user-defined prompt templates.
@@ -13,11 +14,14 @@ export function createTemplateStateManager({ rootDirectory }) {
   return {
     async saveTemplate(template) {
       if (!template?.id) return null;
+      const safeId = sanitizeFileStem(template.id);
+      if (!safeId) return null;
+
       await mkdir(templatesDirectory, { recursive: true });
-      const filePath = path.join(templatesDirectory, `${sanitizeId(template.id)}.json`);
+      const filePath = path.join(templatesDirectory, `${safeId}.json`);
       const now = new Date().toISOString();
       const record = {
-        id:        template.id,
+        id:        safeId,
         name:      String(template.name ?? '').trim(),
         command:   normalizeCommand(template.command),
         prompt:    String(template.prompt ?? '').trim(),
@@ -62,13 +66,17 @@ export function createTemplateStateManager({ rootDirectory }) {
     },
 
     async loadTemplate(id) {
-      const filePath = path.join(templatesDirectory, `${sanitizeId(id)}.json`);
+      const safeId = sanitizeFileStem(id);
+      if (!safeId) throw new Error('A valid template id is required.');
+      const filePath = path.join(templatesDirectory, `${safeId}.json`);
       const raw = await readFile(filePath, 'utf8');
       return JSON.parse(raw);
     },
 
     async deleteTemplate(id) {
-      const filePath = path.join(templatesDirectory, `${sanitizeId(id)}.json`);
+      const safeId = sanitizeFileStem(id);
+      if (!safeId) throw new Error('A valid template id is required.');
+      const filePath = path.join(templatesDirectory, `${safeId}.json`);
       await unlink(filePath);
     }
   };
@@ -77,10 +85,6 @@ export function createTemplateStateManager({ rootDirectory }) {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function sanitizeId(id) {
-  return String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-}
 
 // Ensures commands always start with a single "/" and contain no whitespace.
 function normalizeCommand(raw) {

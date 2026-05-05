@@ -1,15 +1,12 @@
 import path from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
+import { sanitizeMarkdownFilename, sanitizePathSegment } from '../../Shared/Storage/SafePath.js';
 
 // ---------------------------------------------------------------------------
 // MarketplaceState — handles persisting installed items to disk.
 // The renderer is responsible for fetching from the remote API;
 // this module only handles writing files to the local Skills / Personas trees.
 // ---------------------------------------------------------------------------
-
-function sanitiseName(value) {
-  return String(value ?? '').replace(/[^a-zA-Z0-9_\-. ]/g, '').trim();
-}
 
 export function createMarketplaceStateManager({ rootDirectory }) {
   /**
@@ -23,8 +20,8 @@ export function createMarketplaceStateManager({ rootDirectory }) {
    * @returns {Promise<{ filePath: string }>}
    */
   async function installItem({ type, publisher, filename, markdown }) {
-    const safePublisher = sanitiseName(publisher);
-    const safeFilename  = sanitiseName(filename);
+    const safePublisher = sanitizePathSegment(publisher);
+    const safeFilename  = sanitizeMarkdownFilename(filename);
 
     if (!safePublisher) throw new Error('Invalid publisher name.');
     if (!safeFilename)  throw new Error('Invalid filename.');

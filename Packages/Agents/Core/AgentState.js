@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
+import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 
 // ---------------------------------------------------------------------------
 // AgentState — CRUD for user-defined scheduled agents.
@@ -23,16 +24,24 @@ export function createAgentStateManager({ rootDirectory }) {
   }
 
   function agentFilePath(id) {
-    return path.join(agentsDirectory, `${sanitizeId(id)}.json`);
+    const safeId = sanitizeFileStem(id);
+    if (!safeId) {
+      throw new Error('A valid agent id is required.');
+    }
+
+    return path.join(agentsDirectory, `${safeId}.json`);
   }
 
   return {
     async saveAgent(agent) {
       if (!agent?.id) return null;
+      const safeId = sanitizeFileStem(agent.id);
+      if (!safeId) return null;
+
       await ensureDirectory();
       const now = new Date().toISOString();
       const record = {
-        id:        agent.id,
+        id:        safeId,
         name:      String(agent.name      ?? '').trim(),
         avatar:    agent.avatar            ?? null,
         schedule:  normalizeSchedule(agent.schedule),
@@ -41,7 +50,7 @@ export function createAgentStateManager({ rootDirectory }) {
         updatedAt: now,
         lastRunAt: agent.lastRunAt         ?? null
       };
-      await writeFile(agentFilePath(agent.id), `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+      await writeFile(agentFilePath(safeId), `${JSON.stringify(record, null, 2)}\n`, 'utf8');
       return record;
     },
 
@@ -108,10 +117,6 @@ export function createAgentStateManager({ rootDirectory }) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function sanitizeId(id) {
-  return String(id).replace(/[^a-zA-Z0-9_\-]/g, '');
-}
-
 function normalizeSchedule(raw) {
   if (!raw || typeof raw !== 'object') return { type: 'startup' };
 
@@ -135,7 +140,10 @@ function normalizeTime(raw) {
   if (typeof raw !== 'string') return '09:00';
   const match = raw.match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return '09:00';
-  const h = String(parseInt(match[1], 10)).padStart(2, '0');
-  const m = String(parseInt(match[2], 10)).padStart(2, '0');
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  if (hours > 23 || minutes > 59) return '09:00';
+  const h = String(hours).padStart(2, '0');
+  const m = String(minutes).padStart(2, '0');
   return `${h}:${m}`;
 }

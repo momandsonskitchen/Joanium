@@ -1,5 +1,6 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 
@@ -84,7 +85,8 @@ export function createHistoryPanel(strings, {
       const newTitle = input.value.trim();
       if (save && newTitle && newTitle !== session.title) {
         try {
-          await window.JoaniumChat.renameSession(
+          await invokeIpc(
+            'history:rename-session',
             session.id,
             newTitle,
             getActiveProject?.()?.id
@@ -138,7 +140,8 @@ export function createHistoryPanel(strings, {
     pinBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.pinSession(
+        await invokeIpc(
+          'history:pin-session',
           session.id,
           !session.pinned,
           getActiveProject?.()?.id
@@ -167,7 +170,8 @@ export function createHistoryPanel(strings, {
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.deleteSession(
+        await invokeIpc(
+          'history:delete-session',
           session.id,
           getActiveProject?.()?.id
         );
@@ -195,7 +199,7 @@ export function createHistoryPanel(strings, {
       contentEl.append(createElement('div', 'chat-history__skeleton'));
     }
 
-    const allSessions = await window.JoaniumChat.listSessions(getActiveProject?.()?.id);
+    const allSessions = await invokeIpc('history:list-sessions', getActiveProject?.()?.id);
 
     // Filter by query — title match, case-insensitive
     const q = collapseWhitespace(query).toLowerCase();

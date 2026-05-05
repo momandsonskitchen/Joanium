@@ -7,15 +7,15 @@ export async function createPackage({ rootDirectory }) {
     id: 'Personas',
     ipcHandlers: [
       {
-        channel: 'chat:list-personas',
+        channel: 'personas:list-personas',
         handler: async () => personasStateManager.listPersonas()
       },
       {
-        channel: 'chat:load-persona',
+        channel: 'personas:load-persona',
         handler: async (_event, namespace, filename) => personasStateManager.loadPersona(namespace, filename)
       },
       {
-        channel: 'chat:delete-persona',
+        channel: 'personas:delete-persona',
         handler: async (_event, namespace, filename) => personasStateManager.deletePersona(namespace, filename)
       }
     ]

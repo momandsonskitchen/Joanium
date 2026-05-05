@@ -1,5 +1,6 @@
 import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
@@ -66,7 +67,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
     let projects;
     try {
-      projects = await window.JoaniumChat.listProjects();
+      projects = await invokeIpc('projects:list-projects');
     } catch {
       projects = [];
     }
@@ -138,7 +139,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     async function openProject() {
       let fullProject;
       try {
-        fullProject = await window.JoaniumChat.loadProject(project.id);
+        fullProject = await invokeIpc('projects:load-project', project.id);
       } catch (error) {
         console.error('[Joanium] Failed to load project:', error);
         return;
@@ -166,7 +167,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     editBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        const fullProject = await window.JoaniumChat.loadProject(project.id);
+        const fullProject = await invokeIpc('projects:load-project', project.id);
         panelRef?._startEdit(fullProject);
       } catch (error) {
         console.error('[Joanium] Failed to load project for editing:', error);
@@ -180,7 +181,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.deleteProject(project.id);
+        await invokeIpc('projects:delete-project', project.id);
       } catch (error) {
         console.error('[Joanium] Failed to delete project:', error);
       }
@@ -255,7 +256,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     folderBtn.textContent = strings.selectFolder;
     folderBtn.addEventListener('click', async () => {
       try {
-        const selectedPath = await window.JoaniumChat.selectProjectDirectory();
+        const selectedPath = await invokeIpc('projects:select-directory');
         if (selectedPath) {
           draftFolderPath = selectedPath;
           folderBox.input.value = draftFolderPath;
@@ -298,7 +299,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
     coverZone.addEventListener('click', async () => {
       try {
-        const selectedPath = await window.JoaniumChat.selectProjectCover();
+        const selectedPath = await invokeIpc('projects:select-cover');
         if (!selectedPath) return;
         draftCoverImagePath = selectedPath;
         syncCoverZone();
@@ -394,7 +395,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       };
 
       try {
-        await window.JoaniumChat.saveProject(project);
+        await invokeIpc('projects:save-project', project);
       } catch (err) {
         console.error('[Joanium] Failed to save project:', err);
         return;

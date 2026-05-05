@@ -1,12 +1,12 @@
 import path from 'node:path';
-import { access, readdir } from 'node:fs/promises';
+import { readdir, stat } from 'node:fs/promises';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 async function hasEntryFile(entryPath) {
   try {
-    await access(entryPath);
-    return true;
+    const entryStats = await stat(entryPath);
+    return entryStats.isFile() && entryStats.size > 0;
   } catch {
     return false;
   }

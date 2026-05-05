@@ -24,7 +24,7 @@ export function createSetupStateManager({ rootDirectory }) {
     },
     async getLaunchPackageId() {
       const state = await readUserState(rootDirectory);
-      return state.onboardingCompleted ? 'Chat' : 'Setup';
+      return state.onboardingCompleted ? 'Shell' : 'Setup';
     },
     async saveDraft(draftState) {
       const currentState = await readUserState(rootDirectory);

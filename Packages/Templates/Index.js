@@ -2,8 +2,7 @@ import { createTemplateStateManager } from './Core/TemplateState.js';
 
 // ---------------------------------------------------------------------------
 // createPackage — standard package contract (backend-only, no renderer).
-// The boot layer loads this alongside the Chat package and merges its
-// ipcHandlers so neither Chat nor Templates know about each other.
+// The Shell package composes these IPC handlers into the app window.
 // ---------------------------------------------------------------------------
 
 export async function createPackage({ rootDirectory }) {
@@ -13,19 +12,19 @@ export async function createPackage({ rootDirectory }) {
     id: 'Templates',
     ipcHandlers: [
       {
-        channel: 'chat:save-template',
+        channel: 'templates:save-template',
         handler: async (_event, template) => templateStateManager.saveTemplate(template)
       },
       {
-        channel: 'chat:list-templates',
+        channel: 'templates:list-templates',
         handler: async () => templateStateManager.listTemplates()
       },
       {
-        channel: 'chat:load-template',
+        channel: 'templates:load-template',
         handler: async (_event, id) => templateStateManager.loadTemplate(id)
       },
       {
-        channel: 'chat:delete-template',
+        channel: 'templates:delete-template',
         handler: async (_event, id) => templateStateManager.deleteTemplate(id)
       }
     ]

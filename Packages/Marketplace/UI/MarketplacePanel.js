@@ -1,4 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -423,7 +424,8 @@ export function createMarketplacePanel(strings) {
         if (!markdown) {
           markdown = await downloadMarkdown(_activeType, detail.publisher, detail.filename);
         }
-        await window.JoaniumChat.marketplaceInstall(
+        await invokeIpc(
+          'marketplace:install-item',
           _activeType,
           detail.publisher,
           detail.filename,

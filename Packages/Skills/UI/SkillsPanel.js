@@ -1,4 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -68,7 +69,7 @@ export function createSkillsPanel(strings) {
 
     let skills;
     try {
-      skills = await window.JoaniumChat.listSkills();
+      skills = await invokeIpc('skills:list-skills');
     } catch {
       skills = [];
     }
@@ -104,7 +105,7 @@ export function createSkillsPanel(strings) {
 
     let fullSkill;
     try {
-      fullSkill = await window.JoaniumChat.loadSkill(skill.namespace, skill.filename);
+      fullSkill = await invokeIpc('skills:load-skill', skill.namespace, skill.filename);
     } catch (err) {
       console.error('[Joanium] Failed to load skill for viewer:', err);
       return;
@@ -167,7 +168,7 @@ export function createSkillsPanel(strings) {
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await window.JoaniumChat.deleteSkill(skill.namespace, skill.filename);
+        await invokeIpc('skills:delete-skill', skill.namespace, skill.filename);
         await populateList(listEl, _search.getValue().trim());
       } catch (err) {
         console.error('[Joanium] Failed to delete skill:', err);
