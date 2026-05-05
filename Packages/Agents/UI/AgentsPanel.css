@@ -159,9 +159,19 @@
 .agents-form__avatar-grid {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
   -webkit-app-region: no-drag;
+  scrollbar-width: none;
+  padding-left: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.agents-form__avatar-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .agents-form__avatar-tile {
@@ -181,6 +191,7 @@
     box-shadow 140ms ease,
     transform 130ms ease;
   flex-shrink: 0;
+  scroll-snap-align: start;
 }
 
 .agents-form__avatar-tile:hover {
