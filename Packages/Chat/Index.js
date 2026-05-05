@@ -7,7 +7,7 @@ import { readUserState, writeUserState, mergeUserStates } from '../Shared/UserDa
 const chatDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export async function createPackage({ rootDirectory }) {
-  const chatStateManager     = createChatStateManager({ rootDirectory });
+  const chatStateManager    = createChatStateManager({ rootDirectory });
   const usesOverlayControls = process.platform !== 'darwin';
   const overlayOptions = {
     height: 48,
@@ -22,7 +22,7 @@ export async function createPackage({ rootDirectory }) {
     id: 'Chat',
     // Packages whose ipcHandlers the boot layer should merge into this window.
     // This keeps cross-package coupling out of individual package modules.
-    ipcCompanions: ['Templates', 'Projects', 'Skills', 'Personas'],
+    ipcCompanions: ['History', 'Templates', 'Projects', 'Skills', 'Personas'],
     rendererPath: path.join(chatDirectory, 'UI', 'Index.html'),
     preloadPath: path.join(chatDirectory, 'UI', 'Preload.js'),
     window: {
@@ -38,30 +38,6 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:bootstrap',
         handler: async () => chatStateManager.getBootstrapPayload()
-      },
-      {
-        channel: 'chat:save-session',
-        handler: async (_event, session) => chatStateManager.saveSession(session)
-      },
-      {
-        channel: 'chat:list-sessions',
-        handler: async (_event, projectId) => chatStateManager.listSessions(projectId)
-      },
-      {
-        channel: 'chat:load-session',
-        handler: async (_event, id, projectId) => chatStateManager.loadSession(id, projectId)
-      },
-      {
-        channel: 'chat:delete-session',
-        handler: async (_event, id, projectId) => chatStateManager.deleteSession(id, projectId)
-      },
-      {
-        channel: 'chat:rename-session',
-        handler: async (_event, id, newTitle, projectId) => chatStateManager.renameSession(id, newTitle, projectId)
-      },
-      {
-        channel: 'chat:pin-session',
-        handler: async (_event, id, pinned, projectId) => chatStateManager.pinSession(id, pinned, projectId)
       },
       {
         channel: 'chat:open-external',
