@@ -1,6 +1,5 @@
 @import "../../Shared/Common/Common.css";
 @import "../../Shared/CustomScrollbar/CustomScrollbar.css";
-@import "../../Shared/LogoLoader/LogoLoader.css";
 @import "../../Shared/SearchBar/SearchBar.css";
 
 :root {
@@ -103,10 +102,12 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 .chat-stage__scroll--conversation {
   align-items: stretch;
+  justify-content: flex-start;
   padding-bottom: 180px;
 }
 
@@ -317,23 +318,17 @@ textarea {
   pointer-events: none;
 }
 
-.chat-stage__logo {
-  animation: chat-fade-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
-  position: relative !important;
-  inset: auto !important;
-  margin: 140px auto 0;
-}
-
 .chat-stage__title {
   animation: chat-fade-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   width: min(920px, 100%);
-  margin: 10px 0 34px;
-  font-size: clamp(48px, 6vw, 74px);
+  margin: 80px 0 34px;
+  font-size: clamp(40px, 5vw, 62px);
   line-height: 0.98;
   font-weight: 420;
   letter-spacing: -0.07em;
   color: var(--color-chat-text-title);
   text-align: center;
+  width: min(1100px, 100%);
 }
 
 .chat-stage__subtitle {

@@ -8,7 +8,6 @@ import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
 
 // Shared UI Components
-import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 // Panels
@@ -515,7 +514,6 @@ async function bootstrap() {
   let sendButton    = null;
   let thread        = null;
   let title         = null;
-  let logoEl        = null;
   let composer      = null;
   let canvas        = null;
   let scroll        = null;
@@ -1020,7 +1018,6 @@ async function bootstrap() {
     }
 
     const hasMessages = messages.length > 0;
-    logoEl.hidden   = hasMessages;
     title.hidden    = hasMessages;
     thread.hidden   = !hasMessages;
     if (newChatBtn) newChatBtn.hidden = !hasMessages;
@@ -1426,10 +1423,6 @@ async function bootstrap() {
     _greetings[Math.floor(Math.random() * _greetings.length)]
   );
 
-  const logoResult = createLogoLoader({ logoPath: payload.logoPath, infinite: true, inline: true });
-  logoEl = logoResult.element;
-  logoEl.classList.add('chat-stage__logo');
-
   thread   = createElement('section', 'chat-thread');
   thread.hidden = true;
 
@@ -1509,7 +1502,7 @@ async function bootstrap() {
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
 
-  scroll.append(logoEl, title, thread);
+  scroll.append(title, thread);
   bottom.append(composer);
 
   const dragRegion = createElement('div', 'chat-stage__drag-region');
