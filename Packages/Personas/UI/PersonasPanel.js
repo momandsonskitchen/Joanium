@@ -1,5 +1,6 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
+import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 
 // ---------------------------------------------------------------------------
 // Icons
@@ -21,27 +22,39 @@ function createIcon(name, className = '') {
   return icon;
 }
 
+// ---------------------------------------------------------------------------
+// Panel factory
+// ---------------------------------------------------------------------------
+
 export function createPersonasPanel(strings, { getActivePersona, onActivatePersona }) {
-  let panel = null;
-  let _listEl = null;
-  let _search = null;
+  let panel    = null;
+  let _listEl  = null;
+  let _search  = null;
   let _viewerEl = null;
+
+  // ── build ────────────────────────────────────────────────────────────────
 
   function build() {
     panel = createElement('div', 'chat-personas');
     panel.hidden = true;
 
-    const header = createElement('div', 'chat-personas__header');
-    header.append(
-      createElement('h2', 'chat-personas__title', strings.title),
-      createElement('p', 'chat-personas__subtitle', strings.subtitle)
+    // Header — title + subtitle stacked, drag region
+    const header     = createElement('div', 'chat-personas__header');
+    const headerText = createElement('div', 'chat-personas__header-text');
+    headerText.append(
+      createElement('h2', 'chat-personas__title',    strings.title),
+      createElement('p',  'chat-personas__subtitle', strings.subtitle)
     );
+    header.append(headerText);
     panel.append(header);
 
+    // Two-column body
     const body = createElement('div', 'chat-personas__body');
 
-    // Left column: list
-    const listCol = createElement('div', 'chat-personas__list-col');
+    // Left column — frosted-glass card containing search + scrollable list
+    const listCol  = createElement('div', 'chat-personas__list-col');
+    const listCard = createElement('div', 'chat-personas__list-card');
+
     const searchWrap = createElement('div', 'chat-personas__list-search');
     _search = createSearchBar({
       placeholder: strings.searchPlaceholder,
@@ -51,26 +64,34 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     searchWrap.append(_search.element);
 
     _listEl = createElement('div', 'chat-personas__list-content');
-    listCol.append(searchWrap, _listEl);
+    listCard.append(searchWrap, _listEl);
+    listCol.append(listCard);
 
-    // Right column: viewer
+    // Right column — white viewer card (scrolls internally)
     const viewerCol = createElement('div', 'chat-personas__viewer-col');
     _viewerEl = createElement('div', 'chat-personas__viewer-card');
-    _viewerEl.append(createElement('div', 'chat-personas__viewer-empty', 'Select a persona to read its content'));
+    _viewerEl.append(
+      createElement('div', 'chat-personas__viewer-empty', strings.selectPrompt ?? 'Select a persona to read its content')
+    );
     viewerCol.append(_viewerEl);
 
     body.append(listCol, viewerCol);
     panel.append(body);
 
-    panel._listEl = _listEl;
-    panel._search = _search;
+    // Expose sub-elements for external callers (e.g. populateList on mount)
+    panel._listEl   = _listEl;
+    panel._search   = _search;
     panel._viewerEl = _viewerEl;
 
     return panel;
   }
 
+  // ── populateList ─────────────────────────────────────────────────────────
+
   async function populateList(listEl, query = '') {
     listEl.replaceChildren();
+
+    // Show skeletons while loading
     for (let i = 0; i < 3; i++) {
       listEl.append(createElement('div', 'chat-personas__skeleton'));
     }
@@ -82,11 +103,11 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
       personas = [];
     }
 
-    const q = query.toLowerCase();
+    const q        = query.toLowerCase();
     const filtered = q
-      ? personas.filter(p => 
-          p.name.toLowerCase().includes(q) || 
-          p.description.toLowerCase().includes(q) || 
+      ? personas.filter(p =>
+          p.name.toLowerCase().includes(q)        ||
+          p.description.toLowerCase().includes(q) ||
           p.namespace.toLowerCase().includes(q)
         )
       : personas;
@@ -96,8 +117,8 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     if (filtered.length === 0) {
       const empty = createElement('div', 'chat-personas__empty');
       empty.append(
-        createElement('p', 'chat-personas__empty-title', q ? strings.noResults : strings.empty),
-        createElement('p', 'chat-personas__empty-hint', q ? strings.noResultsHint : strings.emptyHint)
+        createElement('p', 'chat-personas__empty-title', q ? strings.noResults    : strings.empty),
+        createElement('p', 'chat-personas__empty-hint',  q ? strings.noResultsHint : strings.emptyHint)
       );
       listEl.append(empty);
       return;
@@ -107,6 +128,8 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
       listEl.append(buildCard(persona, listEl));
     }
   }
+
+  // ── populateViewer ───────────────────────────────────────────────────────
 
   async function populateViewer(persona) {
     if (!_viewerEl) return;
@@ -122,62 +145,70 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     _viewerEl.replaceChildren();
 
     const activePersona = getActivePersona();
-    const isActive = activePersona?.id === persona.id;
+    const isActive      = activePersona?.id === persona.id;
 
+    // ── Viewer header ──────────────────────────────────────────────────────
     const header = createElement('div', 'chat-personas__viewer-header');
-    const title = createElement('h3', 'chat-personas__viewer-title', fullPersona.name);
+
+    const headerLeft = createElement('div', 'chat-personas__viewer-header-left');
+    headerLeft.append(createElement('h3', 'chat-personas__viewer-title', fullPersona.name));
+
     const author = createElement('div', 'chat-personas__viewer-author');
     author.append(
-      createElement('span', 'chat-personas__viewer-author-label', 'Author'),
+      createElement('span', 'chat-personas__viewer-author-label', strings.author ?? 'Author'),
       createElement('span', 'chat-personas__viewer-author-value', fullPersona.namespace)
     );
-    header.append(title, author);
+    headerLeft.append(author);
 
-    if (fullPersona.protected) {
-      const badge = createElement('span', 'chat-personas__viewer-badge', strings.protected);
-      header.append(badge);
-    }
-
-    const actions = createElement('div', 'chat-personas__viewer-actions');
-    const activateBtn = createElement('button', `chat-personas__viewer-activate${isActive ? ' chat-personas__viewer-activate--active' : ''}`);
-    activateBtn.type = 'button';
+    const activateBtn = createElement(
+      'button',
+      `chat-personas__viewer-activate${isActive ? ' chat-personas__viewer-activate--active' : ''}`
+    );
+    activateBtn.type        = 'button';
     activateBtn.textContent = isActive ? strings.active : strings.activate;
     activateBtn.addEventListener('click', async () => {
       onActivatePersona(isActive ? null : fullPersona);
       void populateViewer(persona);
       void populateList(_listEl, _search.getValue().trim());
     });
-    actions.append(activateBtn);
-    
-    const content = createElement('div', 'chat-personas__viewer-content');
-    content.append(createElement('pre', 'chat-personas__viewer-pre', fullPersona.content));
 
-    _viewerEl.append(header, actions, content);
+    header.append(headerLeft, activateBtn);
+    _viewerEl.append(header);
+
+    // ── Markdown content ───────────────────────────────────────────────────
+    const content = createElement('div', 'chat-personas__viewer-content');
+    content.append(renderMarkdown(fullPersona.content, 'chat-personas__viewer-md'));
+    _viewerEl.append(content);
   }
+
+  // ── buildCard ─────────────────────────────────────────────────────────────
 
   function buildCard(persona, listEl) {
     const activePersona = getActivePersona();
-    const isActive = activePersona?.id === persona.id;
-    const card = createElement('div', `chat-personas__card${isActive ? ' chat-personas__card--active' : ''}`);
+    const isActive      = activePersona?.id === persona.id;
+
+    const card = createElement(
+      'div',
+      `chat-personas__card${isActive ? ' chat-personas__card--active' : ''}`
+    );
+
     card.addEventListener('click', () => {
-      listEl.querySelectorAll('.chat-personas__card--active').forEach(el => el.classList.remove('chat-personas__card--active'));
+      listEl.querySelectorAll('.chat-personas__card--active')
+        .forEach(el => el.classList.remove('chat-personas__card--active'));
       card.classList.add('chat-personas__card--active');
       void populateViewer(persona);
     });
 
+    // Card text body
     const body = createElement('div', 'chat-personas__card-body');
-    const nameRow = createElement('div', 'chat-personas__card-name-row');
-    nameRow.append(createElement('span', 'chat-personas__card-name', persona.name));
-    if (persona.protected) {
-      nameRow.append(createElement('span', 'chat-personas__card-badge', strings.protected));
-    }
-    body.append(nameRow);
+    body.append(createElement('span', 'chat-personas__card-name', persona.name));
     if (persona.description) {
       body.append(createElement('div', 'chat-personas__card-desc', persona.description));
     }
 
+    // Actions — delete button (hidden for protected personas)
     const actions = createElement('div', 'chat-personas__card-actions');
-    
+
     if (!persona.protected) {
       const deleteBtn = createElement('button', 'chat-personas__card-btn chat-personas__card-btn--danger');
       deleteBtn.type = 'button';
@@ -188,9 +219,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
         try {
           await window.JoaniumChat.deletePersona(persona.namespace, persona.filename);
           const currentActive = getActivePersona();
-          if (currentActive?.id === persona.id) {
-            onActivatePersona(null);
-          }
+          if (currentActive?.id === persona.id) onActivatePersona(null);
           await populateList(listEl, _search.getValue().trim());
         } catch (err) {
           console.error('[Joanium] Failed to delete persona:', err);
@@ -203,8 +232,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     return card;
   }
 
-  return {
-    build,
-    populateList
-  };
+  // ── Public interface ──────────────────────────────────────────────────────
+
+  return { build, populateList };
 }
