@@ -2,8 +2,7 @@ import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
-import { createInputBox } from '../../Shared/InputBox/InputBox.js';
-
+import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 
 function createProjectId(name) {
   const sanitized = (name || 'Project').trim()
@@ -228,9 +227,11 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     const formHeading = createElement('p', 'chat-projects__form-heading', strings.newProjectHeading);
     formCol.append(formHeading);
 
-    // Name row
-    const nameBox = createInputBox({
-      label: strings.nameLabel ?? 'Name',
+    // Name input
+    const nameBox = createInputBoxLite({
+      label: strings.nameLabel ?? 'PROJECT NAME',
+      labelClassName: 'chat-projects__info-label',
+      className: 'chat-projects__name-input',
       placeholder: strings.namePlaceholder,
       onInput: (value) => {
         draftName = value;
@@ -241,10 +242,12 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     // Folder row
     const folderLabel = createElement('label', 'chat-projects__info-label', strings.folderLabel);
     const folderRow   = createElement('div', 'chat-projects__folder-row');
-    const folderBox = createInputBox({
-      label: '',
+    const folderBox = createInputBoxLite({
+      className: 'chat-projects__folder-input',
       placeholder: strings.folderPlaceholder,
     });
+    folderBox.element.style.flex = '1';
+    folderBox.element.style.minWidth = '0';
     folderBox.input.readOnly = true;
 
     const folderBtn = createElement('button', 'chat-projects__folder-btn');

@@ -1,0 +1,6 @@
+.joanium-input-lite {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}

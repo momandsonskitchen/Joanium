@@ -3,7 +3,6 @@ import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 
-
 // ---------------------------------------------------------------------------
 // Date helpers
 // ---------------------------------------------------------------------------

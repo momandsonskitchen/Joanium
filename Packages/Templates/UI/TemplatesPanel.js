@@ -2,8 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
-import { createInputBox } from '../../Shared/InputBox/InputBox.js';
-
+import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 
 function createTemplateId(name) {
   const sanitized = (name || 'Template').trim()
@@ -155,18 +154,23 @@ export function createTemplatesPanel(strings) {
 
     const formCard = createElement('div', 'chat-templates__form-card');
 
-    const commandBox = createInputBox({
+    const commandBox = createInputBoxLite({
       label: strings.commandLabel,
+      labelClassName: 'chat-templates__field-label',
+      className: 'chat-templates__command-input',
       placeholder: strings.commandPlaceholder,
       description: strings.commandHint,
+      descriptionClassName: 'chat-templates__field-hint',
       onInput: (value) => {
         draftTemplateCommand = value;
         syncTemplateSaveBtn();
       }
     });
 
-    const nameBox = createInputBox({
+    const nameBox = createInputBoxLite({
       label: strings.nameLabel,
+      labelClassName: 'chat-templates__field-label',
+      className: 'chat-templates__name-input',
       placeholder: strings.namePlaceholder,
       onInput: (value) => {
         draftTemplateName = value;
