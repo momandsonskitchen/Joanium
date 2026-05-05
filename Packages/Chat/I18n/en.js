@@ -152,6 +152,47 @@ const en = {
     loading:           'Loading…',
     loadFailed:        'Could not load items',
     loadFailedHint:    'Check your internet connection and try again.'
+  },
+  agents: {
+    title: 'Agents',
+    subtitle: 'Automate tasks by scheduling prompt executions.',
+    newAgentHeading: 'New Agent',
+    editAgentHeading: 'Edit Agent',
+    nameLabel: 'Agent name',
+    namePlaceholder: 'Morning Briefing',
+    avatarLabel: 'Avatar',
+    avatarRandom: 'Random',
+    scheduleLabel: 'Schedule',
+    scheduleTypes: {
+      startup: 'On Startup',
+      daily: 'Daily',
+      weekly: 'Weekly',
+      weekdays: 'Weekdays',
+      weekends: 'Weekends'
+    },
+    scheduleStartup: 'Runs on app startup',
+    scheduleDaily: 'Runs daily at {time}',
+    scheduleWeekly: 'Runs every {day} at {time}',
+    scheduleWeekdays: 'Runs on weekdays at {time}',
+    scheduleWeekends: 'Runs on weekends at {time}',
+    days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    timeLabel: 'Time',
+    timePlaceholder: '09:00',
+    dayLabel: 'Day',
+    promptLabel: 'Prompt',
+    promptPlaceholder: 'Enter the prompt this agent should run...',
+    save: 'Save Agent',
+    update: 'Update Agent',
+    cancel: 'Cancel',
+    yourAgents: 'Your Agents',
+    searchPlaceholder: 'Search agents…',
+    noResults: 'No matching agents',
+    noResultsHint: 'Try a different search term.',
+    empty: 'No agents yet',
+    emptyHint: 'Create your first agent to get started.',
+    run: 'Run now',
+    edit: 'Edit',
+    delete: 'Delete'
   }
 };
 
