@@ -37,6 +37,13 @@ async function bootstrap() {
   let profile = payload.user?.profile ?? {};
   let activeProject = null;
   let activePersona = null;
+
+  // Load the persisted active persona from User.json before anything renders
+  try {
+    activePersona = await invokeIpc('personas:get-active-persona');
+  } catch {
+    // non-fatal — ChatApp has its own Joana fallback
+  }
   let activeRouteId = 'chat';
   let activeTabEl = null;
   let chatView = null;
@@ -86,6 +93,12 @@ async function bootstrap() {
   function setActivePersona(persona) {
     activePersona = persona ?? null;
     chatView?.setActivePersona(activePersona);
+
+    // Persist the choice — falling back to Joana when deactivated
+    const ref = persona
+      ? { namespace: persona.namespace, filename: persona.filename }
+      : { namespace: 'Joanium', filename: 'Joana.md' };
+    void invokeIpc('personas:set-active-persona', ref.namespace, ref.filename);
   }
 
   async function ensureChatView() {

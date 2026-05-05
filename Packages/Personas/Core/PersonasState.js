@@ -5,8 +5,10 @@ import {
   loadNamespacedMarkdown
 } from '../../Shared/Markdown/MarkdownLibrary.js';
 import { sanitizeMarkdownFilename, sanitizePathSegment } from '../../Shared/Storage/SafePath.js';
+import { readUserState, writeUserState, mergeUserStates } from '../../Shared/UserData/UserData.js';
 
 const PROTECTED_PERSONAS = new Set(['Joanium/Joana.md']);
+const DEFAULT_ACTIVE_PERSONA = { namespace: 'Joanium', filename: 'Joana.md' };
 
 export function createPersonasStateManager({ rootDirectory }) {
   const personasDir = path.join(rootDirectory, 'Personas');
@@ -62,5 +64,17 @@ export function createPersonasStateManager({ rootDirectory }) {
     await unlink(path.join(personasDir, safeNs, safeFile));
   }
 
-  return { listPersonas, loadPersona, deletePersona };
+  async function getActivePersona() {
+    const state = await readUserState(rootDirectory);
+    const ref   = state.activePersona ?? DEFAULT_ACTIVE_PERSONA;
+    return loadPersona(ref.namespace, ref.filename);
+  }
+
+  async function setActivePersonaRef(namespace, filename) {
+    const current = await readUserState(rootDirectory);
+    const next    = mergeUserStates(current, { activePersona: { namespace, filename } });
+    await writeUserState(rootDirectory, next);
+  }
+
+  return { listPersonas, loadPersona, deletePersona, getActivePersona, setActivePersonaRef };
 }

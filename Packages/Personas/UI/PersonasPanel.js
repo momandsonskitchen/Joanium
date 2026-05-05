@@ -184,7 +184,15 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
 
     // Card text body
     const body = createElement('div', 'chat-personas__card-body');
-    body.append(createElement('span', 'chat-personas__card-name', persona.name));
+
+    // Name row — name + optional active badge side by side
+    const nameRow = createElement('div', 'chat-personas__card-name-row');
+    nameRow.append(createElement('span', 'chat-personas__card-name', persona.name));
+    if (isActive) {
+      nameRow.append(createElement('span', 'chat-personas__card-active-badge', strings.active));
+    }
+    body.append(nameRow);
+
     if (persona.description) {
       body.append(createElement('div', 'chat-personas__card-desc', persona.description));
     }

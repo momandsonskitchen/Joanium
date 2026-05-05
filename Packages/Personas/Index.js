@@ -17,6 +17,14 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'personas:delete-persona',
         handler: async (_event, namespace, filename) => personasStateManager.deletePersona(namespace, filename)
+      },
+      {
+        channel: 'personas:get-active-persona',
+        handler: async () => personasStateManager.getActivePersona()
+      },
+      {
+        channel: 'personas:set-active-persona',
+        handler: async (_event, namespace, filename) => personasStateManager.setActivePersonaRef(namespace, filename)
       }
     ]
   };

@@ -1,6 +1,8 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
+const DEFAULT_ACTIVE_PERSONA = { namespace: 'Joanium', filename: 'Joana.md' };
+
 export function createDefaultUserState() {
   return {
     locale: 'en',
@@ -20,7 +22,8 @@ export function createDefaultUserState() {
       selected: [],
       details: {}
     },
-    usageModes: []
+    usageModes: [],
+    activePersona: { ...DEFAULT_ACTIVE_PERSONA }
   };
 }
 
@@ -44,7 +47,8 @@ export function mergeUserStates(baseState, nextState = {}) {
         ...(nextState.providers?.details ?? {})
       }
     },
-    usageModes: Array.isArray(nextState.usageModes) ? nextState.usageModes : baseState.usageModes
+    usageModes: Array.isArray(nextState.usageModes) ? nextState.usageModes : baseState.usageModes,
+    activePersona: nextState.activePersona !== undefined ? nextState.activePersona : baseState.activePersona
   };
 }
 
@@ -54,6 +58,14 @@ function sanitizeArray(candidate) {
 
 function sanitizeString(candidate) {
   return typeof candidate === 'string' ? candidate.trim() : '';
+}
+
+function sanitizeActivePersona(candidate) {
+  if (!candidate || typeof candidate !== 'object') return { ...DEFAULT_ACTIVE_PERSONA };
+  const namespace = sanitizeString(candidate.namespace);
+  const filename  = sanitizeString(candidate.filename);
+  if (!namespace || !filename) return { ...DEFAULT_ACTIVE_PERSONA };
+  return { namespace, filename };
 }
 
 function sanitizeDetails(details) {
@@ -105,7 +117,8 @@ export function sanitizeIncomingUserState(candidateState) {
       selected: sanitizeArray(candidateState?.providers?.selected),
       details: sanitizeDetails(candidateState?.providers?.details)
     },
-    usageModes: sanitizeArray(candidateState?.usageModes)
+    usageModes: sanitizeArray(candidateState?.usageModes),
+    activePersona: sanitizeActivePersona(candidateState?.activePersona)
   });
 }
 
