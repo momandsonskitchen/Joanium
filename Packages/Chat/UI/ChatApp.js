@@ -378,9 +378,8 @@ async function bootstrap() {
   let modelButton         = null;
 
   // Tab state
-  let activeTabEl       = null;
-  let lastSelectedEntry = null;
-  const tabElements     = {};
+  let activeTabEl   = null;
+  const tabElements = {};
 
   // Active project context — injected as system prompt when set.
   let activeProject = null;
@@ -916,11 +915,10 @@ async function bootstrap() {
         providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
     ];
 
-    draftValue      = '';
-    isSending       = true;
-    accText         = '';
-    accThinking     = '';
-    lastSelectedEntry = null;
+    draftValue  = '';
+    isSending   = true;
+    accText     = '';
+    accThinking = '';
     syncComposer();
     renderThread();
     focusComposer();
@@ -1298,8 +1296,7 @@ async function bootstrap() {
   composerField.placeholder = strings.composer.placeholder;
   composerField.rows        = 1;
   composerField.addEventListener('input', (e) => {
-    draftValue        = e.target.value;
-    lastSelectedEntry = null;
+    draftValue = e.target.value;
     syncComposerFieldHeight();
     syncComposer();
   });

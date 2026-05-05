@@ -13,11 +13,6 @@ const en = {
     usage: 'Usage'
   },
   profile: 'Settings',
-  greeting: {
-    morning: 'Good morning, {name}',
-    afternoon: 'Good afternoon, {name}',
-    evening: 'Good evening, {name}'
-  },
   composer: {
     placeholder: 'How can I help you today?',
     modelFallback: 'Ready to chat',
