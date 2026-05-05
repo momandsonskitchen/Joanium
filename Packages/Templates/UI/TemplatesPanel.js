@@ -2,6 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createInputBox } from '../../Shared/InputBox/InputBox.js';
 
 
 function createTemplateId(name) {
@@ -154,31 +155,23 @@ export function createTemplatesPanel(strings) {
 
     const formCard = createElement('div', 'chat-templates__form-card');
 
-    const commandLabel = createElement('label', 'chat-templates__field-label', strings.commandLabel);
-    const commandInput = document.createElement('input');
-    commandInput.type        = 'text';
-    commandInput.className   = 'chat-templates__command-input';
-    commandInput.placeholder = strings.commandPlaceholder;
-    commandInput.style.webkitUserSelect = 'text';
-    commandInput.style.userSelect       = 'text';
-    commandInput.style.cursor           = 'text';
-    commandInput.addEventListener('input', (e) => {
-      draftTemplateCommand = e.target.value;
-      syncTemplateSaveBtn();
+    const commandBox = createInputBox({
+      label: strings.commandLabel,
+      placeholder: strings.commandPlaceholder,
+      description: strings.commandHint,
+      onInput: (value) => {
+        draftTemplateCommand = value;
+        syncTemplateSaveBtn();
+      }
     });
-    const commandHint = createElement('span', 'chat-templates__field-hint', strings.commandHint);
 
-    const nameLabel = createElement('label', 'chat-templates__field-label', strings.nameLabel);
-    const nameInput = document.createElement('input');
-    nameInput.type        = 'text';
-    nameInput.className   = 'chat-templates__name-input';
-    nameInput.placeholder = strings.namePlaceholder;
-    nameInput.style.webkitUserSelect = 'text';
-    nameInput.style.userSelect       = 'text';
-    nameInput.style.cursor           = 'text';
-    nameInput.addEventListener('input', (e) => {
-      draftTemplateName = e.target.value;
-      syncTemplateSaveBtn();
+    const nameBox = createInputBox({
+      label: strings.nameLabel,
+      placeholder: strings.namePlaceholder,
+      onInput: (value) => {
+        draftTemplateName = value;
+        syncTemplateSaveBtn();
+      }
     });
 
     const promptLabel = createElement('label', 'chat-templates__field-label', strings.promptLabel);
@@ -224,8 +217,8 @@ export function createTemplatesPanel(strings) {
       draftTemplateCommand     = '';
       draftTemplateName        = '';
       draftTemplatePrompt      = '';
-      commandInput.value       = '';
-      nameInput.value          = '';
+      commandBox.input.value   = '';
+      nameBox.input.value      = '';
       promptTextarea.value     = '';
       syncTemplateFormChrome();
       syncTemplateSaveBtn();
@@ -237,13 +230,13 @@ export function createTemplatesPanel(strings) {
       draftTemplateCommand     = template.command ?? '';
       draftTemplateName        = template.name ?? '';
       draftTemplatePrompt      = template.prompt ?? '';
-      commandInput.value       = draftTemplateCommand;
-      nameInput.value          = draftTemplateName;
+      commandBox.input.value   = draftTemplateCommand;
+      nameBox.input.value      = draftTemplateName;
       promptTextarea.value     = draftTemplatePrompt;
       syncTemplateFormChrome();
       syncTemplateSaveBtn();
-      commandInput.focus();
-      commandInput.select();
+      commandBox.input.focus();
+      commandBox.input.select();
     }
 
     saveBtn.addEventListener('click', async () => {
@@ -277,8 +270,8 @@ export function createTemplatesPanel(strings) {
 
     formActions.append(cancelBtn, saveBtn);
     formCard.append(
-      commandLabel, commandInput, commandHint,
-      nameLabel, nameInput,
+      commandBox.element,
+      nameBox.element,
       promptLabel, promptTextarea,
       formActions
     );

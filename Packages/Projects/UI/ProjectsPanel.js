@@ -2,6 +2,7 @@ import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createInputBox } from '../../Shared/InputBox/InputBox.js';
 
 
 function createProjectId(name) {
@@ -228,31 +229,23 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     formCol.append(formHeading);
 
     // Name row
-    const nameRow = createElement('div', 'chat-projects__name-row');
-    const nameInput = document.createElement('input');
-    nameInput.type        = 'text';
-    nameInput.className   = 'chat-projects__name-input';
-    nameInput.placeholder = strings.namePlaceholder;
-    nameInput.style.webkitUserSelect = 'text';
-    nameInput.style.userSelect       = 'text';
-    nameInput.style.cursor           = 'text';
-    nameInput.addEventListener('input', (e) => {
-      draftName = e.target.value;
-      syncSaveBtn();
+    const nameBox = createInputBox({
+      label: strings.nameLabel ?? 'Name',
+      placeholder: strings.namePlaceholder,
+      onInput: (value) => {
+        draftName = value;
+        syncSaveBtn();
+      }
     });
-    nameRow.append(nameInput);
 
     // Folder row
     const folderLabel = createElement('label', 'chat-projects__info-label', strings.folderLabel);
     const folderRow   = createElement('div', 'chat-projects__folder-row');
-    const folderInput = document.createElement('input');
-    folderInput.type      = 'text';
-    folderInput.className = 'chat-projects__folder-input';
-    folderInput.placeholder = strings.folderPlaceholder;
-    folderInput.readOnly  = true;
-    folderInput.style.webkitUserSelect = 'text';
-    folderInput.style.userSelect = 'text';
-    folderInput.style.cursor = 'text';
+    const folderBox = createInputBox({
+      label: '',
+      placeholder: strings.folderPlaceholder,
+    });
+    folderBox.input.readOnly = true;
 
     const folderBtn = createElement('button', 'chat-projects__folder-btn');
     folderBtn.type = 'button';
@@ -262,13 +255,13 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
         const selectedPath = await window.JoaniumChat.selectProjectDirectory();
         if (selectedPath) {
           draftFolderPath = selectedPath;
-          folderInput.value = draftFolderPath;
+          folderBox.input.value = draftFolderPath;
         }
       } catch (error) {
         console.error('[Joanium] Failed to select folder:', error);
       }
     });
-    folderRow.append(folderInput, folderBtn);
+    folderRow.append(folderBox.element, folderBtn);
 
     // Cover zone
     const coverLabel = createElement('label', 'chat-projects__info-label', strings.coverLabel);
@@ -355,8 +348,8 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       draftInfo           = '';
       draftCoverImagePath = '';
       draftFolderPath     = '';
-      nameInput.value     = '';
-      folderInput.value   = '';
+      nameBox.input.value = '';
+      folderBox.input.value = '';
       infoTextarea.value  = '';
       syncCoverZone();
       syncFormChrome();
@@ -371,14 +364,14 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       draftInfo           = project.info ?? '';
       draftCoverImagePath = project.coverImagePath ?? '';
       draftFolderPath     = project.folderPath ?? '';
-      nameInput.value     = draftName;
-      folderInput.value   = draftFolderPath;
+      nameBox.input.value = draftName;
+      folderBox.input.value = draftFolderPath;
       infoTextarea.value  = draftInfo;
       syncCoverZone();
       syncFormChrome();
       syncSaveBtn();
-      nameInput.focus();
-      nameInput.select();
+      nameBox.input.focus();
+      nameBox.input.select();
     }
 
     saveBtn.addEventListener('click', async () => {
@@ -413,7 +406,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     formActions.append(cancelBtn, saveBtn);
     const formCard = createElement('div', 'chat-projects__form-card');
     formCard.append(
-      nameRow,
+      nameBox.element,
       folderLabel,
       folderRow,
       coverLabel,

@@ -10,6 +10,7 @@ import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js'
 // Shared UI Components
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
+import { createInputBox } from '../../Shared/InputBox/InputBox.js';
 
 // Panels
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
@@ -1012,16 +1013,8 @@ async function bootstrap() {
     const navItems = createElement('div', 'chat-settings__nav-items');
 
     const subMenus = [
-      {
-        id: 'user',
-        label: 'User',
-        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`
-      },
-      {
-        id: 'about',
-        label: 'About',
-        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`
-      }
+      { id: 'user',  label: 'User',  icon: iconMarkup.tabPersonas },
+      { id: 'about', label: 'About', icon: iconMarkup.info        }
     ];
 
     // Right content column
@@ -1067,40 +1060,45 @@ async function bootstrap() {
     const view = createElement('div', 'chat-settings__user');
 
     // ── Name field ──────────────────────────────────────────────────────────
-    const nameLabel = createElement('label', 'chat-settings__field-label', 'Name');
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.className = 'chat-settings__field-input';
-    nameInput.value = draft.name;
-    nameInput.placeholder = 'Your full name';
-    nameInput.style.webkitUserSelect = 'text';
-    nameInput.style.userSelect = 'text';
-    nameInput.style.cursor = 'text';
-    nameInput.addEventListener('input', (e) => { draft.name = e.target.value; });
+    const nameBox = createInputBox({
+      label:       'Name',
+      value:       draft.name,
+      placeholder: 'Your full name',
+      onInput:     (value) => { draft.name = value; }
+    });
 
-    // ── Date of birth row ───────────────────────────────────────────────────
+    // ── Date of birth ───────────────────────────────────────────────────────
     const dobLabel = createElement('label', 'chat-settings__field-label', 'Date of Birth');
-    const dobRow = createElement('div', 'chat-settings__dob-row');
+    const dobRow   = createElement('div', 'chat-settings__dob-row');
 
-    function makeDobInput(placeholder, maxLen, currentVal, onUpdate) {
-      const el = document.createElement('input');
-      el.type = 'text';
-      el.inputMode = 'numeric';
-      el.className = 'chat-settings__dob-input';
-      el.placeholder = placeholder;
-      el.maxLength = maxLen;
-      el.value = currentVal;
-      el.style.webkitUserSelect = 'text';
-      el.style.userSelect = 'text';
-      el.style.cursor = 'text';
-      el.addEventListener('input', (e) => { onUpdate(e.target.value.replace(/\D/g, '')); e.target.value = e.target.value.replace(/\D/g, ''); });
-      return el;
-    }
+    const dayBox = createInputBox({
+      label: '', value: draft.day, placeholder: 'DD', inputMode: 'numeric', maxLength: 2,
+      onInput: (value) => {
+        const cleaned = value.replace(/\D/g, '').slice(0, 2);
+        draft.day = cleaned;
+        if (dayBox.input.value !== cleaned) dayBox.input.value = cleaned;
+      }
+    });
 
-    const dayInput   = makeDobInput('DD',   2, draft.day,   (v) => { draft.day   = v; });
-    const monthInput = makeDobInput('MM',   2, draft.month, (v) => { draft.month = v; });
-    const yearInput  = makeDobInput('YYYY', 4, draft.year,  (v) => { draft.year  = v; });
-    dobRow.append(dayInput, monthInput, yearInput);
+    const monthBox = createInputBox({
+      label: '', value: draft.month, placeholder: 'MM', inputMode: 'numeric', maxLength: 2,
+      onInput: (value) => {
+        const cleaned = value.replace(/\D/g, '').slice(0, 2);
+        draft.month = cleaned;
+        if (monthBox.input.value !== cleaned) monthBox.input.value = cleaned;
+      }
+    });
+
+    const yearBox = createInputBox({
+      label: '', value: draft.year, placeholder: 'YYYY', inputMode: 'numeric', maxLength: 4,
+      onInput: (value) => {
+        const cleaned = value.replace(/\D/g, '').slice(0, 4);
+        draft.year = cleaned;
+        if (yearBox.input.value !== cleaned) yearBox.input.value = cleaned;
+      }
+    });
+
+    dobRow.append(dayBox.element, monthBox.element, yearBox.element);
 
     // ── Save button ─────────────────────────────────────────────────────────
     const status = createElement('p', 'chat-settings__save-status', '');
@@ -1132,7 +1130,7 @@ async function bootstrap() {
     const actions = createElement('div', 'chat-settings__user-actions');
     actions.append(saveBtn, status);
 
-    view.append(nameLabel, nameInput, dobLabel, dobRow, actions);
+    view.append(nameBox.element, dobLabel, dobRow, actions);
     return view;
   }
 

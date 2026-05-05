@@ -1,6 +1,7 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
+import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
-import { iconMarkup } from '../../Shared/Icons/Icons.js';
+import { createIcon } from '../../Shared/Icons/Icons.js';
 
 
 // ---------------------------------------------------------------------------
@@ -134,9 +135,7 @@ export function createHistoryPanel(strings, {
     const pinBtn  = createElement('button', `chat-history__card-btn${session.pinned ? ' chat-history__card-btn--pinned' : ''}`);
     pinBtn.type   = 'button';
     pinBtn.setAttribute('aria-label', session.pinned ? strings.unpin : strings.pin);
-    const pinIcon = createElement('span', 'chat-history__card-btn-icon');
-    pinIcon.innerHTML = session.pinned ? iconMarkup.pinFill : iconMarkup.pin;
-    pinBtn.append(pinIcon);
+    pinBtn.append(createIcon(session.pinned ? 'pinFill' : 'pin', 'chat-history__card-btn-icon'));
     pinBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
@@ -155,9 +154,7 @@ export function createHistoryPanel(strings, {
     const renameBtn  = createElement('button', 'chat-history__card-btn');
     renameBtn.type   = 'button';
     renameBtn.setAttribute('aria-label', strings.rename);
-    const renameIcon = createElement('span', 'chat-history__card-btn-icon');
-    renameIcon.innerHTML = iconMarkup.pencil;
-    renameBtn.append(renameIcon);
+    renameBtn.append(createIcon('pencil', 'chat-history__card-btn-icon'));
     renameBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       startInlineRename(session, titleEl, contentEl, query);
@@ -167,9 +164,7 @@ export function createHistoryPanel(strings, {
     const deleteBtn  = createElement('button', 'chat-history__card-btn chat-history__card-btn--danger');
     deleteBtn.type   = 'button';
     deleteBtn.setAttribute('aria-label', strings.deleteChat);
-    const deleteIcon = createElement('span', 'chat-history__card-btn-icon');
-    deleteIcon.innerHTML = iconMarkup.trash;
-    deleteBtn.append(deleteIcon);
+    deleteBtn.append(createIcon('trash', 'chat-history__card-btn-icon'));
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
@@ -204,9 +199,9 @@ export function createHistoryPanel(strings, {
     const allSessions = await window.JoaniumChat.listSessions(getActiveProject?.()?.id);
 
     // Filter by query — title match, case-insensitive
-    const q = query.toLowerCase();
+    const q = collapseWhitespace(query).toLowerCase();
     const sessions = q
-      ? allSessions.filter((s) => (s.title ?? '').toLowerCase().includes(q))
+      ? allSessions.filter((s) => collapseWhitespace(s.title ?? '').toLowerCase().includes(q))
       : allSessions;
 
     contentEl.replaceChildren();
@@ -274,9 +269,7 @@ export function createHistoryPanel(strings, {
 
     const newBtn = createElement('button', 'chat-history__new-btn');
     newBtn.type  = 'button';
-    const newIconEl = createElement('span', 'chat-history__new-icon');
-    newIconEl.innerHTML = iconMarkup.tabChat ?? '';
-    newBtn.append(newIconEl, createElement('span', 'chat-history__new-label', strings.newChat));
+    newBtn.append(createIcon('tabChat', 'chat-history__new-icon'), createElement('span', 'chat-history__new-label', strings.newChat));
     newBtn.addEventListener('click', () => onNewChat?.());
 
     header.append(headerTitle, newBtn);
