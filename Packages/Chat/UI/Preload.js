@@ -50,5 +50,8 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
 
   listPersonas:  ()                     => ipcRenderer.invoke('chat:list-personas'),
   loadPersona:   (namespace, filename)  => ipcRenderer.invoke('chat:load-persona', namespace, filename),
-  deletePersona: (namespace, filename)  => ipcRenderer.invoke('chat:delete-persona', namespace, filename)
+  deletePersona: (namespace, filename)  => ipcRenderer.invoke('chat:delete-persona', namespace, filename),
+
+  marketplaceInstall: (type, publisher, filename, markdown) =>
+    ipcRenderer.invoke('marketplace:install-item', type, publisher, filename, markdown)
 });

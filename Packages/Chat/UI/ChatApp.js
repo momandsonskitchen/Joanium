@@ -15,6 +15,7 @@ import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
 import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
+import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
 import { createHistoryPanel } from '../../History/UI/HistoryPanel.js';
 
 const dictionaries = { en, de, fr };
@@ -556,6 +557,8 @@ async function bootstrap() {
   let _populateSkillsList = null;
   let personasPanel         = null;
   let _populatePersonasList = null;
+  let marketplacePanel         = null;
+  let _populateMarketplaceList = null;
   let settingsPanel  = null;
 
   // ---------------------------------------------------------------------------
@@ -600,22 +603,24 @@ async function bootstrap() {
   function showChatView() {
     scroll.hidden = false;
     bottom.hidden = false;
-    if (historyPanel)   historyPanel.hidden   = true;
-    if (projectsPanel)  projectsPanel.hidden  = true;
-    if (templatesPanel) templatesPanel.hidden = true;
-    if (settingsPanel)  settingsPanel.hidden  = true;
-    if (skillsPanel)    skillsPanel.hidden    = true;
-    if (personasPanel)  personasPanel.hidden  = true;
+    if (historyPanel)     historyPanel.hidden     = true;
+    if (projectsPanel)   projectsPanel.hidden    = true;
+    if (templatesPanel)  templatesPanel.hidden   = true;
+    if (settingsPanel)   settingsPanel.hidden    = true;
+    if (skillsPanel)     skillsPanel.hidden      = true;
+    if (personasPanel)   personasPanel.hidden    = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
   }
 
   async function showSkillsView() {
     scroll.hidden = true;
     bottom.hidden = true;
-    if (historyPanel)   historyPanel.hidden   = true;
-    if (projectsPanel)  projectsPanel.hidden  = true;
-    if (templatesPanel) templatesPanel.hidden = true;
-    if (settingsPanel)  settingsPanel.hidden  = true;
-    if (personasPanel)  personasPanel.hidden  = true;
+    if (historyPanel)     historyPanel.hidden     = true;
+    if (projectsPanel)   projectsPanel.hidden    = true;
+    if (templatesPanel)  templatesPanel.hidden   = true;
+    if (settingsPanel)   settingsPanel.hidden    = true;
+    if (personasPanel)   personasPanel.hidden    = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
 
     if (!skillsPanel) {
       const sp = createSkillsPanel(strings.skills);
@@ -631,11 +636,12 @@ async function bootstrap() {
   async function showPersonasView() {
     scroll.hidden = true;
     bottom.hidden = true;
-    if (historyPanel)   historyPanel.hidden   = true;
-    if (projectsPanel)  projectsPanel.hidden  = true;
-    if (templatesPanel) templatesPanel.hidden = true;
-    if (settingsPanel)  settingsPanel.hidden  = true;
-    if (skillsPanel)    skillsPanel.hidden    = true;
+    if (historyPanel)     historyPanel.hidden     = true;
+    if (projectsPanel)   projectsPanel.hidden    = true;
+    if (templatesPanel)  templatesPanel.hidden   = true;
+    if (settingsPanel)   settingsPanel.hidden    = true;
+    if (skillsPanel)     skillsPanel.hidden      = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
 
     if (!personasPanel) {
       const pp = createPersonasPanel(strings.personas, {
@@ -654,7 +660,12 @@ async function bootstrap() {
   async function showHistoryView() {
     scroll.hidden = true;
     bottom.hidden = true;
-    if (settingsPanel) settingsPanel.hidden = true;
+    if (settingsPanel)    settingsPanel.hidden    = true;
+    if (skillsPanel)      skillsPanel.hidden      = true;
+    if (personasPanel)    personasPanel.hidden    = true;
+    if (projectsPanel)   projectsPanel.hidden    = true;
+    if (templatesPanel)  templatesPanel.hidden   = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
 
     if (!historyPanel) {
       const hp = createHistoryPanel(strings.history, {
@@ -676,11 +687,12 @@ async function bootstrap() {
   async function showProjectsView() {
     scroll.hidden = true;
     bottom.hidden = true;
-    if (historyPanel)   historyPanel.hidden   = true;
-    if (templatesPanel) templatesPanel.hidden = true;
-    if (settingsPanel)  settingsPanel.hidden  = true;
-    if (skillsPanel)    skillsPanel.hidden    = true;
-    if (personasPanel)  personasPanel.hidden  = true;
+    if (historyPanel)     historyPanel.hidden     = true;
+    if (templatesPanel)  templatesPanel.hidden   = true;
+    if (settingsPanel)   settingsPanel.hidden    = true;
+    if (skillsPanel)     skillsPanel.hidden      = true;
+    if (personasPanel)   personasPanel.hidden    = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
 
     if (!projectsPanel) {
       const proj = createProjectsPanel(strings.projects, {
@@ -783,11 +795,12 @@ async function bootstrap() {
   async function showTemplatesView() {
     scroll.hidden = true;
     bottom.hidden = true;
-    if (historyPanel)  historyPanel.hidden  = true;
-    if (projectsPanel) projectsPanel.hidden = true;
-    if (settingsPanel) settingsPanel.hidden = true;
-    if (skillsPanel)   skillsPanel.hidden   = true;
-    if (personasPanel) personasPanel.hidden = true;
+    if (historyPanel)     historyPanel.hidden     = true;
+    if (projectsPanel)   projectsPanel.hidden    = true;
+    if (settingsPanel)   settingsPanel.hidden    = true;
+    if (skillsPanel)     skillsPanel.hidden      = true;
+    if (personasPanel)   personasPanel.hidden    = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
 
     if (!templatesPanel) {
       const tpl = createTemplatesPanel(strings.templates);
@@ -798,6 +811,30 @@ async function bootstrap() {
 
     templatesPanel.hidden = false;
     await _populateTemplatesList(templatesPanel._listEl, templatesPanel._search.getValue().trim());
+  }
+
+  async function showMarketplaceView() {
+    scroll.hidden = true;
+    bottom.hidden = true;
+    if (historyPanel)    historyPanel.hidden    = true;
+    if (projectsPanel)  projectsPanel.hidden   = true;
+    if (templatesPanel) templatesPanel.hidden  = true;
+    if (settingsPanel)  settingsPanel.hidden   = true;
+    if (skillsPanel)    skillsPanel.hidden     = true;
+    if (personasPanel)  personasPanel.hidden   = true;
+
+    if (!marketplacePanel) {
+      const mp = createMarketplacePanel(strings.marketplace);
+      marketplacePanel = mp.build();
+      _populateMarketplaceList = mp.populateList;
+      canvas.append(marketplacePanel);
+    }
+
+    marketplacePanel.hidden = false;
+    await _populateMarketplaceList(
+      marketplacePanel._listEl,
+      marketplacePanel._search.getValue().trim()
+    );
   }
 
 
@@ -1108,11 +1145,12 @@ async function bootstrap() {
   function showSettingsView() {
     scroll.hidden = true;
     bottom.hidden = true;
-    if (historyPanel)   historyPanel.hidden   = true;
-    if (projectsPanel)  projectsPanel.hidden  = true;
-    if (templatesPanel) templatesPanel.hidden = true;
-    if (skillsPanel)    skillsPanel.hidden    = true;
-    if (personasPanel)  personasPanel.hidden  = true;
+    if (historyPanel)     historyPanel.hidden     = true;
+    if (projectsPanel)   projectsPanel.hidden    = true;
+    if (templatesPanel)  templatesPanel.hidden   = true;
+    if (skillsPanel)     skillsPanel.hidden      = true;
+    if (personasPanel)   personasPanel.hidden    = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
 
     if (!settingsPanel) {
       settingsPanel = buildSettingsPanel();
@@ -1360,6 +1398,8 @@ async function bootstrap() {
         void showSkillsView();
       } else if (id === 'personas') {
         void showPersonasView();
+      } else if (id === 'marketplace') {
+        void showMarketplaceView();
       }
     });
 
