@@ -9,13 +9,13 @@ import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js'
 // Shared UI Components
 import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
-import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 
 // Panels
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
 import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
+import { createHistoryPanel } from '../../History/UI/HistoryPanel.js';
 
 const dictionaries = { en, de, fr };
 
@@ -143,30 +143,6 @@ const iconMarkup = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-    </svg>
-  `,
-  pin: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 17v5" />
-      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v3.76z" />
-    </svg>
-  `,
-  pinFill: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 17v5" />
-      <path fill="currentColor" stroke="none" d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v3.76z" />
-    </svg>
-  `,
-  pencil: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-    </svg>
-  `,
-  trash: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 6h18" />
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     </svg>
   `,
   imageUpload: `
@@ -508,37 +484,6 @@ function generateSessionId() {
 }
 
 // ---------------------------------------------------------------------------
-// History date helpers — groups sessions and formats display timestamps.
-// ---------------------------------------------------------------------------
-function getSessionGroup(isoString) {
-  const date = new Date(isoString);
-  const now = new Date();
-  const startOfToday    = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay      = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-  if (startOfDay.getTime() === startOfToday.getTime())     return 'today';
-  if (startOfDay.getTime() === startOfYesterday.getTime()) return 'yesterday';
-  return 'earlier';
-}
-
-function formatSessionTime(isoString) {
-  const date = new Date(isoString);
-  const now = new Date();
-  const startOfToday    = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay      = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-  if (startOfDay.getTime() >= startOfToday.getTime()) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-  if (startOfDay.getTime() >= startOfYesterday.getTime()) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-}
-
-// ---------------------------------------------------------------------------
 // bootstrap — entry point; builds the full UI tree.
 // ---------------------------------------------------------------------------
 async function bootstrap() {
@@ -601,7 +546,8 @@ async function bootstrap() {
   let activeProject = null;
 
   // History panel — created lazily on first open.
-  let historyPanel    = null;
+  let historyPanel          = null;
+  let _populateHistoryList  = null;
   let projectsPanel         = null;
   let _populateProjectsList  = null;
   let templatesPanel         = null;
@@ -611,15 +557,6 @@ async function bootstrap() {
   let personasPanel         = null;
   let _populatePersonasList = null;
   let settingsPanel  = null;
-
-  // Projects form state — shared across buildProjectsPanel and buildProjectCard
-  let draftName = '';
-  let draftIcon = '📁';
-  let draftInfo = '';
-  let draftCoverImagePath = '';
-  let draftFolderPath = '';
-  let editingProjectId = null;
-  let editingProjectCreatedAt = null;
 
   // ---------------------------------------------------------------------------
   // Session persistence
@@ -720,13 +657,20 @@ async function bootstrap() {
     if (settingsPanel) settingsPanel.hidden = true;
 
     if (!historyPanel) {
-      historyPanel = buildHistoryPanel();
+      const hp = createHistoryPanel(strings.history, {
+        onNewChat:          () => { clearConversation(); switchToTab('chat'); showChatView(); },
+        onLoadSession:      (id) => void loadHistorySession(id),
+        getCurrentSessionId: () => sessionId,
+        getActiveProject:   () => activeProject
+      });
+      historyPanel = hp.build();
+      _populateHistoryList = hp.populateList;
       canvas.append(historyPanel);
     }
 
     historyPanel.hidden = false;
     historyPanel._search.clear();
-    await populateHistoryPanel(historyPanel._contentEl);
+    await _populateHistoryList(historyPanel._contentEl);
   }
 
   async function showProjectsView() {
@@ -828,196 +772,6 @@ async function bootstrap() {
   }
 
   // ---------------------------------------------------------------------------
-  // History panel DOM
-  // ---------------------------------------------------------------------------
-
-  function buildHistoryPanel() {
-    const panel = createElement('div', 'chat-history');
-    panel.hidden = true;
-
-    // ── Header row ────────────────────────────────────────────────────────
-    const header = createElement('div', 'chat-history__header');
-    const headerTitle = createElement('h2', 'chat-history__title', strings.history.title);
-
-    const newChatBtn = createElement('button', 'chat-history__new-btn');
-    newChatBtn.type = 'button';
-    const newIconEl = createElement('span', 'chat-history__new-icon');
-    newIconEl.innerHTML = iconMarkup.tabChat ?? '';
-    newChatBtn.append(newIconEl, createElement('span', 'chat-history__new-label', strings.history.newChat));
-    newChatBtn.addEventListener('click', () => {
-      clearConversation();
-      switchToTab('chat');
-      showChatView();
-    });
-
-    header.append(headerTitle, newChatBtn);
-
-    // ── Search bar (shared component) ─────────────────────────────────────
-    const searchWrap  = createElement('div', 'chat-history__search-wrap');
-    const searchInner = createElement('div', 'chat-history__search-inner');
-
-    const search = createSearchBar({
-      placeholder: strings.history.search,
-      onChange:    (value) => void populateHistoryPanel(contentEl, value.trim())
-    });
-
-    // Prevent Electron drag-region from swallowing input events
-    search.element.style.webkitAppRegion = 'no-drag';
-
-    searchInner.append(search.element);
-    searchWrap.append(searchInner);
-
-    // ── Session list ──────────────────────────────────────────────────────
-    const contentEl = createElement('div', 'chat-history__content');
-
-    panel.append(header, searchWrap, contentEl);
-    panel._contentEl = contentEl;
-    panel._search    = search;
-
-    return panel;
-  }
-
-  async function populateHistoryPanel(contentEl, query = '') {
-    // Show loading skeletons while fetching
-    contentEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      contentEl.append(createElement('div', 'chat-history__skeleton'));
-    }
-
-    const allSessions = await window.JoaniumChat.listSessions(activeProject?.id);
-
-    // Filter by query — title match, case-insensitive
-    const q = query.toLowerCase();
-    const sessions = q
-      ? allSessions.filter((s) => (s.title ?? '').toLowerCase().includes(q))
-      : allSessions;
-
-    contentEl.replaceChildren();
-
-    if (allSessions.length === 0) {
-      const empty = createElement('div', 'chat-history__empty');
-      empty.append(
-        createElement('p', 'chat-history__empty-title', strings.history.empty),
-        createElement('p', 'chat-history__empty-hint',  strings.history.emptyHint)
-      );
-      contentEl.append(empty);
-      return;
-    }
-
-    if (sessions.length === 0) {
-      const empty = createElement('div', 'chat-history__empty');
-      empty.append(
-        createElement('p', 'chat-history__empty-title', strings.history.noResults),
-        createElement('p', 'chat-history__empty-hint',  strings.history.noResultsHint)
-      );
-      contentEl.append(empty);
-      return;
-    }
-
-    // Pinned sessions go first; non-pinned are grouped by date
-    const groups = { pinned: [], today: [], yesterday: [], earlier: [] };
-    for (const session of sessions) {
-      if (session.pinned) {
-        groups.pinned.push(session);
-      } else {
-        groups[getSessionGroup(session.updatedAt)].push(session);
-      }
-    }
-
-    const groupLabels = {
-      pinned:    strings.history.pinned,
-      today:     strings.history.today,
-      yesterday: strings.history.yesterday,
-      earlier:   strings.history.earlier
-    };
-
-    for (const [groupKey, groupSessions] of Object.entries(groups)) {
-      if (groupSessions.length === 0) continue;
-
-      const section = createElement('div', 'chat-history__section');
-      section.append(createElement('div', 'chat-history__section-label', groupLabels[groupKey]));
-
-      for (const session of groupSessions) {
-        section.append(buildSessionCard(session, contentEl, query));
-      }
-
-      contentEl.append(section);
-    }
-  }
-
-  function buildSessionCard(session, contentEl, query) {
-    const card = createElement('div', 'chat-history__card');
-
-    // ── Body: main click target ──────────────────────────────────────────
-    const body = createElement('button', 'chat-history__card-body');
-    body.type = 'button';
-
-    const msgCount = session.messageCount ?? 0;
-    const msgLabel = msgCount === 1
-      ? strings.history.oneMessage
-      : formatText(strings.history.messages, { count: msgCount });
-
-    const titleEl = createElement('div', 'chat-history__card-title', session.title || strings.appName);
-    const metaEl  = createElement('div', 'chat-history__card-meta', `${msgLabel} · ${formatSessionTime(session.updatedAt)}`);
-    body.append(titleEl, metaEl);
-    body.addEventListener('click', () => void loadHistorySession(session.id));
-
-    // ── Actions ──────────────────────────────────────────────────────────
-    const actions = createElement('div', 'chat-history__card-actions');
-
-    // Pin / Unpin
-    const pinBtn  = createElement('button', `chat-history__card-btn${session.pinned ? ' chat-history__card-btn--pinned' : ''}`);
-    pinBtn.type   = 'button';
-    pinBtn.setAttribute('aria-label', session.pinned ? strings.history.unpin : strings.history.pin);
-    const pinIcon = createElement('span', 'chat-history__card-btn-icon');
-    pinIcon.innerHTML = session.pinned ? iconMarkup.pinFill : iconMarkup.pin;
-    pinBtn.append(pinIcon);
-    pinBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      try {
-        await window.JoaniumChat.pinSession(session.id, !session.pinned, activeProject?.id);
-      } catch (err) {
-        console.error('[Joanium] Failed to pin session:', err);
-      }
-      await populateHistoryPanel(contentEl, query);
-    });
-
-    // Rename
-    const renameBtn  = createElement('button', 'chat-history__card-btn');
-    renameBtn.type   = 'button';
-    renameBtn.setAttribute('aria-label', strings.history.rename);
-    const renameIcon = createElement('span', 'chat-history__card-btn-icon');
-    renameIcon.innerHTML = iconMarkup.pencil;
-    renameBtn.append(renameIcon);
-    renameBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      startInlineRename(session, titleEl, contentEl, query);
-    });
-
-    // Delete
-    const deleteBtn  = createElement('button', 'chat-history__card-btn chat-history__card-btn--danger');
-    deleteBtn.type   = 'button';
-    deleteBtn.setAttribute('aria-label', strings.history.deleteChat);
-    const deleteIcon = createElement('span', 'chat-history__card-btn-icon');
-    deleteIcon.innerHTML = iconMarkup.trash;
-    deleteBtn.append(deleteIcon);
-    deleteBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      try {
-        await window.JoaniumChat.deleteSession(session.id, activeProject?.id);
-        if (session.id === sessionId) clearConversation();
-      } catch (err) {
-        console.error('[Joanium] Failed to delete session:', err);
-      }
-      await populateHistoryPanel(contentEl, query);
-    });
-
-    actions.append(pinBtn, renameBtn, deleteBtn);
-    card.append(body, actions);
-    return card;
-  }
-
-  // ---------------------------------------------------------------------------
   // Projects panel — rendered by createProjectsPanel (Projects package).
   // (showProjectsView above builds/shows the panel via the factory)
   // ---------------------------------------------------------------------------
@@ -1050,45 +804,6 @@ async function bootstrap() {
   // ---------------------------------------------------------------------------
   // Skills panel DOM
   // ---------------------------------------------------------------------------
-
-  function startInlineRename(session, titleEl, contentEl, query) {
-    const input = document.createElement('input');
-    input.className = 'chat-history__card-title-input';
-    input.type      = 'text';
-    input.value     = session.title || '';
-    input.style.webkitAppRegion = 'no-drag';
-    input.style.webkitUserSelect = 'text';
-    input.style.userSelect = 'text';
-    input.style.cursor = 'text';
-
-    let committed = false;
-
-    const finish = async (save) => {
-      if (committed) return;
-      committed = true;
-      input.removeEventListener('blur', blurHandler);
-      const newTitle = input.value.trim();
-      if (save && newTitle && newTitle !== session.title) {
-        try {
-          await window.JoaniumChat.renameSession(session.id, newTitle, activeProject?.id);
-        } catch (err) {
-          console.error('[Joanium] Failed to rename session:', err);
-        }
-      }
-      await populateHistoryPanel(contentEl, query);
-    };
-
-    const blurHandler = () => void finish(true);
-    input.addEventListener('blur', blurHandler);
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter')  { e.preventDefault(); void finish(true); }
-      if (e.key === 'Escape') { e.preventDefault(); void finish(false); }
-    });
-
-    titleEl.replaceWith(input);
-    input.focus();
-    input.select();
-  }
 
   async function loadHistorySession(id) {
     try {
