@@ -1,4 +1,5 @@
 import en from '../I18n/en.js';
+import { getTimeGreetings } from '../../../Datasets/messages.js';
 import de from '../I18n/de.js';
 import fr from '../I18n/fr.js';
 
@@ -181,13 +182,6 @@ function getFirstName(name, fallback) {
   const normalized = collapseWhitespace(name);
   if (!normalized) return fallback;
   return normalized.split(' ')[0];
-}
-
-function getGreetingKey(date) {
-  const hour = date.getHours();
-  if (hour < 12) return 'morning';
-  if (hour < 18) return 'afternoon';
-  return 'evening';
 }
 
 // ---------------------------------------------------------------------------
@@ -492,7 +486,7 @@ async function bootstrap() {
   const strings    = getDictionary(payload.user.locale);
   const root       = document.getElementById('app');
   const firstName  = getFirstName(payload.user.profile.name, strings.appName);
-  const greetingKey = getGreetingKey(new Date());
+  const _hour = new Date().getHours();
 
   let activeProvider   = getPreferredProvider(payload);
   let activeModel      = activeProvider?.models?.[0] ?? null;
@@ -521,7 +515,6 @@ async function bootstrap() {
   let sendButton    = null;
   let thread        = null;
   let title         = null;
-  let subtitle      = null;
   let logoEl        = null;
   let composer      = null;
   let canvas        = null;
@@ -1030,7 +1023,6 @@ async function bootstrap() {
     logoEl.hidden   = hasMessages;
     title.hidden    = hasMessages;
     thread.hidden   = !hasMessages;
-    if (subtitle) subtitle.hidden = hasMessages;
     if (newChatBtn) newChatBtn.hidden = !hasMessages;
     composer.classList.toggle('chat-composer--conversation',        hasMessages);
     scroll.classList.toggle('chat-stage__scroll--conversation',     hasMessages);
@@ -1428,16 +1420,16 @@ async function bootstrap() {
   const stage = createElement('section', 'chat-stage');
   canvas = createElement('div', 'chat-stage__canvas');
 
+  const _greetings = getTimeGreetings(_hour, firstName);
   title = createElement(
     'h1', 'chat-stage__title',
-    formatText(strings.greeting[greetingKey], { name: firstName })
+    _greetings[Math.floor(Math.random() * _greetings.length)]
   );
 
   const logoResult = createLogoLoader({ logoPath: payload.logoPath, infinite: true, inline: true });
   logoEl = logoResult.element;
   logoEl.classList.add('chat-stage__logo');
 
-  subtitle = createElement('p', 'chat-stage__subtitle', strings.heroSubtitle);
   thread   = createElement('section', 'chat-thread');
   thread.hidden = true;
 
@@ -1517,7 +1509,7 @@ async function bootstrap() {
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
 
-  scroll.append(logoEl, title, subtitle, thread);
+  scroll.append(logoEl, title, thread);
   bottom.append(composer);
 
   const dragRegion = createElement('div', 'chat-stage__drag-region');

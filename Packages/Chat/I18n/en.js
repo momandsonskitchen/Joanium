@@ -18,7 +18,6 @@ const en = {
     afternoon: 'Good afternoon, {name}',
     evening: 'Good evening, {name}'
   },
-  heroSubtitle: 'You’re doing great — let’s make today count.',
   composer: {
     placeholder: 'How can I help you today?',
     modelFallback: 'Ready to chat',
