@@ -1,11 +1,17 @@
 import en from '../I18n/en.js';
 import de from '../I18n/de.js';
 import fr from '../I18n/fr.js';
+
+// Utils
 import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
+
+// Shared UI Components
 import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
+
+// Panels
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
