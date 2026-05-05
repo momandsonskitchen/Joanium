@@ -74,7 +74,7 @@
 /* Styles for the SearchBar input/icon/clear live in Shared/SearchBar/SearchBar.css */
 
 .chat-history__search-wrap {
-  padding: 0 48px 16px;
+  padding: 0 10px 16px;
   flex-shrink: 0;
   -webkit-app-region: no-drag;
 }
@@ -117,7 +117,7 @@
 .chat-history__content {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 48px 40px;
+  padding: 4px 10px 40px;
 }
 
 .chat-history__content::-webkit-scrollbar {

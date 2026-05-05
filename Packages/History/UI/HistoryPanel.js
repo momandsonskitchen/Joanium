@@ -1,6 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 
 // ---------------------------------------------------------------------------
