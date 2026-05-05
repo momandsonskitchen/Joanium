@@ -1,0 +1,51 @@
+const en = {
+  title: 'Agents',
+  subtitle: 'Create autonomous agents that run your prompts on a schedule.',
+  newAgentHeading: 'New Agent',
+  editAgentHeading: 'Edit Agent',
+  nameLabel: 'Agent name',
+  namePlaceholder: 'Daily Briefing',
+  avatarLabel: 'Avatar',
+  avatarRandom: 'Random',
+  scheduleLabel: 'When to run',
+  scheduleTypes: {
+    startup:  'On app startup',
+    daily:    'Every day',
+    weekly:   'Every week',
+    weekdays: 'Every weekday',
+    weekends: 'Every weekend'
+  },
+  timeLabel: 'At what time',
+  timePlaceholder: '09:00',
+  dayLabel: 'Day of week',
+  days: {
+    0: 'Sunday',
+    1: 'Monday',
+    2: 'Tuesday',
+    3: 'Wednesday',
+    4: 'Thursday',
+    5: 'Friday',
+    6: 'Saturday'
+  },
+  promptLabel: 'Prompt',
+  promptPlaceholder: 'Write a short summary of today\'s tasks and send it to me.',
+  save: 'Save Agent',
+  update: 'Update Agent',
+  cancel: 'Cancel',
+  yourAgents: 'Your Agents',
+  searchPlaceholder: 'Search agents\u2026',
+  noResults: 'No matching agents',
+  noResultsHint: 'Try a different search term.',
+  empty: 'No agents yet',
+  emptyHint: 'Create your first agent to get started.',
+  edit: 'Edit',
+  delete: 'Delete',
+  run: 'Run now',
+  scheduleStartup: 'On startup',
+  scheduleDaily: 'Every day at {time}',
+  scheduleWeekly: 'Every {day} at {time}',
+  scheduleWeekdays: 'Every weekday at {time}',
+  scheduleWeekends: 'Every weekend at {time}'
+};
+
+export default en;

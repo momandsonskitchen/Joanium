@@ -53,5 +53,12 @@ contextBridge.exposeInMainWorld('JoaniumChat', {
   deletePersona: (namespace, filename)  => ipcRenderer.invoke('chat:delete-persona', namespace, filename),
 
   marketplaceInstall: (type, publisher, filename, markdown) =>
-    ipcRenderer.invoke('marketplace:install-item', type, publisher, filename, markdown)
+    ipcRenderer.invoke('marketplace:install-item', type, publisher, filename, markdown),
+
+  listAgentAvatars: ()          => ipcRenderer.invoke('agents:list-avatars'),
+  saveAgent:        (agent)     => ipcRenderer.invoke('agents:save-agent', agent),
+  listAgents:       ()          => ipcRenderer.invoke('agents:list-agents'),
+  loadAgent:        (id)        => ipcRenderer.invoke('agents:load-agent', id),
+  deleteAgent:      (id)        => ipcRenderer.invoke('agents:delete-agent', id),
+  runAgent:         (id)        => ipcRenderer.invoke('agents:run-agent', id)
 });

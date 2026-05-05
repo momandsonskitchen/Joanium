@@ -19,6 +19,7 @@ import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
 import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
 import { createHistoryPanel } from '../../History/UI/HistoryPanel.js';
+import { createAgentsPanel } from '../../Agents/UI/AgentsPanel.js';
 
 const dictionaries = { en, de, fr };
 
@@ -398,6 +399,8 @@ async function bootstrap() {
   let _populatePersonasList = null;
   let marketplacePanel         = null;
   let _populateMarketplaceList = null;
+  let agentsPanel              = null;
+  let _populateAgentsList      = null;
   let settingsPanel  = null;
 
   // ---------------------------------------------------------------------------
@@ -449,6 +452,7 @@ async function bootstrap() {
     if (skillsPanel)     skillsPanel.hidden      = true;
     if (personasPanel)   personasPanel.hidden    = true;
     if (marketplacePanel) marketplacePanel.hidden = true;
+    if (agentsPanel)     agentsPanel.hidden      = true;
   }
 
   async function showSkillsView() {
@@ -674,6 +678,28 @@ async function bootstrap() {
       marketplacePanel._listEl,
       marketplacePanel._search.getValue().trim()
     );
+  }
+
+  async function showAgentsView() {
+    scroll.hidden = true;
+    bottom.hidden = true;
+    if (historyPanel)    historyPanel.hidden    = true;
+    if (projectsPanel)  projectsPanel.hidden   = true;
+    if (templatesPanel) templatesPanel.hidden  = true;
+    if (settingsPanel)  settingsPanel.hidden   = true;
+    if (skillsPanel)    skillsPanel.hidden     = true;
+    if (personasPanel)  personasPanel.hidden   = true;
+    if (marketplacePanel) marketplacePanel.hidden = true;
+
+    if (!agentsPanel) {
+      const ap = createAgentsPanel(strings.agents);
+      agentsPanel = ap.build();
+      _populateAgentsList = ap.populateList;
+      canvas.append(agentsPanel);
+    }
+
+    agentsPanel.hidden = false;
+    await _populateAgentsList(agentsPanel._listEl, agentsPanel._search.getValue().trim());
   }
 
 
@@ -987,6 +1013,7 @@ async function bootstrap() {
     if (skillsPanel)     skillsPanel.hidden      = true;
     if (personasPanel)   personasPanel.hidden    = true;
     if (marketplacePanel) marketplacePanel.hidden = true;
+    if (agentsPanel)     agentsPanel.hidden      = true;
 
     if (!settingsPanel) {
       settingsPanel = buildSettingsPanel();
@@ -1233,6 +1260,8 @@ async function bootstrap() {
         void showPersonasView();
       } else if (id === 'marketplace') {
         void showMarketplaceView();
+      } else if (id === 'agents') {
+        void showAgentsView();
       }
     });
 

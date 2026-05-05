@@ -22,7 +22,7 @@ export async function createPackage({ rootDirectory }) {
     id: 'Chat',
     // Packages whose ipcHandlers the boot layer should merge into this window.
     // This keeps cross-package coupling out of individual package modules.
-    ipcCompanions: ['History', 'Templates', 'Projects', 'Skills', 'Personas', 'Marketplace'],
+    ipcCompanions: ['History', 'Templates', 'Projects', 'Skills', 'Personas', 'Marketplace', 'Agents'],
     rendererPath: path.join(chatDirectory, 'UI', 'Index.html'),
     preloadPath: path.join(chatDirectory, 'UI', 'Preload.js'),
     window: {

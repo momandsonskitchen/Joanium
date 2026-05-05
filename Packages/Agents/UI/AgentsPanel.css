@@ -1,0 +1,706 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Agents Panel
+   Two-column layout: left = new/edit form, right = agents list.
+   Mirrors the TemplatesPanel structure and design language.
+══════════════════════════════════════════════════════════════════════════ */
+
+.agents-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.agents-panel__header {
+  display: flex;
+  align-items: center;
+  padding: 50px 10px 20px;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+}
+
+.agents-panel__header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agents-panel__title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  color: var(--color-chat-text-title);
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+
+.agents-panel__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-chat-text-muted);
+  letter-spacing: -0.01em;
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+
+/* ── Two-column body ─────────────────────────────────────────────────────── */
+
+.agents-panel__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+/* ── Left column — form ──────────────────────────────────────────────────── */
+
+.agents-form-col {
+  width: 460px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 10px 20px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.agents-form-col::-webkit-scrollbar { display: none; }
+
+.agents-form__heading {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-chat-text-label);
+  padding: 0 2px;
+}
+
+/* Frosted-glass form card */
+
+.agents-form__card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 10px 28px rgba(130, 95, 65, 0.07);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+/* Shared field label */
+
+.agents-form__field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-chat-text-label);
+  margin-bottom: 8px;
+}
+
+/* Name input */
+
+.agents-form__name-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.70);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  font-size: 14px;
+  font-weight: 520;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-title);
+  border: 0;
+  outline: none;
+  -webkit-app-region: no-drag;
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.agents-form__name-input::placeholder {
+  color: var(--color-chat-text-placeholder);
+  font-weight: 440;
+}
+
+.agents-form__name-input:focus {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 4px 14px rgba(130, 95, 65, 0.07);
+}
+
+/* ── Avatar picker ───────────────────────────────────────────────────────── */
+
+.agents-form__avatar-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.agents-form__avatar-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.agents-form__avatar-tile {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.60);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
+    0 2px 8px rgba(130, 95, 65, 0.06);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 130ms ease;
+  flex-shrink: 0;
+}
+
+.agents-form__avatar-tile:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.18),
+    0 6px 18px rgba(130, 95, 65, 0.10);
+}
+
+.agents-form__avatar-tile--selected {
+  border-color: rgba(var(--color-accent-rgb), 0.72);
+  box-shadow:
+    0 0 0 3px rgba(var(--color-accent-rgb), 0.18),
+    0 4px 14px rgba(130, 95, 65, 0.10);
+}
+
+.agents-form__avatar-tile--random {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--color-accent-rgb), 0.07);
+}
+
+.agents-form__avatar-random-label {
+  font-size: 10px;
+  font-weight: 680;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  pointer-events: none;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.agents-form__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+/* ── Schedule section ────────────────────────────────────────────────────── */
+
+.agents-form__schedule-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agents-form__schedule-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.agents-form__schedule-type-btn {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  font-size: 12.5px;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-secondary);
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  cursor: pointer;
+  transition: background-color 130ms ease, color 130ms ease, box-shadow 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.agents-form__schedule-type-btn:hover {
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--color-chat-text-title);
+}
+
+.agents-form__schedule-type-btn--active {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-accent-rgb), 0.88) 0%,
+    rgba(var(--color-accent-rgb), 1.00) 100%
+  );
+  color: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--shadow-button-primary);
+}
+
+.agents-form__schedule-type-btn--active:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-accent-rgb), 0.78) 0%,
+    rgba(var(--color-accent-rgb), 0.92) 100%
+  );
+}
+
+/* Time input row */
+
+.agents-form__schedule-time-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.agents-form__time-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.70);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  font-size: 14px;
+  font-weight: 520;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-title);
+  border: 0;
+  outline: none;
+  -webkit-app-region: no-drag;
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.agents-form__time-input:focus {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 4px 14px rgba(130, 95, 65, 0.07);
+}
+
+/* Day-of-week picker */
+
+.agents-form__schedule-day-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agents-form__day-picker {
+  display: flex;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.agents-form__day-btn {
+  flex: 1;
+  height: 34px;
+  border-radius: 10px;
+  border: 0;
+  font-size: 11.5px;
+  font-weight: 580;
+  letter-spacing: 0.01em;
+  color: var(--color-chat-text-secondary);
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.13);
+  cursor: pointer;
+  transition: background-color 130ms ease, color 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.agents-form__day-btn:hover {
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--color-chat-text-title);
+}
+
+.agents-form__day-btn--active {
+  background: rgba(var(--color-accent-rgb), 0.14);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.28);
+}
+
+/* ── Prompt textarea ─────────────────────────────────────────────────────── */
+
+.agents-form__prompt-textarea {
+  width: 100%;
+  min-height: 100px;
+  max-height: 200px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.70);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  font-size: 13.5px;
+  font-weight: 440;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-title);
+  resize: vertical;
+  border: 0;
+  outline: none;
+  -webkit-app-region: no-drag;
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.agents-form__prompt-textarea::placeholder {
+  color: var(--color-chat-text-placeholder);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.agents-form__prompt-textarea:focus {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 4px 14px rgba(130, 95, 65, 0.07);
+}
+
+/* ── Form action buttons ─────────────────────────────────────────────────── */
+
+.agents-form__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.agents-form__btn-cancel {
+  flex: 1;
+  height: 42px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-secondary);
+  background: rgba(255, 255, 255, 0.56);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  transition: background-color 140ms ease, transform 140ms ease;
+  border: 0;
+  -webkit-app-region: no-drag;
+}
+
+.agents-form__btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.90);
+  transform: translateY(-1px);
+}
+
+.agents-form__btn-save {
+  flex: 2;
+  height: 42px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 640;
+  letter-spacing: -0.015em;
+  color: rgba(255, 255, 255, 0.97);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-accent-rgb), 0.92) 0%,
+    rgba(var(--color-accent-rgb), 1) 100%
+  );
+  box-shadow: var(--shadow-button-primary);
+  transition: opacity 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+  border: 0;
+  -webkit-app-region: no-drag;
+}
+
+.agents-form__btn-save:disabled {
+  opacity: 0.36;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.agents-form__btn-save:not(:disabled):hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow:
+    0 22px 52px rgba(var(--color-accent-rgb), 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* ── Right column — list ─────────────────────────────────────────────────── */
+
+.agents-list-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 4px 48px 40px 28px;
+  overflow-y: auto;
+  border-left: 1px solid rgba(170, 134, 104, 0.09);
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.agents-list-col::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.agents-list-col::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-thumb);
+}
+
+.agents-list__heading {
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-chat-text-label);
+  padding: 0 2px;
+}
+
+.agents-list__search {
+  padding: 0 0 14px;
+  flex-shrink: 0;
+}
+
+.agents-list__search .joanium-search__input {
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 4px 14px rgba(130, 95, 65, 0.06);
+}
+
+.agents-list__search .joanium-search__input:focus {
+  background: rgba(255, 255, 255, 0.90);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(170, 134, 104, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 6px 22px rgba(130, 95, 65, 0.08);
+}
+
+.agents-list__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Skeleton loaders ────────────────────────────────────────────────────── */
+
+.agents-skeleton {
+  height: 88px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  background: rgba(180, 140, 110, 0.07);
+  animation: chat-history-shimmer 1.4s ease-in-out infinite;
+}
+
+.agents-skeleton:nth-child(2) { animation-delay: 0.12s; }
+.agents-skeleton:nth-child(3) { animation-delay: 0.24s; }
+
+/* ── Agent card ──────────────────────────────────────────────────────────── */
+
+.agents-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 12px 12px 12px 14px;
+  border-radius: 20px;
+  background: var(--color-chat-card-surface);
+  box-shadow: var(--shadow-chat-card);
+  transition: transform 130ms ease, box-shadow 130ms ease;
+  -webkit-app-region: no-drag;
+  overflow: hidden;
+}
+
+.agents-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-chat-card), 0 6px 20px rgba(100, 60, 140, 0.07);
+}
+
+/* Avatar in the card */
+
+.agents-card__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: rgba(var(--color-accent-rgb), 0.09);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.agents-card__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.agents-card__avatar-initials {
+  font-size: 14px;
+  font-weight: 680;
+  color: var(--color-accent);
+  letter-spacing: -0.01em;
+}
+
+/* Card body */
+
+.agents-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.agents-card__name {
+  font-size: 14px;
+  font-weight: 640;
+  letter-spacing: -0.015em;
+  color: var(--color-chat-text-title);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agents-card__schedule {
+  font-size: 11.5px;
+  font-weight: 560;
+  letter-spacing: 0;
+  color: var(--color-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agents-card__prompt {
+  font-size: 12px;
+  font-weight: 440;
+  line-height: 1.55;
+  color: var(--color-chat-text-muted);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+/* Card action buttons */
+
+.agents-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.agents-card__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-chat-text-muted);
+  transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.agents-card__btn:hover {
+  background: var(--color-chat-hover-surface);
+  color: var(--color-chat-text-title);
+  transform: translateY(-1px);
+}
+
+.agents-card__btn--danger:hover {
+  background: rgba(220, 60, 40, 0.09);
+  color: #c0392b;
+}
+
+.agents-card__btn-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+  pointer-events: none;
+}
+
+.agents-card__btn-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+
+.agents-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 6px;
+}
+
+.agents-empty__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 540;
+  color: var(--color-chat-text-secondary);
+  letter-spacing: -0.025em;
+}
+
+.agents-empty__hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-chat-text-muted);
+  letter-spacing: -0.01em;
+}
