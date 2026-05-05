@@ -1,3 +1,7 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Skills/UI/SkillsPanel.css
+   ══════════════════════════════════════════════════════════════════════ */
+
 .chat-skills {
   position: absolute;
   inset: 0;
@@ -7,24 +11,33 @@
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* ── Panel header ── */
+/* ── Panel header ──────────────────────────────────────────────────────────
+   Drag region spanning the full width. Text group stacks vertically.
+   ────────────────────────────────────────────────────────── */
 
 .chat-skills__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 60px 48px 20px;
   flex-shrink: 0;
   -webkit-app-region: drag;
 }
 
+.chat-skills__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+
 .chat-skills__title {
-  margin: 0 0 4px;
+  margin: 0;
   font-size: 30px;
   font-weight: 500;
   letter-spacing: -0.045em;
+  line-height: 1.1;
   color: var(--color-chat-text-title);
-  -webkit-app-region: no-drag;
-  pointer-events: none;
 }
 
 .chat-skills__subtitle {
@@ -32,11 +45,12 @@
   font-size: 14px;
   color: var(--color-chat-text-muted);
   letter-spacing: -0.01em;
-  -webkit-app-region: no-drag;
-  pointer-events: none;
+  line-height: 1.4;
 }
 
-/* ── Two-column body ── */
+/* ── Two-column body ──────────────────────────────────────────────────────────
+   Body fills all remaining height below the header.
+   ────────────────────────────────────────────────────────── */
 
 .chat-skills__body {
   flex: 1;
@@ -46,28 +60,48 @@
   overflow: hidden;
 }
 
-/* ── Left column: list ── */
+/* ── Left column — transparent gutter, card floats inside ────────────────────
+   No background on the col itself; the frosted-glass card provides
+   the white surface.
+   ────────────────────────────────────────────────────────── */
 
 .chat-skills__list-col {
-  width: 280px;
+  width: 300px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 4px 0 40px;
-  border-right: 1px solid rgba(170, 134, 104, 0.09);
+  padding: 4px 0px 40px 10px;
   overflow: hidden;
 }
 
-.chat-skills__list-search {
-  padding: 0 16px 12px;
-  flex-shrink: 0;
+/* Frosted-glass card */
+
+.chat-skills__list-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 10px 28px rgba(130, 95, 65, 0.07);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  overflow: hidden;
   -webkit-app-region: no-drag;
+}
+
+.chat-skills__list-search {
+  padding: 12px 12px 8px;
+  flex-shrink: 0;
 }
 
 .chat-skills__list-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0 10px 40px;
+  padding: 0 8px 16px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -78,31 +112,32 @@
   display: none;
 }
 
-/* ── List item cards ── */
+/* ── List item cards ──────────────────────────────────────────────────── */
 
 .chat-skills__card {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 12px;
+  padding: 9px 10px;
   border-radius: 14px;
   background: transparent;
   border: 0;
   cursor: default;
   text-align: left;
-  transition:
-    background-color 120ms ease;
+  transition: background-color 120ms ease;
   -webkit-app-region: no-drag;
 }
 
 .chat-skills__card:hover {
-  background: var(--color-chat-hover-surface);
+  background: rgba(255, 255, 255, 0.60);
 }
 
 .chat-skills__card--active {
-  background: var(--color-chat-card-surface);
-  box-shadow: var(--shadow-chat-card);
+  background: rgba(255, 255, 255, 0.80);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    0 4px 10px rgba(130, 95, 65, 0.07);
 }
 
 /* Card body */
@@ -117,6 +152,7 @@
 }
 
 .chat-skills__card-name {
+  display: block;
   font-size: 13.5px;
   font-weight: 580;
   letter-spacing: -0.015em;
@@ -236,39 +272,49 @@
   color: var(--color-chat-text-muted);
 }
 
-/* ── Right column: viewer ── */
+/* ── Right column — viewer ──────────────────────────────────────────────────
+   Column is transparent; the white card floats inside with its own
+   padding. The card itself scrolls — not the column.
+   ────────────────────────────────────────────────────────── */
 
 .chat-skills__viewer-col {
   flex: 1;
   min-width: 0;
   display: flex;
+  padding: 4px 40px 40px 16px;
+  overflow: hidden;
+}
+
+.chat-skills__viewer-card {
+  flex: 1;
+  display: flex;
   flex-direction: column;
-  padding: 4px 48px 40px 28px;
+  min-height: 0;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 10px 28px rgba(130, 95, 65, 0.07);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  padding: 24px 28px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
+  -webkit-app-region: no-drag;
 }
 
-.chat-skills__viewer-col::-webkit-scrollbar {
+.chat-skills__viewer-card::-webkit-scrollbar {
   width: var(--scrollbar-width);
 }
 
-.chat-skills__viewer-col::-webkit-scrollbar-thumb {
+.chat-skills__viewer-card::-webkit-scrollbar-thumb {
   border-radius: var(--radius-pill);
   background: var(--scrollbar-thumb);
 }
 
-.chat-skills__viewer-card {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 100%;
-  border-radius: 20px;
-  background: var(--color-chat-card-surface);
-  box-shadow: var(--shadow-chat-card);
-  padding: 24px 28px;
-  -webkit-app-region: no-drag;
-}
+/* Empty / placeholder state */
 
 .chat-skills__viewer-empty {
   margin: auto;
@@ -277,28 +323,41 @@
   color: var(--color-chat-text-muted);
 }
 
+/* ── Viewer header ──────────────────────────────────────────────────── */
+
 .chat-skills__viewer-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(170, 134, 104, 0.09);
+  flex-shrink: 0;
+}
+
+.chat-skills__viewer-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
 }
 
 .chat-skills__viewer-title {
   margin: 0;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 620;
   letter-spacing: -0.02em;
   color: var(--color-chat-text-title);
+  line-height: 1.2;
 }
 
 .chat-skills__viewer-author {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .chat-skills__viewer-author-label {
@@ -310,13 +369,14 @@
   color: var(--color-chat-text-muted);
 }
 
-/* Metadata row */
+/* ── Trigger metadata ─────────────────────────────────────────────────── */
 
 .chat-skills__viewer-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .chat-skills__viewer-trigger {
@@ -342,22 +402,15 @@
   font-family: var(--font-mono);
 }
 
-/* Content */
+/* ── Viewer content ──────────────────────────────────────────────────── */
 
 .chat-skills__viewer-content {
   flex: 1;
+  min-height: 0;
 }
 
-.chat-skills__viewer-pre {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--color-chat-text-title);
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  background: transparent;
-  padding: 0;
-  -webkit-user-select: text;
-  user-select: text;
+/* Scoped overrides for Markdown rendered inside the viewer */
+
+.chat-skills__viewer-md {
+  font-size: 13.5px;
 }

@@ -9,7 +9,9 @@ const en = {
   delete: 'Delete',
   viewContent: 'View content',
   trigger: 'Triggers',
-  namespace: 'Namespace'
+  namespace: 'Namespace',
+  author: 'Author',
+  selectPrompt: 'Select a skill to read its content'
 };
 
 export default en;

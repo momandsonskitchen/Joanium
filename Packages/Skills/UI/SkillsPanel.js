@@ -1,5 +1,6 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
+import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 
 // ---------------------------------------------------------------------------
 // Icons
@@ -31,17 +32,22 @@ export function createSkillsPanel(strings) {
     panel = createElement('div', 'chat-skills');
     panel.hidden = true;
 
-    const header = createElement('div', 'chat-skills__header');
-    header.append(
-      createElement('h2', 'chat-skills__title', strings.title),
-      createElement('p', 'chat-skills__subtitle', strings.subtitle)
+    // Header — title + subtitle stacked, drag region
+    const header     = createElement('div', 'chat-skills__header');
+    const headerText = createElement('div', 'chat-skills__header-text');
+    headerText.append(
+      createElement('h2', 'chat-skills__title',    strings.title),
+      createElement('p',  'chat-skills__subtitle', strings.subtitle)
     );
+    header.append(headerText);
     panel.append(header);
 
     const body = createElement('div', 'chat-skills__body');
 
-    // Left column: list
-    const listCol = createElement('div', 'chat-skills__list-col');
+    // Left column — frosted-glass card containing search + scrollable list
+    const listCol  = createElement('div', 'chat-skills__list-col');
+    const listCard = createElement('div', 'chat-skills__list-card');
+
     const searchWrap = createElement('div', 'chat-skills__list-search');
     _search = createSearchBar({
       placeholder: strings.searchPlaceholder,
@@ -51,12 +57,15 @@ export function createSkillsPanel(strings) {
     searchWrap.append(_search.element);
 
     _listEl = createElement('div', 'chat-skills__list-content');
-    listCol.append(searchWrap, _listEl);
+    listCard.append(searchWrap, _listEl);
+    listCol.append(listCard);
 
-    // Right column: viewer
+    // Right column — white viewer card (scrolls internally)
     const viewerCol = createElement('div', 'chat-skills__viewer-col');
     _viewerEl = createElement('div', 'chat-skills__viewer-card');
-    _viewerEl.append(createElement('div', 'chat-skills__viewer-empty', 'Select a skill to read its content'));
+    _viewerEl.append(
+      createElement('div', 'chat-skills__viewer-empty', strings.selectPrompt ?? 'Select a skill to read its content')
+    );
     viewerCol.append(_viewerEl);
 
     body.append(listCol, viewerCol);
@@ -121,29 +130,37 @@ export function createSkillsPanel(strings) {
 
     _viewerEl.replaceChildren();
 
+    // ── Viewer header ──────────────────────────────────────────────────────
     const header = createElement('div', 'chat-skills__viewer-header');
-    const title = createElement('h3', 'chat-skills__viewer-title', fullSkill.name);
+
+    const headerLeft = createElement('div', 'chat-skills__viewer-header-left');
+    headerLeft.append(createElement('h3', 'chat-skills__viewer-title', fullSkill.name));
+
     const author = createElement('div', 'chat-skills__viewer-author');
     author.append(
-      createElement('span', 'chat-skills__viewer-author-label', 'Author'),
+      createElement('span', 'chat-skills__viewer-author-label', strings.author ?? 'Author'),
       createElement('span', 'chat-skills__viewer-author-value', fullSkill.namespace)
     );
-    header.append(title, author);
+    headerLeft.append(author);
+    header.append(headerLeft);
+    _viewerEl.append(header);
 
-    const meta = createElement('div', 'chat-skills__viewer-meta');
+    // ── Trigger meta ───────────────────────────────────────────────────────
     if (fullSkill.trigger) {
+      const meta    = createElement('div', 'chat-skills__viewer-meta');
       const trigger = createElement('div', 'chat-skills__viewer-trigger');
       trigger.append(
         createElement('span', 'chat-skills__viewer-trigger-label', strings.trigger),
         createElement('span', 'chat-skills__viewer-trigger-value', fullSkill.trigger)
       );
       meta.append(trigger);
+      _viewerEl.append(meta);
     }
-    
-    const content = createElement('div', 'chat-skills__viewer-content');
-    content.append(createElement('pre', 'chat-skills__viewer-pre', fullSkill.content));
 
-    _viewerEl.append(header, meta, content);
+    // ── Markdown content ───────────────────────────────────────────────────
+    const content = createElement('div', 'chat-skills__viewer-content');
+    content.append(renderMarkdown(fullSkill.content, 'chat-skills__viewer-md'));
+    _viewerEl.append(content);
   }
 
   function buildCard(skill, listEl) {
