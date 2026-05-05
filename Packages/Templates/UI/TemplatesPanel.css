@@ -10,7 +10,7 @@
 .chat-templates__header {
   display: flex;
   align-items: center;
-  padding: 60px 48px 20px;
+  padding: 50px 10px 20px;
   flex-shrink: 0;
   -webkit-app-region: drag;
 }
