@@ -621,6 +621,7 @@ export async function createChatView(strings, {
     const prompt = draftValue.trim();
     if (!prompt || isSending) return;
 
+    const isNewSession = !sessionId;
     if (!sessionId) {
       sessionId = generateSessionId();
       sessionCreatedAt = new Date().toISOString();
@@ -692,7 +693,8 @@ export async function createChatView(strings, {
       providerId: activeProvider?.id ?? null,
       modelId: activeModel?.id ?? null,
       projectInfo: buildProjectContext(activeProject) || null,
-      persona: (getActivePersona?.() ?? activePersona)?.content || null
+      persona: (getActivePersona?.() ?? activePersona)?.content || null,
+      isNewSession
     });
   }
 
