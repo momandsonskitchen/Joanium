@@ -2,9 +2,7 @@ import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+// ─── Formatting helpers ────────────────────────────────────────────────────
 
 function formatNumber(n) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -14,205 +12,157 @@ function formatNumber(n) {
 
 function formatDate(dateKey) {
   const [y, m, d] = dateKey.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// Returns an array of the last `days` YYYY-MM-DD keys (oldest → newest)
-function buildDateRange(days) {
+// ─── Date range helpers ────────────────────────────────────────────────────
+
+// All YYYY-MM-DD keys for a given calendar year (Jan 1 → Dec 31)
+function buildYearRange(year) {
   const result = [];
-  const today  = new Date();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const key = [
-      d.getFullYear(),
-      String(d.getMonth() + 1).padStart(2, '0'),
-      String(d.getDate()).padStart(2, '0')
-    ].join('-');
-    result.push(key);
+  const cur    = new Date(year, 0, 1);
+  while (cur.getFullYear() === year) {
+    result.push([
+      cur.getFullYear(),
+      String(cur.getMonth() + 1).padStart(2, '0'),
+      String(cur.getDate()).padStart(2, '0')
+    ].join('-'));
+    cur.setDate(cur.getDate() + 1);
   }
   return result;
 }
 
-// Returns a 0-4 intensity bucket for a value against a max.
+// Calendar years present in daily data (oldest → newest), always including current year
+function getYearsFromData(daily) {
+  const current = new Date().getFullYear();
+  let min       = current;
+  for (const key of Object.keys(daily)) {
+    const y = parseInt(key.slice(0, 4), 10);
+    if (!isNaN(y) && y >= 2020 && y < min) min = y;
+  }
+  const years = [];
+  for (let y = min; y <= current; y++) years.push(y);
+  return years;
+}
+
+// ─── Intensity helper ──────────────────────────────────────────────────────
+
 function intensityLevel(value, max) {
   if (!value || !max) return 0;
-  const ratio = value / max;
-  if (ratio >= 0.75) return 4;
-  if (ratio >= 0.45) return 3;
-  if (ratio >= 0.20) return 2;
+  const r = value / max;
+  if (r >= 0.75) return 4;
+  if (r >= 0.45) return 3;
+  if (r >= 0.20) return 2;
   return 1;
 }
 
-// ---------------------------------------------------------------------------
-// Heatmap — GitHub contribution-style grid
-// Columns = weeks (oldest left → newest right)
-// Rows    = days of the week (Mon row 0 at the top)
-// ---------------------------------------------------------------------------
+// ─── Stats helpers ─────────────────────────────────────────────────────────
 
-function buildHeatmap(strings, daily, dateKeys) {
-  const heatmapRoot = createElement('div', 'usage-heatmap');
-  const heading     = createElement('h3', 'usage-section-heading', strings.heatmap.heading);
-
-  // ── Token counts per day ──
-  const dayTotals = {};
+function calcLongestStreak(daily, dateKeys) {
+  let longest = 0;
+  let cur     = 0;
   for (const key of dateKeys) {
-    const entry = daily[key];
-    dayTotals[key] = entry ? (entry.tokensIn + entry.tokensOut) : 0;
+    const t = (daily[key]?.tokensIn ?? 0) + (daily[key]?.tokensOut ?? 0);
+    if (t > 0) { cur++; if (cur > longest) longest = cur; }
+    else         cur = 0;
   }
-  const maxTokens = Math.max(1, ...Object.values(dayTotals));
-
-  // ── Build week columns ──
-  // Pad the start so the first cell sits in the correct weekday row.
-  // weekday: 0=Sun…6=Sat. We display Mon–Sun (Mon=row 0).
-  const firstDate = (() => {
-    const [y, m, d] = dateKeys[0].split('-').map(Number);
-    return new Date(y, m - 1, d);
-  })();
-  // Number of empty slots to pad at the top of column 0
-  const startPad = (firstDate.getDay() + 6) % 7; // Mon-based: Mon=0, Sun=6
-
-  const allCells = [];
-  for (let i = 0; i < startPad; i++) allCells.push(null); // padding
-  for (const key of dateKeys) allCells.push(key);
-
-  // Slice into week columns
-  const weeks = [];
-  for (let i = 0; i < allCells.length; i += 7) {
-    weeks.push(allCells.slice(i, i + 7));
-  }
-
-  // ── Month label row ──
-  const monthRow = createElement('div', 'usage-heatmap__months');
-  let lastMonth  = -1;
-  for (const week of weeks) {
-    const firstKey = week.find(Boolean);
-    const monthEl  = createElement('span', 'usage-heatmap__month-label');
-    if (firstKey) {
-      const [, m, d] = firstKey.split('-').map(Number);
-      if (m !== lastMonth && d <= 7) {
-        monthEl.textContent = new Date(0, m - 1).toLocaleString('en-US', { month: 'short' });
-        lastMonth = m;
-      }
-    }
-    monthRow.append(monthEl);
-  }
-
-  // ── Day labels (left column) ──
-  const dayLabels = createElement('div', 'usage-heatmap__day-labels');
-  const days      = strings.heatmap.dayLabels; // ['Sun','Mon'…'Sat']
-  // Mon-first order: Mon Tue Wed Thu Fri Sat Sun
-  const orderedDays = [days[1], days[2], days[3], days[4], days[5], days[6], days[0]];
-  for (let i = 0; i < 7; i++) {
-    const label = createElement('span', 'usage-heatmap__day-label');
-    // only render Mon / Wed / Fri / Sun to keep it sparse
-    if ([0, 2, 4, 6].includes(i)) label.textContent = orderedDays[i];
-    dayLabels.append(label);
-  }
-
-  // ── Grid ──
-  const grid = createElement('div', 'usage-heatmap__grid');
-
-  for (const week of weeks) {
-    const col = createElement('div', 'usage-heatmap__week');
-    for (let row = 0; row < 7; row++) {
-      const key   = week[row] ?? null;
-      const cell  = createElement('div', 'usage-heatmap__cell');
-      if (!key) {
-        cell.classList.add('usage-heatmap__cell--empty');
-      } else {
-        const tokens = dayTotals[key] ?? 0;
-        const level  = intensityLevel(tokens, maxTokens);
-        cell.classList.add(`usage-heatmap__cell--l${level}`);
-        // Tooltip via custom attribute-free approach: hover shows a floating bubble
-        cell._usageKey    = key;
-        cell._usageTokens = tokens;
-        cell.addEventListener('mouseenter', (event) => showCellTip(event, strings, key, tokens));
-        cell.addEventListener('mouseleave', hideCellTip);
-      }
-      col.append(cell);
-    }
-    grid.append(col);
-  }
-
-  // ── Legend ──
-  const legend     = createElement('div', 'usage-heatmap__legend');
-  const lessLabel  = createElement('span', 'usage-heatmap__legend-label', strings.heatmap.less);
-  const moreLabel  = createElement('span', 'usage-heatmap__legend-label', strings.heatmap.more);
-  const legendCells = createElement('div', 'usage-heatmap__legend-cells');
-  for (let l = 0; l <= 4; l++) {
-    const c = createElement('div', `usage-heatmap__cell usage-heatmap__cell--l${l}`);
-    legendCells.append(c);
-  }
-  legend.append(lessLabel, legendCells, moreLabel);
-
-  const bodyWrap = createElement('div', 'usage-heatmap__body');
-  bodyWrap.append(dayLabels, grid);
-
-  heatmapRoot.append(heading, monthRow, bodyWrap, legend);
-  return heatmapRoot;
+  return longest;
 }
 
-// ── Cell tooltip ──
+// ─── Tooltip (shared) ──────────────────────────────────────────────────────
+
 let tipEl = null;
 
-function showCellTip(event, strings, dateKey, tokens) {
-  hideCellTip();
-  if (!tokens) return;
-
+function showTip(event, text) {
+  hideTip();
+  if (!text) return;
   tipEl = createElement('div', 'usage-cell-tip');
-  const text = formatText(strings.heatmap.tooltip, {
-    tokens: formatNumber(tokens),
-    date:   formatDate(dateKey)
-  });
   tipEl.textContent = text;
   document.body.append(tipEl);
-
   const rect = event.target.getBoundingClientRect();
   tipEl.style.left = `${rect.left + rect.width / 2}px`;
   tipEl.style.top  = `${rect.top - 8}px`;
 }
 
-function hideCellTip() {
+function hideTip() {
   tipEl?.remove();
   tipEl = null;
 }
 
-// ---------------------------------------------------------------------------
-// Stat cards
-// ---------------------------------------------------------------------------
+// ─── Year toggle — same pill pattern as Marketplace (Skills | Personas) ───
+
+function buildYearToggle(years, initialYear, onSwitch) {
+  const toggle  = createElement('div', 'usage-year-toggle');
+  const btns    = new Map();
+  let   current = initialYear;
+
+  for (const year of years) {
+    const btn = createElement('button', 'usage-year-toggle__btn');
+    btn.type  = 'button';
+    btn.textContent = String(year);
+    if (year === initialYear) btn.classList.add('usage-year-toggle__btn--active');
+
+    btn.addEventListener('click', () => {
+      if (year === current) return;
+      current = year;
+      for (const [y, b] of btns) b.classList.toggle('usage-year-toggle__btn--active', y === year);
+      onSwitch(year);
+    });
+
+    btns.set(year, btn);
+    toggle.append(btn);
+  }
+
+  return toggle;
+}
+
+// ─── Stat cards (8 cards — 4 × 2) ─────────────────────────────────────────
 
 function buildStatCards(strings, data, dateKeys) {
-  const grid    = createElement('div', 'usage-stats-grid');
-  const dailyIn = dateKeys.map((k) => data.daily[k]?.tokensIn  ?? 0);
-  const dailyOut= dateKeys.map((k) => data.daily[k]?.tokensOut ?? 0);
-  const dailyMsg= dateKeys.map((k) => data.daily[k]?.messages  ?? 0);
+  const daily = data.daily;
 
-  const rangedIn    = dailyIn.reduce((a, b) => a + b, 0);
-  const rangedOut   = dailyOut.reduce((a, b) => a + b, 0);
-  const rangedTotal = rangedIn + rangedOut;
-  const rangedMsg   = dailyMsg.reduce((a, b) => a + b, 0);
+  let sumIn = 0, sumOut = 0, sumMsg = 0, activeDays = 0;
+  let peakKey = '', peakTokens = 0;
 
-  const activeDays  = dateKeys.filter((k) => (data.daily[k]?.tokensIn ?? 0) + (data.daily[k]?.tokensOut ?? 0) > 0).length;
-  const avgPerDay   = activeDays ? Math.round(rangedTotal / activeDays) : 0;
+  for (const k of dateKeys) {
+    const e = daily[k];
+    if (!e) continue;
+    sumIn  += e.tokensIn;
+    sumOut += e.tokensOut;
+    sumMsg += e.messages;
+    const dayTotal = e.tokensIn + e.tokensOut;
+    if (dayTotal > 0) activeDays++;
+    if (dayTotal > peakTokens) { peakTokens = dayTotal; peakKey = k; }
+  }
 
-  const peakKey = dateKeys.reduce((best, k) => {
-    const v = (data.daily[k]?.tokensIn ?? 0) + (data.daily[k]?.tokensOut ?? 0);
-    const b = (data.daily[best]?.tokensIn ?? 0) + (data.daily[best]?.tokensOut ?? 0);
-    return v > b ? k : best;
-  }, dateKeys[0] ?? '');
-  const peakTokens = peakKey ? ((data.daily[peakKey]?.tokensIn ?? 0) + (data.daily[peakKey]?.tokensOut ?? 0)) : 0;
+  const sumTotal  = sumIn + sumOut;
+  const avgPerDay = activeDays ? Math.round(sumTotal / activeDays) : 0;
+  const streak    = calcLongestStreak(daily, dateKeys);
+  const totalDays = dateKeys.length;
 
   const cards = [
-    { label: strings.stats.totalTokens,   value: formatNumber(rangedTotal),               sub: `${formatNumber(rangedIn)} in · ${formatNumber(rangedOut)} out` },
-    { label: strings.stats.totalMessages,  value: formatNumber(rangedMsg),                  sub: `${activeDays} ${strings.stats.activedays}` },
-    { label: strings.stats.avgPerDay,      value: formatNumber(avgPerDay),                  sub: strings.stats.totalTokens.toLowerCase() },
-    { label: strings.stats.peakDay,        value: peakTokens ? formatNumber(peakTokens) : '—', sub: peakKey ? formatDate(peakKey) : '' }
+    {
+      value: formatNumber(sumTotal),
+      label: strings.stats.totalTokens,
+      sub:   `${formatNumber(sumIn)} ${strings.stats.in} · ${formatNumber(sumOut)} ${strings.stats.out}`,
+      hero:  true
+    },
+    { value: formatNumber(sumIn),  label: strings.stats.tokensIn,      sub: strings.stats.inputDesc  },
+    { value: formatNumber(sumOut), label: strings.stats.tokensOut,     sub: strings.stats.outputDesc },
+    { value: formatNumber(sumMsg), label: strings.stats.totalMessages, sub: ''                        },
+    {
+      value: String(activeDays),
+      label: strings.stats.activeDays,
+      sub:   formatText(strings.stats.activeDaysSub, { total: totalDays })
+    },
+    { value: formatNumber(avgPerDay),                        label: strings.stats.avgPerDay, sub: strings.stats.perActiveDay },
+    { value: peakTokens ? formatNumber(peakTokens) : '—',   label: strings.stats.peakDay,   sub: peakKey ? formatDate(peakKey) : '' },
+    { value: streak ? `${streak}d` : '—',                   label: strings.stats.streak,    sub: streak ? strings.stats.streakSub : '' }
   ];
 
+  const grid = createElement('div', 'usage-stats-grid');
   for (const card of cards) {
-    const el  = createElement('div', 'usage-stat-card');
+    const el  = createElement('div', card.hero ? 'usage-stat-card usage-stat-card--hero' : 'usage-stat-card');
     const val = createElement('div', 'usage-stat-card__value', card.value);
     const lbl = createElement('div', 'usage-stat-card__label', card.label);
     const sub = createElement('div', 'usage-stat-card__sub',   card.sub);
@@ -223,32 +173,291 @@ function buildStatCards(strings, data, dateKeys) {
   return grid;
 }
 
-// ---------------------------------------------------------------------------
-// Model breakdown table
-// ---------------------------------------------------------------------------
+// ─── Weekly trend bar chart ────────────────────────────────────────────────
+
+function buildInsights(strings, data, dateKeys) {
+  const daily        = data.daily;
+  const models       = data.models;
+  const ins          = strings.insights;
+  const modelEntries = Object.entries(models);
+  const cards        = [];
+
+  // ── Accumulate year data ──
+  let totalIn = 0, totalOut = 0, totalMsgs = 0;
+  let peakKey = '', peakTokens = 0;
+  let weekdayTokens = 0, weekendTokens = 0, weekdayActive = 0, weekendActive = 0;
+
+  for (const k of dateKeys) {
+    const e = daily[k];
+    if (!e) continue;
+    totalIn   += e.tokensIn;
+    totalOut  += e.tokensOut;
+    totalMsgs += e.messages;
+    const t = e.tokensIn + e.tokensOut;
+    if (t > peakTokens) { peakTokens = t; peakKey = k; }
+    const [y, m, d] = k.split('-').map(Number);
+    const dow = new Date(y, m - 1, d).getDay();
+    if (dow === 0 || dow === 6) { if (t > 0) { weekendTokens += t; weekendActive++; } }
+    else                        { if (t > 0) { weekdayTokens += t; weekdayActive++; } }
+  }
+
+  const totalAll = totalIn + totalOut;
+
+  // 1. Most used model
+  if (modelEntries.length) {
+    const [id, m] = [...modelEntries].sort(
+      (a, b) => (b[1].tokensIn + b[1].tokensOut) - (a[1].tokensIn + a[1].tokensOut)
+    )[0];
+    cards.push({
+      badge: ins.badges.top,
+      label: ins.mostUsedModel,
+      bold:  m.label || id,
+      desc:  `${ins.withCalls.replace('{calls}', m.messages)} ${ins.andTokens.replace('{tokens}', formatNumber(m.tokensIn + m.tokensOut))}`
+    });
+  }
+
+  // 2. Busiest day
+  if (peakKey) {
+    const e = daily[peakKey];
+    cards.push({
+      badge: ins.badges.day,
+      label: ins.busiestDay,
+      bold:  formatDate(peakKey),
+      desc:  `${ins.withCalls.replace('{calls}', e.messages)} ${ins.andTokens.replace('{tokens}', formatNumber(peakTokens))}`
+    });
+  }
+
+  // 3. Token ratio
+  if (totalAll > 0) {
+    const inPct  = Math.round((totalIn  / totalAll) * 100);
+    const outPct = 100 - inPct;
+    const desc   = inPct >= 70
+      ? ins.tokenRatioInputHeavy
+      : outPct >= 50
+        ? ins.tokenRatioOutputHeavy
+        : ins.tokenRatioBalanced;
+    cards.push({
+      badge: ins.badges.mix,
+      label: ins.tokenRatio,
+      bold:  `${outPct}% ${ins.output}, ${inPct}% ${ins.input}`,
+      desc
+    });
+  }
+
+  // 4. Avg tokens per call
+  if (totalMsgs > 0 && totalAll > 0) {
+    const avg      = Math.round(totalAll / totalMsgs);
+    const verbosity = avg > 8000 ? ins.avgLong : avg > 2000 ? ins.avgMedium : ins.avgShort;
+    cards.push({
+      badge: ins.badges.avg,
+      label: ins.avgTokensPerCall,
+      bold:  `${formatNumber(avg)} ${ins.tokensOnAverage}`,
+      desc:  verbosity
+    });
+  }
+
+  // 5. Multi-provider
+  const providers = [...new Set(Object.values(models).map(m => m.providerLabel).filter(Boolean))];
+  if (providers.length > 1) {
+    cards.push({
+      badge: ins.badges.net,
+      label: ins.multiProvider,
+      bold:  ins.usingProviders.replace('{count}', providers.length),
+      desc:  providers.join(', ')
+    });
+  } else if (providers.length === 1) {
+    cards.push({
+      badge: ins.badges.net,
+      label: ins.multiProvider,
+      bold:  providers[0],
+      desc:  ins.singleProvider
+    });
+  }
+
+  // 6. Weekend vs Weekday
+  if (weekdayActive > 0 && weekendActive > 0) {
+    const wdAvg = Math.round(weekdayTokens / weekdayActive);
+    const weAvg = Math.round(weekendTokens / weekendActive);
+    const ratio = (Math.max(wdAvg, weAvg) / Math.max(1, Math.min(wdAvg, weAvg))).toFixed(1);
+    const more  = weAvg > wdAvg ? ins.weekends : ins.weekdays;
+    cards.push({
+      badge: ins.badges.week,
+      label: ins.weekendVsWeekday,
+      bold:  ins.xMoreOn.replace('{ratio}', ratio).replace('{more}', more),
+      desc:  ins.onActiveDays
+    });
+  }
+
+  // 7. Top provider
+  const provTotals = {};
+  const provMsgs   = {};
+  for (const [, m] of modelEntries) {
+    if (!m.providerLabel) continue;
+    provTotals[m.providerLabel] = (provTotals[m.providerLabel] ?? 0) + m.tokensIn + m.tokensOut;
+    provMsgs[m.providerLabel]   = (provMsgs[m.providerLabel]   ?? 0) + m.messages;
+  }
+  const topProvEntry = Object.entries(provTotals).sort((a, b) => b[1] - a[1])[0];
+  if (topProvEntry && totalAll > 0) {
+    const [prov, toks] = topProvEntry;
+    const share        = Math.round((toks / totalAll) * 100);
+    cards.push({
+      badge: ins.badges.prov,
+      label: ins.topProvider,
+      bold:  `${prov} ${ins.accountsFor.replace('{share}', share)}`,
+      desc:  ins.acrossMessages.replace('{calls}', provMsgs[prov] ?? 0)
+    });
+  }
+
+  // 8. Response verbosity
+  const outTotal  = Object.values(models).reduce((s, m) => s + m.tokensOut,  0);
+  const msgTotal  = Object.values(models).reduce((s, m) => s + m.messages,   0);
+  if (msgTotal > 0 && outTotal > 0) {
+    const avgOut      = Math.round(outTotal / msgTotal);
+    const style       = avgOut < 100 ? ins.verbosityLow : avgOut < 500 ? ins.verbosityMedium : ins.verbosityHigh;
+    const mostVerbose = [...modelEntries]
+      .filter(([, m]) => m.messages > 0)
+      .sort((a, b) => (b[1].tokensOut / b[1].messages) - (a[1].tokensOut / a[1].messages))[0];
+    const verbSuffix  = mostVerbose
+      ? ` ${ins.mostVerboseModel.replace('{model}', mostVerbose[1].label || mostVerbose[0])}`
+      : '';
+    cards.push({
+      badge: ins.badges.out,
+      label: ins.responseVerbosity,
+      bold:  ins.avgOutputTokens.replace('{avg}', avgOut),
+      desc:  `${style}${verbSuffix}`
+    });
+  }
+
+  if (!cards.length) return null;
+
+  const section = createElement('div', 'usage-insights');
+  const headRow = createElement('div', 'usage-insights__head');
+  headRow.append(
+    createElement('h3',   'usage-section-heading',     ins.heading),
+    createElement('span', 'usage-insights__auto-label', ins.autoGenerated)
+  );
+
+  const grid = createElement('div', 'usage-insights__grid');
+
+  for (const card of cards) {
+    const el   = createElement('div',    'usage-insight-card');
+    const bdg  = createElement('span',   'usage-insight-card__badge', card.badge);
+    const lbl  = createElement('div',    'usage-insight-card__label', card.label);
+    const body = createElement('div',    'usage-insight-card__body');
+    const bold = createElement('strong', 'usage-insight-card__bold',  card.bold);
+    body.append(bold, document.createTextNode(` ${card.desc}`));
+    el.append(bdg, lbl, body);
+    grid.append(el);
+  }
+
+  section.append(headRow, grid);
+  return section;
+}
+
+// ─── Heatmap (full-year, GitHub-style grid) ────────────────────────────────
+
+function buildHeatmap(strings, daily, dateKeys) {
+  const root    = createElement('div', 'usage-heatmap');
+  const heading = createElement('h3', 'usage-section-heading', strings.heatmap.heading);
+
+  const dayTotals = {};
+  for (const key of dateKeys) {
+    const e       = daily[key];
+    dayTotals[key] = e ? (e.tokensIn + e.tokensOut) : 0;
+  }
+  const maxTokens = Math.max(1, ...Object.values(dayTotals));
+
+  // Pad start so the first cell sits in the correct weekday row (Mon = row 0)
+  const [fy, fm, fd] = dateKeys[0].split('-').map(Number);
+  const startPad     = (new Date(fy, fm - 1, fd).getDay() + 6) % 7;
+
+  const allCells = [...Array(startPad).fill(null), ...dateKeys];
+  const weeks    = [];
+  for (let i = 0; i < allCells.length; i += 7) weeks.push(allCells.slice(i, i + 7));
+
+  // Month label row (above the grid)
+  const monthRow  = createElement('div', 'usage-heatmap__months');
+  let lastMonthHM = -1;
+  for (const week of weeks) {
+    const firstKey = week.find(Boolean);
+    const el       = createElement('span', 'usage-heatmap__month-label');
+    if (firstKey) {
+      const [, m, d] = firstKey.split('-').map(Number);
+      if (m !== lastMonthHM && d <= 7) {
+        el.textContent = new Date(0, m - 1).toLocaleString('en-US', { month: 'short' });
+        lastMonthHM    = m;
+      }
+    }
+    monthRow.append(el);
+  }
+
+  // Day-of-week labels (left side)
+  const dayLabelWrap = createElement('div', 'usage-heatmap__day-labels');
+  const days         = strings.heatmap.dayLabels;
+  const ordered      = [days[1], days[2], days[3], days[4], days[5], days[6], days[0]];
+  for (let i = 0; i < 7; i++) {
+    const lbl = createElement('span', 'usage-heatmap__day-label');
+    if ([0, 2, 4, 6].includes(i)) lbl.textContent = ordered[i];
+    dayLabelWrap.append(lbl);
+  }
+
+  // Week columns grid
+  const grid = createElement('div', 'usage-heatmap__grid');
+  for (const week of weeks) {
+    const col = createElement('div', 'usage-heatmap__week');
+    for (let row = 0; row < 7; row++) {
+      const key  = week[row] ?? null;
+      const cell = createElement('div', 'usage-heatmap__cell');
+      if (!key) {
+        cell.classList.add('usage-heatmap__cell--empty');
+      } else {
+        const tokens = dayTotals[key] ?? 0;
+        cell.classList.add(`usage-heatmap__cell--l${intensityLevel(tokens, maxTokens)}`);
+        cell.addEventListener('mouseenter', e => showTip(e,
+          tokens ? formatText(strings.heatmap.tooltip, { tokens: formatNumber(tokens), date: formatDate(key) }) : null
+        ));
+        cell.addEventListener('mouseleave', hideTip);
+      }
+      col.append(cell);
+    }
+    grid.append(col);
+  }
+
+  // Legend
+  const legend      = createElement('div', 'usage-heatmap__legend');
+  const legendCells = createElement('div', 'usage-heatmap__legend-cells');
+  for (let l = 0; l <= 4; l++) legendCells.append(createElement('div', `usage-heatmap__cell usage-heatmap__cell--l${l}`));
+  legend.append(
+    createElement('span', 'usage-heatmap__legend-label', strings.heatmap.less),
+    legendCells,
+    createElement('span', 'usage-heatmap__legend-label', strings.heatmap.more)
+  );
+
+  const bodyWrap = createElement('div', 'usage-heatmap__body');
+  bodyWrap.append(dayLabelWrap, grid);
+  root.append(heading, monthRow, bodyWrap, legend);
+  return root;
+}
+
+// ─── Model breakdown table ─────────────────────────────────────────────────
 
 function buildModelTable(strings, models) {
-  const section  = createElement('div', 'usage-models');
-  const heading  = createElement('h3', 'usage-section-heading', strings.models.heading);
+  const section = createElement('div', 'usage-models');
+  const heading = createElement('h3', 'usage-section-heading', strings.models.heading);
 
-  const entries = Object.entries(models).sort((a, b) => {
-    const aTotal = a[1].tokensIn + a[1].tokensOut;
-    const bTotal = b[1].tokensIn + b[1].tokensOut;
-    return bTotal - aTotal;
-  });
+  const entries = Object.entries(models).sort((a, b) =>
+    (b[1].tokensIn + b[1].tokensOut) - (a[1].tokensIn + a[1].tokensOut)
+  );
 
   if (!entries.length) {
-    const empty = createElement('p', 'usage-models__empty', '—');
-    section.append(heading, empty);
+    section.append(heading, createElement('p', 'usage-models__empty', '—'));
     return section;
   }
 
   const maxTotal = Math.max(1, ...entries.map(([, m]) => m.tokensIn + m.tokensOut));
   const allTotal = entries.reduce((s, [, m]) => s + m.tokensIn + m.tokensOut, 0) || 1;
 
-  const table = createElement('div', 'usage-models__table');
-
-  // Header row
+  const table  = createElement('div', 'usage-models__table');
   const header = createElement('div', 'usage-models__row usage-models__row--header');
   for (const label of [strings.models.model, strings.models.tokensIn, strings.models.tokensOut, strings.models.messages, strings.models.share]) {
     header.append(createElement('span', 'usage-models__col', label));
@@ -256,30 +465,32 @@ function buildModelTable(strings, models) {
   table.append(header);
 
   for (const [modelId, model] of entries) {
-    const total = model.tokensIn + model.tokensOut;
-    const share = Math.round((total / allTotal) * 100);
-    const bar   = Math.round((total / maxTotal) * 100);
+    const total    = model.tokensIn + model.tokensOut;
+    const share    = Math.round((total / allTotal) * 100);
+    const barWidth = Math.round((total / maxTotal) * 100);
 
-    const row = createElement('div', 'usage-models__row');
+    const row      = createElement('div', 'usage-models__row');
+    const nameCell = createElement('div', 'usage-models__col usage-models__col--name');
+    const barWrap  = createElement('div', 'usage-models__bar-wrap');
+    const barFill  = createElement('div', 'usage-models__bar-fill');
+    barFill.style.width = `${barWidth}%`;
+    barWrap.append(barFill);
+    nameCell.append(
+      createElement('div', 'usage-models__model-name',     model.label || modelId),
+      createElement('div', 'usage-models__model-provider', model.providerLabel || ''),
+      barWrap
+    );
 
-    // Model name + provider
-    const nameCell   = createElement('div', 'usage-models__col usage-models__col--name');
-    const nameLabel  = createElement('div', 'usage-models__model-name', model.label || modelId);
-    const provLabel  = createElement('div', 'usage-models__model-provider', model.providerLabel || '');
-    const barEl      = createElement('div', 'usage-models__bar-wrap');
-    const barFill    = createElement('div', 'usage-models__bar-fill');
-    barFill.style.width = `${bar}%`;
-    barEl.append(barFill);
-    nameCell.append(nameLabel, provLabel, barEl);
+    const shr = createElement('span', 'usage-models__col usage-models__col--share');
+    shr.append(createElement('span', 'usage-models__share-pill', `${share}%`));
 
-    const inCell  = createElement('span', 'usage-models__col usage-models__col--num', formatNumber(model.tokensIn));
-    const outCell = createElement('span', 'usage-models__col usage-models__col--num', formatNumber(model.tokensOut));
-    const msgCell = createElement('span', 'usage-models__col usage-models__col--num', formatNumber(model.messages));
-    const shr     = createElement('span', 'usage-models__col usage-models__col--share');
-    const shrPill = createElement('span', 'usage-models__share-pill', `${share}%`);
-    shr.append(shrPill);
-
-    row.append(nameCell, inCell, outCell, msgCell, shr);
+    row.append(
+      nameCell,
+      createElement('span', 'usage-models__col usage-models__col--num', formatNumber(model.tokensIn)),
+      createElement('span', 'usage-models__col usage-models__col--num', formatNumber(model.tokensOut)),
+      createElement('span', 'usage-models__col usage-models__col--num', formatNumber(model.messages)),
+      shr
+    );
     table.append(row);
   }
 
@@ -287,53 +498,62 @@ function buildModelTable(strings, models) {
   return section;
 }
 
-// ---------------------------------------------------------------------------
-// Full panel builder
-// ---------------------------------------------------------------------------
+// ─── Panel factory ─────────────────────────────────────────────────────────
 
 export function createUsagePanel(strings) {
-  const view    = createElement('div', 'usage-view');
-  const header  = createElement('div', 'usage-view__header');
-  const title   = createElement('h1', 'usage-view__title', strings.title);
-  const sub     = createElement('p',  'usage-view__subtitle', strings.subtitle);
-  header.append(title, sub);
+  const view = createElement('div', 'usage-view');
 
-  // ── Period tabs ──
-  const tabBar   = createElement('div', 'usage-tab-bar');
-  const periods  = [
-    { id: 30,  label: strings.tabs.label30  },
-    { id: 90,  label: strings.tabs.label90  },
-    { id: 365, label: strings.tabs.label365 }
-  ];
-  let activePeriod = 30;
-  const tabBtns    = new Map();
+  // Header: title + subtitle (left) | year toggle (right)
+  const header    = createElement('div', 'usage-view__header');
+  header.style.webkitAppRegion = 'drag';
 
-  for (const period of periods) {
-    const btn = createElement('button', 'usage-tab-bar__tab');
-    btn.type  = 'button';
-    btn.textContent = period.label;
-    if (period.id === activePeriod) btn.classList.add('usage-tab-bar__tab--active');
-    btn.addEventListener('click', () => {
-      if (period.id === activePeriod) return;
-      activePeriod = period.id;
-      for (const [pid, b] of tabBtns) {
-        b.classList.toggle('usage-tab-bar__tab--active', pid === activePeriod);
-      }
-      void renderContent(activePeriod);
-    });
-    tabBtns.set(period.id, btn);
-    tabBar.append(btn);
-  }
+  const headerTop = createElement('div', 'usage-view__header-top');
+  headerTop.style.webkitAppRegion = 'no-drag';
 
-  // ── Content area ──
-  const content = createElement('div', 'usage-content');
+  const headerText = createElement('div', 'usage-view__header-text');
+  headerText.append(
+    createElement('h1', 'usage-view__title',    strings.title),
+    createElement('p',  'usage-view__subtitle', strings.subtitle)
+  );
+
+  const toggleSlot = createElement('div', 'usage-year-toggle-slot');
+
+  headerTop.append(headerText, toggleSlot);
+  header.append(headerTop);
+
+  // Scrollable content
+  const content  = createElement('div', 'usage-content');
   const scroller = createElement('div', 'usage-content__scroller');
   content.append(scroller);
 
   const scrollbar = attachCustomScrollbar(content, scroller);
 
-  // ── Render ──
-  async function renderContent(days) {
+  // State
+  let activeYear = new Date().getFullYear();
+  let cachedData = null;
+
+  function renderYear(year, data) {
+    activeYear     = year;
+    const dateKeys = buildYearRange(year);
+    const hasAny   = dateKeys.some(k => data.daily[k]);
+
+    if (!hasAny && !Object.keys(data.models).length) {
+      scroller.replaceChildren(createElement('p', 'usage-empty', strings.empty));
+      return;
+    }
+
+    const insightsEl = buildInsights(strings, data, dateKeys);
+    const frag = document.createDocumentFragment();
+    frag.append(
+      buildStatCards(strings, data, dateKeys),
+      buildHeatmap(strings, data.daily, dateKeys),
+      ...(insightsEl ? [insightsEl] : []),
+      buildModelTable(strings, data.models)
+    );
+    scroller.replaceChildren(frag);
+  }
+
+  async function renderContent() {
     scroller.replaceChildren(createElement('p', 'usage-loading', strings.loading));
 
     let data;
@@ -343,31 +563,26 @@ export function createUsagePanel(strings) {
       scroller.replaceChildren(createElement('p', 'usage-loading', strings.loading));
       return;
     }
+    cachedData = data;
 
-    const dateKeys = buildDateRange(days);
-    const hasAny   = dateKeys.some((k) => data.daily[k]);
+    const years = getYearsFromData(data.daily);
+    activeYear  = years[years.length - 1]; // default to most recent year with data
 
-    if (!hasAny && !Object.keys(data.models).length) {
-      scroller.replaceChildren(createElement('p', 'usage-empty', strings.empty));
-      return;
-    }
+    toggleSlot.replaceChildren(buildYearToggle(years, activeYear, (year) => {
+      activeYear = year;
+      renderYear(year, cachedData);
+    }));
 
-    const frag = document.createDocumentFragment();
-    frag.append(
-      buildStatCards(strings, data, dateKeys),
-      buildHeatmap(strings, data.daily, dateKeys),
-      buildModelTable(strings, data.models)
-    );
-    scroller.replaceChildren(frag);
+    renderYear(activeYear, data);
   }
 
-  view.append(header, tabBar, content);
+  view.append(header, content);
 
   return {
     element: view,
     scrollbarDispose: scrollbar.dispose,
     async onShow() {
-      await renderContent(activePeriod);
+      await renderContent();
     }
   };
 }
