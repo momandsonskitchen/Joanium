@@ -46,6 +46,7 @@ export function createAgentStateManager({ rootDirectory }) {
         avatar:    agent.avatar            ?? null,
         schedule:  normalizeSchedule(agent.schedule),
         prompt:    String(agent.prompt     ?? '').trim(),
+        enabled:   agent.enabled           ?? true,
         createdAt: agent.createdAt         ?? now,
         updatedAt: now,
         lastRunAt: agent.lastRunAt         ?? null

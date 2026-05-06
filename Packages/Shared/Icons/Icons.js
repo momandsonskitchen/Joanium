@@ -73,6 +73,19 @@ export const iconMarkup = {
 
   // ── Composer ──────────────────────────────────────────────────────────────
 
+  play: `
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l10-6.86a1 1 0 0 0 0-1.72l-10-6.86A1 1 0 0 0 8 5.14z" />
+    </svg>
+  `,
+
+  power: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v6" />
+      <path d="M6.343 6.343a8 8 0 1 0 11.314 0" />
+    </svg>
+  `,
+
   send: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M5 12h12" />

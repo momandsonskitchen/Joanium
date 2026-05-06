@@ -715,3 +715,65 @@
   color: var(--color-chat-text-muted);
   letter-spacing: -0.01em;
 }
+
+/* ── Run button — three pre-rendered states controlled by CSS ────────────── */
+
+.agents-card__btn--run:hover {
+  color: var(--color-accent);
+  background: rgba(var(--color-accent-rgb), 0.08);
+}
+
+/* Default: play visible, spinner + check hidden */
+.agents-card__run-spinner,
+.agents-card__run-check { display: none; }
+
+.agents-card__run-play  { display: inline-flex; }
+
+/* Running: spinner visible only */
+.agents-card__btn--running .agents-card__run-play    { display: none; }
+.agents-card__btn--running .agents-card__run-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(var(--color-accent-rgb), 0.22);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: agents-spin 0.65s linear infinite;
+}
+.agents-card__btn--running .agents-card__run-check   { display: none; }
+
+/* Done: check visible only */
+.agents-card__btn--done .agents-card__run-play    { display: none; }
+.agents-card__btn--done .agents-card__run-spinner { display: none; }
+.agents-card__btn--done .agents-card__run-check {
+  display: inline-flex;
+  color: var(--color-accent);
+}
+
+@keyframes agents-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Toggle (enable/disable) button ─────────────────────────────────────── */
+
+.agents-card__btn--toggle-on {
+  color: var(--color-accent);
+}
+
+.agents-card__btn--toggle-on:hover {
+  background: rgba(var(--color-accent-rgb), 0.10);
+  color: var(--color-accent);
+}
+
+.agents-card__btn--toggle-off {
+  color: var(--color-chat-text-muted);
+  opacity: 0.45;
+}
+
+.agents-card__btn--toggle-off:hover {
+  background: rgba(170, 134, 104, 0.12);
+  color: var(--color-chat-text-title);
+  opacity: 1;
+}
+
+

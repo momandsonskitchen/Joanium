@@ -362,20 +362,71 @@ export function createAgentsPanel(strings) {
     // Actions
     const actions = createElement('div', 'agents-card__actions');
 
-    const runBtn = createElement('button', 'agents-card__btn');
+    // ── Enable / Disable button ──────────────────────────────────────────────
+    let isEnabled = agent.enabled !== false; // default true
+
+    const toggleBtn = createElement('button', 'agents-card__btn agents-card__btn--toggle');
+    toggleBtn.type  = 'button';
+
+    function syncToggleBtn() {
+      toggleBtn.setAttribute('aria-label', isEnabled ? strings.disable : strings.enable);
+      toggleBtn.classList.toggle('agents-card__btn--toggle-on',  isEnabled);
+      toggleBtn.classList.toggle('agents-card__btn--toggle-off', !isEnabled);
+      toggleBtn.innerHTML = '';
+      toggleBtn.append(createIcon('power', 'agents-card__btn-icon'));
+    }
+    syncToggleBtn();
+
+    toggleBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      isEnabled = !isEnabled;
+      syncToggleBtn();
+      // Persist: reload full agent and re-save with updated enabled flag
+      try {
+        const full = await invokeIpc('agents:load-agent', agent.id);
+        await invokeIpc('agents:save-agent', { ...full, enabled: isEnabled });
+      } catch (err) {
+        console.error('[Joanium] Failed to toggle agent enabled state:', err);
+      }
+    });
+
+    // ── Run button ─────────────────────────────────────────────────────────
+    const runBtn = createElement('button', 'agents-card__btn agents-card__btn--run');
     runBtn.type  = 'button';
     runBtn.setAttribute('aria-label', strings.run);
-    runBtn.append(createIcon('send', 'agents-card__btn-icon'));
+
+    // Pre-render all three visual states — CSS toggles visibility, no DOM writes on click
+    const runPlayIcon  = createIcon('play',  'agents-card__btn-icon agents-card__run-play');
+    const runSpinnerEl = createElement('span', 'agents-card__run-spinner');
+    const runCheckIcon = createIcon('check', 'agents-card__btn-icon agents-card__run-check');
+    runBtn.append(runPlayIcon, runSpinnerEl, runCheckIcon);
+
     runBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      runBtn.disabled = true;
+      if (runBtn._isRunning) return;
+      runBtn._isRunning = true;
+
+      runBtn.classList.add('agents-card__btn--running');
+      // setTimeout(0) is a macrotask — guarantees the browser paints the
+      // spinner before any microtask-resolved IPC response can remove it.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Run IPC and a minimum display timer in parallel so the spinner
+      // is always visible for at least 600ms even if IPC is near-instant.
       try {
-        await invokeIpc('agents:run-agent', agent.id);
+        await Promise.all([
+          invokeIpc('agents:run-agent', agent.id),
+          new Promise((resolve) => setTimeout(resolve, 600))
+        ]);
       } catch (err) {
         console.error('[Joanium] Failed to run agent:', err);
-      } finally {
-        runBtn.disabled = false;
       }
+
+      runBtn.classList.remove('agents-card__btn--running');
+      runBtn.classList.add('agents-card__btn--done');
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      runBtn.classList.remove('agents-card__btn--done');
+      runBtn._isRunning = false;
     });
 
     const editBtn = createElement('button', 'agents-card__btn');
@@ -407,7 +458,7 @@ export function createAgentsPanel(strings) {
       await populateList(listEl, panelRef?._search.getValue().trim() ?? '');
     });
 
-    actions.append(runBtn, editBtn, deleteBtn);
+    actions.append(toggleBtn, runBtn, editBtn, deleteBtn);
     card.append(avatarEl, body, actions);
     return card;
   }

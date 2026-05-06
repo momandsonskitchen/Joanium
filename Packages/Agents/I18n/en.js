@@ -41,6 +41,8 @@ const en = {
   edit: 'Edit',
   delete: 'Delete',
   run: 'Run now',
+  enable: 'Enable agent',
+  disable: 'Disable agent',
   scheduleStartup: 'On startup',
   scheduleDaily: 'Every day at {time}',
   scheduleWeekly: 'Every {day} at {time}',

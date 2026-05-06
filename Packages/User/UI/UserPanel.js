@@ -1,12 +1,12 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createInputBox } from '../../Shared/InputBox/InputBox.js';
+import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 
 export function createUserPanel(strings, { getProfile, onProfileSaved }) {
   let draft = createDraft(getProfile());
   const view = createElement('div', 'chat-settings__user');
 
-  const nameBox = createInputBox({
+  const nameBox = createInputBoxLite({
     label: strings.nameLabel,
     value: draft.name,
     placeholder: strings.namePlaceholder,
@@ -85,9 +85,7 @@ function createDraft(profile) {
 }
 
 function createDateBox(placeholder, maxLength, onChange) {
-  const box = createInputBox({
-    label: '',
-    value: '',
+  const box = createInputBoxLite({
     placeholder,
     inputMode: 'numeric',
     maxLength,
