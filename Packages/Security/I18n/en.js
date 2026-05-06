@@ -63,7 +63,18 @@ const en = {
   lockRateLimitMsg: 'Too many attempts. Try again in {time}.',
   lockWrongPassword: 'Incorrect password.',
   lockWrongAnswer: 'Incorrect answer.',
-  lockAttemptsLeft: '{n} attempt{s} remaining before lockout.'
+  lockAttemptsLeft: '{n} attempt{s} remaining before lockout.',
+
+  // Auto-lock
+  autoLockLabel: 'Auto-lock',
+  autoLockDesc: 'Lock automatically after a period of inactivity.',
+  autoLockNever: 'Never',
+  autoLock1Min:  '1 minute',
+  autoLock5Min:  '5 minutes',
+  autoLock10Min: '10 minutes',
+  autoLock15Min: '15 minutes',
+  autoLock30Min: '30 minutes',
+  autoLock1Hr:   '1 hour'
 };
 
 export default en;

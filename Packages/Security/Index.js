@@ -28,6 +28,14 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, answer) => security.verifyAnswer(answer)
       },
       {
+        channel: 'security:get-auto-lock-timeout',
+        handler: async () => security.getAutoLockTimeout()
+      },
+      {
+        channel: 'security:set-auto-lock-timeout',
+        handler: async (_event, timeout) => security.setAutoLockTimeout(timeout)
+      },
+      {
         channel: 'security:change-password',
         handler: async (_event, currentPassword, newPassword) =>
           security.changePassword(currentPassword, newPassword)

@@ -50,6 +50,9 @@ function getLockoutDuration(failedAttempts) {
   return duration;
 }
 
+// ── Allowed auto-lock timeout keys ────────────────────────────────────────
+const VALID_TIMEOUTS = new Set(['never', '1min', '5min', '10min', '15min', '30min', '1hr']);
+
 // ── Default security block ──────────────────────────────────────────────────
 
 function createDefaultSecurity() {
@@ -61,7 +64,8 @@ function createDefaultSecurity() {
     secretAnswerHash: null,
     secretAnswerSalt: null,
     failedPasswordAttempts: 0,
-    lockedUntil: null
+    lockedUntil: null,
+    autoLockTimeout: 'never'
   };
 }
 
@@ -209,6 +213,20 @@ export function createSecurityStateManager({ rootDirectory }) {
       }
 
       return { success: false, error: 'wrongAnswer' };
+    },
+
+    async getAutoLockTimeout() {
+      const state = await readSecurity();
+      return state.autoLockTimeout ?? 'never';
+    },
+
+    async setAutoLockTimeout(timeout) {
+      if (!VALID_TIMEOUTS.has(timeout)) {
+        return { success: false, error: 'invalidTimeout' };
+      }
+      const state = await readSecurity();
+      await writeSecurity({ ...state, autoLockTimeout: timeout });
+      return { success: true };
     },
 
     async changePassword(currentPassword, newPassword) {

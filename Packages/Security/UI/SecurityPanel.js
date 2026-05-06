@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
+import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -36,9 +37,21 @@ function buildStatusBadge(enabled, strings) {
   return badge;
 }
 
+// ── Timeout options ──────────────────────────────────────────────────────────
+
+const TIMEOUT_OPTIONS = [
+  { value: 'never', labelKey: 'autoLockNever' },
+  { value: '1min',  labelKey: 'autoLock1Min'  },
+  { value: '5min',  labelKey: 'autoLock5Min'  },
+  { value: '10min', labelKey: 'autoLock10Min' },
+  { value: '15min', labelKey: 'autoLock15Min' },
+  { value: '30min', labelKey: 'autoLock30Min' },
+  { value: '1hr',   labelKey: 'autoLock1Hr'   },
+];
+
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export function createSecurityPanel(strings) {
+export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
   const view = createElement('div', 'security-panel');
 
   const titleEl    = createElement('h2', 'security-panel__title', strings.title);
@@ -122,6 +135,7 @@ export function createSecurityPanel(strings) {
         const result = await invokeIpc('security:enable', password, question, answer);
         if (result.success) {
           renderEnabled();
+          onSecurityChanged?.();
         } else {
           showFeedback(feedback, strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric, true);
         }
@@ -258,6 +272,7 @@ export function createSecurityPanel(strings) {
         const result = await invokeIpc('security:disable', current);
         if (result.success) {
           renderDisabled();
+          onSecurityChanged?.();
         } else {
           showFeedback(disableFeedback, strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric, true);
         }
@@ -270,6 +285,36 @@ export function createSecurityPanel(strings) {
 
     card.append(badge, desc, btnRow, changeForm, disableForm);
     body.append(card);
+
+    // ── Auto-lock timeout card ─────────────────────────────────────────────
+
+    const autoLockCard   = createElement('div', 'security-panel__card');
+    const autoLockRow    = createElement('div', 'security-panel__setting-row');
+    const autoLockText   = createElement('div', 'security-panel__setting-text');
+    const autoLockLabel  = createElement('p', 'security-panel__setting-label', strings.autoLockLabel);
+    const autoLockDesc   = createElement('p', 'security-panel__setting-desc',  strings.autoLockDesc);
+    autoLockText.append(autoLockLabel, autoLockDesc);
+
+    const timeoutSelect = createDropDownLite({
+      options: TIMEOUT_OPTIONS.map((opt) => ({ value: opt.value, label: strings[opt.labelKey] })),
+      placeholder: strings.autoLockNever,
+      onChange: async (val) => {
+        try {
+          await invokeIpc('security:set-auto-lock-timeout', val);
+          onSecurityChanged?.();
+        } catch {
+          // Non-fatal.
+        }
+      }
+    });
+
+    invokeIpc('security:get-auto-lock-timeout')
+      .then((current) => { timeoutSelect.setValue(current ?? 'never'); })
+      .catch(() => { timeoutSelect.setValue('never'); });
+
+    autoLockRow.append(autoLockText, timeoutSelect.element);
+    autoLockCard.append(autoLockRow);
+    body.append(autoLockCard);
   }
 
   // ── Boot ──────────────────────────────────────────────────────────────────

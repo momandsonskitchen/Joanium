@@ -15,6 +15,7 @@ import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
 import { mountLockScreen } from '../../Security/UI/LockScreen.js';
 import { createSecurityPanel } from '../../Security/UI/SecurityPanel.js';
+import { createAutoLockTimer } from '../../Security/UI/AutoLockTimer.js';
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 
@@ -52,6 +53,24 @@ async function bootstrap() {
   } catch {
     // Security package not ready or disabled — proceed normally.
   }
+
+  // ── Auto-lock timer ────────────────────────────────────────────────────
+  // Created here so it is in scope for buildSettingsPanel below.
+  // The timer listens to window activity events and fires onLock when idle.
+  const autoLockTimer = createAutoLockTimer({
+    onLock: async () => {
+      try {
+        autoLockTimer.pause();
+        const status = await invokeIpc('security:get-status');
+        if (!status.enabled) return;
+        await mountLockScreen(strings.security, status);
+        await autoLockTimer.refresh();
+      } catch {
+        // Non-fatal.
+      }
+    }
+  });
+  autoLockTimer.start();
 
   const payload = await invokeIpc('shell:bootstrap');
   const root = document.getElementById('app');
@@ -405,7 +424,9 @@ async function bootstrap() {
       }
 
       if (id === 'security') {
-        main.append(createSecurityPanel(strings.security));
+        main.append(createSecurityPanel(strings.security, {
+          onSecurityChanged: () => { void autoLockTimer.refresh(); }
+        }));
       }
 
       if (id === 'about') {
@@ -507,6 +528,9 @@ async function bootstrap() {
 
   await showRoute('chat');
   requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
+
+  // Arm the auto-lock timer now that the shell is fully rendered.
+  void autoLockTimer.refresh();
 
   // ── Keyboard shortcuts ────────────────────────────────────────────────────
   // Registered after the initial route is shown so all route creators exist.
