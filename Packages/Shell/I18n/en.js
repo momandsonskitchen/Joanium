@@ -27,8 +27,25 @@ const en = {
     title: 'Settings',
     nav: {
       user: 'User',
+      shortcuts: 'Shortcuts',
       security: 'Security',
       about: 'About'
+    }
+  },
+  shortcuts: {
+    groups: {
+      navigation: 'Navigation'
+    },
+    items: {
+      newChat:     'New Chat',
+      history:     'History',
+      projects:    'Projects',
+      templates:   'Templates',
+      agents:      'Agents',
+      skills:      'Skills',
+      personas:    'Personas',
+      marketplace: 'Marketplace',
+      settings:    'Settings'
     }
   },
   chat,

@@ -15,6 +15,8 @@ import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
 import { mountLockScreen } from '../../Security/UI/LockScreen.js';
 import { createSecurityPanel } from '../../Security/UI/SecurityPanel.js';
+import { registerShortcuts } from './Shortcuts.js';
+import { createShortcutsPanel } from './ShortcutsPanel.js';
 
 function getInitials(name) {
   const parts = collapseWhitespace(name).split(' ').filter(Boolean);
@@ -398,6 +400,10 @@ async function bootstrap() {
         }));
       }
 
+      if (id === 'shortcuts') {
+        main.append(createShortcutsPanel(strings.shortcuts));
+      }
+
       if (id === 'security') {
         main.append(createSecurityPanel(strings.security));
       }
@@ -410,9 +416,10 @@ async function bootstrap() {
     }
 
     for (const menu of [
-      { id: 'user',     label: strings.settings.nav.user,     icon: iconMarkup.tabPersonas },
-      { id: 'security', label: strings.settings.nav.security, icon: iconMarkup.lock },
-      { id: 'about',    label: strings.settings.nav.about,    icon: iconMarkup.info }
+      { id: 'user',      label: strings.settings.nav.user,      icon: iconMarkup.tabPersonas },
+      { id: 'shortcuts', label: strings.settings.nav.shortcuts, icon: iconMarkup.keyboard    },
+      { id: 'security',  label: strings.settings.nav.security,  icon: iconMarkup.lock        },
+      { id: 'about',     label: strings.settings.nav.about,     icon: iconMarkup.info        }
     ]) {
       const item = createElement('button', 'chat-settings__nav-item');
       item.type = 'button';
@@ -500,6 +507,63 @@ async function bootstrap() {
 
   await showRoute('chat');
   requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────────────
+  // Registered after the initial route is shown so all route creators exist.
+  // Ctrl+key and Ctrl+Shift+key combos fire regardless of focus so they work
+  // even when the chat composer textarea is active.
+  registerShortcuts([
+    {
+      id: 'newChat',
+      combo: { ctrl: true, key: 'n' },
+      handler: async () => {
+        const chat = await ensureChatView();
+        chat.clearConversation();
+        await showRoute('chat');
+        chat.focusComposer();
+      }
+    },
+    {
+      id: 'history',
+      combo: { ctrl: true, key: 'h' },
+      handler: () => { void showRoute('history'); }
+    },
+    {
+      id: 'projects',
+      combo: { ctrl: true, key: 'p' },
+      handler: () => { void showRoute('projects'); }
+    },
+    {
+      id: 'templates',
+      combo: { ctrl: true, key: 't' },
+      handler: () => { void showRoute('templates'); }
+    },
+    {
+      id: 'agents',
+      combo: { ctrl: true, key: 'a' },
+      handler: () => { void showRoute('agents'); }
+    },
+    {
+      id: 'skills',
+      combo: { ctrl: true, shift: true, key: 's' },
+      handler: () => { void showRoute('skills'); }
+    },
+    {
+      id: 'personas',
+      combo: { ctrl: true, shift: true, key: 'p' },
+      handler: () => { void showRoute('personas'); }
+    },
+    {
+      id: 'marketplace',
+      combo: { ctrl: true, key: 'm' },
+      handler: () => { void showRoute('marketplace'); }
+    },
+    {
+      id: 'settings',
+      combo: { ctrl: true, key: 's' },
+      handler: () => { void showSettingsPanel(); }
+    }
+  ]);
 }
 
 bootstrap().catch((error) => {
