@@ -287,6 +287,7 @@ export async function createChatView(strings, {
   let activePersona = getActivePersona?.() ?? null;
   let activeProject = getActiveProject?.() ?? null;
   let draftValue = '';
+  let pendingAttachments = [];
   let isSending = false;
   let accText = '';
   let accThinking = '';
@@ -298,6 +299,7 @@ export async function createChatView(strings, {
   let modelPickerOpen = false;
 
   let composerField = null;
+  let attachmentsEl = null;
   let sendButton = null;
   let thread = null;
   let title = null;

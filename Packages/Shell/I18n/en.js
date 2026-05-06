@@ -10,12 +10,18 @@ import user from '../../User/I18n/en.js';
 import about from '../../About/I18n/en.js';
 import security from '../../Security/I18n/en.js';
 import usage from '../../Usage/I18n/en.js';
+import channels from '../../Channels/I18n/en.js';
+import events from '../../Events/I18n/en.js';
+import themes from '../../Themes/I18n/en.js';
+import mcp from '../../MCP/I18n/en.js';
 
 const en = {
   appName: 'Joanium',
   tabs: {
     chat: 'Chat',
     history: 'History',
+    channels: 'Channels',
+    events: 'Events',
     projects: 'Projects',
     templates: 'Templates',
     agents: 'Agents',
@@ -29,6 +35,8 @@ const en = {
     title: 'Settings',
     nav: {
       user: 'User',
+      appearance: 'Appearance',
+      mcp: 'MCP',
       shortcuts: 'Shortcuts',
       security: 'Security',
       about: 'About'
@@ -41,6 +49,8 @@ const en = {
     items: {
       newChat:     'New Chat',
       history:     'History',
+      channels:    'Channels',
+      events:      'Events',
       projects:    'Projects',
       templates:   'Templates',
       agents:      'Agents',
@@ -52,6 +62,10 @@ const en = {
     }
   },
   chat,
+  channels,
+  events,
+  themes,
+  mcp,
   usage,
   history,
   projects,

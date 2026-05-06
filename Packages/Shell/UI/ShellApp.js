@@ -5,6 +5,9 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { createChatView } from '../../Chat/UI/ChatApp.js';
 import { createHistoryPanel } from '../../History/UI/HistoryPanel.js';
+import { createChannelsPanel } from '../../Channels/UI/ChannelsPanel.js';
+import { createChannelGateway } from '../../Channels/UI/ChannelGateway.js';
+import { createEventsPanel } from '../../Events/UI/EventsPanel.js';
 import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createAgentsPanel } from '../../Agents/UI/AgentsPanel.js';
@@ -17,6 +20,9 @@ import { createAboutPanel } from '../../About/UI/AboutPanel.js';
 import { mountLockScreen } from '../../Security/UI/LockScreen.js';
 import { createSecurityPanel } from '../../Security/UI/SecurityPanel.js';
 import { createAutoLockTimer } from '../../Security/UI/AutoLockTimer.js';
+import { createThemePanel } from '../../Themes/UI/ThemePanel.js';
+import { loadAndApplyThemeState, stripNativeTooltips } from '../../Themes/UI/ThemeController.js';
+import { createMCPPanel } from '../../MCP/UI/MCPPanel.js';
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 
@@ -43,6 +49,9 @@ function toFileUrl(filePath) {
 }
 
 async function bootstrap() {
+  stripNativeTooltips();
+  await loadAndApplyThemeState();
+
   // ── Security lock gate ─────────────────────────────────────────────────────
   // Must resolve before ANY UI is built. If the app is locked, the lock screen
   // covers the entire viewport and awaits a correct password / secret answer.
@@ -91,9 +100,13 @@ async function bootstrap() {
   let settingsPanel = null;
   let avatarInitials = null;
   let avatarImg = null;
+  const channelGateway = createChannelGateway(strings.channels, {
+    getActivePersona: () => activePersona
+  });
 
   const routeViews = new Map();
   const tabElements = new Map();
+  channelGateway.start();
 
   const shell = createElement('main', 'chat-shell');
   const sidebar = createElement('nav', 'chat-sidebar');
@@ -199,6 +212,32 @@ async function bootstrap() {
             element._search.clear();
             await panel.populateList(element._contentEl);
           }
+        };
+      }
+    },
+    {
+      id: 'channels',
+      icon: 'tabChannels',
+      create: async () => {
+        const panel = createChannelsPanel(strings.channels);
+        const element = panel.build();
+        canvas.append(element);
+        return {
+          element,
+          onShow: () => panel.populate()
+        };
+      }
+    },
+    {
+      id: 'events',
+      icon: 'tabEvents',
+      create: async () => {
+        const panel = createEventsPanel(strings.events);
+        const element = panel.build();
+        canvas.append(element);
+        return {
+          element,
+          onShow: () => panel.populate()
         };
       }
     },
@@ -436,6 +475,14 @@ async function bootstrap() {
         main.append(createShortcutsPanel(strings.shortcuts));
       }
 
+      if (id === 'appearance') {
+        main.append(createThemePanel(strings.themes));
+      }
+
+      if (id === 'mcp') {
+        main.append(createMCPPanel(strings.mcp));
+      }
+
       if (id === 'security') {
         main.append(createSecurityPanel(strings.security, {
           onSecurityChanged: () => { void autoLockTimer.refresh(); }
@@ -451,6 +498,8 @@ async function bootstrap() {
 
     for (const menu of [
       { id: 'user',      label: strings.settings.nav.user,      icon: iconMarkup.tabPersonas },
+      { id: 'appearance', label: strings.settings.nav.appearance, icon: iconMarkup.palette },
+      { id: 'mcp',       label: strings.settings.nav.mcp,       icon: iconMarkup.network     },
       { id: 'shortcuts', label: strings.settings.nav.shortcuts, icon: iconMarkup.keyboard    },
       { id: 'security',  label: strings.settings.nav.security,  icon: iconMarkup.lock        },
       { id: 'about',     label: strings.settings.nav.about,     icon: iconMarkup.info        }
@@ -564,6 +613,16 @@ async function bootstrap() {
       id: 'history',
       combo: { ctrl: true, key: 'h' },
       handler: () => { void showRoute('history'); }
+    },
+    {
+      id: 'channels',
+      combo: { ctrl: true, shift: true, key: 'c' },
+      handler: () => { void showRoute('channels'); }
+    },
+    {
+      id: 'events',
+      combo: { ctrl: true, key: 'e' },
+      handler: () => { void showRoute('events'); }
     },
     {
       id: 'projects',

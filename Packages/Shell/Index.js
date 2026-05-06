@@ -20,6 +20,8 @@ export async function createPackage({ rootDirectory }) {
     ipcCompanions: [
       'Chat',
       'History',
+      'Channels',
+      'Events',
       'Projects',
       'Templates',
       'Agents',
@@ -29,7 +31,9 @@ export async function createPackage({ rootDirectory }) {
       'Usage',
       'User',
       'About',
-      'Security'
+      'Security',
+      'Themes',
+      'MCP'
     ],
     rendererPath: path.join(shellDirectory, 'UI', 'App.html'),
     preloadPath: path.join(shellDirectory, 'UI', 'Preload.js'),
