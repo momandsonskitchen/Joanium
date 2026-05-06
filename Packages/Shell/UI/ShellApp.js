@@ -478,11 +478,9 @@ async function bootstrap() {
       if (id === 'appearance') {
         main.append(createThemePanel(strings.themes));
       }
-
       if (id === 'mcp') {
         main.append(createMCPPanel(strings.mcp));
       }
-
       if (id === 'security') {
         main.append(createSecurityPanel(strings.security, {
           onSecurityChanged: () => { void autoLockTimer.refresh(); }
