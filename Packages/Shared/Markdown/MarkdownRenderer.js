@@ -199,13 +199,68 @@ function buildDom(blocks) {
       }
 
       case 'codeblock': {
+        const wrap = document.createElement('div');
+        wrap.className = 'md-codeblock';
+
+        // ── Header bar ────────────────────────────────────────────────
+        const header = document.createElement('div');
+        header.className = 'md-codeblock__header';
+
+        const langLabel = document.createElement('span');
+        langLabel.className = 'md-codeblock__lang';
+        langLabel.textContent = block.lang || 'text';
+        header.append(langLabel);
+
+        const actions = document.createElement('div');
+        actions.className = 'md-codeblock__actions';
+
+        // Copy button
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'md-codeblock__btn';
+        copyBtn.type = 'button';
+        copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span>`;
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(block.code).then(() => {
+            copyBtn.querySelector('span').textContent = 'Copied!';
+            copyBtn.classList.add('md-codeblock__btn--success');
+            setTimeout(() => {
+              copyBtn.querySelector('span').textContent = 'Copy';
+              copyBtn.classList.remove('md-codeblock__btn--success');
+            }, 1800);
+          }).catch(() => {});
+        });
+
+        // Download button
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'md-codeblock__btn';
+        dlBtn.type = 'button';
+        const extMap = { js: 'js', javascript: 'js', ts: 'ts', typescript: 'ts', py: 'py', python: 'py', css: 'css', html: 'html', json: 'json', sh: 'sh', bash: 'sh', cpp: 'cpp', c: 'c', java: 'java', rs: 'rs', rust: 'rs', go: 'go', sql: 'sql', md: 'md', yaml: 'yaml', yml: 'yml', xml: 'xml' };
+        const ext = extMap[block.lang?.toLowerCase()] ?? 'txt';
+        dlBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download</span>`;
+        dlBtn.addEventListener('click', () => {
+          const blob = new Blob([block.code], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `snippet.${ext}`;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+
+        actions.append(copyBtn, dlBtn);
+        header.append(actions);
+        wrap.append(header);
+
+        // ── Code area ──────────────────────────────────────────────────
         const pre  = document.createElement('pre');
         pre.className = 'md-pre';
         const code = document.createElement('code');
         code.className = `md-code${block.lang ? ` language-${block.lang}` : ''}`;
         code.textContent = block.code;
         pre.append(code);
-        frag.append(pre);
+        wrap.append(pre);
+
+        frag.append(wrap);
         break;
       }
 

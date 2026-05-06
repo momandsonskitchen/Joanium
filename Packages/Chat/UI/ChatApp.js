@@ -144,8 +144,8 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
       dots.innerHTML = '<span></span><span></span><span></span>';
       bubble.append(dots);
     } else if (message.streaming) {
-      // Live stream — partial tokens, plain text + cursor dot
-      bubble.append(createElement('span', 'chat-message__text', (message.content ?? '').trimStart()));
+      // Live stream — render partial markdown + cursor dot
+      bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
       bubble.append(createElement('span', 'chat-message__stream-dot'));
     } else {
       // Finalised — render as markdown
@@ -181,17 +181,18 @@ function updateLastStreamingMessage(threadEl, { content, thinking }) {
   const bubble = lastEl.querySelector('.chat-message__bubble');
   if (bubble && content) {
     bubble.querySelector('.chat-message__dots')?.remove();
+    bubble.querySelector('.chat-message__stream-dot')?.remove();
 
-    let textSpan = bubble.querySelector('.chat-message__text');
-    if (!textSpan) {
-      textSpan = createElement('span', 'chat-message__text');
-      bubble.prepend(textSpan);
+    // Re-render markdown live into the bubble
+    const fresh = renderMarkdown(content.trimStart(), 'chat-message__md');
+    const existing = bubble.querySelector('.chat-message__md, .chat-message__text');
+    if (existing) {
+      bubble.replaceChild(fresh, existing);
+    } else {
+      bubble.append(fresh);
     }
-    textSpan.textContent = content.trimStart();
 
-    if (!bubble.querySelector('.chat-message__stream-dot')) {
-      bubble.append(createElement('span', 'chat-message__stream-dot'));
-    }
+    bubble.append(createElement('span', 'chat-message__stream-dot'));
   }
 
   lastEl.scrollIntoView({ block: 'end', behavior: 'smooth' });

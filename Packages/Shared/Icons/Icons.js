@@ -136,8 +136,7 @@ export const iconMarkup = {
 
   thinking: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9.5 2a4 4 0 0 1 4 4 4 4 0 0 1 4 4 4 4 0 0 1-2.4 3.7V15a2.5 2.5 0 0 1-5 0v-1.3A4 4 0 0 1 7.5 10a4 4 0 0 1 2-3.46V6a4 4 0 0 1 0-.5A4 4 0 0 1 9.5 2Z" />
-      <path d="M9.5 15v3a2 2 0 0 0 4 0v-3" />
+      <polyline points="22 12 18 12 15 20 9 4 6 12 2 12"/>
     </svg>
   `,
 

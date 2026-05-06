@@ -14,6 +14,7 @@
   line-height: 1.72;
   letter-spacing: -0.008em;
   color: var(--color-chat-text-secondary);
+  white-space: normal;
   -webkit-user-select: text;
   user-select: text;
 }
@@ -66,6 +67,7 @@
 
 /* ── Code blocks ────────────────────────────────────────────────────────── */
 
+/* Standalone <pre> (not inside a codeblock wrapper) */
 .md-pre {
   margin: 12px 0;
   border-radius: 10px;
@@ -73,6 +75,8 @@
   border: 1px solid rgba(170, 134, 104, 0.10);
   padding: 12px 16px;
   overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
 }
@@ -88,6 +92,74 @@
   letter-spacing: 0;
   background: transparent;
   padding: 0;
+}
+
+/* ── Codeblock wrapper (header + pre) ───────────────────────────────────── */
+
+.md-codeblock {
+  margin: 12px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(170, 134, 104, 0.10);
+}
+
+.md-codeblock:last-child { margin-bottom: 0; }
+
+.md-codeblock__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 8px 7px 14px;
+  background: rgba(22, 18, 14, 0.05);
+  border-bottom: 1px solid rgba(170, 134, 104, 0.08);
+}
+
+.md-codeblock__lang {
+  font-family: var(--font-mono, ui-monospace, 'Cascadia Code', monospace);
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-chat-text-muted);
+}
+
+.md-codeblock__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.md-codeblock__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 620;
+  color: var(--color-chat-text-muted);
+  transition:
+    background-color 130ms ease,
+    color 130ms ease;
+}
+
+.md-codeblock__btn:hover {
+  background: rgba(var(--color-accent-rgb), 0.08);
+  color: var(--color-accent);
+}
+
+.md-codeblock__btn--success {
+  color: var(--color-accent);
+}
+
+/* Override <pre> styles when nested inside the wrapper */
+.md-codeblock .md-pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: rgba(22, 18, 14, 0.04);
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 /* ── Blockquote ─────────────────────────────────────────────────────────── */
