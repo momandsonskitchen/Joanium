@@ -9,4 +9,5 @@ Data/Chats/
 Data/Memories/
 Data/Avatar.*
 Data/User.json
+Data/Usage.json
 Data/Security.json

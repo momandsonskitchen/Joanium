@@ -9,6 +9,7 @@ import marketplace from '../../Marketplace/I18n/en.js';
 import user from '../../User/I18n/en.js';
 import about from '../../About/I18n/en.js';
 import security from '../../Security/I18n/en.js';
+import usage from '../../Usage/I18n/en.js';
 
 const en = {
   appName: 'Joanium',
@@ -20,7 +21,8 @@ const en = {
     agents: 'Agents',
     skills: 'Skills',
     personas: 'Personas',
-    marketplace: 'Marketplace'
+    marketplace: 'Marketplace',
+    usage: 'Usage'
   },
   profile: 'Settings',
   settings: {
@@ -45,10 +47,12 @@ const en = {
       skills:      'Skills',
       personas:    'Personas',
       marketplace: 'Marketplace',
+      usage:       'Usage',
       settings:    'Settings'
     }
   },
   chat,
+  usage,
   history,
   projects,
   templates,

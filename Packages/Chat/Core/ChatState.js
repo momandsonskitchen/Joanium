@@ -545,17 +545,30 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
     modelLabel: model.name
   };
 
+  // Estimate input character count across all messages + system prompt.
+  const charCountIn = messages.reduce((sum, m) => sum + (m.content?.length ?? 0), 0)
+    + (systemPrompt?.length ?? 0);
+
+  // Wrap onChunk to accumulate output character count.
+  let charCountOut = 0;
+  const trackingChunk = (chunk) => {
+    if (chunk?.type === 'text' && typeof chunk.text === 'string') {
+      charCountOut += chunk.text.length;
+    }
+    onChunk(chunk);
+  };
+
   if (provider.id === 'google') {
-    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk });
+    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk: trackingChunk });
   } else if (provider.id === 'anthropic') {
-    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk });
+    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk: trackingChunk });
   } else if (openAiCompatibleProviders.has(provider.id)) {
-    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk });
+    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk: trackingChunk });
   } else {
     throw new Error(`${provider.label} chat is not wired up yet.`);
   }
 
-  return meta;
+  return { ...meta, charCountIn, charCountOut };
 }
 
 export function createChatStateManager({ rootDirectory }) {

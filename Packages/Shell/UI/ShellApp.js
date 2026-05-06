@@ -11,6 +11,7 @@ import { createAgentsPanel } from '../../Agents/UI/AgentsPanel.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
 import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
+import { createUsagePanel } from '../../Usage/UI/UsagePanel.js';
 import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
 import { mountLockScreen } from '../../Security/UI/LockScreen.js';
@@ -288,6 +289,18 @@ async function bootstrap() {
         return {
           element,
           onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+        };
+      }
+    },
+    {
+      id: 'usage',
+      icon: 'tabUsage',
+      create: async () => {
+        const panel = createUsagePanel(strings.usage);
+        canvas.append(panel.element);
+        return {
+          element: panel.element,
+          onShow:  () => panel.onShow()
         };
       }
     }
@@ -581,6 +594,11 @@ async function bootstrap() {
       id: 'marketplace',
       combo: { ctrl: true, key: 'm' },
       handler: () => { void showRoute('marketplace'); }
+    },
+    {
+      id: 'usage',
+      combo: { ctrl: true, key: 'u' },
+      handler: () => { void showRoute('usage'); }
     },
     {
       id: 'settings',

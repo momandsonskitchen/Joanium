@@ -3,6 +3,7 @@
 @import "../../Shared/SearchBar/SearchBar.css";
 @import "../../Shared/InputBox/InputBox.css";
 @import "../../Shared/InputBoxLite/InputBoxLite.css";
+@import "../../Usage/UI/UsagePanel.css";
 
 :root {
   color-scheme: light;

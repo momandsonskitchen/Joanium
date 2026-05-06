@@ -26,6 +26,7 @@ export async function createPackage({ rootDirectory }) {
       'Skills',
       'Personas',
       'Marketplace',
+      'Usage',
       'User',
       'About',
       'Security'
