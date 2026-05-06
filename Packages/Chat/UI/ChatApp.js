@@ -303,7 +303,7 @@ export async function createChatView(strings, {
   let composer = null;
   let scroll = null;
   let bottom = null;
-  let newChatBtn = null;
+
   let projectPill = null;
   let projectNameEl = null;
   let projectMetaEl = null;
@@ -587,7 +587,6 @@ export async function createChatView(strings, {
     const hasMessages = messages.length > 0;
     title.hidden = hasMessages;
     thread.hidden = !hasMessages;
-    if (newChatBtn) newChatBtn.hidden = !hasMessages;
     composer.classList.toggle('chat-composer--conversation', hasMessages);
     scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
     bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
@@ -749,12 +748,7 @@ export async function createChatView(strings, {
   attachBtn.append(createIcon('paperclip', 'chat-composer__icon'));
   attachBtn.addEventListener('click', focusComposer);
 
-  newChatBtn = createElement('button', 'chat-composer__icon-button chat-composer__new-chat');
-  newChatBtn.type = 'button';
-  newChatBtn.hidden = true;
-  newChatBtn.append(createIcon('newChat', 'chat-composer__icon'));
-  newChatBtn.addEventListener('click', clearConversation);
-  composerActions.append(attachBtn, newChatBtn);
+  composerActions.append(attachBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   modelButton = createElement('button', 'chat-composer__model');
