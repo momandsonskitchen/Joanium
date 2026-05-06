@@ -27,7 +27,8 @@ export async function createPackage({ rootDirectory }) {
       'Personas',
       'Marketplace',
       'User',
-      'About'
+      'About',
+      'Security'
     ],
     rendererPath: path.join(shellDirectory, 'UI', 'App.html'),
     preloadPath: path.join(shellDirectory, 'UI', 'Preload.js'),

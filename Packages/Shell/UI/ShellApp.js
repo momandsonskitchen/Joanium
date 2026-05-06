@@ -13,6 +13,8 @@ import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
 import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
+import { mountLockScreen } from '../../Security/UI/LockScreen.js';
+import { createSecurityPanel } from '../../Security/UI/SecurityPanel.js';
 
 function getInitials(name) {
   const parts = collapseWhitespace(name).split(' ').filter(Boolean);
@@ -37,6 +39,18 @@ function toFileUrl(filePath) {
 }
 
 async function bootstrap() {
+  // ── Security lock gate ─────────────────────────────────────────────────────
+  // Must resolve before ANY UI is built. If the app is locked, the lock screen
+  // covers the entire viewport and awaits a correct password / secret answer.
+  try {
+    const secStatus = await invokeIpc('security:get-status');
+    if (secStatus.enabled) {
+      await mountLockScreen(strings.security, secStatus);
+    }
+  } catch {
+    // Security package not ready or disabled — proceed normally.
+  }
+
   const payload = await invokeIpc('shell:bootstrap');
   const root = document.getElementById('app');
   let profile = payload.user?.profile ?? {};
@@ -384,6 +398,10 @@ async function bootstrap() {
         }));
       }
 
+      if (id === 'security') {
+        main.append(createSecurityPanel(strings.security));
+      }
+
       if (id === 'about') {
         const aboutPanel = createAboutPanel(strings.about);
         main.append(aboutPanel.element);
@@ -392,8 +410,9 @@ async function bootstrap() {
     }
 
     for (const menu of [
-      { id: 'user', label: strings.settings.nav.user, icon: iconMarkup.tabPersonas },
-      { id: 'about', label: strings.settings.nav.about, icon: iconMarkup.info }
+      { id: 'user',     label: strings.settings.nav.user,     icon: iconMarkup.tabPersonas },
+      { id: 'security', label: strings.settings.nav.security, icon: iconMarkup.lock },
+      { id: 'about',    label: strings.settings.nav.about,    icon: iconMarkup.info }
     ]) {
       const item = createElement('button', 'chat-settings__nav-item');
       item.type = 'button';

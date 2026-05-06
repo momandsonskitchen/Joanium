@@ -8,6 +8,7 @@ import personas from '../../Personas/I18n/en.js';
 import marketplace from '../../Marketplace/I18n/en.js';
 import user from '../../User/I18n/en.js';
 import about from '../../About/I18n/en.js';
+import security from '../../Security/I18n/en.js';
 
 const en = {
   appName: 'Joanium',
@@ -26,6 +27,7 @@ const en = {
     title: 'Settings',
     nav: {
       user: 'User',
+      security: 'Security',
       about: 'About'
     }
   },
@@ -38,7 +40,8 @@ const en = {
   personas,
   marketplace,
   user,
-  about
+  about,
+  security
 };
 
 export default en;

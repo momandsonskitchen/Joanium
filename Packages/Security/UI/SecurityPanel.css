@@ -1,0 +1,236 @@
+/* ── Security panel ──────────────────────────────────────────────────────── */
+
+.security-panel {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  -webkit-app-region: no-drag;
+  animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.security-panel__title {
+  margin: 0 0 6px;
+  font-size: 42px;
+  font-weight: 440;
+  letter-spacing: -0.065em;
+  color: var(--color-chat-text-title);
+}
+
+.security-panel__subtitle {
+  margin: 0 0 32px;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-muted);
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+.security-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+
+.security-panel__card {
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 10px 28px rgba(130, 95, 65, 0.07);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.security-panel__card--form {
+  background: rgba(250, 248, 255, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(160, 100, 210, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 10px 28px rgba(130, 80, 180, 0.07);
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+
+.security-panel__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 10px;
+  border-radius: 100px;
+  background: rgba(220, 60, 60, 0.08);
+  border: 1px solid rgba(220, 60, 60, 0.14);
+  align-self: flex-start;
+}
+
+.security-panel__status-badge--on {
+  background: rgba(34, 197, 94, 0.10);
+  border-color: rgba(34, 197, 94, 0.20);
+}
+
+.security-panel__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(200, 60, 60, 0.75);
+  flex-shrink: 0;
+}
+
+.security-panel__status-badge--on .security-panel__status-dot {
+  background: rgba(34, 197, 94, 0.85);
+}
+
+.security-panel__status-text {
+  font-size: 12.5px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: rgba(150, 40, 40, 0.90);
+}
+
+.security-panel__status-badge--on .security-panel__status-text {
+  color: rgba(22, 120, 60, 0.90);
+}
+
+/* ── Desc ────────────────────────────────────────────────────────────────── */
+
+.security-panel__desc {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 430;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-secondary);
+}
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+
+.security-panel__form-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  color: var(--color-chat-text-title);
+}
+
+.security-panel__form-desc {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 430;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-muted);
+}
+
+.security-panel__inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.security-panel__form-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+/* ── Feedback ────────────────────────────────────────────────────────────── */
+
+.security-panel__feedback {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+}
+
+.security-panel__feedback--ok {
+  color: rgba(22, 120, 60, 0.90);
+}
+
+.security-panel__feedback--error {
+  color: #c04040;
+}
+
+/* ── Button row (enabled state — Change + Disable side by side) ─────────── */
+
+.security-panel__btn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.security-panel__btn-row .security-panel__btn {
+  flex: 1;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+
+.security-panel__btn {
+  padding: 9px 20px;
+  border-radius: 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: background 130ms ease, opacity 130ms ease, transform 80ms ease;
+  cursor: default;
+}
+
+.security-panel__btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.security-panel__btn:disabled {
+  opacity: 0.45;
+}
+
+.security-panel__btn--primary {
+  background: rgba(155, 90, 200, 0.15);
+  color: #3a1060;
+  box-shadow:
+    inset 0 0 0 1px rgba(155, 90, 200, 0.22),
+    0 4px 12px rgba(140, 70, 190, 0.08);
+}
+
+.security-panel__btn--primary:hover:not(:disabled) {
+  background: rgba(155, 90, 200, 0.24);
+}
+
+.security-panel__btn--secondary {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-chat-text-secondary);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.security-panel__btn--secondary:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.security-panel__btn--danger {
+  background: rgba(220, 60, 60, 0.10);
+  color: #a02020;
+  box-shadow: inset 0 0 0 1px rgba(220, 60, 60, 0.18);
+}
+
+.security-panel__btn--danger:hover:not(:disabled) {
+  background: rgba(220, 60, 60, 0.18);
+}
+
+.security-panel__btn--ghost {
+  background: transparent;
+  color: var(--color-chat-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.security-panel__btn--ghost:hover {
+  color: var(--color-chat-text-secondary);
+}
