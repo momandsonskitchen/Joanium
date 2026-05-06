@@ -238,6 +238,15 @@ textarea {
   pointer-events: none;
 }
 
+.chat-sidebar__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  pointer-events: none;
+  display: block;
+}
+
 .chat-stage {
   flex: 1;
   min-width: 0;

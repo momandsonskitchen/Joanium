@@ -1,4 +1,8 @@
 const en = {
+  avatarLabel: 'Profile Picture',
+  uploadAvatar: 'Upload Photo',
+  changeAvatar: 'Change Photo',
+  removeAvatar: 'Remove',
   nameLabel: 'Name',
   namePlaceholder: 'Your full name',
   dateOfBirthLabel: 'Date of Birth',

@@ -12,6 +12,7 @@ export function createDefaultUserState() {
     lastCompletedStep: 0,
     profile: {
       name: '',
+      avatarPath: null,
       dateOfBirth: {
         day: '',
         month: '',
@@ -58,6 +59,13 @@ function sanitizeArray(candidate) {
 
 function sanitizeString(candidate) {
   return typeof candidate === 'string' ? candidate.trim() : '';
+}
+
+function sanitizeAvatarPath(candidate) {
+  if (typeof candidate === 'string' && candidate.trim().length > 0) {
+    return candidate.trim();
+  }
+  return null;
 }
 
 function sanitizeActivePersona(candidate) {
@@ -107,6 +115,7 @@ export function sanitizeIncomingUserState(candidateState) {
       : 0,
     profile: {
       name: sanitizeString(candidateState?.profile?.name),
+      avatarPath: sanitizeAvatarPath(candidateState?.profile?.avatarPath),
       dateOfBirth: {
         day: sanitizeString(candidateState?.profile?.dateOfBirth?.day),
         month: sanitizeString(candidateState?.profile?.dateOfBirth?.month),

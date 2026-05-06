@@ -31,6 +31,11 @@ function getInitials(name) {
   return '?';
 }
 
+// Convert an absolute filesystem path to a file:// URL Chromium can load.
+function toFileUrl(filePath) {
+  return 'file:///' + filePath.replace(/\\/g, '/');
+}
+
 async function bootstrap() {
   const payload = await invokeIpc('shell:bootstrap');
   const root = document.getElementById('app');
@@ -49,6 +54,7 @@ async function bootstrap() {
   let chatView = null;
   let settingsPanel = null;
   let avatarInitials = null;
+  let avatarImg = null;
 
   const routeViews = new Map();
   const tabElements = new Map();
@@ -302,9 +308,36 @@ async function bootstrap() {
     await view.onShow?.();
   }
 
+  // ── Avatar sync ───────────────────────────────────────────────────────────
+  // Keeps the sidebar button in sync with the current profile.
+  // Shows a photo when profile.avatarPath is set; falls back to initials.
+
   function syncAvatar() {
-    if (avatarInitials) {
-      avatarInitials.textContent = getInitials(profile.name);
+    if (profile.avatarPath) {
+      // Build a cache-busted URL so the browser reloads when the file changes
+      // (the destination path is always Data/Avatar.<ext>).
+      const src = toFileUrl(profile.avatarPath) + '?t=' + Date.now();
+
+      if (avatarImg) {
+        avatarImg.src = src;
+      } else {
+        // First time switching from initials → photo
+        avatarImg = createElement('img', 'chat-sidebar__avatar-img');
+        avatarImg.src = src;
+        avatarImg.alt = '';
+        sidebarAvatar.replaceChildren(avatarImg);
+        avatarInitials = null;
+      }
+    } else {
+      if (avatarImg) {
+        // Switching from photo → initials
+        avatarInitials = createElement('span', 'chat-sidebar__avatar-initials', getInitials(profile.name));
+        sidebarAvatar.replaceChildren(avatarInitials);
+        avatarImg = null;
+      } else if (avatarInitials) {
+        // Just updating the name initials
+        avatarInitials.textContent = getInitials(profile.name);
+      }
     }
   }
 
@@ -342,6 +375,10 @@ async function bootstrap() {
           getProfile: () => profile,
           onProfileSaved: (savedProfile) => {
             profile = savedProfile ?? profile;
+            syncAvatar();
+          },
+          onAvatarChanged: (avatarPath) => {
+            profile = { ...profile, avatarPath };
             syncAvatar();
           }
         }));
@@ -415,8 +452,18 @@ async function bootstrap() {
   const sidebarAvatar = createElement('button', 'chat-sidebar__avatar');
   sidebarAvatar.type = 'button';
   sidebarAvatar.setAttribute('aria-label', strings.profile);
-  avatarInitials = createElement('span', 'chat-sidebar__avatar-initials', getInitials(profile.name));
-  sidebarAvatar.append(avatarInitials);
+
+  // Initial render — show photo if we already have one, otherwise initials.
+  if (profile.avatarPath) {
+    avatarImg = createElement('img', 'chat-sidebar__avatar-img');
+    avatarImg.src = toFileUrl(profile.avatarPath);
+    avatarImg.alt = '';
+    sidebarAvatar.append(avatarImg);
+  } else {
+    avatarInitials = createElement('span', 'chat-sidebar__avatar-initials', getInitials(profile.name));
+    sidebarAvatar.append(avatarInitials);
+  }
+
   sidebarAvatar.addEventListener('click', () => {
     if (settingsPanel && !settingsPanel.hidden) {
       void showRoute(activeRouteId);

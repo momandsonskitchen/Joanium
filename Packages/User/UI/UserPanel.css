@@ -7,6 +7,106 @@
   animation: chat-fade-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ── Avatar section ──────────────────────────────────────────────────────── */
+
+.chat-settings__avatar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.chat-settings__avatar-preview-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.chat-settings__avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--color-chat-dock-emphasis-surface);
+  color: var(--color-chat-dock-emphasis-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 140, 110, 0.14),
+    0 2px 8px rgba(118, 90, 62, 0.10);
+}
+
+.chat-settings__avatar-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.chat-settings__avatar-preview-icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  color: currentColor;
+  opacity: 0.55;
+}
+
+.chat-settings__avatar-preview-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-settings__avatar-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-settings__avatar-upload-btn {
+  padding: 7px 16px;
+  border-radius: 9px;
+  background: rgba(var(--color-accent-rgb), 0.10);
+  color: var(--color-chat-text-title);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: background 130ms ease, opacity 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-settings__avatar-upload-btn:hover:not(:disabled) {
+  background: rgba(var(--color-accent-rgb), 0.18);
+}
+
+.chat-settings__avatar-upload-btn:disabled {
+  opacity: 0.45;
+}
+
+.chat-settings__avatar-remove-btn {
+  padding: 7px 14px;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-chat-text-muted);
+  font-size: 12.5px;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  transition: background 130ms ease, color 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-settings__avatar-remove-btn:hover:not(:disabled) {
+  background: rgba(210, 80, 80, 0.08);
+  color: #c05050;
+}
+
+.chat-settings__avatar-remove-btn:disabled {
+  opacity: 0.45;
+}
+
+/* ── Fields ──────────────────────────────────────────────────────────────── */
+
 .chat-settings__field-label {
   display: block;
   font-size: 12px;
