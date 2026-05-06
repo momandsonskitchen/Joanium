@@ -1,4 +1,6 @@
+import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
+import { readAttachmentFiles } from './Core/ChatAttachments.js';
 import { createUsageTracker, estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 export async function createPackage({ rootDirectory }) {
@@ -58,6 +60,90 @@ export async function createPackage({ rootDirectory }) {
             });
 
           return null;
+        }
+      },
+      {
+        channel: 'chat:complete-message',
+        handler: async (_event, request) => {
+          const result = await chatStateManager.completeMessage(request);
+          const tokensIn  = estimateTokens(result?.charCountIn  ?? 0);
+          const tokensOut = estimateTokens(result?.charCountOut ?? 0);
+
+          if ((tokensIn + tokensOut) > 0) {
+            await usageTracker.recordExchange({
+              tokensIn,
+              tokensOut,
+              modelId:       result?.modelId       ?? null,
+              modelLabel:    result?.modelLabel    ?? null,
+              providerLabel: result?.providerLabel ?? null,
+              isNewSession:  Boolean(request?.isNewSession)
+            });
+          }
+
+          return result;
+        }
+      },
+      {
+        channel: 'chat:select-attachments',
+        handler: async (event) => {
+          const window = event.sender.getOwnerBrowserWindow();
+          const result = await dialog.showOpenDialog(window, {
+            properties: ['openFile', 'multiSelections'],
+            filters: [
+              {
+                name: 'Text and code',
+                extensions: [
+                  'txt',
+                  'md',
+                  'mdx',
+                  'log',
+                  'csv',
+                  'tsv',
+                  'json',
+                  'yaml',
+                  'yml',
+                  'toml',
+                  'xml',
+                  'html',
+                  'css',
+                  'scss',
+                  'less',
+                  'js',
+                  'jsx',
+                  'ts',
+                  'tsx',
+                  'mjs',
+                  'cjs',
+                  'py',
+                  'rb',
+                  'go',
+                  'rs',
+                  'java',
+                  'cs',
+                  'c',
+                  'cpp',
+                  'h',
+                  'hpp',
+                  'php',
+                  'sql',
+                  'sh',
+                  'ps1',
+                  'bat',
+                  'env',
+                  'ini',
+                  'conf',
+                  'graphql',
+                  'gql'
+                ]
+              }
+            ]
+          });
+
+          if (result.canceled) {
+            return { attachments: [], rejected: [] };
+          }
+
+          return readAttachmentFiles(result.filePaths);
         }
       }
     ]

@@ -33,16 +33,22 @@ export async function createPackage({ rootDirectory }) {
 
     // Write a run-log entry so we have an audit trail.
     await mkdir(runsDirectory, { recursive: true });
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const firedAt = new Date().toISOString();
+    const timestamp = firedAt.replace(/[:.]/g, '-');
     const safeAgentId = sanitizeFileStem(agent.id);
     if (!safeAgentId) return;
 
+    const runId = `${safeAgentId}-${timestamp}`;
     const logPath   = path.join(runsDirectory, `${safeAgentId}-${timestamp}.json`);
     await writeFile(logPath, JSON.stringify({
+      id:        runId,
       agentId:   agent.id,
       agentName: agent.name,
       prompt:    agent.prompt,
-      firedAt:   new Date().toISOString(),
+      status:    'success',
+      firedAt,
+      startedAt: firedAt,
+      finishedAt: firedAt,
       schedule:  agent.schedule
     }, null, 2), 'utf8');
 
@@ -102,6 +108,14 @@ export async function createPackage({ rootDirectory }) {
           await runAgent(agent);
           return { success: true };
         }
+      },
+      {
+        channel: 'agents:list-runs',
+        handler: async () => agentStateManager.listRuns()
+      },
+      {
+        channel: 'agents:clear-runs',
+        handler: async () => agentStateManager.clearRuns()
       }
     ]
   };

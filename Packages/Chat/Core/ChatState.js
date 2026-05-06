@@ -616,5 +616,26 @@ export function createChatStateManager({ rootDirectory }) {
       }
     },
 
+    async completeMessage(request) {
+      const [user, providers] = await Promise.all([
+        readUserState(rootDirectory),
+        readProviderCatalog(rootDirectory)
+      ]);
+
+      let text = '';
+      let thinking = '';
+      const meta = await requestChatCompletionStream({
+        user,
+        providers,
+        request,
+        onChunk(chunk) {
+          if (chunk?.type === 'text' && chunk.text) text += chunk.text;
+          if (chunk?.type === 'thinking' && chunk.text) thinking += chunk.text;
+        }
+      });
+
+      return { ...meta, text, thinking };
+    },
+
   };
 }
