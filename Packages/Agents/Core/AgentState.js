@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 
 // ---------------------------------------------------------------------------
@@ -18,6 +18,7 @@ import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 
 export function createAgentStateManager({ rootDirectory }) {
   const agentsDirectory = path.join(rootDirectory, 'Data', 'Agents');
+  const runsDirectory = path.join(agentsDirectory, 'Runs');
 
   async function ensureDirectory() {
     await mkdir(agentsDirectory, { recursive: true });
@@ -110,6 +111,56 @@ export function createAgentStateManager({ rootDirectory }) {
       } catch {
         return null;
       }
+    },
+
+    async listRuns() {
+      let files;
+      try {
+        files = await readdir(runsDirectory);
+      } catch {
+        return [];
+      }
+
+      const runs = [];
+
+      for (const file of files) {
+        if (!file.endsWith('.json')) continue;
+        try {
+          const raw = await readFile(path.join(runsDirectory, file), 'utf8');
+          const run = JSON.parse(raw);
+          runs.push({
+            id: run.id ?? file.replace(/\.json$/i, ''),
+            agentId: run.agentId ?? '',
+            agentName: run.agentName ?? 'Agent',
+            prompt: run.prompt ?? '',
+            status: run.status ?? 'success',
+            startedAt: run.startedAt ?? run.firedAt ?? run.timestamp ?? null,
+            finishedAt: run.finishedAt ?? run.firedAt ?? run.timestamp ?? null,
+            schedule: run.schedule ?? null,
+            trigger: run.trigger ?? run.schedule ?? null,
+            summary: run.summary ?? run.prompt ?? '',
+            fullResponse: run.fullResponse ?? '',
+            error: run.error ?? null,
+            provider: run.provider ?? null,
+            model: run.model ?? null,
+            inputTokens: run.inputTokens ?? 0,
+            outputTokens: run.outputTokens ?? 0,
+            source: run.source ?? 'agent'
+          });
+        } catch {
+          // Skip corrupt run logs.
+        }
+      }
+
+      return runs.sort((a, b) =>
+        new Date(b.startedAt ?? b.finishedAt ?? 0) - new Date(a.startedAt ?? a.finishedAt ?? 0)
+      );
+    },
+
+    async clearRuns() {
+      await rm(runsDirectory, { recursive: true, force: true });
+      await mkdir(runsDirectory, { recursive: true });
+      return { ok: true };
     }
   };
 }

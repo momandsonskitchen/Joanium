@@ -70,6 +70,13 @@ export const iconMarkup = {
     </svg>
   `,
 
+  eye: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  `,
+
   info: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10" />
@@ -82,6 +89,16 @@ export const iconMarkup = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <rect x="2" y="6" width="20" height="12" rx="2" />
       <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8" />
+    </svg>
+  `,
+
+  palette: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" stroke="none" />
+      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" stroke="none" />
+      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" stroke="none" />
+      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" stroke="none" />
+      <path d="M12 3a9 9 0 0 0 0 18h1.5a2 2 0 0 0 1.4-3.42 1 1 0 0 1 .7-1.7H17a4 4 0 0 0 0-8h-1.2A4.8 4.8 0 0 1 12 3Z" />
     </svg>
   `,
 
@@ -216,6 +233,14 @@ export const iconMarkup = {
   tabChat: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  `,
+
+  tabChannels: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 8h10" />
+      <path d="M7 12h6" />
+      <path d="M12 21a9 9 0 1 0-7.5-4L3 21l4.2-1.4A8.9 8.9 0 0 0 12 21Z" />
     </svg>
   `,
 
