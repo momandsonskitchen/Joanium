@@ -1,7 +1,5 @@
 // Languages
 import en from '../I18n/en.js';
-import de from '../I18n/de.js';
-import fr from '../I18n/fr.js';
 
 // Shared Components
 import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
@@ -24,7 +22,7 @@ import {
   validateStep
 } from './SetupStore.js';
 
-const dictionaries = { en, de, fr };
+const dictionaries = { en };
 
 function getDictionary(locale) {
   return dictionaries[locale] ?? en;
