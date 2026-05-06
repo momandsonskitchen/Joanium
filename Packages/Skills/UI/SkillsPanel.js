@@ -1,4 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
@@ -74,12 +75,12 @@ export function createSkillsPanel(strings) {
       skills = [];
     }
 
-    const q = query.toLowerCase();
+    const q = collapseWhitespace(query).toLowerCase();
     const filtered = q
-      ? skills.filter(s => 
-          s.name.toLowerCase().includes(q) || 
-          s.description.toLowerCase().includes(q) || 
-          s.namespace.toLowerCase().includes(q)
+      ? skills.filter(s =>
+          collapseWhitespace(s.name).toLowerCase().includes(q) ||
+          collapseWhitespace(s.description).toLowerCase().includes(q) ||
+          collapseWhitespace(s.namespace).toLowerCase().includes(q)
         )
       : skills;
 

@@ -1,5 +1,3 @@
-import { createElement } from '../Utils/DomUtils.js';
-
 export function createInputBoxLite({
   label,
   value = '',

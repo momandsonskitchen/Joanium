@@ -4,6 +4,7 @@ import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js'
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
+import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 
 function getFirstName(name, fallback) {
   const normalized = collapseWhitespace(name);
@@ -142,11 +143,13 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
       const dots = createElement('span', 'chat-message__dots');
       dots.innerHTML = '<span></span><span></span><span></span>';
       bubble.append(dots);
-    } else {
+    } else if (message.streaming) {
+      // Live stream — partial tokens, plain text + cursor dot
       bubble.append(createElement('span', 'chat-message__text', (message.content ?? '').trimStart()));
-      if (message.streaming) {
-        bubble.append(createElement('span', 'chat-message__stream-dot'));
-      }
+      bubble.append(createElement('span', 'chat-message__stream-dot'));
+    } else {
+      // Finalised — render as markdown
+      bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
     }
 
     article.append(bubble);

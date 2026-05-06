@@ -61,8 +61,6 @@ export function createHistoryPanel(strings, {
   getCurrentSessionId,
   getActiveProject
 } = {}) {
-  // Reference to the built panel element — set after build() is called.
-  let panelRef = null;
 
   // ── Session card — inline rename helper ────────────────────────────────
 
@@ -301,7 +299,6 @@ export function createHistoryPanel(strings, {
     panel._contentEl = contentEl;
     panel._search    = search;
 
-    panelRef = panel;
     return panel;
   }
 

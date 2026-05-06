@@ -1,4 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
@@ -86,12 +87,12 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
       personas = [];
     }
 
-    const q        = query.toLowerCase();
+    const q        = collapseWhitespace(query).toLowerCase();
     const filtered = q
       ? personas.filter(p =>
-          p.name.toLowerCase().includes(q)        ||
-          p.description.toLowerCase().includes(q) ||
-          p.namespace.toLowerCase().includes(q)
+          collapseWhitespace(p.name).toLowerCase().includes(q)        ||
+          collapseWhitespace(p.description).toLowerCase().includes(q) ||
+          collapseWhitespace(p.namespace).toLowerCase().includes(q)
         )
       : personas;
 
