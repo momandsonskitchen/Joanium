@@ -1,6 +1,6 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { screen } from 'electron';
+import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 
 const DEFAULT_BOUNDS = Object.freeze({ width: 1460, height: 960 });
 const MINIMUM_BOUNDS = Object.freeze({ width: 1160, height: 780 });
@@ -8,10 +8,6 @@ const SAVE_DELAY_MS = 150;
 
 function isFiniteNumber(value) {
   return Number.isFinite(value);
-}
-
-function getStateFilePath(rootDirectory) {
-  return path.join(rootDirectory, 'Data', 'WindowState.json');
 }
 
 function normalizeDimension(value, fallback, minimum) {
@@ -71,8 +67,8 @@ function normalizeState(candidate, options = {}) {
 
 export async function readWindowState(rootDirectory, options = {}) {
   try {
-    const fileContents = await readFile(getStateFilePath(rootDirectory), 'utf8');
-    return normalizeState(JSON.parse(fileContents), options);
+    const userState = await readUserState(rootDirectory);
+    return normalizeState(userState.windowState ?? {}, options);
   } catch {
     return createDefaultState(options);
   }
@@ -98,15 +94,14 @@ async function writeWindowState(rootDirectory, browserWindow, options = {}) {
     return;
   }
 
-  const stateFilePath = getStateFilePath(rootDirectory);
-  const nextState = {
+  const nextWindowState = {
     bounds: getPersistableBounds(browserWindow, options),
     isMaximized: browserWindow.isMaximized(),
     isFullScreen: browserWindow.isFullScreen()
   };
 
-  await mkdir(path.dirname(stateFilePath), { recursive: true });
-  await writeFile(stateFilePath, `${JSON.stringify(nextState, null, 2)}\n`, 'utf8');
+  const userState = await readUserState(rootDirectory);
+  await writeUserState(rootDirectory, { ...userState, windowState: nextWindowState });
 }
 
 export function applyWindowState(browserWindow, state) {

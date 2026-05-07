@@ -1,5 +1,4 @@
-import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 
 const DEFAULT_SETTINGS = Object.freeze({
   runOnStartup: false,
@@ -20,21 +19,15 @@ function normalizeSettings(candidate = {}) {
 }
 
 export function createAppSettingsStateManager({ rootDirectory }) {
-  const filePath = path.join(rootDirectory, 'Data', 'AppSettings.json');
-
   async function readSettings() {
-    try {
-      const raw = await readFile(filePath, 'utf8');
-      return normalizeSettings(JSON.parse(raw));
-    } catch {
-      return normalizeSettings();
-    }
+    const userState = await readUserState(rootDirectory);
+    return normalizeSettings(userState.appSettings);
   }
 
   async function writeSettings(settings) {
     const normalized = normalizeSettings(settings);
-    await mkdir(path.dirname(filePath), { recursive: true });
-    await writeFile(filePath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
+    const userState = await readUserState(rootDirectory);
+    await writeUserState(rootDirectory, { ...userState, appSettings: normalized });
     return normalized;
   }
 

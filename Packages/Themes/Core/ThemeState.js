@@ -1,5 +1,4 @@
-import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 
 const DEFAULT_THEME_STATE = Object.freeze({
   mode: 'system',
@@ -16,21 +15,15 @@ function sanitizeThemeState(candidate = {}) {
 }
 
 export function createThemeStateManager({ rootDirectory }) {
-  const themeFilePath = path.join(rootDirectory, 'Data', 'Theme.json');
-
   async function readThemeState() {
-    try {
-      const raw = await readFile(themeFilePath, 'utf8');
-      return sanitizeThemeState(JSON.parse(raw));
-    } catch {
-      return { ...DEFAULT_THEME_STATE };
-    }
+    const userState = await readUserState(rootDirectory);
+    return sanitizeThemeState(userState.theme);
   }
 
   async function writeThemeState(nextState) {
     const state = sanitizeThemeState(nextState);
-    await mkdir(path.dirname(themeFilePath), { recursive: true });
-    await writeFile(themeFilePath, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
+    const userState = await readUserState(rootDirectory);
+    await writeUserState(rootDirectory, { ...userState, theme: state });
     return state;
   }
 

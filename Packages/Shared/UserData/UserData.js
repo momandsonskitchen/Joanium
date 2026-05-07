@@ -25,7 +25,23 @@ export function createDefaultUserState() {
       details: {}
     },
     usageModes: [],
-    activePersona: { ...DEFAULT_ACTIVE_PERSONA }
+    activePersona: { ...DEFAULT_ACTIVE_PERSONA },
+    windowState: {
+      bounds: { width: 1460, height: 960, x: null, y: null },
+      isMaximized: true,
+      isFullScreen: false
+    },
+    appSettings: {
+      runOnStartup: false,
+      systemTray: false,
+      keepAwake: false,
+      completionSound: true,
+      animations: true
+    },
+    theme: {
+      mode: 'system',
+      motion: 'full'
+    }
   };
 }
 
@@ -53,7 +69,16 @@ export function mergeUserStates(baseState, nextState = {}) {
       ? nextState.customInstructions
       : baseState.customInstructions,
     usageModes: Array.isArray(nextState.usageModes) ? nextState.usageModes : baseState.usageModes,
-    activePersona: nextState.activePersona !== undefined ? nextState.activePersona : baseState.activePersona
+    activePersona: nextState.activePersona !== undefined ? nextState.activePersona : baseState.activePersona,
+    windowState: (nextState.windowState !== undefined && nextState.windowState !== null && typeof nextState.windowState === 'object')
+      ? { ...baseState.windowState, ...nextState.windowState }
+      : baseState.windowState,
+    appSettings: (nextState.appSettings !== undefined && nextState.appSettings !== null && typeof nextState.appSettings === 'object')
+      ? { ...baseState.appSettings, ...nextState.appSettings }
+      : baseState.appSettings,
+    theme: (nextState.theme !== undefined && nextState.theme !== null && typeof nextState.theme === 'object')
+      ? { ...baseState.theme, ...nextState.theme }
+      : baseState.theme
   };
 }
 
@@ -106,6 +131,46 @@ function sanitizeDetails(details) {
   return nextDetails;
 }
 
+function sanitizeWindowState(candidate) {
+  const defaults = createDefaultUserState().windowState;
+  if (!candidate || typeof candidate !== 'object') return defaults;
+  const bounds = (candidate.bounds && typeof candidate.bounds === 'object') ? candidate.bounds : defaults.bounds;
+  return {
+    bounds: {
+      width: Number.isFinite(bounds.width) ? bounds.width : defaults.bounds.width,
+      height: Number.isFinite(bounds.height) ? bounds.height : defaults.bounds.height,
+      x: Number.isFinite(bounds.x) ? bounds.x : defaults.bounds.x,
+      y: Number.isFinite(bounds.y) ? bounds.y : defaults.bounds.y
+    },
+    isMaximized: Boolean(candidate.isMaximized ?? defaults.isMaximized),
+    isFullScreen: Boolean(candidate.isFullScreen ?? defaults.isFullScreen)
+  };
+}
+
+function sanitizeAppSettings(candidate) {
+  const defaults = createDefaultUserState().appSettings;
+  if (!candidate || typeof candidate !== 'object') return defaults;
+  return {
+    runOnStartup: Boolean(candidate.runOnStartup ?? candidate.run_on_startup ?? defaults.runOnStartup),
+    systemTray: Boolean(candidate.systemTray ?? candidate.system_tray ?? defaults.systemTray),
+    keepAwake: Boolean(candidate.keepAwake ?? candidate.keep_awake ?? defaults.keepAwake),
+    completionSound: Boolean(candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound),
+    animations: Boolean(candidate.animations ?? defaults.animations)
+  };
+}
+
+const THEME_MODES = new Set(['system', 'light', 'dark']);
+const MOTION_MODES = new Set(['full', 'reduced']);
+
+function sanitizeTheme(candidate) {
+  const defaults = createDefaultUserState().theme;
+  if (!candidate || typeof candidate !== 'object') return defaults;
+  return {
+    mode: THEME_MODES.has(candidate.mode) ? candidate.mode : defaults.mode,
+    motion: MOTION_MODES.has(candidate.motion) ? candidate.motion : defaults.motion
+  };
+}
+
 export function sanitizeIncomingUserState(candidateState) {
   const baseState = createDefaultUserState();
 
@@ -132,7 +197,10 @@ export function sanitizeIncomingUserState(candidateState) {
       details: sanitizeDetails(candidateState?.providers?.details)
     },
     usageModes: sanitizeArray(candidateState?.usageModes),
-    activePersona: sanitizeActivePersona(candidateState?.activePersona)
+    activePersona: sanitizeActivePersona(candidateState?.activePersona),
+    windowState: sanitizeWindowState(candidateState?.windowState),
+    appSettings: sanitizeAppSettings(candidateState?.appSettings),
+    theme: sanitizeTheme(candidateState?.theme)
   });
 }
 
