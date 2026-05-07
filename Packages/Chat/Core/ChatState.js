@@ -210,13 +210,11 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {
 
     // Keep the TCP connection alive so routers / NATs don't silently drop long
     // streaming responses before the model finishes generating.
+    // No hard idle timeout is set — thinking models, long contexts, and complex
+    // agentic tasks can legitimately take a very long time. Dead sockets are
+    // caught by the keep-alive probe above instead.
     req.on('socket', (socket) => {
       socket.setKeepAlive(true, 30_000);
-    });
-
-    // Hard ceiling — destroy the request if no response arrives within 3 minutes.
-    req.setTimeout(180_000, () => {
-      req.destroy(Object.assign(new Error('The request timed out. Please try again.'), { code: 'ETIMEDOUT' }));
     });
 
     if (body) {

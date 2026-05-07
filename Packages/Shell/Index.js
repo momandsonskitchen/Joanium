@@ -37,7 +37,8 @@ export async function createPackage({ rootDirectory }) {
       'Security',
       'Themes',
       'MCP',
-      'BrowserPreview'
+      'BrowserPreview',
+      'Providers'
     ],
     rendererPath: path.join(shellDirectory, 'UI', 'App.html'),
     preloadPath: path.join(shellDirectory, 'UI', 'Preload.js'),

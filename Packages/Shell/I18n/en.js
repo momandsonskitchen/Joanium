@@ -17,6 +17,7 @@ import terminal from '../../Terminal/I18n/en.js';
 import memory from '../../Memory/I18n/en.js';
 import themes from '../../Themes/I18n/en.js';
 import mcp from '../../MCP/I18n/en.js';
+import providers from '../../Providers/I18n/en.js';
 
 const en = {
   appName: 'Joanium',
@@ -41,6 +42,7 @@ const en = {
       user: 'User',
       app: 'App',
       channels: 'Channels',
+      providers: 'AI Providers',
       appearance: 'Appearance',
       mcp: 'MCP',
       shortcuts: 'Shortcuts',
@@ -76,6 +78,7 @@ const en = {
   memory,
   themes,
   mcp,
+  providers,
   usage,
   history,
   projects,
