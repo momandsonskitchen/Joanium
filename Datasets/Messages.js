@@ -2,7 +2,9 @@ export const getTimeGreetings = (hour, name) =>
   hour >= 5 && hour < 12
     ? [
       `Good Morning${name ? `, ${name}` : ''} ☀️`,
+      `Happy Morning${name ? `, ${name}` : ''} ☀️`,
       `Rise and shine${name ? `, ${name}` : ''}! 🌅`,
+      `A very good morning${name ? `, ${name}` : ''} ☀️`,
       `Morning${name ? `, ${name}` : ''}! Ready to get things done?`,
       `Top of the morning${name ? ` to you, ${name}` : ''}! ☕`,
       `Hello, sunny day${name ? `, ${name}` : ''}! 🌻`,
