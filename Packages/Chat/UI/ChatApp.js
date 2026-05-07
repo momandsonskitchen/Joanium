@@ -34,6 +34,51 @@ function stripMarkdown(text) {
     .trim();
 }
 
+/**
+ * Strips inline thinking tags that various models embed in their text stream.
+ * Handles: <think>, <thinking>,
+ */
+function parseThinkingFromText(text) {
+  if (!text) return { content: '', thinking: '' };
+
+  const pairs = [
+    ['<thinking>', '</thinking>'],
+    ['<think>', '</think>'],
+  ];
+
+  let thinking = '';
+  let content = text;
+
+  for (const [open, close] of pairs) {
+    let result = '';
+    let remaining = content;
+
+    while (remaining.length > 0) {
+      const start = remaining.indexOf(open);
+      if (start === -1) {
+        result += remaining;
+        break;
+      }
+
+      result += remaining.slice(0, start);
+      const end = remaining.indexOf(close, start + open.length);
+
+      if (end === -1) {
+        // Unclosed tag — still streaming, treat the rest as thinking
+        thinking += remaining.slice(start + open.length);
+        break;
+      }
+
+      thinking += remaining.slice(start + open.length, end);
+      remaining = remaining.slice(end + close.length);
+    }
+
+    content = result;
+  }
+
+  return { content: content.trimStart(), thinking: thinking.trim() };
+}
+
 let activeSpeakBtn = null;
 
 function resetSpeakButton(btn) {
@@ -942,11 +987,12 @@ export async function createChatView(strings, {
     const stoppedNote = strings.composer.generationStopped;
     messages = messages.map((message, index) => {
       if (index !== messages.length - 1) return message;
-      const content = accText ? `${accText}\n\n${stoppedNote}` : stoppedNote;
+      const { content: parsedStopped, thinking: inlineStopped } = parseThinkingFromText(accText);
+      const content = parsedStopped ? `${parsedStopped}\n\n${stoppedNote}` : stoppedNote;
       return {
         role: 'assistant',
         content,
-        thinking: accThinking,
+        thinking: accThinking || inlineStopped,
         streaming: false,
         stopped: true,
         providerLabel: activeProvider?.label ?? 'AI',
@@ -1123,15 +1169,18 @@ export async function createChatView(strings, {
     streamDisposers.push(onIpc('chat:stream-chunk', (chunk) => {
       if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
       if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
-      updateLastStreamingMessage(thread, { content: accText, thinking: accThinking });
+      const { content: displayContent, thinking: inlineThinking } = parseThinkingFromText(accText);
+      const displayThinking = accThinking || inlineThinking;
+      updateLastStreamingMessage(thread, { content: displayContent, thinking: displayThinking });
     }));
 
     streamDisposers.push(onIpc('chat:stream-done', (meta) => {
       removeStreamListeners();
+      const { content: parsedContent, thinking: inlineThinking } = parseThinkingFromText(accText);
       messages = messages.map((message, index) => index !== messages.length - 1 ? message : {
         role: 'assistant',
-        content: accText || strings.composer.emptyResponse,
-        thinking: accThinking,
+        content: parsedContent || strings.composer.emptyResponse,
+        thinking: accThinking || inlineThinking,
         streaming: false,
         providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
         modelLabel: meta?.modelLabel ?? activeModelLabel

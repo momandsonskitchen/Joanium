@@ -23,7 +23,7 @@
       },
       "health": {
         "status": "yellow",
-        "checkedAt": "2026-05-07T09:28:13.132Z"
+        "checkedAt": "2026-05-07T10:55:00.593Z"
       }
     },
     "minimaxai/minimax-m2.5": {
@@ -103,7 +103,7 @@
       },
       "health": {
         "status": "yellow",
-        "checkedAt": "2026-05-07T09:29:05.093Z"
+        "checkedAt": "2026-05-07T10:54:45.633Z"
       }
     },
     "qwen/qwen3.5-397b-a17b": {
@@ -142,8 +142,8 @@
         "output": 0.2
       },
       "health": {
-        "status": "yellow",
-        "checkedAt": "2026-05-07T09:29:20.118Z"
+        "status": "green",
+        "checkedAt": "2026-05-07T10:54:46.364Z"
       }
     },
     "google/gemma-4-31b-it": {
@@ -200,6 +200,10 @@
       "pricing": {
         "input": 0.1,
         "output": 0.2
+      },
+      "health": {
+        "status": "yellow",
+        "checkedAt": "2026-05-07T09:58:51.532Z"
       }
     },
     "openai/gpt-oss-20b": {
