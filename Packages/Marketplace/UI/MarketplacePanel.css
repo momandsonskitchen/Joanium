@@ -74,6 +74,7 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   flex-shrink: 0;
+  margin-right: 25px;
 }
 
 .marketplace__toggle-btn {
