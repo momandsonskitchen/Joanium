@@ -36,7 +36,7 @@ function stripMarkdown(text) {
 
 /**
  * Strips inline thinking tags that various models embed in their text stream.
- * Handles: <think>, <thinking>,
+ * Handles: <think>, <thinking>, <reasoning>, <thought>, <thoughts>, <scratchpad>, <analysis>, <chain_of_thought>
  */
 function parseThinkingFromText(text) {
   if (!text) return { content: '', thinking: '' };
@@ -44,6 +44,12 @@ function parseThinkingFromText(text) {
   const pairs = [
     ['<thinking>', '</thinking>'],
     ['<think>', '</think>'],
+    ['<reasoning>', '</reasoning>'],
+    ['<thought>', '</thought>'],
+    ['<thoughts>', '</thoughts>'],
+    ['<scratchpad>', '</scratchpad>'],
+    ['<analysis>', '</analysis>'],
+    ['<chain_of_thought>', '</chain_of_thought>'],
   ];
 
   let thinking = '';
