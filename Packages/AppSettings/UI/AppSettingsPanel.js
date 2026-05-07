@@ -8,14 +8,10 @@ export function createAppSettingsPanel(strings) {
   const view = createElement('div', 'app-settings');
   const header = createElement('div', 'app-settings__header');
   const options = createElement('div', 'app-settings__options');
-  const runtime = createElement('div', 'app-settings__runtime');
   const status = createElement('p', 'app-settings__status');
   let settings = null;
 
-  header.append(
-    createElement('h3', 'app-settings__title', strings.title),
-    createElement('p', 'app-settings__subtitle', strings.subtitle)
-  );
+
 
   function setStatus(message, tone = 'ok') {
     status.textContent = message;
@@ -28,29 +24,12 @@ export function createAppSettingsPanel(strings) {
     }
   }
 
-  function renderRuntime() {
-    runtime.replaceChildren();
-    const title = createElement('h4', 'app-settings__runtime-title', strings.runtime.title);
-    const tray = createElement('div', 'app-settings__runtime-row');
-    const awake = createElement('div', 'app-settings__runtime-row');
-    tray.append(
-      createElement('span', '', strings.runtime.tray),
-      createElement('strong', '', settings?.trayActive ? strings.runtime.active : strings.runtime.inactive)
-    );
-    awake.append(
-      createElement('span', '', strings.runtime.keepAwake),
-      createElement('strong', '', settings?.keepAwakeActive ? strings.runtime.active : strings.runtime.inactive)
-    );
-    runtime.append(title, tray, awake);
-  }
-
   async function updateSetting(key, value, checkboxElement) {
     checkboxElement.disabled = true;
 
     try {
       settings = await invokeIpc('app-settings:save', { [key]: value });
       window.dispatchEvent(new CustomEvent('joanium:app-settings-changed', { detail: settings }));
-      renderRuntime();
       setStatus(strings.saved);
     } catch {
       checkboxElement.classList.toggle('is-checked', !value);
@@ -78,10 +57,9 @@ export function createAppSettingsPanel(strings) {
       options.append(checkbox.element);
     }
 
-    renderRuntime();
   }
 
-  view.append(header, options, runtime, status);
+  view.append(header, options, status);
   void populate().catch(() => setStatus(strings.saveFailed, 'error'));
   return view;
 }
