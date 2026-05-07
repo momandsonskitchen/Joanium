@@ -31,7 +31,8 @@ const en = {
       net:  'NET',
       week: 'WEEK',
       prov: 'PROV',
-      out:  'OUT'
+      out:  'OUT',
+      mon:  'MON'
     },
     mostUsedModel:         'Most Used Model',
     busiestDay:            'Busiest Day',
@@ -64,7 +65,10 @@ const en = {
     verbosityLow:          'Concise replies — short and to the point.',
     verbosityMedium:       'Moderate verbosity — balanced responses.',
     verbosityHigh:         'Verbose replies — the model elaborates in detail.',
-    mostVerboseModel:      '{model} is your most verbose model.'
+    mostVerboseModel:      '{model} is your most verbose model.',
+    mostActiveMonth:       'Most Active Month',
+    peakMonthTokens:       '{tokens} tokens in {month}',
+    peakMonthShare:        '{share}% of your annual usage.'
   },
   heatmap: {
     heading:   'Daily Activity',

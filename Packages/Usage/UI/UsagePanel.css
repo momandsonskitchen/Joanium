@@ -66,53 +66,11 @@
   align-items: center;
 }
 
-/* ── Year toggle  (mirrors Marketplace Skills | Personas pill) ────────────
-   Pill container — active year gets a filled accent background.
-   ────────────────────────────────────────────────────────────────────── */
+/* ── Year toggle  ─────────────────────────────────────────────────────────── */
 
-.usage-year-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.50);
-  box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.12),
-    0 2px 8px rgba(130, 95, 65, 0.06);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+.usage-year-toggle-slot .joanium-ddm-lite__trigger {
+  min-width: 100px;
 }
-
-.usage-year-toggle__btn {
-  height: 32px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 20px;
-  background: transparent;
-  font-size: 13.5px;
-  font-weight: 580;
-  letter-spacing: -0.01em;
-  color: var(--color-chat-text-muted);
-  cursor: pointer;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    box-shadow 150ms ease;
-  white-space: nowrap;
-}
-
-.usage-year-toggle__btn:hover:not(.usage-year-toggle__btn--active) {
-  color: var(--color-chat-text-secondary);
-  background: rgba(255, 255, 255, 0.40);
-}
-
-.usage-year-toggle__btn--active {
-  background: var(--color-accent);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(130, 65, 190, 0.30);
-}
-
 /* ── Scrollable content ───────────────────────────────────────────────────── */
 
 .usage-content {
@@ -329,8 +287,8 @@
 }
 
 .usage-heatmap__month-label {
-  width: 13px;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 10px;
   font-weight: 580;
   color: var(--color-chat-text-muted);
@@ -341,6 +299,7 @@
 .usage-heatmap__body {
   display: flex;
   gap: 6px;
+  min-width: 0;
 }
 
 .usage-heatmap__day-labels {
@@ -352,36 +311,33 @@
 }
 
 .usage-heatmap__day-label {
-  height: 13px;
+  height: 18px;
   font-size: 9.5px;
   font-weight: 560;
   color: var(--color-chat-text-muted);
-  line-height: 13px;
+  line-height: 18px;
   text-align: right;
 }
 
 .usage-heatmap__grid {
+  flex: 1;
+  min-width: 0;
   display: flex;
   gap: 3px;
   flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.usage-heatmap__grid::-webkit-scrollbar {
-  display: none;
 }
 
 .usage-heatmap__week {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
-  flex-shrink: 0;
 }
 
 .usage-heatmap__cell {
-  width: 13px;
-  height: 13px;
+  width: 100%;
+  height: 18px;
   border-radius: 3px;
   transition: transform 100ms ease, opacity 100ms ease;
   cursor: default;
@@ -434,6 +390,11 @@
 .usage-heatmap__legend-cells {
   display: flex;
   gap: 3px;
+}
+
+.usage-heatmap__legend-cells .usage-heatmap__cell {
+  width: 18px;
+  height: 18px;
 }
 
 /* ── Shared tooltip ───────────────────────────────────────────────────────── */

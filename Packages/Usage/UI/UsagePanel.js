@@ -1,6 +1,7 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
 
 // ─── Formatting helpers ────────────────────────────────────────────────────
 
@@ -89,32 +90,7 @@ function hideTip() {
   tipEl = null;
 }
 
-// ─── Year toggle — same pill pattern as Marketplace (Skills | Personas) ───
 
-function buildYearToggle(years, initialYear, onSwitch) {
-  const toggle  = createElement('div', 'usage-year-toggle');
-  const btns    = new Map();
-  let   current = initialYear;
-
-  for (const year of years) {
-    const btn = createElement('button', 'usage-year-toggle__btn');
-    btn.type  = 'button';
-    btn.textContent = String(year);
-    if (year === initialYear) btn.classList.add('usage-year-toggle__btn--active');
-
-    btn.addEventListener('click', () => {
-      if (year === current) return;
-      current = year;
-      for (const [y, b] of btns) b.classList.toggle('usage-year-toggle__btn--active', y === year);
-      onSwitch(year);
-    });
-
-    btns.set(year, btn);
-    toggle.append(btn);
-  }
-
-  return toggle;
-}
 
 // ─── Stat cards (8 cards — 4 × 2) ─────────────────────────────────────────
 
@@ -328,6 +304,28 @@ function buildInsights(strings, data, dateKeys) {
     });
   }
 
+  // 9. Most active month
+  const monthTotals = {};
+  for (const k of dateKeys) {
+    const e = daily[k];
+    if (!e) continue;
+    const month = k.slice(0, 7); // YYYY-MM
+    monthTotals[month] = (monthTotals[month] ?? 0) + e.tokensIn + e.tokensOut;
+  }
+  const peakMonthEntry = Object.entries(monthTotals).sort((a, b) => b[1] - a[1])[0];
+  if (peakMonthEntry && totalAll > 0) {
+    const [monthKey, monthTokens] = peakMonthEntry;
+    const [pmy, pmm] = monthKey.split('-').map(Number);
+    const monthName  = new Date(pmy, pmm - 1).toLocaleString('en-US', { month: 'long' });
+    const share      = Math.round((monthTokens / totalAll) * 100);
+    cards.push({
+      badge: ins.badges.mon,
+      label: ins.mostActiveMonth,
+      bold:  ins.peakMonthTokens.replace('{tokens}', formatNumber(monthTokens)).replace('{month}', monthName),
+      desc:  ins.peakMonthShare.replace('{share}', share)
+    });
+  }
+
   if (!cards.length) return null;
 
   const section = createElement('div', 'usage-insights');
@@ -531,6 +529,7 @@ export function createUsagePanel(strings) {
   // State
   let activeYear = new Date().getFullYear();
   let cachedData = null;
+  let yearDdm    = null;
 
   function renderYear(year, data) {
     activeYear     = year;
@@ -568,10 +567,16 @@ export function createUsagePanel(strings) {
     const years = getYearsFromData(data.daily);
     activeYear  = years[years.length - 1]; // default to most recent year with data
 
-    toggleSlot.replaceChildren(buildYearToggle(years, activeYear, (year) => {
-      activeYear = year;
-      renderYear(year, cachedData);
-    }));
+    yearDdm?.dispose();
+    yearDdm = createDropDownLite({
+      options:  years.map(y => ({ value: String(y), label: String(y) })),
+      value:    String(activeYear),
+      onChange: (val) => {
+        activeYear = Number(val);
+        renderYear(activeYear, cachedData);
+      }
+    });
+    toggleSlot.replaceChildren(yearDdm.element);
 
     renderYear(activeYear, data);
   }
