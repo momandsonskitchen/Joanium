@@ -1,8 +1,7 @@
 const en = {
   version: 'Version {version}',
   author: 'Author',
-  license: 'License',
-  framework: 'Framework',
+  lastUpdated: 'Last Updated',
   system: 'System',
   os: 'OS',
   cpu: 'CPU',

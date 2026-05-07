@@ -17,8 +17,6 @@ export function createAboutStateManager({ rootDirectory }) {
           version: packageJson.version ?? '',
           description: packageJson.description ?? '',
           author: packageJson.author ?? '',
-          license: packageJson.license ?? '',
-          framework: 'Electron 41',
           system
         };
       } catch {
@@ -27,8 +25,6 @@ export function createAboutStateManager({ rootDirectory }) {
           version: '',
           description: '',
           author: '',
-          license: '',
-          framework: 'Electron',
           system
         };
       }

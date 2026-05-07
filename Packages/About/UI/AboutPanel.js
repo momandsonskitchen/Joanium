@@ -8,6 +8,23 @@ function formatBytes(bytes) {
   return `${gb.toFixed(gb >= 10 ? 0 : 1)} GB`;
 }
 
+function parseBuildDate(version) {
+  if (!version) return '';
+  // Format: YYYY.MMDD.build — e.g. "2026.430.1" → year=2026, month=4, day=30
+  const match = /^(\d{4})\.(\d{1,4})\./.exec(version);
+  if (match) {
+    const year  = Number(match[1]);
+    const mmdd  = match[2].padStart(4, '0'); // ensure at least 4 chars
+    const month = Number(mmdd.slice(0, -2));
+    const day   = Number(mmdd.slice(-2));
+    const date  = new Date(year, month - 1, day);
+    if (!isNaN(date) && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+  }
+  return '';
+}
+
 export function createAboutPanel(strings) {
   const view = createElement('div', 'chat-profile__about');
 
@@ -24,9 +41,8 @@ export function createAboutPanel(strings) {
     const metaCard = createElement('div', 'chat-profile__about-meta');
 
     for (const { label, value } of [
-      { label: strings.author, value: info.author || '' },
-      { label: strings.license, value: info.license || '' },
-      { label: strings.framework, value: info.framework || '' }
+      { label: strings.author,      value: info.author || '' },
+      { label: strings.lastUpdated, value: parseBuildDate(info.version) || '—' }
     ]) {
       const row = createElement('div', 'chat-profile__about-meta-row');
       row.append(
