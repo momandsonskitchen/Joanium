@@ -19,10 +19,6 @@ const en = {
     completionSound: {
       label: 'Completion sound',
       description: 'Play a sound when a response finishes.'
-    },
-    animations: {
-      label: 'Animations',
-      description: 'Use motion and animated transitions in the interface.'
     }
   },
   runtime: {

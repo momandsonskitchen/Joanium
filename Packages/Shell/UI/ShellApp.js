@@ -29,10 +29,6 @@ import { createMCPPanel } from '../../MCP/UI/MCPPanel.js';
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 
-function applyMotionSetting(settings) {
-  document.documentElement.classList.toggle('joanium-reduce-motion', settings?.animations === false);
-}
-
 function getInitials(name) {
   const parts = collapseWhitespace(name).split(' ').filter(Boolean);
 
@@ -58,11 +54,6 @@ function toFileUrl(filePath) {
 async function bootstrap() {
   stripNativeTooltips();
   await loadAndApplyThemeState();
-  invokeIpc('app-settings:get').then(applyMotionSetting).catch(() => {});
-  window.addEventListener('joanium:app-settings-changed', (event) => {
-    applyMotionSetting(event.detail);
-  });
-
   // ── Security lock gate ─────────────────────────────────────────────────────
   // Must resolve before ANY UI is built. If the app is locked, the lock screen
   // covers the entire viewport and awaits a correct password / secret answer.

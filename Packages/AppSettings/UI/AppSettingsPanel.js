@@ -2,7 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
 
-const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound', 'animations'];
+const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound'];
 
 export function createAppSettingsPanel(strings) {
   const view = createElement('div', 'app-settings');
