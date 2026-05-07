@@ -1,9 +1,12 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { collectSystemInfo } from './SystemInfo.js';
 
 export function createAboutStateManager({ rootDirectory }) {
   return {
     async getInfo() {
+      const system = await collectSystemInfo(rootDirectory);
+
       try {
         const packageJson = JSON.parse(
           await readFile(path.join(rootDirectory, 'Package.json'), 'utf8')
@@ -15,7 +18,8 @@ export function createAboutStateManager({ rootDirectory }) {
           description: packageJson.description ?? '',
           author: packageJson.author ?? '',
           license: packageJson.license ?? '',
-          framework: 'Electron 41'
+          framework: 'Electron 41',
+          system
         };
       } catch {
         return {
@@ -24,7 +28,8 @@ export function createAboutStateManager({ rootDirectory }) {
           description: '',
           author: '',
           license: '',
-          framework: 'Electron'
+          framework: 'Electron',
+          system
         };
       }
     }

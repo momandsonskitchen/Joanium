@@ -19,6 +19,7 @@ export function createDefaultUserState() {
         year: ''
       }
     },
+    customInstructions: '',
     providers: {
       selected: [],
       details: {}
@@ -48,6 +49,9 @@ export function mergeUserStates(baseState, nextState = {}) {
         ...(nextState.providers?.details ?? {})
       }
     },
+    customInstructions: nextState.customInstructions !== undefined
+      ? nextState.customInstructions
+      : baseState.customInstructions,
     usageModes: Array.isArray(nextState.usageModes) ? nextState.usageModes : baseState.usageModes,
     activePersona: nextState.activePersona !== undefined ? nextState.activePersona : baseState.activePersona
   };
@@ -122,6 +126,7 @@ export function sanitizeIncomingUserState(candidateState) {
         year: sanitizeString(candidateState?.profile?.dateOfBirth?.year)
       }
     },
+    customInstructions: sanitizeString(candidateState?.customInstructions ?? candidateState?.custom_instructions),
     providers: {
       selected: sanitizeArray(candidateState?.providers?.selected),
       details: sanitizeDetails(candidateState?.providers?.details)

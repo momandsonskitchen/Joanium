@@ -1,6 +1,11 @@
 import path from 'node:path';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { createBootLogger } from '../Boot/Index.js';
+import {
+  applyWindowState,
+  attachWindowStatePersistence,
+  readWindowState
+} from './Core/WindowState.js';
 
 let mainWindow = null;
 let currentPackage = null;
@@ -33,9 +38,10 @@ function registerIpcHandlers(handlerDefinitions = []) {
 
 async function createMainWindow(entryPackage) {
   writeBootLog('createMainWindow:start', entryPackage.rendererPath);
+  const rootDirectory = process.cwd();
+  const windowState = await readWindowState(rootDirectory);
   const browserWindow = new BrowserWindow({
-    width: 1460,
-    height: 960,
+    ...windowState.bounds,
     minWidth: 1160,
     minHeight: 780,
     show: false,
@@ -51,6 +57,8 @@ async function createMainWindow(entryPackage) {
     },
     ...entryPackage.window
   });
+  applyWindowState(browserWindow, windowState);
+  attachWindowStatePersistence(browserWindow, rootDirectory);
 
   const ensureVisible = () => {
     if (browserWindow.isDestroyed()) {
@@ -61,7 +69,6 @@ async function createMainWindow(entryPackage) {
       browserWindow.restore();
     }
 
-    browserWindow.maximize();
     browserWindow.show();
     browserWindow.focus();
     browserWindow.moveTop();
@@ -193,6 +200,9 @@ export async function bootElectron({ entryPackage, loadPackage }) {
 
   app.on('window-all-closed', () => {
     writeBootLog('app:window-all-closed');
+    if (globalThis.JoaniumRuntime?.shouldStayResident?.()) {
+      return;
+    }
     if (process.platform !== 'darwin') {
       app.quit();
     }

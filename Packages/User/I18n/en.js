@@ -9,6 +9,8 @@ const en = {
   dayPlaceholder: 'DD',
   monthPlaceholder: 'MM',
   yearPlaceholder: 'YYYY',
+  instructionsLabel: 'Custom Instructions',
+  instructionsPlaceholder: 'Tone, style, or behavior instructions for Joana.',
   save: 'Save Changes',
   saving: 'Saving...',
   saved: 'Saved!',

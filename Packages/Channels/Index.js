@@ -1,6 +1,18 @@
 import { createChannelStateManager } from './Core/ChannelState.js';
 import { createChannelRuntime } from './Core/ChannelRuntime.js';
 
+function resolveCredentialValue(incoming, saved) {
+  return typeof incoming === 'string' && incoming.trim() ? incoming.trim() : (saved ?? '');
+}
+
+function requireCredential(value, label) {
+  if (!value) {
+    throw new Error(`${label} is required.`);
+  }
+
+  return value;
+}
+
 export async function createPackage({ rootDirectory }) {
   const channelStateManager = createChannelStateManager({ rootDirectory });
   const channelRuntime = createChannelRuntime({ channelStateManager });
@@ -32,20 +44,54 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'channels:validate',
         handler: async (_event, name, credentials = {}) => {
+          const savedConfig = await channelStateManager.getChannel(name) ?? {};
+
           if (name === 'telegram') {
-            return channelRuntime.validateTelegram(credentials.botToken);
+            const botToken = requireCredential(
+              resolveCredentialValue(credentials.botToken, savedConfig.botToken),
+              'Bot token'
+            );
+            return channelRuntime.validateTelegram(botToken);
           }
 
           if (name === 'whatsapp') {
-            return channelRuntime.validateWhatsApp(credentials.accountSid, credentials.authToken);
+            const accountSid = requireCredential(
+              resolveCredentialValue(credentials.accountSid, savedConfig.accountSid),
+              'Account SID'
+            );
+            const authToken = requireCredential(
+              resolveCredentialValue(credentials.authToken, savedConfig.authToken),
+              'Auth token'
+            );
+            return channelRuntime.validateWhatsApp(accountSid, authToken);
           }
 
           if (name === 'discord') {
-            return channelRuntime.validateDiscord(credentials.botToken);
+            const botToken = requireCredential(
+              resolveCredentialValue(credentials.botToken, savedConfig.botToken),
+              'Bot token'
+            );
+            const channelId = requireCredential(
+              resolveCredentialValue(credentials.channelId, savedConfig.channelId),
+              'Channel ID'
+            );
+            const bot = await channelRuntime.validateDiscord(botToken);
+            const channel = await channelRuntime.validateDiscordChannel(botToken, channelId);
+            return { ...bot, ...channel };
           }
 
           if (name === 'slack') {
-            return channelRuntime.validateSlack(credentials.botToken);
+            const botToken = requireCredential(
+              resolveCredentialValue(credentials.botToken, savedConfig.botToken),
+              'Bot token'
+            );
+            const channelId = requireCredential(
+              resolveCredentialValue(credentials.channelId, savedConfig.channelId),
+              'Channel ID'
+            );
+            const bot = await channelRuntime.validateSlack(botToken);
+            const channel = await channelRuntime.validateSlackChannel(botToken, channelId);
+            return { ...bot, ...channel };
           }
 
           throw new Error('Unknown channel.');

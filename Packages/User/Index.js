@@ -16,6 +16,15 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, profile) => userStateManager.saveProfile(profile)
       },
       {
+        channel: 'user:get-custom-instructions',
+        handler: async () => userStateManager.getCustomInstructions()
+      },
+      {
+        channel: 'user:save-custom-instructions',
+        handler: async (_event, customInstructions) =>
+          userStateManager.saveCustomInstructions(customInstructions)
+      },
+      {
         channel: 'user:pick-avatar',
         handler: async (event) => {
           const window = event.sender.getOwnerBrowserWindow();

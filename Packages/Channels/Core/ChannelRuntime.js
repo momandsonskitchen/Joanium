@@ -513,7 +513,9 @@ export function createChannelRuntime({ channelStateManager }) {
       });
 
       if (response.status === 403) {
-        throw new Error(`Discord 403: Bot cannot access channel ${config.channelId}.`);
+        throw new Error(
+          `Discord 403: Bot cannot access channel ${config.channelId}. Make sure the bot is invited and has View Channel, Read Message History, and Send Messages permissions.`
+        );
       }
 
       if (response.status === 401) {
@@ -613,6 +615,18 @@ export function createChannelRuntime({ channelStateManager }) {
 
       const data = await response.json();
       if (!data.ok) {
+        if (data.error === 'channel_not_found') {
+          throw new Error(
+            `Slack channel_not_found: Channel ID "${config.channelId}" is invalid or the bot cannot see it.`
+          );
+        }
+
+        if (data.error === 'not_in_channel') {
+          throw new Error(
+            `Slack not_in_channel: Invite the bot to channel ${config.channelId} before enabling replies.`
+          );
+        }
+
         throw new Error(data.error ?? 'Slack API error');
       }
 
@@ -762,6 +776,33 @@ export function createChannelRuntime({ channelStateManager }) {
       return { username: data.username ?? '' };
     },
 
+    async validateDiscordChannel(botToken, channelId) {
+      const response = await channelFetch(`https://discord.com/api/v10/channels/${channelId}`, {
+        headers: { Authorization: `Bot ${botToken}` }
+      });
+
+      if (response.status === 403) {
+        throw new Error(
+          `Bot cannot access channel ${channelId}. Invite the bot and grant View Channel, Read Message History, and Send Messages permissions.`
+        );
+      }
+
+      if (response.status === 404) {
+        throw new Error(`Channel ${channelId} was not found. Check the Discord Channel ID.`);
+      }
+
+      if (response.status === 401) {
+        throw new Error('Invalid Discord bot token.');
+      }
+
+      if (!response.ok) {
+        throw new Error(`Discord HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { channelName: data.name ?? channelId };
+    },
+
     async validateSlack(botToken) {
       const response = await channelFetch('https://slack.com/api/auth.test', {
         headers: { Authorization: `Bearer ${botToken}` }
@@ -773,6 +814,41 @@ export function createChannelRuntime({ channelStateManager }) {
       return {
         name: data.user ?? '',
         team: data.team ?? ''
+      };
+    },
+
+    async validateSlackChannel(botToken, channelId) {
+      const response = await channelFetch(
+        `https://slack.com/api/conversations.info?channel=${encodeURIComponent(channelId)}`,
+        { headers: { Authorization: `Bearer ${botToken}` } }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Slack HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.ok) {
+        if (data.error === 'channel_not_found') {
+          throw new Error(
+            'Channel not found. Make sure the Channel ID is correct and starts with C for public channels.'
+          );
+        }
+
+        if (data.error === 'not_in_channel') {
+          throw new Error(`Invite the bot to channel ${channelId}, then try again.`);
+        }
+
+        throw new Error(data.error ?? 'Could not validate Slack channel.');
+      }
+
+      if (data.channel?.is_member === false) {
+        throw new Error(`Invite the bot to channel ${channelId}, then try again.`);
+      }
+
+      return {
+        channelName: data.channel?.name ?? channelId,
+        isMember: data.channel?.is_member ?? true
       };
     }
   };

@@ -45,6 +45,17 @@
 * In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
     * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
 
+# Ported Legacy Features
+* Chat attachments and completion sound: `Packages/Chat` owns file picking, validation, extraction, composer chips, prompt context assembly, and the response completion chime. Attachments support text/code files plus PDF, DOCX, XLSX/XLSM, and PPTX extraction without importing from other packages.
+* Channels: `Packages/Channels` owns channel state, runtime polling/replies, validation, reply history, and channel-specific system prompts for Telegram, WhatsApp, Discord, and Slack.
+* Browser Preview: `Packages/BrowserPreview` owns the Electron browser view and IPC; `Packages/Chat` only provides the visible host panel and bounds syncing.
+* App Settings: `Packages/AppSettings` owns persisted app behavior settings plus keep-awake and tray runtime side effects. Shell only mounts its settings panel.
+* Window State: `Packages/Electron` owns persisted native window bounds and maximized/fullscreen restore in `Data/WindowState.json`.
+* Terminal: `Packages/Terminal` owns local command execution, risk assessment, workspace inspection, file utilities, Git helpers, and its Shell route UI.
+* Memory: `Packages/Memory` owns long-term personal memory files in `Data/Memories`, exposes a Shell editor route, and provides compact chat context through IPC.
+* About/System Info: `Packages/About` owns app metadata plus a local system snapshot persisted to `Data/System.json`.
+* Custom Instructions: `Packages/User` stores user-written behavior instructions in `Data/User.json`; `Packages/Chat` adds them to the model system context.
+
 # Design language
 * All buttons should have rounded corners (20px).
 * Should follow material 3 expressive design.

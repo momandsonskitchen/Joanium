@@ -1,0 +1,23 @@
+{
+  "osName": "Windows",
+  "osVersion": "Windows 11 Pro",
+  "platform": "win32",
+  "arch": "x64",
+  "kernel": "10.0.26200",
+  "hostname": "JoelJolly",
+  "username": "withi",
+  "homeDir": "C:\\Users\\withi",
+  "tmpDir": "C:\\Users\\withi\\AppData\\Local\\Temp",
+  "totalMem": 4169388032,
+  "freeMem": 629383168,
+  "cpuModel": "Intel(R) Core(TM) i3-8145U CPU @ 2.10GHz",
+  "cpuCores": 4,
+  "cpuSpeed": "2304 MHz",
+  "shell": "C:\\Windows\\system32\\cmd.exe",
+  "locale": "en-US",
+  "timezone": "Asia/Calcutta",
+  "node": "24.15.0",
+  "electron": "41.4.0",
+  "chrome": "146.0.7680.216",
+  "collectedAt": "2026-05-07T05:09:35.289Z"
+}

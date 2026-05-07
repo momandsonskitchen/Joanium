@@ -17,6 +17,8 @@ export function createShortcutsPanel(strings) {
         { label: strings.items.newChat,      combo: ['Ctrl', 'N'] },
         { label: strings.items.history,      combo: ['Ctrl', 'H'] },
         { label: strings.items.projects,     combo: ['Ctrl', 'P'] },
+        { label: strings.items.terminal,     combo: ['Ctrl', 'Shift', 'T'] },
+        { label: strings.items.memory,       combo: ['Ctrl', 'Shift', 'M'] },
         { label: strings.items.templates,    combo: ['Ctrl', 'T'] },
         { label: strings.items.agents,       combo: ['Ctrl', 'A'] },
         { label: strings.items.skills,       combo: ['Ctrl', '⇧', 'S'] },

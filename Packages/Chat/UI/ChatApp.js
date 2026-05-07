@@ -5,6 +5,7 @@ import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
+import { initCompletionSound, markCompletionSoundAborted, playCompletionSound } from './CompletionSound.js';
 
 function getFirstName(name, fallback) {
   const normalized = collapseWhitespace(name);
@@ -108,7 +109,7 @@ function createMessageActions({ onCopy, onRetry, onSpeak }) {
   return actions;
 }
 
-function createMessageElement(message, { onCopy, onRetry } = {}) {
+function createMessageElement(message, strings, { onCopy, onRetry } = {}) {
   const article = createElement(
     'article',
     [
@@ -128,7 +129,7 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
     const thinkingSummary = createElement('summary', 'chat-message__thinking-summary');
     thinkingSummary.append(
       createIcon('thinking', 'chat-message__thinking-icon'),
-      createElement('span', 'chat-message__thinking-label', 'Reasoning')
+      createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
     );
     thinkingWrap.append(thinkingSummary);
 
@@ -155,6 +156,16 @@ function createMessageElement(message, { onCopy, onRetry } = {}) {
     article.append(bubble);
   } else {
     article.append(createElement('div', 'chat-message__bubble', message.content));
+  }
+
+  if (message.attachments?.length) {
+    const attachmentList = createElement('div', 'chat-message__attachments');
+
+    for (const attachment of message.attachments) {
+      attachmentList.append(createAttachmentPill(attachment, strings));
+    }
+
+    article.append(attachmentList);
   }
 
   if (!message.streaming && !message.pending && typeof onCopy === 'function' && typeof onRetry === 'function') {
@@ -267,6 +278,280 @@ function generateSessionId() {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}-${pad(date.getMilliseconds(), 3)}`;
 }
 
+function formatBytes(bytes = 0) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function getFileExtension(fileName = '') {
+  const ext = String(fileName).split('.').pop()?.trim().toUpperCase();
+  return ext && ext !== fileName.toUpperCase() ? ext.slice(0, 4) : 'FILE';
+}
+
+function toAttachmentSummary(attachment) {
+  return {
+    id: attachment.id,
+    name: attachment.name ?? '',
+    summary: attachment.summary ?? '',
+    kind: attachment.kind ?? '',
+    size: attachment.size ?? 0,
+    lines: attachment.lines ?? 0,
+    truncated: Boolean(attachment.truncated)
+  };
+}
+
+function buildAttachmentContext(strings, attachments) {
+  if (!attachments.length) return '';
+
+  const blocks = attachments.map((attachment, index) => {
+    const header = formatText(strings.composer.attachmentContextItem, {
+      index: String(index + 1),
+      name: attachment.name ?? strings.composer.unknownAttachment
+    });
+    const summary = attachment.summary
+      ? formatText(strings.composer.attachmentContextSummary, { summary: attachment.summary })
+      : '';
+    const truncated = attachment.truncated ? strings.composer.attachmentContextTruncated : '';
+
+    return [header, summary, truncated, attachment.text ?? ''].filter(Boolean).join('\n');
+  });
+
+  return `${strings.composer.attachmentContextHeader}\n\n${blocks.join('\n\n')}`;
+}
+
+function buildModelContent(strings, prompt, attachments) {
+  const attachmentContext = buildAttachmentContext(strings, attachments);
+  return [prompt, attachmentContext].filter(Boolean).join('\n\n');
+}
+
+function createAttachmentPill(attachment, strings, { removable = false, onRemove } = {}) {
+  const pill = createElement('div', 'chat-attachment');
+  const badge = createElement('span', 'chat-attachment__badge', getFileExtension(attachment.name));
+  const body = createElement('span', 'chat-attachment__body');
+  const name = createElement('span', 'chat-attachment__name', attachment.name || strings.composer.unknownAttachment);
+  const metaParts = [attachment.summary, formatBytes(attachment.size)].filter(Boolean);
+  const meta = createElement('span', 'chat-attachment__meta', metaParts.join(' - '));
+
+  body.append(name, meta);
+  pill.append(badge, body);
+
+  if (removable) {
+    const removeButton = createElement('button', 'chat-attachment__remove');
+    removeButton.type = 'button';
+    removeButton.setAttribute(
+      'aria-label',
+      formatText(strings.composer.removeAttachmentNamed, {
+        name: attachment.name || strings.composer.unknownAttachment
+      })
+    );
+    removeButton.append(createIcon('close', 'chat-attachment__remove-icon'));
+    removeButton.addEventListener('click', () => onRemove?.(attachment.id));
+    pill.append(removeButton);
+  }
+
+  return pill;
+}
+
+const DEFAULT_BROWSER_PREVIEW_STATE = Object.freeze({
+  visible: false,
+  hasView: false,
+  hasPage: false,
+  title: '',
+  url: '',
+  status: '',
+  loading: false,
+  canGoBack: false,
+  canGoForward: false
+});
+
+function normalizeBrowserPreviewState(state = {}) {
+  return { ...DEFAULT_BROWSER_PREVIEW_STATE, ...state };
+}
+
+function browserPreviewTone(state) {
+  const status = String(state.status ?? '').toLowerCase();
+  if (state.loading) return 'loading';
+  if (/failed|error|unexpected|timeout/.test(status)) return 'error';
+  if (state.visible && state.hasPage) return 'live';
+  if (state.hasPage) return 'paused';
+  return 'idle';
+}
+
+function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
+  let currentState = normalizeBrowserPreviewState();
+  let disposeStateListener = null;
+  let animationFrameId = 0;
+  let lastBoundsKey = '';
+
+  const panel = createElement('aside', 'browser-preview');
+  panel.hidden = true;
+
+  const header = createElement('div', 'browser-preview__header');
+  const identity = createElement('div', 'browser-preview__identity');
+  const eyebrow = createElement('div', 'browser-preview__eyebrow');
+  eyebrow.append(createIcon('globe', 'browser-preview__eyebrow-icon'), createElement('span', '', strings.eyebrow));
+  const title = createElement('h2', 'browser-preview__title', strings.title);
+  const urlLabel = createElement('div', 'browser-preview__url', strings.emptyUrl);
+  identity.append(eyebrow, title, urlLabel);
+
+  const controls = createElement('div', 'browser-preview__controls');
+  const backButton = createElement('button', 'browser-preview__control');
+  const forwardButton = createElement('button', 'browser-preview__control');
+  const reloadButton = createElement('button', 'browser-preview__control');
+  const closeButton = createElement('button', 'browser-preview__control');
+  backButton.type = 'button';
+  forwardButton.type = 'button';
+  reloadButton.type = 'button';
+  closeButton.type = 'button';
+  backButton.setAttribute('aria-label', strings.back);
+  forwardButton.setAttribute('aria-label', strings.forward);
+  reloadButton.setAttribute('aria-label', strings.reload);
+  closeButton.setAttribute('aria-label', strings.close);
+  backButton.append(createIcon('arrowLeft', 'browser-preview__control-icon'));
+  forwardButton.append(createIcon('arrowRight', 'browser-preview__control-icon'));
+  reloadButton.append(createIcon('retry', 'browser-preview__control-icon'));
+  closeButton.append(createIcon('close', 'browser-preview__control-icon'));
+  controls.append(backButton, forwardButton, reloadButton, closeButton);
+  header.append(identity, controls);
+
+  const form = createElement('form', 'browser-preview__form');
+  const input = document.createElement('input');
+  input.className = 'browser-preview__input';
+  input.type = 'url';
+  input.placeholder = strings.placeholder;
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+  const openButton = createElement('button', 'browser-preview__open');
+  openButton.type = 'submit';
+  openButton.append(createIcon('arrowRight', 'browser-preview__open-icon'), createElement('span', '', strings.open));
+  form.append(input, openButton);
+
+  const statusRow = createElement('div', 'browser-preview__status-row');
+  const statusDot = createElement('span', 'browser-preview__status-dot browser-preview__status-dot--idle');
+  const statusText = createElement('span', 'browser-preview__status', strings.ready);
+  statusRow.append(statusDot, statusText);
+
+  const mount = createElement('div', 'browser-preview__mount');
+  mount.id = 'browser-preview-mount';
+  const viewport = createElement('div', 'browser-preview__viewport');
+  const empty = createElement('div', 'browser-preview__empty');
+  empty.append(
+    createIcon('globe', 'browser-preview__empty-icon'),
+    createElement('strong', 'browser-preview__empty-title', strings.emptyTitle),
+    createElement('span', 'browser-preview__empty-copy', strings.emptyCopy)
+  );
+  mount.append(viewport, empty);
+  panel.append(header, form, statusRow, mount);
+
+  function setTone(tone) {
+    statusDot.className = `browser-preview__status-dot browser-preview__status-dot--${tone}`;
+    statusText.className = `browser-preview__status browser-preview__status--${tone}`;
+  }
+
+  async function syncBounds() {
+    const shouldAttach = currentState.visible && !panel.hidden;
+    let bounds = null;
+
+    if (shouldAttach) {
+      const rect = viewport.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        bounds = {
+          x: Math.round(rect.x),
+          y: Math.round(rect.y),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height)
+        };
+      }
+    }
+
+    const boundsKey = bounds
+      ? `${bounds.x}:${bounds.y}:${bounds.width}:${bounds.height}`
+      : 'null';
+    if (boundsKey === lastBoundsKey) return;
+    lastBoundsKey = boundsKey;
+    await invokeIpc('browser-preview:set-bounds', bounds).catch(() => {
+      lastBoundsKey = '';
+    });
+  }
+
+  function scheduleBoundsSync() {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(() => {
+      void syncBounds();
+    });
+  }
+
+  function applyState(nextState) {
+    currentState = normalizeBrowserPreviewState(nextState);
+    const visible = Boolean(currentState.visible);
+    panel.hidden = !visible;
+    panel.classList.toggle('browser-preview--visible', visible);
+    panel.classList.toggle('browser-preview--has-page', Boolean(currentState.hasPage));
+    panel.classList.toggle('browser-preview--loading', Boolean(currentState.loading));
+    onVisibilityChange?.(visible);
+
+    title.textContent = currentState.title || strings.title;
+    urlLabel.textContent = currentState.url || strings.emptyUrl;
+    statusText.textContent = currentState.status || (currentState.loading ? strings.loading : strings.ready);
+    setTone(browserPreviewTone(currentState));
+
+    backButton.disabled = !currentState.canGoBack;
+    forwardButton.disabled = !currentState.canGoForward;
+    reloadButton.disabled = !currentState.hasPage;
+
+    if (currentState.url && document.activeElement !== input) {
+      input.value = currentState.url;
+    }
+
+    scheduleBoundsSync();
+  }
+
+  backButton.addEventListener('click', () => {
+    void invokeIpc('browser-preview:go-back');
+  });
+  forwardButton.addEventListener('click', () => {
+    void invokeIpc('browser-preview:go-forward');
+  });
+  reloadButton.addEventListener('click', () => {
+    void invokeIpc('browser-preview:reload');
+  });
+  closeButton.addEventListener('click', () => {
+    void invokeIpc('browser-preview:close').then(applyState).catch(() => {});
+  });
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const value = input.value.trim();
+    if (!value) return;
+    statusText.textContent = strings.loading;
+    void invokeIpc('browser-preview:load-url', value).then(applyState).catch((error) => {
+      applyState({
+        ...currentState,
+        visible: true,
+        loading: false,
+        status: error?.message ?? strings.loadFailed
+      });
+    });
+  });
+
+  return {
+    element: panel,
+    start() {
+      disposeStateListener = onIpc('browser-preview:state', applyState);
+      window.addEventListener('resize', scheduleBoundsSync);
+      invokeIpc('browser-preview:get-state').then(applyState).catch(() => applyState(DEFAULT_BROWSER_PREVIEW_STATE));
+    },
+    stop() {
+      disposeStateListener?.();
+      disposeStateListener = null;
+      window.removeEventListener('resize', scheduleBoundsSync);
+      cancelAnimationFrame(animationFrameId);
+      void invokeIpc('browser-preview:set-bounds', null);
+    }
+  };
+}
+
 export async function createChatView(strings, {
   getActiveProject,
   onActiveProjectChange,
@@ -274,6 +559,8 @@ export async function createChatView(strings, {
   onActivePersonaChange,
   getProfile
 } = {}) {
+  initCompletionSound();
+
   const payload = await invokeIpc('chat:bootstrap');
   const view = createElement('div', 'chat-view');
   const profile = getProfile?.() ?? payload.user?.profile ?? {};
@@ -288,6 +575,7 @@ export async function createChatView(strings, {
   let activeProject = getActiveProject?.() ?? null;
   let draftValue = '';
   let pendingAttachments = [];
+  let attachmentNoticeTimer = null;
   let isSending = false;
   let accText = '';
   let accThinking = '';
@@ -300,6 +588,7 @@ export async function createChatView(strings, {
 
   let composerField = null;
   let attachmentsEl = null;
+  let attachmentNotice = null;
   let sendButton = null;
   let thread = null;
   let title = null;
@@ -321,6 +610,79 @@ export async function createChatView(strings, {
     }
   }
 
+  function showAttachmentNotice(message, tone = 'info') {
+    if (!attachmentNotice) return;
+
+    clearTimeout(attachmentNoticeTimer);
+    attachmentNotice.textContent = message;
+    attachmentNotice.hidden = false;
+    attachmentNotice.className = `chat-composer__notice chat-composer__notice--${tone}`;
+
+    attachmentNoticeTimer = setTimeout(() => {
+      if (attachmentNotice) {
+        attachmentNotice.hidden = true;
+        attachmentNotice.textContent = '';
+      }
+    }, 3200);
+  }
+
+  function renderPendingAttachments() {
+    if (!attachmentsEl) return;
+
+    attachmentsEl.replaceChildren();
+    attachmentsEl.hidden = pendingAttachments.length === 0;
+
+    for (const attachment of pendingAttachments) {
+      attachmentsEl.append(createAttachmentPill(attachment, strings, {
+        removable: true,
+        onRemove(id) {
+          pendingAttachments = pendingAttachments.filter((item) => item.id !== id);
+          renderPendingAttachments();
+          syncComposer();
+          focusComposer();
+        }
+      }));
+    }
+  }
+
+  async function selectAttachments() {
+    if (isSending) return;
+
+    try {
+      showAttachmentNotice(strings.composer.attachmentProcessing);
+      const result = await invokeIpc('chat:select-attachments');
+      const incoming = Array.isArray(result?.attachments) ? result.attachments : [];
+      const rejected = Array.isArray(result?.rejected) ? result.rejected : [];
+
+      if (incoming.length > 0) {
+        pendingAttachments = [...pendingAttachments, ...incoming];
+        renderPendingAttachments();
+        syncComposer();
+        showAttachmentNotice(
+          formatText(strings.composer.attachmentAdded, { count: String(incoming.length) })
+        );
+      } else if (rejected.length === 0) {
+        attachmentNotice.hidden = true;
+      }
+
+      if (rejected.length > 0) {
+        showAttachmentNotice(
+          formatText(strings.composer.attachmentRejected, { count: String(rejected.length) }),
+          'warning'
+        );
+      }
+    } catch (error) {
+      showAttachmentNotice(
+        formatText(strings.composer.attachmentFailed, {
+          message: error?.message ?? String(error)
+        }),
+        'warning'
+      );
+    } finally {
+      focusComposer();
+    }
+  }
+
   function removeStreamListeners() {
     for (const dispose of streamDisposers) {
       dispose();
@@ -336,9 +698,11 @@ export async function createChatView(strings, {
     const now = new Date().toISOString();
     const sessionMessages = messages
       .filter((message) => !message.streaming && !message.pending && message.content)
-      .map(({ role, content, thinking }) => {
+      .map(({ role, content, thinking, modelContent, attachments }) => {
         const entry = { role, content };
         if (thinking) entry.thinking = thinking;
+        if (modelContent && modelContent !== content) entry.modelContent = modelContent;
+        if (attachments?.length) entry.attachments = attachments.map(toAttachmentSummary);
         return entry;
       });
 
@@ -370,6 +734,14 @@ export async function createChatView(strings, {
     }
 
     return lines.filter(Boolean).join('\n');
+  }
+
+  async function loadMemoryContext() {
+    try {
+      return await invokeIpc('memory:get-context', 24000);
+    } catch {
+      return '';
+    }
   }
 
   function applyActiveProject(project) {
@@ -410,6 +782,10 @@ export async function createChatView(strings, {
         .map((message) => ({
           role: message.role === 'assistant' ? 'assistant' : 'user',
           content: typeof message.content === 'string' ? message.content : '',
+          modelContent: typeof message.modelContent === 'string' ? message.modelContent : null,
+          attachments: Array.isArray(message.attachments)
+            ? message.attachments.map(toAttachmentSummary)
+            : [],
           thinking: message.thinking ?? '',
           streaming: false
         }))
@@ -499,6 +875,7 @@ export async function createChatView(strings, {
   }
 
   function stopStream() {
+    markCompletionSoundAborted();
     removeStreamListeners();
     const stoppedNote = strings.composer.generationStopped;
     messages = messages.map((message, index) => {
@@ -545,7 +922,7 @@ export async function createChatView(strings, {
         labelEl.hidden = false;
       }
     } else {
-      sendButton.disabled = !draftValue.trim();
+      sendButton.disabled = !draftValue.trim() && pendingAttachments.length === 0;
       sendButton.classList.remove('chat-composer__send--stop');
       if (iconEl) iconEl.innerHTML = iconMarkup.send;
       if (labelEl) {
@@ -564,6 +941,7 @@ export async function createChatView(strings, {
   function clearConversation() {
     messages = [];
     draftValue = '';
+    pendingAttachments = [];
     isSending = false;
     sessionId = null;
     sessionCreatedAt = null;
@@ -572,6 +950,11 @@ export async function createChatView(strings, {
       window.speechSynthesis.cancel();
       resetSpeakButton(activeSpeakBtn);
       activeSpeakBtn = null;
+    }
+    renderPendingAttachments();
+    if (attachmentNotice) {
+      attachmentNotice.hidden = true;
+      attachmentNotice.textContent = '';
     }
     syncComposer();
     renderThread();
@@ -608,11 +991,17 @@ export async function createChatView(strings, {
         const userMessage = messages[userIndex];
         if (!userMessage?.content) return;
         messages = messages.slice(0, userIndex);
-        draftValue = userMessage.content;
+        draftValue = '';
+        pendingAttachments = [];
+        renderPendingAttachments();
         renderThread();
-        void submitPrompt();
+        void submitPrompt({
+          content: userMessage.content,
+          modelContent: userMessage.modelContent,
+          attachments: userMessage.attachments ?? []
+        });
       };
-      return createMessageElement(message, { onCopy, onRetry });
+      return createMessageElement(message, strings, { onCopy, onRetry });
     }));
 
     requestAnimationFrame(() => {
@@ -620,9 +1009,14 @@ export async function createChatView(strings, {
     });
   }
 
-  async function submitPrompt() {
-    const prompt = draftValue.trim();
-    if (!prompt || isSending) return;
+  async function submitPrompt(resend = null) {
+    const attachmentsForSend = Array.isArray(resend?.attachments)
+      ? resend.attachments
+      : pendingAttachments;
+    const prompt = String(resend?.content ?? draftValue).trim()
+      || (attachmentsForSend.length ? strings.composer.attachmentOnlyPrompt : '');
+
+    if ((!prompt && attachmentsForSend.length === 0) || isSending) return;
 
     const isNewSession = !sessionId;
     if (!sessionId) {
@@ -630,9 +1024,18 @@ export async function createChatView(strings, {
       sessionCreatedAt = new Date().toISOString();
     }
 
+    const modelContent = resend?.modelContent
+      || buildModelContent(strings, prompt, attachmentsForSend);
+    const attachmentSummaries = attachmentsForSend.map(toAttachmentSummary);
+
     messages = [
       ...messages,
-      { role: 'user', content: prompt },
+      {
+        role: 'user',
+        content: prompt,
+        modelContent,
+        attachments: attachmentSummaries
+      },
       {
         role: 'assistant',
         content: '',
@@ -644,9 +1047,12 @@ export async function createChatView(strings, {
     ];
 
     draftValue = '';
+    pendingAttachments = [];
     isSending = true;
     accText = '';
     accThinking = '';
+    const generationStartTime = Date.now();
+    renderPendingAttachments();
     syncComposer();
     renderThread();
     focusComposer();
@@ -662,7 +1068,7 @@ export async function createChatView(strings, {
       removeStreamListeners();
       messages = messages.map((message, index) => index !== messages.length - 1 ? message : {
         role: 'assistant',
-        content: accText || 'No response received.',
+        content: accText || strings.composer.emptyResponse,
         thinking: accThinking,
         streaming: false,
         providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
@@ -670,6 +1076,7 @@ export async function createChatView(strings, {
       });
       isSending = false;
       void saveCurrentSession();
+      void playCompletionSound(generationStartTime);
       syncComposer();
       renderThread();
     }));
@@ -678,7 +1085,7 @@ export async function createChatView(strings, {
       removeStreamListeners();
       messages = messages.map((message, index) => index !== messages.length - 1 ? message : {
         role: 'assistant',
-        content: error?.message || 'Unable to get a response right now.',
+        content: error?.message || strings.composer.responseError,
         thinking: accThinking,
         streaming: false,
         error: true,
@@ -690,11 +1097,17 @@ export async function createChatView(strings, {
       renderThread();
     }));
 
-    const historyToSend = messages.slice(0, -1).map(({ role, content }) => ({ role, content }));
+    const historyToSend = messages.slice(0, -1).map(({ role, content, modelContent }) => ({
+      role,
+      content: role === 'user' ? (modelContent || content) : content
+    }));
+    const memoryContext = await loadMemoryContext();
+
     void invokeIpc('chat:stream-message', {
       messages: historyToSend,
       providerId: activeProvider?.id ?? null,
       modelId: activeModel?.id ?? null,
+      memoryContext: memoryContext || null,
       projectInfo: buildProjectContext(activeProject) || null,
       persona: (getActivePersona?.() ?? activePersona)?.content || null,
       isNewSession
@@ -750,8 +1163,11 @@ export async function createChatView(strings, {
   const composerActions = createElement('div', 'chat-composer__actions');
   const attachBtn = createElement('button', 'chat-composer__icon-button');
   attachBtn.type = 'button';
+  attachBtn.setAttribute('aria-label', strings.composer.attachFiles);
   attachBtn.append(createIcon('paperclip', 'chat-composer__icon'));
-  attachBtn.addEventListener('click', focusComposer);
+  attachBtn.addEventListener('click', () => {
+    void selectAttachments();
+  });
 
   composerActions.append(attachBtn);
 
@@ -782,10 +1198,20 @@ export async function createChatView(strings, {
 
   composerSubmit.append(modelButton, sendButton);
   composerFooter.append(composerActions, composerSubmit);
-  composer.append(projectPill, composerField, composerFooter);
+  attachmentsEl = createElement('div', 'chat-composer__attachments');
+  attachmentsEl.hidden = true;
+  attachmentNotice = createElement('div', 'chat-composer__notice');
+  attachmentNotice.hidden = true;
+  composer.append(projectPill, attachmentsEl, attachmentNotice, composerField, composerFooter);
   scroll.append(title, thread);
   bottom.append(composer);
-  view.append(scroll, bottom);
+  const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {
+    onVisibilityChange: (visible) => {
+      view.classList.toggle('chat-view--browser-preview', visible);
+    }
+  });
+  view.append(scroll, bottom, browserPreview.element);
+  browserPreview.start();
 
   applyActiveProject(activeProject);
   syncComposer();

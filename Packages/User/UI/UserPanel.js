@@ -10,6 +10,7 @@ function toFileUrl(filePath) {
 
 export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarChanged }) {
   let draft = createDraft(getProfile());
+  let draftInstructions = '';
   const view = createElement('div', 'chat-settings__user');
 
   // ── Avatar section ────────────────────────────────────────────────────────
@@ -126,6 +127,19 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   yearBox.input.value = draft.year;
   dobRow.append(dayBox.element, monthBox.element, yearBox.element);
 
+  const instructionsLabel = createElement('label', 'chat-settings__field-label', strings.instructionsLabel);
+  const instructionsTextarea = createElement('textarea', 'chat-settings__instructions-textarea');
+  instructionsTextarea.placeholder = strings.instructionsPlaceholder;
+  instructionsTextarea.setAttribute('aria-label', strings.instructionsLabel);
+  instructionsTextarea.addEventListener('input', () => {
+    draftInstructions = instructionsTextarea.value;
+  });
+
+  void invokeIpc('user:get-custom-instructions').then((value) => {
+    draftInstructions = value ?? '';
+    instructionsTextarea.value = draftInstructions;
+  }).catch(() => {});
+
   // ── Save ──────────────────────────────────────────────────────────────────
 
   const status = createElement('p', 'chat-settings__save-status', '');
@@ -137,14 +151,17 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
     status.textContent = '';
 
     try {
-      const savedProfile = await invokeIpc('user:save-profile', {
-        name: draft.name.trim(),
-        dateOfBirth: {
-          day: draft.day,
-          month: draft.month,
-          year: draft.year
-        }
-      });
+      const [savedProfile] = await Promise.all([
+        invokeIpc('user:save-profile', {
+          name: draft.name.trim(),
+          dateOfBirth: {
+            day: draft.day,
+            month: draft.month,
+            year: draft.year
+          }
+        }),
+        invokeIpc('user:save-custom-instructions', draftInstructions)
+      ]);
 
       draft = createDraft(savedProfile);
       onProfileSaved?.(savedProfile);
@@ -166,7 +183,7 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   const actions = createElement('div', 'chat-settings__user-actions');
   actions.append(saveBtn, status);
 
-  view.append(avatarSection, nameBox.element, dobLabel, dobRow, actions);
+  view.append(avatarSection, nameBox.element, dobLabel, dobRow, instructionsLabel, instructionsTextarea, actions);
   return view;
 }
 

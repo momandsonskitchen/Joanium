@@ -502,8 +502,14 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   if (typeof request?.persona === 'string' && request.persona.trim()) {
     parts.push(request.persona.trim());
   }
+  if (typeof user?.customInstructions === 'string' && user.customInstructions.trim()) {
+    parts.push(user.customInstructions.trim());
+  }
   if (typeof request?.projectInfo === 'string' && request.projectInfo.trim()) {
     parts.push(request.projectInfo.trim());
+  }
+  if (typeof request?.memoryContext === 'string' && request.memoryContext.trim()) {
+    parts.push(request.memoryContext.trim());
   }
 
   const systemPrompt = parts.length > 0 ? parts.join('\n\n') : null;

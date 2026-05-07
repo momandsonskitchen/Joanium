@@ -9,6 +9,8 @@ import { createChannelsPanel } from '../../Channels/UI/ChannelsPanel.js';
 import { createChannelGateway } from '../../Channels/UI/ChannelGateway.js';
 import { createEventsPanel } from '../../Events/UI/EventsPanel.js';
 import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
+import { createTerminalPanel } from '../../Terminal/UI/TerminalPanel.js';
+import { createMemoryPanel } from '../../Memory/UI/MemoryPanel.js';
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createAgentsPanel } from '../../Agents/UI/AgentsPanel.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
@@ -17,6 +19,7 @@ import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js
 import { createUsagePanel } from '../../Usage/UI/UsagePanel.js';
 import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
+import { createAppSettingsPanel } from '../../AppSettings/UI/AppSettingsPanel.js';
 import { mountLockScreen } from '../../Security/UI/LockScreen.js';
 import { createSecurityPanel } from '../../Security/UI/SecurityPanel.js';
 import { createAutoLockTimer } from '../../Security/UI/AutoLockTimer.js';
@@ -25,6 +28,10 @@ import { loadAndApplyThemeState, stripNativeTooltips } from '../../Themes/UI/The
 import { createMCPPanel } from '../../MCP/UI/MCPPanel.js';
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
+
+function applyMotionSetting(settings) {
+  document.documentElement.classList.toggle('joanium-reduce-motion', settings?.animations === false);
+}
 
 function getInitials(name) {
   const parts = collapseWhitespace(name).split(' ').filter(Boolean);
@@ -51,6 +58,10 @@ function toFileUrl(filePath) {
 async function bootstrap() {
   stripNativeTooltips();
   await loadAndApplyThemeState();
+  invokeIpc('app-settings:get').then(applyMotionSetting).catch(() => {});
+  window.addEventListener('joanium:app-settings-changed', (event) => {
+    applyMotionSetting(event.detail);
+  });
 
   // ── Security lock gate ─────────────────────────────────────────────────────
   // Must resolve before ANY UI is built. If the app is locked, the lock screen
@@ -264,6 +275,32 @@ async function bootstrap() {
       }
     },
     {
+      id: 'terminal',
+      icon: 'tabTerminal',
+      create: async () => {
+        const panel = createTerminalPanel(strings.terminal);
+        const element = panel.build();
+        canvas.append(element);
+        return {
+          element,
+          onShow: () => panel.onShow()
+        };
+      }
+    },
+    {
+      id: 'memory',
+      icon: 'tabMemory',
+      create: async () => {
+        const panel = createMemoryPanel(strings.memory);
+        const element = panel.build();
+        canvas.append(element);
+        return {
+          element,
+          onShow: () => panel.onShow()
+        };
+      }
+    },
+    {
       id: 'templates',
       icon: 'tabTemplates',
       create: async () => {
@@ -471,6 +508,10 @@ async function bootstrap() {
         }));
       }
 
+      if (id === 'app') {
+        main.append(createAppSettingsPanel(strings.appSettings));
+      }
+
       if (id === 'shortcuts') {
         main.append(createShortcutsPanel(strings.shortcuts));
       }
@@ -496,6 +537,7 @@ async function bootstrap() {
 
     for (const menu of [
       { id: 'user',      label: strings.settings.nav.user,      icon: iconMarkup.tabPersonas },
+      { id: 'app',       label: strings.settings.nav.app,       icon: iconMarkup.power       },
       { id: 'appearance', label: strings.settings.nav.appearance, icon: iconMarkup.palette },
       { id: 'mcp',       label: strings.settings.nav.mcp,       icon: iconMarkup.network     },
       { id: 'shortcuts', label: strings.settings.nav.shortcuts, icon: iconMarkup.keyboard    },
@@ -626,6 +668,16 @@ async function bootstrap() {
       id: 'projects',
       combo: { ctrl: true, key: 'p' },
       handler: () => { void showRoute('projects'); }
+    },
+    {
+      id: 'terminal',
+      combo: { ctrl: true, shift: true, key: 't' },
+      handler: () => { void showRoute('terminal'); }
+    },
+    {
+      id: 'memory',
+      combo: { ctrl: true, shift: true, key: 'm' },
+      handler: () => { void showRoute('memory'); }
     },
     {
       id: 'templates',

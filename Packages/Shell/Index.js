@@ -23,6 +23,8 @@ export async function createPackage({ rootDirectory }) {
       'Channels',
       'Events',
       'Projects',
+      'Terminal',
+      'Memory',
       'Templates',
       'Agents',
       'Skills',
@@ -30,10 +32,12 @@ export async function createPackage({ rootDirectory }) {
       'Marketplace',
       'Usage',
       'User',
+      'AppSettings',
       'About',
       'Security',
       'Themes',
-      'MCP'
+      'MCP',
+      'BrowserPreview'
     ],
     rendererPath: path.join(shellDirectory, 'UI', 'App.html'),
     preloadPath: path.join(shellDirectory, 'UI', 'Preload.js'),

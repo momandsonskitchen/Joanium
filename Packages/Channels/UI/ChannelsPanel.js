@@ -223,16 +223,22 @@ export function createChannelsPanel(strings) {
     }
 
     if (channelName === 'discord' && payload.botToken) {
-      const result = await invokeIpc('channels:validate', channelName, { botToken: payload.botToken });
+      const result = await invokeIpc('channels:validate', channelName, {
+        botToken: payload.botToken,
+        channelId: payload.channelId
+      });
       setFeedback(channelName, formatText(strings.feedback.tokenVerified, {
-        value: result.username ? `@${result.username}` : strings.channels.discord.name
+        value: result.channelName || (result.username ? `@${result.username}` : strings.channels.discord.name)
       }), 'success');
     }
 
     if (channelName === 'slack' && payload.botToken) {
-      const result = await invokeIpc('channels:validate', channelName, { botToken: payload.botToken });
+      const result = await invokeIpc('channels:validate', channelName, {
+        botToken: payload.botToken,
+        channelId: payload.channelId
+      });
       setFeedback(channelName, formatText(strings.feedback.slackVerified, {
-        value: result.team || result.name || strings.channels.slack.name
+        value: result.channelName || result.team || result.name || strings.channels.slack.name
       }), 'success');
     }
   }

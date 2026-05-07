@@ -26,6 +26,15 @@
   display: none !important;
 }
 
+.joanium-reduce-motion *,
+.joanium-reduce-motion *::before,
+.joanium-reduce-motion *::after {
+  animation-duration: 1ms !important;
+  animation-delay: 0ms !important;
+  transition-duration: 1ms !important;
+  scroll-behavior: auto !important;
+}
+
 html,
 body {
   margin: 0;

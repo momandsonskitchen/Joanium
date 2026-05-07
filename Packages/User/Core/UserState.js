@@ -18,6 +18,20 @@ export function createUserStateManager({ rootDirectory }) {
       return next.profile;
     },
 
+    async getCustomInstructions() {
+      const state = await readUserState(rootDirectory);
+      return state.customInstructions ?? '';
+    },
+
+    async saveCustomInstructions(customInstructions) {
+      const current = await readUserState(rootDirectory);
+      const next = mergeUserStates(current, {
+        customInstructions: String(customInstructions ?? '').trim()
+      });
+      await writeUserState(rootDirectory, next);
+      return next.customInstructions;
+    },
+
     async saveAvatar(sourcePath) {
       const ext = path.extname(sourcePath).toLowerCase() || '.png';
       const dataDir = path.join(rootDirectory, 'Data');

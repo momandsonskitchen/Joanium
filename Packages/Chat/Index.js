@@ -1,6 +1,6 @@
 import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
-import { readAttachmentFiles } from './Core/ChatAttachments.js';
+import { getSupportedAttachmentExtensions, readAttachmentFiles } from './Core/ChatAttachments.js';
 import { createUsageTracker, estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 export async function createPackage({ rootDirectory }) {
@@ -91,50 +91,8 @@ export async function createPackage({ rootDirectory }) {
             properties: ['openFile', 'multiSelections'],
             filters: [
               {
-                name: 'Text and code',
-                extensions: [
-                  'txt',
-                  'md',
-                  'mdx',
-                  'log',
-                  'csv',
-                  'tsv',
-                  'json',
-                  'yaml',
-                  'yml',
-                  'toml',
-                  'xml',
-                  'html',
-                  'css',
-                  'scss',
-                  'less',
-                  'js',
-                  'jsx',
-                  'ts',
-                  'tsx',
-                  'mjs',
-                  'cjs',
-                  'py',
-                  'rb',
-                  'go',
-                  'rs',
-                  'java',
-                  'cs',
-                  'c',
-                  'cpp',
-                  'h',
-                  'hpp',
-                  'php',
-                  'sql',
-                  'sh',
-                  'ps1',
-                  'bat',
-                  'env',
-                  'ini',
-                  'conf',
-                  'graphql',
-                  'gql'
-                ]
+                name: 'Documents, text, and code',
+                extensions: getSupportedAttachmentExtensions()
               }
             ]
           });
