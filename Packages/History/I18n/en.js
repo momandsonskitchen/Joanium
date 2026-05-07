@@ -1,5 +1,6 @@
 const en = {
   title: 'History',
+  subtitle: 'Browse and resume your past conversations.',
   newChat: 'New Chat',
   search: 'Search conversations…',
   noResults: 'No matching conversations',

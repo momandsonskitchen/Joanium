@@ -265,15 +265,19 @@ export function createHistoryPanel(strings, {
     panel.hidden = true;
 
     // Header row
-    const header      = createElement('div', 'chat-history__header');
-    const headerTitle = createElement('h2', 'chat-history__title', strings.title);
+    const header     = createElement('div', 'chat-history__header');
+    const headerText = createElement('div', 'chat-history__header-text');
+    headerText.append(
+      createElement('h2', 'chat-history__title',    strings.title),
+      createElement('p',  'chat-history__subtitle', strings.subtitle)
+    );
 
     const newBtn = createElement('button', 'chat-history__new-btn');
     newBtn.type  = 'button';
     newBtn.append(createIcon('tabChat', 'chat-history__new-icon'), createElement('span', 'chat-history__new-label', strings.newChat));
     newBtn.addEventListener('click', () => onNewChat?.());
 
-    header.append(headerTitle, newBtn);
+    header.append(headerText, newBtn);
 
     // Search bar
     const searchWrap  = createElement('div', 'chat-history__search-wrap');
