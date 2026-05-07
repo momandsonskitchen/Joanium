@@ -234,12 +234,6 @@ export function createMCPPanel(strings) {
     renderTools(Array.isArray(tools) ? tools : []);
   }
 
-  const header = createElement('div', 'mcp-panel__header');
-  header.append(
-    createElement('h3', 'mcp-panel__title', strings.title),
-    createElement('p', 'mcp-panel__subtitle', strings.subtitle)
-  );
-
   const body = createElement('div', 'mcp-panel__body');
   const form = createElement('section', 'mcp-form');
   form.append(createElement('div', 'mcp-form__title', strings.form.newServer));
@@ -307,7 +301,7 @@ export function createMCPPanel(strings) {
 
   content.append(listHeader, listEl, toolsHeader, toolsEl);
   body.append(form, content);
-  panel.append(header, body);
+  panel.append(body);
   syncTransportFields();
   void populate();
 

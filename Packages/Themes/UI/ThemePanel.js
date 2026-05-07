@@ -12,12 +12,6 @@ function createSegmentedOption(label, value, groupName) {
 
 export function createThemePanel(strings) {
   const panel = createElement('div', 'theme-panel');
-  const header = createElement('div', 'theme-panel__header');
-  header.append(
-    createElement('h3', 'theme-panel__title', strings.title),
-    createElement('p', 'theme-panel__subtitle', strings.subtitle)
-  );
-
   const modeGroup = createElement('section', 'theme-card');
   modeGroup.append(createElement('div', 'theme-card__label', strings.mode.label));
   const modeControls = createElement('div', 'theme-segmented');
@@ -80,7 +74,7 @@ export function createThemePanel(strings) {
     });
   }
 
-  panel.append(header, modeGroup, motionGroup, feedback);
+  panel.append(modeGroup, motionGroup, feedback);
 
   void invokeIpc('themes:get')
     .then((loaded) => {
