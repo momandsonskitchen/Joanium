@@ -232,12 +232,15 @@ function getPreferredProvider(payload) {
   );
 }
 
-function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
+function createModelPickerPanel({ providers, userProviderDetails, strings, onSelect }) {
   const panel = createElement('div', 'chat-model-picker');
   document.body.append(panel);
 
   const scroller = createElement('div', 'chat-model-picker__scroller');
   panel.append(scroller);
+
+  // key: "providerId/modelId"  value: dot element
+  const dotRefs = new Map();
 
   const readyProviders = providers.filter((provider) => {
     if (!provider.models?.length) return false;
@@ -257,7 +260,13 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
       option.type = 'button';
       option._pickerProviderId = provider.id;
       option._pickerModelId = model.id;
-      option.append(createElement('span', 'chat-model-picker__option-label', model.name ?? model.id));
+
+      const dot = createElement('span', 'chat-model-picker__health-dot chat-model-picker__health-dot--unknown');
+      dot.setAttribute('aria-label', strings.composer.healthYellow);
+      const label = createElement('span', 'chat-model-picker__option-label', model.name ?? model.id);
+      option.append(dot, label);
+      dotRefs.set(`${provider.id}/${model.id}`, dot);
+
       option.addEventListener('click', (event) => {
         event.stopPropagation();
         onSelect(provider, model);
@@ -268,8 +277,56 @@ function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
     scroller.append(group);
   }
 
+  function healthLabel(status) {
+    if (status === 'green')  return strings.composer.healthGreen;
+    if (status === 'red')    return strings.composer.healthRed;
+    return strings.composer.healthYellow;
+  }
+
+  function setDotStatus(dot, status) {
+    dot.className = `chat-model-picker__health-dot chat-model-picker__health-dot--${status}`;
+    dot.setAttribute('aria-label', healthLabel(status));
+  }
+
+  function applyHealthMap(map) {
+    for (const [key, status] of Object.entries(map)) {
+      const dot = dotRefs.get(key);
+      if (!dot) continue;
+      setDotStatus(dot, status);
+    }
+  }
+
+  // Fetch cached health immediately, then kick off background probes for
+  // any model whose status is still unknown / stale.
+  invokeIpc('chat:health-get').then((healthMap) => {
+    applyHealthMap(healthMap);
+
+    // Fire a background probe for every yellow model.
+    for (const provider of readyProviders) {
+      for (const model of provider.models) {
+        const key = `${provider.id}/${model.id}`;
+        if ((healthMap[key] ?? 'yellow') === 'yellow') {
+          void invokeIpc('chat:health-probe', provider.id, model.id);
+        }
+      }
+    }
+  }).catch(() => {});
+
+  // Live updates arriving while the picker is open.
+  const disposeHealthListener = onIpc('chat:health-update', ({ key, status }) => {
+    const dot = dotRefs.get(key);
+    if (dot) setDotStatus(dot, status);
+  });
+
   const scrollbar = attachCustomScrollbar(panel, scroller);
-  return { element: panel, dispose: scrollbar.dispose };
+
+  return {
+    element: panel,
+    dispose() {
+      disposeHealthListener();
+      scrollbar.dispose();
+    }
+  };
 }
 
 function generateSessionId() {
@@ -584,6 +641,7 @@ export async function createChatView(strings, {
   let messages = [];
   let streamDisposers = [];
   let modelPickerPanel = null;
+  let modelPickerDispose = null;
   let modelPickerOpen = false;
 
   let composerField = null;
@@ -803,6 +861,8 @@ export async function createChatView(strings, {
   function closeModelPicker() {
     modelPickerPanel?.classList.remove('chat-model-picker--open');
     modelButton?.classList.remove('chat-composer__model--open');
+    modelPickerDispose?.();
+    modelPickerDispose = null;
     modelPickerOpen = false;
   }
 
@@ -829,21 +889,23 @@ export async function createChatView(strings, {
     }
 
     if (!modelPickerPanel) {
-      const picker = createModelPickerPanel({
-        providers: payload.providers,
-        userProviderDetails: payload.user?.providers?.details ?? {},
-        onSelect(provider, model) {
-          activeProvider = provider;
-          activeModel = model;
-          activeModelLabel = model.name ?? model.id;
-          const labelEl = triggerButton.querySelector('.chat-composer__model-label');
-          if (labelEl) labelEl.textContent = activeModelLabel;
-          syncPickerActiveStates();
-          closeModelPicker();
-        }
-      });
-      modelPickerPanel = picker.element;
-    }
+        const picker = createModelPickerPanel({
+          providers: payload.providers,
+          userProviderDetails: payload.user?.providers?.details ?? {},
+          strings,
+          onSelect(provider, model) {
+            activeProvider = provider;
+            activeModel = model;
+            activeModelLabel = model.name ?? model.id;
+            const labelEl = triggerButton.querySelector('.chat-composer__model-label');
+            if (labelEl) labelEl.textContent = activeModelLabel;
+            syncPickerActiveStates();
+            closeModelPicker();
+          }
+        });
+        modelPickerPanel   = picker.element;
+        modelPickerDispose = picker.dispose;
+      }
 
     syncPickerActiveStates();
     modelPickerOpen = true;

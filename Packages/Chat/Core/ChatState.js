@@ -494,6 +494,67 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
   }
 }
 
+// ---------------------------------------------------------------------------
+// Transient-error retry wrapper
+// Retries the stream up to MAX_ATTEMPTS times with exponential backoff.
+// Only retries BEFORE any tokens have been emitted — once streaming has
+// started we cannot replay chunks, so a mid-stream failure is surfaced
+// immediately as an error.
+// Retryable: 429, 500, 502, 503, 504 and network-level codes.
+// ---------------------------------------------------------------------------
+
+const MAX_ATTEMPTS  = 3;
+const BASE_DELAY_MS = 800;
+
+const RETRYABLE_HTTP = new Set([429, 500, 502, 503, 504]);
+const RETRYABLE_CODES = new Set([
+  'ECONNRESET', 'ECONNREFUSED', 'ENOTFOUND',
+  'EPIPE', 'ETIMEDOUT', 'EAI_AGAIN', 'ENETUNREACH'
+]);
+
+function isRetryable(error) {
+  if (!error) return false;
+  if (RETRYABLE_CODES.has(error.code)) return true;
+  // HTTP errors formatted as "504 Gateway Timeout: ..."
+  const statusMatch = String(error.message ?? '').match(/^(\d{3})\b/);
+  if (statusMatch) return RETRYABLE_HTTP.has(Number(statusMatch[1]));
+  return false;
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function requestChatCompletionStreamWithRetry({ user, providers, request, onChunk }) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let tokensEmitted = false;
+
+    const guardedChunk = (chunk) => {
+      tokensEmitted = true;
+      onChunk(chunk);
+    };
+
+    try {
+      return await requestChatCompletionStream({ user, providers, request, onChunk: guardedChunk });
+    } catch (error) {
+      lastError = error;
+
+      // Once tokens are streaming we cannot retry — surface immediately.
+      if (tokensEmitted) throw error;
+
+      const willRetry = attempt < MAX_ATTEMPTS && isRetryable(error);
+      if (!willRetry) throw error;
+
+      const backoff = BASE_DELAY_MS * 2 ** (attempt - 1);
+      await delay(backoff);
+    }
+  }
+
+  throw lastError;
+}
+
 async function requestChatCompletionStream({ user, providers, request, onChunk }) {
   const messages     = sanitizeConversationMessages(request?.messages);
   const parts = [];
@@ -607,7 +668,7 @@ export function createChatStateManager({ rootDirectory }) {
           readProviderCatalog(rootDirectory)
         ]);
 
-        const meta = await requestChatCompletionStream({
+        const meta = await requestChatCompletionStreamWithRetry({
           user,
           providers,
           request,
@@ -628,7 +689,7 @@ export function createChatStateManager({ rootDirectory }) {
 
       let text = '';
       let thinking = '';
-      const meta = await requestChatCompletionStream({
+      const meta = await requestChatCompletionStreamWithRetry({
         user,
         providers,
         request,

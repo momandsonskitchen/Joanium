@@ -20,7 +20,10 @@ const en = {
     unknownAttachment: 'Attachment',
     reasoning: 'Reasoning',
     emptyResponse: 'No response received.',
-    responseError: 'Unable to get a response right now.'
+    responseError: 'Unable to get a response right now.',
+    healthGreen: 'Model is available',
+    healthYellow: 'Checking availability...',
+    healthRed: 'Model may be discontinued or unavailable'
   },
   projects: {
     activeHint: 'This project context will be used in new chats.',

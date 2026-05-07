@@ -1,11 +1,13 @@
 import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
+import { createModelHealthChecker } from './Core/ModelHealthCheck.js';
 import { getSupportedAttachmentExtensions, readAttachmentFiles } from './Core/ChatAttachments.js';
 import { createUsageTracker, estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 export async function createPackage({ rootDirectory }) {
-  const chatStateManager = createChatStateManager({ rootDirectory });
-  const usageTracker     = createUsageTracker({ rootDirectory });
+  const chatStateManager  = createChatStateManager({ rootDirectory });
+  const healthChecker      = createModelHealthChecker({ rootDirectory });
+  const usageTracker       = createUsageTracker({ rootDirectory });
 
   return {
     id: 'Chat',
@@ -102,6 +104,32 @@ export async function createPackage({ rootDirectory }) {
           }
 
           return readAttachmentFiles(result.filePaths);
+        }
+      },
+      // ── Model health ─────────────────────────────────────────────────────────
+      {
+        channel: 'chat:health-get',
+        handler: async () => {
+          const { providers } = await chatStateManager.getBootstrapPayload();
+          return healthChecker.getHealthMap(providers);
+        }
+      },
+      {
+        channel: 'chat:health-probe',
+        handler: async (event, providerId, modelId) => {
+          const { user, providers } = await chatStateManager.getBootstrapPayload();
+          const provider = providers.find((p) => p.id === providerId);
+          const model    = provider?.models?.find((m) => m.id === modelId);
+          if (!provider || !model) return null;
+
+          const providerDetails = user?.providers?.details?.[providerId] ?? {};
+          const result = await healthChecker.probeAndCache(provider, model, providerDetails);
+
+          if (!event.sender.isDestroyed()) {
+            event.sender.send('chat:health-update', result);
+          }
+
+          return result;
         }
       }
     ]

@@ -1134,6 +1134,66 @@
   height: 100%;
 }
 
+/* ── Health dots ───────────────────────────────────────────────────────── */
+
+.chat-model-picker__health-dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  position: relative;
+  transition: background-color 400ms ease;
+}
+
+.chat-model-picker__health-dot::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: var(--color-chat-text-title);
+  color: var(--color-bg-base, #fff);
+  font-size: 11.5px;
+  font-weight: 580;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease;
+  z-index: 100;
+}
+
+.chat-model-picker__health-dot:hover::after {
+  opacity: 1;
+}
+
+.chat-model-picker__health-dot--unknown {
+  background: rgba(140, 120, 105, 0.22);
+  animation: health-pulse 1.6s ease-in-out infinite;
+}
+
+.chat-model-picker__health-dot--yellow {
+  background: rgba(140, 120, 105, 0.22);
+  animation: health-pulse 1.6s ease-in-out infinite;
+}
+
+.chat-model-picker__health-dot--green {
+  background: #22c55e;
+  box-shadow: 0 0 5px rgba(34, 197, 94, 0.45);
+}
+
+.chat-model-picker__health-dot--red {
+  background: #ef4444;
+  box-shadow: 0 0 5px rgba(239, 68, 68, 0.40);
+}
+
+@keyframes health-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
 @keyframes chat-spin {
   from {
     transform: rotate(0deg);
