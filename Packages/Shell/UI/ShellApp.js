@@ -219,19 +219,6 @@ async function bootstrap() {
       }
     },
     {
-      id: 'events',
-      icon: 'tabEvents',
-      create: async () => {
-        const panel = createEventsPanel(strings.events);
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populate()
-        };
-      }
-    },
-    {
       id: 'projects',
       icon: 'tabProjects',
       create: async () => {
@@ -344,6 +331,19 @@ async function bootstrap() {
         return {
           element,
           onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+        };
+      }
+    },
+    {
+      id: 'events',
+      icon: 'tabEvents',
+      create: async () => {
+        const panel = createEventsPanel(strings.events);
+        const element = panel.build();
+        canvas.append(element);
+        return {
+          element,
+          onShow: () => panel.populate()
         };
       }
     },
