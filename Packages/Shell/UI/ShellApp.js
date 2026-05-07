@@ -227,19 +227,6 @@ async function bootstrap() {
       }
     },
     {
-      id: 'channels',
-      icon: 'tabChannels',
-      create: async () => {
-        const panel = createChannelsPanel(strings.channels);
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populate()
-        };
-      }
-    },
-    {
       id: 'events',
       icon: 'tabEvents',
       create: async () => {
@@ -512,6 +499,14 @@ async function bootstrap() {
         main.append(createAppSettingsPanel(strings.appSettings));
       }
 
+      if (id === 'channels') {
+        const panel = createChannelsPanel(strings.channels);
+        const element = panel.build();
+        element.hidden = false;
+        main.append(element);
+        await panel.populate();
+      }
+
       if (id === 'shortcuts') {
         main.append(createShortcutsPanel(strings.shortcuts));
       }
@@ -538,6 +533,7 @@ async function bootstrap() {
     for (const menu of [
       { id: 'user',      label: strings.settings.nav.user,      icon: iconMarkup.tabPersonas },
       { id: 'app',       label: strings.settings.nav.app,       icon: iconMarkup.power       },
+      { id: 'channels',  label: strings.settings.nav.channels,  icon: iconMarkup.tabChannels },
       { id: 'appearance', label: strings.settings.nav.appearance, icon: iconMarkup.palette },
       { id: 'mcp',       label: strings.settings.nav.mcp,       icon: iconMarkup.network     },
       { id: 'shortcuts', label: strings.settings.nav.shortcuts, icon: iconMarkup.keyboard    },
@@ -655,11 +651,6 @@ async function bootstrap() {
       handler: () => { void showRoute('history'); }
     },
     {
-      id: 'channels',
-      combo: { ctrl: true, shift: true, key: 'c' },
-      handler: () => { void showRoute('channels'); }
-    },
-    {
       id: 'events',
       combo: { ctrl: true, key: 'e' },
       handler: () => { void showRoute('events'); }
@@ -712,6 +703,11 @@ async function bootstrap() {
     {
       id: 'settings',
       combo: { ctrl: true, key: 's' },
+      handler: () => { void showSettingsPanel(); }
+    },
+    {
+      id: 'channels',
+      combo: { ctrl: true, shift: true, key: 'c' },
       handler: () => { void showSettingsPanel(); }
     }
   ]);

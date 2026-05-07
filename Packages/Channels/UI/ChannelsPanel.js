@@ -4,18 +4,6 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 
 const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack'];
 
-function formatDate(value) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  }).format(date);
-}
-
 function createField({ label, placeholder, type = 'text', multiline = false }) {
   const wrap = createElement('label', 'channels-field');
   const labelEl = createElement('span', 'channels-field__label', label);
@@ -53,26 +41,19 @@ function createSecretField({ label, placeholder, strings }) {
   return field;
 }
 
-function getChannelTone(channelName) {
-  return {
-    telegram: 'blue',
-    whatsapp: 'green',
-    discord: 'indigo',
-    slack: 'rose'
-  }[channelName] ?? 'neutral';
-}
-
-function getChannelInitial(channelName, strings) {
-  return strings.channels[channelName].name.slice(0, 1).toUpperCase();
+function getChannelIconPath(channelName) {
+  const names = {
+    telegram: 'Telegram',
+    whatsapp: 'WhatsApp',
+    discord: 'Discord',
+    slack: 'Slack'
+  };
+  return `../../../Assets/Icons/${names[channelName]}.png`;
 }
 
 export function createChannelsPanel(strings) {
   let panel = null;
-  let summaryActive = null;
-  let summaryConfigured = null;
-  let summaryTotal = null;
   let cardsWrap = null;
-  let historyList = null;
   const cardRefs = new Map();
 
   function setFeedback(channelName, message, tone = 'info') {
@@ -125,17 +106,11 @@ export function createChannelsPanel(strings) {
     if (refs.inputs.fromNumber && config?.fromNumber) {
       refs.inputs.fromNumber.value = config.fromNumber;
     }
-
-    if (refs.inputs.systemPrompt) {
-      refs.inputs.systemPrompt.value = config?.systemPrompt ?? '';
-    }
   }
 
   function getPayload(channelName) {
     const refs = cardRefs.get(channelName);
-    const payload = {
-      systemPrompt: refs.inputs.systemPrompt?.value.trim() ?? ''
-    };
+    const payload = {};
 
     if (channelName === 'telegram') {
       const botToken = refs.inputs.botToken.value.trim();
@@ -315,15 +290,22 @@ export function createChannelsPanel(strings) {
 
   function createChannelCard(channelName) {
     const channelStrings = strings.channels[channelName];
-    const card = createElement('article', `channels-card channels-card--${getChannelTone(channelName)}`);
+    const card = createElement('article', 'channels-card');
+
+    // ── Header (always visible) ──────────────────────────────────────────────
     const header = createElement('div', 'channels-card__header');
-    const badge = createElement('div', 'channels-card__badge', getChannelInitial(channelName, strings));
+    const badge = createElement('div', 'channels-card__badge');
+    const badgeImg = document.createElement('img');
+    badgeImg.src = getChannelIconPath(channelName);
+    badgeImg.alt = '';
+    badgeImg.className = 'channels-card__badge-img';
+    badge.append(badgeImg);
     const titleWrap = createElement('div', 'channels-card__title-wrap');
     const titleRow = createElement('div', 'channels-card__title-row');
     const status = createElement('span', 'channels-card__status', strings.common.notConnected);
 
     titleRow.append(createElement('h3', 'channels-card__title', channelStrings.name), status);
-    titleWrap.append(titleRow, createElement('p', 'channels-card__summary', channelStrings.summary));
+    titleWrap.append(titleRow);
 
     const toggleWrap = createElement('label', 'channels-toggle');
     const toggle = document.createElement('input');
@@ -334,7 +316,17 @@ export function createChannelsPanel(strings) {
       void toggleChannel(channelName, toggle.checked);
     });
     toggleWrap.append(toggle, createElement('span', 'channels-toggle__track'));
-    header.append(badge, titleWrap, toggleWrap);
+
+    const expandBtn = createElement('button', 'channels-card__expand');
+    expandBtn.type = 'button';
+    expandBtn.setAttribute('aria-label', strings.common.expand);
+    expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
+
+    header.append(badge, titleWrap, toggleWrap, expandBtn);
+
+    // ── Collapsible body ─────────────────────────────────────────────────────
+    const body = createElement('div', 'channels-card__body');
+    const bodyInner = createElement('div', 'channels-card__body-inner');
 
     const steps = createSetupSteps(channelName);
     const form = createElement('div', 'channels-card__form');
@@ -409,14 +401,6 @@ export function createChannelsPanel(strings) {
       form.append(row);
     }
 
-    const prompt = createField({
-      label: strings.common.optionalPrompt,
-      placeholder: strings.common.optionalPromptPlaceholder,
-      multiline: true
-    });
-    inputs.systemPrompt = prompt.input;
-    form.append(prompt.wrap);
-
     const actions = createElement('div', 'channels-card__actions');
     const disconnect = createElement('button', 'channels-card__secondary', strings.common.disconnect);
     const connect = createElement('button', 'channels-card__primary');
@@ -437,7 +421,16 @@ export function createChannelsPanel(strings) {
     feedback.hidden = true;
     feedback.setAttribute('aria-live', 'polite');
 
-    card.append(header, steps, form, actions, feedback);
+    const summary = createElement('p', 'channels-card__summary', channelStrings.summary);
+    bodyInner.append(summary, steps, form, actions, feedback);
+    body.append(bodyInner);
+    card.append(header, body);
+
+    expandBtn.addEventListener('click', () => {
+      const open = card.classList.toggle('channels-card--open');
+      expandBtn.setAttribute('aria-label', open ? strings.common.collapse : strings.common.expand);
+    });
+
     cardRefs.set(channelName, {
       card,
       status,
@@ -454,123 +447,25 @@ export function createChannelsPanel(strings) {
     return card;
   }
 
-  function renderHistory(messages) {
-    if (!historyList) return;
-    historyList.replaceChildren();
-
-    if (messages.length === 0) {
-      const empty = createElement('div', 'channels-history__empty', strings.history.empty);
-      historyList.append(empty);
-      return;
-    }
-
-    for (const message of messages.slice(0, 40)) {
-      const item = createElement('article', 'channels-history__item');
-      const meta = createElement('div', 'channels-history__meta');
-      const channelLabel = strings.channels[message.channel]?.name ?? message.channel;
-      const status = createElement(
-        'span',
-        `channels-history__status channels-history__status--${message.status === 'error' ? 'error' : 'success'}`,
-        message.status === 'error' ? strings.history.error : strings.history.success
-      );
-      meta.append(
-        createElement('span', 'channels-history__channel', channelLabel),
-        createElement('span', 'channels-history__from', message.from),
-        createElement('span', 'channels-history__date', formatDate(message.repliedAt)),
-        status
-      );
-
-      const incoming = createElement('p', 'channels-history__incoming', message.incoming);
-      const reply = createElement('p', 'channels-history__reply', message.reply || message.error || '');
-      const deleteButton = createElement('button', 'channels-history__delete');
-      deleteButton.type = 'button';
-      deleteButton.setAttribute('aria-label', strings.history.delete);
-      deleteButton.append(createIcon('trash', 'channels-history__delete-icon'));
-      deleteButton.addEventListener('click', async () => {
-        await invokeIpc('channels:delete-message', message.id);
-        await populate();
-      });
-
-      item.append(meta, incoming, reply, deleteButton);
-      historyList.append(item);
-    }
-  }
-
-  function updateSummary(channels) {
-    const configs = Object.values(channels ?? {});
-    const active = configs.filter((config) => config.configured && config.enabled).length;
-    const configured = configs.filter((config) => config.configured).length;
-    summaryActive.textContent = String(active);
-    summaryConfigured.textContent = String(configured);
-    summaryTotal.textContent = String(CHANNEL_ORDER.length);
-  }
-
   async function populate() {
-    const [channels, messages] = await Promise.all([
-      invokeIpc('channels:list'),
-      invokeIpc('channels:list-messages')
-    ]);
-
-    updateSummary(channels);
+    const channels = await invokeIpc('channels:list');
     for (const channelName of CHANNEL_ORDER) {
       setCardState(channelName, channels[channelName] ?? {});
     }
-    renderHistory(Array.isArray(messages) ? messages : []);
-  }
-
-  function buildSummaryTile(label, valueClass) {
-    const tile = createElement('div', 'channels-summary__tile');
-    const value = createElement('strong', valueClass, '0');
-    tile.append(value, createElement('span', 'channels-summary__label', label));
-    return { tile, value };
   }
 
   function build() {
     panel = createElement('div', 'channels');
     panel.hidden = true;
 
-    const header = createElement('div', 'channels__header');
-    const headerText = createElement('div', 'channels__header-text');
-    headerText.append(
-      createElement('h2', 'channels__title', strings.title),
-      createElement('p', 'channels__subtitle', strings.subtitle)
-    );
-    const summary = createElement('div', 'channels-summary');
-    const activeTile = buildSummaryTile(strings.overview.active, 'channels-summary__value');
-    const configuredTile = buildSummaryTile(strings.overview.configured, 'channels-summary__value');
-    const totalTile = buildSummaryTile(strings.overview.total, 'channels-summary__value');
-    summaryActive = activeTile.value;
-    summaryConfigured = configuredTile.value;
-    summaryTotal = totalTile.value;
-    summary.append(activeTile.tile, configuredTile.tile, totalTile.tile);
-    header.append(headerText, summary);
-
     const body = createElement('div', 'channels__body');
     cardsWrap = createElement('section', 'channels-grid');
     for (const channelName of CHANNEL_ORDER) {
       cardsWrap.append(createChannelCard(channelName));
     }
+    body.append(cardsWrap);
 
-    const history = createElement('aside', 'channels-history');
-    const historyHeader = createElement('div', 'channels-history__header');
-    const historyCopy = createElement('div', 'channels-history__copy');
-    historyCopy.append(
-      createElement('h3', 'channels-history__title', strings.history.title),
-      createElement('p', 'channels-history__subtitle', strings.history.subtitle)
-    );
-    const clearButton = createElement('button', 'channels-history__clear');
-    clearButton.type = 'button';
-    clearButton.append(createIcon('trash', 'channels-history__clear-icon'), createElement('span', '', strings.history.clear));
-    clearButton.addEventListener('click', async () => {
-      await invokeIpc('channels:clear-messages');
-      await populate();
-    });
-    historyHeader.append(historyCopy, clearButton);
-    historyList = createElement('div', 'channels-history__list');
-    history.append(historyHeader, historyList);
-    body.append(cardsWrap, history);
-
-    panel.append(header, body);
+    panel.append(body);
     panel._populate = populate;
     return panel;
   }

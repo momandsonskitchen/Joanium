@@ -60,6 +60,7 @@
 * All buttons should have rounded corners (20px).
 * Should follow material 3 expressive design.
 * I need a clean and very premium looking UI.
+* Should match the current app design language.
 
 # Data Storage
 * To store user data we use Data folder. 

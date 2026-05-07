@@ -199,6 +199,12 @@ export function createEventsPanel(strings) {
       body.append(createElement('span', 'events-row__preview', primary));
     }
 
+    if (event.type === 'channel' && event.secondary) {
+      const replyPreview = compactText(event.secondary, 120);
+      const replyEl = createElement('span', 'events-row__reply-preview', replyPreview);
+      body.append(replyEl);
+    }
+
     row.append(icon, body);
     row.addEventListener('click', () => selectEvent(event));
     return row;

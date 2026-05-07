@@ -23,6 +23,8 @@ const en = {
     channelContext: 'You are replying to {from} through {channel}. Keep the reply concise unless the request needs detail.'
   },
   common: {
+    expand: 'Expand',
+    collapse: 'Collapse',
     connect: 'Connect',
     connecting: 'Connecting...',
     disconnect: 'Disconnect',

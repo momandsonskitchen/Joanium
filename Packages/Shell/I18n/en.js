@@ -23,7 +23,6 @@ const en = {
   tabs: {
     chat: 'Chat',
     history: 'History',
-    channels: 'Channels',
     events: 'Events',
     projects: 'Projects',
     terminal: 'Terminal',
@@ -41,6 +40,7 @@ const en = {
     nav: {
       user: 'User',
       app: 'App',
+      channels: 'Channels',
       appearance: 'Appearance',
       mcp: 'MCP',
       shortcuts: 'Shortcuts',

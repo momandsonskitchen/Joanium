@@ -388,6 +388,20 @@
   line-height: 1.4;
 }
 
+.events-row__reply-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--color-chat-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0.72;
+  font-style: italic;
+  padding-left: 10px;
+  border-left: 2px solid rgba(44, 171, 104, 0.36);
+}
+
 .events-detail {
   display: flex;
   flex-direction: column;
