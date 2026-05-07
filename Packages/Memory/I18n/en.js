@@ -9,14 +9,13 @@ const en = {
   selectPrompt: 'Select a memory file to edit it.',
   filenameLabel: 'File',
   descriptionLabel: 'Purpose',
-  stats: '{lines} lines, {bullets} bullets',
+  stats: '{lines} lines',
   save: 'Save',
   saved: 'Saved',
   saving: 'Saving',
   saveFailed: 'Save failed',
   editorLabel: 'Memory Content',
-  emptyEditor: 'Choose a memory file from the list.',
-  contextEnabled: 'Included in chat context when it contains saved details.'
+  emptyEditor: 'Choose a memory file from the list.'
 };
 
 export default en;

@@ -11,7 +11,6 @@ export function createMemoryPanel(strings) {
   let editor = null;
   let filenameEl = null;
   let descriptionEl = null;
-  let statsEl = null;
   let saveButton = null;
   let activeFilename = null;
   let activeMemory = null;
@@ -67,8 +66,7 @@ export function createMemoryPanel(strings) {
     card.append(
       createElement('span', 'chat-memory__card-title', memory.title),
       createElement('span', 'chat-memory__card-meta', formatText(strings.stats, {
-        lines: String(memory.lineCount ?? 0),
-        bullets: String(memory.bulletCount ?? 0)
+        lines: String(memory.lineCount ?? 0)
       }))
     );
     card.addEventListener('click', () => {
@@ -82,7 +80,6 @@ export function createMemoryPanel(strings) {
     activeMemory = null;
     if (filenameEl) filenameEl.textContent = '';
     if (descriptionEl) descriptionEl.textContent = strings.emptyEditor;
-    if (statsEl) statsEl.textContent = '';
     if (editor) {
       editor.value = '';
       editor.disabled = true;
@@ -109,12 +106,6 @@ export function createMemoryPanel(strings) {
 
     if (filenameEl) filenameEl.textContent = activeMemory.filename;
     if (descriptionEl) descriptionEl.textContent = activeMemory.description;
-    if (statsEl) {
-      statsEl.textContent = formatText(strings.stats, {
-        lines: String(activeMemory.lineCount ?? 0),
-        bullets: String(activeMemory.bulletCount ?? 0)
-      });
-    }
     if (editor) {
       editor.disabled = false;
       editor.value = activeMemory.content;
@@ -186,8 +177,7 @@ export function createMemoryPanel(strings) {
     const editorMeta = createElement('div', 'chat-memory__editor-meta');
     filenameEl = createElement('h3', 'chat-memory__editor-title');
     descriptionEl = createElement('p', 'chat-memory__editor-description', strings.emptyEditor);
-    statsEl = createElement('p', 'chat-memory__editor-stats');
-    editorMeta.append(filenameEl, descriptionEl, statsEl);
+    editorMeta.append(filenameEl, descriptionEl);
 
     saveButton = createElement('button', 'chat-memory__save');
     saveButton.type = 'button';
@@ -196,12 +186,11 @@ export function createMemoryPanel(strings) {
     saveButton.addEventListener('click', () => { void saveMemory(); });
     editorHeader.append(editorMeta, saveButton);
 
-    const contextNote = createElement('p', 'chat-memory__context-note', strings.contextEnabled);
     editor = createElement('textarea', 'chat-memory__editor');
     editor.setAttribute('aria-label', strings.editorLabel);
     editor.disabled = true;
 
-    editorColumn.append(editorHeader, contextNote, editor);
+    editorColumn.append(editorHeader, editor);
     body.append(listColumn, editorColumn);
     panel.append(header, body);
     renderEmptyEditor();
