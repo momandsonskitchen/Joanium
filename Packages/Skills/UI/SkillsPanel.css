@@ -2,6 +2,8 @@
    Skills/UI/SkillsPanel.css
    ══════════════════════════════════════════════════════════════════════ */
 
+@import "../../Shared/PanelHeader/PanelHeader.css";
+
 .chat-skills {
   position: absolute;
   inset: 0;
@@ -9,43 +11,6 @@
   flex-direction: column;
   overflow: hidden;
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* ── Panel header ──────────────────────────────────────────────────────────
-   Drag region spanning the full width. Text group stacks vertically.
-   ────────────────────────────────────────────────────────── */
-
-.chat-skills__header {
-  display: flex;
-  align-items: flex-start;
-  padding: 50px 10px 20px;
-  flex-shrink: 0;
-  -webkit-app-region: drag;
-}
-
-.chat-skills__header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  -webkit-app-region: no-drag;
-  pointer-events: none;
-}
-
-.chat-skills__title {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1.1;
-  color: var(--color-chat-text-title);
-}
-
-.chat-skills__subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
-  line-height: 1.4;
 }
 
 /* ── Two-column body ──────────────────────────────────────────────────────────

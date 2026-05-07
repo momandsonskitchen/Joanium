@@ -3,6 +3,7 @@ import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 export function createMemoryPanel(strings) {
   let panel = null;
@@ -152,13 +153,7 @@ export function createMemoryPanel(strings) {
     panel = createElement('div', 'chat-memory');
     panel.hidden = true;
 
-    const header = createElement('div', 'chat-memory__header');
-    const headerCopy = createElement('div', 'chat-memory__header-copy');
-    headerCopy.append(
-      createElement('h2', 'chat-memory__title', strings.title),
-      createElement('p', 'chat-memory__subtitle', strings.subtitle)
-    );
-    header.append(headerCopy);
+    panel.append(createPanelHeader({ title: strings.title, subtitle: strings.subtitle }));
 
     const body = createElement('div', 'chat-memory__body');
     const listColumn = createElement('section', 'chat-memory__list-column');
@@ -192,7 +187,7 @@ export function createMemoryPanel(strings) {
 
     editorColumn.append(editorHeader, editor);
     body.append(listColumn, editorColumn);
-    panel.append(header, body);
+    panel.append(body);
     renderEmptyEditor();
     return panel;
   }

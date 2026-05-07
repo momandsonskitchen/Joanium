@@ -1,0 +1,41 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Shared/PanelHeader/PanelHeader.css
+   Standard drag-region header used across all chat sidebar panels.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 50px 10px 20px;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+}
+
+/* Copy block — title + subtitle stacked */
+
+.panel-header__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+
+.panel-header__title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  color: var(--color-chat-text-title);
+}
+
+.panel-header__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-chat-text-muted);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}

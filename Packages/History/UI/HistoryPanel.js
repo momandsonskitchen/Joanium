@@ -3,6 +3,7 @@ import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 // ---------------------------------------------------------------------------
 // Date helpers
@@ -265,19 +266,12 @@ export function createHistoryPanel(strings, {
     panel.hidden = true;
 
     // Header row
-    const header     = createElement('div', 'chat-history__header');
-    const headerText = createElement('div', 'chat-history__header-text');
-    headerText.append(
-      createElement('h2', 'chat-history__title',    strings.title),
-      createElement('p',  'chat-history__subtitle', strings.subtitle)
-    );
-
     const newBtn = createElement('button', 'chat-history__new-btn');
     newBtn.type  = 'button';
     newBtn.append(createIcon('tabChat', 'chat-history__new-icon'), createElement('span', 'chat-history__new-label', strings.newChat));
     newBtn.addEventListener('click', () => onNewChat?.());
 
-    header.append(headerText, newBtn);
+    const header = createPanelHeader({ title: strings.title, subtitle: strings.subtitle, actions: [newBtn] });
 
     // Search bar
     const searchWrap  = createElement('div', 'chat-history__search-wrap');

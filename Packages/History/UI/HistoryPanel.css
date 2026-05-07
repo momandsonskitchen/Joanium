@@ -1,4 +1,5 @@
 @import "../../Shared/SearchBar/SearchBar.css";
+@import "../../Shared/PanelHeader/PanelHeader.css";
 
 .chat-history {
   position: absolute;
@@ -7,41 +8,6 @@
   flex-direction: column;
   overflow: hidden;
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.chat-history__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 50px 10px 20px;
-  flex-shrink: 0;
-  -webkit-app-region: drag;
-}
-
-.chat-history__header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  -webkit-app-region: no-drag;
-  pointer-events: none;
-}
-
-.chat-history__title {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1.1;
-  color: var(--color-chat-text-title);
-}
-
-.chat-history__subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
-  line-height: 1.4;
 }
 
 .chat-history__new-btn {

@@ -4,6 +4,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 function createProjectId(name) {
   const sanitized = (name || 'Project').trim()
@@ -211,14 +212,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     panel.hidden = true;
 
     // Header
-    const header = createElement('div', 'chat-projects__header');
-    const headerCopy = createElement('div', 'chat-projects__header-copy');
-    headerCopy.append(
-      createElement('h2', 'chat-projects__title', strings.title),
-      createElement('p', 'chat-projects__subtitle', strings.subtitle)
-    );
-    header.append(headerCopy);
-    panel.append(header);
+    panel.append(createPanelHeader({ title: strings.title, subtitle: strings.subtitle }));
 
     // Body
     const body = createElement('div', 'chat-projects__body');

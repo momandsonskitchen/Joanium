@@ -4,6 +4,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 
 // ---------------------------------------------------------------------------
@@ -23,14 +24,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     panel.hidden = true;
 
     // Header — title + subtitle stacked, drag region
-    const header     = createElement('div', 'chat-personas__header');
-    const headerText = createElement('div', 'chat-personas__header-text');
-    headerText.append(
-      createElement('h2', 'chat-personas__title',    strings.title),
-      createElement('p',  'chat-personas__subtitle', strings.subtitle)
-    );
-    header.append(headerText);
-    panel.append(header);
+    panel.append(createPanelHeader({ title: strings.title, subtitle: strings.subtitle }));
 
     // Two-column body
     const body = createElement('div', 'chat-personas__body');
