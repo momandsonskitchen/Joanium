@@ -3,6 +3,7 @@ const en = {
   uploadAvatar: 'Upload Photo',
   changeAvatar: 'Change Photo',
   removeAvatar: 'Remove',
+  avatarHint: 'PNG, JPG, WEBP or GIF — max 5 MB',
   nameLabel: 'Name',
   namePlaceholder: 'Your full name',
   dateOfBirthLabel: 'Date of Birth',

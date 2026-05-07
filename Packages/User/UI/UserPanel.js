@@ -16,9 +16,7 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   // ── Avatar section ────────────────────────────────────────────────────────
 
   const avatarSection = createElement('div', 'chat-settings__avatar-section');
-  const avatarLabel = createElement('label', 'chat-settings__field-label', strings.avatarLabel);
 
-  const avatarPreviewWrap = createElement('div', 'chat-settings__avatar-preview-wrap');
   const avatarPreview = createElement('div', 'chat-settings__avatar-preview');
 
   let currentAvatarPath = getProfile()?.avatarPath ?? null;
@@ -38,7 +36,6 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   }
 
   renderAvatarPreview();
-  avatarPreviewWrap.append(avatarPreview);
 
   const avatarBtns = createElement('div', 'chat-settings__avatar-btns');
 
@@ -50,8 +47,12 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   }
   refreshUploadBtnLabel();
 
-  const removeBtn = createElement('button', 'chat-settings__avatar-remove-btn', strings.removeAvatar);
+  const removeBtn = createElement('button', 'chat-settings__avatar-remove-btn');
   removeBtn.type = 'button';
+  const removeBtnIcon = createElement('span', 'chat-settings__avatar-remove-btn-icon');
+  removeBtnIcon.innerHTML = iconMarkup.trash ?? '';
+  const removeBtnLabel = createElement('span', '', strings.removeAvatar);
+  removeBtn.append(removeBtnIcon, removeBtnLabel);
 
   function refreshRemoveBtnVisibility() {
     removeBtn.hidden = !currentAvatarPath;
@@ -93,8 +94,16 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
     }
   });
 
+  const avatarHint = createElement('p', 'chat-settings__avatar-hint', strings.avatarHint);
+
+  const avatarCardBody = createElement('div', 'chat-settings__avatar-card-body');
+  avatarCardBody.append(avatarBtns, avatarHint);
+
+  const avatarCard = createElement('div', 'chat-settings__avatar-card');
+  avatarCard.append(avatarPreview, avatarCardBody);
+
   avatarBtns.append(uploadBtn, removeBtn);
-  avatarSection.append(avatarLabel, avatarPreviewWrap, avatarBtns);
+  avatarSection.append(avatarCard);
 
   // ── Name ──────────────────────────────────────────────────────────────────
 
