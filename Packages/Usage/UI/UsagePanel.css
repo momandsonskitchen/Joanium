@@ -64,17 +64,11 @@
   display: flex;
   flex-direction: column;
   gap: 36px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: none;
 }
 
 .usage-content__scroller::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.usage-content__scroller::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
+  display: none;
 }
 
 .usage-loading,
