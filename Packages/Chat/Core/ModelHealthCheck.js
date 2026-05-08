@@ -20,39 +20,42 @@ function isFresh(health) {
 }
 
 // ---------------------------------------------------------------------------
-// Health cache — stored in Data/Models/health-cache.json.
+// Health cache — one ModelHealth.json per provider folder.
+// e.g. Data/Models/Nvidia/ModelHealth.json
 // Provider JSON files are never mutated; they are read-only catalog data.
-// A single write-lock promise serialises all writes to the cache file so
-// concurrent probes cannot interleave and corrupt it.
+// Per-provider write locks ensure concurrent probes for different models
+// of the same provider never interleave on disk.
 // ---------------------------------------------------------------------------
 
-let writeLock = Promise.resolve();
+const writeLocks = new Map();
 
-function getCachePath(rootDirectory) {
-  return path.join(rootDirectory, 'Data', 'Models', 'health-cache.json');
+function getProviderCachePath(rootDirectory, providerId) {
+  const folderName = providerId.charAt(0).toUpperCase() + providerId.slice(1);
+  return path.join(rootDirectory, 'Data', 'Models', folderName, 'ModelHealth.json');
 }
 
-async function readHealthCache(rootDirectory) {
+async function readProviderHealth(rootDirectory, providerId) {
   try {
-    const raw = await readFile(getCachePath(rootDirectory), 'utf8');
+    const raw = await readFile(getProviderCachePath(rootDirectory, providerId), 'utf8');
     return JSON.parse(raw);
   } catch {
     return {};
   }
 }
 
-function writeHealthCache(rootDirectory, cache) {
-  // Chain onto the lock so concurrent callers never overlap on disk.
-  writeLock = writeLock.then(async () => {
+function writeProviderHealth(rootDirectory, providerId, data) {
+  const lock = writeLocks.get(providerId) ?? Promise.resolve();
+  const next = lock.then(async () => {
     try {
-      const cachePath = getCachePath(rootDirectory);
+      const cachePath = getProviderCachePath(rootDirectory, providerId);
       await mkdir(path.dirname(cachePath), { recursive: true });
-      await writeFile(cachePath, JSON.stringify(cache, null, 2), 'utf8');
+      await writeFile(cachePath, JSON.stringify(data, null, 2), 'utf8');
     } catch {
       // Non-fatal.
     }
   });
-  return writeLock;
+  writeLocks.set(providerId, next);
+  return next;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,29 +192,29 @@ export function createModelHealthChecker({ rootDirectory }) {
   return {
     // Returns a flat map of { "providerId/modelId": "green"|"yellow"|"red" }
     async getHealthMap(providers) {
-      const cache  = await readHealthCache(rootDirectory);
       const result = {};
 
-      for (const provider of providers) {
+      await Promise.all(providers.map(async (provider) => {
+        const cache = await readProviderHealth(rootDirectory, provider.id);
         for (const model of provider.models ?? []) {
-          const key    = `${provider.id}/${model.id}`;
-          const health = cache[key] ?? null;
+          const key   = `${provider.id}/${model.id}`;
+          const health = cache[model.id] ?? null;
           result[key]  = isFresh(health) ? health.status : 'yellow';
         }
-      }
+      }));
 
       return result;
     },
 
-    // Probes a single model, writes result into the health cache, returns { key, status }.
+    // Probes a single model, writes result into the provider ModelHealth.json, returns { key, status }.
     async probeAndCache(provider, model, providerDetails) {
       const key    = `${provider.id}/${model.id}`;
       const status = await probeModel(provider, model, providerDetails);
 
       try {
-        const cache = await readHealthCache(rootDirectory);
-        cache[key]  = { status, checkedAt: new Date().toISOString() };
-        await writeHealthCache(rootDirectory, cache);
+        const cache   = await readProviderHealth(rootDirectory, provider.id);
+        cache[model.id] = { status, checkedAt: new Date().toISOString() };
+        await writeProviderHealth(rootDirectory, provider.id, cache);
       } catch {
         // Non-fatal.
       }
