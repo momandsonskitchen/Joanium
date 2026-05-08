@@ -15,6 +15,15 @@ app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 app.commandLine.appendSwitch('force-color-profile', 'srgb');
 
+// Disable Windows' native window occlusion tracker. Chromium uses this OS
+// signal to throttle occluded windows through a separate code path that
+// disable-backgrounding-occluded-windows alone does not cover.
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+
+// Speed up GPU channel establishment so the first frame renders immediately
+// when the user switches back to the app after a long absence.
+app.commandLine.appendSwitch('enable-features', 'EarlyEstablishGpuChannel,EstablishGpuChannelAsync');
+
 let mainWindow = null;
 let currentPackage = null;
 let packageLoader = null;
