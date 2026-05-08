@@ -1292,7 +1292,6 @@ export async function createChatView(strings, {
   let projectNameEl = null;
   let projectMetaEl = null;
   let modelButton = null;
-  let terminalButton = null;
 
   function scheduleTerminalProcessRender() {
     if (terminalProcessRenderFrame) return;
@@ -2622,16 +2621,7 @@ export async function createChatView(strings, {
     void selectAttachments();
   });
 
-  terminalButton = createElement('button', 'chat-composer__icon-button');
-  terminalButton.type = 'button';
-  terminalButton.setAttribute('aria-label', strings.terminal.open);
-  terminalButton.append(createIcon('terminal', 'chat-composer__icon'));
-  terminalButton.addEventListener('click', () => {
-    terminalPanel?.toggle();
-    focusComposer();
-  });
-
-  composerActions.append(attachBtn, terminalButton);
+  composerActions.append(attachBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   modelButton = createElement('button', 'chat-composer__model');
@@ -2679,8 +2669,6 @@ export async function createChatView(strings, {
   terminalPanel = createChatTerminalPanel(strings, {
     onOpenChange: (open) => {
       view.classList.toggle('chat-view--terminal', open);
-      terminalButton?.classList.toggle('chat-composer__icon-button--active', open);
-      terminalButton?.setAttribute('aria-label', open ? strings.terminal.close : strings.terminal.open);
     }
   });
   view.append(scroll, bottom, browserPreview.element, terminalPanel.build());

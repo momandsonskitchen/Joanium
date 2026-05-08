@@ -1,7 +1,7 @@
 {
   "deepseek-ai/deepseek-v3.2": {
     "status": "yellow",
-    "checkedAt": "2026-05-08T10:23:04.501Z"
+    "checkedAt": "2026-05-08T13:43:41.365Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -30,5 +30,9 @@
   "google/gemma-4-31b-it": {
     "status": "yellow",
     "checkedAt": "2026-05-08T10:23:19.478Z"
+  },
+  "z-ai/glm4.7": {
+    "status": "yellow",
+    "checkedAt": "2026-05-08T13:43:56.291Z"
   }
 }
