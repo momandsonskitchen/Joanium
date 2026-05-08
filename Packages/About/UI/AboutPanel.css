@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  max-width: 560px;
+  width: 100%;
   -webkit-app-region: no-drag;
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -24,14 +24,108 @@
 }
 
 .chat-profile__about-desc {
-  margin: 0 0 36px;
+  width: 100%;
+  margin: 0 0 24px;
   font-size: 15px;
   font-weight: 420;
   line-height: 1.68;
   letter-spacing: -0.01em;
   color: var(--color-chat-text-secondary);
-  max-width: 460px;
 }
+
+/* ── Social bar ────────────────────────────────────────────────────────── */
+
+.chat-profile__about-social {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+
+.chat-profile__about-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--color-chat-text-muted);
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(170, 134, 104, 0.10);
+  text-decoration: none;
+  transition:
+    background-color 130ms ease,
+    border-color 130ms ease,
+    color 130ms ease,
+    transform 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-profile__about-social-link:hover {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(170, 134, 104, 0.22);
+  color: var(--color-chat-text-title);
+  transform: translateY(-1px);
+}
+
+.chat-profile__about-social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.chat-profile__about-social-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Sponsor (icon-only, pink tint) ────────────────────────────────────── */
+
+.chat-profile__about-sponsor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: #c0529a;
+  background: rgba(192, 82, 154, 0.10);
+  border: 1px solid rgba(192, 82, 154, 0.18);
+  text-decoration: none;
+  transition:
+    background-color 130ms ease,
+    border-color 130ms ease,
+    color 130ms ease,
+    transform 130ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.chat-profile__about-sponsor:hover {
+  background: rgba(192, 82, 154, 0.18);
+  border-color: rgba(192, 82, 154, 0.35);
+  color: #d060ae;
+  transform: translateY(-1px);
+}
+
+/* ── Two-column layout ─────────────────────────────────────────────────── */
+
+.chat-profile__about-columns {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 24px;
+  width: 100%;
+  align-items: start;
+}
+
+.chat-profile__about-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ── Shared card style ─────────────────────────────────────────────────── */
 
 .chat-profile__about-meta {
   width: 100%;
@@ -47,7 +141,7 @@
 }
 
 .chat-profile__about-section-title {
-  margin: 24px 0 10px;
+  margin: 0 0 10px;
   font-size: 13px;
   font-weight: 720;
   letter-spacing: 0.08em;
@@ -84,31 +178,4 @@
   font-weight: 600;
   color: var(--color-chat-text-title);
   letter-spacing: -0.015em;
-}
-
-.chat-profile__about-sponsor {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 9px 20px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 620;
-  letter-spacing: -0.01em;
-  color: #c0529a;
-  background: rgba(192, 82, 154, 0.10);
-  text-decoration: none;
-  border: 1px solid rgba(192, 82, 154, 0.18);
-  transition:
-    background-color 130ms ease,
-    border-color 130ms ease,
-    color 130ms ease;
-  -webkit-app-region: no-drag;
-}
-
-.chat-profile__about-sponsor:hover {
-  background: rgba(192, 82, 154, 0.18);
-  border-color: rgba(192, 82, 154, 0.35);
-  color: #d060ae;
 }
