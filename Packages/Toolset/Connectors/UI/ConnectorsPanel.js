@@ -1,6 +1,7 @@
 import { createElement } from '../../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../../Shared/Icons/Icons.js';
+import { createTwoColGrid } from '../../../Shared/TwoColGrid/TwoColGrid.js';
 import defaultStrings from '../I18n/en.js';
 
 // ── Icon map: connector id → filename in Assets/Icons/ ──────────────────────
@@ -222,24 +223,17 @@ export function createConnectorsPanel(strings = defaultStrings) {
       createElement('h2', 'connectors__title', strings.title),
       createElement('p', 'connectors__subtitle', strings.subtitle)
     );
-    grid = createElement('section', 'connectors-grid');
-    const colA = createElement('div', 'connectors-grid__col');
-    const colB = createElement('div', 'connectors-grid__col');
-    grid.append(colA, colB);
-    grid._colA = colA;
-    grid._colB = colB;
-    panel.append(header, grid);
+    grid = createTwoColGrid();
+    panel.append(header, grid.el);
     return panel;
   }
 
   async function populate() {
     const connectors = await invokeIpc('connectors:list');
-    const colA = grid._colA;
-    const colB = grid._colB;
 
-    if (colA.childElementCount === 0 && colB.childElementCount === 0) {
-      for (let i = 0; i < connectors.length; i++) {
-        (i % 2 === 0 ? colA : colB).append(createConnectorCard(connectors[i]));
+    if (grid.el.querySelector('.connectors-card') === null) {
+      for (const connector of connectors) {
+        grid.append(createConnectorCard(connector));
       }
     }
 

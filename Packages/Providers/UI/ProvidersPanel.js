@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
 
 function createSecretField({ label, placeholder, strings }) {
   const wrap = createElement('label', 'providers-field');
@@ -45,8 +46,6 @@ function createTextField({ label, placeholder }) {
 export function createProvidersPanel(strings) {
   const cardRefs = new Map();
   let grid = null;
-  let colA = null;
-  let colB = null;
 
   function setFeedback(providerId, message, tone = 'info') {
     const refs = cardRefs.get(providerId);
@@ -268,21 +267,17 @@ export function createProvidersPanel(strings) {
   function build() {
     const panel = createElement('div', 'providers');
 
-    grid = createElement('section', 'providers-grid');
-    colA = createElement('div', 'providers-grid__col');
-    colB = createElement('div', 'providers-grid__col');
-    grid.append(colA, colB);
-
-    panel.append(grid);
+    grid = createTwoColGrid();
+    panel.append(grid.el);
     return panel;
   }
 
   async function populate() {
     const providers = await invokeIpc('providers:list-configured');
 
-    if (colA.childElementCount === 0 && colB.childElementCount === 0) {
-      for (let i = 0; i < providers.length; i++) {
-        (i % 2 === 0 ? colA : colB).append(createProviderCard(providers[i]));
+    if (grid.el.querySelector('.providers-card') === null) {
+      for (const provider of providers) {
+        grid.append(createProviderCard(provider));
       }
     }
 

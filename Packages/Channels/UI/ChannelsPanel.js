@@ -1,6 +1,7 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
 
 const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack'];
 
@@ -468,16 +469,12 @@ export function createChannelsPanel(strings) {
     panel.hidden = true;
 
     const body = createElement('div', 'channels__body');
-    cardsWrap = createElement('section', 'channels-grid');
-
-    const colA = createElement('div', 'channels-grid__col');
-    const colB = createElement('div', 'channels-grid__col');
-    for (let i = 0; i < CHANNEL_ORDER.length; i++) {
-      (i % 2 === 0 ? colA : colB).append(createChannelCard(CHANNEL_ORDER[i]));
+    cardsWrap = createTwoColGrid();
+    for (const channelName of CHANNEL_ORDER) {
+      cardsWrap.append(createChannelCard(channelName));
     }
-    cardsWrap.append(colA, colB);
+    body.append(cardsWrap.el);
 
-    body.append(cardsWrap);
     panel.append(body);
     panel._populate = populate;
     return panel;

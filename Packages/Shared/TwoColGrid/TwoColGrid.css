@@ -1,0 +1,24 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Shared/TwoColGrid/TwoColGrid.css
+   Two independent flex columns — expanding a card in one column never
+   affects the spacing of cards in the other column.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.two-col-grid {
+  display: flex;
+  gap: var(--two-col-grid-gap, 16px);
+}
+
+.two-col-grid__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--two-col-grid-gap, 16px);
+}
+
+@media (max-width: 720px) {
+  .two-col-grid {
+    flex-direction: column;
+  }
+}

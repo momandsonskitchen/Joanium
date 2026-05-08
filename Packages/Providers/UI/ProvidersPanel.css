@@ -27,26 +27,6 @@
   letter-spacing: -0.01em;
 }
 
-.providers-grid {
-  display: flex;
-  gap: 8px;
-  padding-bottom: 32px;
-}
-
-.providers-grid__col {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-@media (max-width: 720px) {
-  .providers-grid {
-    flex-direction: column;
-  }
-}
-
 /* ── Card ────────────────────────────────────────────────────────────────── */
 
 .providers-card {
@@ -345,7 +325,6 @@
 .providers-card__primary {
   background: var(--color-accent);
   color: #fff;
-  box-shadow: 0 6px 18px rgba(130, 65, 190, 0.30);
 }
 
 .providers-card__secondary {
