@@ -23,7 +23,7 @@
       },
       "health": {
         "status": "yellow",
-        "checkedAt": "2026-05-08T04:08:23.654Z"
+        "checkedAt": "2026-05-08T09:01:28.479Z"
       }
     },
     "minimaxai/minimax-m2.5": {
@@ -103,7 +103,7 @@
       },
       "health": {
         "status": "yellow",
-        "checkedAt": "2026-05-08T07:58:06.947Z"
+        "checkedAt": "2026-05-08T09:01:13.542Z"
       }
     },
     "qwen/qwen3.5-397b-a17b": {
@@ -203,7 +203,7 @@
       },
       "health": {
         "status": "yellow",
-        "checkedAt": "2026-05-08T07:58:21.895Z"
+        "checkedAt": "2026-05-08T09:01:28.559Z"
       }
     },
     "openai/gpt-oss-20b": {

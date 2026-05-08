@@ -528,18 +528,6 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
   controls.append(backButton, forwardButton, reloadButton, closeButton);
   header.append(identity, controls);
 
-  const form = createElement('form', 'browser-preview__form');
-  const input = document.createElement('input');
-  input.className = 'browser-preview__input';
-  input.type = 'url';
-  input.placeholder = strings.placeholder;
-  input.autocomplete = 'off';
-  input.spellcheck = false;
-  const openButton = createElement('button', 'browser-preview__open');
-  openButton.type = 'submit';
-  openButton.append(createIcon('arrowRight', 'browser-preview__open-icon'), createElement('span', '', strings.open));
-  form.append(input, openButton);
-
   const statusRow = createElement('div', 'browser-preview__status-row');
   const statusDot = createElement('span', 'browser-preview__status-dot browser-preview__status-dot--idle');
   const statusText = createElement('span', 'browser-preview__status', strings.ready);
@@ -555,7 +543,7 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
     createElement('span', 'browser-preview__empty-copy', strings.emptyCopy)
   );
   mount.append(viewport, empty);
-  panel.append(header, form, statusRow, mount);
+  panel.append(header, statusRow, mount);
 
   function setTone(tone) {
     statusDot.className = `browser-preview__status-dot browser-preview__status-dot--${tone}`;
@@ -613,10 +601,6 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
     forwardButton.disabled = !currentState.canGoForward;
     reloadButton.disabled = !currentState.hasPage;
 
-    if (currentState.url && document.activeElement !== input) {
-      input.value = currentState.url;
-    }
-
     scheduleBoundsSync();
   }
 
@@ -632,21 +616,6 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
   closeButton.addEventListener('click', () => {
     void invokeIpc('browser-preview:close').then(applyState).catch(() => {});
   });
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const value = input.value.trim();
-    if (!value) return;
-    statusText.textContent = strings.loading;
-    void invokeIpc('browser-preview:load-url', value).then(applyState).catch((error) => {
-      applyState({
-        ...currentState,
-        visible: true,
-        loading: false,
-        status: error?.message ?? strings.loadFailed
-      });
-    });
-  });
-
   return {
     element: panel,
     start() {
