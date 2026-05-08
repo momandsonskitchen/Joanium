@@ -1,3 +1,21 @@
 {
-  "messages": []
+  "messages": [
+    {
+      "id": "channel-message-1778240716258-72i4jf",
+      "channel": "telegram",
+      "from": "Joel",
+      "incoming": "Hello",
+      "reply": "Hey Joel! How's it going? What can I help you with today?",
+      "status": "success",
+      "error": null,
+      "provider": null,
+      "model": null,
+      "receivedAt": "2026-05-08T11:38:29.000Z",
+      "repliedAt": "2026-05-08T11:45:16.051Z",
+      "timestamp": "2026-05-08T11:45:16.051Z",
+      "externalId": "959887637",
+      "targetId": "5795218782",
+      "conversationId": "5795218782"
+    }
+  ]
 }

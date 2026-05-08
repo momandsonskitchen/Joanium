@@ -7,15 +7,7 @@
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.events__header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 0 40px 16px 0;
-  flex-shrink: 0;
-  -webkit-app-region: drag;
-}
+/* ── Header actions (injected into shared panel-header via actions[]) ──── */
 
 .events__actions {
   display: flex;
@@ -44,8 +36,8 @@
 }
 
 @keyframes events-live-pulse {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.06); }
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.06); }
   100% { transform: scale(1); }
 }
 
@@ -89,11 +81,13 @@
   height: 100%;
 }
 
+/* ── Stats ───────────────────────────────────────────────────────────────── */
+
 .events-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  padding: 0 40px 12px 10px;
+  padding: 0 10px 12px;
   flex-shrink: 0;
 }
 
@@ -130,13 +124,15 @@
   color: var(--color-chat-text-muted);
 }
 
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
 .events__body {
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(360px, 0.92fr) minmax(420px, 1.08fr);
   gap: 16px;
-  padding: 0 40px 40px 10px;
+  padding: 0 10px 20px;
   overflow: hidden;
 }
 
@@ -153,6 +149,8 @@
   -webkit-backdrop-filter: blur(14px) saturate(1.35);
   -webkit-app-region: no-drag;
 }
+
+/* ── Feed ────────────────────────────────────────────────────────────────── */
 
 .events-feed {
   display: flex;
@@ -193,7 +191,6 @@
 .events-filter__button--active {
   background: var(--color-accent);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(130, 65, 190, 0.24);
 }
 
 .events-feed__state {
@@ -214,6 +211,8 @@
   padding: 12px;
   overflow-y: auto;
 }
+
+/* ── Event rows ──────────────────────────────────────────────────────────── */
 
 .events-row {
   width: 100%;
@@ -366,6 +365,8 @@
   border-left: 2px solid rgba(44, 171, 104, 0.36);
 }
 
+/* ── Detail pane ─────────────────────────────────────────────────────────── */
+
 .events-detail {
   display: flex;
   flex-direction: column;
@@ -496,6 +497,8 @@
   color: var(--color-chat-text-secondary);
 }
 
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
 @media (max-width: 1180px) {
   .events__body {
     grid-template-columns: 1fr;
@@ -507,11 +510,6 @@
 }
 
 @media (max-width: 900px) {
-  .events__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .events-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

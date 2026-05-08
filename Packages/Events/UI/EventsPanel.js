@@ -155,12 +155,11 @@ export function createEventsPanel(strings) {
   }
 
   function createStatusBadge(event) {
-    const badge = createElement(
+    return createElement(
       'span',
       `events-row__status events-row__status--${event.status}`,
       strings.status[event.status] ?? event.status
     );
-    return badge;
   }
 
   function selectEvent(event) {
@@ -201,8 +200,7 @@ export function createEventsPanel(strings) {
     }
 
     if (event.type === 'channel' && event.secondary) {
-      const replyPreview = compactText(event.secondary, 120);
-      const replyEl = createElement('span', 'events-row__reply-preview', replyPreview);
+      const replyEl = createElement('span', 'events-row__reply-preview', compactText(event.secondary, 120));
       body.append(replyEl);
     }
 
@@ -344,39 +342,43 @@ export function createEventsPanel(strings) {
     panel = createElement('div', 'events');
     panel.hidden = true;
 
-    const header = createElement('div', 'events__header');
-    const copy = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
-
-    const headerActions = createElement('div', 'events__actions');
+    // ── Header ───────────────────────────────────────────────────────────────
     liveBadge = createElement('span', 'events-live', strings.states.live);
+
     const refreshButton = createElement('button', 'events-action');
     refreshButton.type = 'button';
     refreshButton.setAttribute('aria-label', strings.actions.refresh);
     refreshButton.append(createIcon('retry', 'events-action__icon'));
-    refreshButton.addEventListener('click', () => {
-      void populate({ pulse: true });
-    });
+    refreshButton.addEventListener('click', () => { void populate({ pulse: true }); });
+
     const clearButton = createElement('button', 'events-action events-action--danger');
     clearButton.type = 'button';
     clearButton.setAttribute('aria-label', strings.actions.clearAll);
     clearButton.append(createIcon('trash', 'events-action__icon'), createElement('span', 'events-action__label', strings.actions.clear));
-    clearButton.addEventListener('click', () => {
-      void clearEvents();
-    });
-    headerActions.append(liveBadge, refreshButton, clearButton);
-    header.append(copy, headerActions);
+    clearButton.addEventListener('click', () => { void clearEvents(); });
 
+    const headerActions = createElement('div', 'events__actions');
+    headerActions.append(liveBadge, refreshButton, clearButton);
+
+    const header = createPanelHeader({
+      title: strings.title,
+      subtitle: strings.subtitle,
+      actions: [headerActions]
+    });
+
+    // ── Stats ─────────────────────────────────────────────────────────────────
     const stats = createElement('div', 'events-stats');
-    const total = buildStat(strings.stats.total);
+    const total   = buildStat(strings.stats.total);
     const success = buildStat(strings.stats.success);
-    const errors = buildStat(strings.stats.errors);
+    const errors  = buildStat(strings.stats.errors);
     const sources = buildStat(strings.stats.sources);
-    statTotal = total.value;
+    statTotal   = total.value;
     statSuccess = success.value;
-    statErrors = errors.value;
+    statErrors  = errors.value;
     statSources = sources.value;
     stats.append(total.tile, success.tile, errors.tile, sources.tile);
 
+    // ── Filters + feed ────────────────────────────────────────────────────────
     const filters = createElement('div', 'events-filter');
     for (const filter of FILTERS) {
       const button = createElement(
@@ -401,6 +403,7 @@ export function createEventsPanel(strings) {
     emptyEl.hidden = true;
     listEl = createElement('div', 'events-feed__list');
     feed.append(filters, loadingEl, emptyEl, listEl);
+
     detailEl = createElement('aside', 'events-detail');
     renderDetail(null);
     body.append(feed, detailEl);
