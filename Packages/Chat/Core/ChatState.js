@@ -570,6 +570,12 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   if (typeof request?.memoryContext === 'string' && request.memoryContext.trim()) {
     parts.push(request.memoryContext.trim());
   }
+  if (typeof request?.terminalTools === 'string' && request.terminalTools.trim()) {
+    parts.push(request.terminalTools.trim());
+  }
+  if (typeof request?.toolsetTools === 'string' && request.toolsetTools.trim()) {
+    parts.push(request.toolsetTools.trim());
+  }
 
   const systemPrompt = parts.length > 0 ? parts.join('\n\n') : null;
 

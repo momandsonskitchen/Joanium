@@ -13,7 +13,6 @@ import security from '../../Security/I18n/en.js';
 import usage from '../../Usage/I18n/en.js';
 import channels from '../../Channels/I18n/en.js';
 import events from '../../Events/I18n/en.js';
-import terminal from '../../Terminal/I18n/en.js';
 import memory from '../../Memory/I18n/en.js';
 import themes from '../../Themes/I18n/en.js';
 import mcp from '../../MCP/I18n/en.js';
@@ -26,7 +25,6 @@ const en = {
     history: 'History',
     events: 'Events',
     projects: 'Projects',
-    terminal: 'Terminal',
     memory: 'Memory',
     templates: 'Templates',
     agents: 'Agents',
@@ -60,7 +58,6 @@ const en = {
       channels:    'Channels',
       events:      'Events',
       projects:    'Projects',
-      terminal:    'Terminal',
       memory:      'Memory',
       templates:   'Templates',
       agents:      'Agents',
@@ -74,7 +71,6 @@ const en = {
   chat,
   channels,
   events,
-  terminal,
   memory,
   themes,
   mcp,

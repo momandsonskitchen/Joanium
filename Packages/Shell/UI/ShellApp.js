@@ -9,7 +9,6 @@ import { createChannelsPanel } from '../../Channels/UI/ChannelsPanel.js';
 import { createChannelGateway } from '../../Channels/UI/ChannelGateway.js';
 import { createEventsPanel } from '../../Events/UI/EventsPanel.js';
 import { createProjectsPanel } from '../../Projects/UI/ProjectsPanel.js';
-import { createTerminalPanel } from '../../Terminal/UI/TerminalPanel.js';
 import { createMemoryPanel } from '../../Memory/UI/MemoryPanel.js';
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createAgentsPanel } from '../../Agents/UI/AgentsPanel.js';
@@ -166,7 +165,9 @@ async function bootstrap() {
         onActiveProjectChange: setActiveProject,
         getActivePersona: () => activePersona,
         onActivePersonaChange: setActivePersona,
-        getProfile: () => profile
+        getProfile: () => profile,
+        onNavigate: showRoute,
+        onOpenSettings: showSettingsPanel
       });
       canvas.append(chatView.element);
       routeViews.set('chat', {
@@ -237,19 +238,6 @@ async function bootstrap() {
         return {
           element,
           onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
-        };
-      }
-    },
-    {
-      id: 'terminal',
-      icon: 'tabTerminal',
-      create: async () => {
-        const panel = createTerminalPanel(strings.terminal);
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.onShow()
         };
       }
     },
@@ -468,7 +456,7 @@ async function bootstrap() {
 
     async function activateSubMenu(id) {
       navItems.querySelectorAll('.chat-settings__nav-item').forEach((item) => {
-        item.classList.toggle('chat-settings__nav-item--active', item.dataset.subId === id);
+        item.classList.toggle('chat-settings__nav-item--active', item._settingsSubId === id);
       });
 
       main.replaceChildren();
@@ -541,7 +529,7 @@ async function bootstrap() {
     ]) {
       const item = createElement('button', 'chat-settings__nav-item');
       item.type = 'button';
-      item.dataset.subId = menu.id;
+      item._settingsSubId = menu.id;
       const iconEl = createElement('span', 'chat-settings__nav-item-icon');
       iconEl.innerHTML = menu.icon;
       item.append(iconEl, createElement('span', 'chat-settings__nav-item-label', menu.label));
@@ -658,11 +646,6 @@ async function bootstrap() {
       id: 'projects',
       combo: { ctrl: true, key: 'p' },
       handler: () => { void showRoute('projects'); }
-    },
-    {
-      id: 'terminal',
-      combo: { ctrl: true, shift: true, key: 't' },
-      handler: () => { void showRoute('terminal'); }
     },
     {
       id: 'memory',

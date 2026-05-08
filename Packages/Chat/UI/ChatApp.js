@@ -219,6 +219,10 @@ function createMessageElement(message, strings, { onCopy, onRetry } = {}) {
     article.append(attachmentList);
   }
 
+  if (message.terminal) {
+    article.append(createTerminalCallElement(message.terminal, strings));
+  }
+
   if (!message.streaming && !message.pending && typeof onCopy === 'function' && typeof onRetry === 'function') {
     const onSpeak = message.role === 'assistant'
       ? (btn) => speakText(message.content, btn)
@@ -660,12 +664,515 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
   };
 }
 
+const MAX_TERMINAL_TOOL_CALLS = 3;
+const TERMINAL_TOOL_BLOCK_RE = /```joanium-terminal\s*([\s\S]*?)```/i;
+const TOOLSET_TOOL_BLOCK_RE = /```joanium-tool\s*([\s\S]*?)```/i;
+const SUPPORTED_TERMINAL_TOOLS = new Set([
+  'run_shell_command',
+  'assess_shell_command',
+  'inspect_workspace',
+  'search_workspace',
+  'read_local_file',
+  'list_directory',
+  'git_status',
+  'git_diff',
+  'run_project_checks'
+]);
+
+function parseJsonToolBlock(text, blockRegex) {
+  const rawText = String(text ?? '');
+  const match = rawText.match(blockRegex);
+
+  if (!match) {
+    return null;
+  }
+
+  try {
+    return {
+      payload: JSON.parse(match[1].trim()),
+      visibleContent: rawText.replace(match[0], '').trim()
+    };
+  } catch {
+    return null;
+  }
+}
+
+function parseTerminalToolRequest(text) {
+  const parsed = parseJsonToolBlock(text, TERMINAL_TOOL_BLOCK_RE);
+
+  if (!parsed) {
+    return null;
+  }
+
+  const tool = String(parsed.payload?.tool ?? '').trim();
+
+  if (!SUPPORTED_TERMINAL_TOOLS.has(tool)) {
+    return {
+      tool,
+      payload: parsed.payload,
+      unsupported: true,
+      visibleContent: parsed.visibleContent
+    };
+  }
+
+  return {
+    tool,
+    payload: parsed.payload,
+    unsupported: false,
+    visibleContent: parsed.visibleContent
+  };
+}
+
+function parseToolsetToolRequest(text) {
+  const parsed = parseJsonToolBlock(text, TOOLSET_TOOL_BLOCK_RE);
+  if (!parsed) return null;
+
+  return {
+    tool: String(parsed.payload?.tool ?? '').trim(),
+    payload: parsed.payload,
+    visibleContent: parsed.visibleContent
+  };
+}
+
+function getTerminalToolLabel(strings, tool) {
+  return strings.terminal?.toolLabels?.[tool] ?? tool;
+}
+
+function getTerminalActionSummary(action, strings) {
+  const payload = action?.payload ?? {};
+
+  if (payload.command) {
+    return payload.command;
+  }
+
+  if (payload.query) {
+    return payload.query;
+  }
+
+  if (payload.path) {
+    return payload.path;
+  }
+
+  if (payload.working_directory) {
+    return payload.working_directory;
+  }
+
+  return getTerminalToolLabel(strings, action?.tool);
+}
+
+function createTerminalCallElement(terminal, strings) {
+  const status = terminal.status ?? 'running';
+  const card = createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
+  const header = createElement('div', 'chat-terminal-call__header');
+  const identity = createElement('div', 'chat-terminal-call__identity');
+  const icon = createIcon('terminal', 'chat-terminal-call__icon');
+  const copy = createElement('div', 'chat-terminal-call__copy');
+  const label = createElement(
+    'div',
+    'chat-terminal-call__label',
+    terminal.label || strings.terminal.title
+  );
+  const command = createElement(
+    'div',
+    'chat-terminal-call__command',
+    terminal.command || terminal.summary || ''
+  );
+  copy.append(label, command);
+  identity.append(icon, copy);
+  const statusEl = createElement('span', 'chat-terminal-call__status', terminal.statusLabel ?? status);
+  header.append(identity, statusEl);
+  card.append(header);
+
+  const output = [terminal.output, terminal.error].filter(Boolean).join('\n\n').trim();
+  if (output) {
+    const details = document.createElement('details');
+    details.className = 'chat-terminal-call__details';
+    const summary = createElement('summary', 'chat-terminal-call__details-summary');
+    summary.append(
+      createIcon('chevronDown', 'chat-terminal-call__details-icon'),
+      createElement('span', '', strings.terminal.outputLabel)
+    );
+    const pre = createElement('pre', 'chat-terminal-call__output', output);
+    details.append(summary, pre);
+    card.append(details);
+  }
+
+  return card;
+}
+
+function formatTerminalResultForModel(strings, action, result) {
+  const payload = action?.payload ?? {};
+  const lines = [
+    strings.terminal.resultHeader,
+    `Tool: ${getTerminalToolLabel(strings, action.tool)}`
+  ];
+
+  if (payload.command) lines.push(`Command: ${payload.command}`);
+  if (result?.cwd) lines.push(`Working directory: ${result.cwd}`);
+  if (result?.path) lines.push(`Path: ${result.path}`);
+  if (result?.root) lines.push(`Workspace: ${result.root}`);
+  if (Number.isFinite(result?.exitCode)) {
+    lines.push(formatText(strings.terminal.exitCode, { code: String(result.exitCode) }));
+  }
+  if (result?.error) lines.push(`${strings.terminal.errorLabel}:\n${result.error}`);
+  if (result?.stdout) lines.push(`STDOUT:\n${result.stdout}`);
+  if (result?.stderr) lines.push(`STDERR:\n${result.stderr}`);
+  if (result?.summary) lines.push(`Summary:\n${JSON.stringify(result.summary, null, 2)}`);
+  if (Array.isArray(result?.matches)) {
+    lines.push(`Matches:\n${JSON.stringify(result.matches, null, 2)}`);
+  }
+  if (Array.isArray(result?.entries)) {
+    lines.push(`Entries:\n${JSON.stringify(result.entries, null, 2)}`);
+  }
+  if (result?.content) lines.push(`Content:\n${result.content}`);
+
+  if (lines.length === 2) {
+    lines.push(JSON.stringify(result ?? {}, null, 2));
+  }
+
+  return lines.join('\n\n');
+}
+
+function createChatTerminalPanel(strings, { onOpenChange } = {}) {
+  let panelRef = null;
+  let cwd = '';
+  let commandValue = '';
+  let outputValue = '';
+  let activeProcessId = null;
+  let allowRisky = false;
+  let isOpen = false;
+
+  let cwdInput = null;
+  let commandInput = null;
+  let outputEl = null;
+  let statusText = null;
+  let runButton = null;
+  let stopButton = null;
+
+  function setStatus(text, tone = '') {
+    if (!statusText) return;
+    statusText.textContent = text;
+    statusText.className = `chat-terminal-drawer__status${tone ? ` chat-terminal-drawer__status--${tone}` : ''}`;
+  }
+
+  function replaceOutput(text) {
+    outputValue = String(text ?? '');
+    if (outputEl) {
+      outputEl.textContent = outputValue || strings.terminal.emptyOutput;
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+  }
+
+  function appendOutput(text) {
+    outputValue = `${outputValue}${String(text ?? '')}`;
+    if (outputValue.length > 160000) {
+      outputValue = outputValue.slice(outputValue.length - 160000);
+    }
+    if (outputEl) {
+      outputEl.textContent = outputValue || strings.terminal.emptyOutput;
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+  }
+
+  function setRunning(running) {
+    if (runButton) runButton.disabled = running;
+    if (stopButton) stopButton.disabled = !running;
+    commandInput?.toggleAttribute('disabled', running);
+  }
+
+  function syncCwd(nextCwd) {
+    cwd = nextCwd || cwd;
+    if (cwdInput) cwdInput.value = cwd;
+  }
+
+  async function loadDefaultCwd() {
+    try {
+      const result = await invokeIpc('terminal:get-default-cwd');
+      if (result?.ok) syncCwd(result.cwd);
+    } catch {
+      setStatus(strings.terminal.idle);
+    }
+  }
+
+  async function chooseDirectory() {
+    const result = await invokeIpc('terminal:select-directory', { defaultPath: cwd });
+    if (result?.ok) syncCwd(result.path);
+  }
+
+  async function assessCommand(command) {
+    const result = await invokeIpc('terminal:assess-command-risk', { command });
+    return result?.risk ?? { level: 'low', blocked: false, requiresOptIn: false, reasons: [] };
+  }
+
+  async function runCommand(command = commandValue) {
+    const nextCommand = String(command ?? '').trim();
+    if (!nextCommand) {
+      setStatus(strings.terminal.noCommand, 'warning');
+      return;
+    }
+    if (!cwd) {
+      setStatus(strings.terminal.noDirectory, 'warning');
+      return;
+    }
+
+    const risk = await assessCommand(nextCommand);
+    if (risk.blocked) {
+      setStatus(strings.terminal.criticalRisk, 'danger');
+      appendOutput(`\n${strings.terminal.criticalRisk}\n`);
+      return;
+    }
+    if (risk.requiresOptIn && !allowRisky) {
+      setStatus(strings.terminal.highRisk, 'warning');
+      appendOutput(`\n${formatText(strings.terminal.riskReasons, { reasons: risk.reasons.join(' ') })}\n`);
+      return;
+    }
+
+    commandValue = nextCommand;
+    if (commandInput) commandInput.value = nextCommand;
+    replaceOutput(`$ ${nextCommand}\n`);
+    setRunning(true);
+    setStatus(strings.terminal.running, 'running');
+
+    try {
+      const result = await invokeIpc('terminal:spawn-command', {
+        command: nextCommand,
+        cwd,
+        allowRisky
+      });
+
+      if (!result?.ok) {
+        activeProcessId = null;
+        setRunning(false);
+        setStatus(result?.error ?? strings.terminal.defaultError, result?.risk?.blocked ? 'danger' : 'warning');
+        appendOutput(`\n${result?.error ?? strings.terminal.defaultError}\n`);
+        return;
+      }
+
+      activeProcessId = result.processId;
+      setStatus(strings.terminal.processStarted, 'running');
+    } catch (error) {
+      activeProcessId = null;
+      setRunning(false);
+      setStatus(error?.message ?? strings.terminal.defaultError, 'danger');
+      appendOutput(`\n${error?.message ?? strings.terminal.defaultError}\n`);
+    }
+  }
+
+  async function stopCommand() {
+    if (!activeProcessId) return;
+    const processId = activeProcessId;
+    activeProcessId = null;
+    await invokeIpc('terminal:kill', processId).catch(() => {});
+    setRunning(false);
+    setStatus(strings.terminal.stopped, 'warning');
+    appendOutput(`\n${strings.terminal.processStopped}\n`);
+  }
+
+  async function inspectWorkspace() {
+    if (!cwd) {
+      setStatus(strings.terminal.noDirectory, 'warning');
+      return;
+    }
+
+    replaceOutput('');
+    setStatus(strings.terminal.running, 'running');
+
+    try {
+      const result = await invokeIpc('terminal:inspect-workspace', { rootPath: cwd });
+      if (!result?.ok) {
+        setStatus(result?.error ?? strings.terminal.inspectFailed, 'danger');
+        replaceOutput(result?.error ?? strings.terminal.inspectFailed);
+        return;
+      }
+      replaceOutput(JSON.stringify(result.summary, null, 2));
+      setStatus(strings.terminal.finished, 'success');
+    } catch (error) {
+      setStatus(error?.message ?? strings.terminal.inspectFailed, 'danger');
+      replaceOutput(error?.message ?? strings.terminal.inspectFailed);
+    }
+  }
+
+  function createQuickButton(label, command) {
+    const button = createElement('button', 'chat-terminal-drawer__quick-button');
+    button.type = 'button';
+    button.textContent = label;
+    button.addEventListener('click', () => {
+      void runCommand(command);
+    });
+    return button;
+  }
+
+  function setOpen(nextOpen) {
+    isOpen = Boolean(nextOpen);
+    if (panelRef) panelRef.hidden = !isOpen;
+    onOpenChange?.(isOpen);
+    if (isOpen && !cwd) void loadDefaultCwd();
+  }
+
+  function wireProcessEvents() {
+    onIpc('terminal:process-output', (payload) => {
+      if (!payload || payload.processId !== activeProcessId) return;
+      appendOutput(payload.text);
+    });
+
+    onIpc('terminal:process-exit', (payload) => {
+      if (!payload || payload.processId !== activeProcessId) return;
+      const code = payload.code ?? 0;
+      activeProcessId = null;
+      setRunning(false);
+      appendOutput(`\n${formatText(strings.terminal.processExited, { code: String(code) })}\n`);
+      setStatus(strings.terminal.finished, code === 0 ? 'success' : 'danger');
+    });
+  }
+
+  function build() {
+    if (panelRef) return panelRef;
+
+    const panel = createElement('aside', 'chat-terminal-drawer');
+    panel.hidden = true;
+
+    const header = createElement('div', 'chat-terminal-drawer__header');
+    const headerCopy = createElement('div', 'chat-terminal-drawer__header-copy');
+    headerCopy.append(
+      createElement('h2', 'chat-terminal-drawer__title', strings.terminal.title),
+      createElement('p', 'chat-terminal-drawer__subtitle', strings.terminal.subtitle)
+    );
+    const closeButton = createElement('button', 'chat-terminal-drawer__close');
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', strings.terminal.close);
+    closeButton.append(createIcon('close', 'chat-terminal-drawer__close-icon'));
+    closeButton.addEventListener('click', () => setOpen(false));
+    header.append(headerCopy, closeButton);
+
+    const body = createElement('div', 'chat-terminal-drawer__body');
+    const controls = createElement('div', 'chat-terminal-drawer__controls');
+    const cwdGroup = createElement('label', 'chat-terminal-drawer__field');
+    cwdGroup.append(createElement('span', 'chat-terminal-drawer__label', strings.terminal.cwdLabel));
+    const cwdRow = createElement('div', 'chat-terminal-drawer__cwd-row');
+    cwdInput = createElement('input', 'chat-terminal-drawer__input');
+    cwdInput.type = 'text';
+    cwdInput.setAttribute('aria-label', strings.terminal.cwdLabel);
+    cwdInput.addEventListener('input', () => {
+      cwd = cwdInput.value;
+    });
+    const chooseButton = createElement('button', 'chat-terminal-drawer__icon-button');
+    chooseButton.type = 'button';
+    chooseButton.setAttribute('aria-label', strings.terminal.chooseDirectory);
+    chooseButton.append(createIcon('folderOpen', 'chat-terminal-drawer__icon'));
+    chooseButton.addEventListener('click', () => { void chooseDirectory(); });
+    cwdRow.append(cwdInput, chooseButton);
+    cwdGroup.append(cwdRow);
+
+    const commandGroup = createElement('label', 'chat-terminal-drawer__field');
+    commandGroup.append(createElement('span', 'chat-terminal-drawer__label', strings.terminal.commandLabel));
+    commandInput = createElement('textarea', 'chat-terminal-drawer__command');
+    commandInput.rows = 3;
+    commandInput.placeholder = strings.terminal.commandPlaceholder;
+    commandInput.setAttribute('aria-label', strings.terminal.commandLabel);
+    commandInput.addEventListener('input', () => {
+      commandValue = commandInput.value;
+    });
+    commandInput.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        void runCommand();
+      }
+    });
+    commandGroup.append(commandInput);
+
+    const riskLabel = createElement('label', 'chat-terminal-drawer__risk');
+    const riskInput = document.createElement('input');
+    riskInput.type = 'checkbox';
+    riskInput.className = 'chat-terminal-drawer__risk-input';
+    riskInput.addEventListener('change', () => {
+      allowRisky = riskInput.checked;
+    });
+    const riskCopy = createElement('span', 'chat-terminal-drawer__risk-copy');
+    riskCopy.append(
+      createElement('span', 'chat-terminal-drawer__risk-label', strings.terminal.allowRisky),
+      createElement('span', 'chat-terminal-drawer__risk-description', strings.terminal.allowRiskyDescription)
+    );
+    riskLabel.append(riskInput, riskCopy);
+
+    const actions = createElement('div', 'chat-terminal-drawer__actions');
+    runButton = createElement('button', 'chat-terminal-drawer__run');
+    runButton.type = 'button';
+    runButton.append(createIcon('play', 'chat-terminal-drawer__button-icon'), createElement('span', '', strings.terminal.run));
+    runButton.addEventListener('click', () => { void runCommand(); });
+    stopButton = createElement('button', 'chat-terminal-drawer__stop');
+    stopButton.type = 'button';
+    stopButton.disabled = true;
+    stopButton.append(createIcon('stop', 'chat-terminal-drawer__button-icon'), createElement('span', '', strings.terminal.stop));
+    stopButton.addEventListener('click', () => { void stopCommand(); });
+    actions.append(runButton, stopButton);
+
+    const quick = createElement('div', 'chat-terminal-drawer__quick');
+    quick.append(
+      createElement('span', 'chat-terminal-drawer__quick-label', strings.terminal.quickCommands),
+      createQuickButton(strings.terminal.gitStatus, 'git status --short --branch'),
+      createQuickButton(strings.terminal.gitDiff, 'git diff --stat --patch --minimal --color=never'),
+      createQuickButton(strings.terminal.runChecks, 'npm test')
+    );
+
+    const inspectButton = createElement('button', 'chat-terminal-drawer__secondary');
+    inspectButton.type = 'button';
+    inspectButton.append(createIcon('terminal', 'chat-terminal-drawer__button-icon'), createElement('span', '', strings.terminal.inspect));
+    inspectButton.addEventListener('click', () => { void inspectWorkspace(); });
+
+    controls.append(cwdGroup, commandGroup, riskLabel, actions, inspectButton, quick);
+
+    const outputPane = createElement('div', 'chat-terminal-drawer__output-pane');
+    const outputHeader = createElement('div', 'chat-terminal-drawer__output-header');
+    statusText = createElement('span', 'chat-terminal-drawer__status', strings.terminal.idle);
+    const outputActions = createElement('div', 'chat-terminal-drawer__output-actions');
+    const copyButton = createElement('button', 'chat-terminal-drawer__output-button', strings.terminal.copy);
+    copyButton.type = 'button';
+    copyButton.addEventListener('click', () => {
+      navigator.clipboard.writeText(outputValue).then(() => {
+        copyButton.textContent = strings.terminal.copied;
+        setTimeout(() => {
+          copyButton.textContent = strings.terminal.copy;
+        }, 1200);
+      }).catch(() => {});
+    });
+    const clearButton = createElement('button', 'chat-terminal-drawer__output-button', strings.terminal.clear);
+    clearButton.type = 'button';
+    clearButton.addEventListener('click', () => {
+      replaceOutput('');
+      setStatus(strings.terminal.idle);
+    });
+    outputActions.append(copyButton, clearButton);
+    outputHeader.append(statusText, outputActions);
+    outputEl = createElement('pre', 'chat-terminal-drawer__output', strings.terminal.emptyOutput);
+    outputPane.append(outputHeader, outputEl);
+    body.append(controls, outputPane);
+    panel.append(header, body);
+    panelRef = panel;
+    wireProcessEvents();
+    void loadDefaultCwd();
+    return panel;
+  }
+
+  return {
+    build,
+    toggle() {
+      setOpen(!isOpen);
+    },
+    setOpen,
+    isOpen() {
+      return isOpen;
+    }
+  };
+}
+
 export async function createChatView(strings, {
   getActiveProject,
   onActiveProjectChange,
   getActivePersona,
   onActivePersonaChange,
-  getProfile
+  getProfile,
+  onNavigate,
+  onOpenSettings
 } = {}) {
   initCompletionSound();
 
@@ -691,13 +1198,22 @@ export async function createChatView(strings, {
   let sessionCreatedAt = null;
   let messages = [];
   let streamDisposers = [];
+  let generationToken = 0;
   let modelPickerPanel = null;
   let modelPickerDispose = null;
   let modelPickerOpen = false;
+  let terminalPanel = null;
+  let toolsetPrompt = null;
+  let slashCommandsLoaded = false;
+  let slashCommands = [];
+  let slashFilteredCommands = [];
+  let slashSelectedIndex = 0;
+  let slashStartIndex = 0;
 
   let composerField = null;
   let attachmentsEl = null;
   let attachmentNotice = null;
+  let slashMenu = null;
   let sendButton = null;
   let thread = null;
   let title = null;
@@ -709,6 +1225,7 @@ export async function createChatView(strings, {
   let projectNameEl = null;
   let projectMetaEl = null;
   let modelButton = null;
+  let terminalButton = null;
 
   if (!activePersona) {
     try {
@@ -806,12 +1323,13 @@ export async function createChatView(strings, {
 
     const now = new Date().toISOString();
     const sessionMessages = messages
-      .filter((message) => !message.streaming && !message.pending && message.content)
-      .map(({ role, content, thinking, modelContent, attachments }) => {
+      .filter((message) => !message.hidden && !message.streaming && !message.pending && message.content)
+      .map(({ role, content, thinking, modelContent, attachments, terminal }) => {
         const entry = { role, content };
         if (thinking) entry.thinking = thinking;
         if (modelContent && modelContent !== content) entry.modelContent = modelContent;
         if (attachments?.length) entry.attachments = attachments.map(toAttachmentSummary);
+        if (terminal) entry.terminal = terminal;
         return entry;
       });
 
@@ -851,6 +1369,21 @@ export async function createChatView(strings, {
     } catch {
       return '';
     }
+  }
+
+  async function loadToolsetPrompt() {
+    if (toolsetPrompt !== null) {
+      return toolsetPrompt;
+    }
+
+    try {
+      const result = await invokeIpc('toolset:list-tools');
+      toolsetPrompt = result?.ok ? (result.systemPrompt ?? '') : '';
+    } catch {
+      toolsetPrompt = '';
+    }
+
+    return toolsetPrompt;
   }
 
   function applyActiveProject(project) {
@@ -895,6 +1428,7 @@ export async function createChatView(strings, {
           attachments: Array.isArray(message.attachments)
             ? message.attachments.map(toAttachmentSummary)
             : [],
+          terminal: message.terminal ?? null,
           thinking: message.thinking ?? '',
           streaming: false
         }))
@@ -987,7 +1521,256 @@ export async function createChatView(strings, {
     }, 0);
   }
 
+  function normalizeSlashId(value = '') {
+    return String(value ?? '')
+      .trim()
+      .replace(/^\/+/, '')
+      .replace(/\s+/g, '-')
+      .toLowerCase();
+  }
+
+  async function ensureSlashCommandsLoaded() {
+    if (slashCommandsLoaded) return;
+
+    const baseCommands = (strings.slash.commands ?? []).map((command) => ({
+      ...command,
+      id: normalizeSlashId(command.id)
+    }));
+    const templateCommands = [];
+    const agentCommands = [];
+
+    try {
+      const templates = await invokeIpc('templates:list-templates');
+      for (const template of Array.isArray(templates) ? templates : []) {
+        const id = normalizeSlashId(template.command || template.id || template.name);
+        if (!id || !template.prompt) continue;
+        templateCommands.push({
+          id,
+          label: template.name || id,
+          description: template.prompt.slice(0, 90),
+          type: 'template',
+          icon: 'tabTemplates',
+          prompt: template.prompt
+        });
+      }
+    } catch {
+      // Templates are optional.
+    }
+
+    try {
+      const agents = await invokeIpc('agents:list-agents');
+      for (const agent of Array.isArray(agents) ? agents : []) {
+        const id = normalizeSlashId(agent.id || agent.name);
+        if (!id || !agent.prompt) continue;
+        agentCommands.push({
+          id,
+          label: agent.name || id,
+          description: agent.prompt.slice(0, 90),
+          type: 'agent',
+          icon: 'tabAgents',
+          prompt: agent.prompt
+        });
+      }
+    } catch {
+      // Agents are optional.
+    }
+
+    slashCommands = [...baseCommands, ...templateCommands, ...agentCommands];
+    slashCommandsLoaded = true;
+  }
+
+  function closeSlashMenu() {
+    slashFilteredCommands = [];
+    slashSelectedIndex = 0;
+    if (slashMenu) {
+      slashMenu.hidden = true;
+      slashMenu.classList.remove('chat-slash-menu--open');
+      slashMenu.replaceChildren();
+    }
+  }
+
+  function renderSlashMenu() {
+    if (!slashMenu) return;
+
+    slashMenu.replaceChildren();
+    if (slashFilteredCommands.length === 0) {
+      slashMenu.hidden = true;
+      return;
+    }
+
+    const groups = [
+      ['action', strings.slash.sections.actions],
+      ['navigate', strings.slash.sections.navigate],
+      ['template', strings.slash.sections.templates],
+      ['agent', strings.slash.sections.agents]
+    ];
+
+    let globalIndex = 0;
+    for (const [type, sectionLabel] of groups) {
+      const commands = slashFilteredCommands.filter((command) => command.type === type);
+      if (commands.length === 0) continue;
+
+      slashMenu.append(createElement('div', 'chat-slash-menu__section', sectionLabel));
+
+      for (const command of commands) {
+        const item = createElement(
+          'button',
+          `chat-slash-menu__item${globalIndex === slashSelectedIndex ? ' chat-slash-menu__item--active' : ''}`
+        );
+        item.type = 'button';
+        item._slashIndex = globalIndex;
+        item._slashCommand = command;
+        item.setAttribute('aria-selected', String(globalIndex === slashSelectedIndex));
+
+        const icon = createIcon(command.icon || 'terminal', 'chat-slash-menu__icon');
+        const copy = createElement('span', 'chat-slash-menu__copy');
+        const label = createElement('span', 'chat-slash-menu__label');
+        label.append(
+          createElement('span', 'chat-slash-menu__slash', '/'),
+          createElement('span', 'chat-slash-menu__id', command.id),
+          createElement('span', 'chat-slash-menu__name', command.label)
+        );
+        const description = createElement('span', 'chat-slash-menu__description', command.description || '');
+        copy.append(label, description);
+        const badge = createElement(
+          'span',
+          `chat-slash-menu__badge chat-slash-menu__badge--${command.type}`,
+          strings.slash.badges[command.type] ?? command.type
+        );
+        item.append(icon, copy, badge);
+        item.addEventListener('mouseenter', () => {
+          slashSelectedIndex = item._slashIndex;
+          renderSlashMenu();
+        });
+        item.addEventListener('click', () => {
+          applySlashCommand(command);
+        });
+        slashMenu.append(item);
+        globalIndex += 1;
+      }
+    }
+
+    slashMenu.hidden = false;
+    requestAnimationFrame(() => slashMenu?.classList.add('chat-slash-menu--open'));
+  }
+
+  function getSlashQuery() {
+    if (!composerField) return null;
+
+    const cursor = composerField.selectionStart;
+    const beforeCursor = draftValue.slice(0, cursor);
+    const lineStart = beforeCursor.lastIndexOf('\n') + 1;
+    const currentLine = beforeCursor.slice(lineStart);
+    const match = currentLine.match(/(^|\s)(\/[a-z0-9_-]*)$/i);
+    if (!match) return null;
+
+    const token = match[2];
+    slashStartIndex = lineStart + currentLine.length - token.length;
+    return token.slice(1).toLowerCase();
+  }
+
+  async function updateSlashMenu() {
+    const query = getSlashQuery();
+    if (query === null) {
+      closeSlashMenu();
+      return;
+    }
+
+    await ensureSlashCommandsLoaded();
+    slashFilteredCommands = slashCommands.filter((command) => (
+      command.id.includes(query) ||
+      String(command.label ?? '').toLowerCase().includes(query) ||
+      String(command.description ?? '').toLowerCase().includes(query)
+    ));
+    slashSelectedIndex = 0;
+    renderSlashMenu();
+  }
+
+  function setDraftValue(nextValue, cursorPosition = nextValue.length) {
+    draftValue = nextValue;
+    syncComposer();
+    if (composerField) {
+      composerField.focus();
+      composerField.setSelectionRange(cursorPosition, cursorPosition);
+    }
+    void updateSlashMenu();
+  }
+
+  function removeSlashToken(replacement = '') {
+    if (!composerField) return;
+    const cursor = composerField.selectionStart;
+    const before = draftValue.slice(0, slashStartIndex);
+    const after = draftValue.slice(cursor);
+    setDraftValue(`${before}${replacement}${after}`, before.length + replacement.length);
+  }
+
+  function applySlashCommand(command) {
+    closeSlashMenu();
+
+    if (command.type === 'template' || command.type === 'agent') {
+      removeSlashToken(command.prompt || '');
+      return;
+    }
+
+    removeSlashToken('');
+
+    if (command.id === 'new') {
+      clearConversation();
+      return;
+    }
+
+    if (command.id === 'terminal') {
+      terminalPanel?.setOpen(true);
+      focusComposer();
+      return;
+    }
+
+    if (command.id === 'settings') {
+      onOpenSettings?.();
+      return;
+    }
+
+    if (command.type === 'navigate') {
+      void onNavigate?.(command.id);
+    }
+  }
+
+  function handleSlashKeydown(event) {
+    if (!slashMenu || slashMenu.hidden || slashFilteredCommands.length === 0) {
+      return false;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      slashSelectedIndex = Math.min(slashSelectedIndex + 1, slashFilteredCommands.length - 1);
+      renderSlashMenu();
+      return true;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      slashSelectedIndex = Math.max(slashSelectedIndex - 1, 0);
+      renderSlashMenu();
+      return true;
+    }
+
+    if (event.key === 'Enter' || event.key === 'Tab') {
+      event.preventDefault();
+      applySlashCommand(slashFilteredCommands[slashSelectedIndex]);
+      return true;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeSlashMenu();
+      return true;
+    }
+
+    return false;
+  }
+
   function stopStream() {
+    generationToken += 1;
     markCompletionSoundAborted();
     removeStreamListeners();
     const stoppedNote = strings.composer.generationStopped;
@@ -1053,6 +1836,7 @@ export async function createChatView(strings, {
   }
 
   function clearConversation() {
+    generationToken += 1;
     messages = [];
     draftValue = '';
     pendingAttachments = [];
@@ -1060,6 +1844,7 @@ export async function createChatView(strings, {
     sessionId = null;
     sessionCreatedAt = null;
     removeStreamListeners();
+    closeSlashMenu();
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
       resetSpeakButton(activeSpeakBtn);
@@ -1096,11 +1881,23 @@ export async function createChatView(strings, {
       return;
     }
 
-    thread.replaceChildren(...messages.map((message, index) => {
+    const visibleMessages = messages
+      .map((message, index) => ({ message, index }))
+      .filter(({ message }) => !message.hidden);
+
+    thread.replaceChildren(...visibleMessages.map(({ message, index }) => {
       const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
       const onRetry = () => {
         if (isSending) return;
-        const userIndex = message.role === 'user' ? index : index - 1;
+        let userIndex = message.role === 'user' ? index : -1;
+        if (userIndex < 0) {
+          for (let candidate = index - 1; candidate >= 0; candidate -= 1) {
+            if (messages[candidate]?.role === 'user' && !messages[candidate]?.hidden) {
+              userIndex = candidate;
+              break;
+            }
+          }
+        }
         if (userIndex < 0) return;
         const userMessage = messages[userIndex];
         if (!userMessage?.content) return;
@@ -1120,6 +1917,411 @@ export async function createChatView(strings, {
 
     requestAnimationFrame(() => {
       thread.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    });
+  }
+
+  async function resolveTerminalCwd(requestedPath = '') {
+    const explicitPath = String(requestedPath ?? '').trim();
+    if (explicitPath) return explicitPath;
+
+    try {
+      const result = await invokeIpc('terminal:get-default-cwd');
+      return result?.ok ? result.cwd : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function resolveTerminalTimeout(payload = {}) {
+    const seconds = Number(payload.timeout_seconds);
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.min(Math.max(seconds * 1000, 1000), 300000);
+    }
+
+    return undefined;
+  }
+
+  async function executeTerminalTool(action) {
+    const payload = action?.payload ?? {};
+
+    if (action?.unsupported) {
+      return { ok: false, error: strings.terminal.unsupportedTool };
+    }
+
+    if (action.tool === 'run_shell_command') {
+      return invokeIpc('terminal:run-command', {
+        command: payload.command,
+        cwd: await resolveTerminalCwd(payload.working_directory ?? payload.cwd),
+        timeout: resolveTerminalTimeout(payload),
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'assess_shell_command') {
+      return invokeIpc('terminal:assess-command-risk', { command: payload.command });
+    }
+
+    if (action.tool === 'inspect_workspace') {
+      return invokeIpc('terminal:inspect-workspace', {
+        rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory)
+      });
+    }
+
+    if (action.tool === 'search_workspace') {
+      return invokeIpc('terminal:search-workspace', {
+        rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory),
+        query: payload.query,
+        maxResults: payload.max_results
+      });
+    }
+
+    if (action.tool === 'read_local_file') {
+      return invokeIpc('terminal:read-file', {
+        filePath: payload.path,
+        maxLines: payload.max_lines
+      });
+    }
+
+    if (action.tool === 'list_directory') {
+      return invokeIpc('terminal:list-directory', {
+        dirPath: payload.path || await resolveTerminalCwd(payload.working_directory)
+      });
+    }
+
+    if (action.tool === 'git_status') {
+      return invokeIpc('terminal:git-status', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path)
+      });
+    }
+
+    if (action.tool === 'git_diff') {
+      return invokeIpc('terminal:git-diff', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        staged: payload.staged === true
+      });
+    }
+
+    if (action.tool === 'run_project_checks') {
+      return invokeIpc('terminal:run-project-checks', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        includeLint: payload.include_lint !== false,
+        includeTest: payload.include_test !== false,
+        includeBuild: payload.include_build !== false
+      });
+    }
+
+    return { ok: false, error: strings.terminal.unsupportedTool };
+  }
+
+  async function executeToolsetTool(action) {
+    const payload = action?.payload ?? {};
+    return invokeIpc('toolset:execute-tool', {
+      tool: action.tool,
+      parameters: payload.parameters ?? {}
+    });
+  }
+
+  function formatToolsetResultForModel(action, result) {
+    const lines = [
+      'Built-in tool result',
+      `Tool: ${action.tool}`
+    ];
+
+    if (result?.output) lines.push(`Output:\n${result.output}`);
+    if (result?.error) lines.push(`Error:\n${result.error}`);
+    if (!result?.output && !result?.error) lines.push(JSON.stringify(result ?? {}, null, 2));
+    return lines.join('\n\n');
+  }
+
+  function updateLastAssistantMessage(updater) {
+    messages = messages.map((message, index) => (
+      index !== messages.length - 1 ? message : updater(message)
+    ));
+  }
+
+  function buildTerminalDisplayOutput(result) {
+    const parts = [];
+    if (result?.stdout) parts.push(result.stdout);
+    if (result?.stderr) parts.push(result.stderr);
+    if (result?.error) parts.push(result.error);
+    if (result?.summary) parts.push(JSON.stringify(result.summary, null, 2));
+    if (Array.isArray(result?.matches)) parts.push(JSON.stringify(result.matches, null, 2));
+    if (Array.isArray(result?.entries)) parts.push(JSON.stringify(result.entries, null, 2));
+    if (result?.content) parts.push(result.content);
+    return parts.join('\n\n').trim();
+  }
+
+  async function continueAfterTerminalTool(action, terminalDepth, runToken, generationStartTime) {
+    let result;
+
+    try {
+      result = await executeTerminalTool(action);
+    } catch (error) {
+      result = { ok: false, error: error?.message ?? String(error) };
+    }
+
+    if (runToken !== generationToken) return;
+
+    const isBlocked = Boolean(result?.risk?.blocked);
+    const ok = result?.ok !== false && !result?.error;
+    const status = isBlocked ? 'blocked' : ok ? 'completed' : 'failed';
+    const statusLabel = isBlocked
+      ? strings.terminal.blockedTool
+      : ok
+        ? strings.terminal.completedTool
+        : strings.terminal.failedTool;
+    const modelResult = formatTerminalResultForModel(strings, action, result);
+
+    updateLastAssistantMessage((message) => ({
+      ...message,
+      terminal: {
+        ...(message.terminal ?? {}),
+        status,
+        statusLabel,
+        output: buildTerminalDisplayOutput(result),
+        exitCode: result?.exitCode
+      }
+    }));
+
+    messages = [
+      ...messages,
+      {
+        role: 'user',
+        content: strings.terminal.hiddenResultLabel,
+        modelContent: modelResult,
+        hidden: true
+      },
+      {
+        role: 'assistant',
+        content: '',
+        thinking: '',
+        streaming: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel
+      }
+    ];
+
+    accText = '';
+    accThinking = '';
+    syncComposer();
+    renderThread();
+
+    await startAssistantStream({
+      isNewSession: false,
+      terminalDepth: terminalDepth + 1,
+      runToken,
+      generationStartTime
+    });
+  }
+
+  async function continueAfterToolsetTool(action, terminalDepth, runToken, generationStartTime) {
+    let result;
+
+    try {
+      result = await executeToolsetTool(action);
+    } catch (error) {
+      result = { ok: false, error: error?.message ?? String(error), tool: action.tool };
+    }
+
+    if (runToken !== generationToken) return;
+
+    const ok = result?.ok !== false && !result?.error;
+    const modelResult = formatToolsetResultForModel(action, result);
+
+    updateLastAssistantMessage((message) => ({
+      ...message,
+      terminal: {
+        ...(message.terminal ?? {}),
+        status: ok ? 'completed' : 'failed',
+        statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
+        output: result?.output ?? result?.error ?? ''
+      }
+    }));
+
+    messages = [
+      ...messages,
+      {
+        role: 'user',
+        content: strings.tools.hiddenResultLabel,
+        modelContent: modelResult,
+        hidden: true
+      },
+      {
+        role: 'assistant',
+        content: '',
+        thinking: '',
+        streaming: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel
+      }
+    ];
+
+    accText = '';
+    accThinking = '';
+    syncComposer();
+    renderThread();
+
+    await startAssistantStream({
+      isNewSession: false,
+      terminalDepth: terminalDepth + 1,
+      runToken,
+      generationStartTime
+    });
+  }
+
+  async function startAssistantStream({
+    isNewSession,
+    terminalDepth = 0,
+    runToken,
+    generationStartTime
+  }) {
+    removeStreamListeners();
+
+    streamDisposers.push(onIpc('chat:stream-chunk', (chunk) => {
+      if (runToken !== generationToken) return;
+      if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
+      if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
+      const { content: displayContent, thinking: inlineThinking } = parseThinkingFromText(accText);
+      const displayThinking = accThinking || inlineThinking;
+      updateLastStreamingMessage(thread, { content: displayContent, thinking: displayThinking });
+    }));
+
+    streamDisposers.push(onIpc('chat:stream-done', (meta) => {
+      if (runToken !== generationToken) return;
+      removeStreamListeners();
+      const { content: parsedContent, thinking: inlineThinking } = parseThinkingFromText(accText);
+      const terminalAction = parseTerminalToolRequest(parsedContent);
+      const toolsetAction = terminalAction ? null : parseToolsetToolRequest(parsedContent);
+
+      if ((terminalAction || toolsetAction) && terminalDepth >= MAX_TERMINAL_TOOL_CALLS) {
+        const action = terminalAction || toolsetAction;
+        updateLastAssistantMessage((message) => ({
+          ...message,
+          role: 'assistant',
+          content: action.visibleContent || strings.terminal.unsupportedTool,
+          thinking: accThinking || inlineThinking,
+          streaming: false,
+          error: true,
+          providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+          modelLabel: meta?.modelLabel ?? activeModelLabel
+        }));
+        isSending = false;
+        void saveCurrentSession();
+        void playCompletionSound(generationStartTime);
+        syncComposer();
+        renderThread();
+        return;
+      }
+
+      if (terminalAction) {
+        const label = getTerminalToolLabel(strings, terminalAction.tool);
+        updateLastAssistantMessage((message) => ({
+          ...message,
+          role: 'assistant',
+          content: terminalAction.visibleContent || strings.terminal.runningTool,
+          thinking: accThinking || inlineThinking,
+          streaming: false,
+          providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+          modelLabel: meta?.modelLabel ?? activeModelLabel,
+          terminal: {
+            label,
+            command: getTerminalActionSummary(terminalAction, strings),
+            status: terminalAction.unsupported ? 'failed' : 'running',
+            statusLabel: terminalAction.unsupported
+              ? strings.terminal.unsupportedTool
+              : strings.terminal.running
+          }
+        }));
+        syncComposer();
+        renderThread();
+
+        if (terminalAction.unsupported) {
+          isSending = false;
+          void saveCurrentSession();
+          void playCompletionSound(generationStartTime);
+          syncComposer();
+          return;
+        }
+
+        void continueAfterTerminalTool(terminalAction, terminalDepth, runToken, generationStartTime);
+        return;
+      }
+
+      if (toolsetAction) {
+        updateLastAssistantMessage((message) => ({
+          ...message,
+          role: 'assistant',
+          content: toolsetAction.visibleContent || strings.tools.runningTool,
+          thinking: accThinking || inlineThinking,
+          streaming: false,
+          providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+          modelLabel: meta?.modelLabel ?? activeModelLabel,
+          terminal: {
+            label: toolsetAction.tool,
+            command: toolsetAction.tool,
+            status: 'running',
+            statusLabel: strings.terminal.running
+          }
+        }));
+        syncComposer();
+        renderThread();
+        void continueAfterToolsetTool(toolsetAction, terminalDepth, runToken, generationStartTime);
+        return;
+      }
+
+      updateLastAssistantMessage(() => ({
+        role: 'assistant',
+        content: parsedContent || strings.composer.emptyResponse,
+        thinking: accThinking || inlineThinking,
+        streaming: false,
+        providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+        modelLabel: meta?.modelLabel ?? activeModelLabel
+      }));
+      isSending = false;
+      void saveCurrentSession();
+      void playCompletionSound(generationStartTime);
+      syncComposer();
+      renderThread();
+    }));
+
+    streamDisposers.push(onIpc('chat:stream-error', (error) => {
+      if (runToken !== generationToken) return;
+      removeStreamListeners();
+      updateLastAssistantMessage(() => ({
+        role: 'assistant',
+        content: error?.message || strings.composer.responseError,
+        thinking: accThinking,
+        streaming: false,
+        error: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel
+      }));
+      isSending = false;
+      syncComposer();
+      renderThread();
+    }));
+
+    const historyToSend = messages.slice(0, -1).map(({ role, content, modelContent }) => ({
+      role,
+      content: role === 'user' ? (modelContent || content) : content
+    }));
+    const [memoryContext, toolsetTools] = await Promise.all([
+      loadMemoryContext(),
+      loadToolsetPrompt()
+    ]);
+
+    if (runToken !== generationToken) return;
+
+    void invokeIpc('chat:stream-message', {
+      messages: historyToSend,
+      providerId: activeProvider?.id ?? null,
+      modelId: activeModel?.id ?? null,
+      memoryContext: memoryContext || null,
+      projectInfo: buildProjectContext(activeProject) || null,
+      persona: (getActivePersona?.() ?? activePersona)?.content || null,
+      terminalTools: strings.terminal.systemPrompt,
+      toolsetTools: toolsetTools || null,
+      isNewSession
     });
   }
 
@@ -1166,68 +2368,17 @@ export async function createChatView(strings, {
     accText = '';
     accThinking = '';
     const generationStartTime = Date.now();
+    const runToken = ++generationToken;
+    closeSlashMenu();
     renderPendingAttachments();
     syncComposer();
     renderThread();
     focusComposer();
-    removeStreamListeners();
-
-    streamDisposers.push(onIpc('chat:stream-chunk', (chunk) => {
-      if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
-      if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
-      const { content: displayContent, thinking: inlineThinking } = parseThinkingFromText(accText);
-      const displayThinking = accThinking || inlineThinking;
-      updateLastStreamingMessage(thread, { content: displayContent, thinking: displayThinking });
-    }));
-
-    streamDisposers.push(onIpc('chat:stream-done', (meta) => {
-      removeStreamListeners();
-      const { content: parsedContent, thinking: inlineThinking } = parseThinkingFromText(accText);
-      messages = messages.map((message, index) => index !== messages.length - 1 ? message : {
-        role: 'assistant',
-        content: parsedContent || strings.composer.emptyResponse,
-        thinking: accThinking || inlineThinking,
-        streaming: false,
-        providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-        modelLabel: meta?.modelLabel ?? activeModelLabel
-      });
-      isSending = false;
-      void saveCurrentSession();
-      void playCompletionSound(generationStartTime);
-      syncComposer();
-      renderThread();
-    }));
-
-    streamDisposers.push(onIpc('chat:stream-error', (error) => {
-      removeStreamListeners();
-      messages = messages.map((message, index) => index !== messages.length - 1 ? message : {
-        role: 'assistant',
-        content: error?.message || strings.composer.responseError,
-        thinking: accThinking,
-        streaming: false,
-        error: true,
-        providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
-      });
-      isSending = false;
-      syncComposer();
-      renderThread();
-    }));
-
-    const historyToSend = messages.slice(0, -1).map(({ role, content, modelContent }) => ({
-      role,
-      content: role === 'user' ? (modelContent || content) : content
-    }));
-    const memoryContext = await loadMemoryContext();
-
-    void invokeIpc('chat:stream-message', {
-      messages: historyToSend,
-      providerId: activeProvider?.id ?? null,
-      modelId: activeModel?.id ?? null,
-      memoryContext: memoryContext || null,
-      projectInfo: buildProjectContext(activeProject) || null,
-      persona: (getActivePersona?.() ?? activePersona)?.content || null,
-      isNewSession
+    await startAssistantStream({
+      isNewSession,
+      terminalDepth: 0,
+      runToken,
+      generationStartTime
     });
   }
 
@@ -1268,8 +2419,10 @@ export async function createChatView(strings, {
     draftValue = event.target.value;
     syncComposerFieldHeight();
     syncComposer();
+    void updateSlashMenu();
   });
   composerField.addEventListener('keydown', (event) => {
+    if (handleSlashKeydown(event)) return;
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       void submitPrompt();
@@ -1286,7 +2439,16 @@ export async function createChatView(strings, {
     void selectAttachments();
   });
 
-  composerActions.append(attachBtn);
+  terminalButton = createElement('button', 'chat-composer__icon-button');
+  terminalButton.type = 'button';
+  terminalButton.setAttribute('aria-label', strings.terminal.open);
+  terminalButton.append(createIcon('terminal', 'chat-composer__icon'));
+  terminalButton.addEventListener('click', () => {
+    terminalPanel?.toggle();
+    focusComposer();
+  });
+
+  composerActions.append(attachBtn, terminalButton);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   modelButton = createElement('button', 'chat-composer__model');
@@ -1319,7 +2481,11 @@ export async function createChatView(strings, {
   attachmentsEl.hidden = true;
   attachmentNotice = createElement('div', 'chat-composer__notice');
   attachmentNotice.hidden = true;
-  composer.append(projectPill, attachmentsEl, attachmentNotice, composerField, composerFooter);
+  slashMenu = createElement('div', 'chat-slash-menu');
+  slashMenu.hidden = true;
+  slashMenu.setAttribute('role', 'listbox');
+  slashMenu.setAttribute('aria-label', strings.slash.label);
+  composer.append(projectPill, attachmentsEl, attachmentNotice, composerField, composerFooter, slashMenu);
   scroll.append(title, thread);
   bottom.append(composer);
   const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {
@@ -1327,7 +2493,14 @@ export async function createChatView(strings, {
       view.classList.toggle('chat-view--browser-preview', visible);
     }
   });
-  view.append(scroll, bottom, browserPreview.element);
+  terminalPanel = createChatTerminalPanel(strings, {
+    onOpenChange: (open) => {
+      view.classList.toggle('chat-view--terminal', open);
+      terminalButton?.classList.toggle('chat-composer__icon-button--active', open);
+      terminalButton?.setAttribute('aria-label', open ? strings.terminal.close : strings.terminal.open);
+    }
+  });
+  view.append(scroll, bottom, browserPreview.element, terminalPanel.build());
   browserPreview.start();
 
   applyActiveProject(activeProject);

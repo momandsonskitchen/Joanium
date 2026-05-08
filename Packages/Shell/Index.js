@@ -24,6 +24,7 @@ export async function createPackage({ rootDirectory }) {
       'Events',
       'Projects',
       'Terminal',
+      'Toolset',
       'Memory',
       'Templates',
       'Agents',
