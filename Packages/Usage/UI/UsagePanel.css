@@ -20,7 +20,7 @@
 
 .usage-view__header {
   flex-shrink: 0;
-  padding: 0 52px 0 0;
+  padding: 0 40px 0 0;
   -webkit-app-region: drag;
 }
 
@@ -60,7 +60,7 @@
 .usage-content__scroller {
   height: 100%;
   overflow-y: auto;
-  padding: 24px 52px 64px;
+  padding: 24px 40px 64px 10px;
   display: flex;
   flex-direction: column;
   gap: 36px;
