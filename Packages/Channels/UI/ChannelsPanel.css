@@ -14,8 +14,21 @@
 
 .channels-grid {
   display: flex;
+  gap: 8px;
+}
+
+.channels-grid__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .channels-grid {
+    flex-direction: column;
+  }
 }
 
 .channels-card {

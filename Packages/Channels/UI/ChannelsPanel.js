@@ -427,8 +427,17 @@ export function createChannelsPanel(strings) {
     card.append(header, body);
 
     expandBtn.addEventListener('click', () => {
-      const open = card.classList.toggle('channels-card--open');
-      expandBtn.setAttribute('aria-label', open ? strings.common.collapse : strings.common.expand);
+      const isOpen = card.classList.contains('channels-card--open');
+      // Close all cards
+      for (const [, r] of cardRefs) {
+        r.card.classList.remove('channels-card--open');
+        r.card.querySelector('.channels-card__expand')?.setAttribute('aria-label', strings.common.expand);
+      }
+      // Open this one only if it was closed
+      if (!isOpen) {
+        card.classList.add('channels-card--open');
+        expandBtn.setAttribute('aria-label', strings.common.collapse);
+      }
     });
 
     cardRefs.set(channelName, {
@@ -460,11 +469,15 @@ export function createChannelsPanel(strings) {
 
     const body = createElement('div', 'channels__body');
     cardsWrap = createElement('section', 'channels-grid');
-    for (const channelName of CHANNEL_ORDER) {
-      cardsWrap.append(createChannelCard(channelName));
-    }
-    body.append(cardsWrap);
 
+    const colA = createElement('div', 'channels-grid__col');
+    const colB = createElement('div', 'channels-grid__col');
+    for (let i = 0; i < CHANNEL_ORDER.length; i++) {
+      (i % 2 === 0 ? colA : colB).append(createChannelCard(CHANNEL_ORDER[i]));
+    }
+    cardsWrap.append(colA, colB);
+
+    body.append(cardsWrap);
     panel.append(body);
     panel._populate = populate;
     return panel;

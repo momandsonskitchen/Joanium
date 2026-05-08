@@ -29,9 +29,22 @@
 
 .providers-grid {
   display: flex;
-  flex-direction: column;
   gap: 8px;
   padding-bottom: 32px;
+}
+
+.providers-grid__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .providers-grid {
+    flex-direction: column;
+  }
 }
 
 /* ── Card ────────────────────────────────────────────────────────────────── */

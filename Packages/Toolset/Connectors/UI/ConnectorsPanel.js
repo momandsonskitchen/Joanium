@@ -197,8 +197,17 @@ export function createConnectorsPanel(strings = defaultStrings) {
     card.append(header, body);
 
     expandBtn.addEventListener('click', () => {
-      const open = card.classList.toggle('connectors-card--open');
-      expandBtn.setAttribute('aria-label', open ? 'Collapse' : 'Expand');
+      const isOpen = card.classList.contains('connectors-card--open');
+      // Close all cards
+      for (const [, ref] of refs) {
+        ref.card.classList.remove('connectors-card--open');
+        ref.card.querySelector('.connectors-card__expand')?.setAttribute('aria-label', 'Expand');
+      }
+      // Open this one only if it was closed
+      if (!isOpen) {
+        card.classList.add('connectors-card--open');
+        expandBtn.setAttribute('aria-label', 'Collapse');
+      }
     });
 
     refs.set(connector.id, { card, input, status, save, saveLabel, remove, feedback });
@@ -214,15 +223,23 @@ export function createConnectorsPanel(strings = defaultStrings) {
       createElement('p', 'connectors__subtitle', strings.subtitle)
     );
     grid = createElement('section', 'connectors-grid');
+    const colA = createElement('div', 'connectors-grid__col');
+    const colB = createElement('div', 'connectors-grid__col');
+    grid.append(colA, colB);
+    grid._colA = colA;
+    grid._colB = colB;
     panel.append(header, grid);
     return panel;
   }
 
   async function populate() {
     const connectors = await invokeIpc('connectors:list');
-    if (grid.childElementCount === 0) {
-      for (const connector of connectors) {
-        grid.append(createConnectorCard(connector));
+    const colA = grid._colA;
+    const colB = grid._colB;
+
+    if (colA.childElementCount === 0 && colB.childElementCount === 0) {
+      for (let i = 0; i < connectors.length; i++) {
+        (i % 2 === 0 ? colA : colB).append(createConnectorCard(connectors[i]));
       }
     }
 

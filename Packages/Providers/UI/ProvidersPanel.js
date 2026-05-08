@@ -45,6 +45,8 @@ function createTextField({ label, placeholder }) {
 export function createProvidersPanel(strings) {
   const cardRefs = new Map();
   let grid = null;
+  let colA = null;
+  let colB = null;
 
   function setFeedback(providerId, message, tone = 'info') {
     const refs = cardRefs.get(providerId);
@@ -236,8 +238,17 @@ export function createProvidersPanel(strings) {
     card.append(header, body);
 
     expandBtn.addEventListener('click', () => {
-      const open = card.classList.toggle('providers-card--open');
-      expandBtn.setAttribute('aria-label', open ? strings.collapse : strings.expand);
+      const isOpen = card.classList.contains('providers-card--open');
+      // Close all cards
+      for (const [, r] of cardRefs) {
+        r.card.classList.remove('providers-card--open');
+        r.card.querySelector('.providers-card__expand')?.setAttribute('aria-label', strings.expand);
+      }
+      // Open this one only if it was closed
+      if (!isOpen) {
+        card.classList.add('providers-card--open');
+        expandBtn.setAttribute('aria-label', strings.collapse);
+      }
     });
 
     cardRefs.set(provider.id, {
@@ -258,6 +269,9 @@ export function createProvidersPanel(strings) {
     const panel = createElement('div', 'providers');
 
     grid = createElement('section', 'providers-grid');
+    colA = createElement('div', 'providers-grid__col');
+    colB = createElement('div', 'providers-grid__col');
+    grid.append(colA, colB);
 
     panel.append(grid);
     return panel;
@@ -266,9 +280,9 @@ export function createProvidersPanel(strings) {
   async function populate() {
     const providers = await invokeIpc('providers:list-configured');
 
-    if (grid.childElementCount === 0) {
-      for (const provider of providers) {
-        grid.append(createProviderCard(provider));
+    if (colA.childElementCount === 0 && colB.childElementCount === 0) {
+      for (let i = 0; i < providers.length; i++) {
+        (i % 2 === 0 ? colA : colB).append(createProviderCard(providers[i]));
       }
     }
 
