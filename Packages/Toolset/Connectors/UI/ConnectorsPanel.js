@@ -3,6 +3,46 @@ import { invokeIpc } from '../../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../../Shared/Icons/Icons.js';
 import defaultStrings from '../I18n/en.js';
 
+// ── Icon map: connector id → filename in Assets/Icons/ ──────────────────────
+const ICON_MAP = {
+  github:       'Github',
+  openweather:  'OpenWeatherMap',
+  google:       'Google',
+  gmail:        'Gmail',
+  drive:        'Drive',
+  calendar:     'Calendar',
+  notion:       'Notion',
+  slack:        'Slack',
+  discord:      'Discord',
+  telegram:     'Telegram',
+  spotify:      'Spotify',
+  stripe:       'Stripe',
+  supabase:     'Supabase',
+  vercel:       'Vercel',
+  netlify:      'Netlify',
+  gitlab:       'Gitlab',
+  jira:         'Jira',
+  linear:       'Linear',
+  hubspot:      'Hubspot',
+  sentry:       'Sentry',
+  figma:        'Figma',
+  unsplash:     'Unsplash',
+  wikipedia:    'Wikipedia',
+  nasa:         'Nasa',
+  coingecko:    'CoinGecko',
+  perplexity:   'Perplexity',
+  youtube:      'Youtube',
+  whatsapp:     'WhatsApp',
+};
+
+function getConnectorIconPath(connectorId) {
+  const file = ICON_MAP[connectorId?.toLowerCase()];
+  // Path is relative to Packages/Shell/UI/App.html (the renderer entry point)
+  return file ? `../../../Assets/Icons/${file}.png` : null;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 function createCredentialField({ connector, strings }) {
   const field = createElement('label', 'connectors-field');
   const label = createElement('span', 'connectors-field__label', connector.credentialLabel);
@@ -99,22 +139,42 @@ export function createConnectorsPanel(strings = defaultStrings) {
 
   function createConnectorCard(connector) {
     const card = createElement('article', 'connectors-card');
+
+    // ── Header (always visible) ──────────────────────────────────────────────
     const header = createElement('div', 'connectors-card__header');
+
+    // Real icon image or SVG fallback
     const badge = createElement('div', 'connectors-card__badge');
-    badge.append(createIcon(connector.id === 'github' ? 'github' : 'globe', 'connectors-card__badge-icon'));
+    const iconPath = getConnectorIconPath(connector.id);
+    if (iconPath) {
+      const img = document.createElement('img');
+      img.src = iconPath;
+      img.alt = '';
+      img.className = 'connectors-card__badge-img';
+      badge.append(img);
+    } else {
+      badge.append(createIcon('globe', 'connectors-card__badge-icon'));
+    }
 
     const copy = createElement('div', 'connectors-card__copy');
-    const titleRow = createElement('div', 'connectors-card__title-row');
-    titleRow.append(
+    copy.append(
       createElement('h3', 'connectors-card__title', connector.label),
-      createElement('span', 'connectors-card__pill', connector.optional ? strings.optional : strings.required)
+      createElement('p', 'connectors-card__description', connector.description)
     );
-    copy.append(titleRow, createElement('p', 'connectors-card__description', connector.description));
 
     const status = createElement('span', 'connectors-card__status', strings.notConnected);
-    header.append(badge, copy, status);
 
+    const expandBtn = createElement('button', 'connectors-card__expand');
+    expandBtn.type = 'button';
+    expandBtn.setAttribute('aria-label', 'Expand');
+    expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
+
+    header.append(badge, copy, status, expandBtn);
+
+    // ── Collapsible body ─────────────────────────────────────────────────────
     const body = createElement('div', 'connectors-card__body');
+    const bodyInner = createElement('div', 'connectors-card__body-inner');
+
     const { field, input } = createCredentialField({ connector, strings });
     const actions = createElement('div', 'connectors-card__actions');
     const remove = createElement('button', 'connectors-card__secondary', strings.disconnect);
@@ -132,8 +192,15 @@ export function createConnectorsPanel(strings = defaultStrings) {
     feedback.hidden = true;
     feedback.setAttribute('aria-live', 'polite');
 
-    body.append(field, actions, feedback);
+    bodyInner.append(field, actions, feedback);
+    body.append(bodyInner);
     card.append(header, body);
+
+    expandBtn.addEventListener('click', () => {
+      const open = card.classList.toggle('connectors-card--open');
+      expandBtn.setAttribute('aria-label', open ? 'Collapse' : 'Expand');
+    });
+
     refs.set(connector.id, { card, input, status, save, saveLabel, remove, feedback });
     setCardState(connector);
     return card;
