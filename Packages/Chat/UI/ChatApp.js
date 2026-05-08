@@ -237,31 +237,114 @@ function updateLastStreamingMessage(threadEl, { content, thinking }) {
   const lastEl = threadEl?.lastElementChild;
   if (!lastEl || !lastEl.classList.contains('chat-message--assistant')) return;
 
-  const thinkingWrap = lastEl.querySelector('.chat-message__thinking');
-  const thinkingText = lastEl.querySelector('.chat-message__thinking-text');
-  if (thinkingWrap && thinkingText && thinking) {
-    thinkingText.textContent = thinking;
-    thinkingWrap.hidden = false;
+  // Target the LAST thinking/bubble element — works for both single-turn and
+  // grouped multi-turn articles where tool loop iterations are merged into one.
+  if (thinking) {
+    const allThinkingWraps = lastEl.querySelectorAll('.chat-message__thinking');
+    const thinkingWrap = allThinkingWraps[allThinkingWraps.length - 1];
+    const thinkingText = thinkingWrap?.querySelector('.chat-message__thinking-text');
+    if (thinkingWrap && thinkingText) {
+      thinkingText.textContent = thinking;
+      thinkingWrap.hidden = false;
+    }
   }
 
-  const bubble = lastEl.querySelector('.chat-message__bubble');
-  if (bubble && content) {
-    bubble.querySelector('.chat-message__dots')?.remove();
-    bubble.querySelector('.chat-message__stream-dot')?.remove();
-
-    // Re-render markdown live into the bubble
-    const fresh = renderMarkdown(content.trimStart(), 'chat-message__md');
-    const existing = bubble.querySelector('.chat-message__md, .chat-message__text');
-    if (existing) {
-      bubble.replaceChild(fresh, existing);
-    } else {
-      bubble.append(fresh);
+  if (content) {
+    const allBubbles = lastEl.querySelectorAll('.chat-message__bubble');
+    const bubble = allBubbles[allBubbles.length - 1];
+    if (bubble) {
+      bubble.querySelector('.chat-message__dots')?.remove();
+      bubble.querySelector('.chat-message__stream-dot')?.remove();
+      const fresh = renderMarkdown(content.trimStart(), 'chat-message__md');
+      const existing = bubble.querySelector('.chat-message__md, .chat-message__text');
+      if (existing) {
+        bubble.replaceChild(fresh, existing);
+      } else {
+        bubble.append(fresh);
+      }
+      bubble.append(createElement('span', 'chat-message__stream-dot'));
     }
-
-    bubble.append(createElement('span', 'chat-message__stream-dot'));
   }
 
   lastEl.scrollIntoView({ block: 'end', behavior: 'smooth' });
+}
+
+/**
+ * Renders a group of consecutive assistant messages (one logical response) as
+ * a single <article>. This is what makes interleaved thinking look like Claude.ai:
+ *
+ *   [REASONING 1]  ← streams in from turn 1
+ *   [TEXT 1]       ← "Let me check that…" (omitted if empty)
+ *   [TOOL CARD]    ← terminal / toolset call
+ *   [REASONING 2]  ← streams in from turn 2
+ *   [TEXT 2]       ← final answer
+ *   [COPY / RETRY] ← only after the whole response is done
+ *
+ * Action buttons are withheld until every message in the group is finalised.
+ */
+function createAssistantGroupElement(items, strings, { onCopy, onRetry } = {}) {
+  const lastMessage = items[items.length - 1].message;
+  const isStreaming = items.some(({ message }) => message.streaming || message.pending);
+
+  const article = createElement(
+    'article',
+    [
+      'chat-message',
+      'chat-message--assistant',
+      isStreaming ? 'chat-message--streaming' : '',
+      lastMessage.error ? 'chat-message--error' : '',
+      lastMessage.stopped ? 'chat-message--stopped' : ''
+    ].filter(Boolean).join(' ')
+  );
+
+  for (const { message } of items) {
+    // 1. Thinking block — always first so it appears before the text it precedes
+    const thinkingWrap = document.createElement('details');
+    thinkingWrap.className = 'chat-message__thinking';
+    thinkingWrap.hidden = !message.thinking;
+
+    const thinkingSummary = createElement('summary', 'chat-message__thinking-summary');
+    thinkingSummary.append(
+      createIcon('thinking', 'chat-message__thinking-icon'),
+      createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+    );
+    thinkingWrap.append(thinkingSummary);
+    const thinkingBody = createElement('div', 'chat-message__thinking-body');
+    thinkingBody.append(createElement('p', 'chat-message__thinking-text', message.thinking ?? ''));
+    thinkingWrap.append(thinkingBody);
+    article.append(thinkingWrap);
+
+    // 2. Text bubble — skipped for intermediate turns that have no visible content
+    const bubble = createElement('div', 'chat-message__bubble');
+
+    if (message.pending || (message.streaming && !message.content)) {
+      const dots = createElement('span', 'chat-message__dots');
+      dots.innerHTML = '<span></span><span></span><span></span>';
+      bubble.append(dots);
+    } else if (message.streaming) {
+      bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
+      bubble.append(createElement('span', 'chat-message__stream-dot'));
+    } else if (message.content) {
+      bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
+    }
+
+    if (bubble.childElementCount > 0) {
+      article.append(bubble);
+    }
+
+    // 3. Tool card — appears after the text that triggered it
+    if (message.terminal) {
+      article.append(createTerminalCallElement(message.terminal, strings));
+    }
+  }
+
+  // Action buttons — only after the entire response is complete
+  if (!isStreaming && typeof onCopy === 'function' && typeof onRetry === 'function') {
+    const onSpeak = (btn) => speakText(lastMessage.content, btn);
+    article.append(createMessageActions({ onCopy, onRetry, onSpeak }));
+  }
+
+  return article;
 }
 
 function getPreferredProvider(payload) {
@@ -1916,23 +1999,35 @@ export async function createChatView(strings, {
       .map((message, index) => ({ message, index }))
       .filter(({ message }) => !message.hidden);
 
-    thread.replaceChildren(...visibleMessages.map(({ message, index }) => {
+    // Group consecutive assistant messages so the entire tool-loop response
+  // (think → call tool → think → answer) renders as one article with blocks
+  // in the order they were generated, matching Claude.ai behaviour.
+  const renderGroups = [];
+  let assistantGroup = null;
+
+  for (const item of visibleMessages) {
+    if (item.message.role === 'assistant') {
+      if (!assistantGroup) assistantGroup = [];
+      assistantGroup.push(item);
+    } else {
+      if (assistantGroup) {
+        renderGroups.push({ type: 'assistant', items: assistantGroup });
+        assistantGroup = null;
+      }
+      renderGroups.push({ type: 'user', items: [item] });
+    }
+  }
+  if (assistantGroup) renderGroups.push({ type: 'assistant', items: assistantGroup });
+
+  thread.replaceChildren(...renderGroups.map((group) => {
+    if (group.type === 'user') {
+      const { message, index } = group.items[0];
       const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
       const onRetry = () => {
         if (isSending) return;
-        let userIndex = message.role === 'user' ? index : -1;
-        if (userIndex < 0) {
-          for (let candidate = index - 1; candidate >= 0; candidate -= 1) {
-            if (messages[candidate]?.role === 'user' && !messages[candidate]?.hidden) {
-              userIndex = candidate;
-              break;
-            }
-          }
-        }
-        if (userIndex < 0) return;
-        const userMessage = messages[userIndex];
+        const userMessage = messages[index];
         if (!userMessage?.content) return;
-        messages = messages.slice(0, userIndex);
+        messages = messages.slice(0, index);
         draftValue = '';
         pendingAttachments = [];
         renderPendingAttachments();
@@ -1944,7 +2039,38 @@ export async function createChatView(strings, {
         });
       };
       return createMessageElement(message, strings, { onCopy, onRetry });
-    }));
+    }
+
+    // Assistant group — find the preceding user message for retry
+    const firstIndex = group.items[0].index;
+    const lastMessage = group.items[group.items.length - 1].message;
+    const onCopy = () => navigator.clipboard.writeText(lastMessage.content ?? '').catch(() => {});
+    const onRetry = () => {
+      if (isSending) return;
+      let userIndex = -1;
+      for (let candidate = firstIndex - 1; candidate >= 0; candidate -= 1) {
+        if (messages[candidate]?.role === 'user' && !messages[candidate]?.hidden) {
+          userIndex = candidate;
+          break;
+        }
+      }
+      if (userIndex < 0) return;
+      const userMessage = messages[userIndex];
+      if (!userMessage?.content) return;
+      messages = messages.slice(0, userIndex);
+      draftValue = '';
+      pendingAttachments = [];
+      renderPendingAttachments();
+      renderThread();
+      void submitPrompt({
+        content: userMessage.content,
+        modelContent: userMessage.modelContent,
+        attachments: userMessage.attachments ?? []
+      });
+    };
+
+    return createAssistantGroupElement(group.items, strings, { onCopy, onRetry });
+  }));
 
     requestAnimationFrame(() => {
       thread.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
