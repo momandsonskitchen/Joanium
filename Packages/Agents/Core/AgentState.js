@@ -19,6 +19,7 @@ import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 export function createAgentStateManager({ rootDirectory }) {
   const agentsDirectory = path.join(rootDirectory, 'Data', 'Agents');
   const runsDirectory = path.join(agentsDirectory, 'Runs');
+  const avatarsDirectory = path.join(rootDirectory, 'Assets', 'Agents');
 
   async function ensureDirectory() {
     await mkdir(agentsDirectory, { recursive: true });
@@ -121,6 +122,22 @@ export function createAgentStateManager({ rootDirectory }) {
         return [];
       }
 
+      // Build agentId → avatar filename map so runs can resolve their icon path.
+      const agentAvatarMap = new Map();
+      try {
+        const agentFiles = await readdir(agentsDirectory);
+        for (const agentFile of agentFiles) {
+          if (!agentFile.endsWith('.json')) continue;
+          try {
+            const raw = await readFile(path.join(agentsDirectory, agentFile), 'utf8');
+            const agent = JSON.parse(raw);
+            if (agent.id && agent.avatar) {
+              agentAvatarMap.set(agent.id, agent.avatar);
+            }
+          } catch { /* skip corrupt agent file */ }
+        }
+      } catch { /* agents directory unreadable */ }
+
       const runs = [];
 
       for (const file of files) {
@@ -128,10 +145,12 @@ export function createAgentStateManager({ rootDirectory }) {
         try {
           const raw = await readFile(path.join(runsDirectory, file), 'utf8');
           const run = JSON.parse(raw);
+          const avatarFilename = agentAvatarMap.get(run.agentId) ?? run.agentAvatar ?? null;
           runs.push({
             id: run.id ?? file.replace(/\.json$/i, ''),
             agentId: run.agentId ?? '',
             agentName: run.agentName ?? 'Agent',
+            agentAvatarPath: avatarFilename ? path.join(avatarsDirectory, avatarFilename) : null,
             prompt: run.prompt ?? '',
             status: run.status ?? 'success',
             startedAt: run.startedAt ?? run.firedAt ?? run.timestamp ?? null,

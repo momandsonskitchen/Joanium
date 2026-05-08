@@ -5,6 +5,12 @@ import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 const FILTERS = ['all', 'channels', 'agents', 'errors'];
 
+// Converts an absolute OS file path to a file:// URL safe for <img src>.
+function toFileUrl(filePath) {
+  if (!filePath) return null;
+  return `file://${String(filePath).replace(/\\/g, '/')}`;
+}
+
 function toDate(value) {
   const date = value ? new Date(value) : new Date();
   return Number.isNaN(date.getTime()) ? new Date() : date;
@@ -67,6 +73,8 @@ function normalizeAgentRun(run, strings, index) {
     model: run.model ?? null,
     tokensIn: run.inputTokens ?? 0,
     tokensOut: run.outputTokens ?? 0,
+    avatarUrl: toFileUrl(run.agentAvatarPath ?? null),
+    channelKey: null,
     raw: run
   };
 }
@@ -93,6 +101,8 @@ function normalizeChannelMessage(message, strings, index) {
     conversationId: message.conversationId ?? null,
     targetId: message.targetId ?? null,
     externalId: message.externalId ?? null,
+    avatarUrl: null, // resolved after channel icon paths are loaded
+    channelKey: message.channel ?? null,
     raw: message
   };
 }
@@ -125,15 +135,33 @@ export function createEventsPanel(strings) {
   let events = [];
   let pollTimer = null;
 
+  // channel name → file:// URL for that channel's logo image
+  let channelIconUrls = {};
+
   async function fetchEvents() {
-    const [agentRuns, channelMessages] = await Promise.all([
+    const [agentRuns, channelMessages, rawIconPaths] = await Promise.all([
       invokeIpc('agents:list-runs').catch(() => []),
-      invokeIpc('channels:list-messages').catch(() => [])
+      invokeIpc('channels:list-messages').catch(() => []),
+      invokeIpc('channels:icon-paths').catch(() => ({}))
     ]);
+
+    // Build a channel-name → file:// URL map from the raw OS paths.
+    channelIconUrls = {};
+    for (const [name, filePath] of Object.entries(rawIconPaths ?? {})) {
+      const url = toFileUrl(filePath);
+      if (url) channelIconUrls[name] = url;
+    }
 
     const normalized = [
       ...(Array.isArray(agentRuns) ? agentRuns.map((run, index) => normalizeAgentRun(run, strings, index)) : []),
-      ...(Array.isArray(channelMessages) ? channelMessages.map((message, index) => normalizeChannelMessage(message, strings, index)) : [])
+      ...(Array.isArray(channelMessages) ? channelMessages.map((message, index) => {
+        const event = normalizeChannelMessage(message, strings, index);
+        // Resolve the channel icon URL now that we have the paths map.
+        if (event.channelKey && channelIconUrls[event.channelKey]) {
+          event.avatarUrl = channelIconUrls[event.channelKey];
+        }
+        return event;
+      }) : [])
     ];
 
     return normalized
@@ -168,6 +196,20 @@ export function createEventsPanel(strings) {
     renderDetail(event);
   }
 
+  // Returns either an <img> (when a real avatar/logo URL is available) or the
+  // generic SVG icon, ready to be appended into the icon container.
+  function buildAvatarContent(event, iconClass, imgClass) {
+    if (event.avatarUrl) {
+      const img = document.createElement('img');
+      img.src = event.avatarUrl;
+      img.alt = event.title;
+      img.className = imgClass;
+      img.draggable = false;
+      return img;
+    }
+    return createIcon(event.type === 'agent' ? 'tabAgents' : 'tabChannels', iconClass);
+  }
+
   function createEventRow(event) {
     const row = createElement(
       'button',
@@ -176,7 +218,7 @@ export function createEventsPanel(strings) {
     row.type = 'button';
 
     const icon = createElement('span', 'events-row__icon');
-    icon.append(createIcon(event.type === 'agent' ? 'tabAgents' : 'tabChannels', 'events-row__icon-svg'));
+    icon.append(buildAvatarContent(event, 'events-row__icon-svg', 'events-row__avatar-img'));
 
     const body = createElement('span', 'events-row__body');
     const top = createElement('span', 'events-row__top');
@@ -258,7 +300,7 @@ export function createEventsPanel(strings) {
 
     const header = createElement('div', 'events-detail__header');
     const badge = createElement('div', `events-detail__type events-detail__type--${event.type}`);
-    badge.append(createIcon(event.type === 'agent' ? 'tabAgents' : 'tabChannels', 'events-detail__type-icon'));
+    badge.append(buildAvatarContent(event, 'events-detail__type-icon', 'events-detail__type-img'));
     const titleWrap = createElement('div', 'events-detail__title-wrap');
     titleWrap.append(
       createElement('div', 'events-detail__eyebrow', strings.types[event.type]),

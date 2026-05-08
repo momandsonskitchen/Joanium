@@ -283,6 +283,7 @@
   background: rgba(var(--color-accent-rgb), 0.09);
   color: var(--color-accent);
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .events-row--channel .events-row__icon {
@@ -301,6 +302,23 @@
 .events-detail__type-icon svg {
   width: 100%;
   height: 100%;
+}
+
+/* Real image avatars / channel logos */
+.events-row__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+}
+
+.events-detail__type-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
 }
 
 .events-row__body,
@@ -438,6 +456,7 @@
   justify-content: center;
   background: rgba(var(--color-accent-rgb), 0.09);
   color: var(--color-accent);
+  overflow: hidden;
 }
 
 .events-detail__type--channel {

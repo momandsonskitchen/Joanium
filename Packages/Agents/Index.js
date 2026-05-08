@@ -41,15 +41,16 @@ export async function createPackage({ rootDirectory }) {
     const runId = `${safeAgentId}-${timestamp}`;
     const logPath   = path.join(runsDirectory, `${safeAgentId}-${timestamp}.json`);
     await writeFile(logPath, JSON.stringify({
-      id:        runId,
-      agentId:   agent.id,
-      agentName: agent.name,
-      prompt:    agent.prompt,
-      status:    'success',
+      id:          runId,
+      agentId:     agent.id,
+      agentName:   agent.name,
+      agentAvatar: agent.avatar ?? null,
+      prompt:      agent.prompt,
+      status:      'success',
       firedAt,
-      startedAt: firedAt,
-      finishedAt: firedAt,
-      schedule:  agent.schedule
+      startedAt:   firedAt,
+      finishedAt:  firedAt,
+      schedule:    agent.schedule
     }, null, 2), 'utf8');
 
     console.info(`[Agents] Agent "${agent.name}" fired (schedule: ${agent.schedule?.type}).`);

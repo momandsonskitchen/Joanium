@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { createChannelStateManager } from './Core/ChannelState.js';
 import { createChannelRuntime } from './Core/ChannelRuntime.js';
 
@@ -21,6 +22,18 @@ export async function createPackage({ rootDirectory }) {
   return {
     id: 'Channels',
     ipcHandlers: [
+      {
+        channel: 'channels:icon-paths',
+        handler: async () => {
+          const iconsDirectory = path.join(rootDirectory, 'Assets', 'Icons');
+          return {
+            telegram: path.join(iconsDirectory, 'Telegram.png'),
+            whatsapp: path.join(iconsDirectory, 'WhatsApp.png'),
+            discord:  path.join(iconsDirectory, 'Discord.png'),
+            slack:    path.join(iconsDirectory, 'Slack.png')
+          };
+        }
+      },
       {
         channel: 'channels:list',
         handler: async () => channelStateManager.getAllChannels()
