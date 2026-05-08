@@ -1,6 +1,4 @@
 const en = {
-  title: 'AI Providers',
-  subtitle: 'Connect the AI services Joana uses to respond.',
   cloud: 'Cloud',
   local: 'Local',
   connected: 'Connected',

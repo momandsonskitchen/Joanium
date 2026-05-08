@@ -257,15 +257,9 @@ export function createProvidersPanel(strings) {
   function build() {
     const panel = createElement('div', 'providers');
 
-    const header = createElement('div', 'providers__header');
-    header.append(
-      createElement('h2', 'providers__title', strings.title),
-      createElement('p', 'providers__subtitle', strings.subtitle)
-    );
-
     grid = createElement('section', 'providers-grid');
 
-    panel.append(header, grid);
+    panel.append(grid);
     return panel;
   }
 

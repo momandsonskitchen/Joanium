@@ -54,10 +54,6 @@ const TIMEOUT_OPTIONS = [
 export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
   const view = createElement('div', 'security-panel');
 
-  const titleEl    = createElement('h2', 'security-panel__title', strings.title);
-  const subtitleEl = createElement('p',  'security-panel__subtitle', strings.subtitle);
-  view.append(titleEl, subtitleEl);
-
   const body = createElement('div', 'security-panel__body');
   view.append(body);
 

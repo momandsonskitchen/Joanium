@@ -1,8 +1,5 @@
 const en = {
   // Settings panel
-  title: 'Security',
-  subtitle: 'Protect Joanium with a password lock.',
-
   statusEnabled: 'App Lock is on',
   statusDisabled: 'App Lock is off',
   statusEnabledDesc: 'A password is required every time Joanium opens.',
