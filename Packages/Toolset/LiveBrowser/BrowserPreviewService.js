@@ -270,6 +270,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   let viewAttached = false;
   let visible = false;
   let hostBounds = null;
+  let paused = false;
   let title = 'Browser Preview';
   let url = '';
   let status = 'Ready';
@@ -331,7 +332,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   }
 
   function attach() {
-    if (!visible || !view) return;
+    if (!visible || !view || paused) return;
     const targetWindow = windowRef ?? BrowserWindow.getAllWindows()[0] ?? null;
     if (!targetWindow || targetWindow.isDestroyed()) return;
     windowRef = targetWindow;
@@ -765,6 +766,24 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       detach();
       emitState();
       return getState();
+    },
+
+    // Called by the Shell when the user leaves the chat panel.
+    // The WebContentsView is removed from the compositor so it stops painting,
+    // but the WebContents stays alive — the AI can still read and interact with
+    // the page. attach() becomes a no-op until resume() is called.
+    pauseView() {
+      paused = true;
+      detach();
+      emitState();
+    },
+
+    // Called by the Shell when the user returns to the chat panel.
+    // Clears the paused flag and re-syncs bounds so the view reappears.
+    resumeView() {
+      paused = false;
+      if (visible) attach();
+      emitState();
     },
 
     goBack,

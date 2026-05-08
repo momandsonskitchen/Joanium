@@ -179,6 +179,17 @@ export async function createPackage({ rootDirectory }) {
         handler: async () => browserPreviewService.reload()
       },
       {
+        channel: 'browser-preview:pause',
+        handler: async () => browserPreviewService.pauseView()
+      },
+      {
+        channel: 'browser-preview:resume',
+        handler: async (event) => {
+          browserPreviewService.attachToWindow(ownerWindow(event));
+          browserPreviewService.resumeView();
+        }
+      },
+      {
         channel: 'browser-preview:close',
         handler: async () => browserPreviewService.close()
       }

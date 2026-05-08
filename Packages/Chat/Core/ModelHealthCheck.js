@@ -1,7 +1,7 @@
 import https from 'node:https';
 import http from 'node:http';
 import path from 'node:path';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
 // ---------------------------------------------------------------------------
 // TTLs
@@ -20,44 +20,39 @@ function isFresh(health) {
 }
 
 // ---------------------------------------------------------------------------
-// Provider file resolver
-// Scans index.json once and caches a map of providerId -> file path.
+// Health cache — stored in Data/Models/health-cache.json.
+// Provider JSON files are never mutated; they are read-only catalog data.
+// A single write-lock promise serialises all writes to the cache file so
+// concurrent probes cannot interleave and corrupt it.
 // ---------------------------------------------------------------------------
 
-let fileMapCache = null;
+let writeLock = Promise.resolve();
 
-async function buildFileMap(rootDirectory) {
-  if (fileMapCache) return fileMapCache;
+function getCachePath(rootDirectory) {
+  return path.join(rootDirectory, 'Data', 'Models', 'health-cache.json');
+}
 
-  const modelsDir  = path.join(rootDirectory, 'Data', 'Models');
-  const indexPath  = path.join(modelsDir, 'index.json');
-  const fileNames  = JSON.parse(await readFile(indexPath, 'utf8'));
-  const map        = new Map();
-
-  for (const fileName of fileNames) {
-    const name     = path.basename(fileName, '.json');
-    const filePath = path.join(modelsDir, name, fileName);
-    const raw      = await readFile(filePath, 'utf8');
-    const json     = JSON.parse(raw);
-    map.set(json.provider, { filePath, json });
+async function readHealthCache(rootDirectory) {
+  try {
+    const raw = await readFile(getCachePath(rootDirectory), 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return {};
   }
-
-  fileMapCache = map;
-  return map;
 }
 
-async function readProviderFile(rootDirectory, providerId) {
-  const map   = await buildFileMap(rootDirectory);
-  const entry = map.get(providerId);
-  if (!entry) return null;
-
-  // Always re-read to get latest — another write may have happened.
-  const raw = await readFile(entry.filePath, 'utf8');
-  return { filePath: entry.filePath, json: JSON.parse(raw) };
-}
-
-async function writeProviderFile(filePath, json) {
-  await writeFile(filePath, JSON.stringify(json, null, 2), 'utf8');
+function writeHealthCache(rootDirectory, cache) {
+  // Chain onto the lock so concurrent callers never overlap on disk.
+  writeLock = writeLock.then(async () => {
+    try {
+      const cachePath = getCachePath(rootDirectory);
+      await mkdir(path.dirname(cachePath), { recursive: true });
+      await writeFile(cachePath, JSON.stringify(cache, null, 2), 'utf8');
+    } catch {
+      // Non-fatal.
+    }
+  });
+  return writeLock;
 }
 
 // ---------------------------------------------------------------------------
@@ -194,14 +189,13 @@ export function createModelHealthChecker({ rootDirectory }) {
   return {
     // Returns a flat map of { "providerId/modelId": "green"|"yellow"|"red" }
     async getHealthMap(providers) {
+      const cache  = await readHealthCache(rootDirectory);
       const result = {};
 
       for (const provider of providers) {
-        const file = await readProviderFile(rootDirectory, provider.id).catch(() => null);
-
         for (const model of provider.models ?? []) {
           const key    = `${provider.id}/${model.id}`;
-          const health = file?.json?.models?.[model.id]?.health ?? null;
+          const health = cache[key] ?? null;
           result[key]  = isFresh(health) ? health.status : 'yellow';
         }
       }
@@ -209,19 +203,17 @@ export function createModelHealthChecker({ rootDirectory }) {
       return result;
     },
 
-    // Probes a single model, writes result back into the provider JSON, returns { key, status }.
+    // Probes a single model, writes result into the health cache, returns { key, status }.
     async probeAndCache(provider, model, providerDetails) {
       const key    = `${provider.id}/${model.id}`;
       const status = await probeModel(provider, model, providerDetails);
 
       try {
-        const file = await readProviderFile(rootDirectory, provider.id);
-        if (file && file.json.models?.[model.id]) {
-          file.json.models[model.id].health = { status, checkedAt: new Date().toISOString() };
-          await writeProviderFile(file.filePath, file.json);
-        }
+        const cache = await readHealthCache(rootDirectory);
+        cache[key]  = { status, checkedAt: new Date().toISOString() };
+        await writeHealthCache(rootDirectory, cache);
       } catch {
-        // Non-fatal — result still returned even if we couldn't persist.
+        // Non-fatal.
       }
 
       return { key, status };

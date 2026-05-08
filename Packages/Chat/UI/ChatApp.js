@@ -712,6 +712,14 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
       window.removeEventListener('resize', scheduleBoundsSync);
       cancelAnimationFrame(animationFrameId);
       void invokeIpc('browser-preview:set-bounds', null);
+    },
+    // Detach the native view without closing it — called when the user leaves chat.
+    pause() {
+      void invokeIpc('browser-preview:pause');
+    },
+    // Re-attach the native view — called when the user returns to chat.
+    resume() {
+      void invokeIpc('browser-preview:resume');
     }
   };
 }
@@ -2694,6 +2702,16 @@ export async function createChatView(strings, {
     },
     getCurrentSessionId() {
       return sessionId;
+    },
+    // Called by ShellApp when the user navigates away from chat — detaches the
+    // native BrowserView so it doesn't paint over other panels.
+    pauseBrowserPreview() {
+      browserPreview.pause();
+    },
+    // Called by ShellApp when the user returns to chat — re-syncs the native
+    // BrowserView bounds so it reappears in the correct position.
+    resumeBrowserPreview() {
+      browserPreview.resume();
     }
   };
 }

@@ -20,10 +20,6 @@
       "pricing": {
         "input": 0.01,
         "output": 0.02
-      },
-      "health": {
-        "status": "yellow",
-        "checkedAt": "2026-05-08T09:01:28.479Z"
       }
     },
     "minimaxai/minimax-m2.5": {
@@ -40,10 +36,6 @@
       "pricing": {
         "input": 0.01,
         "output": 0.02
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T09:27:58.549Z"
       }
     },
     "moonshotai/kimi-k2-instruct": {
@@ -60,10 +52,6 @@
       "pricing": {
         "input": 0.1,
         "output": 0.2
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T09:27:58.646Z"
       }
     },
     "moonshotai/kimi-k2-thinking": {
@@ -80,10 +68,6 @@
       "pricing": {
         "input": 1,
         "output": 3
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T09:27:58.704Z"
       }
     },
     "deepseek-ai/deepseek-v3.2": {
@@ -100,10 +84,6 @@
       "pricing": {
         "input": 0.27,
         "output": 1.1
-      },
-      "health": {
-        "status": "yellow",
-        "checkedAt": "2026-05-08T09:26:10.652Z"
       }
     },
     "qwen/qwen3.5-397b-a17b": {
@@ -120,10 +100,6 @@
       "pricing": {
         "input": 0.01,
         "output": 0.02
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T09:28:02.041Z"
       }
     },
     "qwen/qwen3-coder-480b-a35b-instruct": {
@@ -140,10 +116,6 @@
       "pricing": {
         "input": 0.1,
         "output": 0.2
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T10:54:46.364Z"
       }
     },
     "google/gemma-4-31b-it": {
@@ -160,10 +132,6 @@
       "pricing": {
         "input": 0.1,
         "output": 0.2
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T09:28:09.971Z"
       }
     },
     "nvidia/nemotron-3-super-120b-a12b": {
@@ -180,10 +148,6 @@
       "pricing": {
         "input": 0.01,
         "output": 0.02
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T09:27:59.079Z"
       }
     },
     "z-ai/glm4.7": {
@@ -200,10 +164,6 @@
       "pricing": {
         "input": 0.1,
         "output": 0.2
-      },
-      "health": {
-        "status": "yellow",
-        "checkedAt": "2026-05-08T09:26:25.589Z"
       }
     },
     "openai/gpt-oss-20b": {
@@ -220,10 +180,6 @@
       "pricing": {
         "input": 0.03,
         "output": 0.1
-      },
-      "health": {
-        "status": "green",
-        "checkedAt": "2026-05-07T09:27:58.341Z"
       }
     }
   }

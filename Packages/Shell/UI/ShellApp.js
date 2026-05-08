@@ -385,10 +385,22 @@ async function bootstrap() {
 
   async function showRoute(routeId) {
     const view = await ensureRouteView(routeId);
+
+    // Detach the native BrowserView before hiding the chat panel so it stops
+    // painting over whatever panel the user is switching to.
+    if (activeRouteId === 'chat' && routeId !== 'chat') {
+      chatView?.pauseBrowserPreview();
+    }
+
     hideAllViews();
     view.element.hidden = false;
     activeRouteId = routeId;
     sidebarAvatar.classList.remove('chat-sidebar__avatar--active');
+
+    // Re-attach and re-sync the native BrowserView now that chat is visible.
+    if (routeId === 'chat') {
+      chatView?.resumeBrowserPreview();
+    }
 
     const tab = tabElements.get(routeId);
     if (tab && tab !== activeTabEl) {
@@ -435,6 +447,10 @@ async function bootstrap() {
   }
 
   async function showSettingsPanel() {
+    if (activeRouteId === 'chat') {
+      chatView?.pauseBrowserPreview();
+    }
+
     hideAllViews();
 
     if (!settingsPanel) {
