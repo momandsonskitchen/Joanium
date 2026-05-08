@@ -1,11 +1,19 @@
 import path from 'node:path';
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, powerSaveBlocker } from 'electron';
 import { createBootLogger } from '../Boot/Index.js';
 import {
   applyWindowState,
   attachWindowStatePersistence,
   readWindowState
 } from './Core/WindowState.js';
+
+// Prevent Chromium from throttling timers, IPC, and JS execution when the
+// window is in the background. Without these the app becomes unresponsive
+// after being backgrounded for an extended period.
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+app.commandLine.appendSwitch('force-color-profile', 'srgb');
 
 let mainWindow = null;
 let currentPackage = null;
@@ -53,7 +61,8 @@ async function createMainWindow(entryPackage) {
       contextIsolation: true,
       sandbox: false,
       nodeIntegration: false,
-      spellcheck: false
+      spellcheck: false,
+      backgroundThrottling: false
     },
     ...entryPackage.window
   });
@@ -219,6 +228,7 @@ export async function bootElectron({ entryPackage, loadPackage }) {
   const launchMainWindow = async () => {
     writeBootLog('launchMainWindow:start');
     mainWindow = await createMainWindow(entryPackage);
+    powerSaveBlocker.start('prevent-app-suspension');
     writeBootLog('launchMainWindow:complete');
   };
 
