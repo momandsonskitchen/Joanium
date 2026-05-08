@@ -333,7 +333,6 @@
 .channels-card__primary {
   background: var(--color-accent);
   color: #fff;
-  box-shadow: 0 6px 18px rgba(130, 65, 190, 0.30);
 }
 
 .channels-card__secondary {

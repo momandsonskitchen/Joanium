@@ -314,7 +314,6 @@
 .connectors-card__primary {
   color: #ffffff;
   background: rgba(var(--color-accent-rgb), 0.88);
-  box-shadow: 0 10px 22px rgba(var(--color-accent-rgb), 0.18);
 }
 
 .connectors-card__secondary {
