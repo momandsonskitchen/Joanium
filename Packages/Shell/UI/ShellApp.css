@@ -299,16 +299,16 @@ textarea {
 .chat-settings__header {
   display: flex;
   align-items: center;
-  padding: 60px 48px 20px;
+  padding: 60px 4px 20px;
   flex-shrink: 0;
   -webkit-app-region: drag;
 }
 
 .chat-settings__title {
   margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
+  font-size: 42px;
+  font-weight: 440;
+  letter-spacing: -0.065em;
   color: var(--color-chat-text-title);
   -webkit-app-region: no-drag;
   pointer-events: none;

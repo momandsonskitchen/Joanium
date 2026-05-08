@@ -4,6 +4,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 function createTemplateId(name) {
   const sanitized = (name || 'Template').trim()
@@ -136,13 +137,7 @@ export function createTemplatesPanel(strings) {
     panel.hidden = true;
 
     // Header
-    const header = createElement('div', 'chat-templates__header');
-    const headerCopy = createElement('div', 'chat-templates__header-copy');
-    headerCopy.append(
-      createElement('h2', 'chat-templates__title', strings.title),
-      createElement('p', 'chat-templates__subtitle', strings.subtitle)
-    );
-    header.append(headerCopy);
+    const header = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
     panel.append(header);
 
     // Body

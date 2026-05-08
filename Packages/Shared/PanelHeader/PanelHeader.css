@@ -25,9 +25,9 @@
 
 .panel-header__title {
   margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
+  font-size: 42px;
+  font-weight: 440;
+  letter-spacing: -0.065em;
   line-height: 1.1;
   color: var(--color-chat-text-title);
 }

@@ -3,6 +3,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -86,11 +87,7 @@ export function createMarketplacePanel(strings) {
     const headerTop = createElement('div', 'marketplace__header-top');
     headerTop.style.webkitAppRegion = 'no-drag';
 
-    const headerText = createElement('div', 'marketplace__header-text');
-    headerText.append(
-      createElement('h2', 'marketplace__title',    strings.title),
-      createElement('p',  'marketplace__subtitle', strings.subtitle)
-    );
+    const headerText = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
 
     // Type toggle (Skills | Personas)
     const toggle      = createElement('div', 'marketplace__toggle');

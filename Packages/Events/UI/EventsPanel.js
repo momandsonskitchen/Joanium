@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 const FILTERS = ['all', 'channels', 'agents', 'errors'];
 
@@ -344,11 +345,7 @@ export function createEventsPanel(strings) {
     panel.hidden = true;
 
     const header = createElement('div', 'events__header');
-    const copy = createElement('div', 'events__header-copy');
-    copy.append(
-      createElement('h2', 'events__title', strings.title),
-      createElement('p', 'events__subtitle', strings.subtitle)
-    );
+    const copy = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
 
     const headerActions = createElement('div', 'events__actions');
     liveBadge = createElement('span', 'events-live', strings.states.live);

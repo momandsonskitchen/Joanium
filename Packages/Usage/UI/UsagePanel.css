@@ -20,7 +20,7 @@
 
 .usage-view__header {
   flex-shrink: 0;
-  padding: 56px 52px 0;
+  padding: 0 52px 0 0;
   -webkit-app-region: drag;
 }
 
@@ -35,29 +35,6 @@
 
 .usage-view__header-top > * {
   pointer-events: auto;
-}
-
-.usage-view__header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.usage-view__title {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  color: var(--color-chat-text-title);
-  pointer-events: none;
-}
-
-.usage-view__subtitle {
-  margin: 0;
-  font-size: 13px;
-  color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
-  pointer-events: none;
 }
 
 .usage-year-toggle-slot {

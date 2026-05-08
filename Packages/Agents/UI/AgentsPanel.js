@@ -4,6 +4,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -514,13 +515,7 @@ export function createAgentsPanel(strings) {
     panel.hidden = true;
 
     // Header
-    const header = createElement('div', 'agents-panel__header');
-    const headerCopy = createElement('div', 'agents-panel__header-copy');
-    headerCopy.append(
-      createElement('h2', 'agents-panel__title', strings.title),
-      createElement('p', 'agents-panel__subtitle', strings.subtitle)
-    );
-    header.append(headerCopy);
+    const header = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
     panel.append(header);
 
     // Body

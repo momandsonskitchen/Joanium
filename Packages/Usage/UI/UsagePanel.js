@@ -2,6 +2,7 @@ import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
+import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 // ─── Formatting helpers ────────────────────────────────────────────────────
 
@@ -508,11 +509,7 @@ export function createUsagePanel(strings) {
   const headerTop = createElement('div', 'usage-view__header-top');
   headerTop.style.webkitAppRegion = 'no-drag';
 
-  const headerText = createElement('div', 'usage-view__header-text');
-  headerText.append(
-    createElement('h1', 'usage-view__title',    strings.title),
-    createElement('p',  'usage-view__subtitle', strings.subtitle)
-  );
+  const headerText = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
 
   const toggleSlot = createElement('div', 'usage-year-toggle-slot');
 
