@@ -4,13 +4,8 @@
   margin-top: 18px;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: none;
   cursor: grab;
   padding-bottom: 10px;
-}
-
-.joanium-provider-picker__viewport::-webkit-scrollbar {
-  display: none;
 }
 
 .joanium-provider-picker__viewport:active {

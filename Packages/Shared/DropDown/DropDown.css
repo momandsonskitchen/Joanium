@@ -90,7 +90,6 @@
     0 24px 56px rgba(96, 67, 47, 0.14);
   max-height: 300px;
   overflow-y: auto;
-  scrollbar-width: none;
   overscroll-behavior: contain;
   opacity: 0;
   transform: translateY(-6px) scale(0.98);
@@ -98,10 +97,6 @@
   transition:
     opacity 200ms var(--transition-spring),
     transform 200ms var(--transition-spring);
-}
-
-.joanium-dropdown__panel::-webkit-scrollbar {
-  display: none;
 }
 
 /* Open state targets the panel directly (it's no longer a child of wrapper) */

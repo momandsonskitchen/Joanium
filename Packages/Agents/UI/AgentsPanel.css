@@ -68,10 +68,7 @@
   gap: 12px;
   padding: 0 10px 20px;
   overflow-y: auto;
-  scrollbar-width: none;
 }
-
-.agents-form-col::-webkit-scrollbar { display: none; }
 
 .agents-form__heading {
   margin: 0;
@@ -164,14 +161,9 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-app-region: no-drag;
-  scrollbar-width: none;
   padding-left: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
-}
-
-.agents-form__avatar-grid::-webkit-scrollbar {
-  display: none;
 }
 
 .agents-form__avatar-tile {
@@ -485,17 +477,6 @@
   padding: 4px 48px 40px 28px;
   overflow-y: auto;
   border-left: 1px solid rgba(170, 134, 104, 0.09);
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
-}
-
-.agents-list-col::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.agents-list-col::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
 }
 
 .agents-list__heading {

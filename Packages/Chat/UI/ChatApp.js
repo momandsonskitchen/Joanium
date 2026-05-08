@@ -676,7 +676,9 @@ const SUPPORTED_TERMINAL_TOOLS = new Set([
   'list_directory',
   'git_status',
   'git_diff',
-  'run_project_checks'
+  'run_project_checks',
+  'start_local_server',
+  'read_terminal_output'
 ]);
 
 function parseJsonToolBlock(text, blockRegex) {
@@ -811,6 +813,8 @@ function formatTerminalResultForModel(strings, action, result) {
   if (result?.cwd) lines.push(`Working directory: ${result.cwd}`);
   if (result?.path) lines.push(`Path: ${result.path}`);
   if (result?.root) lines.push(`Workspace: ${result.root}`);
+  if (result?.processId) lines.push(`Process id: ${result.processId}`);
+  if (result?.running !== undefined) lines.push(`Running: ${result.running ? 'yes' : 'no'}`);
   if (Number.isFinite(result?.exitCode)) {
     lines.push(formatText(strings.terminal.exitCode, { code: String(result.exitCode) }));
   }
@@ -825,6 +829,7 @@ function formatTerminalResultForModel(strings, action, result) {
     lines.push(`Entries:\n${JSON.stringify(result.entries, null, 2)}`);
   }
   if (result?.content) lines.push(`Content:\n${result.content}`);
+  if (result?.buffer) lines.push(`Output buffer:\n${result.buffer}`);
 
   if (lines.length === 2) {
     lines.push(JSON.stringify(result ?? {}, null, 2));
@@ -1209,6 +1214,8 @@ export async function createChatView(strings, {
   let slashFilteredCommands = [];
   let slashSelectedIndex = 0;
   let slashStartIndex = 0;
+  let terminalProcessRenderFrame = null;
+  let terminalProcessCardsWired = false;
 
   let composerField = null;
   let attachmentsEl = null;
@@ -1226,6 +1233,61 @@ export async function createChatView(strings, {
   let projectMetaEl = null;
   let modelButton = null;
   let terminalButton = null;
+
+  function scheduleTerminalProcessRender() {
+    if (terminalProcessRenderFrame) return;
+    terminalProcessRenderFrame = requestAnimationFrame(() => {
+      terminalProcessRenderFrame = null;
+      renderThread();
+    });
+  }
+
+  function appendTerminalCardOutput(currentOutput, nextText) {
+    const output = `${String(currentOutput ?? '')}${String(nextText ?? '')}`;
+    return output.length > 96000 ? output.slice(output.length - 96000) : output;
+  }
+
+  function updateTerminalProcessCard(processId, updater) {
+    const id = String(processId ?? '').trim();
+    if (!id) return;
+
+    let changed = false;
+    messages = messages.map((message) => {
+      if (message.terminal?.processId !== id) return message;
+      changed = true;
+      return {
+        ...message,
+        terminal: updater(message.terminal)
+      };
+    });
+
+    if (changed) scheduleTerminalProcessRender();
+  }
+
+  function wireTerminalProcessCards() {
+    if (terminalProcessCardsWired) return;
+    terminalProcessCardsWired = true;
+
+    onIpc('terminal:process-output', (payload) => {
+      updateTerminalProcessCard(payload?.processId, (terminal) => ({
+        ...terminal,
+        status: 'running',
+        statusLabel: strings.terminal.running,
+        output: appendTerminalCardOutput(terminal.output, payload?.text ?? '')
+      }));
+    });
+
+    onIpc('terminal:process-exit', (payload) => {
+      const exitLine = `\n${formatText(strings.terminal.processExited, { code: String(payload?.code ?? 0) })}\n`;
+      updateTerminalProcessCard(payload?.processId, (terminal) => ({
+        ...terminal,
+        status: payload?.code === 0 ? 'completed' : 'failed',
+        statusLabel: payload?.code === 0 ? strings.terminal.completedTool : strings.terminal.failedTool,
+        output: appendTerminalCardOutput(terminal.output, exitLine),
+        exitCode: payload?.code ?? 0
+      }));
+    });
+  }
 
   if (!activePersona) {
     try {
@@ -2010,6 +2072,18 @@ export async function createChatView(strings, {
       });
     }
 
+    if (action.tool === 'start_local_server') {
+      return invokeIpc('terminal:spawn-command', {
+        command: payload.command,
+        cwd: await resolveTerminalCwd(payload.working_directory ?? payload.cwd),
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'read_terminal_output') {
+      return invokeIpc('terminal:read-output', payload.process_id ?? payload.processId ?? payload.pid);
+    }
+
     return { ok: false, error: strings.terminal.unsupportedTool };
   }
 
@@ -2048,6 +2122,8 @@ export async function createChatView(strings, {
     if (Array.isArray(result?.matches)) parts.push(JSON.stringify(result.matches, null, 2));
     if (Array.isArray(result?.entries)) parts.push(JSON.stringify(result.entries, null, 2));
     if (result?.content) parts.push(result.content);
+    if (result?.processId) parts.push(`Process id: ${result.processId}`);
+    if (result?.buffer) parts.push(result.buffer);
     return parts.join('\n\n').trim();
   }
 
@@ -2064,10 +2140,13 @@ export async function createChatView(strings, {
 
     const isBlocked = Boolean(result?.risk?.blocked);
     const ok = result?.ok !== false && !result?.error;
-    const status = isBlocked ? 'blocked' : ok ? 'completed' : 'failed';
+    const isRunningProcess = ok && result?.running === true && result?.processId;
+    const status = isBlocked ? 'blocked' : isRunningProcess ? 'running' : ok ? 'completed' : 'failed';
     const statusLabel = isBlocked
       ? strings.terminal.blockedTool
-      : ok
+      : isRunningProcess
+        ? strings.terminal.running
+        : ok
         ? strings.terminal.completedTool
         : strings.terminal.failedTool;
     const modelResult = formatTerminalResultForModel(strings, action, result);
@@ -2078,6 +2157,7 @@ export async function createChatView(strings, {
         ...(message.terminal ?? {}),
         status,
         statusLabel,
+        processId: result?.processId ?? message.terminal?.processId ?? null,
         output: buildTerminalDisplayOutput(result),
         exitCode: result?.exitCode
       }
@@ -2502,6 +2582,7 @@ export async function createChatView(strings, {
   });
   view.append(scroll, bottom, browserPreview.element, terminalPanel.build());
   browserPreview.start();
+  wireTerminalProcessCards();
 
   applyActiveProject(activeProject);
   syncComposer();

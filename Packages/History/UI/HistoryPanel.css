@@ -101,15 +101,6 @@
   padding: 4px 10px 40px;
 }
 
-.chat-history__content::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.chat-history__content::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
-}
-
 /* ── Skeleton loading state ─────────────────────────────────────────────── */
 
 .chat-history__skeleton {

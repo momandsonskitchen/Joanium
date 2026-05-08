@@ -24,6 +24,9 @@ export function createDefaultUserState() {
       selected: [],
       details: {}
     },
+    connectors: {
+      details: {}
+    },
     usageModes: [],
     activePersona: { ...DEFAULT_ACTIVE_PERSONA },
     windowState: {
@@ -62,6 +65,14 @@ export function mergeUserStates(baseState, nextState = {}) {
       details: {
         ...baseState.providers.details,
         ...(nextState.providers?.details ?? {})
+      }
+    },
+    connectors: {
+      ...baseState.connectors,
+      ...(nextState.connectors ?? {}),
+      details: {
+        ...baseState.connectors.details,
+        ...(nextState.connectors?.details ?? {})
       }
     },
     customInstructions: nextState.customInstructions !== undefined
@@ -124,6 +135,32 @@ function sanitizeDetails(details) {
 
     if (typeof providerDetails.endpoint === 'string') {
       nextDetails[providerId].endpoint = providerDetails.endpoint.trim();
+    }
+  }
+
+  return nextDetails;
+}
+
+function sanitizeConnectorDetails(details) {
+  if (!details || typeof details !== 'object') {
+    return {};
+  }
+
+  const nextDetails = {};
+
+  for (const [connectorId, connectorDetails] of Object.entries(details)) {
+    if (!connectorDetails || typeof connectorDetails !== 'object') {
+      continue;
+    }
+
+    nextDetails[connectorId] = {};
+
+    if (typeof connectorDetails.apiKey === 'string') {
+      nextDetails[connectorId].apiKey = connectorDetails.apiKey.trim();
+    }
+
+    if (typeof connectorDetails.token === 'string') {
+      nextDetails[connectorId].token = connectorDetails.token.trim();
     }
   }
 
@@ -193,6 +230,9 @@ export function sanitizeIncomingUserState(candidateState) {
     providers: {
       selected: sanitizeArray(candidateState?.providers?.selected),
       details: sanitizeDetails(candidateState?.providers?.details)
+    },
+    connectors: {
+      details: sanitizeConnectorDetails(candidateState?.connectors?.details)
     },
     usageModes: sanitizeArray(candidateState?.usageModes),
     activePersona: sanitizeActivePersona(candidateState?.activePersona),

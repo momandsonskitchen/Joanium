@@ -1,13 +1,8 @@
-import { createHash, randomInt, randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import strings from '../I18n/en.js';
+import { generatePasswordValue } from '../Security/PasswordTools.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
-const WORDS = Object.freeze([
-  'amber', 'atlas', 'bright', 'cedar', 'cinder', 'comet', 'coral', 'delta',
-  'ember', 'forest', 'harbor', 'indigo', 'jasmine', 'keystone', 'lantern',
-  'marble', 'meadow', 'meteor', 'nectar', 'onyx', 'orbit', 'quartz',
-  'raven', 'river', 'signal', 'silver', 'summit', 'timber', 'violet', 'zenith'
-]);
 const DAYS = Object.freeze(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
 const MONTHS = Object.freeze([
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -709,63 +704,6 @@ function getTextStats(text) {
     `Average word length: ${words.length ? (totalWordCharacters / words.length).toFixed(2) : '0.00'}`,
     `Estimated reading time: ${words.length ? (words.length / 200).toFixed(2) : '0.00'} min`
   ].join('\n');
-}
-
-function randomFrom(charset) {
-  return charset[randomInt(0, charset.length)];
-}
-
-function generatePasswordValue(params) {
-  const type = String(params.type ?? 'password').toLowerCase();
-  const count = clampInteger(params.count, 1, 1, 10);
-  const values = [];
-
-  if (type === 'passphrase') {
-    const wordCount = clampInteger(params.length, 4, 2, 10);
-    for (let index = 0; index < count; index += 1) {
-      values.push(Array.from({ length: wordCount }, () => WORDS[randomInt(0, WORDS.length)]).join('-'));
-    }
-  } else if (type === 'pin') {
-    const length = clampInteger(params.length, 6, 4, 20);
-    for (let index = 0; index < count; index += 1) {
-      values.push(Array.from({ length }, () => String(randomInt(0, 10))).join(''));
-    }
-  } else if (type === 'memorable') {
-    const length = clampInteger(params.length, 10, 6, 20);
-    const consonants = 'bcdfghjklmnpqrstvwxyz';
-    const vowels = 'aeiou';
-    for (let index = 0; index < count; index += 1) {
-      values.push(Array.from({ length }, (_, charIndex) => randomFrom(charIndex % 2 ? vowels : consonants)).join(''));
-    }
-  } else {
-    const length = clampInteger(params.length, 16, 4, 128);
-    const includeSymbols = toBoolean(params.include_symbols, true);
-    const includeNumbers = toBoolean(params.include_numbers, true);
-    const includeUppercase = toBoolean(params.include_uppercase, true);
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numbers = '0123456789';
-    const symbols = '!@#$%^&*()-_=+[]{};:,.?';
-    const requiredSets = [
-      lowercase,
-      includeUppercase ? uppercase : '',
-      includeNumbers ? numbers : '',
-      includeSymbols ? symbols : ''
-    ].filter(Boolean);
-    const allChars = requiredSets.join('');
-
-    for (let index = 0; index < count; index += 1) {
-      const chars = requiredSets.map(randomFrom);
-      while (chars.length < length) chars.push(randomFrom(allChars));
-      for (let charIndex = chars.length - 1; charIndex > 0; charIndex -= 1) {
-        const swapIndex = randomInt(0, charIndex + 1);
-        [chars[charIndex], chars[swapIndex]] = [chars[swapIndex], chars[charIndex]];
-      }
-      values.push(chars.join(''));
-    }
-  }
-
-  return [`Generated ${type}${count === 1 ? '' : 's'}:`, '', ...values.map((value) => `- ${value}`)].join('\n');
 }
 
 function calculateDate(params) {
@@ -1892,7 +1830,7 @@ function getMapUrl(params) {
 
 function buildToolsPrompt(tools) {
   return [
-    'Built-in non-connector tools are available when the user asks for calculations, conversions, local date/time utilities, URL parsing/formatting helpers, local geospatial math/conversion helpers, text utilities, JSON formatting, hashing, UUIDs, timezone lookup, or password generation.',
+    'Built-in tools are available when the user asks for calculations, conversions, local date/time utilities, URL helpers, geospatial math, text utilities, JSON formatting, hashing, UUIDs, timezone lookup, password generation, connector lookups, public web/reference data, package registries, weather, crypto/finance data, Stack Overflow, Wikipedia, or live browser work.',
     'When one of these tools is needed, respond with exactly one fenced block and no final answer yet:',
     '```joanium-tool',
     '{"tool":"calculate_expression","parameters":{"expression":"sqrt(144) + pi","precision":4}}',
@@ -1908,8 +1846,8 @@ function buildToolsPrompt(tools) {
   ].join('\n');
 }
 
-export function createToolsetService() {
-  const tools = strings.tools;
+export function createToolsetService({ toolHandlers = {}, toolDefinitions = [] } = {}) {
+  const tools = [...strings.tools, ...toolDefinitions];
   const handlers = {
     calculate_expression(params) {
       const expression = String(params.expression ?? '').trim();
@@ -2036,7 +1974,8 @@ export function createToolsetService() {
       if (params.text == null) throw new Error(strings.errors.missingText);
       return getTextStats(params.text);
     },
-    generate_password: generatePasswordValue
+    generate_password: generatePasswordValue,
+    ...toolHandlers
   };
 
   return {
@@ -2047,12 +1986,12 @@ export function createToolsetService() {
         systemPrompt: buildToolsPrompt(tools)
       };
     },
-    executeTool(payload = {}) {
+    async executeTool(payload = {}, context = {}) {
       const tool = String(payload.tool ?? '').trim();
       const handler = handlers[tool];
       if (!handler) return { ok: false, error: strings.errors.unknownTool, tool };
       try {
-        return { ok: true, tool, output: handler(payload.parameters ?? {}) };
+        return { ok: true, tool, output: await handler(payload.parameters ?? {}, context) };
       } catch (error) {
         return { ok: false, tool, error: error?.message ?? String(error) };
       }

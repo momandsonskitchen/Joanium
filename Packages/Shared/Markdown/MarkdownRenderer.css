@@ -77,8 +77,6 @@
   overflow-x: auto;
   max-height: 500px;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 .md-pre:last-child { margin-bottom: 0; }

@@ -340,7 +340,7 @@ export function createTerminalService({ rootDirectory }) {
       });
     });
 
-    return { ok: true, processId, command: payload.command, cwd, risk };
+    return { ok: true, processId, command: payload.command, cwd, running: true, risk };
   }
 
   function writeProcess(processId, data) {

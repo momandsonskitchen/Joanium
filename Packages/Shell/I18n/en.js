@@ -17,6 +17,7 @@ import memory from '../../Memory/I18n/en.js';
 import themes from '../../Themes/I18n/en.js';
 import mcp from '../../MCP/I18n/en.js';
 import providers from '../../Providers/I18n/en.js';
+import connectors from '../../Toolset/Connectors/I18n/en.js';
 
 const en = {
   appName: 'Joanium',
@@ -40,6 +41,7 @@ const en = {
       user: 'User',
       app: 'App',
       channels: 'Channels',
+      connectors: 'Connectors',
       providers: 'AI Providers',
       appearance: 'Appearance',
       mcp: 'MCP',
@@ -75,6 +77,7 @@ const en = {
   themes,
   mcp,
   providers,
+  connectors,
   usage,
   history,
   projects,

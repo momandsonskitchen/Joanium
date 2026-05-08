@@ -61,10 +61,7 @@
   gap: 12px;
   padding: 0px 10px 20px;
   overflow-y: auto;
-  scrollbar-width: none;
 }
-
-.chat-projects__form-col::-webkit-scrollbar { display: none; }
 
 .chat-projects__form-heading {
   margin: 0;
@@ -321,17 +318,6 @@
   padding: 4px 48px 40px 28px;
   overflow-y: auto;
   border-left: 1px solid rgba(170, 134, 104, 0.09);
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
-}
-
-.chat-projects__list-col::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.chat-projects__list-col::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
 }
 
 .chat-projects__list-heading {

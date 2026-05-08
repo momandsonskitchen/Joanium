@@ -316,15 +316,6 @@
   pointer-events: auto;
 }
 
-.chat-stage__scroll::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.chat-stage__scroll::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
-}
-
 .chat-stage__title {
   animation: chat-fade-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   margin: 80px 0 34px;
@@ -1718,11 +1709,6 @@
 .chat-model-picker__scroller {
   max-height: 340px;
   overflow-y: auto;
-  scrollbar-width: none;
-}
-
-.chat-model-picker__scroller::-webkit-scrollbar {
-  display: none;
 }
 
 .chat-model-picker--open {

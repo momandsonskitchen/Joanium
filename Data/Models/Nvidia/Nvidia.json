@@ -103,7 +103,7 @@
       },
       "health": {
         "status": "yellow",
-        "checkedAt": "2026-05-08T04:08:08.763Z"
+        "checkedAt": "2026-05-08T07:58:06.947Z"
       }
     },
     "qwen/qwen3.5-397b-a17b": {
@@ -203,7 +203,7 @@
       },
       "health": {
         "status": "yellow",
-        "checkedAt": "2026-05-07T12:18:35.276Z"
+        "checkedAt": "2026-05-08T07:58:21.895Z"
       }
     },
     "openai/gpt-oss-20b": {

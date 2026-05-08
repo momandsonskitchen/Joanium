@@ -1,16 +1,49 @@
 @import "../Common/Common.css";
 
-/* ─── Joanium Custom Scrollbar ─────────────────────────────────────────────
-   Usage: attach via attachCustomScrollbar(container, scroller).
-   The container receives .joanium-custom-scrollbar-host (for hover reveal).
-   The track + thumb are injected as children of that container.
+/* ════════════════════════════════════════════════════════════════════════════
+   Joanium Custom Scrollbar  —  Single Source of Truth
+   ────────────────────────────────────────────────────────────────────────────
+   ALL scrollbar code lives here.  No other file may contain:
+     • scrollbar-width / scrollbar-color
+     • ::-webkit-scrollbar / ::-webkit-scrollbar-thumb / ::-webkit-scrollbar-track
+   ════════════════════════════════════════════════════════════════════════════
+
+   Two rendering modes:
+
+   1. JS-INJECTED  (attachCustomScrollbar)
+      Injects a track + thumb div as children of the host container.
+      The host gets .joanium-custom-scrollbar-host for the hover-reveal rule.
+      Use when you need pixel-perfect compositor-thread animation (e.g. Usage).
+
+   2. NATIVE CSS  (.joanium-scrollbar utility class  OR  named selectors below)
+      Apply .joanium-scrollbar directly to any overflow-y:auto element for the
+      same thin pill-shaped accent-purple look without JS overhead.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Accent-purple scrollbar design tokens ───────────────────────────────────
+   Extracted from the Usage panel scrollbar design (image reference).
+   Override in a theme block (e.g. ThemePanel dark mode) via:
+     --scrollbar-accent-track / --scrollbar-accent-thumb / --scrollbar-accent-thumb-hover
+   ──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --scrollbar-accent-track:       rgba(200, 116, 217, 0.07);
+  --scrollbar-accent-thumb:       rgba(200, 116, 217, 0.30);
+  --scrollbar-accent-thumb-hover: rgba(200, 116, 217, 0.54);
+}
+
+
+/* ── 1. JS-injected scrollbar ────────────────────────────────────────────────
+   attachCustomScrollbar() injects .joanium-custom-scrollbar (track) and
+   .joanium-custom-scrollbar__thumb inside the host container.
    ──────────────────────────────────────────────────────────────────────────── */
 
 .joanium-custom-scrollbar {
   position: absolute;
   width: var(--scrollbar-width);
   border-radius: var(--radius-pill);
-  background: var(--scrollbar-track);
+  background: var(--scrollbar-accent-track);
   opacity: 0;
   transition: opacity 200ms ease;
   pointer-events: none;
@@ -26,7 +59,7 @@
   left: 0;
   right: 0;
   border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
+  background: var(--scrollbar-accent-thumb);
   cursor: pointer;
   pointer-events: all;
   will-change: transform;
@@ -35,5 +68,157 @@
 
 .joanium-custom-scrollbar__thumb:hover,
 .joanium-custom-scrollbar__thumb.is-dragging {
-  background: var(--scrollbar-thumb-hover);
+  background: var(--scrollbar-accent-thumb-hover);
+}
+
+
+/* ── 2. Native CSS scrollbar ─────────────────────────────────────────────────
+   .joanium-scrollbar — utility class, apply to any overflow-y:auto element.
+   Named panel selectors below extend the same rules without requiring a
+   class change in markup.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ·· Shared property block (applies to .joanium-scrollbar + all named selectors) */
+
+.joanium-scrollbar,
+.agents-list-col,
+.chat-history__content,
+.chat-stage__scroll,
+.events-feed__list,
+.events-detail,
+.marketplace__list-content,
+.marketplace__viewer-card,
+.mcp-list,
+.mcp-tools,
+.chat-memory__list,
+.chat-personas__viewer-card,
+.chat-projects__list-col,
+.chat-settings__main,
+.chat-skills__viewer-card,
+.chat-templates__list-col,
+.md-pre {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-accent-thumb) transparent;
+}
+
+/* ·· Webkit track */
+
+.joanium-scrollbar::-webkit-scrollbar,
+.agents-list-col::-webkit-scrollbar,
+.chat-history__content::-webkit-scrollbar,
+.chat-stage__scroll::-webkit-scrollbar,
+.events-feed__list::-webkit-scrollbar,
+.events-detail::-webkit-scrollbar,
+.marketplace__list-content::-webkit-scrollbar,
+.marketplace__viewer-card::-webkit-scrollbar,
+.mcp-list::-webkit-scrollbar,
+.mcp-tools::-webkit-scrollbar,
+.chat-memory__list::-webkit-scrollbar,
+.chat-personas__viewer-card::-webkit-scrollbar,
+.chat-projects__list-col::-webkit-scrollbar,
+.chat-settings__main::-webkit-scrollbar,
+.chat-skills__viewer-card::-webkit-scrollbar,
+.chat-templates__list-col::-webkit-scrollbar,
+.md-pre::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+.joanium-scrollbar::-webkit-scrollbar-track,
+.agents-list-col::-webkit-scrollbar-track,
+.chat-history__content::-webkit-scrollbar-track,
+.chat-stage__scroll::-webkit-scrollbar-track,
+.events-feed__list::-webkit-scrollbar-track,
+.events-detail::-webkit-scrollbar-track,
+.marketplace__list-content::-webkit-scrollbar-track,
+.marketplace__viewer-card::-webkit-scrollbar-track,
+.mcp-list::-webkit-scrollbar-track,
+.mcp-tools::-webkit-scrollbar-track,
+.chat-memory__list::-webkit-scrollbar-track,
+.chat-personas__viewer-card::-webkit-scrollbar-track,
+.chat-projects__list-col::-webkit-scrollbar-track,
+.chat-settings__main::-webkit-scrollbar-track,
+.chat-skills__viewer-card::-webkit-scrollbar-track,
+.chat-templates__list-col::-webkit-scrollbar-track,
+.md-pre::-webkit-scrollbar-track {
+  background: var(--scrollbar-accent-track);
+  border-radius: var(--radius-pill);
+}
+
+/* ·· Webkit thumb */
+
+.joanium-scrollbar::-webkit-scrollbar-thumb,
+.agents-list-col::-webkit-scrollbar-thumb,
+.chat-history__content::-webkit-scrollbar-thumb,
+.chat-stage__scroll::-webkit-scrollbar-thumb,
+.events-feed__list::-webkit-scrollbar-thumb,
+.events-detail::-webkit-scrollbar-thumb,
+.marketplace__list-content::-webkit-scrollbar-thumb,
+.marketplace__viewer-card::-webkit-scrollbar-thumb,
+.mcp-list::-webkit-scrollbar-thumb,
+.mcp-tools::-webkit-scrollbar-thumb,
+.chat-memory__list::-webkit-scrollbar-thumb,
+.chat-personas__viewer-card::-webkit-scrollbar-thumb,
+.chat-projects__list-col::-webkit-scrollbar-thumb,
+.chat-settings__main::-webkit-scrollbar-thumb,
+.chat-skills__viewer-card::-webkit-scrollbar-thumb,
+.chat-templates__list-col::-webkit-scrollbar-thumb,
+.md-pre::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--scrollbar-accent-thumb);
+}
+
+.joanium-scrollbar::-webkit-scrollbar-thumb:hover,
+.agents-list-col::-webkit-scrollbar-thumb:hover,
+.chat-history__content::-webkit-scrollbar-thumb:hover,
+.chat-stage__scroll::-webkit-scrollbar-thumb:hover,
+.events-feed__list::-webkit-scrollbar-thumb:hover,
+.events-detail::-webkit-scrollbar-thumb:hover,
+.marketplace__list-content::-webkit-scrollbar-thumb:hover,
+.marketplace__viewer-card::-webkit-scrollbar-thumb:hover,
+.mcp-list::-webkit-scrollbar-thumb:hover,
+.mcp-tools::-webkit-scrollbar-thumb:hover,
+.chat-memory__list::-webkit-scrollbar-thumb:hover,
+.chat-personas__viewer-card::-webkit-scrollbar-thumb:hover,
+.chat-projects__list-col::-webkit-scrollbar-thumb:hover,
+.chat-settings__main::-webkit-scrollbar-thumb:hover,
+.chat-skills__viewer-card::-webkit-scrollbar-thumb:hover,
+.chat-templates__list-col::-webkit-scrollbar-thumb:hover,
+.md-pre::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-accent-thumb-hover);
+}
+
+
+/* ── 3. Hidden scrollbars ────────────────────────────────────────────────────
+   Elements that scroll internally but must never show a scrollbar track.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.agents-form-col,
+.agents-form__avatar-grid,
+.chat-model-picker__scroller,
+.chat-personas__list-content,
+.chat-projects__form-col,
+.chat-skills__list-content,
+.chat-templates__form-col,
+.usage-content__scroller,
+.chat-settings__nav,
+.joanium-ddm-lite__panel,
+.joanium-provider-picker__viewport,
+.joanium-dropdown__panel {
+  scrollbar-width: none;
+}
+
+.agents-form-col::-webkit-scrollbar,
+.agents-form__avatar-grid::-webkit-scrollbar,
+.chat-model-picker__scroller::-webkit-scrollbar,
+.chat-personas__list-content::-webkit-scrollbar,
+.chat-projects__form-col::-webkit-scrollbar,
+.chat-skills__list-content::-webkit-scrollbar,
+.chat-templates__form-col::-webkit-scrollbar,
+.usage-content__scroller::-webkit-scrollbar,
+.chat-settings__nav::-webkit-scrollbar,
+.joanium-ddm-lite__panel::-webkit-scrollbar,
+.joanium-provider-picker__viewport::-webkit-scrollbar,
+.joanium-dropdown__panel::-webkit-scrollbar {
+  display: none;
 }

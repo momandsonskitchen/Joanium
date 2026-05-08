@@ -70,11 +70,6 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  scrollbar-width: none;
-}
-
-.chat-skills__list-content::-webkit-scrollbar {
-  display: none;
 }
 
 /* ── List item cards ──────────────────────────────────────────────────── */
@@ -265,18 +260,7 @@
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
   padding: 24px 28px;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
   -webkit-app-region: no-drag;
-}
-
-.chat-skills__viewer-card::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.chat-skills__viewer-card::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
 }
 
 /* Empty / placeholder state */

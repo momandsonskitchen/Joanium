@@ -16,9 +16,9 @@ html.joanium-theme-dark {
   --color-chat-user-bubble-text: rgba(28, 22, 18, 0.96);
   --color-chat-error-bubble-surface: rgba(80, 35, 34, 0.72);
   --color-chat-error-bubble-text: rgba(255, 226, 220, 0.95);
-  --scrollbar-track: rgba(255, 255, 255, 0.06);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.24);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.42);
+  --scrollbar-accent-track:       rgba(255, 255, 255, 0.06);
+  --scrollbar-accent-thumb:       rgba(255, 255, 255, 0.24);
+  --scrollbar-accent-thumb-hover: rgba(255, 255, 255, 0.42);
 }
 
 html.joanium-theme-dark body {

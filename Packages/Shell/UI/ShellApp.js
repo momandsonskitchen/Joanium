@@ -26,6 +26,7 @@ import { createThemePanel } from '../../Themes/UI/ThemePanel.js';
 import { loadAndApplyThemeState, stripNativeTooltips } from '../../Themes/UI/ThemeController.js';
 import { createMCPPanel } from '../../MCP/UI/MCPPanel.js';
 import { createProvidersPanel } from '../../Providers/UI/ProvidersPanel.js';
+import { createConnectorsPanel } from '../../Toolset/Connectors/UI/ConnectorsPanel.js';
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 
@@ -103,6 +104,7 @@ async function bootstrap() {
   let avatarInitials = null;
   let avatarImg = null;
   const channelGateway = createChannelGateway(strings.channels, {
+    chatStrings: strings.chat,
     getActivePersona: () => activePersona
   });
 
@@ -493,6 +495,12 @@ async function bootstrap() {
         await panel.populate();
       }
 
+      if (id === 'connectors') {
+        const panel = createConnectorsPanel(strings.connectors);
+        main.append(panel.build());
+        await panel.populate();
+      }
+
       if (id === 'shortcuts') {
         main.append(createShortcutsPanel(strings.shortcuts));
       }
@@ -520,6 +528,7 @@ async function bootstrap() {
       { id: 'user',      label: strings.settings.nav.user,      icon: iconMarkup.tabPersonas },
       { id: 'app',       label: strings.settings.nav.app,       icon: iconMarkup.power       },
       { id: 'channels',   label: strings.settings.nav.channels,   icon: iconMarkup.tabChannels },
+      { id: 'connectors', label: strings.settings.nav.connectors, icon: iconMarkup.network     },
       { id: 'providers',  label: strings.settings.nav.providers,  icon: iconMarkup.verified    },
       { id: 'appearance', label: strings.settings.nav.appearance, icon: iconMarkup.palette },
       { id: 'mcp',       label: strings.settings.nav.mcp,       icon: iconMarkup.network     },

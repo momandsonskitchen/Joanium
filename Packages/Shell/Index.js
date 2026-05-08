@@ -23,7 +23,6 @@ export async function createPackage({ rootDirectory }) {
       'Channels',
       'Events',
       'Projects',
-      'Terminal',
       'Toolset',
       'Memory',
       'Templates',
@@ -38,7 +37,6 @@ export async function createPackage({ rootDirectory }) {
       'Security',
       'Themes',
       'MCP',
-      'BrowserPreview',
       'Providers'
     ],
     rendererPath: path.join(shellDirectory, 'UI', 'App.html'),

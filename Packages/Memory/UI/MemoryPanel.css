@@ -85,17 +85,6 @@
   gap: 8px;
   padding: 0 14px 14px;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
-}
-
-.chat-memory__list::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.chat-memory__list::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
 }
 
 .chat-memory__card {

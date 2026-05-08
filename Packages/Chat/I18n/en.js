@@ -102,7 +102,9 @@ const en = {
       list_directory: 'List directory',
       git_status: 'Git status',
       git_diff: 'Git diff',
-      run_project_checks: 'Run project checks'
+      run_project_checks: 'Run project checks',
+      start_local_server: 'Start local server',
+      read_terminal_output: 'Read terminal output'
     },
     systemPrompt: [
       'You can use local terminal tools when the user asks for codebase work, filesystem inspection, command execution, git inspection, or project checks.',
@@ -110,7 +112,8 @@ const en = {
       '```joanium-terminal',
       '{"tool":"run_shell_command","command":"npm test","working_directory":"D:/absolute/path","timeout_seconds":90,"allow_risky":false}',
       '```',
-      'Supported tools: run_shell_command, assess_shell_command, inspect_workspace, search_workspace, read_local_file, list_directory, git_status, git_diff, run_project_checks.',
+      'Supported tools: run_shell_command, assess_shell_command, inspect_workspace, search_workspace, read_local_file, list_directory, git_status, git_diff, run_project_checks, start_local_server, read_terminal_output.',
+      'Use start_local_server for dev servers/watchers and read_terminal_output with the returned process id to inspect its output.',
       'Use absolute paths when you know them. Never request connector tools from terminal. After the terminal result is returned, give the user the final answer.'
     ].join('\n')
   },

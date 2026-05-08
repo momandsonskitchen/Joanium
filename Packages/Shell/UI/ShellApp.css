@@ -330,12 +330,7 @@ textarea {
   padding: 8px 0 40px;
   border-right: 1px solid rgba(170, 134, 104, 0.09);
   overflow-y: auto;
-  scrollbar-width: none;
   -webkit-app-region: drag;
-}
-
-.chat-settings__nav::-webkit-scrollbar {
-  display: none;
 }
 
 .chat-settings__nav-items {
@@ -404,18 +399,7 @@ textarea {
   min-width: 0;
   overflow-y: auto;
   padding: 24px 52px 40px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
   -webkit-app-region: drag;
-}
-
-.chat-settings__main::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.chat-settings__main::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--scrollbar-thumb);
 }
 
 /* ── Shortcuts panel ──────────────────────────────────────────────────────── */
