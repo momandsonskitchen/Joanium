@@ -1883,3 +1883,92 @@
     min-height: 220px;
   }
 }
+
+/* ── Conversation track ───────────────────────────────────────────────────── */
+
+.chat-thread-track {
+  position: absolute;
+  top: 48px;
+  right: 30px;
+  bottom: 0;
+  width: 14px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 220ms ease;
+}
+
+.chat-view--browser-preview .chat-thread-track {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chat-thread-track::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  background: rgba(150, 120, 100, 0.16);
+  border-radius: 99px;
+}
+
+.chat-thread-track__dot {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(150, 120, 100, 0.25);
+  border: 0;
+  padding: 0;
+  pointer-events: all;
+  cursor: pointer;
+  transition:
+    width 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.chat-thread-track__dot:hover,
+.chat-thread-track__dot--active {
+  width: 14px;
+  height: 4px;
+  background: var(--color-accent, #a855f7);
+  box-shadow: 0 0 6px rgba(var(--color-accent-rgb, 168, 85, 247), 0.45);
+}
+
+.chat-message--highlighted .chat-message__bubble {
+  animation: chat-message-highlight 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes chat-message-highlight {
+  0%   { box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.22), 0 0 28px rgba(168, 85, 247, 0.18); }
+  55%  { box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.22), 0 0 28px rgba(168, 85, 247, 0.18); }
+  100% { box-shadow: 0 0 0 0px rgba(168, 85, 247, 0), 0 0 0px rgba(168, 85, 247, 0); }
+}
+
+.chat-thread-track__label {
+  position: absolute;
+  right: calc(100% + 10px);
+  transform: translateY(-50%);
+  white-space: nowrap;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 5px 13px;
+  border-radius: var(--radius-pill, 99px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  font-size: 12px;
+  font-weight: 520;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-title);
+  box-shadow: var(--shadow-chat-pill, 0 2px 12px rgba(0,0,0,0.08));
+  pointer-events: none;
+}

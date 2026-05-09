@@ -1,7 +1,7 @@
 {
   "deepseek-ai/deepseek-v3.2": {
     "status": "yellow",
-    "checkedAt": "2026-05-08T13:43:41.365Z"
+    "checkedAt": "2026-05-09T04:11:15.069Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -28,11 +28,19 @@
     "checkedAt": "2026-05-08T10:23:09.781Z"
   },
   "google/gemma-4-31b-it": {
-    "status": "yellow",
-    "checkedAt": "2026-05-08T10:23:19.478Z"
+    "status": "green",
+    "checkedAt": "2026-05-09T03:14:49.590Z"
   },
   "z-ai/glm4.7": {
+    "status": "green",
+    "checkedAt": "2026-05-09T03:20:40.068Z"
+  },
+  "minimaxai/minimax-m2.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-08T13:43:56.291Z"
+    "checkedAt": "2026-05-09T04:11:29.946Z"
+  },
+  "qwen/qwen3.5-397b-a17b": {
+    "status": "green",
+    "checkedAt": "2026-05-09T03:20:42.889Z"
   }
 }

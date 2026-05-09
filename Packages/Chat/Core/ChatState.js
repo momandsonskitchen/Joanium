@@ -27,7 +27,7 @@ function sanitizeConversationMessages(candidateMessages) {
     return [];
   }
 
-  return candidateMessages
+  const cleaned = candidateMessages
     .map((message) => {
       const role = message?.role === 'assistant' ? 'assistant' : 'user';
       const content = typeof message?.content === 'string' ? message.content.trim() : '';
@@ -36,12 +36,31 @@ function sanitizeConversationMessages(candidateMessages) {
         return null;
       }
 
-      return {
-        role,
-        content
-      };
+      return { role, content };
     })
     .filter(Boolean);
+
+  // Enforce strict user/assistant alternation that most models require.
+  // Consecutive same-role turns are merged so the model always sees a clean
+  // back-and-forth, even when retries or error placeholders slipped through.
+  const alternating = [];
+  for (const message of cleaned) {
+    const last = alternating[alternating.length - 1];
+    if (last && last.role === message.role) {
+      // Merge into the previous turn rather than producing an invalid sequence.
+      last.content += `\n\n${message.content}`;
+    } else {
+      alternating.push({ ...message });
+    }
+  }
+
+  // Drop any leading assistant turns — some providers reject conversations
+  // that don't start with a user message.
+  while (alternating.length > 0 && alternating[0].role === 'assistant') {
+    alternating.shift();
+  }
+
+  return alternating;
 }
 
 function buildProviderOrder(user, providers) {
@@ -537,7 +556,17 @@ async function requestChatCompletionStreamWithRetry({ user, providers, request, 
     };
 
     try {
-      return await requestChatCompletionStream({ user, providers, request, onChunk: guardedChunk });
+      const result = await requestChatCompletionStream({ user, providers, request, onChunk: guardedChunk });
+
+      // If the stream ended cleanly but produced zero tokens, treat it as a
+      // transient failure and retry — this is the root cause of "No response
+      // received" / "Empty Response" on weaker models.
+      if (!tokensEmitted && attempt < MAX_ATTEMPTS) {
+        await delay(BASE_DELAY_MS * 2 ** (attempt - 1));
+        continue;
+      }
+
+      return result;
     } catch (error) {
       lastError = error;
 
@@ -552,7 +581,7 @@ async function requestChatCompletionStreamWithRetry({ user, providers, request, 
     }
   }
 
-  throw lastError;
+  throw lastError ?? new Error('Empty response after retries.');
 }
 
 async function requestChatCompletionStream({ user, providers, request, onChunk }) {
@@ -578,6 +607,12 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   }
 
   const systemPrompt = parts.length > 0 ? parts.join('\n\n') : null;
+
+  // Prepend a lightweight multi-turn anchor so weaker models always know
+  // which message they should be responding to, even in long conversations.
+  const groundedSystemPrompt = systemPrompt
+    ? `You are in a multi-turn conversation. Respond only to the most recent user message.\n\n${systemPrompt}`
+    : 'You are in a multi-turn conversation. Respond only to the most recent user message.';
 
   if (messages.length === 0) {
     throw new Error('A message is required to start the chat.');
@@ -641,11 +676,11 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   };
 
   if (provider.id === 'google') {
-    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk: trackingChunk });
+    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt: groundedSystemPrompt, onChunk: trackingChunk });
   } else if (provider.id === 'anthropic') {
-    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk: trackingChunk });
+    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt: groundedSystemPrompt, onChunk: trackingChunk });
   } else if (openAiCompatibleProviders.has(provider.id)) {
-    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk: trackingChunk });
+    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt: groundedSystemPrompt, onChunk: trackingChunk });
   } else {
     throw new Error(`${provider.label} chat is not wired up yet.`);
   }

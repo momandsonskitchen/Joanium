@@ -1270,6 +1270,8 @@ export async function createChatView(strings, {
   let terminalPanel = null;
   let toolsetPrompt = null;
   let slashCommandsLoaded = false;
+  let track = null;
+  let trackLabel = null;
   let slashCommands = [];
   let slashFilteredCommands = [];
   let slashSelectedIndex = 0;
@@ -1981,6 +1983,75 @@ export async function createChatView(strings, {
     focusComposer();
   }
 
+  function renderTrack() {
+    if (!track || !trackLabel || !thread || !scroll) return;
+
+    const userMsgs = Array.from(thread.querySelectorAll('.chat-message--user'));
+    const toShow = userMsgs;
+
+    track.querySelectorAll('.chat-thread-track__dot').forEach((d) => d.remove());
+
+    if (toShow.length < 2) {
+      track.hidden = true;
+      trackLabel.hidden = true;
+      return;
+    }
+
+    track.hidden = false;
+    const totalH = scroll.scrollHeight;
+
+    for (const msgEl of toShow) {
+      const dot = createElement('button', 'chat-thread-track__dot');
+      dot.type = 'button';
+      const pct = totalH > 0 ? (msgEl.offsetTop / totalH) * 100 : 0;
+      dot.style.top = `${pct}%`;
+
+      const preview = truncate(
+        collapseWhitespace(msgEl.querySelector('.chat-message__bubble')?.textContent ?? ''),
+        38
+      );
+
+      dot.addEventListener('mouseenter', () => {
+        trackLabel.textContent = preview;
+        trackLabel.style.top = dot.style.top;
+        trackLabel.hidden = false;
+      });
+      dot.addEventListener('mouseleave', () => {
+        trackLabel.hidden = true;
+      });
+      dot.addEventListener('click', () => {
+        msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        msgEl.classList.add('chat-message--highlighted');
+        setTimeout(() => msgEl.classList.remove('chat-message--highlighted'), 1600);
+      });
+
+      track.append(dot);
+    }
+
+    updateTrackActive();
+  }
+
+  function updateTrackActive() {
+    if (!track || !thread || !scroll) return;
+
+    const dots = Array.from(track.querySelectorAll('.chat-thread-track__dot'));
+    const userMsgs = Array.from(thread.querySelectorAll('.chat-message--user'));
+    if (!dots.length) return;
+
+    const scrollMid = scroll.scrollTop + scroll.clientHeight * 0.4;
+    let activeIdx = 0;
+    let minDist = Infinity;
+
+    userMsgs.forEach((msgEl, i) => {
+      const dist = Math.abs(msgEl.offsetTop - scrollMid);
+      if (dist < minDist) { minDist = dist; activeIdx = i; }
+    });
+
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('chat-thread-track__dot--active', i === activeIdx);
+    });
+  }
+
   function renderThread() {
     if (!thread || !title || !composer || !scroll || !bottom) return;
 
@@ -2081,6 +2152,7 @@ export async function createChatView(strings, {
 
     requestAnimationFrame(() => {
       thread.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+      renderTrack();
     });
   }
 
@@ -2451,11 +2523,13 @@ export async function createChatView(strings, {
         return;
       }
 
+      const isEmpty = !parsedContent && !accThinking;
       updateLastAssistantMessage(() => ({
         role: 'assistant',
         content: parsedContent || strings.composer.emptyResponse,
         thinking: accThinking || inlineThinking,
         streaming: false,
+        empty: isEmpty,
         providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
         modelLabel: meta?.modelLabel ?? activeModelLabel
       }));
@@ -2483,10 +2557,13 @@ export async function createChatView(strings, {
       renderThread();
     }));
 
-    const historyToSend = messages.slice(0, -1).map(({ role, content, modelContent }) => ({
-      role,
-      content: role === 'user' ? (modelContent || content) : content
-    }));
+    const historyToSend = messages
+      .slice(0, -1)
+      .filter(({ error, stopped, empty }) => !error && !stopped && !empty)
+      .map(({ role, content, modelContent }) => ({
+        role,
+        content: role === 'user' ? (modelContent || content) : content
+      }));
     const [memoryContext, toolsetTools] = await Promise.all([
       loadMemoryContext(),
       loadToolsetPrompt()
@@ -2672,6 +2749,13 @@ export async function createChatView(strings, {
     }
   });
   view.append(scroll, bottom, browserPreview.element, terminalPanel.build());
+  track = createElement('div', 'chat-thread-track');
+  track.hidden = true;
+  trackLabel = createElement('div', 'chat-thread-track__label');
+  trackLabel.hidden = true;
+  track.append(trackLabel);
+  view.append(track);
+  scroll.addEventListener('scroll', () => updateTrackActive(), { passive: true });
   browserPreview.start();
   wireTerminalProcessCards();
 
