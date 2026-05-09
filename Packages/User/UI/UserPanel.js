@@ -103,7 +103,8 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   avatarCard.append(avatarPreview, avatarCardBody);
 
   avatarBtns.append(uploadBtn, removeBtn);
-  avatarSection.append(avatarCard);
+  const avatarHeading = createElement('p', 'chat-settings__field-label', strings.avatarLabel ?? 'Profile Picture');
+  avatarSection.append(avatarHeading, avatarCard);
 
   // ── Name ──────────────────────────────────────────────────────────────────
 
@@ -192,7 +193,16 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   const actions = createElement('div', 'chat-settings__user-actions');
   actions.append(saveBtn, status);
 
-  view.append(avatarSection, nameBox.element, dobLabel, dobRow, instructionsLabel, instructionsTextarea, actions);
+  const leftCol = createElement('div', 'chat-settings__user-left');
+  leftCol.append(avatarSection, nameBox.element, dobLabel, dobRow, actions);
+
+  const rightCol = createElement('div', 'chat-settings__user-right');
+  rightCol.append(instructionsLabel, instructionsTextarea);
+
+  const cols = createElement('div', 'chat-settings__user-cols');
+  cols.append(leftCol, rightCol);
+
+  view.append(cols);
   return view;
 }
 

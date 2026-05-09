@@ -2,9 +2,28 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-width: 480px;
   -webkit-app-region: no-drag;
   animation: chat-fade-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.chat-settings__user-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.chat-settings__user-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-settings__user-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
 }
 
 /* ── Avatar section ──────────────────────────────────────────────────────── */
@@ -166,8 +185,8 @@
 
 .chat-settings__instructions-textarea {
   width: 100%;
-  min-height: 120px;
-  max-height: 220px;
+  min-height: 200px;
+  max-height: 400px;
   padding: 13px 14px;
   border: 0;
   outline: 0;
