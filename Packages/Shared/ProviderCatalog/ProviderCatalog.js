@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
+import { app } from 'electron';
 
 const providerPalette = {
   anthropic: { tint: '#f6c59e', glow: '#ffefe0' },
@@ -98,7 +99,10 @@ function buildProviderRecord(providerConfiguration, rootDirectory) {
 }
 
 export async function readProviderCatalog(rootDirectory) {
-  const modelsDirectory = path.join(rootDirectory, 'Data', 'Models');
+  // Data lives in extraResources (outside asar) when packaged, at process.resourcesPath.
+  // Assets remain inside the asar so rootDirectory is still correct for icons/logo.
+  const dataRoot = app.isPackaged ? process.resourcesPath : rootDirectory;
+  const modelsDirectory = path.join(dataRoot, 'Data', 'Models');
   const indexPath = path.join(modelsDirectory, 'index.json');
   const indexContents = await readFile(indexPath, 'utf8');
   const providerFiles = JSON.parse(indexContents);

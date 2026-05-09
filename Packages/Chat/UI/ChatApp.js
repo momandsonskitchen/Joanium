@@ -1,4 +1,4 @@
-import { getTimeGreetings } from '../../../Datasets/messages.js';
+import { getTimeGreetings } from '../../../Datasets/Messages.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';

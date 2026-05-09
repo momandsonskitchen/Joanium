@@ -60,6 +60,27 @@
 * About/System Info: `Packages/About` owns app metadata plus a local system snapshot persisted to `Data/System.json`.
 * Custom Instructions: `Packages/User` stores user-written behavior instructions in `Data/User.json`; `Packages/Chat` adds them to the model system context.
 
+# Build System
+
+## Scripts
+* `Scripts/Build.mjs` — production build entry point. Runs `SetVersionByDate.mjs` then `electron-builder`.
+* `Scripts/SetVersionByDate.mjs` — stamps `package.json` with a date-based version (`YYYY.MMDD.patch`). Writes the 2-part base version to stdout so CI can append its own counter.
+
+## Config
+* `electron-builder.json` — electron-builder configuration (targets, icons, file inclusion, publish settings). Kept separate from `package.json` for clarity.
+
+## File Packaging Strategy
+* **Inside asar** (`files`): `App.js`, `Packages`, `Datasets`, `Prompts`. Code-only, read-only at runtime.
+* **Outside asar** (`extraResources`): `Assets`, `Data`, `Skills`, `Personas`. Placed at `process.resourcesPath` so they are accessible outside the asar sandbox.
+* `Data` ships only seed/static files. User-generated data (chats, memories, agents, channels, projects, security, avatar, usage) is excluded from the build via filters that mirror `.gitignore`.
+
+## Path Resolution (Packaged vs Dev)
+* `rootDirectory` always resolves to the asar root (or project root in dev) — used for `Assets`, `Packages`, etc.
+* Files in `extraResources` (e.g. `Data/Models`) must be resolved via `process.resourcesPath` when `app.isPackaged` is `true`. Use the pattern: `const dataRoot = app.isPackaged ? process.resourcesPath : rootDirectory;`
+
+## CI/CD
+* `.github/workflows/Release.yml` — manual trigger (`workflow_dispatch`) that versions, tags, creates a GitHub release, then fans out to three parallel jobs: Windows (NSIS installer), macOS (DMG), Linux (AppImage). Each job calls `electron-builder --publish always` with `GH_TOKEN`.
+
 # Design language
 * All buttons should have rounded corners (20px).
 * Should follow material 3 expressive design.

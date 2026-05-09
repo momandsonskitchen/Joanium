@@ -1,5 +1,15 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { app } from 'electron';
+
+// In dev, writable user data lives under Data/ in the project root.
+// When packaged, Program Files is read-only — use the OS user-data directory instead.
+// Windows: %APPDATA%\Joanium  |  macOS: ~/Library/Application Support/Joanium
+function getWritableDataDirectory(rootDirectory) {
+  return app.isPackaged ? app.getPath('userData') : path.join(rootDirectory, 'Data');
+}
+
+export { getWritableDataDirectory };
 
 const DEFAULT_ACTIVE_PERSONA = { namespace: 'Joanium', filename: 'Joana.md' };
 
@@ -243,7 +253,7 @@ export function sanitizeIncomingUserState(candidateState) {
 }
 
 function getUserDataFilePath(rootDirectory) {
-  return path.join(rootDirectory, 'Data', 'User.json');
+  return path.join(getWritableDataDirectory(rootDirectory), 'User.json');
 }
 
 export async function readUserState(rootDirectory) {
