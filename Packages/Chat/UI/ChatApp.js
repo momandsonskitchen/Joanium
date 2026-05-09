@@ -2895,11 +2895,9 @@ export async function createChatView(strings, {
 
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
-  title = createElement(
-    'h1',
-    'chat-stage__title',
-    greetings[Math.floor(Math.random() * greetings.length)]
-  );
+  const rawGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+  const greeting = rawGreeting.replace(/\s(\S+\s*)$/, '\u00A0$1');
+  title = createElement('h1', 'chat-stage__title', greeting);
   thread = createElement('section', 'chat-thread');
   thread.hidden = true;
 

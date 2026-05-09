@@ -325,7 +325,7 @@
   letter-spacing: -0.07em;
   color: var(--color-chat-text-title);
   text-align: center;
-  width: min(1100px, 100%);
+  width: min(1400px, 100%);
 }
 
 .chat-thread {
