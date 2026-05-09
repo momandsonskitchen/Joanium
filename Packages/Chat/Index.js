@@ -1,7 +1,7 @@
 import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
 import { createModelHealthChecker } from './Core/ModelHealthCheck.js';
-import { getSupportedAttachmentExtensions, readAttachmentFiles } from './Core/ChatAttachments.js';
+import { getSupportedAttachmentExtensions, getImageAttachmentExtensions, readAttachmentFiles } from './Core/ChatAttachments.js';
 import { createUsageTracker, estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 export async function createPackage({ rootDirectory }) {
@@ -87,23 +87,31 @@ export async function createPackage({ rootDirectory }) {
       },
       {
         channel: 'chat:select-attachments',
-        handler: async (event) => {
+        handler: async (event, options = {}) => {
+          const allowImages = Boolean(options?.allowImages);
           const window = event.sender.getOwnerBrowserWindow();
+          const docExtensions = getSupportedAttachmentExtensions();
+          const imgExtensions = getImageAttachmentExtensions();
+
+          const filters = [];
+
+          if (allowImages) {
+            filters.push({ name: 'All supported files', extensions: [...imgExtensions, ...docExtensions] });
+            filters.push({ name: 'Images', extensions: imgExtensions });
+          }
+
+          filters.push({ name: 'Documents, text, and code', extensions: docExtensions });
+
           const result = await dialog.showOpenDialog(window, {
             properties: ['openFile', 'multiSelections'],
-            filters: [
-              {
-                name: 'Documents, text, and code',
-                extensions: getSupportedAttachmentExtensions()
-              }
-            ]
+            filters
           });
 
           if (result.canceled) {
             return { attachments: [], rejected: [] };
           }
 
-          return readAttachmentFiles(result.filePaths);
+          return readAttachmentFiles(result.filePaths, { allowImages });
         }
       },
       // ── Model health ─────────────────────────────────────────────────────────

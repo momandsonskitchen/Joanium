@@ -36,7 +36,15 @@ function sanitizeConversationMessages(candidateMessages) {
         return null;
       }
 
-      return { role, content };
+      const result = { role, content };
+
+      // Carry image attachments through so provider functions can build
+      // multimodal content blocks (base64 data lives only in-memory).
+      if (role === 'user' && Array.isArray(message?.imageAttachments) && message.imageAttachments.length > 0) {
+        result.imageAttachments = message.imageAttachments;
+      }
+
+      return result;
     })
     .filter(Boolean);
 
@@ -49,6 +57,9 @@ function sanitizeConversationMessages(candidateMessages) {
     if (last && last.role === message.role) {
       // Merge into the previous turn rather than producing an invalid sequence.
       last.content += `\n\n${message.content}`;
+      if (message.imageAttachments) {
+        last.imageAttachments = [...(last.imageAttachments ?? []), ...message.imageAttachments];
+      }
     } else {
       alternating.push({ ...message });
     }
@@ -337,10 +348,18 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
     : `${streamEndpoint}?alt=sse`;
 
   const googleBody = {
-    contents: messages.map((message) => ({
-      role: message.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: message.content }]
-    })),
+    contents: messages.map((message) => {
+      const role = message.role === 'assistant' ? 'model' : 'user';
+      if (message.role === 'assistant' || !message.imageAttachments?.length) {
+        return { role, parts: [{ text: message.content }] };
+      }
+      const parts = [];
+      if (message.content) parts.push({ text: message.content });
+      for (const img of message.imageAttachments) {
+        parts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
+      }
+      return { role, parts };
+    }),
     generationConfig: { temperature: 0.7 }
   };
 
@@ -394,10 +413,18 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
     model: model.id,
     max_tokens: Math.min(model.max_output ?? 16000, 16000),
     stream: true,
-    messages: messages.map((message) => ({
-      role: message.role,
-      content: [{ type: 'text', text: message.content }]
-    }))
+    messages: messages.map((message) => {
+      if (message.role === 'assistant' || !message.imageAttachments?.length) {
+        return { role: message.role, content: [{ type: 'text', text: message.content }] };
+      }
+      // Multimodal user turn — interleave text and image blocks.
+      const content = [];
+      if (message.content) content.push({ type: 'text', text: message.content });
+      for (const img of message.imageAttachments) {
+        content.push({ type: 'image', source: { type: 'base64', media_type: img.mimeType, data: img.base64 } });
+      }
+      return { role: message.role, content };
+    })
   };
 
   if (systemPrompt) {
@@ -468,10 +495,18 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
 
   const streamOaiBodyStr = JSON.stringify({
     model: model.id,
-    messages: oaiMessages.map((message) => ({
-      role: message.role,
-      content: message.content
-    })),
+    messages: oaiMessages.map((message) => {
+      if (message.role !== 'user' || !message.imageAttachments?.length) {
+        return { role: message.role, content: message.content };
+      }
+      // Multimodal user turn — data-URI images in the OpenAI vision format.
+      const content = [];
+      if (message.content) content.push({ type: 'text', text: message.content });
+      for (const img of message.imageAttachments) {
+        content.push({ type: 'image_url', image_url: { url: `data:${img.mimeType};base64,${img.base64}` } });
+      }
+      return { role: message.role, content };
+    }),
     temperature: 0.7,
     stream: true
   });
@@ -663,8 +698,11 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   };
 
   // Estimate input character count across all messages + system prompt.
-  const charCountIn = messages.reduce((sum, m) => sum + (m.content?.length ?? 0), 0)
-    + (systemPrompt?.length ?? 0);
+  const charCountIn = messages.reduce((sum, m) => {
+    const textCount = m.content?.length ?? 0;
+    const imageCount = (m.imageAttachments ?? []).reduce((s, img) => s + (img.base64?.length ?? 0), 0);
+    return sum + textCount + imageCount;
+  }, 0) + (systemPrompt?.length ?? 0);
 
   // Wrap onChunk to accumulate output character count.
   let charCountOut = 0;

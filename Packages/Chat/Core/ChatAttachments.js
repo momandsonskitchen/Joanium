@@ -60,6 +60,21 @@ const TEXT_EXTENSIONS = new Set([
 
 const EXTRACTABLE_EXTENSIONS = new Set(['pdf', 'docx', 'xlsx', 'xlsm', 'pptx']);
 
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'bmp', 'tiff']);
+
+const IMAGE_MIME_TYPES = {
+  jpg:  'image/jpeg',
+  jpeg: 'image/jpeg',
+  png:  'image/png',
+  gif:  'image/gif',
+  webp: 'image/webp',
+  avif: 'image/avif',
+  bmp:  'image/bmp',
+  tiff: 'image/tiff'
+};
+
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+
 let pdfParseModule = null;
 let mammothModule = null;
 let excelJsModule = null;
@@ -385,24 +400,29 @@ function resolveLimit(fileName) {
   return EXTRACTABLE_EXTENSIONS.has(ext) ? EXTRACTABLE_MAX_BYTES : DIRECT_TEXT_MAX_BYTES;
 }
 
-function isSupportedAttachment(fileName) {
+function isSupportedAttachment(fileName, allowImages = false) {
   const ext = getExtension(fileName);
-  return TEXT_EXTENSIONS.has(ext) || EXTRACTABLE_EXTENSIONS.has(ext);
+  return TEXT_EXTENSIONS.has(ext) || EXTRACTABLE_EXTENSIONS.has(ext) || (allowImages && IMAGE_EXTENSIONS.has(ext));
 }
 
 export function getSupportedAttachmentExtensions() {
   return [...TEXT_EXTENSIONS, ...EXTRACTABLE_EXTENSIONS].sort();
 }
 
-export async function readAttachmentFiles(filePaths = []) {
+export function getImageAttachmentExtensions() {
+  return [...IMAGE_EXTENSIONS];
+}
+
+export async function readAttachmentFiles(filePaths = [], { allowImages = false } = {}) {
   const attachments = [];
   const rejected = [];
   const selectedPaths = Array.isArray(filePaths) ? filePaths : [];
 
   for (const filePath of selectedPaths.slice(0, MAX_FILES)) {
     const fileName = path.basename(filePath);
+    const ext = getExtension(fileName);
 
-    if (!isSupportedAttachment(fileName)) {
+    if (!isSupportedAttachment(fileName, allowImages)) {
       rejected.push({ fileName, reason: 'unsupported' });
       continue;
     }
@@ -418,6 +438,38 @@ export async function readAttachmentFiles(filePaths = []) {
 
     if (!fileStats.isFile()) {
       rejected.push({ fileName, reason: 'not-file' });
+      continue;
+    }
+
+    // ── Image files ────────────────────────────────────────────────────────
+    if (allowImages && IMAGE_EXTENSIONS.has(ext)) {
+      if (fileStats.size > IMAGE_MAX_BYTES) {
+        rejected.push({ fileName, reason: 'too-large', limitBytes: IMAGE_MAX_BYTES, sizeBytes: fileStats.size });
+        continue;
+      }
+
+      try {
+        const buffer = await readFile(filePath);
+        const mimeType = IMAGE_MIME_TYPES[ext] ?? 'image/jpeg';
+        attachments.push({
+          id: randomUUID(),
+          type: 'file',
+          kind: 'image',
+          name: fileName,
+          path: filePath,
+          size: fileStats.size,
+          mimeType,
+          base64: buffer.toString('base64'),
+          summary: 'Image',
+          text: null,
+          lines: 0,
+          truncated: false,
+          warnings: []
+        });
+      } catch (error) {
+        rejected.push({ fileName, reason: 'extract-failed', message: error?.message ?? String(error) });
+      }
+
       continue;
     }
 

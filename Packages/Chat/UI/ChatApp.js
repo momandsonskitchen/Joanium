@@ -511,9 +511,11 @@ function toAttachmentSummary(attachment) {
 }
 
 function buildAttachmentContext(strings, attachments) {
-  if (!attachments.length) return '';
+  // Images are sent as multimodal content blocks — exclude them from text context.
+  const textAttachments = attachments.filter((a) => a.kind !== 'image' && a.text);
+  if (!textAttachments.length) return '';
 
-  const blocks = attachments.map((attachment, index) => {
+  const blocks = textAttachments.map((attachment, index) => {
     const header = formatText(strings.composer.attachmentContextItem, {
       index: String(index + 1),
       name: attachment.name ?? strings.composer.unknownAttachment
@@ -536,7 +538,21 @@ function buildModelContent(strings, prompt, attachments) {
 
 function createAttachmentPill(attachment, strings, { removable = false, onRemove } = {}) {
   const pill = createElement('div', 'chat-attachment');
-  const badge = createElement('span', 'chat-attachment__badge', getFileExtension(attachment.name));
+
+  // For image attachments that still have their base64 data in memory,
+  // show a small thumbnail instead of the plain extension badge.
+  let badge;
+  if (attachment.kind === 'image' && attachment.base64 && attachment.mimeType) {
+    badge = createElement('span', 'chat-attachment__badge chat-attachment__badge--thumb');
+    const thumb = document.createElement('img');
+    thumb.src = `data:${attachment.mimeType};base64,${attachment.base64}`;
+    thumb.className = 'chat-attachment__thumb';
+    thumb.alt = '';
+    thumb.draggable = false;
+    badge.append(thumb);
+  } else {
+    badge = createElement('span', 'chat-attachment__badge', getFileExtension(attachment.name));
+  }
   const body = createElement('span', 'chat-attachment__body');
   const name = createElement('span', 'chat-attachment__name', attachment.name || strings.composer.unknownAttachment);
   const metaParts = [attachment.summary, formatBytes(attachment.size)].filter(Boolean);
@@ -1546,9 +1562,10 @@ export async function createChatView(strings, {
 
   async function selectAttachments() {
     if (isSending) return;
+    const allowImages = activeModel?.inputs?.image === true;
 
     try {
-      const result = await invokeIpc('chat:select-attachments');
+      const result = await invokeIpc('chat:select-attachments', { allowImages });
       const incoming = Array.isArray(result?.attachments) ? result.attachments : [];
       const rejected = Array.isArray(result?.rejected) ? result.rejected : [];
 
@@ -2262,7 +2279,8 @@ export async function createChatView(strings, {
         void submitPrompt({
           content: userMessage.content,
           modelContent: userMessage.modelContent,
-          attachments: userMessage.attachments ?? []
+          attachments: userMessage.attachments ?? [],
+          imageAttachments: userMessage.imageAttachments ?? []
         });
       };
       return createMessageElement(message, strings, { onCopy, onRetry });
@@ -2292,7 +2310,8 @@ export async function createChatView(strings, {
       void submitPrompt({
         content: userMessage.content,
         modelContent: userMessage.modelContent,
-        attachments: userMessage.attachments ?? []
+        attachments: userMessage.attachments ?? [],
+        imageAttachments: userMessage.imageAttachments ?? []
       });
     };
 
@@ -2765,10 +2784,13 @@ export async function createChatView(strings, {
     const historyToSend = messages
       .slice(0, -1)
       .filter(({ error, stopped, empty }) => !error && !stopped && !empty)
-      .map(({ role, content, modelContent }) => ({
-        role,
-        content: role === 'user' ? (modelContent || content) : content
-      }));
+      .map(({ role, content, modelContent, imageAttachments }) => {
+        if (role !== 'user') return { role, content };
+        const textContent = modelContent || content;
+        // Carry image data so providers can build multimodal content blocks.
+        if (!imageAttachments?.length) return { role, content: textContent };
+        return { role, content: textContent, imageAttachments };
+      });
     const [memoryContext, toolsetTools] = await Promise.all([
       loadMemoryContext(),
       loadToolsetPrompt()
@@ -2790,13 +2812,35 @@ export async function createChatView(strings, {
   }
 
   async function submitPrompt(resend = null) {
-    const attachmentsForSend = Array.isArray(resend?.attachments)
-      ? resend.attachments
-      : pendingAttachments;
-    const prompt = String(resend?.content ?? draftValue).trim()
-      || (attachmentsForSend.length ? strings.composer.attachmentOnlyPrompt : '');
+    const isResend = resend !== null;
 
-    if ((!prompt && attachmentsForSend.length === 0) || isSending) return;
+    // Display summaries shown in the thread (no base64 — safe to store in session).
+    // Exception: image attachments keep mimeType + base64 in-memory so the thread
+    // can render thumbnails. saveCurrentSession() strips them via toAttachmentSummary.
+    const allDisplayAttachments = isResend
+      ? (resend.attachments ?? [])
+      : pendingAttachments.map((a) =>
+          a.kind === 'image'
+            ? { ...toAttachmentSummary(a), mimeType: a.mimeType, base64: a.base64 }
+            : toAttachmentSummary(a)
+        );
+
+    // Text-only attachments used to build the model context block.
+    const textAttachments = isResend
+      ? allDisplayAttachments.filter((a) => a.kind !== 'image')
+      : pendingAttachments.filter((a) => a.kind !== 'image');
+
+    // Image attachments with base64 for the API.  Never persisted to disk.
+    const imageAttachmentsData = isResend
+      ? (resend.imageAttachments ?? [])
+      : pendingAttachments
+          .filter((a) => a.kind === 'image')
+          .map((a) => ({ mimeType: a.mimeType, base64: a.base64 }));
+
+    const prompt = String(resend?.content ?? draftValue).trim()
+      || (allDisplayAttachments.length ? strings.composer.attachmentOnlyPrompt : '');
+
+    if ((!prompt && allDisplayAttachments.length === 0) || isSending) return;
 
     const isNewSession = !sessionId;
     if (!sessionId) {
@@ -2805,8 +2849,7 @@ export async function createChatView(strings, {
     }
 
     const modelContent = resend?.modelContent
-      || buildModelContent(strings, prompt, attachmentsForSend);
-    const attachmentSummaries = attachmentsForSend.map(toAttachmentSummary);
+      || buildModelContent(strings, prompt, textAttachments);
 
     messages = [
       ...messages,
@@ -2814,7 +2857,8 @@ export async function createChatView(strings, {
         role: 'user',
         content: prompt,
         modelContent,
-        attachments: attachmentSummaries
+        attachments: allDisplayAttachments,
+        imageAttachments: imageAttachmentsData
       },
       {
         role: 'assistant',
