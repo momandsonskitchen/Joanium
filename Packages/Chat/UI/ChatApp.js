@@ -1471,6 +1471,7 @@ export async function createChatView(strings, {
   let attachmentsEl = null;
   let attachmentNotice = null;
   let slashMenu = null;
+  let slashScroller = null;
   let sendButton = null;
   let thread = null;
   let title = null;
@@ -1901,14 +1902,14 @@ export async function createChatView(strings, {
     if (slashMenu) {
       slashMenu.hidden = true;
       slashMenu.classList.remove('chat-slash-menu--open');
-      slashMenu.replaceChildren();
+      slashScroller?.replaceChildren();
     }
   }
 
   function renderSlashMenu() {
-    if (!slashMenu) return;
+    if (!slashMenu || !slashScroller) return;
 
-    slashMenu.replaceChildren();
+    slashScroller.replaceChildren();
     if (slashFilteredCommands.length === 0) {
       slashMenu.hidden = true;
       return;
@@ -1927,7 +1928,7 @@ export async function createChatView(strings, {
       const commands = slashFilteredCommands.filter((command) => command.type === type);
       if (commands.length === 0) continue;
 
-      slashMenu.append(createElement('div', 'chat-slash-menu__section', sectionLabel));
+      slashScroller.append(createElement('div', 'chat-slash-menu__section', sectionLabel));
 
       for (const command of commands) {
         const item = createElement(
@@ -1962,7 +1963,7 @@ export async function createChatView(strings, {
         item.addEventListener('click', () => {
           applySlashCommand(command);
         });
-        slashMenu.append(item);
+        slashScroller.append(item);
         globalIndex += 1;
       }
     }
@@ -3091,6 +3092,9 @@ export async function createChatView(strings, {
   slashMenu.hidden = true;
   slashMenu.setAttribute('role', 'listbox');
   slashMenu.setAttribute('aria-label', strings.slash.label);
+  slashScroller = createElement('div', 'chat-slash-menu__scroller');
+  slashMenu.append(slashScroller);
+  attachCustomScrollbar(slashMenu, slashScroller, { top: 6, bottom: 6, right: 4, minThumb: 24 });
   diagPanel = createDiagnosticPanel(strings);
   privateNoticeEl = createElement('div', 'chat-composer__private-notice');
   privateNoticeEl.hidden = true;

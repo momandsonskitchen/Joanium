@@ -1603,8 +1603,6 @@
   right: 16px;
   bottom: calc(100% + 10px);
   z-index: 20;
-  max-height: 320px;
-  overflow-y: auto;
   border-radius: 20px;
   padding: 8px;
   background: rgba(255, 255, 255, 0.86);
@@ -1620,6 +1618,16 @@
     opacity 160ms ease,
     transform 160ms ease;
   -webkit-app-region: no-drag;
+}
+
+.chat-slash-menu__scroller {
+  max-height: 304px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.chat-slash-menu__scroller::-webkit-scrollbar {
+  display: none;
 }
 
 .chat-slash-menu--open {
