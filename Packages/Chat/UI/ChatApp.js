@@ -1548,7 +1548,6 @@ export async function createChatView(strings, {
     if (isSending) return;
 
     try {
-      showAttachmentNotice(strings.composer.attachmentProcessing);
       const result = await invokeIpc('chat:select-attachments');
       const incoming = Array.isArray(result?.attachments) ? result.attachments : [];
       const rejected = Array.isArray(result?.rejected) ? result.rejected : [];
@@ -1557,9 +1556,6 @@ export async function createChatView(strings, {
         pendingAttachments = [...pendingAttachments, ...incoming];
         renderPendingAttachments();
         syncComposer();
-        showAttachmentNotice(
-          formatText(strings.composer.attachmentAdded, { count: String(incoming.length) })
-        );
       } else if (rejected.length === 0) {
         attachmentNotice.hidden = true;
       }
