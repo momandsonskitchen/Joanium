@@ -53,23 +53,23 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "Assets/Icon.ico"
+      "icon": "Assets/Logo/Logo.ico"
     },
     "mac": {
       "target": "dmg",
-      "icon": "Assets/Icon.icns",
+      "icon": "Assets/Logo/Logo.icns",
       "category": "public.app-category.productivity"
     },
     "linux": {
       "target": "AppImage",
-      "icon": "Assets/Icon.png",
+      "icon": "Assets/Logo/Logo.png",
       "category": "Utility"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "Assets/Icon.ico",
-      "uninstallerIcon": "Assets/Icon.ico"
+      "installerIcon": "Assets/Logo/Logo.ico",
+      "uninstallerIcon": "Assets/Logo/Logo.ico"
     }
   },
   "keywords": [
