@@ -1,4 +1,13 @@
 const en = {
+  panel: {
+    groups: {
+      actions:    'Actions',
+      modes:      'Modes',
+      navigation: 'Navigation'
+    },
+    empty: 'No slash commands registered.'
+  },
+
   modes: {
     judge: [
       'JUDGE MODE ACTIVE.',

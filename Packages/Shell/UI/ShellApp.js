@@ -29,6 +29,7 @@ import { createProvidersPanel } from '../../Providers/UI/ProvidersPanel.js';
 import { createConnectorsPanel } from '../../Toolset/Connectors/UI/ConnectorsPanel.js';
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
+import { createSlashCommandsPanel } from '../../SlashCommands/UI/SlashCommandsPanel.js';
 
 function getInitials(name) {
   const parts = collapseWhitespace(name).split(' ').filter(Boolean);
@@ -479,9 +480,10 @@ async function bootstrap() {
       providers:  strings.settings.nav.providers,
       appearance: strings.settings.nav.appearance,
       mcp:        strings.settings.nav.mcp,
-      shortcuts:  strings.settings.nav.shortcuts,
-      security:   strings.settings.nav.security,
-      about:      strings.settings.nav.about
+      shortcuts:     strings.settings.nav.shortcuts,
+      slashCommands: strings.settings.nav.slashCommands,
+      security:      strings.settings.nav.security,
+      about:         strings.settings.nav.about
     };
 
     header.append(createElement('h2', 'chat-settings__title', strings.settings.title));
@@ -540,6 +542,10 @@ async function bootstrap() {
         main.append(createShortcutsPanel(strings.shortcuts));
       }
 
+      if (id === 'slashCommands') {
+        main.append(await createSlashCommandsPanel(strings.slashCommands.panel));
+      }
+
       if (id === 'appearance') {
         main.append(createThemePanel(strings.themes));
       }
@@ -567,8 +573,9 @@ async function bootstrap() {
       { id: 'providers',  label: strings.settings.nav.providers,  icon: iconMarkup.verified    },
       { id: 'appearance', label: strings.settings.nav.appearance, icon: iconMarkup.palette },
       { id: 'mcp',       label: strings.settings.nav.mcp,       icon: iconMarkup.network     },
-      { id: 'shortcuts', label: strings.settings.nav.shortcuts, icon: iconMarkup.keyboard    },
-      { id: 'security',  label: strings.settings.nav.security,  icon: iconMarkup.lock        },
+      { id: 'shortcuts',     label: strings.settings.nav.shortcuts,     icon: iconMarkup.keyboard    },
+      { id: 'slashCommands',  label: strings.settings.nav.slashCommands,  icon: iconMarkup.terminal    },
+      { id: 'security',       label: strings.settings.nav.security,       icon: iconMarkup.lock        },
       { id: 'about',     label: strings.settings.nav.about,     icon: iconMarkup.info        }
     ]) {
       const item = createElement('button', 'chat-settings__nav-item');

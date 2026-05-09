@@ -18,6 +18,7 @@ import themes from '../../Themes/I18n/en.js';
 import mcp from '../../MCP/I18n/en.js';
 import providers from '../../Providers/I18n/en.js';
 import connectors from '../../Toolset/Connectors/I18n/en.js';
+import slashCommands from '../../SlashCommands/I18n/en.js';
 
 const en = {
   appName: 'Joanium',
@@ -45,9 +46,10 @@ const en = {
       providers: 'AI Providers',
       appearance: 'Appearance',
       mcp: 'MCP',
-      shortcuts: 'Shortcuts',
-      security: 'Security',
-      about: 'About'
+      shortcuts:     'Shortcuts',
+      slashCommands: 'Slash Commands',
+      security:      'Security',
+      about:         'About'
     }
   },
   shortcuts: {
@@ -78,6 +80,7 @@ const en = {
   mcp,
   providers,
   connectors,
+  slashCommands,
   usage,
   history,
   projects,
