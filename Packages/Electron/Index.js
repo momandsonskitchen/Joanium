@@ -134,6 +134,32 @@ async function createMainWindow(entryPackage) {
 
   await browserWindow.loadFile(entryPackage.rendererPath);
   writeBootLog('createMainWindow:loadFile-resolved');
+
+  // ── Production hardening ───────────────────────────────────────────────────
+  // Only active in packaged builds. During development these stay open so you
+  // can use DevTools and reload normally.
+  if (app.isPackaged) {
+    // Disable DevTools entirely — prevents Ctrl+Shift+I / F12 from opening it.
+    // The keydown events still reach the renderer so app shortcuts still fire.
+    browserWindow.webContents.setDevToolsEnabled(false);
+
+    // Block reload shortcuts at the input level before Electron/Chromium acts
+    // on them. Ctrl+R, Ctrl+Shift+R and F5 would otherwise reload the page
+    // and wipe all in-memory state.
+    browserWindow.webContents.on('before-input-event', (event, input) => {
+      const key = input.key.toLowerCase();
+      const ctrl = input.control || input.meta;
+
+      const isReload     = ctrl && !input.shift && key === 'r';
+      const isHardReload = ctrl &&  input.shift && key === 'r';
+      const isF5         = key === 'f5';
+
+      if (isReload || isHardReload || isF5) {
+        event.preventDefault();
+      }
+    });
+  }
+
   ensureVisible();
   return browserWindow;
 }
