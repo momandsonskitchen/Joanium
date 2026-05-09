@@ -25,6 +25,19 @@ const en = {
     healthYellow: 'Checking availability...',
     healthRed: 'Model may be discontinued or unavailable'
   },
+  diag: {
+    statusLabel: 'Status',
+    slowResponse: 'Response is taking longer than usual…',
+    checkingInternet: 'Checking internet connection…',
+    internetStable: 'Internet: Stable',
+    internetUnreachable: 'Internet: Unreachable',
+    checkingProvider: 'Checking AI provider…',
+    providerReachable: 'AI provider: Reachable',
+    providerUnreachable: 'AI provider: Unreachable',
+    providerSlow: 'The AI provider is taking longer than usual to respond',
+    providerNoEndpoint: 'AI provider: Status unknown',
+    checkSettings: 'Check your API key or provider settings'
+  },
   projects: {
     activeHint: 'This project context will be used in new chats.',
     removeActive: 'Remove active project',

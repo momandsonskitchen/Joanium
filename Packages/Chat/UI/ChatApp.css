@@ -1972,3 +1972,66 @@
   box-shadow: var(--shadow-chat-pill, 0 2px 12px rgba(0,0,0,0.08));
   pointer-events: none;
 }
+
+/* ── Connection diagnostic (lives inside the reasoning/thinking block) ─── */
+
+.chat-diag {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.chat-diag--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chat-diag__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: chat-diag-item-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes chat-diag-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.chat-diag__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+  color: #16a34a;
+}
+
+.chat-diag__icon--spin  { color: rgba(120, 60, 180, 0.65); }
+.chat-diag__icon--warn  { color: #b45309; }
+.chat-diag__icon--error { color: #dc2626; }
+
+.chat-diag__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-diag__icon--spin svg {
+  animation: chat-spin 1s linear infinite;
+}
+
+.chat-diag__text {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: rgba(80, 40, 130, 0.65);
+}
