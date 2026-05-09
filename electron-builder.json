@@ -1,0 +1,55 @@
+{
+  "appId": "com.joanium.app",
+  "productName": "Joanium",
+  "copyright": "Copyright © 2026 Joel Jolly",
+  "files": [
+    "App.js",
+    "Assets/**/*",
+    "Datasets/**/*",
+    "Packages/**/*",
+    "Prompts/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "Data/Models",
+      "to": "Data/Models"
+    },
+    {
+      "from": "Skills",
+      "to": "Skills",
+      "filter": ["**/*.md"]
+    },
+    {
+      "from": "Personas",
+      "to": "Personas",
+      "filter": ["**/*.md"]
+    }
+  ],
+  "directories": {
+    "output": "dist"
+  },
+  "publish": {
+    "provider": "github",
+    "releaseType": "release"
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "Assets/Logo/Logo.ico"
+  },
+  "mac": {
+    "target": "dmg",
+    "icon": "Assets/Logo/Logo.icns",
+    "category": "public.app-category.productivity"
+  },
+  "linux": {
+    "target": "AppImage",
+    "icon": "Assets/Logo/Logo.png",
+    "category": "Utility"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "Assets/Logo/Logo.ico",
+    "uninstallerIcon": "Assets/Logo/Logo.ico"
+  }
+}
