@@ -17,16 +17,16 @@ export function createShortcutsPanel(strings) {
         { label: strings.items.newChat,      combo: ['Ctrl', 'N'] },
         { label: strings.items.history,      combo: ['Ctrl', 'H'] },
         { label: strings.items.events,       combo: ['Ctrl', 'E'] },
-        { label: strings.items.channels,     combo: ['Ctrl', '⇧', 'C'] },
-        { label: strings.items.projects,     combo: ['Ctrl', 'P'] },
-        { label: strings.items.terminal,     combo: ['Ctrl', 'Shift', 'T'] },
+        { label: strings.items.channels,     combo: ['Ctrl', 'Shift', 'L'] },
+        { label: strings.items.projects,     combo: ['Ctrl', 'Shift', 'R'] },
         { label: strings.items.memory,       combo: ['Ctrl', 'Shift', 'M'] },
         { label: strings.items.templates,    combo: ['Ctrl', 'T'] },
-        { label: strings.items.agents,       combo: ['Ctrl', 'A'] },
-        { label: strings.items.skills,       combo: ['Ctrl', '⇧', 'S'] },
-        { label: strings.items.personas,     combo: ['Ctrl', '⇧', 'P'] },
+        { label: strings.items.agents,       combo: ['Ctrl', 'Shift', 'G'] },
+        { label: strings.items.skills,       combo: ['Ctrl', 'Shift', 'S'] },
+        { label: strings.items.personas,     combo: ['Ctrl', 'Shift', 'P'] },
         { label: strings.items.marketplace,  combo: ['Ctrl', 'M'] },
-        { label: strings.items.settings,     combo: ['Ctrl', 'S'] }
+        { label: strings.items.usage,        combo: ['Ctrl', 'U'] },
+        { label: strings.items.settings,     combo: ['Ctrl', 'Shift', 'I'] }
       ]
     }
   ];

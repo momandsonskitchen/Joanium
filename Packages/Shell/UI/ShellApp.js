@@ -688,7 +688,7 @@ async function bootstrap() {
     },
     {
       id: 'projects',
-      combo: { ctrl: true, key: 'p' },
+      combo: { ctrl: true, shift: true, key: 'r' },
       handler: () => { void showRoute('projects'); }
     },
     {
@@ -703,7 +703,7 @@ async function bootstrap() {
     },
     {
       id: 'agents',
-      combo: { ctrl: true, key: 'a' },
+      combo: { ctrl: true, shift: true, key: 'g' },
       handler: () => { void showRoute('agents'); }
     },
     {
@@ -728,12 +728,12 @@ async function bootstrap() {
     },
     {
       id: 'settings',
-      combo: { ctrl: true, key: 's' },
+      combo: { ctrl: true, shift: true, key: 'i' },
       handler: () => { void showSettingsPanel(); }
     },
     {
       id: 'channels',
-      combo: { ctrl: true, shift: true, key: 'c' },
+      combo: { ctrl: true, shift: true, key: 'l' },
       handler: () => { void showSettingsPanel(); }
     }
   ]);
