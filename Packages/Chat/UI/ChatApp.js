@@ -1915,10 +1915,11 @@ export async function createChatView(strings, {
     }
 
     const groups = [
-      ['action', strings.slash.sections.actions],
+      ['action',   strings.slash.sections.actions],
+      ['mode',     strings.slash.sections.modes],
       ['navigate', strings.slash.sections.navigate],
       ['template', strings.slash.sections.templates],
-      ['agent', strings.slash.sections.agents]
+      ['agent',    strings.slash.sections.agents]
     ];
 
     let globalIndex = 0;
@@ -2046,7 +2047,7 @@ export async function createChatView(strings, {
       return;
     }
 
-    if (command.id === 'judge' || command.id === 'human' || command.id === 'godmode') {
+    if (command.type === 'mode') {
       if (activeMode === command.id) {
         activeMode = null;
         activeModeInstruction = null;

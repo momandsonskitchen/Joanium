@@ -144,12 +144,14 @@ const en = {
     empty: 'No matching commands',
     sections: {
       actions: 'Actions',
+      modes: 'Modes',
       navigate: 'Navigate',
       templates: 'Templates',
       agents: 'Agents'
     },
     badges: {
       action: 'Action',
+      mode: 'Mode',
       navigate: 'Nav',
       template: 'Template',
       agent: 'Agent'
