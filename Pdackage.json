@@ -1,6 +1,6 @@
 {
   "name": "Joanium",
-  "version": "2026.430.1",
+  "version": "2026.509.0",
   "description": "Local-first AI desktop assistant with multi-model chat, automations, agents, MCP, and real integrations. Works with Anthropic, OpenAI, Gemini, Ollama and more.",
   "type": "module",
   "engines": {
@@ -21,7 +21,56 @@
   "main": "App.js",
   "scripts": {
     "start": "electron .",
+    "build": "node Scripts/Build.mjs",
     "lint": "eslint ."
+  },
+  "build": {
+    "appId": "com.joanium.app",
+    "productName": "Joanium",
+    "copyright": "Copyright © 2026 Joel Jolly",
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!Scripts/**",
+      "!.github/**",
+      "!Build/**",
+      "!**/*.map",
+      "!.git/**",
+      "!.eslint*",
+      "!.editor*",
+      "!.gitignore",
+      "!.gitattributes",
+      "!.npmignore",
+      "!.npmrc",
+      "!.nvmrc"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "Assets/Icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "Assets/Icon.icns",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "Assets/Icon.png",
+      "category": "Utility"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "Assets/Icon.ico",
+      "uninstallerIcon": "Assets/Icon.ico"
+    }
   },
   "keywords": [
     "joanium",
