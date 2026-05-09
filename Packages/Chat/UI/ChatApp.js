@@ -2110,7 +2110,7 @@ export async function createChatView(strings, {
         labelEl.hidden = false;
       }
     } else {
-      sendButton.disabled = !draftValue.trim() && pendingAttachments.length === 0;
+      sendButton.disabled = false;
       sendButton.classList.remove('chat-composer__send--stop');
       if (iconEl) iconEl.innerHTML = iconMarkup.send;
       if (labelEl) {
