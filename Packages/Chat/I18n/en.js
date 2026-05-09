@@ -153,21 +153,7 @@ const en = {
       navigate: 'Nav',
       template: 'Template',
       agent: 'Agent'
-    },
-    commands: [
-      { id: 'new', label: 'New chat', description: 'Start a fresh conversation.', type: 'action', icon: 'newChat' },
-      { id: 'terminal', label: 'Terminal', description: 'Open the chat terminal.', type: 'action', icon: 'terminal' },
-      { id: 'settings', label: 'Settings', description: 'Open settings.', type: 'action', icon: 'info' },
-      { id: 'projects', label: 'Projects', description: 'Open project workspaces.', type: 'navigate', icon: 'tabProjects' },
-      { id: 'memory', label: 'Memory', description: 'Open long-term memory.', type: 'navigate', icon: 'tabMemory' },
-      { id: 'templates', label: 'Templates', description: 'Open prompt templates.', type: 'navigate', icon: 'tabTemplates' },
-      { id: 'agents', label: 'Agents', description: 'Open scheduled agents.', type: 'navigate', icon: 'tabAgents' },
-      { id: 'skills', label: 'Skills', description: 'Open skills.', type: 'navigate', icon: 'tabSkills' },
-      { id: 'personas', label: 'Personas', description: 'Open personas.', type: 'navigate', icon: 'tabPersonas' },
-      { id: 'marketplace', label: 'Marketplace', description: 'Open marketplace.', type: 'navigate', icon: 'tabMarketplace' },
-      { id: 'events', label: 'Events', description: 'Open events.', type: 'navigate', icon: 'tabEvents' },
-      { id: 'usage', label: 'Usage', description: 'Open usage.', type: 'navigate', icon: 'tabUsage' }
-    ]
+    }
   }
 };
 

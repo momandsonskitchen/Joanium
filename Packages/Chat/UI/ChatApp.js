@@ -1462,6 +1462,8 @@ export async function createChatView(strings, {
   let slashFilteredCommands = [];
   let slashSelectedIndex = 0;
   let slashStartIndex = 0;
+  let activeMode = null;
+  let activeModeInstruction = null;
   let terminalProcessRenderFrame = null;
   let terminalProcessCardsWired = false;
 
@@ -1840,10 +1842,16 @@ export async function createChatView(strings, {
   async function ensureSlashCommandsLoaded() {
     if (slashCommandsLoaded) return;
 
-    const baseCommands = (strings.slash.commands ?? []).map((command) => ({
-      ...command,
-      id: normalizeSlashId(command.id)
-    }));
+    let baseCommands = [];
+    try {
+      const rawCommands = await invokeIpc('slash-commands:list');
+      baseCommands = (Array.isArray(rawCommands) ? rawCommands : []).map((command) => ({
+        ...command,
+        id: normalizeSlashId(command.id)
+      }));
+    } catch {
+      // SlashCommands package unavailable — palette still works for templates and agents.
+    }
     const templateCommands = [];
     const agentCommands = [];
 
@@ -2038,9 +2046,28 @@ export async function createChatView(strings, {
       return;
     }
 
+    if (command.id === 'judge' || command.id === 'human' || command.id === 'godmode') {
+      if (activeMode === command.id) {
+        activeMode = null;
+        activeModeInstruction = null;
+      } else {
+        activeMode = command.id;
+        activeModeInstruction = null;
+        invokeIpc('slash-commands:get-mode-instruction', command.id)
+          .then((instruction) => { activeModeInstruction = instruction ?? null; })
+          .catch(() => {});
+      }
+      focusComposer();
+      return;
+    }
+
     if (command.type === 'navigate') {
       void onNavigate?.(command.id);
     }
+  }
+
+  function getModeInstruction() {
+    return activeModeInstruction;
   }
 
   function handleSlashKeydown(event) {
@@ -2831,6 +2858,7 @@ export async function createChatView(strings, {
       memoryContext: memoryContext || null,
       projectInfo: buildProjectContext(activeProject) || null,
       persona: (getActivePersona?.() ?? activePersona)?.content || null,
+      modeInstruction: getModeInstruction(),
       terminalTools: strings.terminal.systemPrompt,
       toolsetTools: toolsetTools || null,
       isNewSession

@@ -19,6 +19,7 @@ export async function createPackage({ rootDirectory }) {
     id: 'Shell',
     ipcCompanions: [
       'Chat',
+      'SlashCommands',
       'History',
       'Channels',
       'Events',

@@ -625,6 +625,9 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   if (typeof request?.persona === 'string' && request.persona.trim()) {
     parts.push(request.persona.trim());
   }
+  if (typeof request?.modeInstruction === 'string' && request.modeInstruction.trim()) {
+    parts.push(request.modeInstruction.trim());
+  }
   if (typeof user?.customInstructions === 'string' && user.customInstructions.trim()) {
     parts.push(user.customInstructions.trim());
   }
