@@ -218,13 +218,8 @@ export function createConnectorsPanel(strings = defaultStrings) {
 
   function build() {
     const panel = createElement('div', 'connectors');
-    const header = createElement('div', 'connectors__header');
-    header.append(
-      createElement('h2', 'connectors__title', strings.title),
-      createElement('p', 'connectors__subtitle', strings.subtitle)
-    );
     grid = createTwoColGrid();
-    panel.append(header, grid.el);
+    panel.append(grid.el);
     return panel;
   }
 

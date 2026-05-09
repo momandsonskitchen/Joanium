@@ -469,6 +469,20 @@ async function bootstrap() {
     const nav = createElement('nav', 'chat-settings__nav');
     const navItems = createElement('div', 'chat-settings__nav-items');
     const main = createElement('div', 'chat-settings__main');
+    const mainHeading = createElement('h2', 'chat-settings__main-heading');
+
+    const pageLabels = {
+      user:       strings.settings.nav.user,
+      app:        strings.settings.nav.app,
+      channels:   strings.settings.nav.channels,
+      connectors: strings.settings.nav.connectors,
+      providers:  strings.settings.nav.providers,
+      appearance: strings.settings.nav.appearance,
+      mcp:        strings.settings.nav.mcp,
+      shortcuts:  strings.settings.nav.shortcuts,
+      security:   strings.settings.nav.security,
+      about:      strings.settings.nav.about
+    };
 
     header.append(createElement('h2', 'chat-settings__title', strings.settings.title));
 
@@ -477,7 +491,12 @@ async function bootstrap() {
         item.classList.toggle('chat-settings__nav-item--active', item._settingsSubId === id);
       });
 
-      main.replaceChildren();
+      mainHeading.textContent = pageLabels[id] ?? '';
+      if (id === 'about') {
+        main.replaceChildren();
+      } else {
+        main.replaceChildren(mainHeading);
+      }
 
       if (id === 'user') {
         main.append(createUserPanel(strings.user, {

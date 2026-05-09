@@ -66,6 +66,61 @@
 * I need a clean and very premium looking UI.
 * Should match the current app design language.
 
+# Packages/AppSettings
+Owns persisted app behavior settings plus keep-awake and tray runtime side effects. Shell mounts its settings panel and routes each nav item to the correct sub-panel. The settings panel is a modal overlay with a left-side nav and a right-side content area.
+
+## Settings Panel Pages
+
+### User
+* Owned by `Packages/User`.
+* Lets the user update their display name, date of birth, avatar photo, and custom instructions (tone / style / behavior hints passed to the AI).
+* Profile data is persisted in `Data/User.json`; the avatar image is stored in `Data/`.
+* Shell re-syncs the sidebar avatar whenever a profile save or avatar change fires.
+
+### App
+* Owned by `Packages/AppSettings`.
+* Exposes boolean toggles for app-level behaviour: run on startup, system tray, keep-awake, and completion sound.
+* Settings are persisted and broadcast via a `joanium:app-settings-changed` window event so other packages can react without polling.
+
+### Channels
+* Owned by `Packages/Channels`.
+* Manages connected external messaging channels: Telegram, WhatsApp, Discord, and Slack.
+* Each channel entry stores its credentials, polling state, and an optional channel-specific system prompt.
+
+### Connectors
+* Owned by `Packages/Toolset/Connectors`.
+* Stores API-key-backed service credentials (e.g. GitHub, OpenWeather) used by Toolset chat tools.
+* Connector credentials are kept separate from channel config and are never exposed in the chat context directly.
+
+### Providers
+* Owned by `Packages/Providers`.
+* Configures AI model providers — both API-based (OpenAI, Anthropic, etc.) and local (Ollama) models.
+* The active provider and model selection drive what the chat completion engine calls at runtime.
+
+### Appearance
+* Owned by `Packages/Themes`.
+* Controls the visual theme of the app (colour scheme, accent, light/dark mode).
+* Theme state is persisted and applied on boot via `ThemeController` before any UI is rendered.
+
+### MCP
+* Owned by `Packages/MCP`.
+* Manages Model Context Protocol server connections that extend the AI's tool capabilities.
+* Each MCP entry stores the server URL, name, and connection state.
+
+### Shortcuts
+* Owned by `Packages/Shell` (`ShortcutsPanel.js`).
+* Displays all registered keyboard shortcuts in a read-only reference panel.
+* Shortcuts themselves are registered in `Shortcuts.js` and fire regardless of focus.
+
+### Security
+* Owned by `Packages/Security`.
+* Configures app-lock: enable/disable password protection, set the password, choose the auto-lock idle timeout, and define a secret recovery answer.
+* When enabled, a lock screen is mounted on boot and after the idle timer fires.
+
+### About
+* Owned by `Packages/About`.
+* Shows app metadata (name, version, build) and a local system snapshot (OS, CPU, RAM, etc.) persisted to `Data/System.json`.
+
 # Data Storage
 * To store user data we use Data folder. 
 * Project workspace records are stored in `Data/Projects` and can include user-defined context and cover image paths.

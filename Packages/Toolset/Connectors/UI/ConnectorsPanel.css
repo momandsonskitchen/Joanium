@@ -5,28 +5,6 @@
   -webkit-app-region: no-drag;
 }
 
-.connectors__header {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.connectors__title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 680;
-  letter-spacing: -0.03em;
-  color: var(--color-chat-text-title);
-}
-
-.connectors__subtitle {
-  margin: 0;
-  max-width: 680px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-chat-text-muted);
-}
-
 .connectors-card {
   display: flex;
   flex-direction: column;

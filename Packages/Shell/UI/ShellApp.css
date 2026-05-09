@@ -402,6 +402,16 @@ textarea {
   -webkit-app-region: drag;
 }
 
+.chat-settings__main-heading {
+  margin: 0 0 28px;
+  font-size: 42px;
+  font-weight: 440;
+  letter-spacing: -0.065em;
+  color: var(--color-chat-text-title);
+  pointer-events: none;
+  -webkit-app-region: no-drag;
+}
+
 /* ── Shortcuts panel ──────────────────────────────────────────────────────── */
 
 .chat-shortcuts {
