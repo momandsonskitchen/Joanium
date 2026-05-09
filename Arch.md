@@ -45,6 +45,10 @@
 * In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
     * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
 
+# Read Only Files
+* All files inside Assets, Config, Datasets are read only and needs to be inside the asar (for production).
+* All files inside Data are read and write only.
+
 # Ported Legacy Features
 * Chat attachments and completion sound: `Packages/Chat` owns file picking, validation, extraction, composer chips, prompt context assembly, and the response completion chime. Attachments support text/code files plus PDF, DOCX, XLSX/XLSM, and PPTX extraction without importing from other packages.
 * Chat slash commands: `Packages/Chat` owns the inline `/` command palette for chat actions, Shell navigation, prompt templates, and agent prompts. Connector slash scopes from legacy are intentionally not ported.

@@ -102,7 +102,7 @@ export async function readProviderCatalog(rootDirectory) {
   // Data lives in extraResources (outside asar) when packaged, at process.resourcesPath.
   // Assets remain inside the asar so rootDirectory is still correct for icons/logo.
   const dataRoot = app.isPackaged ? process.resourcesPath : rootDirectory;
-  const modelsDirectory = path.join(dataRoot, 'Data', 'Models');
+  const modelsDirectory = path.join(dataRoot, 'Config', 'Models');
   const indexPath = path.join(modelsDirectory, 'index.json');
   const indexContents = await readFile(indexPath, 'utf8');
   const providerFiles = JSON.parse(indexContents);
