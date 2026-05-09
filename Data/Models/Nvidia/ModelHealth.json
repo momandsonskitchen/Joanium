@@ -1,11 +1,11 @@
 {
   "google/gemma-4-31b-it": {
-    "status": "yellow",
-    "checkedAt": "2026-05-09T13:48:28.998Z"
+    "status": "green",
+    "checkedAt": "2026-05-09T15:09:17.061Z"
   },
   "deepseek-ai/deepseek-v3.2": {
     "status": "yellow",
-    "checkedAt": "2026-05-09T14:38:23.680Z"
+    "checkedAt": "2026-05-09T15:27:59.647Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -25,10 +25,22 @@
   },
   "minimaxai/minimax-m2.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-09T14:02:39.968Z"
+    "checkedAt": "2026-05-09T15:28:14.587Z"
   },
   "z-ai/glm4.7": {
     "status": "yellow",
     "checkedAt": "2026-05-09T14:38:38.724Z"
+  },
+  "minimaxai/minimax-m2.5": {
+    "status": "green",
+    "checkedAt": "2026-05-09T15:09:10.612Z"
+  },
+  "qwen/qwen3.5-397b-a17b": {
+    "status": "green",
+    "checkedAt": "2026-05-09T15:09:11.452Z"
+  },
+  "qwen/qwen3-coder-480b-a35b-instruct": {
+    "status": "yellow",
+    "checkedAt": "2026-05-09T15:09:25.062Z"
   }
 }

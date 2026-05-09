@@ -1957,7 +1957,7 @@ export async function createChatView(strings, {
         item.append(icon, copy, badge);
         item.addEventListener('mouseenter', () => {
           slashSelectedIndex = item._slashIndex;
-          renderSlashMenu();
+          updateSlashActiveState();
         });
         item.addEventListener('click', () => {
           applySlashCommand(command);
@@ -2100,6 +2100,17 @@ export async function createChatView(strings, {
     return activeModeInstruction;
   }
 
+  function updateSlashActiveState() {
+    if (!slashMenu) return;
+    const items = slashMenu.querySelectorAll('.chat-slash-menu__item');
+    items.forEach((item, i) => {
+      const isActive = i === slashSelectedIndex;
+      item.classList.toggle('chat-slash-menu__item--active', isActive);
+      item.setAttribute('aria-selected', String(isActive));
+      if (isActive) item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+  }
+
   function handleSlashKeydown(event) {
     if (!slashMenu || slashMenu.hidden || slashFilteredCommands.length === 0) {
       return false;
@@ -2108,14 +2119,14 @@ export async function createChatView(strings, {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       slashSelectedIndex = Math.min(slashSelectedIndex + 1, slashFilteredCommands.length - 1);
-      renderSlashMenu();
+      updateSlashActiveState();
       return true;
     }
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       slashSelectedIndex = Math.max(slashSelectedIndex - 1, 0);
-      renderSlashMenu();
+      updateSlashActiveState();
       return true;
     }
 

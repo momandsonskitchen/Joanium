@@ -1652,13 +1652,14 @@
     transform 120ms ease;
 }
 
-.chat-slash-menu__item:hover,
-.chat-slash-menu__item--active {
+.chat-slash-menu__item:hover {
   color: var(--color-chat-text-title);
-  background: var(--color-chat-hover-surface);
+  background: rgba(var(--color-accent-rgb), 0.08);
 }
 
 .chat-slash-menu__item--active {
+  color: var(--color-chat-text-title);
+  background: rgba(var(--color-accent-rgb), 0.14);
   transform: translateY(-1px);
 }
 
