@@ -127,7 +127,7 @@ function speakText(rawText, btn) {
   window.speechSynthesis.speak(utterance);
 }
 
-function createMessageActions({ onCopy, onRetry, onSpeak }) {
+function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, strings }) {
   const actions = createElement('div', 'chat-message__actions');
 
   const copyBtn = createElement('button', 'chat-message__action-button');
@@ -156,6 +156,11 @@ function createMessageActions({ onCopy, onRetry, onSpeak }) {
     speakBtn.append(createIcon('volumeOn', 'chat-message__action-icon'));
     speakBtn.addEventListener('click', () => onSpeak(speakBtn));
     actions.append(speakBtn);
+  }
+
+  if (durationMs > 0 && strings) {
+    const durationEl = createElement('span', 'chat-message__duration', formatText(strings.composer.workedFor, { duration: formatDuration(durationMs) }));
+    actions.append(durationEl);
   }
 
   return actions;
@@ -355,8 +360,10 @@ function createAssistantGroupElement(items, strings, { onCopy, onRetry } = {}) {
   // Action buttons — only after the entire response is complete
   if (!isStreaming && typeof onCopy === 'function' && typeof onRetry === 'function') {
     const onSpeak = (btn) => speakText(lastMessage.content, btn);
-    article.append(createMessageActions({ onCopy, onRetry, onSpeak }));
+    article.append(createMessageActions({ onCopy, onRetry, onSpeak, durationMs: lastMessage.durationMs, strings }));
   }
+
+
 
   return article;
 }
@@ -492,6 +499,16 @@ function formatBytes(bytes = 0) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function formatDuration(ms) {
+  const totalSeconds = Math.round(ms / 1000);
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m ${seconds}s`;
 }
 
 function getFileExtension(fileName = '') {
@@ -2757,6 +2774,7 @@ export async function createChatView(strings, {
         thinking: accThinking || inlineThinking,
         streaming: false,
         empty: isEmpty,
+        durationMs: Date.now() - generationStartTime,
         providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
         modelLabel: meta?.modelLabel ?? activeModelLabel
       }));

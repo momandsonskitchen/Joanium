@@ -22,6 +22,7 @@ const en = {
     reasoning: 'Reasoning',
     emptyResponse: 'No response received.',
     responseError: 'Unable to get a response right now.',
+    workedFor: 'Worked for {duration}',
     healthGreen: 'Model is available',
     healthYellow: 'Checking availability...',
     healthRed: 'Model may be discontinued or unavailable'
