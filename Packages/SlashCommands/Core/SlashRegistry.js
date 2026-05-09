@@ -1,19 +1,22 @@
-import en from '../I18n/en.js';
+import COMMANDS from './Commands.js';
 
-const LOCALES = { en };
-
-export function createSlashRegistry({ locale = 'en' } = {}) {
-  const strings = LOCALES[locale] ?? LOCALES.en;
+export function createSlashRegistry() {
+  // Build a lookup map for O(1) mode instruction access.
+  const modeInstructions = new Map(
+    COMMANDS
+      .filter((command) => command.type === 'mode')
+      .map((command) => [command.id, command.instruction ?? ''])
+  );
 
   return {
     /**
      * Returns all built-in slash command definitions.
      * Templates and agents are discovered separately by the Chat package.
      *
-     * @returns {Array<{ id: string, label: string, description: string, type: string, icon: string }>}
+     * @returns {Array<object>}
      */
     listCommands() {
-      return strings.commands ?? [];
+      return COMMANDS;
     },
 
     /**
@@ -25,7 +28,7 @@ export function createSlashRegistry({ locale = 'en' } = {}) {
      */
     getModeInstruction(modeId) {
       if (!modeId) return null;
-      return strings.modes?.[modeId] ?? null;
+      return modeInstructions.get(modeId) ?? null;
     }
   };
 }

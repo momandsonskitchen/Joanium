@@ -2024,6 +2024,7 @@ export async function createChatView(strings, {
   function applySlashCommand(command) {
     closeSlashMenu();
 
+    // Templates and agents paste their prompt into the composer.
     if (command.type === 'template' || command.type === 'agent') {
       removeSlashToken(command.prompt || '');
       return;
@@ -2031,22 +2032,48 @@ export async function createChatView(strings, {
 
     removeSlashToken('');
 
-    if (command.id === 'new') {
-      clearConversation();
+    // ── Actions ───────────────────────────────────────────────────────────────
+    // Dispatched by the `action` field defined in Core/Commands.js.
+    // To add a new action command, add it to Commands.js with an `action` value
+    // that matches one of the cases below. Only add a new case here when you
+    // need a genuinely new kind of side effect.
+    if (command.type === 'action') {
+      switch (command.action) {
+        case 'clearConversation':
+          clearConversation();
+          break;
+
+        case 'openTerminal':
+          terminalPanel?.setOpen(true);
+          focusComposer();
+          break;
+
+        case 'openSettings':
+          onOpenSettings?.();
+          break;
+
+        case 'switchTheme': {
+          const mode = command.payload?.mode;
+          if (mode) {
+            // Apply immediately so the switch feels instant.
+            document.documentElement.classList.remove('joanium-theme-light', 'joanium-theme-dark');
+            document.documentElement.classList.add(`joanium-theme-${mode}`);
+            // Persist — preserve the existing motion preference.
+            invokeIpc('themes:get')
+              .then((state) => invokeIpc('themes:save', { motion: state?.motion ?? 'full', mode }))
+              .catch(() => invokeIpc('themes:save', { mode, motion: 'full' }).catch(() => {}));
+            // Notify any open panels (e.g. ThemePanel) so their UI stays in sync.
+            window.dispatchEvent(new CustomEvent('joanium:theme-changed', { detail: { mode } }));
+            focusComposer();
+          }
+          break;
+        }
+      }
       return;
     }
 
-    if (command.id === 'terminal') {
-      terminalPanel?.setOpen(true);
-      focusComposer();
-      return;
-    }
-
-    if (command.id === 'settings') {
-      onOpenSettings?.();
-      return;
-    }
-
+    // ── Modes ─────────────────────────────────────────────────────────────────
+    // Toggles a persistent system-prompt instruction for the session.
     if (command.type === 'mode') {
       if (activeMode === command.id) {
         activeMode = null;
@@ -2062,6 +2089,8 @@ export async function createChatView(strings, {
       return;
     }
 
+    // ── Navigation ────────────────────────────────────────────────────────────
+    // Routes to the shell panel whose id matches command.id.
     if (command.type === 'navigate') {
       void onNavigate?.(command.id);
     }
