@@ -1,4 +1,5 @@
 import { getTimeGreetings } from '../../../Datasets/Messages.js';
+import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
@@ -1452,6 +1453,7 @@ export async function createChatView(strings, {
   let sendButton = null;
   let thread = null;
   let title = null;
+  let bubblesEl = null;
   let composer = null;
   let scroll = null;
   let bottom = null;
@@ -2229,6 +2231,7 @@ export async function createChatView(strings, {
 
     const hasMessages = messages.length > 0;
     title.hidden = hasMessages;
+    bubblesEl.hidden = hasMessages;
     thread.hidden = !hasMessages;
     composer.classList.toggle('chat-composer--conversation', hasMessages);
     scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
@@ -2900,6 +2903,20 @@ export async function createChatView(strings, {
   thread = createElement('section', 'chat-thread');
   thread.hidden = true;
 
+  // ── Prompt bubbles ──────────────────────────────────────────────────────
+  bubblesEl = createElement('div', 'chat-prompt-bubbles');
+  for (const { icon, label, prompt, submit } of getRandomSuggestions()) {
+    const btn = createElement('button', 'chat-prompt-bubble');
+    btn.type = 'button';
+    btn.append(createIcon(icon, 'chat-prompt-bubble__icon'), createElement('span', 'chat-prompt-bubble__label', label));
+    btn.addEventListener('click', () => {
+      setDraftValue(prompt);
+      if (submit) void submitPrompt();
+      else focusComposer();
+    });
+    bubblesEl.append(btn);
+  }
+
   composer = createElement('section', 'chat-composer');
   projectPill = createElement('div', 'chat-composer__project');
   projectPill.hidden = true;
@@ -2986,7 +3003,7 @@ export async function createChatView(strings, {
   slashMenu.setAttribute('aria-label', strings.slash.label);
   diagPanel = createDiagnosticPanel(strings);
   composer.append(projectPill, attachmentsEl, attachmentNotice, composerField, composerFooter, slashMenu);
-  scroll.append(title, thread);
+  scroll.append(title, bubblesEl, thread);
   bottom.append(composer);
   const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {
     onVisibilityChange: (visible) => {

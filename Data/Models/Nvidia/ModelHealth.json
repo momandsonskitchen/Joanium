@@ -1,7 +1,7 @@
 {
   "deepseek-ai/deepseek-v3.2": {
     "status": "yellow",
-    "checkedAt": "2026-05-09T12:13:07.515Z"
+    "checkedAt": "2026-05-09T12:56:36.158Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -22,5 +22,13 @@
   "qwen/qwen3.5-397b-a17b": {
     "status": "yellow",
     "checkedAt": "2026-05-09T12:13:22.489Z"
+  },
+  "moonshotai/kimi-k2-thinking": {
+    "status": "green",
+    "checkedAt": "2026-05-09T12:56:36.610Z"
+  },
+  "google/gemma-4-31b-it": {
+    "status": "yellow",
+    "checkedAt": "2026-05-09T12:56:51.130Z"
   }
 }
