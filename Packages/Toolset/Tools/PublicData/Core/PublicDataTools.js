@@ -138,6 +138,14 @@ export const PUBLIC_DATA_TOOL_DEFINITIONS = [
     to: { type: 'string', required: false, description: 'Target currency code.' },
     amount: { type: 'number', required: false, description: 'Amount to convert, default 1.' }
   }),
+  tool('get_treasury_data', 'Get official US Treasury debt, rates, or daily cash-balance data.', 'finance', {
+    type: { type: 'string', required: false, description: 'debt, rates, or balance. Defaults to debt.' },
+    limit: { type: 'number', required: false, description: 'Rows to return, default 5, max 20.' }
+  }),
+  tool('get_fred_data', 'Get recent Federal Reserve economic series observations from FRED graph data.', 'finance', {
+    series_id: { type: 'string', required: true, description: 'FRED series ID such as GDP, UNRATE, CPIAUCSL, FEDFUNDS, DGS10, or SP500.' },
+    limit: { type: 'number', required: false, description: 'Observations to return, default 5, max 25.' }
+  }),
   tool('get_crypto_price', 'Get crypto price, market cap, volume, and 24h change from CoinGecko.', 'crypto', {
     coin: { type: 'string', required: true, description: 'Coin name, symbol, or id.' },
     vs_currency: { type: 'string', required: false, description: 'Currency, default usd.' }
@@ -157,7 +165,47 @@ export const PUBLIC_DATA_TOOL_DEFINITIONS = [
     date: { type: 'string', required: false, description: 'YYYY-MM-DD date.' },
     api_key: { type: 'string', required: false, description: 'Optional NASA API key.' }
   }),
-  tool('get_iss_location', 'Get the current International Space Station position.', 'astronomy', {})
+  tool('get_iss_location', 'Get the current International Space Station position.', 'astronomy', {}),
+  tool('shorten_url', 'Shorten a long URL using CleanURI.', 'url', {
+    url: { type: 'string', required: true, description: 'URL to shorten.' }
+  }),
+  tool('get_url_metadata', 'Fetch public page title, description, image, and publisher metadata using Microlink.', 'url', {
+    url: { type: 'string', required: true, description: 'Public URL to inspect.' }
+  }),
+  tool('generate_qr_code_url', 'Generate a QR-code image URL for any link.', 'url', {
+    url: { type: 'string', required: true, description: 'URL to encode.' },
+    size: { type: 'number', required: false, description: 'Square image size in pixels, default 200, max 1000.' }
+  }),
+  tool('get_whois_info', 'Retrieve RDAP registration info for a domain.', 'url', {
+    domain: { type: 'string', required: true, description: 'Domain name such as example.com.' }
+  }),
+  tool('check_redirect_chain', 'Trace redirect hops for a URL.', 'url', {
+    url: { type: 'string', required: true, description: 'URL to check.' },
+    limit: { type: 'number', required: false, description: 'Maximum redirect hops, default 8, max 15.' }
+  }),
+  tool('get_ip_info', 'Look up geolocation and network info for an IP address, or current public IP when omitted.', 'geo', {
+    ip: { type: 'string', required: false, description: 'IP address to look up.' }
+  }),
+  tool('forward_geocode', 'Convert a place name or address into coordinates using OpenStreetMap Nominatim.', 'geo', {
+    query: { type: 'string', required: true, description: 'Address or place name.' },
+    limit: { type: 'number', required: false, description: 'Results to return, default 3, max 10.' }
+  }),
+  tool('reverse_geocode', 'Convert latitude/longitude coordinates into an address using OpenStreetMap Nominatim.', 'geo', {
+    lat: { type: 'number', required: true, description: 'Latitude.' },
+    lon: { type: 'number', required: true, description: 'Longitude.' }
+  }),
+  tool('search_places', 'Search places with optional country restriction using OpenStreetMap Nominatim.', 'geo', {
+    query: { type: 'string', required: true, description: 'Place search query.' },
+    country_code: { type: 'string', required: false, description: 'Optional ISO country code.' },
+    limit: { type: 'number', required: false, description: 'Results to return, default 5, max 20.' }
+  }),
+  tool('get_postal_code_info', 'Resolve a postal/ZIP code to city, region, and country.', 'geo', {
+    country_code: { type: 'string', required: true, description: 'ISO 2-letter country code.' },
+    postal_code: { type: 'string', required: true, description: 'Postal or ZIP code.' }
+  }),
+  tool('get_elevation', 'Get terrain elevation for one or more latitude/longitude points.', 'geo', {
+    locations: { type: 'array', required: true, description: 'Array of { lat, lon } objects, or JSON string.' }
+  })
 ];
 
 function clampInteger(value, fallback, min, max) {
@@ -202,6 +250,16 @@ async function fetchJson(url, { headers = {}, ...options } = {}) {
     throw new Error(message);
   }
   return data;
+}
+
+async function fetchText(url, { headers = {}, ...options } = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: { ...DEFAULT_HEADERS, ...headers }
+  });
+  const text = await response.text();
+  if (!response.ok) throw new Error(text || `HTTP ${response.status}`);
+  return text;
 }
 
 function formatList(title, rows) {
@@ -764,6 +822,200 @@ async function getIssLocation() {
   ].join('\n');
 }
 
+async function shortenUrl(params) {
+  const input = requireText(params, 'url');
+  parseUrlValue(input);
+  const body = new URLSearchParams({ url: input });
+  const data = await fetchJson('https://cleanuri.com/api/v1/shorten', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body
+  });
+  return ['Shortened URL', '', `Original: ${input}`, `Short: ${data.result_url ?? 'n/a'}`].join('\n');
+}
+
+async function getUrlMetadata(params) {
+  const input = requireText(params, 'url');
+  parseUrlValue(input);
+  const data = await fetchJson(`https://api.microlink.io/?url=${encodeURIComponent(input)}`);
+  const item = data.data ?? {};
+  return [
+    'URL metadata',
+    '',
+    `URL: ${input}`,
+    `Title: ${item.title ?? 'n/a'}`,
+    `Description: ${item.description ?? 'n/a'}`,
+    `Publisher: ${item.publisher ?? 'n/a'}`,
+    `Language: ${item.lang ?? 'n/a'}`,
+    `Image: ${item.image?.url ?? 'n/a'}`
+  ].join('\n');
+}
+
+function generateQrCodeUrl(params) {
+  const input = requireText(params, 'url');
+  parseUrlValue(input);
+  const size = clampInteger(params.size, 200, 80, 1000);
+  const imageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(input)}`;
+  return ['QR code URL', '', `Input: ${input}`, `Size: ${size}x${size}`, `Image: ${imageUrl}`].join('\n');
+}
+
+async function getWhoisInfo(params) {
+  const domain = requireText(params, 'domain').replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
+  const data = await fetchJson(`https://rdap.org/domain/${encodeURIComponent(domain)}`);
+  const events = Object.fromEntries((data.events ?? []).map((event) => [event.eventAction, event.eventDate]));
+  const nameservers = (data.nameservers ?? []).map((item) => item.ldhName).filter(Boolean);
+  return [
+    `RDAP: ${domain}`,
+    '',
+    `Handle: ${data.handle ?? 'n/a'}`,
+    `Status: ${(data.status ?? []).join(', ') || 'n/a'}`,
+    `Created: ${events.registration ?? events.creation ?? 'n/a'}`,
+    `Updated: ${events.last changed ?? events.lastChanged ?? 'n/a'}`,
+    `Expires: ${events.expiration ?? 'n/a'}`,
+    `Nameservers: ${nameservers.join(', ') || 'n/a'}`
+  ].join('\n');
+}
+
+async function checkRedirectChain(params) {
+  let current = requireText(params, 'url');
+  parseUrlValue(current);
+  const limit = clampInteger(params.limit, 8, 1, 15);
+  const rows = [];
+  for (let index = 0; index < limit; index += 1) {
+    const response = await fetch(current, {
+      method: 'HEAD',
+      redirect: 'manual',
+      headers: { 'user-agent': DEFAULT_HEADERS['user-agent'] }
+    }).catch(() => fetch(current, { method: 'GET', redirect: 'manual' }));
+    const location = response.headers.get('location');
+    rows.push(`${index + 1}. ${response.status} ${response.statusText} - ${current}`);
+    if (!location || response.status < 300 || response.status >= 400) break;
+    current = new URL(location, current).toString();
+  }
+  return ['Redirect chain', '', ...rows, '', `Final URL: ${current}`].join('\n');
+}
+
+async function getTreasuryData(params) {
+  const type = String(params.type ?? 'debt').trim().toLowerCase();
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const config = {
+    debt: {
+      title: 'US Treasury debt to the penny',
+      url: 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/debt_to_penny',
+      fields: ['record_date', 'tot_pub_debt_out_amt']
+    },
+    rates: {
+      title: 'US Treasury average interest rates',
+      url: 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/avg_interest_rates',
+      fields: ['record_date', 'security_desc', 'avg_interest_rate_amt']
+    },
+    balance: {
+      title: 'US Treasury daily cash balance',
+      url: 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/dts_table_1',
+      fields: ['record_date', 'account_type', 'close_today_bal']
+    }
+  }[type] ?? null;
+  if (!config) throw new Error('type must be debt, rates, or balance.');
+  const url = new URL(config.url);
+  url.searchParams.set('sort', '-record_date');
+  url.searchParams.set('page[size]', String(limit));
+  const data = await fetchJson(url.toString());
+  const rows = (data.data ?? []).map((row) => config.fields.map((field) => `${field}: ${row[field] ?? 'n/a'}`).join(' | '));
+  return rows.length ? [config.title, '', ...rows].join('\n') : `${config.title}\n\nNo rows returned.`;
+}
+
+async function getFredData(params) {
+  const seriesId = requireText(params, 'series_id').toUpperCase();
+  const limit = clampInteger(params.limit, 5, 1, 25);
+  const csv = await fetchText(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(seriesId)}`);
+  const rows = csv.trim().split(/\r?\n/).slice(1)
+    .map((line) => {
+      const [date, value] = line.split(',');
+      return { date, value };
+    })
+    .filter((row) => row.date && row.value && row.value !== '.')
+    .slice(-limit);
+  return rows.length
+    ? [`FRED series: ${seriesId}`, '', ...rows.map((row) => `${row.date}: ${row.value}`)].join('\n')
+    : `No FRED observations found for ${seriesId}.`;
+}
+
+async function getIpInfo(params) {
+  const ip = String(params.ip ?? '').trim();
+  const data = await fetchJson(`https://ipapi.co/${ip ? `${encodeURIComponent(ip)}/` : ''}json/`);
+  return [
+    `IP info: ${data.ip ?? ip ?? 'current IP'}`,
+    `Location: ${[data.city, data.region, data.country_name].filter(Boolean).join(', ') || 'n/a'}`,
+    `Coordinates: ${data.latitude ?? 'n/a'}, ${data.longitude ?? 'n/a'}`,
+    `Timezone: ${data.timezone ?? 'n/a'}`,
+    `Network: ${data.org ?? data.asn ?? 'n/a'}`
+  ].join('\n');
+}
+
+function formatPlace(place, index = null) {
+  return [
+    `${index == null ? '' : `${index + 1}. `}${place.display_name}`,
+    `Type: ${[place.class, place.type].filter(Boolean).join('/') || 'n/a'}`,
+    `Coordinates: ${place.lat}, ${place.lon}`,
+    place.importance ? `Importance: ${place.importance}` : ''
+  ].filter(Boolean).join('\n');
+}
+
+async function forwardGeocode(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 3, 1, 10);
+  const data = await fetchJson(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}&limit=${limit}`);
+  return data.length ? formatList(`Geocode: ${query}`, data.map(formatPlace)) : `No geocoding results for "${query}".`;
+}
+
+async function reverseGeocode(params) {
+  const lat = requireNumberParam(params, 'lat');
+  const lon = requireNumberParam(params, 'lon');
+  const data = await fetchJson(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+  return ['Reverse geocode', '', formatPlace(data)].join('\n');
+}
+
+async function searchPlaces(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const country = String(params.country_code ?? '').trim().toLowerCase();
+  const url = new URL('https://nominatim.openstreetmap.org/search');
+  url.searchParams.set('format', 'jsonv2');
+  url.searchParams.set('q', query);
+  url.searchParams.set('limit', String(limit));
+  if (country) url.searchParams.set('countrycodes', country);
+  const data = await fetchJson(url.toString());
+  return data.length ? formatList(`Place search: ${query}`, data.map(formatPlace)) : `No places found for "${query}".`;
+}
+
+async function getPostalCodeInfo(params) {
+  const country = requireText(params, 'country_code').toLowerCase();
+  const postalCode = requireText(params, 'postal_code');
+  const data = await fetchJson(`https://api.zippopotam.us/${encodeURIComponent(country)}/${encodeURIComponent(postalCode)}`);
+  const places = data.places ?? [];
+  return [
+    `Postal code: ${postalCode}, ${data.country ?? country.toUpperCase()}`,
+    '',
+    ...places.map((place, index) => `${index + 1}. ${place['place name']}, ${place.state}\n   Coordinates: ${place.latitude}, ${place.longitude}`)
+  ].join('\n');
+}
+
+async function getElevation(params) {
+  const rawLocations = params.locations;
+  const locations = Array.isArray(rawLocations) ? rawLocations : JSON.parse(String(rawLocations ?? '[]'));
+  if (!Array.isArray(locations) || locations.length === 0) throw new Error('locations must be a non-empty array.');
+  const safeLocations = locations.slice(0, 100).map((item) => ({
+    latitude: Number(item.lat ?? item.latitude),
+    longitude: Number(item.lon ?? item.longitude)
+  }));
+  const data = await fetchJson('https://api.open-elevation.com/api/v1/lookup', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ locations: safeLocations })
+  });
+  return formatList('Elevation results', (data.results ?? []).map((item, index) => `${index + 1}. ${item.latitude}, ${item.longitude}: ${item.elevation} m`));
+}
+
 export function createPublicDataToolHandlers() {
   return {
     search_web: searchWeb,
@@ -795,11 +1047,24 @@ export function createPublicDataToolHandlers() {
     get_air_quality: getAirQuality,
     get_sunrise_sunset: getSunriseSunset,
     get_exchange_rate: getExchangeRate,
+    get_treasury_data: getTreasuryData,
+    get_fred_data: getFredData,
     get_crypto_price: getCryptoPrice,
     get_crypto_trending: getCryptoTrending,
     get_top_coins: getTopCoins,
     search_crypto: searchCrypto,
     get_apod: getApod,
-    get_iss_location: getIssLocation
+    get_iss_location: getIssLocation,
+    shorten_url: shortenUrl,
+    get_url_metadata: getUrlMetadata,
+    generate_qr_code_url: generateQrCodeUrl,
+    get_whois_info: getWhoisInfo,
+    check_redirect_chain: checkRedirectChain,
+    get_ip_info: getIpInfo,
+    forward_geocode: forwardGeocode,
+    reverse_geocode: reverseGeocode,
+    search_places: searchPlaces,
+    get_postal_code_info: getPostalCodeInfo,
+    get_elevation: getElevation
   };
 }

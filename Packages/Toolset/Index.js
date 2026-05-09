@@ -6,11 +6,7 @@ import {
   LIVE_BROWSER_TOOL_NAMES
 } from './LiveBrowser/BrowserPreviewService.js';
 import { createConnectorStateManager } from './Connectors/Core/ConnectorState.js';
-import { createConnectorToolHandlers } from './Connectors/Core/ConnectorTools.js';
-import {
-  createPublicDataToolHandlers,
-  PUBLIC_DATA_TOOL_DEFINITIONS
-} from './PublicData/PublicDataTools.js';
+import { discoverToolPackages } from './Tools/Index.js';
 
 const { dialog } = electron;
 
@@ -21,9 +17,11 @@ function ownerWindow(event) {
 export async function createPackage({ rootDirectory }) {
   const terminalService = createTerminalService({ rootDirectory });
   const browserPreviewService = createBrowserPreviewService({ rootDirectory });
-  const connectorStateManager = createConnectorStateManager({ rootDirectory });
-  const connectorToolHandlers = createConnectorToolHandlers({ rootDirectory });
-  const publicDataToolHandlers = createPublicDataToolHandlers({ rootDirectory });
+  const toolPackages = await discoverToolPackages({ rootDirectory });
+  const connectorStateManager = createConnectorStateManager({
+    rootDirectory,
+    connectorCatalog: toolPackages.connectors
+  });
   const browserToolHandlers = Object.fromEntries(
     LIVE_BROWSER_TOOL_NAMES.map((toolName) => [
       toolName,
@@ -33,10 +31,9 @@ export async function createPackage({ rootDirectory }) {
   const toolsetService = createToolsetService({
     toolHandlers: {
       ...browserToolHandlers,
-      ...connectorToolHandlers,
-      ...publicDataToolHandlers
+      ...toolPackages.toolHandlers
     },
-    toolDefinitions: PUBLIC_DATA_TOOL_DEFINITIONS
+    toolDefinitions: toolPackages.toolDefinitions
   });
 
   return {

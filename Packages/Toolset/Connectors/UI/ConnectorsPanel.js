@@ -44,14 +44,14 @@ function getConnectorIconPath(connectorId) {
 
 // ────────────────────────────────────────────────────────────────────────────
 
-function createCredentialField({ connector, strings }) {
+function createCredentialField({ fieldConfig, strings }) {
   const field = createElement('label', 'connectors-field');
-  const label = createElement('span', 'connectors-field__label', connector.credentialLabel);
+  const label = createElement('span', 'connectors-field__label', fieldConfig.label);
   const holder = createElement('div', 'connectors-field__secret');
   const input = document.createElement('input');
-  input.type = 'password';
+  input.type = fieldConfig.type === 'text' ? 'text' : 'password';
   input.className = 'connectors-field__input';
-  input.placeholder = connector.credentialPlaceholder;
+  input.placeholder = fieldConfig.placeholder ?? '';
   input.autocomplete = 'off';
   input.spellcheck = false;
 
@@ -68,6 +68,18 @@ function createCredentialField({ connector, strings }) {
   holder.append(input, toggle);
   field.append(label, holder);
   return { field, input };
+}
+
+function getConnectorFields(connector) {
+  return Array.isArray(connector.fields) && connector.fields.length
+    ? connector.fields
+    : [{
+        key: connector.credentialKey,
+        label: connector.credentialLabel,
+        placeholder: connector.credentialPlaceholder,
+        type: 'password',
+        required: !connector.optional
+      }];
 }
 
 export function createConnectorsPanel(strings = defaultStrings) {
@@ -90,21 +102,36 @@ export function createConnectorsPanel(strings = defaultStrings) {
     ref.status.textContent = connector.configured ? strings.connected : strings.notConnected;
     ref.status.className = `connectors-card__status${connector.configured ? ' connectors-card__status--active' : ''}`;
     ref.remove.hidden = !connector.credentialSaved;
-    if (connector.credentialSaved) {
-      ref.input.value = '';
-      ref.input.placeholder = strings.savedSecret;
-    } else {
-      ref.input.placeholder = connector.credentialPlaceholder;
+    const savedKeys = new Set(connector.savedCredentialKeys ?? []);
+
+    for (const field of getConnectorFields(connector)) {
+      const input = ref.inputs.get(field.key);
+      if (!input) continue;
+      if (savedKeys.has(field.key)) {
+        input.value = '';
+        input.placeholder = strings.savedSecret;
+      } else {
+        input.placeholder = field.placeholder ?? '';
+      }
     }
   }
 
   async function saveConnector(connector) {
     const ref = refs.get(connector.id);
-    const credential = ref.input.value.trim();
-    const hasSavedCredential = ref.input.placeholder === strings.savedSecret;
+    const credentials = {};
+    let firstMissingInput = null;
 
-    if (!credential && !connector.optional && !hasSavedCredential) {
-      ref.input.focus();
+    for (const field of getConnectorFields(connector)) {
+      const input = ref.inputs.get(field.key);
+      credentials[field.key] = input.value.trim();
+      const fieldHasSavedCredential = input.placeholder === strings.savedSecret;
+      if (field.required !== false && !credentials[field.key] && !connector.optional && !fieldHasSavedCredential && !firstMissingInput) {
+        firstMissingInput = input;
+      }
+    }
+
+    if (firstMissingInput) {
+      firstMissingInput.focus();
       setFeedback(connector.id, strings.credentialRequired, 'error');
       return;
     }
@@ -114,7 +141,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     setFeedback(connector.id, '', 'info');
 
     try {
-      const updated = await invokeIpc('connectors:save', connector.id, { credential });
+      const updated = await invokeIpc('connectors:save', connector.id, { credentials });
       setCardState(updated);
       setFeedback(connector.id, strings.connectedFeedback, 'success');
     } catch (error) {
@@ -129,8 +156,12 @@ export function createConnectorsPanel(strings = defaultStrings) {
     try {
       await invokeIpc('connectors:remove', connector.id);
       const ref = refs.get(connector.id);
-      ref.input.value = '';
-      ref.input.placeholder = connector.credentialPlaceholder;
+      for (const field of getConnectorFields(connector)) {
+        const input = ref.inputs.get(field.key);
+        if (!input) continue;
+        input.value = '';
+        input.placeholder = field.placeholder ?? '';
+      }
       setCardState({ ...connector, configured: connector.optional, credentialSaved: false });
       setFeedback(connector.id, strings.disconnectedFeedback, 'info');
     } catch (error) {
@@ -176,7 +207,12 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const body = createElement('div', 'connectors-card__body');
     const bodyInner = createElement('div', 'connectors-card__body-inner');
 
-    const { field, input } = createCredentialField({ connector, strings });
+    const inputs = new Map();
+    const fields = getConnectorFields(connector).map((fieldConfig) => {
+      const { field, input } = createCredentialField({ fieldConfig, strings });
+      inputs.set(fieldConfig.key, input);
+      return field;
+    });
     const actions = createElement('div', 'connectors-card__actions');
     const remove = createElement('button', 'connectors-card__secondary', strings.disconnect);
     const save = createElement('button', 'connectors-card__primary');
@@ -193,7 +229,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     feedback.hidden = true;
     feedback.setAttribute('aria-live', 'polite');
 
-    bodyInner.append(field, actions, feedback);
+    bodyInner.append(...fields, actions, feedback);
     body.append(bodyInner);
     card.append(header, body);
 
@@ -211,7 +247,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
       }
     });
 
-    refs.set(connector.id, { card, input, status, save, saveLabel, remove, feedback });
+    refs.set(connector.id, { card, inputs, status, save, saveLabel, remove, feedback });
     setCardState(connector);
     return card;
   }

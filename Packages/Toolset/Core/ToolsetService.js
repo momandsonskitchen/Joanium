@@ -1846,8 +1846,16 @@ function buildToolsPrompt(tools) {
   ].join('\n');
 }
 
+function mergeToolDefinitions(...toolGroups) {
+  const byName = new Map();
+  for (const tool of toolGroups.flat()) {
+    if (tool?.name) byName.set(tool.name, tool);
+  }
+  return [...byName.values()];
+}
+
 export function createToolsetService({ toolHandlers = {}, toolDefinitions = [] } = {}) {
-  const tools = [...strings.tools, ...toolDefinitions];
+  const tools = mergeToolDefinitions(strings.tools, toolDefinitions);
   const handlers = {
     calculate_expression(params) {
       const expression = String(params.expression ?? '').trim();

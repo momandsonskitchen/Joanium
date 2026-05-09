@@ -459,43 +459,6 @@ const en = {
       }
     },
     {
-      name: 'github_get_repository',
-      description: 'Fetch GitHub repository metadata. Uses the GitHub connector token from Settings > Connectors when configured.',
-      category: 'connector',
-      parameters: {
-        owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
-        repo: { type: 'string', required: true, description: 'Repository name.' }
-      }
-    },
-    {
-      name: 'github_get_user',
-      description: 'Fetch a GitHub user or organization profile.',
-      category: 'connector',
-      parameters: {
-        username: { type: 'string', required: true, description: 'GitHub username or organization login.' }
-      }
-    },
-    {
-      name: 'github_list_issues',
-      description: 'List recent GitHub issues or pull requests for a repository.',
-      category: 'connector',
-      parameters: {
-        owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
-        repo: { type: 'string', required: true, description: 'Repository name.' },
-        state: { type: 'string', required: false, description: 'open, closed, or all. Defaults to open.' },
-        limit: { type: 'number', required: false, description: 'Maximum results, default 10, max 30.' }
-      }
-    },
-    {
-      name: 'openweather_current',
-      description: 'Get current weather for a city or place using the OpenWeather connector API key.',
-      category: 'connector',
-      parameters: {
-        location: { type: 'string', required: true, description: 'City, place, or "city,country code".' },
-        units: { type: 'string', required: false, description: 'metric, imperial, or standard. Defaults to metric.' }
-      }
-    },
-    {
       name: 'browser_navigate',
       description: 'Open a URL in the live browser preview on the right side of chat.',
       category: 'browser',

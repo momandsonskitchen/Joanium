@@ -155,12 +155,12 @@ function sanitizeConnectorDetails(details) {
 
     nextDetails[connectorId] = {};
 
-    if (typeof connectorDetails.apiKey === 'string') {
-      nextDetails[connectorId].apiKey = connectorDetails.apiKey.trim();
-    }
-
-    if (typeof connectorDetails.token === 'string') {
-      nextDetails[connectorId].token = connectorDetails.token.trim();
+    for (const [key, value] of Object.entries(connectorDetails)) {
+      if (typeof value === 'string') {
+        nextDetails[connectorId][key] = value.trim();
+      } else if (typeof value === 'boolean' || Number.isFinite(value)) {
+        nextDetails[connectorId][key] = value;
+      }
     }
   }
 

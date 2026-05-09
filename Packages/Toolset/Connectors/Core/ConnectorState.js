@@ -1,8 +1,18 @@
 import { readUserState, writeUserState } from '../../../Shared/UserData/UserData.js';
-import { CONNECTOR_CATALOG, getConnectorDefinition } from './ConnectorCatalog.js';
+import {
+  CONNECTOR_CATALOG,
+  createConnectorCatalog,
+  getConnectorDefinition
+} from './ConnectorCatalog.js';
 
 function sanitizeCredential(value) {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function getConnectorFields(connector) {
+  return Array.isArray(connector.fields) && connector.fields.length
+    ? connector.fields
+    : [{ key: connector.credentialKey, required: !connector.optional }];
 }
 
 function hasCredential(connector, details = {}) {
@@ -10,10 +20,24 @@ function hasCredential(connector, details = {}) {
     return true;
   }
 
-  return Boolean(sanitizeCredential(details[connector.credentialKey]));
+  return getConnectorFields(connector)
+    .filter((field) => field.required !== false)
+    .every((field) => Boolean(sanitizeCredential(details[field.key])));
 }
 
-export function createConnectorStateManager({ rootDirectory }) {
+function hasAnySavedCredential(connector, details = {}) {
+  return getConnectorFields(connector).some((field) => Boolean(sanitizeCredential(details[field.key])));
+}
+
+function getSavedCredentialKeys(connector, details = {}) {
+  return getConnectorFields(connector)
+    .filter((field) => Boolean(sanitizeCredential(details[field.key])))
+    .map((field) => field.key);
+}
+
+export function createConnectorStateManager({ rootDirectory, connectorCatalog = CONNECTOR_CATALOG }) {
+  const catalog = createConnectorCatalog(connectorCatalog);
+
   async function readState() {
     return readUserState(rootDirectory);
   }
@@ -24,11 +48,11 @@ export function createConnectorStateManager({ rootDirectory }) {
   }
 
   function toViewModel(connector, details = {}) {
-    const credentialValue = sanitizeCredential(details[connector.credentialKey]);
     return {
       ...connector,
       configured: hasCredential(connector, details),
-      credentialSaved: Boolean(credentialValue),
+      credentialSaved: hasAnySavedCredential(connector, details),
+      savedCredentialKeys: getSavedCredentialKeys(connector, details),
       credentialKey: connector.credentialKey
     };
   }
@@ -37,23 +61,37 @@ export function createConnectorStateManager({ rootDirectory }) {
     async listConnectors() {
       const state = await readState();
       const details = state.connectors?.details ?? {};
-      return CONNECTOR_CATALOG.map((connector) => toViewModel(connector, details[connector.id] ?? {}));
+      return catalog.map((connector) => toViewModel(connector, details[connector.id] ?? {}));
     },
 
     async saveConnector(connectorId, incoming = {}) {
-      const connector = getConnectorDefinition(connectorId);
+      const connector = getConnectorDefinition(connectorId, catalog);
       if (!connector) throw new Error('Unknown connector.');
 
-      const credential = sanitizeCredential(incoming.credential);
-      if (!credential && !connector.optional) throw new Error('Credential is required.');
+      const fields = getConnectorFields(connector);
+      const incomingCredentials = incoming.credentials && typeof incoming.credentials === 'object'
+        ? incoming.credentials
+        : { [connector.credentialKey]: incoming.credential };
 
       await writeState((state) => {
         const currentDetails = state.connectors?.details ?? {};
         const existing = currentDetails[connectorId] ?? {};
         const nextDetails = { ...existing };
 
-        if (credential) {
-          nextDetails[connector.credentialKey] = credential;
+        for (const field of fields) {
+          const credential = sanitizeCredential(incomingCredentials[field.key]);
+          if (credential) {
+            nextDetails[field.key] = credential;
+          }
+        }
+
+        if (!connector.optional) {
+          const missingField = fields
+            .filter((field) => field.required !== false)
+            .find((field) => !sanitizeCredential(nextDetails[field.key]));
+          if (missingField) {
+            throw new Error(`${missingField.label ?? 'Credential'} is required.`);
+          }
         }
 
         return {

@@ -1,7 +1,7 @@
 {
   "deepseek-ai/deepseek-v3.2": {
     "status": "yellow",
-    "checkedAt": "2026-05-09T06:54:49.463Z"
+    "checkedAt": "2026-05-09T07:48:03.403Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -37,7 +37,7 @@
   },
   "minimaxai/minimax-m2.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-09T06:55:04.492Z"
+    "checkedAt": "2026-05-09T07:48:18.332Z"
   },
   "qwen/qwen3.5-397b-a17b": {
     "status": "green",
