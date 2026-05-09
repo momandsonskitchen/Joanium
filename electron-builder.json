@@ -11,8 +11,23 @@
   ],
   "extraResources": [
     {
-      "from": "Data/Models",
-      "to": "Data/Models"
+      "from": "Data",
+      "to": "Data",
+      "filter": [
+        "**/*",
+        "!Agents/**",
+        "!Channels/**",
+        "!Projects/**",
+        "!Templates/**",
+        "!Chats/**",
+        "!Memories/**",
+        "!Avatar.*",
+        "!User.json",
+        "!Usage.json",
+        "!Channels.json",
+        "!Security.json",
+        "!System.json"
+      ]
     },
     {
       "from": "Skills",

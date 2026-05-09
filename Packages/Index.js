@@ -1,9 +1,14 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { app } from 'electron';
 import { discoverPackages, loadPackageModule, createBootLogger } from './Boot/Index.js';
 
 const packagesDirectory = path.dirname(fileURLToPath(import.meta.url));
-const rootDirectory = path.resolve(packagesDirectory, '..');
+// When packaged, Data/Skills/Personas live in extraResources next to app.asar
+// (at process.resourcesPath), not inside the asar itself.
+const rootDirectory = app.isPackaged
+  ? process.resourcesPath
+  : path.resolve(packagesDirectory, '..');
 
 const writeBootLog = createBootLogger(
   path.join(rootDirectory, 'Build', 'Logs', 'electron-boot.log')
