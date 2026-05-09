@@ -6,7 +6,6 @@ const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound
 
 export function createAppSettingsPanel(strings) {
   const view = createElement('div', 'app-settings');
-  const header = createElement('div', 'app-settings__header');
   const options = createElement('div', 'app-settings__options');
   const status = createElement('p', 'app-settings__status');
   let settings = null;
@@ -59,7 +58,7 @@ export function createAppSettingsPanel(strings) {
 
   }
 
-  view.append(header, options, status);
+  view.append(options, status);
   void populate().catch(() => setStatus(strings.saveFailed, 'error'));
   return view;
 }

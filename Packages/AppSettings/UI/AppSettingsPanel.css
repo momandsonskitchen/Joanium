@@ -5,12 +5,6 @@
   -webkit-app-region: no-drag;
 }
 
-.app-settings__header {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .app-settings__title,
 .app-settings__runtime-title {
   margin: 0;
