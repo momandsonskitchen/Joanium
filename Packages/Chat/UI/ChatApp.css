@@ -758,6 +758,34 @@
   -webkit-app-region: no-drag;
 }
 
+.chat-composer__private-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.14);
+  font-size: 12.5px;
+  font-weight: 560;
+  color: #7c3aed;
+  -webkit-app-region: no-drag;
+}
+
+.chat-composer__private-notice-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  color: currentColor;
+}
+
+.chat-composer__private-notice-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 .chat-composer__notice {
   margin: -2px 0 10px;
   padding: 8px 12px;
@@ -1904,6 +1932,82 @@
   .chat-terminal-drawer__output-pane {
     min-height: 220px;
   }
+}
+
+/* ── Private chat button ───────────────────────────────────────────────── */
+
+.chat-private-btn {
+  position: absolute;
+  bottom: 38px;
+  right: 44px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
+    0 4px 14px rgba(130, 95, 65, 0.08);
+  color: var(--color-chat-text-muted);
+  -webkit-app-region: no-drag;
+  transition:
+    width 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+  overflow: hidden;
+}
+
+.chat-private-btn:hover {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.16),
+    0 6px 18px rgba(130, 95, 65, 0.11);
+  color: var(--color-chat-text-title);
+}
+
+.chat-private-btn--active {
+  width: auto;
+  padding: 0 14px 0 10px;
+  background: rgba(124, 58, 237, 0.09);
+  box-shadow:
+    inset 0 0 0 1px rgba(124, 58, 237, 0.22),
+    0 4px 14px rgba(124, 58, 237, 0.10);
+  color: #7c3aed;
+}
+
+.chat-private-btn--active:hover {
+  background: rgba(124, 58, 237, 0.14);
+  color: #6d28d9;
+}
+
+.chat-private-btn__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: currentColor;
+}
+
+.chat-private-btn__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-private-btn__label {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  display: none;
+}
+
+.chat-private-btn--active .chat-private-btn__label {
+  display: inline;
 }
 
 /* ── Conversation track ───────────────────────────────────────────────────── */

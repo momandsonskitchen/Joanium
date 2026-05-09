@@ -1422,6 +1422,8 @@ export async function createChatView(strings, {
   let pendingAttachments = [];
   let attachmentNoticeTimer = null;
   let isSending = false;
+  let isPrivate = false;
+  let privateNoticeEl = null;
   let accText = '';
   let accThinking = '';
   let sessionId = null;
@@ -1605,6 +1607,7 @@ export async function createChatView(strings, {
   }
 
   async function saveCurrentSession() {
+    if (isPrivate) return;
     if (!sessionId || messages.length === 0) return;
     const firstUser = messages.find((message) => message.role === 'user');
     if (!firstUser) return;
@@ -3000,7 +3003,10 @@ export async function createChatView(strings, {
   slashMenu.setAttribute('role', 'listbox');
   slashMenu.setAttribute('aria-label', strings.slash.label);
   diagPanel = createDiagnosticPanel(strings);
-  composer.append(projectPill, attachmentsEl, attachmentNotice, composerField, composerFooter, slashMenu);
+  privateNoticeEl = createElement('div', 'chat-composer__private-notice');
+  privateNoticeEl.hidden = true;
+  privateNoticeEl.append(createIcon('lock', 'chat-composer__private-notice-icon'), createElement('span', '', strings.composer.privateNotice));
+  composer.append(projectPill, attachmentsEl, attachmentNotice, privateNoticeEl, composerField, composerFooter, slashMenu);
   scroll.append(title, bubblesEl, thread);
   bottom.append(composer);
   const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {
@@ -3013,7 +3019,16 @@ export async function createChatView(strings, {
       view.classList.toggle('chat-view--terminal', open);
     }
   });
-  view.append(scroll, bottom, browserPreview.element, terminalPanel.build());
+  const privateBtn = createElement('button', 'chat-private-btn');
+  privateBtn.type = 'button';
+  privateBtn.setAttribute('aria-label', 'Toggle private chat');
+  privateBtn.append(createIcon('lock', 'chat-private-btn__icon'), createElement('span', 'chat-private-btn__label', 'Private'));
+  privateBtn.addEventListener('click', () => {
+    isPrivate = !isPrivate;
+    privateBtn.classList.toggle('chat-private-btn--active', isPrivate);
+    if (privateNoticeEl) privateNoticeEl.hidden = !isPrivate;
+  });
+  view.append(scroll, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
   track = createElement('div', 'chat-thread-track');
   track.hidden = true;
   trackLabel = createElement('div', 'chat-thread-track__label');

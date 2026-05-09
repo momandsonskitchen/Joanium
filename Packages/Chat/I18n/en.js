@@ -2,6 +2,7 @@ const en = {
   appName: 'Joanium',
   composer: {
     placeholder: 'How can I help you today?',
+    privateNotice: 'You are in private mode — none of your chats are being stored.',
     modelFallback: 'Ready to chat',
     stop: 'Stop',
     generationStopped: 'Generation stopped.',
