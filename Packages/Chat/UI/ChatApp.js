@@ -2259,6 +2259,8 @@ export async function createChatView(strings, {
 
     if (!hasMessages) {
       thread.replaceChildren();
+      if (track) track.hidden = true;
+      if (trackLabel) trackLabel.hidden = true;
       return;
     }
 

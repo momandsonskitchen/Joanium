@@ -2,5 +2,29 @@
   "google/gemma-4-31b-it": {
     "status": "yellow",
     "checkedAt": "2026-05-09T13:48:28.998Z"
+  },
+  "deepseek-ai/deepseek-v3.2": {
+    "status": "yellow",
+    "checkedAt": "2026-05-09T14:02:24.977Z"
+  },
+  "openai/gpt-oss-20b": {
+    "status": "green",
+    "checkedAt": "2026-05-09T14:02:25.238Z"
+  },
+  "moonshotai/kimi-k2-thinking": {
+    "status": "green",
+    "checkedAt": "2026-05-09T14:02:25.598Z"
+  },
+  "moonshotai/kimi-k2-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-09T14:02:27.673Z"
+  },
+  "nvidia/nemotron-3-super-120b-a12b": {
+    "status": "green",
+    "checkedAt": "2026-05-09T14:02:34.803Z"
+  },
+  "minimaxai/minimax-m2.7": {
+    "status": "yellow",
+    "checkedAt": "2026-05-09T14:02:39.968Z"
   }
 }
