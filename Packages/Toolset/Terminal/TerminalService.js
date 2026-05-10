@@ -114,8 +114,24 @@ function severityRank(level) {
 
 function getShellPath() {
   return process.platform === 'win32'
-    ? process.env.ComSpec || 'cmd.exe'
+    ? (process.env.PSModulePath ? 'powershell.exe' : 'powershell.exe')
     : process.env.SHELL || '/bin/bash';
+}
+
+// Build a cross-platform exec invocation.
+// On Windows we call PowerShell directly so Unix-style commands
+// (ls, pwd, cat, rm, mkdir, cp, mv, touch, ...) all work out of the box.
+function buildExecInvocation(command) {
+  if (process.platform === 'win32') {
+    return {
+      cmd: `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command ${JSON.stringify(command)}`,
+      options: { shell: false }
+    };
+  }
+  return {
+    cmd: command,
+    options: { shell: process.env.SHELL || '/bin/bash', env: { ...process.env, FORCE_COLOR: '1' } }
+  };
 }
 
 function isProbablyTextFile(filePath) {
@@ -262,14 +278,14 @@ export function createTerminalService({ rootDirectory }) {
     const timeout = Math.min(Math.max(Number(payload.timeout) || DEFAULT_TIMEOUT, 1000), MAX_TIMEOUT);
 
     return new Promise((resolve) => {
+      const { cmd, options } = buildExecInvocation(payload.command);
       exec(
-        payload.command,
+        cmd,
         {
           cwd,
           timeout,
           maxBuffer: OUTPUT_LIMIT * 4,
-          shell: getShellPath(),
-          env: { ...process.env, FORCE_COLOR: '1' }
+          ...options
         },
         (error, stdout, stderr) => {
           resolve({
@@ -301,11 +317,21 @@ export function createTerminalService({ rootDirectory }) {
 
     const cwd = resolveDirectory(payload.cwd, fallbackDirectory);
     const processId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const child = spawn(payload.command, {
-      cwd,
-      shell: true,
-      env: { ...process.env, FORCE_COLOR: '1' }
-    });
+
+    let child;
+    if (process.platform === 'win32') {
+      child = spawn(
+        'powershell.exe',
+        ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', payload.command],
+        { cwd, env: { ...process.env } }
+      );
+    } else {
+      child = spawn(payload.command, {
+        cwd,
+        shell: true,
+        env: { ...process.env, FORCE_COLOR: '1' }
+      });
+    }
 
     activeProcesses.set(processId, child);
     processBuffers.set(processId, '');
@@ -620,6 +646,29 @@ export function createTerminalService({ rootDirectory }) {
     return { ok: true, path: resolvedPath };
   }
 
+  function resolveDirectoryChange(payload = {}) {
+    const current = String(payload.cwd ?? '').trim() || os.homedir();
+    const target  = String(payload.target ?? '').trim();
+
+    // bare `cd` or `cd ~` → home
+    const resolved =
+      !target || target === '~'
+        ? os.homedir()
+        : target.startsWith('~/')
+          ? path.join(os.homedir(), target.slice(2))
+          : path.resolve(current, target);
+
+    try {
+      const stat = fs.statSync(resolved);
+      if (!stat.isDirectory()) {
+        return { ok: false, error: `cd: not a directory: ${target}` };
+      }
+      return { ok: true, cwd: resolved };
+    } catch {
+      return { ok: false, error: `cd: no such file or directory: ${target}` };
+    }
+  }
+
   return {
     getDefaultCwd: () => fallbackDirectory,
     assessCommandRisk,
@@ -636,6 +685,7 @@ export function createTerminalService({ rootDirectory }) {
     gitStatus,
     gitDiff,
     writeFile,
-    deleteItem
+    deleteItem,
+    resolveDirectoryChange
   };
 }

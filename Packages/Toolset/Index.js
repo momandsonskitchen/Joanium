@@ -68,6 +68,10 @@ export async function createPackage({ rootDirectory }) {
         handler: async () => ({ ok: true, cwd: os.homedir() })
       },
       {
+        channel: 'terminal:resolve-directory',
+        handler: async (_event, payload) => terminalService.resolveDirectoryChange(payload)
+      },
+      {
         channel: 'terminal:select-directory',
         handler: async (event, options = {}) => {
           const window = ownerWindow(event);

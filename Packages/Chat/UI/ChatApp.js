@@ -1028,6 +1028,27 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       return;
     }
 
+    // ── cd is stateful — handle it here, not in the subprocess ────────────────
+    const cdMatch = nextCommand.match(/^cd(?:\s+(.*))?$/);
+    if (cdMatch) {
+      const target = (cdMatch[1] ?? '').trim();
+      appendOutput(`${nextCommand}\n`);
+      if (commandHistory[commandHistory.length - 1] !== nextCommand) {
+        commandHistory.push(nextCommand);
+      }
+      historyIndex = -1;
+      currentInput = '';
+      const result = await invokeIpc('terminal:resolve-directory', { cwd, target });
+      if (result?.ok) {
+        syncCwd(result.cwd);
+        setStatus(strings.terminal.idle);
+      } else {
+        appendOutput(`${result?.error || 'cd: no such file or directory'}\n`);
+        setStatus(result?.error || 'Error', 'warning');
+      }
+      return;
+    }
+
     if (commandHistory[commandHistory.length - 1] !== nextCommand) {
       commandHistory.push(nextCommand);
     }
