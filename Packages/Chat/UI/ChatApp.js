@@ -1249,6 +1249,48 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
 
+    // ── Resize ───────────────────────────────────────────────────────────────────
+    const resizeHandle = createElement('div', 'chat-terminal-drawer__resize');
+    panel.append(resizeHandle);
+
+    let resizeActive = false;
+    let resizeOriginX = 0;
+    let resizeOriginY = 0;
+    let resizeStartW = 0;
+    let resizeStartOutputH = 0;
+
+    function onResizeStart(event) {
+      if (event.button !== 0) return;
+      resizeActive = true;
+      resizeOriginX = event.clientX;
+      resizeOriginY = event.clientY;
+      resizeStartW = panel.offsetWidth;
+      resizeStartOutputH = outputEl ? outputEl.offsetHeight : 200;
+      panel.classList.add('chat-terminal-drawer--resizing');
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    function onResizeMove(event) {
+      if (!resizeActive) return;
+      const dx = event.clientX - resizeOriginX;
+      const dy = event.clientY - resizeOriginY;
+      const newW = Math.max(340, Math.min(window.innerWidth - 100, resizeStartW + dx));
+      const newOutputH = Math.max(80, Math.min(window.innerHeight - 260, resizeStartOutputH + dy));
+      panel.style.width = `${newW}px`;
+      if (outputEl) outputEl.style.height = `${newOutputH}px`;
+    }
+
+    function onResizeEnd() {
+      if (!resizeActive) return;
+      resizeActive = false;
+      panel.classList.remove('chat-terminal-drawer--resizing');
+    }
+
+    resizeHandle.addEventListener('mousedown', onResizeStart);
+    document.addEventListener('mousemove', onResizeMove);
+    document.addEventListener('mouseup', onResizeEnd);
+
     wireProcessEvents();
     void loadDefaultCwd();
     return panel;

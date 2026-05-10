@@ -1,4 +1,5 @@
 import electron from 'electron';
+import os from 'node:os';
 import { createToolsetService } from './Core/ToolsetService.js';
 import { createTerminalService } from './Terminal/TerminalService.js';
 import {
@@ -64,7 +65,7 @@ export async function createPackage({ rootDirectory }) {
       },
       {
         channel: 'terminal:get-default-cwd',
-        handler: async () => ({ ok: true, cwd: terminalService.getDefaultCwd() })
+        handler: async () => ({ ok: true, cwd: os.homedir() })
       },
       {
         channel: 'terminal:select-directory',

@@ -1115,7 +1115,9 @@
 .chat-terminal-drawer {
   position: fixed;
   z-index: 200;
-  width: min(920px, calc(100% - 76px));
+  width: min(740px, calc(100% - 76px));
+  min-width: 340px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   border-radius: 24px;
@@ -1256,7 +1258,7 @@
 
 .chat-terminal-drawer__output {
   flex: none;
-  height: 140px;
+  height: 200px;
   margin: 0;
   padding: 14px;
   overflow: auto;
@@ -1296,7 +1298,6 @@
 
 .chat-terminal-drawer__prompt--running {
   color: rgba(250, 190, 50, 0.85);
-  animation: chat-dot-bounce 1.4s ease-in-out infinite;
 }
 
 .chat-terminal-drawer__cmd-input {
@@ -1316,6 +1317,39 @@
 .chat-terminal-drawer__cmd-input:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+/* ── Resize handle ────────────────────────────────────────────────────────── */
+
+.chat-terminal-drawer__resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  cursor: se-resize;
+  border-radius: 0 0 24px 0;
+  opacity: 0.35;
+  transition: opacity 140ms ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 5px;
+}
+
+.chat-terminal-drawer__resize:hover,
+.chat-terminal-drawer--resizing .chat-terminal-drawer__resize {
+  opacity: 0.7;
+}
+
+.chat-terminal-drawer__resize::after {
+  content: '';
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--color-chat-text-muted);
+  border-bottom: 2px solid var(--color-chat-text-muted);
+  border-radius: 0 0 3px 0;
 }
 
 .chat-terminal-call {
