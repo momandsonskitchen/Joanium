@@ -98,6 +98,7 @@
   margin: 12px 0;
   border-radius: 10px;
   overflow: hidden;
+  max-width: 800px;
   border: 1px solid rgba(170, 134, 104, 0.10);
 }
 
