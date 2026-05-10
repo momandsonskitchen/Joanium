@@ -266,26 +266,25 @@ export function createHistoryPanel(strings, {
     panel.hidden = true;
 
     // Header row
+    const header = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
+
+    // Search bar + New Chat button row
+    const searchWrap  = createElement('div', 'chat-history__search-wrap');
+    const searchInner = createElement('div', 'chat-history__search-inner');
+
     const newBtn = createElement('button', 'chat-history__new-btn');
     newBtn.type  = 'button';
     newBtn.append(createIcon('tabChat', 'chat-history__new-icon'), createElement('span', 'chat-history__new-label', strings.newChat));
     newBtn.addEventListener('click', () => onNewChat?.());
-
-    const header = createPanelHeader({ title: strings.title, subtitle: strings.subtitle, actions: [newBtn] });
-
-    // Search bar
-    const searchWrap  = createElement('div', 'chat-history__search-wrap');
-    const searchInner = createElement('div', 'chat-history__search-inner');
 
     const search = createSearchBar({
       placeholder: strings.search,
       onChange:    (value) => void populateList(contentEl, value.trim())
     });
 
-    // Prevent Electron drag-region from swallowing input events
     search.element.style.webkitAppRegion = 'no-drag';
 
-    searchInner.append(search.element);
+    searchInner.append(search.element, newBtn);
     searchWrap.append(searchInner);
 
     // Session list
