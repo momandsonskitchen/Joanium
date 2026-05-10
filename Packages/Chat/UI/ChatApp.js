@@ -322,6 +322,76 @@ function updateLastStreamingMessage(threadEl, { content, thinking }) {
 }
 
 /**
+ * Updates a sub-agent card in-place without re-rendering the whole thread.
+ * Preserves <details> open/closed state across task progress ticks.
+ */
+function updateSubAgentCard(threadEl, subAgents, strings) {
+  const lastAssistant = threadEl?.lastElementChild;
+  if (!lastAssistant) return;
+  const card = lastAssistant.querySelector('.chat-subagent-call');
+  if (!card) return;
+
+  const doneCount = subAgents.filter((a) => a.status === 'completed' || a.status === 'failed').length;
+  const countEl = card.querySelector('.chat-subagent-call__count');
+  if (countEl) {
+    countEl.textContent = formatText(strings.tools.subAgentsCountProgress, {
+      done: String(doneCount),
+      total: String(subAgents.length)
+    });
+  }
+
+  const agentRows = card.querySelectorAll('.chat-subagent-call__agent');
+
+  subAgents.forEach((agent, i) => {
+    const row = agentRows[i];
+    if (!row) return;
+
+    const agentStatus = agent.status ?? 'queued';
+    row.className = `chat-subagent-call__agent chat-subagent-call__agent--${agentStatus}`;
+
+    const dot = row.querySelector('.chat-subagent-call__agent-status');
+    if (dot) dot.className = `chat-subagent-call__agent-status chat-subagent-call__agent-status--${agentStatus}`;
+
+    const badge = row.querySelector('.chat-subagent-call__agent-badge');
+    if (badge) {
+      if (agentStatus === 'running') badge.textContent = strings.tools.subAgentStatusRunning;
+      else if (agentStatus === 'completed') badge.textContent = strings.tools.subAgentStatusDone;
+      else if (agentStatus === 'failed') badge.textContent = strings.tools.subAgentStatusFailed;
+      else badge.textContent = strings.tools.subAgentStatusQueued;
+    }
+
+    const body = row.querySelector('.chat-subagent-call__agent-body');
+    if (!body) return;
+
+    if (agent.prompt && !body.querySelector('.chat-subagent-call__agent-prompt')) {
+      const promptSection = createElement('div', 'chat-subagent-call__agent-section');
+      const promptTitle = createElement('h4', 'chat-subagent-call__agent-section-title', strings.tools.subAgentPromptSection);
+      const promptEl = createElement('pre', 'chat-subagent-call__agent-prompt', agent.prompt);
+      promptSection.append(promptTitle, promptEl);
+      body.prepend(promptSection);
+    }
+
+    if (agent.output || agent.error) {
+      let outputSection = body.querySelector('.chat-subagent-call__agent-output-section');
+      if (!outputSection) {
+        outputSection = createElement('div', 'chat-subagent-call__agent-section chat-subagent-call__agent-output-section');
+        const isError = Boolean(agent.error && !agent.output);
+        const sectionTitle = createElement('h4', 'chat-subagent-call__agent-section-title',
+          isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection);
+        const outputEl = createElement('pre', 'chat-subagent-call__agent-output', agent.output || agent.error || '');
+        outputSection.append(sectionTitle, outputEl);
+        body.append(outputSection);
+      } else {
+        const outputEl = outputSection.querySelector('.chat-subagent-call__agent-output');
+        if (outputEl) outputEl.textContent = agent.output || agent.error || '';
+      }
+    }
+  });
+
+  card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+/**
  * Renders a group of consecutive assistant messages (one logical response) as
  * a single <article>. This is what makes interleaved thinking look like Claude.ai:
  *
@@ -900,7 +970,90 @@ function getTerminalActionSummary(action, strings) {
   return getTerminalToolLabel(strings, action?.tool);
 }
 
+function createSubAgentCallElement(terminal, strings) {
+  const status = terminal.status ?? 'running';
+  const subAgents = terminal.subAgents ?? [];
+  const doneCount = subAgents.filter((a) => a.status === 'completed' || a.status === 'failed').length;
+
+  const card = createElement('section', `chat-terminal-call chat-terminal-call--${status} chat-subagent-call`);
+
+  const header = createElement('div', 'chat-terminal-call__header');
+  const identity = createElement('div', 'chat-terminal-call__identity');
+  const icon = createIcon('tabAgents', 'chat-terminal-call__icon');
+  const copy = createElement('div', 'chat-terminal-call__copy');
+  const label = createElement('div', 'chat-terminal-call__label', terminal.label || strings.tools.subAgentsLabel);
+  const count = createElement('div', 'chat-subagent-call__count');
+  count.textContent = subAgents.length > 0
+    ? formatText(strings.tools.subAgentsCountProgress, { done: String(doneCount), total: String(subAgents.length) })
+    : (terminal.statusLabel ?? strings.tools.subAgentsRunning);
+  copy.append(label, count);
+  identity.append(icon, copy);
+  const statusEl = createElement('span', 'chat-terminal-call__status', terminal.statusLabel ?? status);
+  header.append(identity, statusEl);
+  card.append(header);
+
+  if (subAgents.length > 0) {
+    const agentsContainer = createElement('div', 'chat-subagent-call__agents');
+
+    for (const [index, agent] of subAgents.entries()) {
+      const agentStatus = agent.status ?? 'queued';
+      const details = document.createElement('details');
+      details.className = `chat-subagent-call__agent chat-subagent-call__agent--${agentStatus}`;
+
+      const summary = createElement('summary', 'chat-subagent-call__agent-summary');
+      const statusDot = createElement('span', `chat-subagent-call__agent-status chat-subagent-call__agent-status--${agentStatus}`);
+
+      const info = createElement('div', 'chat-subagent-call__agent-info');
+      const title = createElement('div', 'chat-subagent-call__agent-title', agent.title || '');
+      const goal = createElement('div', 'chat-subagent-call__agent-goal', agent.goal || '');
+      info.append(title, goal);
+
+      const badge = createElement('span', 'chat-subagent-call__agent-badge');
+      if (agentStatus === 'running') badge.textContent = strings.tools.subAgentStatusRunning;
+      else if (agentStatus === 'completed') badge.textContent = strings.tools.subAgentStatusDone;
+      else if (agentStatus === 'failed') badge.textContent = strings.tools.subAgentStatusFailed;
+      else badge.textContent = strings.tools.subAgentStatusQueued;
+
+      const chevron = createIcon('chevronDown', 'chat-subagent-call__agent-chevron');
+
+      summary.append(statusDot, info, badge, chevron);
+      details.append(summary);
+
+      const body = createElement('div', 'chat-subagent-call__agent-body');
+
+      if (agent.prompt) {
+        const promptSection = createElement('div', 'chat-subagent-call__agent-section');
+        const promptTitle = createElement('h4', 'chat-subagent-call__agent-section-title', strings.tools.subAgentPromptSection);
+        const promptEl = createElement('pre', 'chat-subagent-call__agent-prompt', agent.prompt);
+        promptSection.append(promptTitle, promptEl);
+        body.append(promptSection);
+      }
+
+      if (agent.output || agent.error) {
+        const outputSection = createElement('div', 'chat-subagent-call__agent-section chat-subagent-call__agent-output-section');
+        const isError = Boolean(agent.error && !agent.output);
+        const sectionTitle = createElement('h4', 'chat-subagent-call__agent-section-title',
+          isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection);
+        const outputEl = createElement('pre', 'chat-subagent-call__agent-output', agent.output || agent.error || '');
+        outputSection.append(sectionTitle, outputEl);
+        body.append(outputSection);
+      }
+
+      details.append(body);
+      agentsContainer.append(details);
+    }
+
+    card.append(agentsContainer);
+  }
+
+  return card;
+}
+
 function createTerminalCallElement(terminal, strings) {
+  if (Array.isArray(terminal.subAgents)) {
+    return createSubAgentCallElement(terminal, strings);
+  }
+
   const status = terminal.status ?? 'running';
   const card = createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
   const header = createElement('div', 'chat-terminal-call__header');
@@ -2733,7 +2886,7 @@ export async function createChatView(strings, {
     return lines.join('\n');
   }
 
-  async function executeSubAgentTool(action) {
+  async function executeSubAgentTool(action, onProgress) {
     const payload = action?.payload ?? {};
     const tasks = normalizeSubAgentTasks(payload.parameters?.tasks ?? payload.tasks);
 
@@ -2754,13 +2907,16 @@ export async function createChatView(strings, {
     const memoryContext = await loadMemoryContext();
 
     const results = await Promise.all(tasks.map(async (task, index) => {
+      const prompt = buildSubAgentTaskPrompt(task, coordinationGoal, index, tasks.length);
+      onProgress?.(index, { status: 'running', prompt });
+
       try {
         const result = await invokeIpc('chat:complete-message', {
           messages: [
             ...conversationContext,
             {
               role: 'user',
-              content: buildSubAgentTaskPrompt(task, coordinationGoal, index, tasks.length)
+              content: prompt
             }
           ],
           providerId: activeProvider?.id ?? null,
@@ -2772,7 +2928,7 @@ export async function createChatView(strings, {
           isNewSession: false
         });
 
-        return {
+        const agentResult = {
           ok: true,
           text: String(result?.text ?? '').trim() || strings.composer.emptyResponse,
           usage: {
@@ -2782,11 +2938,12 @@ export async function createChatView(strings, {
           providerLabel: result?.providerLabel ?? '',
           modelLabel: result?.modelLabel ?? ''
         };
+        onProgress?.(index, { status: 'completed', output: agentResult.text });
+        return agentResult;
       } catch (error) {
-        return {
-          ok: false,
-          error: error?.message ?? String(error)
-        };
+        const agentResult = { ok: false, error: error?.message ?? String(error) };
+        onProgress?.(index, { status: 'failed', error: agentResult.error });
+        return agentResult;
       }
     }));
 
@@ -2910,6 +3067,86 @@ export async function createChatView(strings, {
   }
 
   async function continueAfterToolsetTool(action, terminalDepth, runToken, generationStartTime) {
+    // ── Sub-agents: special-cased for live per-task progress ─────────────────
+    if (action.tool === 'spawn_sub_agents') {
+      const initTasks = normalizeSubAgentTasks(action.payload?.parameters?.tasks ?? action.payload?.tasks);
+      let currentSubAgents = initTasks.map((task) => ({
+        title: task.title,
+        goal: task.goal,
+        prompt: '',
+        status: 'queued',
+        output: '',
+        error: ''
+      }));
+
+      updateLastAssistantMessage((message) => ({
+        ...message,
+        terminal: {
+          ...(message.terminal ?? {}),
+          status: 'running',
+          statusLabel: strings.tools.subAgentsRunning,
+          subAgents: currentSubAgents
+        }
+      }));
+      syncComposer();
+      renderThread();
+
+      const onProgress = (index, agentState) => {
+        if (runToken !== generationToken) return;
+        currentSubAgents = currentSubAgents.map((a, i) => (i === index ? { ...a, ...agentState } : a));
+        updateSubAgentCard(thread, currentSubAgents, strings);
+      };
+
+      let subAgentResult;
+      try {
+        subAgentResult = await executeSubAgentTool(action, onProgress);
+      } catch (error) {
+        subAgentResult = { ok: false, error: error?.message ?? String(error), tool: action.tool };
+      }
+
+      if (runToken !== generationToken) return;
+
+      if (Array.isArray(subAgentResult?.results)) {
+        subAgentResult.results.forEach((agentResult, i) => {
+          currentSubAgents = currentSubAgents.map((a, idx) => {
+            if (idx !== i) return a;
+            return agentResult.ok
+              ? { ...a, status: 'completed', output: agentResult.text ?? '' }
+              : { ...a, status: 'failed', error: agentResult.error ?? '' };
+          });
+        });
+      }
+
+      const subAgentOk = subAgentResult?.ok !== false && !subAgentResult?.error;
+      const subAgentModelResult = formatToolsetResultForModel(action, subAgentResult);
+
+      updateLastAssistantMessage((message) => ({
+        ...message,
+        terminal: {
+          ...(message.terminal ?? {}),
+          status: subAgentOk ? 'completed' : 'failed',
+          statusLabel: subAgentOk ? strings.tools.subAgentsComplete : strings.tools.subAgentsFailed,
+          output: subAgentResult?.output ?? subAgentResult?.error ?? '',
+          subAgents: currentSubAgents
+        }
+      }));
+
+      messages = [
+        ...messages,
+        { role: 'user', content: strings.tools.hiddenResultLabel, modelContent: subAgentModelResult, hidden: true },
+        { role: 'assistant', content: '', thinking: '', streaming: true, providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
+      ];
+
+      accText = '';
+      accThinking = '';
+      syncComposer();
+      renderThread();
+
+      await startAssistantStream({ isNewSession: false, terminalDepth: terminalDepth + 1, runToken, generationStartTime });
+      return;
+    }
+
+    // ── All other toolset tools ───────────────────────────────────────────────
     let result;
 
     try {
@@ -2921,7 +3158,6 @@ export async function createChatView(strings, {
     if (runToken !== generationToken) return;
 
     const ok = result?.ok !== false && !result?.error;
-    const isSubAgentAction = action.tool === 'spawn_sub_agents';
     const modelResult = formatToolsetResultForModel(action, result);
 
     updateLastAssistantMessage((message) => ({
@@ -2929,29 +3165,15 @@ export async function createChatView(strings, {
       terminal: {
         ...(message.terminal ?? {}),
         status: ok ? 'completed' : 'failed',
-        statusLabel: isSubAgentAction
-          ? (ok ? strings.tools.subAgentsComplete : strings.tools.subAgentsFailed)
-          : (ok ? strings.tools.completedTool : strings.tools.failedTool),
+        statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
         output: result?.output ?? result?.error ?? ''
       }
     }));
 
     messages = [
       ...messages,
-      {
-        role: 'user',
-        content: strings.tools.hiddenResultLabel,
-        modelContent: modelResult,
-        hidden: true
-      },
-      {
-        role: 'assistant',
-        content: '',
-        thinking: '',
-        streaming: true,
-        providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
-      }
+      { role: 'user', content: strings.tools.hiddenResultLabel, modelContent: modelResult, hidden: true },
+      { role: 'assistant', content: '', thinking: '', streaming: true, providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
     ];
 
     accText = '';
@@ -2959,12 +3181,7 @@ export async function createChatView(strings, {
     syncComposer();
     renderThread();
 
-    await startAssistantStream({
-      isNewSession: false,
-      terminalDepth: terminalDepth + 1,
-      runToken,
-      generationStartTime
-    });
+    await startAssistantStream({ isNewSession: false, terminalDepth: terminalDepth + 1, runToken, generationStartTime });
   }
 
   async function startAssistantStream({

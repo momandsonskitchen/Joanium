@@ -152,7 +152,15 @@ const en = {
     subAgentsGoal: 'Goal: {goal}',
     subAgentsDeliverable: 'Expected handoff: {deliverable}',
     subAgentsHandoff: 'Handoff',
-    subAgentsError: 'Error'
+    subAgentsError: 'Error',
+    subAgentsCountProgress: '{done} of {total} done',
+    subAgentStatusQueued: 'Queued',
+    subAgentStatusRunning: 'Working',
+    subAgentStatusDone: 'Done',
+    subAgentStatusFailed: 'Failed',
+    subAgentPromptSection: 'Prompt',
+    subAgentOutputSection: 'Output',
+    subAgentErrorSection: 'Error'
   },
   slash: {
     label: 'Slash commands',

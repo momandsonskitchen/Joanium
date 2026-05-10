@@ -360,6 +360,7 @@
   font-size: 15px;
   line-height: 1;
   white-space: pre-wrap;
+  min-width: 0;
 }
 
 .chat-message--user .chat-message__bubble {
@@ -1482,6 +1483,193 @@
   font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
   font-size: 11.5px;
   line-height: 1.55;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+/* ── Sub-agent call card ─────────────────────────────────────────────────────────── */
+
+.chat-subagent-call__count {
+  font-size: 11px;
+  font-weight: 580;
+  color: var(--color-chat-text-muted);
+  letter-spacing: -0.01em;
+}
+
+.chat-subagent-call__agents {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-subagent-call__agent {
+  border-top: 1px solid rgba(170, 134, 104, 0.10);
+  overflow: hidden;
+}
+
+.chat-subagent-call__agent-summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  list-style: none;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background-color 130ms ease;
+}
+
+.chat-subagent-call__agent-summary::-webkit-details-marker,
+.chat-subagent-call__agent-summary::marker {
+  display: none;
+  content: '';
+}
+
+.chat-subagent-call__agent-summary:hover {
+  background: rgba(var(--color-accent-rgb), 0.04);
+}
+
+.chat-subagent-call__agent-status {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(170, 134, 104, 0.28);
+  transition: background-color 200ms ease;
+}
+
+.chat-subagent-call__agent-status--running {
+  background: rgba(var(--color-accent-rgb), 0.9);
+  animation: chat-subagent-pulse 1.4s ease-in-out infinite;
+}
+
+.chat-subagent-call__agent-status--completed {
+  background: #22c55e;
+}
+
+.chat-subagent-call__agent-status--failed {
+  background: #ef4444;
+}
+
+@keyframes chat-subagent-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.30; }
+}
+
+.chat-subagent-call__agent-info {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-subagent-call__agent-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 680;
+  color: var(--color-chat-text-title);
+}
+
+.chat-subagent-call__agent-goal {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--color-chat-text-muted);
+}
+
+.chat-subagent-call__agent-badge {
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  padding: 4px 9px;
+  font-size: 10.5px;
+  font-weight: 720;
+  color: var(--color-chat-text-muted);
+  background: rgba(255, 255, 255, 0.70);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease;
+}
+
+.chat-subagent-call__agent--running .chat-subagent-call__agent-badge {
+  color: rgb(var(--color-accent-rgb));
+  background: rgba(var(--color-accent-rgb), 0.10);
+}
+
+.chat-subagent-call__agent--completed .chat-subagent-call__agent-badge {
+  color: #287b49;
+  background: rgba(40, 123, 73, 0.10);
+}
+
+.chat-subagent-call__agent--failed .chat-subagent-call__agent-badge {
+  color: #a23036;
+  background: rgba(162, 48, 54, 0.10);
+}
+
+.chat-subagent-call__agent-chevron {
+  flex-shrink: 0;
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: var(--color-chat-text-muted);
+  transition: transform 160ms ease;
+}
+
+.chat-subagent-call__agent-chevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-subagent-call__agent[open] .chat-subagent-call__agent-chevron {
+  transform: rotate(180deg);
+}
+
+.chat-subagent-call__agent-body {
+  display: flex;
+  flex-direction: column;
+  animation: chat-thinking-body-in 200ms ease 60ms both;
+}
+
+.chat-subagent-call__agent-section {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(170, 134, 104, 0.08);
+}
+
+.chat-subagent-call__agent-section-title {
+  margin: 0 0 7px;
+  font-size: 10px;
+  font-weight: 780;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-chat-text-label);
+}
+
+.chat-subagent-call__agent-prompt {
+  margin: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.58;
+  color: var(--color-chat-text-secondary);
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+.chat-subagent-call__agent-output {
+  margin: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--color-chat-text-secondary);
   user-select: text;
   -webkit-user-select: text;
   cursor: text;
