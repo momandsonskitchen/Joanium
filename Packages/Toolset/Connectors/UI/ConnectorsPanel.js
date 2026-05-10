@@ -34,6 +34,7 @@ const ICON_MAP = {
   perplexity:   'Perplexity',
   youtube:      'Youtube',
   whatsapp:     'WhatsApp',
+  cloudflare:   'Cloudflare',
 };
 
 function getConnectorIconPath(connectorId) {
