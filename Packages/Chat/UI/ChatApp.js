@@ -363,8 +363,6 @@ function createAssistantGroupElement(items, strings, { onCopy, onRetry } = {}) {
     article.append(createMessageActions({ onCopy, onRetry, onSpeak, durationMs: lastMessage.durationMs, strings }));
   }
 
-
-
   return article;
 }
 
@@ -1098,13 +1096,26 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     });
   }
 
+  function positionInitial() {
+    if (!panelRef) return;
+    const panelWidth = panelRef.offsetWidth;
+    const panelHeight = panelRef.offsetHeight;
+    const left = Math.max(38, Math.round((window.innerWidth - panelWidth) / 2));
+    const top = Math.max(8, window.innerHeight - 142 - panelHeight);
+    panelRef.style.left = `${left}px`;
+    panelRef.style.top = `${top}px`;
+  }
+
   function setOpen(nextOpen) {
     isOpen = Boolean(nextOpen);
     if (panelRef) panelRef.hidden = !isOpen;
     onOpenChange?.(isOpen);
     if (isOpen) {
       if (!cwd) void loadDefaultCwd();
-      requestAnimationFrame(() => inputEl?.focus());
+      requestAnimationFrame(() => {
+        if (!panelRef.style.left) positionInitial();
+        inputEl?.focus();
+      });
     }
   }
 
@@ -1199,6 +1210,45 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     inputRow.append(promptEl, inputEl);
     panel.append(header, outputEl, inputRow);
     panelRef = panel;
+
+    // ── Drag ─────────────────────────────────────────────────────────────────
+    let dragActive = false;
+    let dragOriginX = 0;
+    let dragOriginY = 0;
+    let dragStartLeft = 0;
+    let dragStartTop = 0;
+
+    function onDragStart(event) {
+      if (event.button !== 0 || event.target.closest('button')) return;
+      dragActive = true;
+      dragOriginX = event.clientX;
+      dragOriginY = event.clientY;
+      dragStartLeft = parseInt(panel.style.left, 10) || 0;
+      dragStartTop = parseInt(panel.style.top, 10) || 0;
+      panel.classList.add('chat-terminal-drawer--dragging');
+      event.preventDefault();
+    }
+
+    function onDragMove(event) {
+      if (!dragActive) return;
+      const dx = event.clientX - dragOriginX;
+      const dy = event.clientY - dragOriginY;
+      const maxLeft = window.innerWidth - panel.offsetWidth;
+      const maxTop = window.innerHeight - panel.offsetHeight;
+      panel.style.left = `${Math.max(0, Math.min(maxLeft, dragStartLeft + dx))}px`;
+      panel.style.top = `${Math.max(0, Math.min(maxTop, dragStartTop + dy))}px`;
+    }
+
+    function onDragEnd() {
+      if (!dragActive) return;
+      dragActive = false;
+      panel.classList.remove('chat-terminal-drawer--dragging');
+    }
+
+    header.addEventListener('mousedown', onDragStart);
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('mouseup', onDragEnd);
+
     wireProcessEvents();
     void loadDefaultCwd();
     return panel;
