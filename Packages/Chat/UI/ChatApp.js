@@ -948,18 +948,18 @@ function formatTerminalResultForModel(strings, action, result) {
 function createChatTerminalPanel(strings, { onOpenChange } = {}) {
   let panelRef = null;
   let cwd = '';
-  let commandValue = '';
   let outputValue = '';
   let activeProcessId = null;
-  let allowRisky = false;
+  let isRunning = false;
   let isOpen = false;
+  let commandHistory = [];
+  let historyIndex = -1;
+  let currentInput = '';
 
-  let cwdInput = null;
-  let commandInput = null;
   let outputEl = null;
+  let inputEl = null;
+  let promptEl = null;
   let statusText = null;
-  let runButton = null;
-  let stopButton = null;
 
   function setStatus(text, tone = '') {
     if (!statusText) return;
@@ -970,7 +970,7 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
   function replaceOutput(text) {
     outputValue = String(text ?? '');
     if (outputEl) {
-      outputEl.textContent = outputValue || strings.terminal.emptyOutput;
+      outputEl.textContent = outputValue;
       outputEl.scrollTop = outputEl.scrollHeight;
     }
   }
@@ -981,20 +981,31 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       outputValue = outputValue.slice(outputValue.length - 160000);
     }
     if (outputEl) {
-      outputEl.textContent = outputValue || strings.terminal.emptyOutput;
+      outputEl.textContent = outputValue;
       outputEl.scrollTop = outputEl.scrollHeight;
     }
   }
 
   function setRunning(running) {
-    if (runButton) runButton.disabled = running;
-    if (stopButton) stopButton.disabled = !running;
-    commandInput?.toggleAttribute('disabled', running);
+    isRunning = running;
+    if (inputEl) {
+      inputEl.disabled = running;
+      if (!running) requestAnimationFrame(() => inputEl?.focus());
+    }
+    if (promptEl) {
+      promptEl.classList.toggle('chat-terminal-drawer__prompt--running', running);
+    }
+  }
+
+  function updatePrompt() {
+    if (!promptEl) return;
+    const short = cwd.length > 48 ? `\u2026${cwd.slice(-48)}` : cwd;
+    promptEl.textContent = short ? `${short} >` : '>';
   }
 
   function syncCwd(nextCwd) {
     cwd = nextCwd || cwd;
-    if (cwdInput) cwdInput.value = cwd;
+    updatePrompt();
   }
 
   async function loadDefaultCwd() {
@@ -1002,13 +1013,8 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       const result = await invokeIpc('terminal:get-default-cwd');
       if (result?.ok) syncCwd(result.cwd);
     } catch {
-      setStatus(strings.terminal.idle);
+      // ignore
     }
-  }
-
-  async function chooseDirectory() {
-    const result = await invokeIpc('terminal:select-directory', { defaultPath: cwd });
-    if (result?.ok) syncCwd(result.path);
   }
 
   async function assessCommand(command) {
@@ -1016,57 +1022,53 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     return result?.risk ?? { level: 'low', blocked: false, requiresOptIn: false, reasons: [] };
   }
 
-  async function runCommand(command = commandValue) {
+  async function runCommand(command) {
     const nextCommand = String(command ?? '').trim();
-    if (!nextCommand) {
-      setStatus(strings.terminal.noCommand, 'warning');
-      return;
-    }
+    if (!nextCommand || isRunning) return;
     if (!cwd) {
-      setStatus(strings.terminal.noDirectory, 'warning');
+      appendOutput(`${strings.terminal.noDirectory}\n`);
       return;
     }
+
+    if (commandHistory[commandHistory.length - 1] !== nextCommand) {
+      commandHistory.push(nextCommand);
+    }
+    historyIndex = -1;
+    currentInput = '';
+
+    appendOutput(`${nextCommand}\n`);
+    setRunning(true);
+    setStatus(strings.terminal.running, 'running');
 
     const risk = await assessCommand(nextCommand);
     if (risk.blocked) {
+      setRunning(false);
       setStatus(strings.terminal.criticalRisk, 'danger');
-      appendOutput(`\n${strings.terminal.criticalRisk}\n`);
+      appendOutput(`${strings.terminal.criticalRisk}\n`);
       return;
     }
-    if (risk.requiresOptIn && !allowRisky) {
-      setStatus(strings.terminal.highRisk, 'warning');
-      appendOutput(`\n${formatText(strings.terminal.riskReasons, { reasons: risk.reasons.join(' ') })}\n`);
-      return;
-    }
-
-    commandValue = nextCommand;
-    if (commandInput) commandInput.value = nextCommand;
-    replaceOutput(`$ ${nextCommand}\n`);
-    setRunning(true);
-    setStatus(strings.terminal.running, 'running');
 
     try {
       const result = await invokeIpc('terminal:spawn-command', {
         command: nextCommand,
         cwd,
-        allowRisky
+        allowRisky: false
       });
 
       if (!result?.ok) {
         activeProcessId = null;
         setRunning(false);
         setStatus(result?.error ?? strings.terminal.defaultError, result?.risk?.blocked ? 'danger' : 'warning');
-        appendOutput(`\n${result?.error ?? strings.terminal.defaultError}\n`);
+        appendOutput(`${result?.error ?? strings.terminal.defaultError}\n`);
         return;
       }
 
       activeProcessId = result.processId;
-      setStatus(strings.terminal.processStarted, 'running');
     } catch (error) {
       activeProcessId = null;
       setRunning(false);
       setStatus(error?.message ?? strings.terminal.defaultError, 'danger');
-      appendOutput(`\n${error?.message ?? strings.terminal.defaultError}\n`);
+      appendOutput(`${error?.message ?? strings.terminal.defaultError}\n`);
     }
   }
 
@@ -1080,47 +1082,6 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     appendOutput(`\n${strings.terminal.processStopped}\n`);
   }
 
-  async function inspectWorkspace() {
-    if (!cwd) {
-      setStatus(strings.terminal.noDirectory, 'warning');
-      return;
-    }
-
-    replaceOutput('');
-    setStatus(strings.terminal.running, 'running');
-
-    try {
-      const result = await invokeIpc('terminal:inspect-workspace', { rootPath: cwd });
-      if (!result?.ok) {
-        setStatus(result?.error ?? strings.terminal.inspectFailed, 'danger');
-        replaceOutput(result?.error ?? strings.terminal.inspectFailed);
-        return;
-      }
-      replaceOutput(JSON.stringify(result.summary, null, 2));
-      setStatus(strings.terminal.finished, 'success');
-    } catch (error) {
-      setStatus(error?.message ?? strings.terminal.inspectFailed, 'danger');
-      replaceOutput(error?.message ?? strings.terminal.inspectFailed);
-    }
-  }
-
-  function createQuickButton(label, command) {
-    const button = createElement('button', 'chat-terminal-drawer__quick-button');
-    button.type = 'button';
-    button.textContent = label;
-    button.addEventListener('click', () => {
-      void runCommand(command);
-    });
-    return button;
-  }
-
-  function setOpen(nextOpen) {
-    isOpen = Boolean(nextOpen);
-    if (panelRef) panelRef.hidden = !isOpen;
-    onOpenChange?.(isOpen);
-    if (isOpen && !cwd) void loadDefaultCwd();
-  }
-
   function wireProcessEvents() {
     onIpc('terminal:process-output', (payload) => {
       if (!payload || payload.processId !== activeProcessId) return;
@@ -1132,9 +1093,19 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       const code = payload.code ?? 0;
       activeProcessId = null;
       setRunning(false);
-      appendOutput(`\n${formatText(strings.terminal.processExited, { code: String(code) })}\n`);
+      appendOutput(`${formatText(strings.terminal.processExited, { code: String(code) })}\n`);
       setStatus(strings.terminal.finished, code === 0 ? 'success' : 'danger');
     });
+  }
+
+  function setOpen(nextOpen) {
+    isOpen = Boolean(nextOpen);
+    if (panelRef) panelRef.hidden = !isOpen;
+    onOpenChange?.(isOpen);
+    if (isOpen) {
+      if (!cwd) void loadDefaultCwd();
+      requestAnimationFrame(() => inputEl?.focus());
+    }
   }
 
   function build() {
@@ -1143,122 +1114,90 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     const panel = createElement('aside', 'chat-terminal-drawer');
     panel.hidden = true;
 
+    // ── Header ───────────────────────────────────────────────────────────
     const header = createElement('div', 'chat-terminal-drawer__header');
+
     const headerCopy = createElement('div', 'chat-terminal-drawer__header-copy');
-    headerCopy.append(
-      createElement('h2', 'chat-terminal-drawer__title', strings.terminal.title),
-      createElement('p', 'chat-terminal-drawer__subtitle', strings.terminal.subtitle)
-    );
-    const closeButton = createElement('button', 'chat-terminal-drawer__close');
-    closeButton.type = 'button';
-    closeButton.setAttribute('aria-label', strings.terminal.close);
-    closeButton.append(createIcon('close', 'chat-terminal-drawer__close-icon'));
-    closeButton.addEventListener('click', () => setOpen(false));
-    header.append(headerCopy, closeButton);
+    headerCopy.append(createElement('h2', 'chat-terminal-drawer__title', strings.terminal.title));
 
-    const body = createElement('div', 'chat-terminal-drawer__body');
-    const controls = createElement('div', 'chat-terminal-drawer__controls');
-    const cwdGroup = createElement('label', 'chat-terminal-drawer__field');
-    cwdGroup.append(createElement('span', 'chat-terminal-drawer__label', strings.terminal.cwdLabel));
-    const cwdRow = createElement('div', 'chat-terminal-drawer__cwd-row');
-    cwdInput = createElement('input', 'chat-terminal-drawer__input');
-    cwdInput.type = 'text';
-    cwdInput.setAttribute('aria-label', strings.terminal.cwdLabel);
-    cwdInput.addEventListener('input', () => {
-      cwd = cwdInput.value;
-    });
-    const chooseButton = createElement('button', 'chat-terminal-drawer__icon-button');
-    chooseButton.type = 'button';
-    chooseButton.setAttribute('aria-label', strings.terminal.chooseDirectory);
-    chooseButton.append(createIcon('folderOpen', 'chat-terminal-drawer__icon'));
-    chooseButton.addEventListener('click', () => { void chooseDirectory(); });
-    cwdRow.append(cwdInput, chooseButton);
-    cwdGroup.append(cwdRow);
-
-    const commandGroup = createElement('label', 'chat-terminal-drawer__field');
-    commandGroup.append(createElement('span', 'chat-terminal-drawer__label', strings.terminal.commandLabel));
-    commandInput = createElement('textarea', 'chat-terminal-drawer__command');
-    commandInput.rows = 3;
-    commandInput.placeholder = strings.terminal.commandPlaceholder;
-    commandInput.setAttribute('aria-label', strings.terminal.commandLabel);
-    commandInput.addEventListener('input', () => {
-      commandValue = commandInput.value;
-    });
-    commandInput.addEventListener('keydown', (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-        event.preventDefault();
-        void runCommand();
-      }
-    });
-    commandGroup.append(commandInput);
-
-    const riskLabel = createElement('label', 'chat-terminal-drawer__risk');
-    const riskInput = document.createElement('input');
-    riskInput.type = 'checkbox';
-    riskInput.className = 'chat-terminal-drawer__risk-input';
-    riskInput.addEventListener('change', () => {
-      allowRisky = riskInput.checked;
-    });
-    const riskCopy = createElement('span', 'chat-terminal-drawer__risk-copy');
-    riskCopy.append(
-      createElement('span', 'chat-terminal-drawer__risk-label', strings.terminal.allowRisky),
-      createElement('span', 'chat-terminal-drawer__risk-description', strings.terminal.allowRiskyDescription)
-    );
-    riskLabel.append(riskInput, riskCopy);
-
-    const actions = createElement('div', 'chat-terminal-drawer__actions');
-    runButton = createElement('button', 'chat-terminal-drawer__run');
-    runButton.type = 'button';
-    runButton.append(createIcon('play', 'chat-terminal-drawer__button-icon'), createElement('span', '', strings.terminal.run));
-    runButton.addEventListener('click', () => { void runCommand(); });
-    stopButton = createElement('button', 'chat-terminal-drawer__stop');
-    stopButton.type = 'button';
-    stopButton.disabled = true;
-    stopButton.append(createIcon('stop', 'chat-terminal-drawer__button-icon'), createElement('span', '', strings.terminal.stop));
-    stopButton.addEventListener('click', () => { void stopCommand(); });
-    actions.append(runButton, stopButton);
-
-    const quick = createElement('div', 'chat-terminal-drawer__quick');
-    quick.append(
-      createElement('span', 'chat-terminal-drawer__quick-label', strings.terminal.quickCommands),
-      createQuickButton(strings.terminal.gitStatus, 'git status --short --branch'),
-      createQuickButton(strings.terminal.gitDiff, 'git diff --stat --patch --minimal --color=never'),
-      createQuickButton(strings.terminal.runChecks, 'npm test')
-    );
-
-    const inspectButton = createElement('button', 'chat-terminal-drawer__secondary');
-    inspectButton.type = 'button';
-    inspectButton.append(createIcon('terminal', 'chat-terminal-drawer__button-icon'), createElement('span', '', strings.terminal.inspect));
-    inspectButton.addEventListener('click', () => { void inspectWorkspace(); });
-
-    controls.append(cwdGroup, commandGroup, riskLabel, actions, inspectButton, quick);
-
-    const outputPane = createElement('div', 'chat-terminal-drawer__output-pane');
-    const outputHeader = createElement('div', 'chat-terminal-drawer__output-header');
+    const headerActions = createElement('div', 'chat-terminal-drawer__header-actions');
     statusText = createElement('span', 'chat-terminal-drawer__status', strings.terminal.idle);
-    const outputActions = createElement('div', 'chat-terminal-drawer__output-actions');
+
     const copyButton = createElement('button', 'chat-terminal-drawer__output-button', strings.terminal.copy);
     copyButton.type = 'button';
     copyButton.addEventListener('click', () => {
       navigator.clipboard.writeText(outputValue).then(() => {
         copyButton.textContent = strings.terminal.copied;
-        setTimeout(() => {
-          copyButton.textContent = strings.terminal.copy;
-        }, 1200);
+        setTimeout(() => { copyButton.textContent = strings.terminal.copy; }, 1200);
       }).catch(() => {});
     });
+
     const clearButton = createElement('button', 'chat-terminal-drawer__output-button', strings.terminal.clear);
     clearButton.type = 'button';
     clearButton.addEventListener('click', () => {
       replaceOutput('');
       setStatus(strings.terminal.idle);
     });
-    outputActions.append(copyButton, clearButton);
-    outputHeader.append(statusText, outputActions);
-    outputEl = createElement('pre', 'chat-terminal-drawer__output', strings.terminal.emptyOutput);
-    outputPane.append(outputHeader, outputEl);
-    body.append(controls, outputPane);
-    panel.append(header, body);
+
+    const closeButton = createElement('button', 'chat-terminal-drawer__close');
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', strings.terminal.close);
+    closeButton.append(createIcon('close', 'chat-terminal-drawer__close-icon'));
+    closeButton.addEventListener('click', () => setOpen(false));
+
+    headerActions.append(statusText, copyButton, clearButton, closeButton);
+    header.append(headerCopy, headerActions);
+
+    // ── Output area ──────────────────────────────────────────────────────
+    outputEl = createElement('pre', 'chat-terminal-drawer__output');
+    outputEl.textContent = '';
+
+    // ── Command input row ────────────────────────────────────────────────
+    const inputRow = createElement('div', 'chat-terminal-drawer__input-row');
+    promptEl = createElement('span', 'chat-terminal-drawer__prompt', '>');
+
+    inputEl = createElement('input', 'chat-terminal-drawer__cmd-input');
+    inputEl.type = 'text';
+    inputEl.spellcheck = false;
+    inputEl.setAttribute('autocomplete', 'off');
+    inputEl.setAttribute('autocorrect', 'off');
+    inputEl.setAttribute('autocapitalize', 'off');
+
+    inputEl.addEventListener('keydown', async (event) => {
+      if (event.key === 'Enter') {
+        const command = inputEl.value.trim();
+        inputEl.value = '';
+        currentInput = '';
+        historyIndex = -1;
+        if (command) void runCommand(command);
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (commandHistory.length === 0) return;
+        if (historyIndex === -1) {
+          currentInput = inputEl.value;
+          historyIndex = commandHistory.length - 1;
+        } else if (historyIndex > 0) {
+          historyIndex -= 1;
+        }
+        inputEl.value = commandHistory[historyIndex] ?? '';
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (historyIndex === -1) return;
+        if (historyIndex < commandHistory.length - 1) {
+          historyIndex += 1;
+          inputEl.value = commandHistory[historyIndex];
+        } else {
+          historyIndex = -1;
+          inputEl.value = currentInput;
+        }
+      } else if (event.key === 'c' && event.ctrlKey && isRunning) {
+        event.preventDefault();
+        void stopCommand();
+      }
+    });
+
+    inputRow.append(promptEl, inputEl);
+    panel.append(header, outputEl, inputRow);
     panelRef = panel;
     wireProcessEvents();
     void loadDefaultCwd();
