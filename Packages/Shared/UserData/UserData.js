@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { app } from 'electron';
 
 // In dev, writable user data lives under Data/ in the project root.
@@ -282,7 +282,9 @@ export async function readUserState(rootDirectory) {
 
 export async function writeUserState(rootDirectory, nextState) {
   const userFilePath = getUserDataFilePath(rootDirectory);
+  const tempFilePath = `${userFilePath}.tmp`;
   await mkdir(path.dirname(userFilePath), { recursive: true });
-  await writeFile(userFilePath, `${JSON.stringify(nextState, null, 2)}\n`, 'utf8');
+  await writeFile(tempFilePath, `${JSON.stringify(nextState, null, 2)}\n`, 'utf8');
+  await rename(tempFilePath, userFilePath);
   return nextState;
 }

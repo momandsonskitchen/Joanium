@@ -187,6 +187,11 @@ async function bootstrap() {
       return;
     }
 
+    // Cancel any pending draft auto-save. If it were allowed to fire after
+    // setup:complete it would overwrite onboardingCompleted back to false.
+    window.clearTimeout(autoSaveTimer);
+    autoSaveTimer = 0;
+
     try {
       const completedState = {
         ...serializeSetupState(state, providersById),

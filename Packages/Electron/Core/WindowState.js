@@ -141,9 +141,19 @@ export function attachWindowStatePersistence(browserWindow, rootDirectory, optio
     }, SAVE_DELAY_MS);
   };
 
-  const saveNow = () => {
+  const saveNow = (event) => {
     clearSaveTimer();
-    void writeWindowState(rootDirectory, browserWindow, options);
+    // Prevent the window from closing until the async write has fully flushed.
+    // Without this, writeFile truncates User.json to 0 bytes and the process
+    // may exit before the write completes, leaving an empty file.
+    event.preventDefault();
+    writeWindowState(rootDirectory, browserWindow, options)
+      .catch(() => {})
+      .finally(() => {
+        if (!browserWindow.isDestroyed()) {
+          browserWindow.destroy();
+        }
+      });
   };
 
   browserWindow.on('resize', saveSoon);
