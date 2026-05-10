@@ -13,6 +13,7 @@ const en = {
   expand: 'Expand',
   collapse: 'Collapse',
   required: 'This field is required.',
+  apiKeyTooShort: 'API key looks too short. Please check it and try again.',
   saveFailed: 'Failed to save. Please try again.',
   disconnectFailed: 'Failed to disconnect. Please try again.',
   lastProvider: 'This is your only connected provider. Add another before removing this one.',

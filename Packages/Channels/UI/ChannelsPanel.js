@@ -145,34 +145,76 @@ export function createChannelsPanel(strings) {
     const refs = cardRefs.get(channelName);
 
     if (channelName === 'telegram') {
-      if (!refs.inputs.botToken.value.trim() && !hasSavedSecret(refs.inputs.botToken)) {
+      const val = refs.inputs.botToken.value.trim();
+      if (!val && !hasSavedSecret(refs.inputs.botToken)) {
         refs.inputs.botToken.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      if (val && val.length < 10) {
+        refs.inputs.botToken.focus();
+        setFeedback(channelName, strings.common.tokenTooShort, 'error');
         return false;
       }
     }
 
     if (channelName === 'whatsapp') {
-      if (!refs.inputs.accountSid.value.trim() && !hasSavedSecret(refs.inputs.accountSid)) {
+      const sidVal = refs.inputs.accountSid.value.trim();
+      if (!sidVal && !hasSavedSecret(refs.inputs.accountSid)) {
         refs.inputs.accountSid.focus();
+        setFeedback(channelName, strings.common.required, 'error');
         return false;
       }
-      if (!refs.inputs.authToken.value.trim() && !hasSavedSecret(refs.inputs.authToken)) {
+      if (sidVal && sidVal.length < 10) {
+        refs.inputs.accountSid.focus();
+        setFeedback(channelName, strings.common.sidTooShort, 'error');
+        return false;
+      }
+      const authVal = refs.inputs.authToken.value.trim();
+      if (!authVal && !hasSavedSecret(refs.inputs.authToken)) {
         refs.inputs.authToken.focus();
+        setFeedback(channelName, strings.common.required, 'error');
         return false;
       }
-      if (!refs.inputs.fromNumber.value.trim()) {
+      if (authVal && authVal.length < 10) {
+        refs.inputs.authToken.focus();
+        setFeedback(channelName, strings.common.authTokenTooShort, 'error');
+        return false;
+      }
+      const numVal = refs.inputs.fromNumber.value.trim();
+      if (!numVal) {
         refs.inputs.fromNumber.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      if (numVal.replace(/[^0-9]/g, '').length < 7) {
+        refs.inputs.fromNumber.focus();
+        setFeedback(channelName, strings.common.numberTooShort, 'error');
         return false;
       }
     }
 
     if (channelName === 'discord' || channelName === 'slack') {
-      if (!refs.inputs.botToken.value.trim() && !hasSavedSecret(refs.inputs.botToken)) {
+      const tokenVal = refs.inputs.botToken.value.trim();
+      if (!tokenVal && !hasSavedSecret(refs.inputs.botToken)) {
         refs.inputs.botToken.focus();
+        setFeedback(channelName, strings.common.required, 'error');
         return false;
       }
-      if (!refs.inputs.channelId.value.trim()) {
+      if (tokenVal && tokenVal.length < 10) {
+        refs.inputs.botToken.focus();
+        setFeedback(channelName, strings.common.tokenTooShort, 'error');
+        return false;
+      }
+      const channelIdVal = refs.inputs.channelId.value.trim();
+      if (!channelIdVal) {
         refs.inputs.channelId.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      if (channelIdVal.length < 5) {
+        refs.inputs.channelId.focus();
+        setFeedback(channelName, strings.common.channelIdTooShort, 'error');
         return false;
       }
     }
@@ -222,7 +264,6 @@ export function createChannelsPanel(strings) {
   async function connectChannel(channelName) {
     const refs = cardRefs.get(channelName);
     if (!validateRequired(channelName)) {
-      setFeedback(channelName, strings.common.required, 'error');
       return;
     }
 

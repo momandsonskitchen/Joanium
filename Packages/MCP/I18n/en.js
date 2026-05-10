@@ -41,6 +41,9 @@ const en = {
   feedback: {
     saved: 'Server saved.',
     invalidEnv: 'Environment must be valid JSON object.',
+    commandRequired: 'Command is required for Stdio transport.',
+    urlRequired: 'URL is required for HTTP transport.',
+    urlInvalid: 'URL must start with http:// or https://',
     saveFailed: 'Could not save the server.',
     connectFailed: 'Could not connect the server.'
   }

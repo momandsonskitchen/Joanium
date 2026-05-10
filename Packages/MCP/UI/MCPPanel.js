@@ -108,6 +108,32 @@ export function createMCPPanel(strings) {
   async function saveServer() {
     const name = collapseWhitespace(nameField.input.value) || strings.form.namePlaceholder;
 
+    if (transport === 'stdio') {
+      const cmd = collapseWhitespace(commandField.input.value);
+      if (!cmd) {
+        commandField.input.focus();
+        feedbackEl.textContent = strings.feedback.commandRequired;
+        feedbackEl.hidden = false;
+        return;
+      }
+    }
+
+    if (transport === 'http') {
+      const rawUrl = collapseWhitespace(urlField.input.value);
+      if (!rawUrl) {
+        urlField.input.focus();
+        feedbackEl.textContent = strings.feedback.urlRequired;
+        feedbackEl.hidden = false;
+        return;
+      }
+      if (!/^https?:\/\/.+/i.test(rawUrl)) {
+        urlField.input.focus();
+        feedbackEl.textContent = strings.feedback.urlInvalid;
+        feedbackEl.hidden = false;
+        return;
+      }
+    }
+
     try {
       const payload = {
         id: editingId ?? createServerId(name),

@@ -99,6 +99,11 @@ export function createProvidersPanel(strings) {
         setFeedback(providerId, strings.required, 'error');
         return;
       }
+      if (val && val.length < 10) {
+        refs.apiKeyInput.focus();
+        setFeedback(providerId, strings.apiKeyTooShort, 'error');
+        return;
+      }
       if (val) incoming.apiKey = val;
     }
 
