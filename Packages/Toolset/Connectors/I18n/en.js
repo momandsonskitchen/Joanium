@@ -12,6 +12,7 @@ const en = {
   disconnect: 'Remove',
   savedSecret: 'Saved credential',
   credentialRequired: 'Enter the required credential first.',
+  credentialTooShort: 'This credential looks too short. Please check it and try again.',
   connectedFeedback: 'Connector saved.',
   disconnectedFeedback: 'Connector removed.',
   saveFailed: 'Could not save connector.',

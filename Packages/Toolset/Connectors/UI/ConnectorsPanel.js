@@ -125,6 +125,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const ref = refs.get(connector.id);
     const credentials = {};
     let firstMissingInput = null;
+    let firstShortInput = null;
 
     for (const field of getVisibleFields(connector)) {
       const input = ref.inputs.get(field.key);
@@ -133,11 +134,25 @@ export function createConnectorsPanel(strings = defaultStrings) {
       if (field.required !== false && !credentials[field.key] && !connector.optional && !fieldHasSavedCredential && !firstMissingInput) {
         firstMissingInput = input;
       }
+      if (
+        !firstShortInput &&
+        field.type !== 'text' &&
+        credentials[field.key] &&
+        credentials[field.key].length < 10
+      ) {
+        firstShortInput = input;
+      }
     }
 
     if (firstMissingInput) {
       firstMissingInput.focus();
       setFeedback(connector.id, strings.credentialRequired, 'error');
+      return;
+    }
+
+    if (firstShortInput) {
+      firstShortInput.focus();
+      setFeedback(connector.id, strings.credentialTooShort, 'error');
       return;
     }
 
@@ -236,6 +251,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
       save.addEventListener('click', async () => {
         const credentials = {};
         let firstMissing = null;
+        let firstShort = null;
         for (const field of getVisibleFields(connector)) {
           const input = inputs.get(field.key);
           credentials[field.key] = input?.value.trim() ?? '';
@@ -243,10 +259,23 @@ export function createConnectorsPanel(strings = defaultStrings) {
           if (field.required !== false && !credentials[field.key] && !hasSaved && !firstMissing) {
             firstMissing = input;
           }
+          if (
+            !firstShort &&
+            field.type !== 'text' &&
+            credentials[field.key] &&
+            credentials[field.key].length < 10
+          ) {
+            firstShort = input;
+          }
         }
         if (firstMissing) {
           firstMissing.focus();
           setFeedback(connector.id, strings.credentialRequired, 'error');
+          return;
+        }
+        if (firstShort) {
+          firstShort.focus();
+          setFeedback(connector.id, strings.credentialTooShort, 'error');
           return;
         }
         save.disabled = true;
