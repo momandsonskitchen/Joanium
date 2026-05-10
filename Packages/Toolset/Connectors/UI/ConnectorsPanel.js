@@ -83,6 +83,10 @@ function getConnectorFields(connector) {
       }];
 }
 
+function getVisibleFields(connector) {
+  return getConnectorFields(connector).filter((field) => !field.hidden);
+}
+
 export function createConnectorsPanel(strings = defaultStrings) {
   const refs = new Map();
   let grid = null;
@@ -105,7 +109,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     ref.remove.hidden = !connector.credentialSaved;
     const savedKeys = new Set(connector.savedCredentialKeys ?? []);
 
-    for (const field of getConnectorFields(connector)) {
+    for (const field of getVisibleFields(connector)) {
       const input = ref.inputs.get(field.key);
       if (!input) continue;
       if (savedKeys.has(field.key)) {
@@ -122,7 +126,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const credentials = {};
     let firstMissingInput = null;
 
-    for (const field of getConnectorFields(connector)) {
+    for (const field of getVisibleFields(connector)) {
       const input = ref.inputs.get(field.key);
       credentials[field.key] = input.value.trim();
       const fieldHasSavedCredential = input.placeholder === strings.savedSecret;
@@ -209,21 +213,65 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const bodyInner = createElement('div', 'connectors-card__body-inner');
 
     const inputs = new Map();
-    const fields = getConnectorFields(connector).map((fieldConfig) => {
+    const fields = getVisibleFields(connector).map((fieldConfig) => {
       const { field, input } = createCredentialField({ fieldConfig, strings });
       inputs.set(fieldConfig.key, input);
       return field;
     });
     const actions = createElement('div', 'connectors-card__actions');
     const remove = createElement('button', 'connectors-card__secondary', strings.disconnect);
-    const save = createElement('button', 'connectors-card__primary');
-    const saveLabel = createElement('span', 'connectors-card__primary-label', strings.save);
     remove.type = 'button';
-    save.type = 'button';
     remove.hidden = true;
-    save.append(saveLabel);
     remove.addEventListener('click', () => { void removeConnector(connector); });
-    save.addEventListener('click', () => { void saveConnector(connector); });
+
+    let save;
+    let saveLabel;
+
+    if (connector.oauthChannel) {
+      // ── OAuth flow button ──────────────────────────────────────────────────
+      save = createElement('button', 'connectors-card__primary');
+      saveLabel = createElement('span', 'connectors-card__primary-label', strings.connect);
+      save.type = 'button';
+      save.append(saveLabel);
+      save.addEventListener('click', async () => {
+        const credentials = {};
+        let firstMissing = null;
+        for (const field of getVisibleFields(connector)) {
+          const input = inputs.get(field.key);
+          credentials[field.key] = input?.value.trim() ?? '';
+          const hasSaved = input?.placeholder === strings.savedSecret;
+          if (field.required !== false && !credentials[field.key] && !hasSaved && !firstMissing) {
+            firstMissing = input;
+          }
+        }
+        if (firstMissing) {
+          firstMissing.focus();
+          setFeedback(connector.id, strings.credentialRequired, 'error');
+          return;
+        }
+        save.disabled = true;
+        saveLabel.textContent = strings.connecting;
+        setFeedback(connector.id, '', 'info');
+        try {
+          const updated = await invokeIpc(connector.oauthChannel, credentials);
+          setCardState(updated);
+          setFeedback(connector.id, strings.connectedFeedback, 'success');
+        } catch (error) {
+          setFeedback(connector.id, error?.message ?? strings.oauthFailed, 'error');
+        } finally {
+          save.disabled = false;
+          saveLabel.textContent = strings.connect;
+        }
+      });
+    } else {
+      // ── Normal save button ─────────────────────────────────────────────────
+      save = createElement('button', 'connectors-card__primary');
+      saveLabel = createElement('span', 'connectors-card__primary-label', strings.save);
+      save.type = 'button';
+      save.append(saveLabel);
+      save.addEventListener('click', () => { void saveConnector(connector); });
+    }
+
     actions.append(remove, save);
 
     const feedback = createElement('div', 'connectors-card__feedback');

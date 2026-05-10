@@ -7,6 +7,7 @@ import {
   LIVE_BROWSER_TOOL_NAMES
 } from './LiveBrowser/BrowserPreviewService.js';
 import { createConnectorStateManager } from './Connectors/Core/ConnectorState.js';
+import { startGoogleOAuthFlow } from './Connectors/Core/GoogleOAuth.js';
 import { discoverToolPackages } from './Tools/Index.js';
 
 const { dialog } = electron;
@@ -63,6 +64,20 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'connectors:remove',
         handler: async (_event, connectorId) => connectorStateManager.removeConnector(connectorId)
+      },
+      {
+        channel: 'connectors:google-oauth',
+        handler: async (_event, { clientId, clientSecret } = {}) => {
+          if (!clientId?.trim() || !clientSecret?.trim()) {
+            throw new Error('Client ID and Client Secret are required before connecting.');
+          }
+          const tokens = await startGoogleOAuthFlow({ clientId: clientId.trim(), clientSecret: clientSecret.trim() });
+          return connectorStateManager.saveConnectorDetails('google', {
+            clientId: clientId.trim(),
+            clientSecret: clientSecret.trim(),
+            refreshToken: tokens.refreshToken
+          });
+        }
       },
       {
         channel: 'terminal:get-default-cwd',

@@ -7,6 +7,8 @@ const en = {
   required: 'Required',
   save: 'Save',
   saving: 'Saving',
+  connect: 'Connect',
+  connecting: 'Connecting…',
   disconnect: 'Remove',
   savedSecret: 'Saved credential',
   credentialRequired: 'Enter the required credential first.',
@@ -14,6 +16,7 @@ const en = {
   disconnectedFeedback: 'Connector removed.',
   saveFailed: 'Could not save connector.',
   disconnectFailed: 'Could not remove connector.',
+  oauthFailed: 'Sign-in failed.',
   show: 'Show credential',
   hide: 'Hide credential'
 };

@@ -2,16 +2,31 @@ const googleStrings = {
   connector: {
     id: 'google',
     label: 'Google Workspace',
-    description: 'Gmail, Drive, Calendar, and account lookups through Google APIs using an OAuth access token.',
-    credentialKey: 'accessToken',
+    description: 'Gmail, Drive, Calendar, and account lookups. Enter your OAuth2 Client ID and Secret, then click Connect to sign in with Google.',
+    credentialKey: 'clientId',
+    oauthChannel: 'connectors:google-oauth',
     optional: false,
     fields: [
       {
-        key: 'accessToken',
-        label: 'OAuth access token',
-        placeholder: 'ya29...',
+        key: 'clientId',
+        label: 'Client ID',
+        placeholder: 'xxxx.apps.googleusercontent.com',
+        type: 'text',
+        required: true
+      },
+      {
+        key: 'clientSecret',
+        label: 'Client Secret',
+        placeholder: 'GOCSPX-...',
         type: 'password',
         required: true
+      },
+      {
+        key: 'refreshToken',
+        label: 'Refresh Token',
+        type: 'password',
+        required: true,
+        hidden: true
       }
     ]
   },

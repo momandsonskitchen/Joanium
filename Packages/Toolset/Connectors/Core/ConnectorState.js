@@ -124,6 +124,27 @@ export function createConnectorStateManager({ rootDirectory, connectorCatalog = 
         };
       });
       return { ok: true };
+    },
+
+    async saveConnectorDetails(connectorId, rawDetails = {}) {
+      await writeState((state) => {
+        const currentDetails = state.connectors?.details ?? {};
+        const existing = currentDetails[connectorId] ?? {};
+        const nextDetails = { ...existing };
+        for (const [key, value] of Object.entries(rawDetails)) {
+          const sanitized = sanitizeCredential(value);
+          if (sanitized) nextDetails[key] = sanitized;
+        }
+        return {
+          ...state,
+          connectors: {
+            ...(state.connectors ?? {}),
+            details: { ...currentDetails, [connectorId]: nextDetails }
+          }
+        };
+      });
+      const updated = await this.listConnectors();
+      return updated.find((item) => item.id === connectorId) ?? null;
     }
   };
 }
