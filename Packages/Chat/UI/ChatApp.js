@@ -317,8 +317,6 @@ function updateLastStreamingMessage(threadEl, { content, thinking }) {
       bubble.append(createElement('span', 'chat-message__stream-dot'));
     }
   }
-
-  lastEl.scrollIntoView({ block: 'end', behavior: 'smooth' });
 }
 
 /**
@@ -387,8 +385,6 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
       }
     }
   });
-
-  card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 /**
@@ -1754,6 +1750,23 @@ export async function createChatView(strings, {
   let terminalProcessRenderFrame = null;
   let terminalProcessCardsWired = false;
 
+  let userScrolledUp = false;
+  let scrollToBottomFrame = null;
+
+  function isNearBottom() {
+    if (!scroll) return true;
+    return scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 80;
+  }
+
+  function scheduleScrollToBottom() {
+    if (userScrolledUp) return;
+    if (scrollToBottomFrame) return;
+    scrollToBottomFrame = requestAnimationFrame(() => {
+      scrollToBottomFrame = null;
+      if (!userScrolledUp && scroll) scroll.scrollTop = scroll.scrollHeight;
+    });
+  }
+
   let composerField = null;
   let attachmentsEl = null;
   let attachmentNotice = null;
@@ -2711,7 +2724,7 @@ export async function createChatView(strings, {
   }));
 
     requestAnimationFrame(() => {
-      thread.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+      if (!userScrolledUp) scroll.scrollTop = scroll.scrollHeight;
       renderTrack();
     });
   }
@@ -3249,6 +3262,7 @@ export async function createChatView(strings, {
       const { content: displayContent, thinking: inlineThinking } = parseThinkingFromText(accText);
       const displayThinking = accThinking || inlineThinking;
       updateLastStreamingMessage(thread, { content: displayContent, thinking: displayThinking });
+      scheduleScrollToBottom();
     }));
 
     streamDisposers.push(onIpc('chat:stream-done', (meta) => {
@@ -3471,6 +3485,7 @@ export async function createChatView(strings, {
     isSending = true;
     accText = '';
     accThinking = '';
+    userScrolledUp = false;
     const generationStartTime = Date.now();
     const runToken = ++generationToken;
     closeSlashMenu();
@@ -3629,6 +3644,9 @@ export async function createChatView(strings, {
   track.append(trackLabel);
   view.append(track);
   scroll.addEventListener('scroll', () => updateTrackActive(), { passive: true });
+  scroll.addEventListener('scroll', () => {
+    userScrolledUp = !isNearBottom();
+  }, { passive: true });
   browserPreview.start();
   wireTerminalProcessCards();
 
