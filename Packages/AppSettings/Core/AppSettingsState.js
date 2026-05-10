@@ -4,15 +4,17 @@ const DEFAULT_SETTINGS = Object.freeze({
   runOnStartup: false,
   systemTray: false,
   keepAwake: false,
-  completionSound: true
+  completionSound: true,
+  defaultView: 'chat'
 });
 
 function normalizeSettings(candidate = {}) {
   return {
-    runOnStartup: Boolean(candidate.runOnStartup ?? candidate.run_on_startup ?? DEFAULT_SETTINGS.runOnStartup),
-    systemTray: Boolean(candidate.systemTray ?? candidate.system_tray ?? DEFAULT_SETTINGS.systemTray),
-    keepAwake: Boolean(candidate.keepAwake ?? candidate.keep_awake ?? DEFAULT_SETTINGS.keepAwake),
-    completionSound: Boolean(candidate.completionSound ?? candidate.completion_sound ?? DEFAULT_SETTINGS.completionSound)
+    runOnStartup: Boolean(candidate.runOnStartup ?? DEFAULT_SETTINGS.runOnStartup),
+    systemTray: Boolean(candidate.systemTray ?? DEFAULT_SETTINGS.systemTray),
+    keepAwake: Boolean(candidate.keepAwake ?? DEFAULT_SETTINGS.keepAwake),
+    completionSound: Boolean(candidate.completionSound ?? DEFAULT_SETTINGS.completionSound),
+    defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView
   };
 }
 

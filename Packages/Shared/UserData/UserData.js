@@ -48,7 +48,8 @@ export function createDefaultUserState() {
       runOnStartup: false,
       systemTray: false,
       keepAwake: false,
-      completionSound: true
+      completionSound: true,
+      defaultView: 'chat'
     },
     theme: {
       mode: 'system',
@@ -193,14 +194,21 @@ function sanitizeWindowState(candidate) {
   };
 }
 
+const VALID_DEFAULT_VIEWS = new Set([
+  'chat', 'history', 'projects', 'agents', 'skills',
+  'personas', 'marketplace', 'events', 'usage'
+]);
+
 function sanitizeAppSettings(candidate) {
   const defaults = createDefaultUserState().appSettings;
   if (!candidate || typeof candidate !== 'object') return defaults;
+  const rawView = candidate.defaultView ?? candidate.default_view ?? defaults.defaultView;
   return {
     runOnStartup: Boolean(candidate.runOnStartup ?? candidate.run_on_startup ?? defaults.runOnStartup),
     systemTray: Boolean(candidate.systemTray ?? candidate.system_tray ?? defaults.systemTray),
     keepAwake: Boolean(candidate.keepAwake ?? candidate.keep_awake ?? defaults.keepAwake),
-    completionSound: Boolean(candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound)
+    completionSound: Boolean(candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound),
+    defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView
   };
 }
 

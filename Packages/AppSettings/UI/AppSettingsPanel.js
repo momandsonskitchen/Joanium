@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
+import { createDropDown } from '../../Shared/DropDown/DropDown.js';
 
 const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound'];
 
@@ -9,6 +10,7 @@ export function createAppSettingsPanel(strings) {
   const options = createElement('div', 'app-settings__options');
   const status = createElement('p', 'app-settings__status');
   let settings = null;
+  let defaultViewDropdown = null;
 
 
 
@@ -39,10 +41,40 @@ export function createAppSettingsPanel(strings) {
     }
   }
 
+  async function updateDefaultView(value) {
+    try {
+      settings = await invokeIpc('app-settings:save', { defaultView: value });
+      window.dispatchEvent(new CustomEvent('joanium:app-settings-changed', { detail: settings }));
+      setStatus(strings.saved);
+    } catch {
+      setStatus(strings.saveFailed, 'error');
+    }
+  }
+
   async function populate() {
     settings = await invokeIpc('app-settings:get');
     options.replaceChildren();
+    defaultViewDropdown?.dispose();
+    defaultViewDropdown = null;
 
+    // ── Default view row (first) ───────────────────────────────────────────
+    const viewOptions = Object.entries(strings.defaultView.views).map(([value, label]) => ({ value, label }));
+    defaultViewDropdown = createDropDown({
+      label: '',
+      options: viewOptions,
+      selectedValue: settings.defaultView ?? 'chat',
+      onChange: (value) => { void updateDefaultView(value); }
+    });
+
+    const dropdownRow = createElement('div', 'app-settings__dropdown-row');
+    const dropdownMeta = createElement('div', 'app-settings__dropdown-meta');
+    const dropdownLabel = createElement('span', 'app-settings__dropdown-label', strings.defaultView.label);
+    const dropdownDesc = createElement('span', 'app-settings__dropdown-desc', strings.defaultView.description);
+    dropdownMeta.append(dropdownLabel, dropdownDesc);
+    dropdownRow.append(dropdownMeta, defaultViewDropdown.element);
+    options.append(dropdownRow);
+
+    // ── Boolean toggles ───────────────────────────────────────────────────
     for (const key of OPTION_KEYS) {
       const option = strings.options[key];
       const checkbox = createCheckbox({
@@ -55,7 +87,6 @@ export function createAppSettingsPanel(strings) {
       });
       options.append(checkbox.element);
     }
-
   }
 
   view.append(options, status);

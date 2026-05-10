@@ -87,6 +87,7 @@ async function bootstrap() {
   autoLockTimer.start();
 
   const payload = await invokeIpc('shell:bootstrap');
+  const appSettings = await invokeIpc('app-settings:get').catch(() => ({}));
   const root = document.getElementById('app');
   let profile = payload.user?.profile ?? {};
   let activeProject = null;
@@ -98,7 +99,7 @@ async function bootstrap() {
   } catch {
     // non-fatal — ChatApp has its own Joana fallback
   }
-  let activeRouteId = 'chat';
+  let activeRouteId = appSettings.defaultView ?? 'chat';
   let activeTabEl = null;
   let chatView = null;
   let settingsPanel = null;
@@ -664,7 +665,7 @@ async function bootstrap() {
   shell.append(sidebar, stage);
   root.replaceChildren(shell);
 
-  await showRoute('chat');
+  await showRoute(appSettings.defaultView ?? 'chat');
   requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
 
   // Arm the auto-lock timer now that the shell is fully rendered.

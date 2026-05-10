@@ -21,6 +21,21 @@ const en = {
       description: 'Play a sound when a response finishes.'
     }
   },
+  defaultView: {
+    label: 'Default view',
+    description: 'The view shown when Joanium opens.',
+    views: {
+      chat:        'Chat',
+      history:     'History',
+      projects:    'Projects',
+      agents:      'Agents',
+      skills:      'Skills',
+      personas:    'Personas',
+      marketplace: 'Marketplace',
+      events:      'Events',
+      usage:       'Usage'
+    }
+  },
   runtime: {
     title: 'Runtime',
     tray: 'Tray',

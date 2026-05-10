@@ -108,6 +108,7 @@ Owns persisted app behavior settings plus keep-awake and tray runtime side effec
 ### App
 * Owned by `Packages/AppSettings`.
 * Exposes boolean toggles for app-level behaviour: run on startup, system tray, keep-awake, and completion sound.
+* **App default view** — controls which view the app opens on after setup. Defaults to `chat`. The user can change it to any of the following: `chat`, `history`, `projects`, `agents`, `skills`, `personas`, `marketplace`, `events`, `usage`. The selected value is persisted in `Data/AppSettings.json` and read by Shell on boot to navigate to the correct view before anything is rendered.
 * Settings are persisted and broadcast via a `joanium:app-settings-changed` window event so other packages can react without polling.
 
 ### Channels
