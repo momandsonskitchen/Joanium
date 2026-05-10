@@ -6,6 +6,7 @@ import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
+import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js';
 import { initCompletionSound, markCompletionSoundAborted, playCompletionSound } from './CompletionSound.js';
 
 function getFirstName(name, fallback) {
@@ -945,14 +946,29 @@ function formatTerminalResultForModel(strings, action, result) {
 
 function createChatTerminalPanel(strings, { onOpenChange } = {}) {
   let panelRef = null;
-  let cwd = '';
-  let outputValue = '';
-  let activeProcessId = null;
-  let isRunning = false;
   let isOpen = false;
-  let commandHistory = [];
-  let historyIndex = -1;
-  let currentInput = '';
+
+  // ── Tab state ──────────────────────────────────────────────────────────────
+  // Each tab is an independent terminal session with its own cwd, history, and
+  // running process. activeTabIndex always points into the tabs array.
+  function createTabState() {
+    return {
+      cwd: '',
+      outputValue: '',
+      activeProcessId: null,
+      isRunning: false,
+      commandHistory: [],
+      historyIndex: -1,
+      currentInput: ''
+    };
+  }
+
+  function getActiveTab() {
+    return tabs[activeTabIndex] ?? tabs[0];
+  }
+
+  let activeTabIndex = 0;
+  let tabs = [createTabState()];
 
   let outputEl = null;
   let inputEl = null;
@@ -966,26 +982,35 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
   }
 
   function replaceOutput(text) {
-    outputValue = String(text ?? '');
+    const tab = getActiveTab();
+    if (!tab) return;
+    tab.outputValue = String(text ?? '');
     if (outputEl) {
-      outputEl.textContent = outputValue;
+      outputEl.textContent = tab.outputValue;
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+  }
+
+  function appendOutputForTab(tabIndex, text) {
+    const tab = tabs[tabIndex];
+    if (!tab) return;
+    tab.outputValue = `${tab.outputValue}${String(text ?? '')}`;
+    if (tab.outputValue.length > 160000) {
+      tab.outputValue = tab.outputValue.slice(tab.outputValue.length - 160000);
+    }
+    if (tabIndex === activeTabIndex && outputEl) {
+      outputEl.textContent = tab.outputValue;
       outputEl.scrollTop = outputEl.scrollHeight;
     }
   }
 
   function appendOutput(text) {
-    outputValue = `${outputValue}${String(text ?? '')}`;
-    if (outputValue.length > 160000) {
-      outputValue = outputValue.slice(outputValue.length - 160000);
-    }
-    if (outputEl) {
-      outputEl.textContent = outputValue;
-      outputEl.scrollTop = outputEl.scrollHeight;
-    }
+    appendOutputForTab(activeTabIndex, text);
   }
 
   function setRunning(running) {
-    isRunning = running;
+    const tab = getActiveTab();
+    if (tab) tab.isRunning = running;
     if (inputEl) {
       inputEl.disabled = running;
       if (!running) requestAnimationFrame(() => inputEl?.focus());
@@ -997,22 +1022,31 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
 
   function updatePrompt() {
     if (!promptEl) return;
+    const cwd = getActiveTab()?.cwd ?? '';
     const short = cwd.length > 48 ? `\u2026${cwd.slice(-48)}` : cwd;
     promptEl.textContent = short ? `${short} >` : '>';
   }
 
   function syncCwd(nextCwd) {
-    cwd = nextCwd || cwd;
+    const tab = getActiveTab();
+    if (tab) tab.cwd = nextCwd || tab.cwd;
     updatePrompt();
   }
 
-  async function loadDefaultCwd() {
+  async function loadDefaultCwdForTab(tabIndex) {
     try {
       const result = await invokeIpc('terminal:get-default-cwd');
-      if (result?.ok) syncCwd(result.cwd);
+      if (result?.ok && tabs[tabIndex]) {
+        tabs[tabIndex].cwd = result.cwd;
+        if (tabIndex === activeTabIndex) updatePrompt();
+      }
     } catch {
       // ignore
     }
+  }
+
+  async function loadDefaultCwd() {
+    await loadDefaultCwdForTab(activeTabIndex);
   }
 
   async function assessCommand(command) {
@@ -1022,7 +1056,9 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
 
   async function runCommand(command) {
     const nextCommand = String(command ?? '').trim();
-    if (!nextCommand || isRunning) return;
+    const tab = getActiveTab();
+    const cwd = tab?.cwd ?? '';
+    if (!nextCommand || tab?.isRunning) return;
     if (!cwd) {
       appendOutput(`${strings.terminal.noDirectory}\n`);
       return;
@@ -1033,11 +1069,11 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     if (cdMatch) {
       const target = (cdMatch[1] ?? '').trim();
       appendOutput(`${nextCommand}\n`);
-      if (commandHistory[commandHistory.length - 1] !== nextCommand) {
-        commandHistory.push(nextCommand);
+      if (tab.commandHistory[tab.commandHistory.length - 1] !== nextCommand) {
+        tab.commandHistory.push(nextCommand);
       }
-      historyIndex = -1;
-      currentInput = '';
+      tab.historyIndex = -1;
+      tab.currentInput = '';
       const result = await invokeIpc('terminal:resolve-directory', { cwd, target });
       if (result?.ok) {
         syncCwd(result.cwd);
@@ -1049,11 +1085,11 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       return;
     }
 
-    if (commandHistory[commandHistory.length - 1] !== nextCommand) {
-      commandHistory.push(nextCommand);
+    if (tab.commandHistory[tab.commandHistory.length - 1] !== nextCommand) {
+      tab.commandHistory.push(nextCommand);
     }
-    historyIndex = -1;
-    currentInput = '';
+    tab.historyIndex = -1;
+    tab.currentInput = '';
 
     appendOutput(`${nextCommand}\n`);
     setRunning(true);
@@ -1075,16 +1111,16 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       });
 
       if (!result?.ok) {
-        activeProcessId = null;
+        tab.activeProcessId = null;
         setRunning(false);
         setStatus(result?.error ?? strings.terminal.defaultError, result?.risk?.blocked ? 'danger' : 'warning');
         appendOutput(`${result?.error ?? strings.terminal.defaultError}\n`);
         return;
       }
 
-      activeProcessId = result.processId;
+      tab.activeProcessId = result.processId;
     } catch (error) {
-      activeProcessId = null;
+      tab.activeProcessId = null;
       setRunning(false);
       setStatus(error?.message ?? strings.terminal.defaultError, 'danger');
       appendOutput(`${error?.message ?? strings.terminal.defaultError}\n`);
@@ -1092,9 +1128,10 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
   }
 
   async function stopCommand() {
-    if (!activeProcessId) return;
-    const processId = activeProcessId;
-    activeProcessId = null;
+    const tab = getActiveTab();
+    if (!tab?.activeProcessId) return;
+    const processId = tab.activeProcessId;
+    tab.activeProcessId = null;
     await invokeIpc('terminal:kill', processId).catch(() => {});
     setRunning(false);
     setStatus(strings.terminal.stopped, 'warning');
@@ -1103,17 +1140,25 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
 
   function wireProcessEvents() {
     onIpc('terminal:process-output', (payload) => {
-      if (!payload || payload.processId !== activeProcessId) return;
-      appendOutput(payload.text);
+      if (!payload?.processId) return;
+      const tabIndex = tabs.findIndex((tab) => tab.activeProcessId === payload.processId);
+      if (tabIndex < 0) return;
+      appendOutputForTab(tabIndex, payload.text);
     });
 
     onIpc('terminal:process-exit', (payload) => {
-      if (!payload || payload.processId !== activeProcessId) return;
+      if (!payload?.processId) return;
+      const tabIndex = tabs.findIndex((tab) => tab.activeProcessId === payload.processId);
+      if (tabIndex < 0) return;
+      const tab = tabs[tabIndex];
       const code = payload.code ?? 0;
-      activeProcessId = null;
-      setRunning(false);
-      appendOutput(`${formatText(strings.terminal.processExited, { code: String(code) })}\n`);
-      setStatus(strings.terminal.finished, code === 0 ? 'success' : 'danger');
+      tab.activeProcessId = null;
+      tab.isRunning = false;
+      appendOutputForTab(tabIndex, `${formatText(strings.terminal.processExited, { code: String(code) })}\n`);
+      if (tabIndex === activeTabIndex) {
+        setRunning(false);
+        setStatus(strings.terminal.finished, code === 0 ? 'success' : 'danger');
+      }
     });
   }
 
@@ -1132,7 +1177,7 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     if (panelRef) panelRef.hidden = !isOpen;
     onOpenChange?.(isOpen);
     if (isOpen) {
-      if (!cwd) void loadDefaultCwd();
+      if (!getActiveTab()?.cwd) void loadDefaultCwd();
       requestAnimationFrame(() => {
         if (!panelRef.style.left) positionInitial();
         inputEl?.focus();
@@ -1158,7 +1203,7 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     const copyButton = createElement('button', 'chat-terminal-drawer__output-button', strings.terminal.copy);
     copyButton.type = 'button';
     copyButton.addEventListener('click', () => {
-      navigator.clipboard.writeText(outputValue).then(() => {
+      navigator.clipboard.writeText(getActiveTab()?.outputValue ?? '').then(() => {
         copyButton.textContent = strings.terminal.copied;
         setTimeout(() => { copyButton.textContent = strings.terminal.copy; }, 1200);
       }).catch(() => {});
@@ -1198,31 +1243,36 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     inputEl.addEventListener('keydown', async (event) => {
       if (event.key === 'Enter') {
         const command = inputEl.value.trim();
+        const tab = getActiveTab();
         inputEl.value = '';
-        currentInput = '';
-        historyIndex = -1;
+        if (tab) {
+          tab.currentInput = '';
+          tab.historyIndex = -1;
+        }
         if (command) void runCommand(command);
       } else if (event.key === 'ArrowUp') {
         event.preventDefault();
-        if (commandHistory.length === 0) return;
-        if (historyIndex === -1) {
-          currentInput = inputEl.value;
-          historyIndex = commandHistory.length - 1;
-        } else if (historyIndex > 0) {
-          historyIndex -= 1;
+        const tab = getActiveTab();
+        if (!tab || tab.commandHistory.length === 0) return;
+        if (tab.historyIndex === -1) {
+          tab.currentInput = inputEl.value;
+          tab.historyIndex = tab.commandHistory.length - 1;
+        } else if (tab.historyIndex > 0) {
+          tab.historyIndex -= 1;
         }
-        inputEl.value = commandHistory[historyIndex] ?? '';
+        inputEl.value = tab.commandHistory[tab.historyIndex] ?? '';
       } else if (event.key === 'ArrowDown') {
         event.preventDefault();
-        if (historyIndex === -1) return;
-        if (historyIndex < commandHistory.length - 1) {
-          historyIndex += 1;
-          inputEl.value = commandHistory[historyIndex];
+        const tab = getActiveTab();
+        if (!tab || tab.historyIndex === -1) return;
+        if (tab.historyIndex < tab.commandHistory.length - 1) {
+          tab.historyIndex += 1;
+          inputEl.value = tab.commandHistory[tab.historyIndex];
         } else {
-          historyIndex = -1;
-          inputEl.value = currentInput;
+          tab.historyIndex = -1;
+          inputEl.value = tab.currentInput;
         }
-      } else if (event.key === 'c' && event.ctrlKey && isRunning) {
+      } else if (event.key === 'c' && event.ctrlKey && getActiveTab()?.isRunning) {
         event.preventDefault();
         void stopCommand();
       }
@@ -1718,9 +1768,15 @@ export async function createChatView(strings, {
       formatText(strings.projects.systemContextName, { name: project.name ?? '' })
     ];
     const info = collapseWhitespace(project.info);
+    const folder = collapseWhitespace(project.folderPath ?? project.rootPath);
 
     if (info) {
       lines.push(formatText(strings.projects.systemContextInfo, { info }));
+    }
+
+    if (folder) {
+      lines.push(formatText(strings.projects.systemContextFolder, { folder }));
+      lines.push(strings.projects.systemContextGit);
     }
 
     return lines.filter(Boolean).join('\n');
@@ -1755,6 +1811,8 @@ export async function createChatView(strings, {
       name: project.name ?? '',
       icon: project.icon ?? '',
       info: project.info ?? '',
+      folderPath: project.folderPath ?? project.rootPath ?? '',
+      rootPath: project.rootPath ?? project.folderPath ?? '',
       coverImagePath: project.coverImagePath ?? ''
     } : null;
     syncActiveProjectPill();
@@ -1777,7 +1835,9 @@ export async function createChatView(strings, {
 
     projectPill.hidden = false;
     projectNameEl.textContent = activeProject.name;
-    projectMetaEl.textContent = collapseWhitespace(activeProject.info) || strings.projects.activeHint;
+    projectMetaEl.textContent = collapseWhitespace(activeProject.info)
+      || collapseWhitespace(activeProject.folderPath ?? activeProject.rootPath)
+      || strings.projects.activeHint;
   }
 
   async function loadSession(id) {
@@ -2474,6 +2534,9 @@ export async function createChatView(strings, {
     const explicitPath = String(requestedPath ?? '').trim();
     if (explicitPath) return explicitPath;
 
+    const projectFolder = collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
+    if (projectFolder) return projectFolder;
+
     try {
       const result = await invokeIpc('terminal:get-default-cwd');
       return result?.ok ? result.cwd : '';
@@ -2575,7 +2638,138 @@ export async function createChatView(strings, {
     return { ok: false, error: strings.terminal.unsupportedTool };
   }
 
+  function buildSubAgentTaskPrompt(task, coordinationGoal, index, total) {
+    return [
+      `You are sub-agent ${index + 1} of ${total} inside Joanium.`,
+      coordinationGoal ? `Team objective: ${coordinationGoal}` : '',
+      `Task title: ${task.title}`,
+      `Task goal: ${task.goal}`,
+      task.context ? `Extra context:\n${task.context}` : '',
+      task.deliverable ? `Expected handoff:\n${task.deliverable}` : '',
+      [
+        'Return a compact handoff for the coordinator with:',
+        '1. Key findings',
+        '2. Evidence, assumptions, or relevant references',
+        '3. Risks or uncertainties',
+        '4. Best next recommendation'
+      ].join('\n'),
+      'Stay read-only. Do not claim you modified files or took external actions.'
+    ].filter(Boolean).join('\n\n');
+  }
+
+  function getSubAgentConversationContext() {
+    return messages
+      .filter((message) => !message.hidden && !message.streaming && !message.pending && message.content)
+      .filter((message) => message.role === 'user' || message.role === 'assistant')
+      .slice(-8)
+      .map((message) => ({
+        role: message.role,
+        content: message.modelContent || message.content
+      }));
+  }
+
+  function formatSubAgentOutput(tasks, results, coordinationGoal) {
+    const lines = [strings.tools.subAgentsResultHeader];
+
+    if (coordinationGoal) {
+      lines.push('', formatText(strings.tools.subAgentsCoordinationGoal, { goal: coordinationGoal }));
+    }
+
+    tasks.forEach((task, index) => {
+      const result = results[index] ?? {};
+      lines.push(
+        '',
+        formatText(strings.tools.subAgentsTaskHeader, {
+          index: String(index + 1),
+          title: task.title
+        }),
+        formatText(strings.tools.subAgentsGoal, { goal: task.goal })
+      );
+
+      if (task.deliverable) {
+        lines.push(formatText(strings.tools.subAgentsDeliverable, { deliverable: task.deliverable }));
+      }
+
+      if (result.ok) {
+        lines.push('', `${strings.tools.subAgentsHandoff}:\n${result.text}`);
+      } else {
+        lines.push('', `${strings.tools.subAgentsError}:\n${result.error}`);
+      }
+    });
+
+    return lines.join('\n');
+  }
+
+  async function executeSubAgentTool(action) {
+    const payload = action?.payload ?? {};
+    const tasks = normalizeSubAgentTasks(payload.parameters?.tasks ?? payload.tasks);
+
+    if (!tasks.length) {
+      return {
+        ok: false,
+        tool: action.tool,
+        error: strings.tools.subAgentsNoTasks
+      };
+    }
+
+    const coordinationGoal = collapseWhitespace(
+      payload.parameters?.coordination_goal
+      ?? payload.coordination_goal
+      ?? strings.tools.subAgentFallbackGoal
+    );
+    const conversationContext = getSubAgentConversationContext();
+    const memoryContext = await loadMemoryContext();
+
+    const results = await Promise.all(tasks.map(async (task, index) => {
+      try {
+        const result = await invokeIpc('chat:complete-message', {
+          messages: [
+            ...conversationContext,
+            {
+              role: 'user',
+              content: buildSubAgentTaskPrompt(task, coordinationGoal, index, tasks.length)
+            }
+          ],
+          providerId: activeProvider?.id ?? null,
+          modelId: activeModel?.id ?? null,
+          memoryContext: memoryContext || null,
+          projectInfo: buildProjectContext(activeProject) || null,
+          persona: (getActivePersona?.() ?? activePersona)?.content || null,
+          modeInstruction: getModeInstruction(),
+          isNewSession: false
+        });
+
+        return {
+          ok: true,
+          text: String(result?.text ?? '').trim() || strings.composer.emptyResponse,
+          usage: {
+            input: result?.charCountIn ?? 0,
+            output: result?.charCountOut ?? 0
+          },
+          providerLabel: result?.providerLabel ?? '',
+          modelLabel: result?.modelLabel ?? ''
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error: error?.message ?? String(error)
+        };
+      }
+    }));
+
+    return {
+      ok: results.some((result) => result.ok),
+      tool: action.tool,
+      output: formatSubAgentOutput(tasks, results, coordinationGoal),
+      results
+    };
+  }
+
   async function executeToolsetTool(action) {
+    if (action?.tool === 'spawn_sub_agents') {
+      return executeSubAgentTool(action);
+    }
+
     const payload = action?.payload ?? {};
     return invokeIpc('toolset:execute-tool', {
       tool: action.tool,
@@ -2694,6 +2888,7 @@ export async function createChatView(strings, {
     if (runToken !== generationToken) return;
 
     const ok = result?.ok !== false && !result?.error;
+    const isSubAgentAction = action.tool === 'spawn_sub_agents';
     const modelResult = formatToolsetResultForModel(action, result);
 
     updateLastAssistantMessage((message) => ({
@@ -2701,7 +2896,9 @@ export async function createChatView(strings, {
       terminal: {
         ...(message.terminal ?? {}),
         status: ok ? 'completed' : 'failed',
-        statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
+        statusLabel: isSubAgentAction
+          ? (ok ? strings.tools.subAgentsComplete : strings.tools.subAgentsFailed)
+          : (ok ? strings.tools.completedTool : strings.tools.failedTool),
         output: result?.output ?? result?.error ?? ''
       }
     }));
@@ -2869,16 +3066,17 @@ export async function createChatView(strings, {
       }
 
       if (toolsetAction) {
+        const isSubAgentAction = toolsetAction.tool === 'spawn_sub_agents';
         updateLastAssistantMessage((message) => ({
           ...message,
           role: 'assistant',
-          content: toolsetAction.visibleContent || strings.tools.runningTool,
+          content: toolsetAction.visibleContent || (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
           thinking: accThinking || inlineThinking,
           streaming: false,
           providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
           modelLabel: meta?.modelLabel ?? activeModelLabel,
           terminal: {
-            label: toolsetAction.tool,
+            label: isSubAgentAction ? strings.tools.subAgentsLabel : toolsetAction.tool,
             command: toolsetAction.tool,
             status: 'running',
             statusLabel: strings.terminal.running

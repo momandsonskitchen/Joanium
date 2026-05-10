@@ -1828,7 +1828,7 @@ function getMapUrl(params) {
   return lines.join('\n');
 }
 
-function buildToolsPrompt(tools) {
+function buildToolsPrompt(tools, promptSections = []) {
   return [
     'Built-in tools are available when the user asks for calculations, conversions, local date/time utilities, URL helpers, geospatial math, text utilities, JSON formatting, hashing, UUIDs, timezone lookup, password generation, connector lookups, public web/reference data, package registries, weather, crypto/finance data, Stack Overflow, Wikipedia, or live browser work.',
     'When one of these tools is needed, respond with exactly one fenced block and no final answer yet:',
@@ -1842,6 +1842,9 @@ function buildToolsPrompt(tools) {
         .join(', ');
       return `- ${tool.name}: ${tool.description}${params ? ` Parameters: ${params}.` : ''}`;
     }),
+    ...promptSections
+      .map((section) => String(section ?? '').trim())
+      .filter(Boolean),
     'After the tool result is returned, give the user the final answer.'
   ].join('\n');
 }
@@ -1854,7 +1857,7 @@ function mergeToolDefinitions(...toolGroups) {
   return [...byName.values()];
 }
 
-export function createToolsetService({ toolHandlers = {}, toolDefinitions = [] } = {}) {
+export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], promptSections = [] } = {}) {
   const tools = mergeToolDefinitions(strings.tools, toolDefinitions);
   const handlers = {
     calculate_expression(params) {
@@ -1991,7 +1994,7 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [] }
       return {
         ok: true,
         tools,
-        systemPrompt: buildToolsPrompt(tools)
+        systemPrompt: buildToolsPrompt(tools, promptSections)
       };
     },
     async executeTool(payload = {}, context = {}) {

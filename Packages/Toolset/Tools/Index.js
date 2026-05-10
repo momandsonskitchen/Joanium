@@ -20,6 +20,9 @@ function normalizeToolPackage(toolPackage = {}) {
     toolHandlers: toolPackage.toolHandlers && typeof toolPackage.toolHandlers === 'object'
       ? toolPackage.toolHandlers
       : {},
+    promptSections: Array.isArray(toolPackage.promptSections)
+      ? toolPackage.promptSections
+      : [],
     connectors: Array.isArray(toolPackage.connectors)
       ? toolPackage.connectors.map(normalizeConnector).filter(Boolean)
       : []
@@ -44,6 +47,7 @@ export async function discoverToolPackages({ rootDirectory } = {}) {
   return {
     packages,
     toolDefinitions: packages.flatMap((toolPackage) => toolPackage.toolDefinitions),
+    promptSections: packages.flatMap((toolPackage) => toolPackage.promptSections),
     toolHandlers: packages.reduce((handlers, toolPackage) => ({
       ...handlers,
       ...toolPackage.toolHandlers

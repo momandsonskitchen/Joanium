@@ -1,5 +1,8 @@
 import https from 'node:https';
 import http from 'node:http';
+import os from 'node:os';
+import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { readUserState } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
@@ -21,6 +24,33 @@ const openAiCompatibleProviders = new Set([
   'together',
   'xai'
 ]);
+
+async function readSystemPromptFile(rootDirectory) {
+  try {
+    return (await readFile(path.join(rootDirectory, 'Prompts', 'System.md'), 'utf8')).trim();
+  } catch {
+    return '';
+  }
+}
+
+async function buildBaseSystemPrompt(rootDirectory, user) {
+  const prompt = await readSystemPromptFile(rootDirectory);
+  const now = new Date();
+  const displayName = collapseWhitespace(user?.profile?.name) || os.userInfo().username || 'User';
+  const locale = collapseWhitespace(user?.locale) || Intl.DateTimeFormat().resolvedOptions().locale || 'en';
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
+
+  return [
+    prompt || 'You are running inside Joanium, a local-first AI desktop assistant.',
+    '# Runtime',
+    `- User: ${displayName}`,
+    `- Local time: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}`,
+    `- Timezone: ${timezone}`,
+    `- Locale: ${locale}`,
+    `- Platform: ${os.type()} ${os.release()} (${os.platform()} ${os.arch()})`,
+    `- Home directory: ${os.homedir()}`
+  ].join('\n');
+}
 
 function sanitizeConversationMessages(candidateMessages) {
   if (!Array.isArray(candidateMessages)) {
@@ -622,6 +652,9 @@ async function requestChatCompletionStreamWithRetry({ user, providers, request, 
 async function requestChatCompletionStream({ user, providers, request, onChunk }) {
   const messages     = sanitizeConversationMessages(request?.messages);
   const parts = [];
+  if (typeof request?.baseSystemPrompt === 'string' && request.baseSystemPrompt.trim()) {
+    parts.push(request.baseSystemPrompt.trim());
+  }
   if (typeof request?.persona === 'string' && request.persona.trim()) {
     parts.push(request.persona.trim());
   }
@@ -749,11 +782,12 @@ export function createChatStateManager({ rootDirectory }) {
           readUserState(rootDirectory),
           readProviderCatalog(rootDirectory)
         ]);
+        const baseSystemPrompt = await buildBaseSystemPrompt(rootDirectory, user);
 
         const meta = await requestChatCompletionStreamWithRetry({
           user,
           providers,
-          request,
+          request: { ...request, baseSystemPrompt },
           onChunk
         });
 
@@ -768,13 +802,14 @@ export function createChatStateManager({ rootDirectory }) {
         readUserState(rootDirectory),
         readProviderCatalog(rootDirectory)
       ]);
+      const baseSystemPrompt = await buildBaseSystemPrompt(rootDirectory, user);
 
       let text = '';
       let thinking = '';
       const meta = await requestChatCompletionStreamWithRetry({
         user,
         providers,
-        request,
+        request: { ...request, baseSystemPrompt },
         onChunk(chunk) {
           if (chunk?.type === 'text' && chunk.text) text += chunk.text;
           if (chunk?.type === 'thinking' && chunk.text) thinking += chunk.text;

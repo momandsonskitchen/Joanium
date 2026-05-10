@@ -44,7 +44,9 @@ const en = {
     activeHint: 'This project context will be used in new chats.',
     removeActive: 'Remove active project',
     systemContextName: 'Project name: {name}',
-    systemContextInfo: 'Project context: {info}'
+    systemContextInfo: 'Project context: {info}',
+    systemContextFolder: 'Project workspace folder: {folder}',
+    systemContextGit: 'Use the project workspace folder as the default working directory for terminal, git status, git diff, and project checks.'
   },
   browserPreview: {
     eyebrow: 'Browser',
@@ -137,7 +139,20 @@ const en = {
     completedTool: 'Tool completed.',
     failedTool: 'Tool failed.',
     unsupportedTool: 'Unsupported built-in tool request.',
-    hiddenResultLabel: 'Tool result'
+    hiddenResultLabel: 'Tool result',
+    subAgentsLabel: 'Sub-agents',
+    subAgentsRunning: 'Running sub-agents...',
+    subAgentsComplete: 'Sub-agents completed.',
+    subAgentsFailed: 'Sub-agents failed.',
+    subAgentFallbackGoal: 'Help the coordinator finish the user request by combining focused delegated handoffs.',
+    subAgentsResultHeader: 'Sub-agent handoffs',
+    subAgentsCoordinationGoal: 'Coordination goal: {goal}',
+    subAgentsNoTasks: 'No valid sub-agent tasks were provided.',
+    subAgentsTaskHeader: '{index}. {title}',
+    subAgentsGoal: 'Goal: {goal}',
+    subAgentsDeliverable: 'Expected handoff: {deliverable}',
+    subAgentsHandoff: 'Handoff',
+    subAgentsError: 'Error'
   },
   slash: {
     label: 'Slash commands',

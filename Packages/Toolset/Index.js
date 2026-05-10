@@ -34,7 +34,8 @@ export async function createPackage({ rootDirectory }) {
       ...browserToolHandlers,
       ...toolPackages.toolHandlers
     },
-    toolDefinitions: toolPackages.toolDefinitions
+    toolDefinitions: toolPackages.toolDefinitions,
+    promptSections: toolPackages.promptSections
   });
 
   return {

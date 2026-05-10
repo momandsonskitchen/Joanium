@@ -144,6 +144,8 @@ async function bootstrap() {
       name: project.name ?? '',
       icon: project.icon ?? '',
       info: project.info ?? '',
+      folderPath: project.folderPath ?? project.rootPath ?? '',
+      rootPath: project.rootPath ?? project.folderPath ?? '',
       coverImagePath: project.coverImagePath ?? ''
     } : null;
 

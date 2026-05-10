@@ -29,7 +29,9 @@ const en = {
   delete: 'Delete',
   created: 'Created {date}',
   systemContextName: 'Project name: {name}',
-  systemContextInfo: 'Project context: {info}'
+  systemContextInfo: 'Project context: {info}',
+  systemContextFolder: 'Project workspace folder: {folder}',
+  systemContextGit: 'Use the project workspace folder as the default working directory for terminal, git status, git diff, and project checks.'
 };
 
 export default en;

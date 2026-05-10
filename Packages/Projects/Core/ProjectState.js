@@ -11,7 +11,13 @@ export function createProjectStateManager({ rootDirectory }) {
       const safeId = sanitizeFileStem(project.id);
       if (!safeId) return null;
 
-      const record = { ...project, id: safeId };
+      const folderPath = String(project.folderPath ?? project.rootPath ?? '').trim();
+      const record = {
+        ...project,
+        id: safeId,
+        folderPath,
+        rootPath: folderPath
+      };
       const projectDir = path.join(projectsDirectory, safeId);
       await mkdir(path.join(projectDir, 'Chats'), { recursive: true });
 
@@ -71,6 +77,8 @@ export function createProjectStateManager({ rootDirectory }) {
             name: project.name,
             icon: project.icon || '',
             info: project.info ?? '',
+            folderPath: project.folderPath ?? project.rootPath ?? '',
+            rootPath: project.rootPath ?? project.folderPath ?? '',
             coverImagePath: project.coverImagePath ?? '',
             createdAt: project.createdAt,
             updatedAt: project.updatedAt

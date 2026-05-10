@@ -58,9 +58,12 @@
 * Window State: `Packages/Electron` owns persisted native window bounds and maximized/fullscreen restore in `Data/WindowState.json`.
 * Terminal: `Packages/Toolset/Terminal` owns local command execution, risk assessment, workspace inspection, file utilities, Git helpers, and process output buffers. Chat owns the embedded terminal drawer and terminal tool loop through Toolset-provided Terminal IPC, so command work stays inside the conversation instead of a separate Shell route.
 * Toolset: `Packages/Toolset` owns built-in chat tools for calculations, unit conversion, local date/time utilities, local URL parsing/formatting helpers, local geospatial math/conversion helpers, timezone lookup, UUIDs, hashing, Base64, JSON formatting, text transforms, text stats, terminal-backed workspace tools, public data tools, connector-backed tools, and live browser tools. Service and public lookup tool packages are discovered from `Packages/Toolset/Tools/<ToolName>/Index.js`; each tool keeps backend code in `Core`, user-facing tool/connector strings in `I18n`, and UI assets in `UI` only when needed. Password generation and similar password/security utilities live under `Packages/Toolset/Security`. Chat loads the tool prompt and executes requests through Toolset IPC.
+* Tool package standard: Toolset discovery supports package-level prompt sections in addition to tool definitions and executors. New tools should use `Packages/Toolset/Tools/<ToolName>/API.js`, `Tools.js`, `Executors.js`, `Prompt.js`, and `Index.js`; `Index.js` is the only file Toolset discovery imports directly.
+* Sub Agents: `Packages/Toolset/Tools/SubAgents` publishes the `spawn_sub_agents` chat tool using the standard tool package shape. The Chat package executes delegation so each sub-agent inherits the active conversation, persona, memory, selected model, and project context, then returns structured handoffs to the coordinator for the final answer.
 * Public Data Tools: `Packages/Toolset/PublicData` owns no-key public lookup tools ported from legacy chat capabilities, including Wikipedia, Stack Overflow, npm, Open-Meteo weather, dictionary, country facts, quotes, jokes, Hacker News, Wikimedia Commons image search, exchange rates, CoinGecko crypto data, NASA APOD, and ISS location.
 * Connectors: `Packages/Toolset/Connectors` owns API-key-backed tool credentials and the shared settings UI. Connector-backed tool packages such as GitHub and OpenWeather live under `Packages/Toolset/Tools`, publish their connector metadata from their own `I18n` files, and are discovered by Toolset during boot.
 * Memory: `Packages/Memory` owns long-term personal memory files in `Data/Memories`, exposes a Shell editor route, and provides compact chat context through IPC.
+* System Prompts: `Packages/Chat/Core/ChatState.js` builds the model system context from `Prompts/System.md`, compact runtime facts, active persona, custom user instructions, active project workspace context, memory, terminal tools, and Toolset prompt sections.
 * About/System Info: `Packages/About` owns app metadata plus a local system snapshot persisted to `Data/System.json`.
 * Custom Instructions: `Packages/User` stores user-written behavior instructions in `Data/User.json`; `Packages/Chat` adds them to the model system context.
 
@@ -153,6 +156,7 @@ Owns persisted app behavior settings plus keep-awake and tray runtime side effec
 # Project Workspace
 * The projects view should behave like a native workspace browser with searchable project cards, native image picking, and visually rich project previews.
 * Opening a project should make that workspace context visible to the user inside chat, not silently attach hidden state.
+* Project records preserve the selected workspace folder as `folderPath` / `rootPath`; Chat includes it in the system context and uses it as the default working directory for terminal, Git status, Git diff, and project checks.
 
 # Must Follow
 * Keep your code clean and organized.
