@@ -737,7 +737,7 @@ async function bootstrap() {
     },
     {
       id: 'settings',
-      combo: { ctrl: true, shift: true, key: 'i' },
+      combo: { ctrl: true, key: ',' },
       handler: () => { void showSettingsPanel(); }
     },
     {
