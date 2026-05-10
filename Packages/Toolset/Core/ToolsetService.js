@@ -1845,6 +1845,7 @@ function buildToolsPrompt(tools, promptSections = []) {
     ...promptSections
       .map((section) => String(section ?? '').trim())
       .filter(Boolean),
+    'IMPORTANT: Use only the joanium-tool code block format shown above. Do not use any other tool invocation format — no XML tags, no JSON outside a code block, no provider-specific or model-specific markup of any kind.',
     'After the tool result is returned, give the user the final answer.'
   ].join('\n');
 }

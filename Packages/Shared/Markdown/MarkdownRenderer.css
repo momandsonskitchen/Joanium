@@ -157,6 +157,7 @@
   border-radius: 0;
   background: rgba(22, 18, 14, 0.04);
   max-height: 500px;
+  overflow-x: auto;
   overflow-y: auto;
 }
 

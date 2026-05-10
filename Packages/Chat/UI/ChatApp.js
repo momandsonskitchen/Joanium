@@ -87,6 +87,38 @@ function parseThinkingFromText(text) {
   return { content: content.trimStart(), thinking: thinking.trim() };
 }
 
+/**
+ * Strips any XML-style native tool call markup that models may emit alongside
+ * the joanium-tool code block. Different models have different tag names
+ * (e.g. <tool_call>, <function_call>, <invoke>, vendor-namespaced variants like
+ * <vendor:toolcall>, etc.) so we match the shape rather than specific names.
+ */
+function stripNativeToolCalls(text) {
+  if (!text) return text;
+  return text
+    // Namespaced XML tags: <vendor:anything>...</vendor:anything>
+    .replace(/<[a-z][a-z0-9]*:[a-z][a-z0-9_-]*[\s\S]*?<\/[a-z][a-z0-9]*:[a-z][a-z0-9_-]*>/gi, '')
+    // Common unnamespaced tool-call wrapper elements (complete pairs only)
+    .replace(/<(?:tool_call|tool_use|function_call|invoke|tool_calls)[^>]*>[\s\S]*?<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi, '')
+    // Orphaned opening tags of the same set (mid-stream cutoff)
+    .replace(/<(?:tool_call|tool_use|function_call|invoke|tool_calls)[^>]*>/gi, '')
+    // Orphaned closing tags
+    .replace(/<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi, '')
+    .trim();
+}
+
+/**
+ * Strips joanium-tool and joanium-terminal fenced blocks from visible content.
+ * Used when generation is stopped mid-stream so raw JSON doesn't render as markdown.
+ */
+function stripToolCallBlocks(text) {
+  if (!text) return text;
+  return text
+    .replace(/```joanium-tool[\s\S]*?```/gi, '')
+    .replace(/```joanium-terminal[\s\S]*?```/gi, '')
+    .trim();
+}
+
 let activeSpeakBtn = null;
 
 function resetSpeakButton(btn) {
@@ -2269,7 +2301,8 @@ export async function createChatView(strings, {
     messages = messages.map((message, index) => {
       if (index !== messages.length - 1) return message;
       const { content: parsedStopped, thinking: inlineStopped } = parseThinkingFromText(accText);
-      const content = parsedStopped ? `${parsedStopped}\n\n${stoppedNote}` : stoppedNote;
+      const cleanedStopped = stripNativeToolCalls(stripToolCallBlocks(parsedStopped));
+      const content = cleanedStopped ? `${cleanedStopped}\n\n${stoppedNote}` : stoppedNote;
       return {
         role: 'assistant',
         content,
@@ -3036,7 +3069,7 @@ export async function createChatView(strings, {
         updateLastAssistantMessage((message) => ({
           ...message,
           role: 'assistant',
-          content: terminalAction.visibleContent || strings.terminal.runningTool,
+          content: stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool,
           thinking: accThinking || inlineThinking,
           streaming: false,
           providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
@@ -3070,7 +3103,7 @@ export async function createChatView(strings, {
         updateLastAssistantMessage((message) => ({
           ...message,
           role: 'assistant',
-          content: toolsetAction.visibleContent || (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
+          content: stripNativeToolCalls(toolsetAction.visibleContent) || (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
           thinking: accThinking || inlineThinking,
           streaming: false,
           providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
