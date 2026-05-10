@@ -364,24 +364,67 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
     if (agent.prompt && !body.querySelector('.chat-subagent-call__agent-prompt')) {
       const promptSection = createElement('div', 'chat-subagent-call__agent-section');
       const promptTitle = createElement('h4', 'chat-subagent-call__agent-section-title', strings.tools.subAgentPromptSection);
-      const promptEl = createElement('pre', 'chat-subagent-call__agent-prompt', agent.prompt);
+      const promptEl = renderMarkdown(agent.prompt, 'chat-subagent-call__agent-prompt');
       promptSection.append(promptTitle, promptEl);
       body.prepend(promptSection);
     }
 
     if (agent.output || agent.error) {
       let outputSection = body.querySelector('.chat-subagent-call__agent-output-section');
+      const rawOutput = agent.output || agent.error || '';
+      const { content: parsedOutput, thinking: outputThinking } = parseThinkingFromText(rawOutput);
+
       if (!outputSection) {
         outputSection = createElement('div', 'chat-subagent-call__agent-section chat-subagent-call__agent-output-section');
         const isError = Boolean(agent.error && !agent.output);
         const sectionTitle = createElement('h4', 'chat-subagent-call__agent-section-title',
           isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection);
-        const outputEl = createElement('pre', 'chat-subagent-call__agent-output', agent.output || agent.error || '');
-        outputSection.append(sectionTitle, outputEl);
+        outputSection.append(sectionTitle);
+        if (outputThinking) {
+          const thinkWrap = document.createElement('details');
+          thinkWrap.className = 'chat-message__thinking';
+          const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
+          thinkSummary.append(
+            createIcon('thinking', 'chat-message__thinking-icon'),
+            createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+          );
+          thinkWrap.append(thinkSummary);
+          const thinkBody = createElement('div', 'chat-message__thinking-body');
+          thinkBody.append(createElement('p', 'chat-message__thinking-text', outputThinking));
+          thinkWrap.append(thinkBody);
+          outputSection.append(thinkWrap);
+        }
+        outputSection.append(renderMarkdown((parsedOutput || rawOutput).trimStart(), 'chat-subagent-call__agent-output'));
         body.append(outputSection);
       } else {
-        const outputEl = outputSection.querySelector('.chat-subagent-call__agent-output');
-        if (outputEl) outputEl.textContent = agent.output || agent.error || '';
+        // Update thinking block if it exists, or create if thinking newly arrived
+        let thinkWrap = outputSection.querySelector('.chat-message__thinking');
+        if (outputThinking) {
+          if (!thinkWrap) {
+            thinkWrap = document.createElement('details');
+            thinkWrap.className = 'chat-message__thinking';
+            const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
+            thinkSummary.append(
+              createIcon('thinking', 'chat-message__thinking-icon'),
+              createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+            );
+            thinkWrap.append(thinkSummary);
+            const thinkBody = createElement('div', 'chat-message__thinking-body');
+            thinkBody.append(createElement('p', 'chat-message__thinking-text', outputThinking));
+            thinkWrap.append(thinkBody);
+            const sectionTitle = outputSection.querySelector('.chat-subagent-call__agent-section-title');
+            if (sectionTitle) sectionTitle.after(thinkWrap);
+            else outputSection.prepend(thinkWrap);
+          } else {
+            const thinkText = thinkWrap.querySelector('.chat-message__thinking-text');
+            if (thinkText) thinkText.textContent = outputThinking;
+          }
+        }
+        // Re-render output markdown with fresh content
+        const existing = outputSection.querySelector('.chat-subagent-call__agent-output');
+        const fresh = renderMarkdown((parsedOutput || rawOutput).trimStart(), 'chat-subagent-call__agent-output');
+        if (existing) existing.replaceWith(fresh);
+        else outputSection.append(fresh);
       }
     }
   });
@@ -1020,7 +1063,7 @@ function createSubAgentCallElement(terminal, strings) {
       if (agent.prompt) {
         const promptSection = createElement('div', 'chat-subagent-call__agent-section');
         const promptTitle = createElement('h4', 'chat-subagent-call__agent-section-title', strings.tools.subAgentPromptSection);
-        const promptEl = createElement('pre', 'chat-subagent-call__agent-prompt', agent.prompt);
+        const promptEl = renderMarkdown(agent.prompt, 'chat-subagent-call__agent-prompt');
         promptSection.append(promptTitle, promptEl);
         body.append(promptSection);
       }
@@ -1030,8 +1073,24 @@ function createSubAgentCallElement(terminal, strings) {
         const isError = Boolean(agent.error && !agent.output);
         const sectionTitle = createElement('h4', 'chat-subagent-call__agent-section-title',
           isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection);
-        const outputEl = createElement('pre', 'chat-subagent-call__agent-output', agent.output || agent.error || '');
-        outputSection.append(sectionTitle, outputEl);
+        outputSection.append(sectionTitle);
+        const rawOutput = agent.output || agent.error || '';
+        const { content: parsedOutput, thinking: outputThinking } = parseThinkingFromText(rawOutput);
+        if (outputThinking) {
+          const thinkWrap = document.createElement('details');
+          thinkWrap.className = 'chat-message__thinking';
+          const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
+          thinkSummary.append(
+            createIcon('thinking', 'chat-message__thinking-icon'),
+            createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+          );
+          thinkWrap.append(thinkSummary);
+          const thinkBody = createElement('div', 'chat-message__thinking-body');
+          thinkBody.append(createElement('p', 'chat-message__thinking-text', outputThinking));
+          thinkWrap.append(thinkBody);
+          outputSection.append(thinkWrap);
+        }
+        outputSection.append(renderMarkdown((parsedOutput || rawOutput).trimStart(), 'chat-subagent-call__agent-output'));
         body.append(outputSection);
       }
 

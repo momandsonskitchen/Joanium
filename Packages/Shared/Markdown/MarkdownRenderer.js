@@ -51,6 +51,34 @@ function renderInline(text) {
 }
 
 // ---------------------------------------------------------------------------
+// Table helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Splits a GFM table row string into trimmed cell strings.
+ * Handles leading/trailing pipes: | a | b | → ['a', 'b']
+ */
+function parseTableRow(line) {
+  return line
+    .replace(/^\|?|\|?\s*$/g, '')
+    .split('|')
+    .map((cell) => cell.trim());
+}
+
+/**
+ * Reads column alignments from a GFM separator row (e.g. |:---|:---:|---:|).
+ * Returns an array of 'left' | 'center' | 'right' per column.
+ */
+function parseTableAlignments(line) {
+  return parseTableRow(line).map((cell) => {
+    const c = cell.trim();
+    if (c.startsWith(':') && c.endsWith(':')) return 'center';
+    if (c.endsWith(':')) return 'right';
+    return 'left';
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Block parser — produces an AST-like array of block objects
 // ---------------------------------------------------------------------------
 
@@ -141,6 +169,27 @@ function parseBlocks(lines) {
         i++;
       }
       blocks.push({ type: 'ol', items });
+      continue;
+    }
+
+    // ── Table  | col | col | separator row ─────────────────────────────
+    // A table starts with a pipe-leading line whose NEXT line is a GFM
+    // separator (only pipes, dashes, colons, and spaces).
+    if (
+      /^\|/.test(line) &&
+      i + 1 < lines.length &&
+      /^\|?[\s|:*-]+\|?\s*$/.test(lines[i + 1])
+    ) {
+      const headers = parseTableRow(line);
+      i++; // consume separator
+      const alignments = parseTableAlignments(lines[i]);
+      i++;
+      const rows = [];
+      while (i < lines.length && /^\|/.test(lines[i]) && lines[i].trim() !== '') {
+        rows.push(parseTableRow(lines[i]));
+        i++;
+      }
+      blocks.push({ type: 'table', headers, alignments, rows });
       continue;
     }
 
@@ -296,6 +345,47 @@ function buildDom(blocks) {
           ol.append(li);
         }
         frag.append(ol);
+        break;
+      }
+
+      case 'table': {
+        const tableWrap = document.createElement('div');
+        tableWrap.className = 'md-table-wrap';
+        const table = document.createElement('table');
+        table.className = 'md-table';
+
+        // Header
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        for (let ci = 0; ci < block.headers.length; ci++) {
+          const th = document.createElement('th');
+          th.className = 'md-th';
+          th.style.textAlign = block.alignments[ci] ?? 'left';
+          th.innerHTML = renderInline(block.headers[ci]);
+          headerRow.append(th);
+        }
+        thead.append(headerRow);
+        table.append(thead);
+
+        // Body
+        if (block.rows.length > 0) {
+          const tbody = document.createElement('tbody');
+          for (const row of block.rows) {
+            const tr = document.createElement('tr');
+            for (let ci = 0; ci < block.headers.length; ci++) {
+              const td = document.createElement('td');
+              td.className = 'md-td';
+              td.style.textAlign = block.alignments[ci] ?? 'left';
+              td.innerHTML = renderInline(row[ci] ?? '');
+              tr.append(td);
+            }
+            tbody.append(tr);
+          }
+          table.append(tbody);
+        }
+
+        tableWrap.append(table);
+        frag.append(tableWrap);
         break;
       }
 
