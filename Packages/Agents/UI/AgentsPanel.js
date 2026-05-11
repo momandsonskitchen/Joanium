@@ -450,17 +450,20 @@ export function createAgentsPanel(strings) {
     // Actions
     const actions = createElement('div', 'agents-card__actions');
 
-    // Enable / Disable
+    // Enable / Disable — pill toggle (dot slides left↔right)
     let isEnabled = agent.enabled !== false;
     const toggleBtn = createElement('button', 'agents-card__btn agents-card__btn--toggle');
     toggleBtn.type  = 'button';
+
+    const togglePill  = createElement('span', 'agents-toggle');
+    const toggleThumb = createElement('span', 'agents-toggle__thumb');
+    togglePill.append(toggleThumb);
+    toggleBtn.append(togglePill);
 
     function syncToggleBtn() {
       toggleBtn.setAttribute('aria-label', isEnabled ? strings.disable : strings.enable);
       toggleBtn.classList.toggle('agents-card__btn--toggle-on',  isEnabled);
       toggleBtn.classList.toggle('agents-card__btn--toggle-off', !isEnabled);
-      toggleBtn.innerHTML = '';
-      toggleBtn.append(createIcon('power', 'agents-card__btn-icon'));
     }
     syncToggleBtn();
     toggleBtn.addEventListener('click', async (e) => {
@@ -475,14 +478,14 @@ export function createAgentsPanel(strings) {
       }
     });
 
-    // Run
+    // Run — bolt icon → circular spinner when running → check when done
     const runBtn = createElement('button', 'agents-card__btn agents-card__btn--run');
     runBtn.type  = 'button';
     runBtn.setAttribute('aria-label', strings.run);
-    const runPlayIcon  = createIcon('play',  'agents-card__btn-icon agents-card__run-play');
+    const runBoltIcon  = createIcon('bolt',  'agents-card__btn-icon agents-card__run-play');
     const runSpinnerEl = createElement('span', 'agents-card__run-spinner');
     const runCheckIcon = createIcon('check', 'agents-card__btn-icon agents-card__run-check');
-    runBtn.append(runPlayIcon, runSpinnerEl, runCheckIcon);
+    runBtn.append(runBoltIcon, runSpinnerEl, runCheckIcon);
     runBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (runBtn._isRunning) return;
