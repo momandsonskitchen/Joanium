@@ -27,6 +27,8 @@ const en = {
     5: 'Friday',
     6: 'Saturday'
   },
+  modelLabel: 'Model',
+  modelDefault: 'Use default model',
   promptLabel: 'Prompt',
   promptPlaceholder: 'Write a short summary of today\'s tasks and send it to me.',
   save: 'Save Agent',

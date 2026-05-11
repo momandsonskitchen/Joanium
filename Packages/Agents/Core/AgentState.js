@@ -47,6 +47,7 @@ export function createAgentStateManager({ rootDirectory }) {
         name:      String(agent.name      ?? '').trim(),
         avatar:    agent.avatar            ?? null,
         schedule:  normalizeSchedule(agent.schedule),
+        model:     normalizeModel(agent.model),
         prompt:    String(agent.prompt     ?? '').trim(),
         enabled:   agent.enabled           ?? true,
         createdAt: agent.createdAt         ?? now,
@@ -77,6 +78,7 @@ export function createAgentStateManager({ rootDirectory }) {
             name:      data.name,
             avatar:    data.avatar    ?? null,
             schedule:  data.schedule  ?? { type: 'startup' },
+            model:     data.model     ?? null,
             prompt:    data.prompt,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
@@ -205,6 +207,14 @@ function normalizeSchedule(raw) {
   }
 
   return { type, time };
+}
+
+function normalizeModel(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const providerId = typeof raw.providerId === 'string' ? raw.providerId.trim() : '';
+  const modelId    = typeof raw.modelId    === 'string' ? raw.modelId.trim()    : '';
+  if (!providerId || !modelId) return null;
+  return { providerId, modelId };
 }
 
 function normalizeTime(raw) {

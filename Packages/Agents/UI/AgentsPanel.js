@@ -5,6 +5,7 @@ import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -46,38 +47,125 @@ function buildScheduleDescription(schedule, strings) {
   }
 }
 
+// Encode { providerId, modelId } → "providerId/modelId" (or 'default' for null).
+// Uses 'default' (not '') because DropDown skips options with empty values.
+function encodeModelValue(model) {
+  if (!model?.providerId || !model?.modelId) return 'default';
+  return `${model.providerId}/${model.modelId}`;
+}
+
+// Decode "providerId/modelId" → { providerId, modelId } (or null for 'default').
+function decodeModelValue(value) {
+  if (!value || value === 'default') return null;
+  const slashIndex = value.indexOf('/');
+  if (slashIndex < 0) return null;
+  return {
+    providerId: value.slice(0, slashIndex),
+    modelId:    value.slice(slashIndex + 1)
+  };
+}
+
 // ---------------------------------------------------------------------------
 // createAgentsPanel
-//
-// Factory that builds and manages the Agents sidebar panel.
-// Accepts the `agents` i18n namespace so the caller controls locale.
-//
-// Returns:
-//   build()        — builds and returns the panel HTMLElement (call once)
-//   populateList() — re-fetches and renders the agent cards
 // ---------------------------------------------------------------------------
 
 export function createAgentsPanel(strings) {
   // Panel-scoped draft state
   let draftName         = '';
-  let draftAvatar       = null; // null = random; string = filename like '1.png'
+  let draftAvatar       = null;
   let draftScheduleType = 'startup';
   let draftTime         = '09:00';
-  let draftDay          = 1; // Monday
+  let draftDay          = 1;
   let draftPrompt       = '';
+  let draftModel        = null; // null = use default; { providerId, modelId } = specific
   let editingAgentId    = null;
   let editingCreatedAt  = null;
 
-  // All available avatars fetched from the main process
+  // Avatar catalog
   let availableAvatars = [];
 
+  // Provider catalog (fetched once for the model dropdown)
+  let cachedProviders           = [];
+  let cachedUserProviderDetails = {};
+
   // DOM refs
-  let panelRef     = null;
-  let avatarGridEl = null;
-  let timeRowEl    = null;
-  let dayRowEl     = null;
-  let saveBtnRef   = null;
-  let formHeadingRef = null;
+  let panelRef        = null;
+  let avatarGridEl    = null;
+  let timeRowEl       = null;
+  let dayRowEl        = null;
+  let saveBtnRef      = null;
+  let formHeadingRef  = null;
+  let modelSectionEl  = null;
+  let modelDropdown   = null;
+
+  // ── Provider loading ──────────────────────────────────────────────────────
+
+  async function loadProviders() {
+    try {
+      const bootstrap = await invokeIpc('chat:bootstrap');
+      cachedProviders           = Array.isArray(bootstrap.providers) ? bootstrap.providers : [];
+      cachedUserProviderDetails = bootstrap.user?.providers?.details ?? {};
+    } catch {
+      cachedProviders           = [];
+      cachedUserProviderDetails = {};
+    }
+    rebuildModelDropdown();
+  }
+
+  function buildModelOptions() {
+    const options = [{ value: 'default', label: strings.modelDefault }];
+    for (const provider of cachedProviders) {
+      if (!provider.models?.length) continue;
+      const details  = cachedUserProviderDetails?.[provider.id] ?? {};
+      const endpoint = (details.endpoint ?? '').trim() || (provider.endpoint ?? '').trim();
+      if (!endpoint) continue;
+      if (provider.requiresApiKey && !(details.apiKey ?? '').trim()) continue;
+      for (const model of provider.models) {
+        options.push({
+          value: `${provider.id}/${model.id}`,
+          label: `${provider.label} — ${model.name ?? model.id}`
+        });
+      }
+    }
+    return options;
+  }
+
+  // Rebuild (or first-build) the model dropdown inside its container.
+  function rebuildModelDropdown() {
+    if (!modelSectionEl) return;
+    const wrap = modelSectionEl.querySelector('.agents-form__model-dropdown-wrap');
+    if (!wrap) return;
+
+    // Tear down the old instance so its panel element is removed from <body>.
+    if (modelDropdown) {
+      modelDropdown.dispose();
+      modelDropdown = null;
+    }
+
+    const options       = buildModelOptions();
+    const selectedValue = encodeModelValue(draftModel);
+
+    modelDropdown = createDropDownLite({
+      options,
+      value:    selectedValue,
+      onChange: (value) => { draftModel = decodeModelValue(value); }
+    });
+
+    wrap.replaceChildren(modelDropdown.element);
+  }
+
+  // Build the static shell of the model section (dropdown is injected later).
+  function buildModelSection() {
+    const wrapper = createElement('div', 'agents-form__model-section');
+    const label   = createElement('label', 'agents-form__field-label', strings.modelLabel);
+    const wrap    = createElement('div', 'agents-form__model-dropdown-wrap');
+    wrapper.append(label, wrap);
+    modelSectionEl = wrapper;
+    // Dropdown rendered once providers are loaded (rebuildModelDropdown is
+    // called at the end of loadProviders, or immediately if already cached).
+    rebuildModelDropdown();
+    return wrapper;
+  }
 
   // ── Avatar grid ────────────────────────────────────────────────────────────
 
@@ -88,7 +176,6 @@ export function createAgentsPanel(strings) {
 
     avatarGridEl = createElement('div', 'agents-form__avatar-grid');
 
-    // "Random" tile (always first)
     const randomTile = createElement('button', 'agents-form__avatar-tile agents-form__avatar-tile--random');
     randomTile.type = 'button';
     randomTile.setAttribute('aria-label', strings.avatarRandom);
@@ -109,7 +196,6 @@ export function createAgentsPanel(strings) {
 
     if (!avatarGridEl) return;
 
-    // Clear existing image tiles (keep the random tile at index 0)
     const existingTiles = avatarGridEl.querySelectorAll('.agents-form__avatar-tile--image');
     for (const tile of existingTiles) tile.remove();
 
@@ -120,10 +206,9 @@ export function createAgentsPanel(strings) {
       tile._avatarFilename = avatar.filename;
 
       const img = document.createElement('img');
-      img.src = `file://${avatar.filePath.replace(/\\/g, '/')}`;
+      img.src       = `file://${avatar.filePath.replace(/\\/g, '/')}`;
       img.className = 'agents-form__avatar-img';
-      img.alt = avatar.filename;
-      // Prevent drag
+      img.alt       = avatar.filename;
       img.draggable = false;
       tile.append(img);
 
@@ -135,18 +220,15 @@ export function createAgentsPanel(strings) {
   }
 
   function selectAvatar(filename) {
-    draftAvatar = filename; // null = random
+    draftAvatar = filename;
     syncAvatarTileSelection();
   }
 
   function syncAvatarTileSelection() {
     if (!avatarGridEl) return;
-    const tiles = avatarGridEl.querySelectorAll('.agents-form__avatar-tile');
-    for (const tile of tiles) {
-      const isRandom = tile.classList.contains('agents-form__avatar-tile--random');
-      const isSelected = isRandom
-        ? draftAvatar === null
-        : tile._avatarFilename === draftAvatar;
+    for (const tile of avatarGridEl.querySelectorAll('.agents-form__avatar-tile')) {
+      const isRandom   = tile.classList.contains('agents-form__avatar-tile--random');
+      const isSelected = isRandom ? draftAvatar === null : tile._avatarFilename === draftAvatar;
       tile.classList.toggle('agents-form__avatar-tile--selected', isSelected);
     }
   }
@@ -158,10 +240,8 @@ export function createAgentsPanel(strings) {
     const label   = createElement('label', 'agents-form__field-label', strings.scheduleLabel);
     wrapper.append(label);
 
-    // Type toggle row
     const typeRow = createElement('div', 'agents-form__schedule-types');
-    const scheduleTypes = ['startup', 'daily', 'weekly', 'weekdays', 'weekends'];
-    for (const type of scheduleTypes) {
+    for (const type of ['startup', 'daily', 'weekly', 'weekdays', 'weekends']) {
       const btn = createElement('button', 'agents-form__schedule-type-btn');
       btn.type = 'button';
       btn.textContent = strings.scheduleTypes[type];
@@ -175,7 +255,6 @@ export function createAgentsPanel(strings) {
     }
     wrapper.append(typeRow);
 
-    // Time input row (hidden for startup)
     timeRowEl = createElement('div', 'agents-form__schedule-time-row');
     const timeBox = createInputBoxLite({
       label: strings.timeLabel,
@@ -189,20 +268,16 @@ export function createAgentsPanel(strings) {
     timeRowEl.append(timeBox.element);
     wrapper.append(timeRowEl);
 
-    // Day-of-week row (only for weekly)
     dayRowEl = createElement('div', 'agents-form__schedule-day-row');
-    const dayLabel = createElement('label', 'agents-form__field-label', strings.dayLabel);
+    const dayLabel  = createElement('label', 'agents-form__field-label', strings.dayLabel);
     const dayPicker = createElement('div', 'agents-form__day-picker');
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames  = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     for (let d = 0; d < 7; d++) {
       const dayBtn = createElement('button', 'agents-form__day-btn');
       dayBtn.type = 'button';
       dayBtn.textContent = dayNames[d];
       dayBtn._dayIndex = d;
-      dayBtn.addEventListener('click', () => {
-        draftDay = d;
-        syncDayButtons(dayPicker);
-      });
+      dayBtn.addEventListener('click', () => { draftDay = d; syncDayButtons(dayPicker); });
       dayPicker.append(dayBtn);
     }
     dayRowEl.append(dayLabel, dayPicker);
@@ -211,25 +286,19 @@ export function createAgentsPanel(strings) {
     syncScheduleTypeButtons(typeRow);
     syncScheduleConditionals();
     syncDayButtons(dayPicker);
-
     return wrapper;
   }
 
   function syncScheduleTypeButtons(typeRow) {
     for (const btn of typeRow.querySelectorAll('.agents-form__schedule-type-btn')) {
-      btn.classList.toggle(
-        'agents-form__schedule-type-btn--active',
-        btn._scheduleType === draftScheduleType
-      );
+      btn.classList.toggle('agents-form__schedule-type-btn--active', btn._scheduleType === draftScheduleType);
     }
   }
 
   function syncScheduleConditionals() {
     if (!timeRowEl || !dayRowEl) return;
-    const needsTime = draftScheduleType !== 'startup';
-    const needsDay  = draftScheduleType === 'weekly';
-    timeRowEl.hidden = !needsTime;
-    dayRowEl.hidden  = !needsDay;
+    timeRowEl.hidden = draftScheduleType === 'startup';
+    dayRowEl.hidden  = draftScheduleType !== 'weekly';
   }
 
   function syncDayButtons(dayPicker) {
@@ -247,9 +316,7 @@ export function createAgentsPanel(strings) {
 
   function syncFormChrome() {
     if (formHeadingRef) {
-      formHeadingRef.textContent = editingAgentId
-        ? strings.editAgentHeading
-        : strings.newAgentHeading;
+      formHeadingRef.textContent = editingAgentId ? strings.editAgentHeading : strings.newAgentHeading;
     }
     if (saveBtnRef) {
       saveBtnRef.textContent = editingAgentId ? strings.update : strings.save;
@@ -257,47 +324,15 @@ export function createAgentsPanel(strings) {
   }
 
   function resetForm() {
-    editingAgentId   = null;
-    editingCreatedAt = null;
-    draftName        = '';
-    draftAvatar      = null;
+    editingAgentId    = null;
+    editingCreatedAt  = null;
+    draftName         = '';
+    draftAvatar       = null;
     draftScheduleType = 'startup';
-    draftTime        = '09:00';
-    draftDay         = 1;
-    draftPrompt      = '';
-
-    // Reset DOM inputs via stored refs
-    if (panelRef) {
-      const nameInput   = panelRef.querySelector('.agents-form__name-input');
-      const timeInput   = panelRef.querySelector('.agents-form__time-input');
-      const promptTA    = panelRef.querySelector('.agents-form__prompt-textarea');
-      const typeRow     = panelRef.querySelector('.agents-form__schedule-types');
-      const dayPicker   = panelRef.querySelector('.agents-form__day-picker');
-
-      if (nameInput)  nameInput.value  = '';
-      if (timeInput)  timeInput.value  = '09:00';
-      if (promptTA)   promptTA.value   = '';
-      if (typeRow)  { syncScheduleTypeButtons(typeRow); }
-      if (dayPicker){ syncDayButtons(dayPicker); }
-    }
-
-    syncAvatarTileSelection();
-    syncScheduleConditionals();
-    syncSaveBtn();
-    syncFormChrome();
-  }
-
-  function applyAgentToForm(agent) {
-    editingAgentId   = agent.id;
-    editingCreatedAt = agent.createdAt ?? null;
-    draftName        = agent.name     ?? '';
-    draftAvatar      = agent.avatar   ?? null;
-    draftPrompt      = agent.prompt   ?? '';
-
-    const schedule   = agent.schedule ?? { type: 'startup' };
-    draftScheduleType = schedule.type ?? 'startup';
-    draftTime         = schedule.time ?? '09:00';
-    draftDay          = schedule.day  ?? 1;
+    draftTime         = '09:00';
+    draftDay          = 1;
+    draftPrompt       = '';
+    draftModel        = null;
 
     if (panelRef) {
       const nameInput = panelRef.querySelector('.agents-form__name-input');
@@ -306,19 +341,53 @@ export function createAgentsPanel(strings) {
       const typeRow   = panelRef.querySelector('.agents-form__schedule-types');
       const dayPicker = panelRef.querySelector('.agents-form__day-picker');
 
-      if (nameInput)  { nameInput.value = draftName;  }
-      if (timeInput)  { timeInput.value = draftTime;  }
-      if (promptTA)   { promptTA.value  = draftPrompt; }
-      if (typeRow)    { syncScheduleTypeButtons(typeRow); }
-      if (dayPicker)  { syncDayButtons(dayPicker); }
+      if (nameInput)  nameInput.value  = '';
+      if (timeInput)  timeInput.value  = '09:00';
+      if (promptTA)   promptTA.value   = '';
+      if (typeRow)    syncScheduleTypeButtons(typeRow);
+      if (dayPicker)  syncDayButtons(dayPicker);
     }
 
     syncAvatarTileSelection();
     syncScheduleConditionals();
+    rebuildModelDropdown();
+    syncSaveBtn();
+    syncFormChrome();
+  }
+
+  function applyAgentToForm(agent) {
+    editingAgentId    = agent.id;
+    editingCreatedAt  = agent.createdAt ?? null;
+    draftName         = agent.name      ?? '';
+    draftAvatar       = agent.avatar    ?? null;
+    draftPrompt       = agent.prompt    ?? '';
+    draftModel        = agent.model     ?? null;
+
+    const schedule    = agent.schedule  ?? { type: 'startup' };
+    draftScheduleType = schedule.type   ?? 'startup';
+    draftTime         = schedule.time   ?? '09:00';
+    draftDay          = schedule.day    ?? 1;
+
+    if (panelRef) {
+      const nameInput = panelRef.querySelector('.agents-form__name-input');
+      const timeInput = panelRef.querySelector('.agents-form__time-input');
+      const promptTA  = panelRef.querySelector('.agents-form__prompt-textarea');
+      const typeRow   = panelRef.querySelector('.agents-form__schedule-types');
+      const dayPicker = panelRef.querySelector('.agents-form__day-picker');
+
+      if (nameInput)  nameInput.value  = draftName;
+      if (timeInput)  timeInput.value  = draftTime;
+      if (promptTA)   promptTA.value   = draftPrompt;
+      if (typeRow)    syncScheduleTypeButtons(typeRow);
+      if (dayPicker)  syncDayButtons(dayPicker);
+    }
+
+    syncAvatarTileSelection();
+    syncScheduleConditionals();
+    rebuildModelDropdown(); // re-render dropdown with agent's saved model
     syncSaveBtn();
     syncFormChrome();
 
-    // Focus name field
     panelRef?.querySelector('.agents-form__name-input')?.focus();
   }
 
@@ -333,11 +402,21 @@ export function createAgentsPanel(strings) {
     return found ? `file://${found.filePath.replace(/\\/g, '/')}` : null;
   }
 
+  function resolveModelLabel(agent) {
+    const m = agent.model;
+    if (!m?.providerId || !m?.modelId) return null;
+    const provider = cachedProviders.find((p) => p.id === m.providerId);
+    const model    = provider?.models?.find((mo) => mo.id === m.modelId);
+    if (provider && model) return `${provider.label} — ${model.name ?? model.id}`;
+    // Provider/model no longer in catalog — show raw ids.
+    return `${m.providerId} / ${m.modelId}`;
+  }
+
   function buildCard(agent, listEl) {
     const card = createElement('div', 'agents-card');
 
     // Avatar
-    const avatarEl = createElement('div', 'agents-card__avatar');
+    const avatarEl  = createElement('div', 'agents-card__avatar');
     const avatarSrc = resolveAvatarSrc(agent);
     if (avatarSrc) {
       const img = document.createElement('img');
@@ -347,7 +426,6 @@ export function createAgentsPanel(strings) {
       img.draggable = false;
       avatarEl.append(img);
     } else {
-      // Fallback initials
       const initials = (agent.name || 'A').slice(0, 2).toUpperCase();
       avatarEl.append(createElement('span', 'agents-card__avatar-initials', initials));
     }
@@ -355,17 +433,25 @@ export function createAgentsPanel(strings) {
     // Body
     const body     = createElement('div', 'agents-card__body');
     const nameEl   = createElement('div', 'agents-card__name', agent.name);
-    const schedEl  = createElement('div', 'agents-card__schedule',
-      buildScheduleDescription(agent.schedule, strings));
+    const metaRow  = createElement('div', 'agents-card__meta');
+    const schedEl  = createElement('span', 'agents-card__schedule', buildScheduleDescription(agent.schedule, strings));
+    metaRow.append(schedEl);
+
+    const modelLabel = resolveModelLabel(agent);
+    if (modelLabel) {
+      const dot      = createElement('span', 'agents-card__meta-dot', '·');
+      const modelEl  = createElement('span', 'agents-card__model', modelLabel);
+      metaRow.append(dot, modelEl);
+    }
+
     const promptEl = createElement('div', 'agents-card__prompt', agent.prompt);
-    body.append(nameEl, schedEl, promptEl);
+    body.append(nameEl, metaRow, promptEl);
 
     // Actions
     const actions = createElement('div', 'agents-card__actions');
 
-    // ── Enable / Disable button ──────────────────────────────────────────────
-    let isEnabled = agent.enabled !== false; // default true
-
+    // Enable / Disable
+    let isEnabled = agent.enabled !== false;
     const toggleBtn = createElement('button', 'agents-card__btn agents-card__btn--toggle');
     toggleBtn.type  = 'button';
 
@@ -377,12 +463,10 @@ export function createAgentsPanel(strings) {
       toggleBtn.append(createIcon('power', 'agents-card__btn-icon'));
     }
     syncToggleBtn();
-
     toggleBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       isEnabled = !isEnabled;
       syncToggleBtn();
-      // Persist: reload full agent and re-save with updated enabled flag
       try {
         const full = await invokeIpc('agents:load-agent', agent.id);
         await invokeIpc('agents:save-agent', { ...full, enabled: isEnabled });
@@ -391,29 +475,20 @@ export function createAgentsPanel(strings) {
       }
     });
 
-    // ── Run button ─────────────────────────────────────────────────────────
+    // Run
     const runBtn = createElement('button', 'agents-card__btn agents-card__btn--run');
     runBtn.type  = 'button';
     runBtn.setAttribute('aria-label', strings.run);
-
-    // Pre-render all three visual states — CSS toggles visibility, no DOM writes on click
     const runPlayIcon  = createIcon('play',  'agents-card__btn-icon agents-card__run-play');
     const runSpinnerEl = createElement('span', 'agents-card__run-spinner');
     const runCheckIcon = createIcon('check', 'agents-card__btn-icon agents-card__run-check');
     runBtn.append(runPlayIcon, runSpinnerEl, runCheckIcon);
-
     runBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (runBtn._isRunning) return;
       runBtn._isRunning = true;
-
       runBtn.classList.add('agents-card__btn--running');
-      // setTimeout(0) is a macrotask — guarantees the browser paints the
-      // spinner before any microtask-resolved IPC response can remove it.
       await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Run IPC and a minimum display timer in parallel so the spinner
-      // is always visible for at least 600ms even if IPC is near-instant.
       try {
         await Promise.all([
           invokeIpc('agents:run-agent', agent.id),
@@ -422,7 +497,6 @@ export function createAgentsPanel(strings) {
       } catch (err) {
         console.error('[Joanium] Failed to run agent:', err);
       }
-
       runBtn.classList.remove('agents-card__btn--running');
       runBtn.classList.add('agents-card__btn--done');
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -430,6 +504,7 @@ export function createAgentsPanel(strings) {
       runBtn._isRunning = false;
     });
 
+    // Edit
     const editBtn = createElement('button', 'agents-card__btn');
     editBtn.type  = 'button';
     editBtn.setAttribute('aria-label', strings.edit);
@@ -444,6 +519,7 @@ export function createAgentsPanel(strings) {
       }
     });
 
+    // Delete
     const deleteBtn = createElement('button', 'agents-card__btn agents-card__btn--danger');
     deleteBtn.type  = 'button';
     deleteBtn.setAttribute('aria-label', strings.delete);
@@ -468,9 +544,7 @@ export function createAgentsPanel(strings) {
 
   async function populateList(listEl, query = '') {
     listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'agents-skeleton'));
-    }
+    for (let i = 0; i < 3; i++) listEl.append(createElement('div', 'agents-skeleton'));
 
     let agents;
     try {
@@ -503,9 +577,7 @@ export function createAgentsPanel(strings) {
       return;
     }
 
-    for (const agent of filtered) {
-      listEl.append(buildCard(agent, listEl));
-    }
+    for (const agent of filtered) listEl.append(buildCard(agent, listEl));
   }
 
   // ── build ──────────────────────────────────────────────────────────────────
@@ -514,14 +586,10 @@ export function createAgentsPanel(strings) {
     const panel = createElement('div', 'agents-panel');
     panel.hidden = true;
 
-    // Header
     const header = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
     panel.append(header);
 
-    // Body
-    const body = createElement('div', 'agents-panel__body');
-
-    // ── Left: form ────────────────────────────────────────────────────────
+    const body    = createElement('div', 'agents-panel__body');
     const formCol = createElement('div', 'agents-form-col');
 
     formHeadingRef = createElement('p', 'agents-form__heading', strings.newAgentHeading);
@@ -539,16 +607,17 @@ export function createAgentsPanel(strings) {
     });
     formCard.append(nameBox.element);
 
-    // Avatar picker
-    const avatarSection = buildAvatarGrid();
-    formCard.append(avatarSection);
+    // Avatar
+    formCard.append(buildAvatarGrid());
 
     // Schedule
-    const scheduleSection = buildScheduleSection();
-    formCard.append(scheduleSection);
+    formCard.append(buildScheduleSection());
+
+    // Model
+    formCard.append(buildModelSection());
 
     // Prompt
-    const promptLabel = createElement('label', 'agents-form__field-label', strings.promptLabel);
+    const promptLabel    = createElement('label', 'agents-form__field-label', strings.promptLabel);
     const promptTextarea = document.createElement('textarea');
     promptTextarea.className   = 'agents-form__prompt-textarea';
     promptTextarea.placeholder = strings.promptPlaceholder;
@@ -556,40 +625,36 @@ export function createAgentsPanel(strings) {
     promptTextarea.style.webkitUserSelect = 'text';
     promptTextarea.style.userSelect       = 'text';
     promptTextarea.style.cursor           = 'text';
-    promptTextarea.addEventListener('input', (e) => {
-      draftPrompt = e.target.value;
-      syncSaveBtn();
-    });
+    promptTextarea.addEventListener('input', (e) => { draftPrompt = e.target.value; syncSaveBtn(); });
     formCard.append(promptLabel, promptTextarea);
 
-    // Form actions
+    // Actions
     const formActions = createElement('div', 'agents-form__actions');
-
-    const cancelBtn = createElement('button', 'agents-form__btn-cancel');
+    const cancelBtn   = createElement('button', 'agents-form__btn-cancel');
     cancelBtn.type = 'button';
     cancelBtn.textContent = strings.cancel;
     cancelBtn.addEventListener('click', resetForm);
 
     saveBtnRef = createElement('button', 'agents-form__btn-save');
-    saveBtnRef.type = 'button';
+    saveBtnRef.type     = 'button';
     saveBtnRef.disabled = true;
     saveBtnRef.textContent = strings.save;
+
     saveBtnRef.addEventListener('click', async () => {
       const name   = draftName.trim();
       const prompt = draftPrompt.trim();
       if (!name || !prompt) return;
 
-      // Resolve avatar — pick random if none selected
       let avatar = draftAvatar;
       if (!avatar && availableAvatars.length > 0) {
         avatar = pickRandomItem(availableAvatars).filename;
       }
 
-      const now = new Date().toISOString();
+      const now      = new Date().toISOString();
       const schedule = draftScheduleType === 'startup'
         ? { type: 'startup' }
         : draftScheduleType === 'weekly'
-          ? { type: 'weekly',   time: draftTime, day: draftDay }
+          ? { type: 'weekly', time: draftTime, day: draftDay }
           : { type: draftScheduleType, time: draftTime };
 
       const agent = {
@@ -597,6 +662,7 @@ export function createAgentsPanel(strings) {
         name,
         avatar,
         schedule,
+        model:     draftModel,   // null = use app default; { providerId, modelId } = specific
         prompt,
         createdAt: editingCreatedAt ?? now,
         updatedAt: now
@@ -617,7 +683,7 @@ export function createAgentsPanel(strings) {
     formCard.append(formActions);
     formCol.append(formCard);
 
-    // ── Right: list ───────────────────────────────────────────────────────
+    // ── Right: list ────────────────────────────────────────────────────────
     const listCol = createElement('div', 'agents-list-col');
     listCol.append(createElement('p', 'agents-list__heading', strings.yourAgents));
 
@@ -635,7 +701,6 @@ export function createAgentsPanel(strings) {
     body.append(formCol, listCol);
     panel.append(body);
 
-    // Attach public refs
     panel._listEl    = listContent;
     panel._search    = search;
     panel._startEdit = applyAgentToForm;
@@ -646,8 +711,9 @@ export function createAgentsPanel(strings) {
     syncFormChrome();
     syncSaveBtn();
 
-    // Load avatars asynchronously — grid renders when ready
+    // Load async data — neither blocks the initial render
     void loadAvatars();
+    void loadProviders();
 
     return panel;
   }
