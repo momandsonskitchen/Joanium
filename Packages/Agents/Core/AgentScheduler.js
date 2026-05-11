@@ -73,6 +73,7 @@ export function createAgentScheduler({ agentsDirectory, runAgent }) {
 
     const agents = await loadAllAgents();
     for (const agent of agents) {
+      if (agent.enabled === false) continue;
       if (!agent.schedule || agent.schedule.type === 'startup') continue;
       if (shouldRunNow(agent.schedule, now)) {
         try {
@@ -88,17 +89,22 @@ export function createAgentScheduler({ agentsDirectory, runAgent }) {
 
   return {
     async start() {
-      // Run startup agents immediately.
+      // Small delay so the rest of the app (IPC, windows) is fully initialised
+      // before agents start making AI calls.
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Run startup agents — fire all in parallel so one slow AI call
+      // doesn't block the others, and errors are isolated per-agent.
       const agents = await loadAllAgents();
-      for (const agent of agents) {
-        if (agent.schedule?.type === 'startup') {
-          try {
-            await runAgent(agent);
-          } catch (err) {
-            console.error(`[Agents] Failed to run startup agent "${agent.name}":`, err);
-          }
-        }
-      }
+      await Promise.allSettled(
+        agents
+          .filter((agent) => agent.enabled !== false && agent.schedule?.type === 'startup')
+          .map((agent) =>
+            runAgent(agent).catch((err) =>
+              console.error(`[Agents] Failed to run startup agent "${agent.name}":`, err)
+            )
+          )
+      );
 
       // Start the minute-tick for time-based agents.
       if (tickTimer) clearInterval(tickTimer);

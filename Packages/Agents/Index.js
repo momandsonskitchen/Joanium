@@ -4,6 +4,8 @@ import { readdir, mkdir, writeFile } from 'node:fs/promises';
 import { createAgentStateManager } from './Core/AgentState.js';
 import { createAgentScheduler } from './Core/AgentScheduler.js';
 import { sanitizeFileStem } from '../Shared/Storage/SafePath.js';
+import { createChatStateManager } from '../Chat/Core/ChatState.js';
+import { estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 const agentsPackageDirectory = path.dirname(fileURLToPath(import.meta.url));
 
@@ -15,6 +17,7 @@ const agentsPackageDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export async function createPackage({ rootDirectory }) {
   const agentStateManager = createAgentStateManager({ rootDirectory });
+  const chatStateManager  = createChatStateManager({ rootDirectory });
   const agentsDirectory   = path.join(rootDirectory, 'Data', 'Agents');
   const avatarsDirectory  = path.join(rootDirectory, 'Assets', 'Agents');
 
@@ -31,29 +34,82 @@ export async function createPackage({ rootDirectory }) {
     // Mark last run time in the agent record.
     await agentStateManager.markAgentRun(agent.id).catch(() => {});
 
-    // Write a run-log entry so we have an audit trail.
     await mkdir(runsDirectory, { recursive: true });
-    const firedAt = new Date().toISOString();
-    const timestamp = firedAt.replace(/[:.]/g, '-');
+    const startedAt   = new Date().toISOString();
     const safeAgentId = sanitizeFileStem(agent.id);
     if (!safeAgentId) return;
 
-    const runId = `${safeAgentId}-${timestamp}`;
+    const timestamp = startedAt.replace(/[:.]/g, '-');
+    const runId     = `${safeAgentId}-${timestamp}`;
     const logPath   = path.join(runsDirectory, `${safeAgentId}-${timestamp}.json`);
-    await writeFile(logPath, JSON.stringify({
+
+    // Write a 'running' entry immediately so Events shows the agent is active
+    // even while the AI call is still in progress.
+    const baseLog = {
       id:          runId,
       agentId:     agent.id,
       agentName:   agent.name,
       agentAvatar: agent.avatar ?? null,
       prompt:      agent.prompt,
-      status:      'success',
-      firedAt,
-      startedAt:   firedAt,
-      finishedAt:  firedAt,
-      schedule:    agent.schedule
+      schedule:    agent.schedule,
+      firedAt:     startedAt,
+      startedAt
+    };
+
+    await writeFile(logPath, JSON.stringify({
+      ...baseLog,
+      status:       'running',
+      finishedAt:   null,
+      fullResponse: '',
+      thinking:     '',
+      provider:     null,
+      model:        null,
+      inputTokens:  0,
+      outputTokens: 0,
+      error:        null
+    }, null, 2), 'utf8').catch(() => {});
+
+    // ── Call the AI ───────────────────────────────────────────────────────
+    let aiResult     = null;
+    let status       = 'success';
+    let errorMessage = null;
+
+    try {
+      const request = {
+        messages: [{ role: 'user', content: agent.prompt }]
+      };
+
+      // Use the agent's pinned model if set, otherwise fall back to the
+      // user's active default provider + model.
+      if (agent.model?.providerId && agent.model?.modelId) {
+        request.providerId = agent.model.providerId;
+        request.modelId    = agent.model.modelId;
+      }
+
+      aiResult = await chatStateManager.completeMessage(request);
+    } catch (err) {
+      status       = 'error';
+      errorMessage = err?.message ?? String(err);
+      console.error(`[Agents] Agent "${agent.name}" failed:`, err);
+    }
+
+    const finishedAt = new Date().toISOString();
+
+    // Overwrite the 'running' entry with the final result.
+    await writeFile(logPath, JSON.stringify({
+      ...baseLog,
+      status,
+      finishedAt,
+      fullResponse: aiResult?.text          ?? '',
+      thinking:     aiResult?.thinking      ?? '',
+      provider:     aiResult?.providerLabel ?? null,
+      model:        aiResult?.modelLabel    ?? aiResult?.modelId ?? null,
+      inputTokens:  estimateTokens(aiResult?.charCountIn  ?? 0),
+      outputTokens: estimateTokens(aiResult?.charCountOut ?? 0),
+      error:        errorMessage
     }, null, 2), 'utf8');
 
-    console.info(`[Agents] Agent "${agent.name}" fired (schedule: ${agent.schedule?.type}).`);
+    console.info(`[Agents] Agent "${agent.name}" ${status} (schedule: ${agent.schedule?.type}).`);
   }
 
   const scheduler = createAgentScheduler({ agentsDirectory, runAgent });

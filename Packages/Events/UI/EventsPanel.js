@@ -332,6 +332,7 @@ export function createEventsPanel(strings) {
       ]
       : [
         createDetailSection(strings.labels.prompt, event.primary),
+        event.raw?.thinking ? createDetailSection(strings.labels.thinking, event.raw.thinking, 'events-detail__section--thinking') : null,
         createDetailSection(strings.labels.response, event.secondary),
         createDetailSection(strings.labels.error, event.error, 'events-detail__section--error')
       ];

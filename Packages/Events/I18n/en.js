@@ -32,6 +32,7 @@ const en = {
     inbound: 'Inbound',
     reply: 'Reply',
     prompt: 'Prompt',
+    thinking: 'Thinking',
     response: 'Response',
     error: 'Error',
     source: 'Source',

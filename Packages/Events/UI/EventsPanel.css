@@ -552,6 +552,20 @@
   box-shadow: inset 0 0 0 1px rgba(190, 70, 54, 0.11);
 }
 
+.events-detail__section--thinking {
+  background: rgba(var(--color-accent-rgb), 0.04);
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.09);
+}
+
+.events-detail__section--thinking .events-detail__section-label {
+  color: var(--color-accent);
+}
+
+.events-detail__section--thinking .events-detail__section-value {
+  color: var(--color-chat-text-muted);
+  font-style: italic;
+}
+
 .events-detail__section-value {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
