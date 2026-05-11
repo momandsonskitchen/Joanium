@@ -1,4 +1,4 @@
-// ── Birthday helpers ──────────────────────────────────────────────────────
+// ── Birthday helpers ─────────────────────────────────────────────────────
 
 /**
  * Returns true when today's date matches the user's stored date of birth.
@@ -69,6 +69,56 @@ export function getBirthdayGreeting(name) {
     `May joy follow you all day long${n}! 🎂`,
     `Here's to the next chapter${n}! 🎉`,
     `New year, same amazing you${n}! 🥳`,
+  ];
+  return greetings[Math.floor(Math.random() * greetings.length)];
+}
+
+// ── Christmas helpers ───────────────────────────────────────────────────
+
+/**
+ * Returns true when today is December 25th.
+ */
+export function isChristmasToday() {
+  const now = new Date();
+  return now.getMonth() === 11 && now.getDate() === 25;
+}
+
+/**
+ * Returns a random Christmas greeting string used on the chat welcome screen.
+ */
+export function getChristmasGreeting(name) {
+  const n = name ? `, ${name}` : '';
+  const greetings = [
+    `Merry Christmas${n}! 🎄`,
+    `Merry Christmas${n}! ❄️`,
+    `Merry Christmas${n}! 🎅`,
+    `Wishing you a wonderful Christmas${n}! 🎄`,
+    `Happy Christmas${n}! ❄️`,
+    `Season's Greetings${n}! 🎅`,
+    `Hope your Christmas is magical${n}! 🎄`,
+    `Wishing you joy and peace this Christmas${n}! ❄️`,
+    `Have a holly jolly Christmas${n}! 🎅`,
+    `May your Christmas be merry and bright${n}! 🎄`,
+    `Tis the season to be jolly${n}! ❄️`,
+    `Hope Santa was good to you${n}! 🎅`,
+    `Wishing you warmth and love this Christmas${n}! 🎄`,
+    `May this Christmas fill your heart with joy${n}! ❄️`,
+    `Spreading Christmas cheer your way${n}! 🎅`,
+    `Hope your day is full of festive magic${n}! 🎄`,
+    `Wishing you peace, love, and lots of gifts${n}! ❄️`,
+    `May the Christmas spirit surround you${n}! 🎅`,
+    `Feliz Navidad${n}! 🎄`,
+    `Sending you all the Christmas love${n}! ❄️`,
+    `Hope this Christmas is your best one yet${n}! 🎅`,
+    `May your home be filled with laughter today${n}! 🎄`,
+    `Wishing you cosy vibes and good cheer${n}! ❄️`,
+    `Ho ho ho${n}! 🎅`,
+    `Deck the halls and celebrate${n}! 🎄`,
+    `May your Christmas be as warm as your heart${n}! ❄️`,
+    `Cheers to a festive and joyful day${n}! 🎅`,
+    `Hope your Christmas is nothing short of wonderful${n}! 🎄`,
+    `Wishing you all the magic of the season${n}! ❄️`,
+    `May this Christmas bring you everything you wished for${n}! 🎅`,
   ];
   return greetings[Math.floor(Math.random() * greetings.length)];
 }
