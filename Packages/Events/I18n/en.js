@@ -34,6 +34,7 @@ const en = {
     prompt: 'Prompt',
     thinking: 'Thinking',
     response: 'Response',
+    reasoning: 'Reasoning',
     error: 'Error',
     source: 'Source',
     status: 'Status',

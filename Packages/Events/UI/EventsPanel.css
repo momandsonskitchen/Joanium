@@ -559,7 +559,6 @@
 }
 
 .events-detail__section-value {
-  white-space: pre-wrap;
   overflow-wrap: anywhere;
   user-select: text;
   -webkit-user-select: text;

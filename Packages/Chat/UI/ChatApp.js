@@ -6,6 +6,7 @@ import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
+import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js';
 import { initCompletionSound, markCompletionSoundAborted, playCompletionSound } from './CompletionSound.js';
 
@@ -34,57 +35,6 @@ function stripMarkdown(text) {
     .replace(/<[^>]+>/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
-}
-
-/**
- * Strips inline thinking tags that various models embed in their text stream.
- * Handles: <think>, <thinking>, <reasoning>, <thought>, <thoughts>, <scratchpad>, <analysis>, <chain_of_thought>
- */
-function parseThinkingFromText(text) {
-  if (!text) return { content: '', thinking: '' };
-
-  const pairs = [
-    ['<thinking>', '</thinking>'],
-    ['<think>', '</think>'],
-    ['<reasoning>', '</reasoning>'],
-    ['<thought>', '</thought>'],
-    ['<thoughts>', '</thoughts>'],
-    ['<scratchpad>', '</scratchpad>'],
-    ['<analysis>', '</analysis>'],
-    ['<chain_of_thought>', '</chain_of_thought>'],
-  ];
-
-  let thinking = '';
-  let content = text;
-
-  for (const [open, close] of pairs) {
-    let result = '';
-    let remaining = content;
-
-    while (remaining.length > 0) {
-      const start = remaining.indexOf(open);
-      if (start === -1) {
-        result += remaining;
-        break;
-      }
-
-      result += remaining.slice(0, start);
-      const end = remaining.indexOf(close, start + open.length);
-
-      if (end === -1) {
-        // Unclosed tag — still streaming, treat the rest as thinking
-        thinking += remaining.slice(start + open.length);
-        break;
-      }
-
-      thinking += remaining.slice(start + open.length, end);
-      remaining = remaining.slice(end + close.length);
-    }
-
-    content = result;
-  }
-
-  return { content: content.trimStart(), thinking: thinking.trim() };
 }
 
 /**

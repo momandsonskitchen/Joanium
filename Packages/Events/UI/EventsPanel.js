@@ -2,6 +2,8 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
+import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 
 const FILTERS = ['all', 'channels', 'agents', 'errors'];
 
@@ -269,13 +271,59 @@ export function createEventsPanel(strings) {
     }
   }
 
+  // ── createDetailSection ───────────────────────────────────────────────────
+  // Generic section: label + markdown-rendered value.
+
   function createDetailSection(label, value, className = '') {
     if (value === null || value === undefined || String(value).trim() === '') return null;
     const section = createElement('div', `events-detail__section${className ? ` ${className}` : ''}`);
+    const valueEl = createElement('div', 'events-detail__section-value');
+    valueEl.append(renderMarkdown(String(value)));
     section.append(
       createElement('div', 'events-detail__section-label', label),
-      createElement('div', 'events-detail__section-value', String(value))
+      valueEl
     );
+    return section;
+  }
+
+  // ── createResponseSection ─────────────────────────────────────────────────
+  // Like createDetailSection but also strips and renders any inline <think>
+  // blocks as a collapsible reasoning disclosure widget above the main content.
+
+  function createResponseSection(label, value, className = '') {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+
+    const { content, thinking } = parseThinkingFromText(String(value));
+
+    const section = createElement('div', `events-detail__section${className ? ` ${className}` : ''}`);
+    section.append(createElement('div', 'events-detail__section-label', label));
+
+    // Reasoning block — only when the model emitted inline thinking.
+    if (thinking) {
+      const thinkWrap = document.createElement('details');
+      thinkWrap.className = 'chat-message__thinking';
+
+      const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
+      thinkSummary.append(
+        createIcon('thinking', 'chat-message__thinking-icon'),
+        createElement('span', 'chat-message__thinking-label', strings.labels.reasoning)
+      );
+      thinkWrap.append(thinkSummary);
+
+      const thinkBody = createElement('div', 'chat-message__thinking-body');
+      thinkBody.append(createElement('p', 'chat-message__thinking-text', thinking));
+      thinkWrap.append(thinkBody);
+
+      section.append(thinkWrap);
+    }
+
+    // Main response content rendered as markdown.
+    if (content.trim()) {
+      const valueEl = createElement('div', 'events-detail__section-value');
+      valueEl.append(renderMarkdown(content));
+      section.append(valueEl);
+    }
+
     return section;
   }
 
@@ -327,13 +375,13 @@ export function createEventsPanel(strings) {
     const sections = event.type === 'channel'
       ? [
         createDetailSection(strings.labels.inbound, event.primary),
-        createDetailSection(strings.labels.reply, event.secondary),
+        createResponseSection(strings.labels.reply, event.secondary),
         createDetailSection(strings.labels.error, event.error, 'events-detail__section--error')
       ]
       : [
         createDetailSection(strings.labels.prompt, event.primary),
         event.raw?.thinking ? createDetailSection(strings.labels.thinking, event.raw.thinking, 'events-detail__section--thinking') : null,
-        createDetailSection(strings.labels.response, event.secondary),
+        createResponseSection(strings.labels.response, event.secondary),
         createDetailSection(strings.labels.error, event.error, 'events-detail__section--error')
       ];
 
