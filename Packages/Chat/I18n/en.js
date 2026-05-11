@@ -119,6 +119,14 @@ const en = {
       list_directory: 'List directory',
       git_status: 'Git status',
       git_diff: 'Git diff',
+      git_branches: 'Git branches',
+      git_create_branch: 'Create Git branch',
+      git_checkout_branch: 'Checkout Git branch',
+      git_delete_branch: 'Delete Git branch',
+      git_pull: 'Git pull',
+      git_commit: 'Git commit',
+      git_push: 'Git push',
+      git_push_sync: 'Git pull and push',
       run_project_checks: 'Run project checks',
       start_local_server: 'Start local server',
       read_terminal_output: 'Read terminal output'
@@ -129,7 +137,8 @@ const en = {
       '```joanium-terminal',
       '{"tool":"run_shell_command","command":"npm test","working_directory":"D:/absolute/path","timeout_seconds":90,"allow_risky":false}',
       '```',
-      'Supported tools: run_shell_command, assess_shell_command, inspect_workspace, search_workspace, read_local_file, list_directory, git_status, git_diff, run_project_checks, start_local_server, read_terminal_output.',
+      'Supported tools: run_shell_command, assess_shell_command, inspect_workspace, search_workspace, read_local_file, list_directory, git_status, git_diff, git_branches, git_create_branch, git_checkout_branch, git_delete_branch, git_pull, git_commit, git_push, git_push_sync, run_project_checks, start_local_server, read_terminal_output.',
+      'Git mutation tools require allow_risky=true and should only be used when the user explicitly asks for that Git action. Project context sets the default working directory automatically.',
       'Use start_local_server for dev servers/watchers and read_terminal_output with the returned process id to inspect its output.',
       'Use absolute paths when you know them. Never request connector tools from terminal. After the terminal result is returned, give the user the final answer.'
     ].join('\n')

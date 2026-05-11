@@ -2,7 +2,7 @@ const googleStrings = {
   connector: {
     id: 'google',
     label: 'Google Workspace',
-    description: 'Gmail, Drive, Calendar, and account lookups. Enter your OAuth2 Client ID and Secret, then click Connect to sign in with Google.',
+    description: 'Google Workspace tools for Gmail, Drive, Calendar, Contacts, Docs, Forms, Photos, Sheets, Slides, Tasks, YouTube, and account lookups. Enter your OAuth2 Client ID and Secret, then click Connect to sign in with Google.',
     credentialKey: 'clientId',
     oauthChannel: 'connectors:google-oauth',
     optional: false,

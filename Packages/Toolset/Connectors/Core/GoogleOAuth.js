@@ -5,9 +5,18 @@ const GOOGLE_OAUTH_SCOPES = [
   'openid',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',
-  'https://www.googleapis.com/auth/gmail.readonly',
-  'https://www.googleapis.com/auth/drive.readonly',
-  'https://www.googleapis.com/auth/calendar.readonly'
+  'https://mail.google.com/',
+  'https://www.googleapis.com/auth/calendar',
+  'https://www.googleapis.com/auth/contacts',
+  'https://www.googleapis.com/auth/documents',
+  'https://www.googleapis.com/auth/drive',
+  'https://www.googleapis.com/auth/forms.body',
+  'https://www.googleapis.com/auth/forms.responses.readonly',
+  'https://www.googleapis.com/auth/photoslibrary.readonly',
+  'https://www.googleapis.com/auth/presentations',
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/tasks',
+  'https://www.googleapis.com/auth/youtube.force-ssl'
 ].join(' ');
 
 function startCallbackServer() {

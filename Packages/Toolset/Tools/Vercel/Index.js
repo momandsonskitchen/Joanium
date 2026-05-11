@@ -1,12 +1,20 @@
 import strings from './I18n/en.js';
 import { createVercelToolHandlers } from './Core/VercelTools.js';
+import { TOOL_DEFINITIONS } from './Tools.js';
+import { createVercelLegacyToolHandlers } from './Executors.js';
+import { buildVercelPromptSection } from './Prompt.js';
+import { mergeToolDefinitions } from '../Core/LegacyToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {
     id: 'vercel',
     connectors: [strings.connector],
-    toolDefinitions: strings.tools,
-    toolHandlers: createVercelToolHandlers({ rootDirectory })
+    toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
+    toolHandlers: {
+      ...createVercelLegacyToolHandlers({ rootDirectory }),
+      ...createVercelToolHandlers({ rootDirectory })
+    },
+    promptSections: [buildVercelPromptSection()]
   };
 }
 

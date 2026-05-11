@@ -1,4 +1,4 @@
-import { getTimeGreetings, isBirthdayToday, getBirthdayGreeting, isChristmasToday, getChristmasGreeting } from '../../../Datasets/Messages.js';
+import { getTimeGreetings, isBirthdayToday, getBirthdayGreeting, isChristmasToday, getChristmasGreeting, isNewYearToday, getNewYearGreeting } from '../../../Datasets/Messages.js';
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
@@ -923,6 +923,14 @@ const SUPPORTED_TERMINAL_TOOLS = new Set([
   'list_directory',
   'git_status',
   'git_diff',
+  'git_branches',
+  'git_create_branch',
+  'git_checkout_branch',
+  'git_delete_branch',
+  'git_pull',
+  'git_commit',
+  'git_push',
+  'git_push_sync',
   'run_project_checks',
   'start_local_server',
   'read_terminal_output'
@@ -1156,6 +1164,8 @@ function formatTerminalResultForModel(strings, action, result) {
   ];
 
   if (payload.command) lines.push(`Command: ${payload.command}`);
+  if (payload.branch) lines.push(`Branch: ${payload.branch}`);
+  if (payload.message) lines.push(`Message: ${payload.message}`);
   if (result?.cwd) lines.push(`Working directory: ${result.cwd}`);
   if (result?.path) lines.push(`Path: ${result.path}`);
   if (result?.root) lines.push(`Workspace: ${result.root}`);
@@ -1164,6 +1174,10 @@ function formatTerminalResultForModel(strings, action, result) {
   if (Number.isFinite(result?.exitCode)) {
     lines.push(formatText(strings.terminal.exitCode, { code: String(result.exitCode) }));
   }
+  if (result?.hint) lines.push(`Hint:\n${result.hint}`);
+  if (result?.category) lines.push(`Category: ${result.category}`);
+  if (result?.current) lines.push(`Current branch: ${result.current}`);
+  if (Array.isArray(result?.branches)) lines.push(`Branches:\n${result.branches.join('\n')}`);
   if (result?.error) lines.push(`${strings.terminal.errorLabel}:\n${result.error}`);
   if (result?.stdout) lines.push(`STDOUT:\n${result.stdout}`);
   if (result?.stderr) lines.push(`STDERR:\n${result.stderr}`);
@@ -1772,6 +1786,7 @@ export async function createChatView(strings, {
   const hour = new Date().getHours();
   const isBirthday = isBirthdayToday(profile.dateOfBirth);
   const isChristmas = !isBirthday && isChristmasToday();
+  const isNewYear  = !isBirthday && !isChristmas && isNewYearToday();
   const greetings = getTimeGreetings(hour, firstName);
 
   let activeProvider = getPreferredProvider(payload);
@@ -2874,6 +2889,65 @@ export async function createChatView(strings, {
       });
     }
 
+    if (action.tool === 'git_branches') {
+      return invokeIpc('terminal:git-branches', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path)
+      });
+    }
+
+    if (action.tool === 'git_create_branch') {
+      return invokeIpc('terminal:git-create-branch', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        branch: payload.branch,
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'git_checkout_branch') {
+      return invokeIpc('terminal:git-checkout-branch', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        branch: payload.branch,
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'git_delete_branch') {
+      return invokeIpc('terminal:git-delete-branch', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        branch: payload.branch,
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'git_pull') {
+      return invokeIpc('terminal:git-pull', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'git_commit') {
+      return invokeIpc('terminal:git-commit', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        message: payload.message,
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'git_push') {
+      return invokeIpc('terminal:git-push', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
+    if (action.tool === 'git_push_sync') {
+      return invokeIpc('terminal:git-push-sync', {
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
+        allowRisky: payload.allow_risky === true
+      });
+    }
+
     if (action.tool === 'run_project_checks') {
       return invokeIpc('terminal:run-project-checks', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
@@ -2913,7 +2987,7 @@ export async function createChatView(strings, {
         '3. Risks or uncertainties',
         '4. Best next recommendation'
       ].join('\n'),
-      'Stay read-only. Do not claim you modified files or took external actions.'
+      'Use tools only for read-only investigation. Do not modify files, mutate external services, or claim you changed anything.'
     ].filter(Boolean).join('\n\n');
   }
 
@@ -2960,6 +3034,106 @@ export async function createChatView(strings, {
     return lines.join('\n');
   }
 
+  async function runSubAgentConversation({ conversationContext, prompt, memoryContext }) {
+    const localMessages = [
+      ...conversationContext,
+      {
+        role: 'user',
+        content: prompt
+      }
+    ];
+    const toolsetTools = await loadToolsetPrompt();
+    let usage = { input: 0, output: 0 };
+    let lastMeta = {};
+
+    for (let depth = 0; depth <= MAX_TERMINAL_TOOL_CALLS; depth += 1) {
+      const result = await invokeIpc('chat:complete-message', {
+        messages: localMessages,
+        providerId: activeProvider?.id ?? null,
+        modelId: activeModel?.id ?? null,
+        memoryContext: memoryContext || null,
+        projectInfo: buildProjectContext(activeProject) || null,
+        persona: (getActivePersona?.() ?? activePersona)?.content || null,
+        modeInstruction: getModeInstruction(),
+        terminalTools: strings.terminal.systemPrompt,
+        toolsetTools: toolsetTools || null,
+        isNewSession: false
+      });
+
+      usage = {
+        input: usage.input + (result?.charCountIn ?? 0),
+        output: usage.output + (result?.charCountOut ?? 0)
+      };
+      lastMeta = result ?? {};
+
+      const { content: parsedContent } = parseThinkingFromText(String(result?.text ?? ''));
+      const terminalAction = parseTerminalToolRequest(parsedContent);
+      const toolsetAction = terminalAction ? null : parseToolsetToolRequest(parsedContent);
+
+      if (!terminalAction && !toolsetAction) {
+        return {
+          ...lastMeta,
+          text: parsedContent || strings.composer.emptyResponse,
+          charCountIn: usage.input,
+          charCountOut: usage.output
+        };
+      }
+
+      if (depth >= MAX_TERMINAL_TOOL_CALLS) {
+        return {
+          ...lastMeta,
+          text: stripNativeToolCalls(parsedContent) || strings.terminal.unsupportedTool,
+          charCountIn: usage.input,
+          charCountOut: usage.output
+        };
+      }
+
+      let modelResult;
+
+      if (terminalAction) {
+        const terminalResult = await executeTerminalTool(terminalAction).catch((error) => ({
+          ok: false,
+          error: error?.message ?? String(error)
+        }));
+        modelResult = formatTerminalResultForModel(strings, terminalAction, terminalResult);
+        localMessages.push({
+          role: 'assistant',
+          content: stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool
+        });
+      } else {
+        const toolsetResult = toolsetAction.tool === 'spawn_sub_agents'
+          ? {
+              ok: false,
+              tool: toolsetAction.tool,
+              error: 'Nested sub-agents are not available inside a sub-agent task.'
+            }
+          : await executeToolsetTool(toolsetAction).catch((error) => ({
+              ok: false,
+              tool: toolsetAction.tool,
+              error: error?.message ?? String(error)
+            }));
+        modelResult = formatToolsetResultForModel(toolsetAction, toolsetResult);
+        localMessages.push({
+          role: 'assistant',
+          content: stripNativeToolCalls(toolsetAction.visibleContent) || strings.tools.runningTool
+        });
+      }
+
+      localMessages.push({
+        role: 'user',
+        content: modelResult
+      });
+    }
+
+    return {
+      text: strings.composer.emptyResponse,
+      charCountIn: usage.input,
+      charCountOut: usage.output,
+      providerLabel: lastMeta.providerLabel ?? '',
+      modelLabel: lastMeta.modelLabel ?? ''
+    };
+  }
+
   async function executeSubAgentTool(action, onProgress) {
     const payload = action?.payload ?? {};
     const tasks = normalizeSubAgentTasks(payload.parameters?.tasks ?? payload.tasks);
@@ -2985,21 +3159,10 @@ export async function createChatView(strings, {
       onProgress?.(index, { status: 'running', prompt });
 
       try {
-        const result = await invokeIpc('chat:complete-message', {
-          messages: [
-            ...conversationContext,
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          providerId: activeProvider?.id ?? null,
-          modelId: activeModel?.id ?? null,
-          memoryContext: memoryContext || null,
-          projectInfo: buildProjectContext(activeProject) || null,
-          persona: (getActivePersona?.() ?? activePersona)?.content || null,
-          modeInstruction: getModeInstruction(),
-          isNewSession: false
+        const result = await runSubAgentConversation({
+          conversationContext,
+          prompt,
+          memoryContext
         });
 
         const agentResult = {
@@ -3065,6 +3228,14 @@ export async function createChatView(strings, {
     if (result?.stderr) parts.push(result.stderr);
     if (result?.error) parts.push(result.error);
     if (result?.summary) parts.push(JSON.stringify(result.summary, null, 2));
+    if (result?.hint) parts.push(result.hint);
+    if (result?.category) parts.push(`Category: ${result.category}`);
+    if (result?.current || Array.isArray(result?.branches)) {
+      parts.push([
+        result.current ? `Current branch: ${result.current}` : '',
+        Array.isArray(result.branches) ? `Branches:\n${result.branches.join('\n')}` : ''
+      ].filter(Boolean).join('\n'));
+    }
     if (Array.isArray(result?.matches)) parts.push(JSON.stringify(result.matches, null, 2));
     if (Array.isArray(result?.entries)) parts.push(JSON.stringify(result.entries, null, 2));
     if (result?.content) parts.push(result.content);
@@ -3568,6 +3739,8 @@ export async function createChatView(strings, {
     ? getBirthdayGreeting(firstName)
     : isChristmas
     ? getChristmasGreeting(firstName)
+    : isNewYear
+    ? getNewYearGreeting(firstName)
     : greetings[Math.floor(Math.random() * greetings.length)];
   const greeting = rawGreeting.replace(/\s(\S+\s*)$/, '\u00A0$1');
   title = createElement('h1', 'chat-stage__title', greeting);

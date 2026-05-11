@@ -1,0 +1,12 @@
+export * as GoogleApiFetch from './Core/API/GoogleApiFetch.js';
+export * as CalendarAPI from './Calendar/Core/API/CalendarAPI.js';
+export * as ContactsAPI from './Contacts/Core/API/ContactsAPI.js';
+export * as DocsAPI from './Docs/Core/API/DocsAPI.js';
+export * as DriveAPI from './Drive/Core/API/DriveApi.js';
+export * as FormsAPI from './Forms/Core/API/FormsAPI.js';
+export * as GmailAPI from './Gmail/Core/API/GmailAPI.js';
+export * as PhotosAPI from './Photos/Core/API/PhotosAPI.js';
+export * as SheetsAPI from './Sheets/Core/API/SheetsAPI.js';
+export * as SlidesAPI from './Slides/Core/API/SlidesAPI.js';
+export * as TasksAPI from './Tasks/Core/API/TasksAPI.js';
+export * as YouTubeAPI from './Youtube/Core/API/YouTubeAPI.js';

@@ -158,6 +158,38 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, payload) => terminalService.gitDiff(payload)
       },
       {
+        channel: 'terminal:git-branches',
+        handler: async (_event, payload) => terminalService.gitBranches(payload)
+      },
+      {
+        channel: 'terminal:git-create-branch',
+        handler: async (_event, payload) => terminalService.gitCreateBranch(payload)
+      },
+      {
+        channel: 'terminal:git-checkout-branch',
+        handler: async (_event, payload) => terminalService.gitCheckoutBranch(payload)
+      },
+      {
+        channel: 'terminal:git-delete-branch',
+        handler: async (_event, payload) => terminalService.gitDeleteBranch(payload)
+      },
+      {
+        channel: 'terminal:git-pull',
+        handler: async (_event, payload) => terminalService.gitPull(payload)
+      },
+      {
+        channel: 'terminal:git-commit',
+        handler: async (_event, payload) => terminalService.gitCommit(payload)
+      },
+      {
+        channel: 'terminal:git-push',
+        handler: async (_event, payload) => terminalService.gitPush(payload)
+      },
+      {
+        channel: 'terminal:git-push-sync',
+        handler: async (_event, payload) => terminalService.gitPushSync(payload)
+      },
+      {
         channel: 'terminal:run-project-checks',
         handler: async (_event, payload) => terminalService.runProjectChecks(payload)
       },

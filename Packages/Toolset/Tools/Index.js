@@ -1,8 +1,9 @@
-import { readdir } from 'node:fs/promises';
+import { access, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const toolsDirectory = path.dirname(fileURLToPath(import.meta.url));
+const NON_PACKAGE_DIRECTORIES = new Set(['Core']);
 
 function normalizeConnector(connector = {}) {
   if (!connector.id) return null;
@@ -35,8 +36,12 @@ export async function discoverToolPackages({ rootDirectory } = {}) {
 
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     if (!entry.isDirectory()) continue;
+    if (NON_PACKAGE_DIRECTORIES.has(entry.name)) continue;
 
     const packageIndex = path.join(toolsDirectory, entry.name, 'Index.js');
+    const hasIndex = await access(packageIndex).then(() => true).catch(() => false);
+    if (!hasIndex) continue;
+
     const imported = await import(pathToFileURL(packageIndex).href).catch(() => null);
     const createToolPackage = imported?.createToolPackage ?? imported?.default;
     if (typeof createToolPackage !== 'function') continue;

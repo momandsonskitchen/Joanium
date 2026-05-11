@@ -1,13 +1,13 @@
-import {
-  createPublicDataToolHandlers,
-  PUBLIC_DATA_TOOL_DEFINITIONS
-} from './Core/PublicDataTools.js';
+import { TOOL_DEFINITIONS } from './Tools.js';
+import { createPublicDataToolHandlers } from './Executors.js';
+import { buildPublicDataPromptSection } from './Prompt.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {
     id: 'public-data',
-    toolDefinitions: PUBLIC_DATA_TOOL_DEFINITIONS,
-    toolHandlers: createPublicDataToolHandlers({ rootDirectory })
+    toolDefinitions: TOOL_DEFINITIONS,
+    toolHandlers: createPublicDataToolHandlers({ rootDirectory }),
+    promptSections: [buildPublicDataPromptSection()]
   };
 }
 

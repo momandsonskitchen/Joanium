@@ -870,7 +870,7 @@ async function getWhoisInfo(params) {
     `Handle: ${data.handle ?? 'n/a'}`,
     `Status: ${(data.status ?? []).join(', ') || 'n/a'}`,
     `Created: ${events.registration ?? events.creation ?? 'n/a'}`,
-    `Updated: ${events.last changed ?? events.lastChanged ?? 'n/a'}`,
+    `Updated: ${events['last changed'] ?? events.lastChanged ?? 'n/a'}`,
     `Expires: ${events.expiration ?? 'n/a'}`,
     `Nameservers: ${nameservers.join(', ') || 'n/a'}`
   ].join('\n');
