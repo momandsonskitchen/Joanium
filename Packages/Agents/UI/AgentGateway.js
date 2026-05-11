@@ -329,7 +329,9 @@ async function runAgentWithTools({
   terminalTools,
   toolsetTools,
   providerId,
-  modelId
+  modelId,
+  onProgress,
+  streamChat
 }) {
   let providerLabel   = null;
   let modelLabel      = null;
@@ -354,7 +356,7 @@ async function runAgentWithTools({
     if (providerId) request.providerId = providerId;
     if (modelId)    request.modelId    = modelId;
 
-    const result = await invokeIpc('chat:complete-message', request);
+    const result = await streamChat(request, { onProgress, depth });
 
     providerLabel  = result?.providerLabel ?? result?.providerId ?? providerLabel;
     modelLabel     = result?.modelLabel    ?? result?.modelId    ?? modelLabel;
@@ -365,6 +367,13 @@ async function runAgentWithTools({
 
     const terminalAction = parseTerminalToolRequest(finalText);
     const toolsetAction  = terminalAction ? null : parseToolsetToolRequest(finalText);
+
+    // Update tool name / depth in the log now that we know which tool was
+    // requested (mid-stream progress already wrote the partial text).
+    if (typeof onProgress === 'function') {
+      const currentTool = (terminalAction || toolsetAction)?.tool ?? null;
+      onProgress({ text: finalText, toolName: currentTool, depth }).catch?.(() => {});
+    }
 
     // No tool call — we have the final answer.
     if (!terminalAction && !toolsetAction) {
@@ -426,6 +435,70 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
   let dispose       = null;
   let toolsetPrompt = null;
 
+  // ── Agent stream demuxer ──────────────────────────────────────────────────
+  // Each streamChatForAgent call gets a unique streamId. Main-process events
+  // carry that id so concurrent tool-loop rounds don’t mix up their chunks.
+  let nextStreamId      = 0;
+  const pendingStreams   = new Map();
+  let disposeChunk      = null;
+  let disposeDone       = null;
+  let disposeStreamErr  = null;
+
+  function setupStreamListeners() {
+    disposeChunk = onIpc('agents:stream-chunk', ({ streamId, type, text }) => {
+      const s = pendingStreams.get(streamId);
+      if (!s) return;
+
+      if (type === 'text')    s.text    += text;
+      if (type === 'thinking') s.thinking += text;
+
+      // Throttle log writes to at most once per second so we don’t hammer disk.
+      const now = Date.now();
+      if (s.onProgress && now - s.lastProgressAt >= 1000) {
+        s.lastProgressAt = now;
+        s.onProgress({ text: s.text, toolName: null, depth: s.depth }).catch?.(() => {});
+      }
+    });
+
+    disposeDone = onIpc('agents:stream-done', (payload) => {
+      const s = pendingStreams.get(payload.streamId);
+      if (!s) return;
+      pendingStreams.delete(payload.streamId);
+      const { streamId: _sid, ...meta } = payload;
+      s.resolve({ text: s.text, thinking: s.thinking, ...meta });
+    });
+
+    disposeStreamErr = onIpc('agents:stream-error', ({ streamId, message }) => {
+      const s = pendingStreams.get(streamId);
+      if (!s) return;
+      pendingStreams.delete(streamId);
+      s.reject(new Error(message ?? 'Agent stream error.'));
+    });
+  }
+
+  function teardownStreamListeners() {
+    disposeChunk?.();     disposeChunk     = null;
+    disposeDone?.();      disposeDone      = null;
+    disposeStreamErr?.(); disposeStreamErr = null;
+  }
+
+  // Replaces invokeIpc('chat:complete-message') with a proper streaming call
+  // so tokens appear in the Events panel as they’re generated, not all at once.
+  function streamChatForAgent(request, { onProgress, depth } = {}) {
+    const streamId = `agent-${++nextStreamId}`;
+    return new Promise((resolve, reject) => {
+      pendingStreams.set(streamId, {
+        text: '', thinking: '', resolve, reject,
+        onProgress: onProgress ?? null,
+        depth:      depth      ?? 0,
+        lastProgressAt: 0
+      });
+      // Fire-and-forget — the handler returns null immediately; actual data
+      // arrives through agents:stream-chunk / done / error events above.
+      invokeIpc('chat:stream-message-agent', { ...request, streamId }).catch(reject);
+    });
+  }
+
   async function processRun({ id, agentName, prompt, providerId, modelId }) {
     const activePersona = getActivePersona?.() ?? null;
 
@@ -442,6 +515,8 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       strings.gateway?.agentContext ?? ''
     ].filter((part) => String(part ?? '').trim());
 
+    const onProgress = (data) => invokeIpc('agents:progress', id, data);
+
     let result;
     try {
       result = await runAgentWithTools({
@@ -451,7 +526,9 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
         terminalTools: chatStrings.terminal?.systemPrompt ?? '',
         toolsetTools:  toolsetPrompt || '',
         providerId:    providerId ?? null,
-        modelId:       modelId    ?? null
+        modelId:       modelId    ?? null,
+        onProgress,
+        streamChat:    (req, opts) => streamChatForAgent(req, opts)
       });
     } catch (error) {
       result = {
@@ -478,8 +555,17 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       if (started) return;
       started = true;
 
+      setupStreamListeners();
+
       dispose = onIpc('agents:run-with-tools', (payload) => {
         void processRun(payload);
+      });
+
+      // Signal the main process that the run-with-tools listener is live.
+      // The scheduler holds startup agents until this resolves so the
+      // webContents.send never fires into a void.
+      invokeIpc('agents:renderer-ready').catch((err) => {
+        console.error('[AgentGateway] Failed to signal renderer-ready:', err);
       });
     },
 
@@ -487,6 +573,7 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       dispose?.();
       dispose  = null;
       started  = false;
+      teardownStreamListeners();
     }
   };
 }

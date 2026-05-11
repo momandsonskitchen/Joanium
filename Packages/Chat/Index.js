@@ -64,6 +64,63 @@ export async function createPackage({ rootDirectory }) {
           return null;
         }
       },
+
+      // ── Agent streaming ──────────────────────────────────────────────────────
+      // Like chat:stream-message but routes chunks to agents:stream-* channels
+      // so agent token events don’t collide with the chat UI stream.
+      // Each call carries a streamId that is echoed in every event so
+      // concurrent agent tool-loop rounds can be demuxed in the renderer.
+      {
+        channel: 'chat:stream-message-agent',
+        handler: (event, request) => {
+          const { streamId } = request;
+
+          chatStateManager
+            .streamMessage(request, {
+              onChunk: (chunk) => {
+                if (!event.sender.isDestroyed()) {
+                  event.sender.send('agents:stream-chunk', { streamId, ...chunk });
+                }
+              },
+              onDone: (meta) => {
+                if (!event.sender.isDestroyed()) {
+                  event.sender.send('agents:stream-done', { streamId, ...meta });
+                }
+
+                const tokensIn  = estimateTokens(meta?.charCountIn  ?? 0);
+                const tokensOut = estimateTokens(meta?.charCountOut ?? 0);
+                if ((tokensIn + tokensOut) > 0) {
+                  usageTracker.recordExchange({
+                    tokensIn,
+                    tokensOut,
+                    modelId:       meta?.modelId       ?? null,
+                    modelLabel:    meta?.modelLabel    ?? null,
+                    providerLabel: meta?.providerLabel ?? null,
+                    isNewSession:  Boolean(request?.isNewSession)
+                  }).catch(() => {});
+                }
+              },
+              onError: (error) => {
+                if (!event.sender.isDestroyed()) {
+                  event.sender.send('agents:stream-error', {
+                    streamId,
+                    message: error?.message ?? String(error)
+                  });
+                }
+              }
+            })
+            .catch((error) => {
+              if (!event.sender.isDestroyed()) {
+                event.sender.send('agents:stream-error', {
+                  streamId,
+                  message: error?.message ?? String(error)
+                });
+              }
+            });
+
+          return null;
+        }
+      },
       {
         channel: 'chat:complete-message',
         handler: async (_event, request) => {

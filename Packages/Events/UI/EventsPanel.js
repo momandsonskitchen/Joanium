@@ -75,6 +75,8 @@ function normalizeAgentRun(run, strings, index) {
     model: run.model ?? null,
     tokensIn: run.inputTokens ?? 0,
     tokensOut: run.outputTokens ?? 0,
+    streamTool: run.streamTool ?? null,
+    streamDepth: run.streamDepth ?? 0,
     avatarUrl: toFileUrl(run.agentAvatarPath ?? null),
     channelKey: null,
     raw: run
@@ -372,6 +374,22 @@ export function createEventsPanel(strings) {
 
     detailEl.append(header, metaGrid);
 
+    // ── Streaming indicator for in-progress agent runs ──────────────────────────
+    if (event.status === 'running') {
+      const streamEl = createElement('div', 'events-detail__stream');
+      streamEl.append(createElement('span', 'events-detail__stream-dot'));
+
+      let label = strings.status.running;
+      if (event.streamTool) {
+        label += ` · ${event.streamTool}`;
+      }
+      if (event.streamDepth > 0) {
+        label += ` (${event.streamDepth})`;
+      }
+      streamEl.append(createElement('span', 'events-detail__stream-label', label));
+      detailEl.append(streamEl);
+    }
+
     const sections = event.type === 'channel'
       ? [
         createDetailSection(strings.labels.inbound, event.primary),
@@ -381,7 +399,7 @@ export function createEventsPanel(strings) {
       : [
         createDetailSection(strings.labels.prompt, event.primary),
         event.raw?.thinking ? createDetailSection(strings.labels.thinking, event.raw.thinking, 'events-detail__section--thinking') : null,
-        createResponseSection(strings.labels.response, event.secondary),
+        createResponseSection(strings.labels.response, event.secondary, event.status === 'running' ? 'events-detail__section--live' : ''),
         createDetailSection(strings.labels.error, event.error, 'events-detail__section--error')
       ];
 

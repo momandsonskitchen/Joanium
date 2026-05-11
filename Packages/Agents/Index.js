@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { readdir, mkdir, writeFile } from 'node:fs/promises';
+import { readdir, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { BrowserWindow } from 'electron';
 import { createAgentStateManager } from './Core/AgentState.js';
 import { createAgentScheduler } from './Core/AgentScheduler.js';
@@ -37,11 +37,25 @@ export async function createPackage({ rootDirectory }) {
 
   const pendingRuns = new Map();
 
+  // ── Renderer-ready gate ────────────────────────────────────────────────────
+  // Startup agents must not fire until AgentGateway has registered its
+  // `agents:run-with-tools` listener in the renderer.  AgentGateway calls
+  // `agents:renderer-ready` from its `start()` method; the scheduler awaits
+  // `waitForRendererReady()` before dispatching any startup agents.
+  let resolveRendererReady = null;
+  const rendererReadyPromise = new Promise((resolve) => {
+    resolveRendererReady = resolve;
+  });
+
+  function waitForRendererReady() {
+    return rendererReadyPromise;
+  }
+
   function getAppWindow() {
     return BrowserWindow.getAllWindows().find((w) => !w.isDestroyed()) ?? null;
   }
 
-  function requestAgentRun(agent) {
+  function requestAgentRun(agent, logPath) {
     return new Promise((resolve, reject) => {
       const window = getAppWindow();
       if (!window) {
@@ -63,7 +77,8 @@ export async function createPackage({ rootDirectory }) {
 
       pendingRuns.set(id, {
         resolve: (result) => { clearTimeout(timer); resolve(result); },
-        reject:  (error)  => { clearTimeout(timer); reject(error);  }
+        reject:  (error)  => { clearTimeout(timer); reject(error);  },
+        logPath: logPath ?? null
       });
 
       window.webContents.send('agents:run-with-tools', {
@@ -164,7 +179,7 @@ export async function createPackage({ rootDirectory }) {
     let errorMessage = null;
 
     try {
-      aiResult = await requestAgentRun(agent);
+      aiResult = await requestAgentRun(agent, logPath);
     } catch (err) {
       status       = 'error';
       errorMessage = err?.message ?? String(err);
@@ -196,7 +211,7 @@ export async function createPackage({ rootDirectory }) {
     console.error('[Agents] Failed to recover interrupted runs:', err)
   );
 
-  scheduler.start().catch((err) =>
+  scheduler.start({ onReady: waitForRendererReady }).catch((err) =>
     console.error('[Agents] Scheduler start error:', err)
   );
 
@@ -205,6 +220,18 @@ export async function createPackage({ rootDirectory }) {
   return {
     id: 'Agents',
     ipcHandlers: [
+      // ── Renderer-ready handshake ─────────────────────────────────────────
+      // AgentGateway calls this once its `agents:run-with-tools` listener is
+      // live.  Resolving here unblocks the startup-agent queue in the
+      // scheduler, guaranteeing the event is never sent into a void.
+      {
+        channel: 'agents:renderer-ready',
+        handler: () => {
+          resolveRendererReady?.();
+          return { ok: true };
+        }
+      },
+
       // ── Tool-loop reply from AgentGateway (renderer) ─────────────────────
       {
         channel: 'agents:tool-reply',
@@ -214,6 +241,30 @@ export async function createPackage({ rootDirectory }) {
           pendingRuns.delete(id);
           pending.resolve(result);
           return { ok: true };
+        }
+      },
+
+      // ── Streaming progress from AgentGateway (renderer) ──────────────────
+      // Written into the run log so the Events panel picks it up on its
+      // next poll without any extra IPC wiring on the renderer side.
+      {
+        channel: 'agents:progress',
+        handler: async (_event, id, { text, toolName, depth } = {}) => {
+          const pending = pendingRuns.get(id);
+          if (!pending?.logPath) return { ok: false };
+          try {
+            const raw = await readFile(pending.logPath, 'utf8');
+            const log = JSON.parse(raw);
+            await writeFile(pending.logPath, JSON.stringify({
+              ...log,
+              fullResponse: text     ?? '',
+              streamTool:  toolName ?? null,
+              streamDepth: depth    ?? 0
+            }, null, 2), 'utf8');
+            return { ok: true };
+          } catch {
+            return { ok: false };
+          }
         }
       },
 

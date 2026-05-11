@@ -132,10 +132,14 @@ export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) 
   // ── Public API ────────────────────────────────────────────────────────────
 
   return {
-    async start() {
-      // Wait for the rest of the app (IPC, windows, AgentGateway) to be
-      // fully initialised before making any AI calls.
-      await delay(2000);
+    async start({ onReady } = {}) {
+      // Wait for AgentGateway in the renderer to signal it is ready before
+      // dispatching any startup agents.  This replaces the old blind 2-second
+      // delay: however long the renderer takes to boot, startup agents will
+      // always find a live listener on the other end.
+      if (typeof onReady === 'function') {
+        await onReady();
+      }
 
       const agents        = await loadAllAgents();
       const startupAgents = agents.filter(
