@@ -1779,7 +1779,10 @@ export async function createChatView(strings, {
 } = {}) {
   initCompletionSound();
 
-  const payload = await invokeIpc('chat:bootstrap');
+  const [payload, appSettings] = await Promise.all([
+    invokeIpc('chat:bootstrap'),
+    invokeIpc('app-settings:get').catch(() => null)
+  ]);
   const view = createElement('div', 'chat-view');
   const profile = getProfile?.() ?? payload.user?.profile ?? {};
   const firstName = getFirstName(profile.name, strings.appName);
@@ -1789,9 +1792,29 @@ export async function createChatView(strings, {
   const isNewYear  = !isBirthday && !isChristmas && isNewYearToday();
   const greetings = getTimeGreetings(hour, firstName);
 
-  let activeProvider = getPreferredProvider(payload);
-  let activeModel = activeProvider?.models?.[0] ?? null;
-  let activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
+  // Resolve the active provider/model. A user-configured default model (set
+  // in App Settings) takes precedence; if none is set we fall back to the
+  // auto-detected preferred provider.
+  let activeProvider = null;
+  let activeModel = null;
+  let activeModelLabel = strings.composer.modelFallback;
+
+  const dm = appSettings?.defaultModel;
+  if (dm?.providerId && dm?.modelId) {
+    const dmProvider = payload.providers.find((p) => p.id === dm.providerId) ?? null;
+    const dmModel = dmProvider?.models?.find((m) => m.id === dm.modelId) ?? null;
+    if (dmProvider && dmModel) {
+      activeProvider = dmProvider;
+      activeModel = dmModel;
+      activeModelLabel = dmModel.name ?? dmModel.id;
+    }
+  }
+
+  if (!activeProvider) {
+    activeProvider = getPreferredProvider(payload);
+    activeModel = activeProvider?.models?.[0] ?? null;
+    activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
+  }
   let activePersona = getActivePersona?.() ?? null;
   let activeProject = getActiveProject?.() ?? null;
   let draftValue = '';
@@ -2179,6 +2202,7 @@ export async function createChatView(strings, {
             activeProvider = provider;
             activeModel = model;
             activeModelLabel = model.name ?? model.id;
+            userOverrodeModel = true;
             const labelEl = triggerButton.querySelector('.chat-composer__model-label');
             if (labelEl) labelEl.textContent = activeModelLabel;
             syncPickerActiveStates();
@@ -3891,6 +3915,43 @@ export async function createChatView(strings, {
   applyActiveProject(activeProject);
   syncComposer();
   renderThread();
+
+  // ── React to default-model changes made in App Settings ──────────────────
+  // When the user saves a new default model, update the active provider/model
+  // and the composer button label so the UI stays in sync without requiring a
+  // full reload. Only applies when the user has not manually picked a different
+  // model in the current session (tracked via the userOverrodeModel flag).
+  let userOverrodeModel = Boolean(appSettings?.defaultModel);
+
+  function applyDefaultModelFromSettings(settings) {
+    const dm = settings?.defaultModel;
+    const dmProvider = dm?.providerId
+      ? payload.providers.find((p) => p.id === dm.providerId) ?? null
+      : null;
+    const dmModel = dmProvider?.models?.find((m) => m.id === dm?.modelId) ?? null;
+
+    if (dmProvider && dmModel) {
+      activeProvider = dmProvider;
+      activeModel = dmModel;
+      activeModelLabel = dmModel.name ?? dmModel.id;
+    } else {
+      // Default model was cleared or is no longer available — fall back.
+      activeProvider = getPreferredProvider(payload);
+      activeModel = activeProvider?.models?.[0] ?? null;
+      activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
+    }
+
+    // Sync the composer button label.
+    const labelEl = modelButton?.querySelector('.chat-composer__model-label');
+    if (labelEl) labelEl.textContent = activeModelLabel;
+  }
+
+  window.addEventListener('joanium:app-settings-changed', (event) => {
+    // Always honour an explicit change from settings — it means the user
+    // intentionally picked a model there, so override any in-chat selection.
+    userOverrodeModel = false;
+    applyDefaultModelFromSettings(event.detail);
+  });
 
   return {
     element: view,

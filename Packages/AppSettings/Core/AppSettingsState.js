@@ -5,8 +5,21 @@ const DEFAULT_SETTINGS = Object.freeze({
   systemTray: false,
   keepAwake: false,
   completionSound: true,
-  defaultView: 'chat'
+  defaultView: 'chat',
+  defaultModel: null
 });
+
+function normalizeDefaultModel(candidate) {
+  if (
+    candidate &&
+    typeof candidate === 'object' &&
+    typeof candidate.providerId === 'string' && candidate.providerId.trim() &&
+    typeof candidate.modelId === 'string' && candidate.modelId.trim()
+  ) {
+    return { providerId: candidate.providerId.trim(), modelId: candidate.modelId.trim() };
+  }
+  return null;
+}
 
 function normalizeSettings(candidate = {}) {
   return {
@@ -14,7 +27,8 @@ function normalizeSettings(candidate = {}) {
     systemTray: Boolean(candidate.systemTray ?? DEFAULT_SETTINGS.systemTray),
     keepAwake: Boolean(candidate.keepAwake ?? DEFAULT_SETTINGS.keepAwake),
     completionSound: Boolean(candidate.completionSound ?? DEFAULT_SETTINGS.completionSound),
-    defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView
+    defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView,
+    defaultModel: normalizeDefaultModel(candidate.defaultModel)
   };
 }
 

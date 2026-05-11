@@ -36,6 +36,10 @@ const en = {
       usage:       'Usage'
     }
   },
+  defaultModel: {
+    label: 'Default model',
+    description: 'The AI model used by default when starting a new conversation.'
+  },
   runtime: {
     title: 'Runtime',
     tray: 'Tray',

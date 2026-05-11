@@ -49,7 +49,8 @@ export function createDefaultUserState() {
       systemTray: false,
       keepAwake: false,
       completionSound: true,
-      defaultView: 'chat'
+      defaultView: 'chat',
+      defaultModel: null
     },
     theme: {
       mode: 'system',
@@ -199,6 +200,18 @@ const VALID_DEFAULT_VIEWS = new Set([
   'personas', 'marketplace', 'events', 'usage'
 ]);
 
+function sanitizeDefaultModel(candidate) {
+  if (
+    candidate &&
+    typeof candidate === 'object' &&
+    typeof candidate.providerId === 'string' && candidate.providerId.trim() &&
+    typeof candidate.modelId === 'string' && candidate.modelId.trim()
+  ) {
+    return { providerId: candidate.providerId.trim(), modelId: candidate.modelId.trim() };
+  }
+  return null;
+}
+
 function sanitizeAppSettings(candidate) {
   const defaults = createDefaultUserState().appSettings;
   if (!candidate || typeof candidate !== 'object') return defaults;
@@ -208,7 +221,8 @@ function sanitizeAppSettings(candidate) {
     systemTray: Boolean(candidate.systemTray ?? candidate.system_tray ?? defaults.systemTray),
     keepAwake: Boolean(candidate.keepAwake ?? candidate.keep_awake ?? defaults.keepAwake),
     completionSound: Boolean(candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound),
-    defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView
+    defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView,
+    defaultModel: sanitizeDefaultModel(candidate.defaultModel)
   };
 }
 
