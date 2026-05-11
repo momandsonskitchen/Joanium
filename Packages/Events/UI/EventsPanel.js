@@ -452,19 +452,9 @@ export function createEventsPanel(strings) {
     panel.hidden = true;
 
     // ── Header ───────────────────────────────────────────────────────────────
-    const clearButton = createElement('button', 'events-action events-action--danger');
-    clearButton.type = 'button';
-    clearButton.setAttribute('aria-label', strings.actions.clearAll);
-    clearButton.append(createIcon('trash', 'events-action__icon'), createElement('span', 'events-action__label', strings.actions.clear));
-    clearButton.addEventListener('click', () => { void clearEvents(); });
-
-    const headerActions = createElement('div', 'events__actions');
-    headerActions.append(clearButton);
-
     const header = createPanelHeader({
       title: strings.title,
-      subtitle: strings.subtitle,
-      actions: [headerActions]
+      subtitle: strings.subtitle
     });
 
     // ── Stats ─────────────────────────────────────────────────────────────────
@@ -496,6 +486,13 @@ export function createEventsPanel(strings) {
       filterButtons.set(filter, button);
       filters.append(button);
     }
+
+    const clearButton = createElement('button', 'events-filter__clear');
+    clearButton.type = 'button';
+    clearButton.setAttribute('aria-label', strings.actions.clearAll);
+    clearButton.textContent = strings.actions.clear;
+    clearButton.addEventListener('click', () => { void clearEvents(); });
+    filters.append(clearButton);
 
     const body = createElement('div', 'events__body');
     const feed = createElement('section', 'events-feed');
