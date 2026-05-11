@@ -1,4 +1,4 @@
-import { getTimeGreetings } from '../../../Datasets/Messages.js';
+import { getTimeGreetings, isBirthdayToday, getBirthdayGreeting } from '../../../Datasets/Messages.js';
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
@@ -1770,6 +1770,7 @@ export async function createChatView(strings, {
   const profile = getProfile?.() ?? payload.user?.profile ?? {};
   const firstName = getFirstName(profile.name, strings.appName);
   const hour = new Date().getHours();
+  const isBirthday = isBirthdayToday(profile.dateOfBirth);
   const greetings = getTimeGreetings(hour, firstName);
 
   let activeProvider = getPreferredProvider(payload);
@@ -3562,7 +3563,9 @@ export async function createChatView(strings, {
 
   scroll = createElement('div', 'chat-stage__scroll');
   bottom = createElement('div', 'chat-stage__bottom');
-  const rawGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+  const rawGreeting = isBirthday
+    ? getBirthdayGreeting(firstName)
+    : greetings[Math.floor(Math.random() * greetings.length)];
   const greeting = rawGreeting.replace(/\s(\S+\s*)$/, '\u00A0$1');
   title = createElement('h1', 'chat-stage__title', greeting);
   thread = createElement('section', 'chat-thread');

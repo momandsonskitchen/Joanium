@@ -1,3 +1,80 @@
+// ── Birthday helpers ──────────────────────────────────────────────────────
+
+/**
+ * Returns true when today's date matches the user's stored date of birth.
+ * Only day + month are compared; year is irrelevant for the birthday check.
+ */
+export function isBirthdayToday(dateOfBirth) {
+  if (!dateOfBirth?.day || !dateOfBirth?.month) return false;
+  const now = new Date();
+  return (
+    parseInt(dateOfBirth.day, 10)   === now.getDate() &&
+    parseInt(dateOfBirth.month, 10) === now.getMonth() + 1
+  );
+}
+
+/**
+ * Returns a random birthday greeting string used on the chat welcome screen.
+ */
+export function getBirthdayGreeting(name) {
+  const n = name ? `, ${name}` : '';
+  const greetings = [
+    `Happy Birthday${n}! 🎂`,
+    `Happy Birthday${n}! 🥳`,
+    `Happy Birthday${n}! 🎉`,
+    `It's your birthday${n}! 🎂`,
+    `Wishing you the happiest birthday${n}! 🎉`,
+    `Many happy returns of the day${n}! 🥳`,
+    `Hope your birthday is absolutely amazing${n}! 🎂`,
+    `Celebrating you today${n}! 🎉`,
+    `Today is YOUR day${n}! 🥳`,
+    `Have the best birthday ever${n}! 🎂`,
+    `Another year of awesomeness begins${n}! 🎉`,
+    `Hope this birthday is your best one yet${n}! 🥳`,
+    `Big birthday wishes coming your way${n}! 🎂`,
+    `May this birthday bring you so much joy${n}! 🎉`,
+    `Here's to you on your special day${n}! 🥳`,
+    `Sending you all the birthday love${n}! 🎂`,
+    `Today's all about you${n}! 🎉`,
+    `You deserve the world today${n}! 🥳`,
+    `Shine bright on your birthday${n}! 🎂`,
+    `Hope your day is as incredible as you are${n}! 🎉`,
+    `It's the most wonderful day of the year${n}! 🎂`,
+    `Levelling up today${n}! 🎉`,
+    `One year wiser, one year cooler${n}! 🥳`,
+    `Hope today is absolutely unforgettable${n}! 🎂`,
+    `The world got a whole lot better the day you were born${n}! 🎉`,
+    `May your birthday be filled with laughter and love${n}! 🥳`,
+    `Another lap around the sun complete${n}! 🎂`,
+    `Here's to a legendary birthday${n}! 🎉`,
+    `Born to be amazing, celebrating that today${n}! 🥳`,
+    `Wishing you a birthday as awesome as you are${n}! 🎂`,
+    `Today we celebrate the legend that is you${n}! 🎉`,
+    `May this year bring you everything you've dreamed of${n}! 🥳`,
+    `Bigger, better, another year stronger${n}! 🎂`,
+    `The birthday king/queen has arrived${n}! 🎉`,
+    `Hope every moment of today feels magical${n}! 🥳`,
+    `Raise a toast to you${n}! 🎂`,
+    `You only turn this age once — make it count${n}! 🎉`,
+    `Grateful you exist and celebrating it today${n}! 🥳`,
+    `May the cake be big and the problems be small${n}! 🎂`,
+    `Sending all the good vibes your way today${n}! 🎉`,
+    `This day belongs to you${n}! 🥳`,
+    `Another year of greatness incoming${n}! 🎂`,
+    `Hope your birthday is everything and more${n}! 🎉`,
+    `Cheers to you on this epic day${n}! 🥳`,
+    `May your birthday be as legendary as you${n}! 🎂`,
+    `Keep shining, it's your birthday${n}! 🎉`,
+    `Today you are the main character${n}! 🥳`,
+    `May joy follow you all day long${n}! 🎂`,
+    `Here's to the next chapter${n}! 🎉`,
+    `New year, same amazing you${n}! 🥳`,
+  ];
+  return greetings[Math.floor(Math.random() * greetings.length)];
+}
+
+// ── Time-based greetings ──────────────────────────────────────────────────
+
 export const getTimeGreetings = (hour, name) =>
   hour >= 5 && hour < 12
     ? [
