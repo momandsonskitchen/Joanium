@@ -1,11 +1,11 @@
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createLegacyToolHandlers } from '../Core/LegacyToolAdapter.js';
+import { createConnectorToolHandlers } from '../Core/ConnectorToolAdapter.js';
 import { executeGitlabChatTool } from './Core/Chat/ChatExecutor.js';
 
 export { executeGitlabChatTool };
 
-export function createGitLabLegacyToolHandlers({ rootDirectory }) {
-  return createLegacyToolHandlers({
+export function createGitLabConnectorToolHandlers({ rootDirectory }) {
+  return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
     executeTool: executeGitlabChatTool

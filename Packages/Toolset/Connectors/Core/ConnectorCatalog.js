@@ -1,8 +1,11 @@
 export const CONNECTOR_CATALOG = Object.freeze([]);
 
 function normalizeConnector(connector = {}) {
+  const noCredential = connector.noCredential === true || connector.noKey === true;
   const credentialKey = connector.credentialKey ?? connector.fields?.[0]?.key ?? 'token';
-  const fields = Array.isArray(connector.fields) && connector.fields.length
+  const fields = noCredential
+    ? []
+    : Array.isArray(connector.fields) && connector.fields.length
     ? connector.fields
     : [{
         key: credentialKey,

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 const VALID_TRANSPORTS = new Set(['stdio', 'http']);
 
@@ -59,7 +60,7 @@ export function sanitizeServerConfig(candidate = {}) {
 }
 
 export function createMCPStateManager({ rootDirectory }) {
-  const serversFilePath = path.join(rootDirectory, 'Data', 'MCPServers.json');
+  const serversFilePath = path.join(getWritableDataDirectory(rootDirectory), 'MCPServers.json');
 
   async function readServers() {
     try {

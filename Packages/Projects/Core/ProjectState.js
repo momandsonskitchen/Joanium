@@ -1,9 +1,10 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink, rm, copyFile } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 export function createProjectStateManager({ rootDirectory }) {
-  const projectsDirectory = path.join(rootDirectory, 'Data', 'Projects');
+  const projectsDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Projects');
 
   return {
     async saveProject(project) {

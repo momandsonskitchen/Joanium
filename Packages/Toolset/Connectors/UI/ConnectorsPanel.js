@@ -8,6 +8,8 @@ import defaultStrings from '../I18n/en.js';
 const ICON_MAP = {
   github:       'Github',
   openweather:  'OpenWeatherMap',
+  open_meteo:    'OpenMeteo',
+  coingecko:     'CoinGecko',
   google:       'Google',
   gmail:        'Gmail',
   drive:        'Drive',
@@ -29,12 +31,13 @@ const ICON_MAP = {
   figma:        'Figma',
   unsplash:     'Unsplash',
   wikipedia:    'Wikipedia',
+  wikimedia:    'Wikipedia',
   nasa:         'Nasa',
-  coingecko:    'CoinGecko',
   perplexity:   'Perplexity',
   youtube:      'Youtube',
   whatsapp:     'WhatsApp',
   cloudflare:   'Cloudflare',
+  hackernews:   'HackerNews',
 };
 
 function getConnectorIconPath(connectorId) {
@@ -87,9 +90,14 @@ function getVisibleFields(connector) {
   return getConnectorFields(connector).filter((field) => !field.hidden);
 }
 
+function isPublicConnector(connector) {
+  return connector.publicTool === true || connector.noCredential === true || connector.noKey === true;
+}
+
 export function createConnectorsPanel(strings = defaultStrings) {
   const refs = new Map();
-  let grid = null;
+  let servicesMount = null;
+  let publicMount = null;
 
   function setFeedback(connectorId, message, tone = 'info') {
     const ref = refs.get(connectorId);
@@ -218,7 +226,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
 
     const expandBtn = createElement('button', 'connectors-card__expand');
     expandBtn.type = 'button';
-    expandBtn.setAttribute('aria-label', 'Expand');
+    expandBtn.setAttribute('aria-label', strings.expand);
     expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
 
     header.append(badge, copy, status, expandBtn);
@@ -316,12 +324,12 @@ export function createConnectorsPanel(strings = defaultStrings) {
       // Close all cards
       for (const [, ref] of refs) {
         ref.card.classList.remove('connectors-card--open');
-        ref.card.querySelector('.connectors-card__expand')?.setAttribute('aria-label', 'Expand');
+        ref.card.querySelector('.connectors-card__expand')?.setAttribute('aria-label', strings.expand);
       }
       // Open this one only if it was closed
       if (!isOpen) {
         card.classList.add('connectors-card--open');
-        expandBtn.setAttribute('aria-label', 'Collapse');
+        expandBtn.setAttribute('aria-label', strings.collapse);
       }
     });
 
@@ -330,23 +338,86 @@ export function createConnectorsPanel(strings = defaultStrings) {
     return card;
   }
 
+  function createPublicConnectorCard(connector) {
+    const card = createElement('article', 'connectors-card connectors-card--connected connectors-card--public');
+    const header = createElement('div', 'connectors-card__header');
+    const badge = createElement('div', 'connectors-card__badge');
+    const iconPath = getConnectorIconPath(connector.id);
+
+    if (iconPath) {
+      const img = document.createElement('img');
+      img.src = iconPath;
+      img.alt = '';
+      img.className = 'connectors-card__badge-img';
+      badge.append(img);
+    } else {
+      badge.append(createIcon('globe', 'connectors-card__badge-icon'));
+    }
+
+    const copy = createElement('div', 'connectors-card__copy');
+    copy.append(
+      createElement('h3', 'connectors-card__title', connector.label),
+      createElement('p', 'connectors-card__description', connector.description)
+    );
+
+    const status = createElement('span', 'connectors-card__status connectors-card__status--active', strings.available);
+    header.append(badge, copy, status);
+    card.append(header);
+
+    if (connector.toolHint) {
+      const hint = createElement('p', 'connectors-card__public-hint', connector.toolHint);
+      card.append(hint);
+    }
+
+    return card;
+  }
+
+  function createSection(title, subtitle) {
+    const section = createElement('section', 'connectors-section');
+    const header = createElement('div', 'connectors-section__header');
+    header.append(
+      createElement('h3', 'connectors-section__title', title),
+      createElement('p', 'connectors-section__subtitle', subtitle)
+    );
+    const mount = createElement('div', 'connectors-section__grid');
+    section.append(header, mount);
+    return { section, mount };
+  }
+
+  function renderGrid(mount, connectors, createCard) {
+    mount.replaceChildren();
+    if (!connectors.length) {
+      mount.append(createElement('p', 'connectors-section__empty', strings.emptySection));
+      return;
+    }
+
+    const nextGrid = createTwoColGrid();
+    for (const connector of connectors) {
+      nextGrid.append(createCard(connector));
+    }
+    mount.append(nextGrid.el);
+  }
+
   function build() {
     const panel = createElement('div', 'connectors');
-    grid = createTwoColGrid();
-    panel.append(grid.el);
+    const servicesSection = createSection(strings.credentialsTitle, strings.credentialsSubtitle);
+    const publicSection = createSection(strings.publicTitle, strings.publicSubtitle);
+    servicesMount = servicesSection.mount;
+    publicMount = publicSection.mount;
+    panel.append(servicesSection.section, publicSection.section);
     return panel;
   }
 
   async function populate() {
     const connectors = await invokeIpc('connectors:list');
+    const serviceConnectors = connectors.filter((connector) => !isPublicConnector(connector));
+    const publicConnectors = connectors.filter(isPublicConnector);
 
-    if (grid.el.querySelector('.connectors-card') === null) {
-      for (const connector of connectors) {
-        grid.append(createConnectorCard(connector));
-      }
-    }
+    refs.clear();
+    renderGrid(servicesMount, serviceConnectors, createConnectorCard);
+    renderGrid(publicMount, publicConnectors, createPublicConnectorCard);
 
-    for (const connector of connectors) {
+    for (const connector of serviceConnectors) {
       setCardState(connector);
     }
   }

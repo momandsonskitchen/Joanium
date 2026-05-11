@@ -6,6 +6,7 @@ import { BrowserWindow } from 'electron';
 import { createAgentStateManager } from './Core/AgentState.js';
 import { createAgentScheduler } from './Core/AgentScheduler.js';
 import { sanitizeFileStem } from '../Shared/Storage/SafePath.js';
+import { getWritableDataDirectory } from '../Shared/Storage/ResourcePaths.js';
 import { estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 const agentsPackageDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -18,7 +19,7 @@ const agentsPackageDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export async function createPackage({ rootDirectory }) {
   const agentStateManager = createAgentStateManager({ rootDirectory });
-  const agentsDirectory   = path.join(rootDirectory, 'Data', 'Agents');
+  const agentsDirectory   = path.join(getWritableDataDirectory(rootDirectory), 'Agents');
   const avatarsDirectory  = path.join(rootDirectory, 'Assets', 'Agents');
 
   // Image extensions we accept for avatars.

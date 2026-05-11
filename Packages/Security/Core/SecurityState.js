@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { randomBytes, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 // ── Crypto constants ────────────────────────────────────────────────────────
 // 210,000 PBKDF2-SHA512 iterations — matches OWASP 2024 recommendation.
@@ -74,7 +75,7 @@ function createDefaultSecurity() {
 // they are clearly separated from user profile data.
 
 export function createSecurityStateManager({ rootDirectory }) {
-  const securityFilePath = path.join(rootDirectory, 'Data', 'Security.json');
+  const securityFilePath = path.join(getWritableDataDirectory(rootDirectory), 'Security.json');
 
   async function readSecurity() {
     try {

@@ -46,7 +46,7 @@ export function mergeToolDefinitions(...toolGroups) {
   return [...byName.values()];
 }
 
-export async function createLegacyToolContext(rootDirectory) {
+export async function createConnectorToolContext(rootDirectory) {
   const state = await readUserState(rootDirectory);
   state.connectors ??= {};
   state.connectors.details ??= {};
@@ -55,7 +55,7 @@ export async function createLegacyToolContext(rootDirectory) {
   };
 }
 
-export function createLegacyToolHandlers({ rootDirectory, toolDefinitions = [], executeTool }) {
+export function createConnectorToolHandlers({ rootDirectory, toolDefinitions = [], executeTool }) {
   if (typeof executeTool !== 'function') return {};
 
   return Object.fromEntries(
@@ -64,7 +64,7 @@ export function createLegacyToolHandlers({ rootDirectory, toolDefinitions = [], 
       .map((tool) => [
         tool.name,
         async (params = {}) => {
-          const result = await executeTool(await createLegacyToolContext(rootDirectory), tool.name, params);
+          const result = await executeTool(await createConnectorToolContext(rootDirectory), tool.name, params);
           if (result && typeof result === 'object' && result.ok === false) {
             throw new Error(result.error ?? 'Tool failed.');
           }

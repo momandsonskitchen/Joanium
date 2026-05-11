@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { getWritableDataDirectory } from '../Storage/ResourcePaths.js';
 
 // ---------------------------------------------------------------------------
 // Token estimation
@@ -17,7 +18,7 @@ export function estimateTokens(charCount) {
 // ---------------------------------------------------------------------------
 
 function getUsageFilePath(rootDirectory) {
-  return path.join(rootDirectory, 'Data', 'Usage.json');
+  return path.join(getWritableDataDirectory(rootDirectory), 'Usage.json');
 }
 
 function todayKey() {

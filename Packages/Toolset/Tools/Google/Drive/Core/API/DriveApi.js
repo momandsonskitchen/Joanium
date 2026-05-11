@@ -1,5 +1,5 @@
 async function getFreshGoogleCreds(creds) {
-  const { getFreshCreds: getFreshCreds } = await import('../../../GoogleWorkspace.js');
+  const { getFreshCreds: getFreshCreds } = await import('../../../../GoogleWorkspace.js');
   return getFreshCreds(creds);
 }
 const DRIVE_BASE = 'https://www.googleapis.com/drive/v3',

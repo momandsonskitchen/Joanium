@@ -2,6 +2,7 @@ import electron from 'electron';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 const { BrowserWindow, WebContentsView } = electron;
 
@@ -652,7 +653,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   async function browserScreenshot(params = {}, ownerWindow = null) {
     const webContents = await getPageWebContents(ownerWindow);
     const image = await webContents.capturePage();
-    const directory = path.join(rootDirectory || os.tmpdir(), 'Data', 'Screenshots');
+    const directory = path.join(rootDirectory ? getWritableDataDirectory(rootDirectory) : os.tmpdir(), 'Screenshots');
     await mkdir(directory, { recursive: true });
     const filePath = path.join(directory, safeScreenshotName(params.file_name ?? params.fileName));
     await writeFile(filePath, image.toPNG());

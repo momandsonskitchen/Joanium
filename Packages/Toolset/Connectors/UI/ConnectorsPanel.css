@@ -5,6 +5,40 @@
   -webkit-app-region: no-drag;
 }
 
+.connectors-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.connectors-section__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 2px;
+}
+
+.connectors-section__title {
+  margin: 0;
+  color: var(--color-chat-text-title);
+  font-size: 14px;
+  font-weight: 760;
+}
+
+.connectors-section__subtitle,
+.connectors-section__empty {
+  margin: 0;
+  color: var(--color-chat-text-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.connectors-section__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .connectors-card {
   display: flex;
   flex-direction: column;
@@ -22,6 +56,25 @@
     inset 0 0 0 1px rgba(76, 163, 112, 0.20),
     inset 0 1px 0 rgba(255, 255, 255, 0.84),
     0 14px 32px rgba(70, 135, 90, 0.08);
+}
+
+.connectors-card--public {
+  gap: 12px;
+}
+
+.connectors-card--public .connectors-card__header {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+}
+
+.connectors-card__public-hint {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 15px;
+  color: var(--color-chat-text-secondary);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.10);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 /* ── Header ─────────────────────────────────────────────────────────────── */

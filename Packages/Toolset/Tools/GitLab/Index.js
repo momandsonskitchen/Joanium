@@ -1,9 +1,9 @@
 import strings from './I18n/en.js';
 import { createGitLabToolHandlers } from './Core/GitLabTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createGitLabLegacyToolHandlers } from './Executors.js';
+import { createGitLabConnectorToolHandlers } from './Executors.js';
 import { buildGitLabPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/LegacyToolAdapter.js';
+import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {
@@ -11,8 +11,8 @@ export function createToolPackage({ rootDirectory }) {
     connectors: [strings.connector],
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
-      ...createGitLabLegacyToolHandlers({ rootDirectory }),
-      ...createGitLabToolHandlers({ rootDirectory })
+      ...createGitLabToolHandlers({ rootDirectory }),
+      ...createGitLabConnectorToolHandlers({ rootDirectory })
     },
     promptSections: [buildGitLabPromptSection()]
   };

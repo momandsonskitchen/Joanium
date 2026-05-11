@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 const DEFAULT_CHANNELS = Object.freeze({
   telegram: {
@@ -138,8 +139,9 @@ export function isConfigured(name, config) {
 }
 
 export function createChannelStateManager({ rootDirectory }) {
-  const channelsFilePath = path.join(rootDirectory, 'Data', 'Channels.json');
-  const messagesFilePath = path.join(rootDirectory, 'Data', 'ChannelMessages.json');
+  const dataDirectory = getWritableDataDirectory(rootDirectory);
+  const channelsFilePath = path.join(dataDirectory, 'Channels.json');
+  const messagesFilePath = path.join(dataDirectory, 'ChannelMessages.json');
 
   async function readChannels() {
     try {

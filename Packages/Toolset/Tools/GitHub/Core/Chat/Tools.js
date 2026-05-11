@@ -2637,7 +2637,7 @@ export const GITHUB_TOOLS = [
   {
     name: 'github_get_combined_status',
     description:
-      'Get the combined commit status for a ref — aggregates all legacy status checks into a single state.',
+      'Get the combined commit status for a ref; aggregates older status checks into a single state.',
     category: 'github',
     connectorId: 'github',
     parameters: {

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { sanitizeMarkdownFilename, sanitizePathSegment } from '../../Shared/Storage/SafePath.js';
+import { getWritableResourceDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 // ---------------------------------------------------------------------------
 // MarketplaceState — handles persisting installed items to disk.
@@ -27,7 +28,7 @@ export function createMarketplaceStateManager({ rootDirectory }) {
     if (!safeFilename)  throw new Error('Invalid filename.');
 
     const root   = type === 'personas' ? 'Personas' : 'Skills';
-    const dir    = path.join(rootDirectory, root, safePublisher);
+    const dir    = path.join(getWritableResourceDirectory(rootDirectory, root), safePublisher);
     const filePath = path.join(dir, safeFilename);
 
     await mkdir(dir, { recursive: true });

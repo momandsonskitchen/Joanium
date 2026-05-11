@@ -5,16 +5,28 @@ import {
   loadNamespacedMarkdown
 } from '../../Shared/Markdown/MarkdownLibrary.js';
 import { sanitizeMarkdownFilename, sanitizePathSegment } from '../../Shared/Storage/SafePath.js';
+import {
+  getBundledResourceDirectory,
+  getWritableResourceDirectory
+} from '../../Shared/Storage/ResourcePaths.js';
 import { readUserState, writeUserState, mergeUserStates } from '../../Shared/UserData/UserData.js';
 
 const PROTECTED_PERSONAS = new Set(['Joanium/Joana.md']);
 const DEFAULT_ACTIVE_PERSONA = { namespace: 'Joanium', filename: 'Joana.md' };
 
 export function createPersonasStateManager({ rootDirectory }) {
-  const personasDir = path.join(rootDirectory, 'Personas');
+  const bundledPersonasDir = getBundledResourceDirectory(rootDirectory, 'Personas');
+  const writablePersonasDir = getWritableResourceDirectory(rootDirectory, 'Personas');
+  const personaDirs = [...new Set([
+    path.resolve(bundledPersonasDir),
+    path.resolve(writablePersonasDir)
+  ])];
 
-  async function listPersonas() {
-    const personas = await listNamespacedMarkdown(personasDir, ({
+  async function listPersonasFrom(personasDir) {
+    const bundledOnly = path.resolve(personasDir) === path.resolve(bundledPersonasDir)
+      && path.resolve(bundledPersonasDir) !== path.resolve(writablePersonasDir);
+
+    return listNamespacedMarkdown(personasDir, ({
       id,
       namespace,
       filename,
@@ -25,8 +37,19 @@ export function createPersonasStateManager({ rootDirectory }) {
       filename,
       name: frontmatter.name || filename.replace(/\.md$/, ''),
       description: frontmatter.description || '',
-      protected: PROTECTED_PERSONAS.has(id)
+      protected: PROTECTED_PERSONAS.has(id) || bundledOnly
     }));
+  }
+
+  async function listPersonas() {
+    const personasById = new Map();
+    for (const personasDir of personaDirs) {
+      for (const persona of await listPersonasFrom(personasDir)) {
+        personasById.set(persona.id, persona);
+      }
+    }
+
+    const personas = [...personasById.values()];
 
     return personas.sort((a, b) => {
       if (a.protected && !b.protected) return -1;
@@ -36,21 +59,30 @@ export function createPersonasStateManager({ rootDirectory }) {
   }
 
   async function loadPersona(namespace, filename) {
-    return loadNamespacedMarkdown(personasDir, namespace, filename, ({
-      id,
-      namespace: safeNamespace,
-      filename: safeFilename,
-      frontmatter,
-      content
-    }) => ({
-      id,
-      namespace: safeNamespace,
-      filename: safeFilename,
-      name: frontmatter.name || safeFilename.replace(/\.md$/, ''),
-      description: frontmatter.description || '',
-      protected: PROTECTED_PERSONAS.has(id),
-      content
-    }));
+    let lastError;
+    for (const personasDir of [...new Set([path.resolve(writablePersonasDir), path.resolve(bundledPersonasDir)])]) {
+      try {
+        return await loadNamespacedMarkdown(personasDir, namespace, filename, ({
+          id,
+          namespace: safeNamespace,
+          filename: safeFilename,
+          frontmatter,
+          content
+        }) => ({
+          id,
+          namespace: safeNamespace,
+          filename: safeFilename,
+          name: frontmatter.name || safeFilename.replace(/\.md$/, ''),
+          description: frontmatter.description || '',
+          protected: PROTECTED_PERSONAS.has(id),
+          content
+        }));
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError ?? new Error('Persona not found.');
   }
 
   async function deletePersona(namespace, filename) {
@@ -61,7 +93,7 @@ export function createPersonasStateManager({ rootDirectory }) {
       throw new Error('This persona is protected and cannot be deleted.');
     }
 
-    await unlink(path.join(personasDir, safeNs, safeFile));
+    await unlink(path.join(writablePersonasDir, safeNs, safeFile));
   }
 
   async function getActivePersona() {

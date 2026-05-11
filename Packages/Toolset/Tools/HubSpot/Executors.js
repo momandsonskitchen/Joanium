@@ -1,11 +1,11 @@
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createLegacyToolHandlers } from '../Core/LegacyToolAdapter.js';
+import { createConnectorToolHandlers } from '../Core/ConnectorToolAdapter.js';
 import { executeHubSpotChatTool } from './Core/Chat/ChatExecutor.js';
 
 export { executeHubSpotChatTool };
 
-export function createHubSpotLegacyToolHandlers({ rootDirectory }) {
-  return createLegacyToolHandlers({
+export function createHubSpotConnectorToolHandlers({ rootDirectory }) {
+  return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
     executeTool: executeHubSpotChatTool

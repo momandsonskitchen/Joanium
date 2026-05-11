@@ -644,7 +644,7 @@ export async function listRadarValueLists(creds, limit = 10) {
   }));
 }
 
-// 16. List plans (legacy pricing model, still fully supported)
+// 16. List plans (classic pricing model, still fully supported)
 export async function listPlans(creds, limit = 10) {
   const data = await stripeFetch(`/plans?limit=${limit}`, creds);
   return (data.data ?? []).map((p) => ({

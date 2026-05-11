@@ -1,6 +1,12 @@
 const en = {
   title: 'Connectors',
   subtitle: 'Credentials used by chat tools such as GitHub and OpenWeather.',
+  credentialsTitle: 'Credential Connectors',
+  credentialsSubtitle: 'Services that need tokens, OAuth, or API keys before their tools can run.',
+  publicTitle: 'Free Connectors',
+  publicSubtitle: 'Public tools that work immediately without setup.',
+  available: 'Available',
+  emptySection: 'Nothing to show here yet.',
   connected: 'Configured',
   notConnected: 'Not configured',
   optional: 'Optional',
@@ -19,7 +25,9 @@ const en = {
   disconnectFailed: 'Could not remove connector.',
   oauthFailed: 'Sign-in failed.',
   show: 'Show credential',
-  hide: 'Hide credential'
+  hide: 'Hide credential',
+  expand: 'Expand',
+  collapse: 'Collapse'
 };
 
 export default en;

@@ -5,6 +5,7 @@
   "files": [
     "App.js",
     "Assets/**/*",
+    "Config/**/*",
     "Datasets/**/*",
     "Packages/**/*",
     "Prompts/**/*"

@@ -1,11 +1,11 @@
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createLegacyToolHandlers } from '../Core/LegacyToolAdapter.js';
+import { createConnectorToolHandlers } from '../Core/ConnectorToolAdapter.js';
 import { executeJiraChatTool } from './Core/Chat/ChatExecutor.js';
 
 export { executeJiraChatTool };
 
-export function createJiraLegacyToolHandlers({ rootDirectory }) {
-  return createLegacyToolHandlers({
+export function createJiraConnectorToolHandlers({ rootDirectory }) {
+  return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
     executeTool: executeJiraChatTool

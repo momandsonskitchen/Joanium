@@ -1832,6 +1832,16 @@ export async function createChatView(strings, {
   let projectPill = null;
   let projectNameEl = null;
   let projectMetaEl = null;
+  let gitBarEl = null;
+  let gitBranchEl = null;
+  let gitMetaEl = null;
+  let gitStatusDotEl = null;
+  let gitPrimaryBtn = null;
+  let gitSecondaryBtn = null;
+  let gitRefreshBtn = null;
+  let gitRefreshTimer = null;
+  let gitState = null;
+  let gitBusy = false;
   let modelButton = null;
 
   function scheduleTerminalProcessRender() {
@@ -2070,6 +2080,166 @@ export async function createChatView(strings, {
     onActiveProjectChange?.(null);
   }
 
+  function getActiveProjectFolder() {
+    return collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
+  }
+
+  function parseGitStatusOutput(stdout = '') {
+    const lines = String(stdout ?? '').split(/\r?\n/).filter(Boolean);
+    const header = lines[0] ?? '';
+    const branchMatch = header.match(/^## (?:No commits yet on )?(.+?)(?:\.\.\.|\s|$)/);
+    const aheadMatch = header.match(/ahead (\d+)/);
+    const behindMatch = header.match(/behind (\d+)/);
+    const dirty = lines.slice(1).some((line) => line.trim());
+
+    return {
+      branch: branchMatch?.[1]?.trim() || strings.git.unknownBranch,
+      dirty,
+      ahead: aheadMatch ? Number(aheadMatch[1]) : 0,
+      behind: behindMatch ? Number(behindMatch[1]) : 0
+    };
+  }
+
+  function setGitBarBusy(busy) {
+    gitBusy = busy;
+    for (const button of [gitPrimaryBtn, gitSecondaryBtn, gitRefreshBtn]) {
+      if (button) button.disabled = busy;
+    }
+  }
+
+  function syncGitBarView() {
+    if (!gitBarEl || !gitBranchEl || !gitMetaEl || !gitStatusDotEl || !gitPrimaryBtn || !gitSecondaryBtn) return;
+
+    if (!activeProject || !gitState) {
+      gitBarEl.hidden = true;
+      gitBranchEl.textContent = '';
+      gitMetaEl.textContent = '';
+      return;
+    }
+
+    gitBarEl.hidden = false;
+    gitBranchEl.textContent = gitState.branch;
+    gitStatusDotEl.classList.toggle('chat-gitbar__dot--dirty', gitState.dirty);
+    gitStatusDotEl.classList.toggle('chat-gitbar__dot--clean', !gitState.dirty);
+
+    const meta = [];
+    meta.push(gitState.dirty ? strings.git.dirty : strings.git.clean);
+    if (gitState.ahead > 0) meta.push(formatText(strings.git.ahead, { count: String(gitState.ahead) }));
+    if (gitState.behind > 0) meta.push(formatText(strings.git.behind, { count: String(gitState.behind) }));
+    gitMetaEl.textContent = meta.join(' · ');
+
+    const primaryAction = gitState.dirty ? 'diff' : gitState.ahead > 0 ? 'push' : 'pull';
+    gitPrimaryBtn._gitAction = primaryAction;
+    gitPrimaryBtn.textContent = strings.git.actions[primaryAction];
+
+    const secondaryAction = gitState.dirty && gitState.ahead > 0 ? 'push' : 'status';
+    gitSecondaryBtn._gitAction = secondaryAction;
+    gitSecondaryBtn.textContent = strings.git.actions[secondaryAction];
+  }
+
+  async function refreshProjectGitStatus({ silent = false } = {}) {
+    const workingDir = getActiveProjectFolder();
+    if (!workingDir) {
+      gitState = null;
+      syncGitBarView();
+      return;
+    }
+
+    try {
+      const result = await invokeIpc('terminal:git-status', { workingDir });
+      if (!result?.ok || result.exitCode !== 0) {
+        gitState = null;
+        syncGitBarView();
+        return;
+      }
+
+      gitState = parseGitStatusOutput(result.stdout);
+      syncGitBarView();
+    } catch (error) {
+      gitState = null;
+      syncGitBarView();
+      if (!silent) showAttachmentNotice(error?.message ?? strings.git.refreshFailed, 'warning');
+    }
+  }
+
+  function restartGitStatusTimer() {
+    if (gitRefreshTimer) {
+      clearInterval(gitRefreshTimer);
+      gitRefreshTimer = null;
+    }
+
+    if (getActiveProjectFolder()) {
+      gitRefreshTimer = setInterval(() => {
+        void refreshProjectGitStatus({ silent: true });
+      }, 15000);
+    }
+  }
+
+  function appendGitResultMessage(label, command, result) {
+    const output = [result?.stdout, result?.stderr].map((value) => String(value ?? '').trim()).filter(Boolean).join('\n\n')
+      || result?.hint
+      || result?.error
+      || strings.git.emptyOutput;
+
+    messages = [
+      ...messages,
+      {
+        role: 'assistant',
+        content: label,
+        terminal: {
+          label,
+          command,
+          status: result?.ok ? 'completed' : 'failed',
+          statusLabel: result?.ok ? strings.terminal.completedTool : strings.terminal.failedTool,
+          output,
+          error: result?.ok ? null : result?.error,
+          exitCode: result?.exitCode ?? 0
+        }
+      }
+    ];
+
+    renderThread();
+    scheduleScrollToBottom();
+    void saveCurrentSession();
+  }
+
+  async function runGitBarAction(action) {
+    if (gitBusy) return;
+    const workingDir = getActiveProjectFolder();
+    if (!workingDir) {
+      showAttachmentNotice(strings.git.noProjectFolder, 'warning');
+      return;
+    }
+
+    const channel = {
+      status: 'terminal:git-status',
+      diff: 'terminal:git-diff',
+      pull: 'terminal:git-pull',
+      push: 'terminal:git-push'
+    }[action];
+
+    if (!channel) return;
+    setGitBarBusy(true);
+
+    try {
+      const result = await invokeIpc(channel, {
+        workingDir,
+        allowRisky: action === 'pull' || action === 'push'
+      });
+      appendGitResultMessage(strings.git.resultLabels[action], strings.git.commands[action], result);
+
+      if (action === 'pull' || action === 'push') {
+        showAttachmentNotice(result?.ok ? strings.git.actionComplete : (result?.hint || result?.error || strings.git.actionFailed), result?.ok ? 'info' : 'warning');
+      }
+
+      await refreshProjectGitStatus({ silent: true });
+    } catch (error) {
+      showAttachmentNotice(error?.message ?? strings.git.actionFailed, 'warning');
+    } finally {
+      setGitBarBusy(false);
+    }
+  }
+
   function syncActiveProjectPill() {
     if (!projectPill || !projectNameEl || !projectMetaEl) return;
 
@@ -2077,6 +2247,9 @@ export async function createChatView(strings, {
       projectPill.hidden = true;
       projectNameEl.textContent = '';
       projectMetaEl.textContent = '';
+      gitState = null;
+      syncGitBarView();
+      restartGitStatusTimer();
       return;
     }
 
@@ -2085,6 +2258,8 @@ export async function createChatView(strings, {
     projectMetaEl.textContent = collapseWhitespace(activeProject.info)
       || collapseWhitespace(activeProject.folderPath ?? activeProject.rootPath)
       || strings.projects.activeHint;
+    void refreshProjectGitStatus({ silent: true });
+    restartGitStatusTimer();
   }
 
   async function loadSession(id) {
@@ -3754,6 +3929,40 @@ export async function createChatView(strings, {
   });
   projectPill.append(projectIconEl, projectBodyEl, projectClearBtn);
 
+  gitBarEl = createElement('div', 'chat-gitbar');
+  gitBarEl.hidden = true;
+  const gitIdentity = createElement('div', 'chat-gitbar__identity');
+  gitStatusDotEl = createElement('span', 'chat-gitbar__dot');
+  const gitCopy = createElement('div', 'chat-gitbar__copy');
+  gitBranchEl = createElement('div', 'chat-gitbar__branch');
+  gitMetaEl = createElement('div', 'chat-gitbar__meta');
+  gitCopy.append(gitBranchEl, gitMetaEl);
+  gitIdentity.append(gitStatusDotEl, createIcon('github', 'chat-gitbar__icon'), gitCopy);
+
+  const gitActions = createElement('div', 'chat-gitbar__actions');
+  gitRefreshBtn = createElement('button', 'chat-gitbar__icon-button');
+  gitRefreshBtn.type = 'button';
+  gitRefreshBtn.setAttribute('aria-label', strings.git.refresh);
+  gitRefreshBtn.append(createIcon('retry', 'chat-gitbar__button-icon'));
+  gitRefreshBtn.addEventListener('click', () => {
+    void refreshProjectGitStatus();
+  });
+
+  gitSecondaryBtn = createElement('button', 'chat-gitbar__secondary');
+  gitSecondaryBtn.type = 'button';
+  gitSecondaryBtn.addEventListener('click', () => {
+    void runGitBarAction(gitSecondaryBtn._gitAction);
+  });
+
+  gitPrimaryBtn = createElement('button', 'chat-gitbar__primary');
+  gitPrimaryBtn.type = 'button';
+  gitPrimaryBtn.addEventListener('click', () => {
+    void runGitBarAction(gitPrimaryBtn._gitAction);
+  });
+
+  gitActions.append(gitRefreshBtn, gitSecondaryBtn, gitPrimaryBtn);
+  gitBarEl.append(gitIdentity, gitActions);
+
   composerField = document.createElement('textarea');
   composerField.className = 'chat-composer__field';
   composerField.placeholder = strings.composer.placeholder;
@@ -3826,7 +4035,7 @@ export async function createChatView(strings, {
   privateNoticeEl = createElement('div', 'chat-composer__private-notice');
   privateNoticeEl.hidden = true;
   privateNoticeEl.append(createIcon('lock', 'chat-composer__private-notice-icon'), createElement('span', '', strings.composer.privateNotice));
-  composer.append(projectPill, attachmentsEl, attachmentNotice, privateNoticeEl, composerField, composerFooter, slashMenu);
+  composer.append(projectPill, gitBarEl, attachmentsEl, attachmentNotice, privateNoticeEl, composerField, composerFooter, slashMenu);
   scroll.append(title, bubblesEl, thread);
   bottom.append(composer);
   const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {

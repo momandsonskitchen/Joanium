@@ -1,9 +1,9 @@
 import strings from './I18n/en.js';
 import { createSpotifyToolHandlers } from './Core/SpotifyTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createSpotifyLegacyToolHandlers } from './Executors.js';
+import { createSpotifyConnectorToolHandlers } from './Executors.js';
 import { buildSpotifyPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/LegacyToolAdapter.js';
+import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {
@@ -11,8 +11,8 @@ export function createToolPackage({ rootDirectory }) {
     connectors: [strings.connector],
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
-      ...createSpotifyLegacyToolHandlers({ rootDirectory }),
-      ...createSpotifyToolHandlers({ rootDirectory })
+      ...createSpotifyToolHandlers({ rootDirectory }),
+      ...createSpotifyConnectorToolHandlers({ rootDirectory })
     },
     promptSections: [buildSpotifyPromptSection()]
   };

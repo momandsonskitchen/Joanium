@@ -1,5 +1,5 @@
 async function getFreshGoogleCreds(creds) {
-  const { getFreshCreds: getFreshCreds } = await import('../../../GoogleWorkspace.js');
+  const { getFreshCreds: getFreshCreds } = await import('../../../../GoogleWorkspace.js');
   return getFreshCreds(creds);
 }
 const GMAIL_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';

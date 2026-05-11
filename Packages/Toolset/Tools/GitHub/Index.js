@@ -1,9 +1,9 @@
 import strings from './I18n/en.js';
 import { createGitHubToolHandlers } from './Core/GitHubTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createGitHubLegacyToolHandlers } from './Executors.js';
+import { createGitHubConnectorToolHandlers } from './Executors.js';
 import { buildGitHubPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/LegacyToolAdapter.js';
+import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {
@@ -11,8 +11,8 @@ export function createToolPackage({ rootDirectory }) {
     connectors: [strings.connector],
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
-      ...createGitHubLegacyToolHandlers({ rootDirectory }),
-      ...createGitHubToolHandlers({ rootDirectory })
+      ...createGitHubToolHandlers({ rootDirectory }),
+      ...createGitHubConnectorToolHandlers({ rootDirectory })
     },
     promptSections: [buildGitHubPromptSection()]
   };

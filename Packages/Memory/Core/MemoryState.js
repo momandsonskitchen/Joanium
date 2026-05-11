@@ -1,8 +1,9 @@
 import path from 'node:path';
 import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { sanitizeMarkdownFilename } from '../../Shared/Storage/SafePath.js';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
-const HIDDEN_PREFIXES = ['Archive-', 'Legacy-', '_'];
+const HIDDEN_PREFIXES = ['Archive-', 'Old-', '_'];
 const DEFAULT_MAX_CONTEXT_CHARS = 24000;
 
 const DEFAULT_MEMORY_FILES = [
@@ -136,7 +137,7 @@ function finalizeContent(content, filename) {
 }
 
 export function createMemoryStateManager({ rootDirectory }) {
-  const memoriesDir = path.join(rootDirectory, 'Data', 'Memories');
+  const memoriesDir = path.join(getWritableDataDirectory(rootDirectory), 'Memories');
 
   async function ensureLibrary() {
     await mkdir(memoriesDir, { recursive: true });

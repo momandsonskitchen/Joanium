@@ -2,6 +2,7 @@ import https from 'node:https';
 import http from 'node:http';
 import path from 'node:path';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 // ---------------------------------------------------------------------------
 // TTLs
@@ -31,7 +32,7 @@ const writeLocks = new Map();
 
 function getProviderCachePath(rootDirectory, providerId) {
   const folderName = providerId.charAt(0).toUpperCase() + providerId.slice(1);
-  return path.join(rootDirectory, 'Data', 'Models', folderName, 'ModelHealth.json');
+  return path.join(getWritableDataDirectory(rootDirectory), 'Models', folderName, 'ModelHealth.json');
 }
 
 async function readProviderHealth(rootDirectory, providerId) {

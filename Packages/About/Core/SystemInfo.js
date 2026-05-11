@@ -1,6 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 function resolveOsName(platform) {
   if (platform === 'darwin') return 'macOS';
@@ -18,7 +19,7 @@ function safeUserInfo() {
 }
 
 function getSystemInfoFile(rootDirectory) {
-  return path.join(rootDirectory, 'Data', 'System.json');
+  return path.join(getWritableDataDirectory(rootDirectory), 'System.json');
 }
 
 async function persistSystemInfo(rootDirectory, info) {

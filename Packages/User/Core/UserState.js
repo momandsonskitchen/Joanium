@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { copyFile, mkdir, unlink } from 'node:fs/promises';
 import { mergeUserStates, readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 const AVATAR_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.avif'];
 
@@ -34,7 +35,7 @@ export function createUserStateManager({ rootDirectory }) {
 
     async saveAvatar(sourcePath) {
       const ext = path.extname(sourcePath).toLowerCase() || '.png';
-      const dataDir = path.join(rootDirectory, 'Data');
+      const dataDir = getWritableDataDirectory(rootDirectory);
       await mkdir(dataDir, { recursive: true });
 
       for (const e of AVATAR_EXTENSIONS) {
@@ -56,7 +57,7 @@ export function createUserStateManager({ rootDirectory }) {
 
     async removeAvatar() {
       const current = await readUserState(rootDirectory);
-      const dataDir = path.join(rootDirectory, 'Data');
+      const dataDir = getWritableDataDirectory(rootDirectory);
 
       for (const ext of AVATAR_EXTENSIONS) {
         await unlink(path.join(dataDir, `Avatar${ext}`)).catch(() => {});

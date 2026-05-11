@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 // ---------------------------------------------------------------------------
 // createHistoryStateManager
@@ -11,8 +12,9 @@ import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 // ---------------------------------------------------------------------------
 
 export function createHistoryStateManager({ rootDirectory }) {
-  const chatsDirectory    = path.join(rootDirectory, 'Data', 'Chats');
-  const projectsDirectory = path.join(rootDirectory, 'Data', 'Projects');
+  const dataDirectory = getWritableDataDirectory(rootDirectory);
+  const chatsDirectory    = path.join(dataDirectory, 'Chats');
+  const projectsDirectory = path.join(dataDirectory, 'Projects');
 
   function getChatsDirectory(projectId) {
     if (!projectId) return chatsDirectory;

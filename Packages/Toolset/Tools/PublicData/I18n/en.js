@@ -1,0 +1,177 @@
+const publicDataStrings = {
+  connectors: [
+    {
+      id: 'open_meteo',
+      label: 'Open-Meteo',
+      description: 'Weather, hourly forecasts, weekly forecasts, air quality, sunrise, and sunset data.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask about current weather, forecasts, air quality, or sunrise and sunset times.'
+    },
+    {
+      id: 'coingecko',
+      label: 'CoinGecko',
+      description: 'Crypto prices, market data, trending coins, and asset search.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for crypto prices, top coins, trending assets, or coin search.'
+    },
+    {
+      id: 'exchange_rate',
+      label: 'Exchange Rates',
+      description: 'Currency conversion and latest exchange-rate tables.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to convert currencies or list exchange rates from a base currency.'
+    },
+    {
+      id: 'treasury',
+      label: 'US Treasury',
+      description: 'Debt, average interest-rate, and daily cash-balance data.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for US debt, Treasury rates, or daily cash-balance rows.'
+    },
+    {
+      id: 'fred',
+      label: 'FRED',
+      description: 'Federal Reserve economic series through public graph data.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for economic series such as GDP, UNRATE, CPIAUCSL, FEDFUNDS, DGS10, or SP500.'
+    },
+    {
+      id: 'wikipedia',
+      label: 'Wikipedia',
+      description: 'Article summaries, search results, full extracts, sections, random pages, and on-this-day facts.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for Wikipedia summaries, article search, sections, random articles, or on-this-day events.'
+    },
+    {
+      id: 'dictionary',
+      label: 'Dictionary',
+      description: 'English definitions and examples.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for the definition of an English word.'
+    },
+    {
+      id: 'restcountries',
+      label: 'Country Info',
+      description: 'Country facts including capital, population, region, languages, and currencies.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for facts about a country or ISO country code.'
+    },
+    {
+      id: 'jokeapi',
+      label: 'Jokes',
+      description: 'Safe jokes from public joke APIs.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for a joke, optionally by category.'
+    },
+    {
+      id: 'quotes',
+      label: 'Quotes',
+      description: 'Short quotes, optionally by tag or topic.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for a quote by topic or tag.'
+    },
+    {
+      id: 'hackernews',
+      label: 'Hacker News',
+      description: 'Top, new, best, ask, show, and job stories.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for Hacker News top, new, best, ask, show, or job stories.'
+    },
+    {
+      id: 'wikimedia',
+      label: 'Wikimedia Commons',
+      description: 'Reusable image search from Wikimedia Commons.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to search reusable public images by topic.'
+    },
+    {
+      id: 'npm',
+      label: 'npm',
+      description: 'Package search, metadata, versions, downloads, and comparisons.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to search npm, inspect a package, compare packages, or check downloads.'
+    },
+    {
+      id: 'stackoverflow',
+      label: 'Stack Overflow',
+      description: 'Question search, answers, hot questions, tag browsing, and similar-question lookup.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to search Stack Overflow for an error, question, tag, or answer set.'
+    },
+    {
+      id: 'nasa',
+      label: 'NASA',
+      description: 'Astronomy Picture of the Day and current ISS location.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for NASA APOD or the current ISS location.'
+    },
+    {
+      id: 'cleanuri',
+      label: 'CleanURI',
+      description: 'Public URL shortening.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to shorten a URL.'
+    },
+    {
+      id: 'ipgeo',
+      label: 'IP Geolocation',
+      description: 'IP location, ISP, timezone, and network lookup.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for IP geolocation or current public IP details.'
+    },
+    {
+      id: 'openstreetmap',
+      label: 'OpenStreetMap',
+      description: 'Forward geocoding, reverse geocoding, place search, postal-code lookup, and elevation.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to geocode places, reverse geocode coordinates, search places, or get elevation.'
+    },
+    {
+      id: 'url_metadata',
+      label: 'URL Metadata',
+      description: 'Public metadata, QR code URL generation, RDAP registration, and redirect-chain checks.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to inspect a URL, generate a QR code URL, check RDAP info, or trace redirects.'
+    }
+  ]
+};
+
+export default publicDataStrings;

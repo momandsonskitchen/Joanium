@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 // ---------------------------------------------------------------------------
 // AgentState — CRUD for user-defined scheduled agents.
@@ -17,7 +18,7 @@ import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 // ---------------------------------------------------------------------------
 
 export function createAgentStateManager({ rootDirectory }) {
-  const agentsDirectory = path.join(rootDirectory, 'Data', 'Agents');
+  const agentsDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Agents');
   const runsDirectory = path.join(agentsDirectory, 'Runs');
   const avatarsDirectory = path.join(rootDirectory, 'Assets', 'Agents');
 

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
+import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 // ---------------------------------------------------------------------------
 // TemplateState — CRUD for user-defined prompt templates.
@@ -9,7 +10,7 @@ import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 // ---------------------------------------------------------------------------
 
 export function createTemplateStateManager({ rootDirectory }) {
-  const templatesDirectory = path.join(rootDirectory, 'Data', 'Templates');
+  const templatesDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Templates');
 
   return {
     async saveTemplate(template) {

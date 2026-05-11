@@ -621,7 +621,7 @@ export const STRIPE_TOOLS = [
   {
     name: 'stripe_list_plans',
     description:
-      'List Stripe Plans (legacy pricing model, still fully supported) with nickname, amount, currency, and billing interval.',
+      'List Stripe Plans (classic pricing model, still fully supported) with nickname, amount, currency, and billing interval.',
     category: 'stripe',
     connectorId: 'stripe',
     parameters: {

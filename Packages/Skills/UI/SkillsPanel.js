@@ -156,21 +156,23 @@ export function createSkillsPanel(strings) {
     }
 
     const actions = createElement('div', 'chat-skills__card-actions');
-    const deleteBtn = createElement('button', 'chat-skills__card-btn chat-skills__card-btn--danger');
-    deleteBtn.type = 'button';
-    deleteBtn.setAttribute('aria-label', strings.delete);
-    deleteBtn.append(createIcon('trash', 'chat-skills__card-btn-icon'));
-    deleteBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      try {
-        await invokeIpc('skills:delete-skill', skill.namespace, skill.filename);
-        await populateList(listEl, _search.getValue().trim());
-      } catch (err) {
-        console.error('[Joanium] Failed to delete skill:', err);
-      }
-    });
+    if (!skill.protected) {
+      const deleteBtn = createElement('button', 'chat-skills__card-btn chat-skills__card-btn--danger');
+      deleteBtn.type = 'button';
+      deleteBtn.setAttribute('aria-label', strings.delete);
+      deleteBtn.append(createIcon('trash', 'chat-skills__card-btn-icon'));
+      deleteBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          await invokeIpc('skills:delete-skill', skill.namespace, skill.filename);
+          await populateList(listEl, _search.getValue().trim());
+        } catch (err) {
+          console.error('[Joanium] Failed to delete skill:', err);
+        }
+      });
 
-    actions.append(deleteBtn);
+      actions.append(deleteBtn);
+    }
     card.append(body, actions);
     return card;
   }

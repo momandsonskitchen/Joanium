@@ -171,6 +171,37 @@ const en = {
     subAgentOutputSection: 'Output',
     subAgentErrorSection: 'Error'
   },
+  git: {
+    refresh: 'Refresh git status',
+    unknownBranch: 'unknown',
+    dirty: 'Uncommitted changes',
+    clean: 'Clean',
+    ahead: '{count} ahead',
+    behind: '{count} behind',
+    noProjectFolder: 'No project folder is set for this project.',
+    refreshFailed: 'Could not refresh git status.',
+    actionComplete: 'Git action completed.',
+    actionFailed: 'Git action failed.',
+    emptyOutput: 'No output.',
+    actions: {
+      diff: 'View diff',
+      push: 'Push',
+      pull: 'Pull',
+      status: 'Status'
+    },
+    resultLabels: {
+      diff: 'Git diff',
+      push: 'Git push',
+      pull: 'Git pull',
+      status: 'Git status'
+    },
+    commands: {
+      diff: 'git diff',
+      push: 'git push',
+      pull: 'git pull',
+      status: 'git status'
+    }
+  },
   slash: {
     label: 'Slash commands',
     empty: 'No matching commands',
