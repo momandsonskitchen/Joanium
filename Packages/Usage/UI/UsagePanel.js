@@ -160,7 +160,7 @@ function buildInsights(strings, data, dateKeys) {
   const cards        = [];
 
   // ── Accumulate year data ──
-  let totalIn = 0, totalOut = 0, totalMsgs = 0;
+  let totalIn = 0, totalOut = 0, totalMsgs = 0, activeDays = 0;
   let peakKey = '', peakTokens = 0;
   let weekdayTokens = 0, weekendTokens = 0, weekdayActive = 0, weekendActive = 0;
 
@@ -171,6 +171,7 @@ function buildInsights(strings, data, dateKeys) {
     totalOut  += e.tokensOut;
     totalMsgs += e.messages;
     const t = e.tokensIn + e.tokensOut;
+    if (t > 0) activeDays++;
     if (t > peakTokens) { peakTokens = t; peakKey = k; }
     const [y, m, d] = k.split('-').map(Number);
     const dow = new Date(y, m - 1, d).getDay();
@@ -306,6 +307,68 @@ function buildInsights(strings, data, dateKeys) {
   }
 
   // 9. Most active month
+  // (defined below after new cards)
+
+  // 10. Usage intensity (messages per active day)
+  if (activeDays > 0 && totalMsgs > 0) {
+    const msgsPerDay = (totalMsgs / activeDays).toFixed(1);
+    const intensity  = msgsPerDay >= 20 ? ins.intensityHigh : msgsPerDay >= 8 ? ins.intensityMedium : ins.intensityLow;
+    cards.push({
+      badge: ins.badges.rpd,
+      label: ins.usageIntensity,
+      bold:  ins.msgsPerDay.replace('{msgs}', msgsPerDay),
+      desc:  intensity
+    });
+  }
+
+  // 11. Model diversity
+  if (modelEntries.length > 0) {
+    const desc = modelEntries.length === 1
+      ? ins.modelDiversitySingle
+      : ins.modelDiversityMulti.replace('{count}', modelEntries.length);
+    const topTwo = modelEntries
+      .sort((a, b) => (b[1].tokensIn + b[1].tokensOut) - (a[1].tokensIn + a[1].tokensOut))
+      .slice(0, 2)
+      .map(([id, m]) => m.label || id)
+      .join(ins.andJoiner);
+    cards.push({
+      badge: ins.badges.mdv,
+      label: ins.modelDiversity,
+      bold:  topTwo,
+      desc
+    });
+  }
+
+  // 12. Growth trend (last 30 days vs prior 30 days)
+  {
+    const today      = dateKeys[dateKeys.length - 1];
+    const todayIdx   = dateKeys.indexOf(today);
+    const last30     = dateKeys.slice(Math.max(0, todayIdx - 29), todayIdx + 1);
+    const prior30    = dateKeys.slice(Math.max(0, todayIdx - 59), todayIdx - 29);
+    const sumRange   = (keys) => keys.reduce((s, k) => {
+      const e = daily[k];
+      return s + (e ? e.tokensIn + e.tokensOut : 0);
+    }, 0);
+    const t1 = sumRange(prior30);
+    const t2 = sumRange(last30);
+    if (t2 > 0) {
+      const trend = t1 === 0
+        ? ins.trendNew
+        : t2 > t1 * 1.1
+          ? ins.trendGrowing.replace('{ratio}', (t2 / t1).toFixed(1))
+          : t1 > t2 * 1.1
+            ? ins.trendDeclining.replace('{ratio}', (t1 / t2).toFixed(1))
+            : ins.trendSteady;
+      cards.push({
+        badge: ins.badges.trd,
+        label: ins.growthTrend,
+        bold:  trend,
+        desc:  ins.trendWindow
+      });
+    }
+  }
+
+  // (original 9 — moved here)
   const monthTotals = {};
   for (const k of dateKeys) {
     const e = daily[k];

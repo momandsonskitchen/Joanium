@@ -32,7 +32,10 @@ const en = {
       week: 'WEEK',
       prov: 'PROV',
       out:  'OUT',
-      mon:  'MON'
+      mon:  'MON',
+      rpd:  'RPD',
+      mdv:  'MDV',
+      trd:  'TRD'
     },
     mostUsedModel:         'Most Used Model',
     busiestDay:            'Busiest Day',
@@ -68,7 +71,22 @@ const en = {
     mostVerboseModel:      '{model} is your most verbose model.',
     mostActiveMonth:       'Most Active Month',
     peakMonthTokens:       '{tokens} tokens in {month}',
-    peakMonthShare:        '{share}% of your annual usage.'
+    peakMonthShare:        '{share}% of your annual usage.',
+    usageIntensity:        'Usage Intensity',
+    msgsPerDay:            '{msgs} messages per active day.',
+    intensityHigh:         'Very active — heavy daily AI usage.',
+    intensityMedium:       'Regular usage — a solid daily habit.',
+    intensityLow:          'Light usage — occasional sessions.',
+    modelDiversity:        'Top Models',
+    modelDiversitySingle:  'You stick to one model consistently.',
+    modelDiversityMulti:   'You have used {count} different models this year.',
+    andJoiner:             ' & ',
+    growthTrend:           'Growth Trend',
+    trendGrowing:          '{ratio}× more in the last 30 days.',
+    trendDeclining:        '{ratio}× less in the last 30 days.',
+    trendSteady:           'Consistent usage over the last 60 days.',
+    trendNew:              'First 30 days of activity recorded.',
+    trendWindow:           'Comparing last 30 days vs prior 30 days.'
   },
   heatmap: {
     heading:   'Daily Activity',
