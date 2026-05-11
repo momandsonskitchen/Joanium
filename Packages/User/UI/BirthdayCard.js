@@ -6,6 +6,34 @@ function toFileUrl(filePath) {
   return 'file:///' + filePath.replace(/\\/g, '/');
 }
 
+const STORAGE_KEY = 'joanium:birthday-card-shown';
+
+function todayKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
+function wasAlreadyShownToday() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return false;
+    if (stored === todayKey()) return true;
+    // Stale entry from a previous day — remove it.
+    localStorage.removeItem(STORAGE_KEY);
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function markShownToday() {
+  try {
+    localStorage.setItem(STORAGE_KEY, todayKey());
+  } catch {
+    // non-fatal
+  }
+}
+
 function isBirthday(dateOfBirth) {
   if (!dateOfBirth?.day || !dateOfBirth?.month) return false;
   const now = new Date();
@@ -33,6 +61,9 @@ function calculateAge(dateOfBirth) {
  */
 export function mountBirthdayCard(strings, { profile }) {
   if (!isBirthday(profile?.dateOfBirth)) return;
+  if (wasAlreadyShownToday()) return;
+
+  markShownToday();
 
   const firstName = (profile.name ?? '').split(' ')[0].trim() || profile.name;
   const age       = calculateAge(profile.dateOfBirth);
