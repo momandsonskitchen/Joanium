@@ -434,14 +434,6 @@ export function createEventsPanel(strings) {
     panel.hidden = true;
 
     // ── Header ───────────────────────────────────────────────────────────────
-    liveBadge = createElement('span', 'events-live', strings.states.live);
-
-    const refreshButton = createElement('button', 'events-action');
-    refreshButton.type = 'button';
-    refreshButton.setAttribute('aria-label', strings.actions.refresh);
-    refreshButton.append(createIcon('retry', 'events-action__icon'));
-    refreshButton.addEventListener('click', () => { void populate({ pulse: true }); });
-
     const clearButton = createElement('button', 'events-action events-action--danger');
     clearButton.type = 'button';
     clearButton.setAttribute('aria-label', strings.actions.clearAll);
@@ -449,7 +441,7 @@ export function createEventsPanel(strings) {
     clearButton.addEventListener('click', () => { void clearEvents(); });
 
     const headerActions = createElement('div', 'events__actions');
-    headerActions.append(liveBadge, refreshButton, clearButton);
+    headerActions.append(clearButton);
 
     const header = createPanelHeader({
       title: strings.title,
