@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 // ---------------------------------------------------------------------------
@@ -13,15 +13,24 @@ import path from 'node:path';
 //
 // The caller provides a `runAgent(agent)` callback that performs the actual
 // prompt execution.  The scheduler only manages timing; it never touches AI.
+//
+// Agents are always run sequentially — one at a time — with a 5-second gap
+// between each run.  This prevents concurrent requests from hammering the
+// provider and triggering 429 rate-limit errors.
 // ---------------------------------------------------------------------------
 
-const TICK_INTERVAL_MS = 60_000; // re-check every minute
+const TICK_INTERVAL_MS   = 60_000; // re-check every minute
+const BETWEEN_RUNS_DELAY = 5_000;  // 5 s gap between consecutive agent runs
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export function createAgentScheduler({ agentsDirectory, runAgent }) {
-  let tickTimer = null;
+  let tickTimer      = null;
   let lastTickMinute = -1;
 
-  // ── Internal helpers ─────────────────────────────────────────────────────
+  // ── Internal helpers ──────────────────────────────────────────────────────
 
   async function loadAllAgents() {
     let files;
@@ -35,7 +44,7 @@ export function createAgentScheduler({ agentsDirectory, runAgent }) {
     for (const file of files) {
       if (!file.endsWith('.json')) continue;
       try {
-        const raw  = await readFile(path.join(agentsDirectory, file), 'utf8');
+        const raw = await readFile(path.join(agentsDirectory, file), 'utf8');
         agents.push(JSON.parse(raw));
       } catch {
         // Skip corrupt files.
@@ -47,9 +56,9 @@ export function createAgentScheduler({ agentsDirectory, runAgent }) {
   function shouldRunNow(schedule, now) {
     if (!schedule) return false;
 
-    const hh   = now.getHours();
-    const mm   = now.getMinutes();
-    const dow  = now.getDay(); // 0=Sun … 6=Sat
+    const hh  = now.getHours();
+    const mm  = now.getMinutes();
+    const dow = now.getDay(); // 0=Sun … 6=Sat
 
     const [schedH, schedM] = (schedule.time ?? '09:00').split(':').map(Number);
     const timeMatches = hh === schedH && mm === schedM;
@@ -63,25 +72,41 @@ export function createAgentScheduler({ agentsDirectory, runAgent }) {
     }
   }
 
+  // Run a list of agents one after another with a delay between each to
+  // avoid hitting provider rate limits.
+  async function runSequentially(agents) {
+    for (let i = 0; i < agents.length; i += 1) {
+      const agent = agents[i];
+      try {
+        await runAgent(agent);
+      } catch (err) {
+        console.error(`[Agents] Failed to run agent "${agent.name}":`, err);
+      }
+
+      // Pause between runs — skip the delay after the last agent.
+      if (i < agents.length - 1) {
+        await delay(BETWEEN_RUNS_DELAY);
+      }
+    }
+  }
+
   async function tick() {
-    const now = new Date();
+    const now           = new Date();
     const currentMinute = now.getHours() * 60 + now.getMinutes();
 
-    // Only fire once per minute even if the timer fires slightly early.
+    // Only fire once per minute even if the timer drifts slightly.
     if (currentMinute === lastTickMinute) return;
     lastTickMinute = currentMinute;
 
     const agents = await loadAllAgents();
-    for (const agent of agents) {
-      if (agent.enabled === false) continue;
-      if (!agent.schedule || agent.schedule.type === 'startup') continue;
-      if (shouldRunNow(agent.schedule, now)) {
-        try {
-          await runAgent(agent);
-        } catch (err) {
-          console.error(`[Agents] Failed to run agent "${agent.name}":`, err);
-        }
-      }
+    const due    = agents.filter((agent) => {
+      if (agent.enabled === false) return false;
+      if (!agent.schedule || agent.schedule.type === 'startup') return false;
+      return shouldRunNow(agent.schedule, now);
+    });
+
+    if (due.length > 0) {
+      await runSequentially(due);
     }
   }
 
@@ -89,22 +114,19 @@ export function createAgentScheduler({ agentsDirectory, runAgent }) {
 
   return {
     async start() {
-      // Small delay so the rest of the app (IPC, windows) is fully initialised
-      // before agents start making AI calls.
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Wait for the rest of the app (IPC, windows, AgentGateway) to be
+      // fully initialised before making any AI calls.
+      await delay(2000);
 
-      // Run startup agents — fire all in parallel so one slow AI call
-      // doesn't block the others, and errors are isolated per-agent.
-      const agents = await loadAllAgents();
-      await Promise.allSettled(
-        agents
-          .filter((agent) => agent.enabled !== false && agent.schedule?.type === 'startup')
-          .map((agent) =>
-            runAgent(agent).catch((err) =>
-              console.error(`[Agents] Failed to run startup agent "${agent.name}":`, err)
-            )
-          )
+      const agents        = await loadAllAgents();
+      const startupAgents = agents.filter(
+        (agent) => agent.enabled !== false && agent.schedule?.type === 'startup'
       );
+
+      if (startupAgents.length > 0) {
+        console.info(`[Agents] Running ${startupAgents.length} startup agent(s) sequentially.`);
+        await runSequentially(startupAgents);
+      }
 
       // Start the minute-tick for time-based agents.
       if (tickTimer) clearInterval(tickTimer);
