@@ -123,6 +123,57 @@ export function getChristmasGreeting(name) {
   return greetings[Math.floor(Math.random() * greetings.length)];
 }
 
+// ── New Year helpers ───────────────────────────────────────────────────
+
+/**
+ * Returns true when today is January 1st.
+ */
+export function isNewYearToday() {
+  const now = new Date();
+  return now.getMonth() === 0 && now.getDate() === 1;
+}
+
+/**
+ * Returns a random New Year greeting string used on the chat welcome screen.
+ */
+export function getNewYearGreeting(name) {
+  const n = name ? `, ${name}` : '';
+  const year = new Date().getFullYear();
+  const greetings = [
+    `Happy New Year${n}! 🎆`,
+    `Happy New Year${n}! ✨`,
+    `Happy New Year${n}! 🎉`,
+    `Welcome to ${year}${n}! 🎆`,
+    `Here's to an amazing ${year}${n}! ✨`,
+    `New year, new possibilities${n}! 🎉`,
+    `Wishing you a fantastic ${year}${n}! 🎆`,
+    `May ${year} be your best year yet${n}! ✨`,
+    `Cheers to the New Year${n}! 🎉`,
+    `A fresh start and endless possibilities${n}! 🎆`,
+    `${year} is going to be incredible${n}! ✨`,
+    `Wishing you health, happiness and success in ${year}${n}! 🎉`,
+    `Out with the old, in with the new${n}! 🎆`,
+    `May ${year} bring you everything you've been waiting for${n}! ✨`,
+    `New year, new adventures${n}! 🎉`,
+    `Here's to fresh beginnings${n}! 🎆`,
+    `May ${year} be full of joy and good vibes${n}! ✨`,
+    `Wishing you a year filled with wins${n}! 🎉`,
+    `${year} — let's make it legendary${n}! 🎆`,
+    `A whole new year of greatness awaits${n}! ✨`,
+    `May every day of ${year} be better than the last${n}! 🎉`,
+    `Cheers to new beginnings and bigger dreams${n}! 🎆`,
+    `${year} is yours for the taking${n}! ✨`,
+    `Wishing you a year as bright as the fireworks${n}! 🎉`,
+    `New year, same amazing you — but better${n}! 🎆`,
+    `May ${year} be the chapter you've been waiting to write${n}! ✨`,
+    `Here's to 365 new days of opportunity${n}! 🎉`,
+    `Sending all the New Year love your way${n}! 🎆`,
+    `May success and happiness follow you through ${year}${n}! ✨`,
+    `Welcome to your best year yet${n}! 🎉`,
+  ];
+  return greetings[Math.floor(Math.random() * greetings.length)];
+}
+
 // ── Time-based greetings ──────────────────────────────────────────────────
 
 export const getTimeGreetings = (hour, name) =>
