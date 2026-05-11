@@ -30,6 +30,7 @@ import { createConnectorsPanel } from '../../Toolset/Connectors/UI/ConnectorsPan
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 import { createSlashCommandsPanel } from '../../SlashCommands/UI/SlashCommandsPanel.js';
+import { mountBirthdayCard } from '../../User/UI/BirthdayCard.js';
 
 function getInitials(name) {
   const parts = collapseWhitespace(name).split(' ').filter(Boolean);
@@ -667,6 +668,12 @@ async function bootstrap() {
 
   await showRoute(appSettings.defaultView ?? 'chat');
   requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
+
+  // ── Birthday card ──────────────────────────────────────────────────────────
+  // Checks today's date against the user's date of birth and shows a
+  // celebratory overlay with confetti when it's a match. No-ops silently
+  // when it isn't the user's birthday.
+  mountBirthdayCard(strings.user.birthday, { profile });
 
   // Arm the auto-lock timer now that the shell is fully rendered.
   void autoLockTimer.refresh();

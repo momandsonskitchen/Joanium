@@ -66,6 +66,7 @@
 * System Prompts: `Packages/Chat/Core/ChatState.js` builds the model system context from `Prompts/System.md`, compact runtime facts, active persona, custom user instructions, active project workspace context, memory, terminal tools, and Toolset prompt sections.
 * About/System Info: `Packages/About` owns app metadata plus a local system snapshot persisted to `Data/System.json`.
 * Custom Instructions: `Packages/User` stores user-written behavior instructions in `Data/User.json`; `Packages/Chat` adds them to the model system context.
+* Birthday Card: `Packages/User/UI/BirthdayCard.js` mounts a full-viewport celebratory overlay with canvas confetti on the user's birthday (day + month match from `Data/User.json`). Shows the user's avatar photo when one is set; omits the image slot otherwise. Mounted by `Packages/Shell` after the initial route renders. All strings are owned by `Packages/User/I18n`.
 
 # Build System
 
