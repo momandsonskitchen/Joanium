@@ -79,7 +79,48 @@ export async function createPackage({ rootDirectory }) {
   // ── Scheduler ─────────────────────────────────────────────────────────────
   const runsDirectory = path.join(agentsDirectory, 'Runs');
 
-  async function runAgent(agent) {
+  // ── queueAgent ─────────────────────────────────────────────────────────────
+  // Pre-writes a 'queued' log for an agent that is waiting in the sequential
+  // run queue.  Returns { runId, logPath, firedAt } so runAgent can promote
+  // the same file to 'running' without creating a duplicate entry.
+  async function queueAgent(agent) {
+    await mkdir(runsDirectory, { recursive: true });
+    const firedAt     = new Date().toISOString();
+    const safeAgentId = sanitizeFileStem(agent.id);
+    if (!safeAgentId) return null;
+
+    const timestamp = firedAt.replace(/[:.]/g, '-');
+    const runId     = `${safeAgentId}-${timestamp}`;
+    const logPath   = path.join(runsDirectory, `${runId}.json`);
+
+    await writeFile(logPath, JSON.stringify({
+      id:           runId,
+      agentId:      agent.id,
+      agentName:    agent.name,
+      agentAvatar:  agent.avatar ?? null,
+      prompt:       agent.prompt,
+      schedule:     agent.schedule,
+      firedAt,
+      startedAt:    null,
+      status:       'queued',
+      finishedAt:   null,
+      fullResponse: '',
+      thinking:     '',
+      provider:     null,
+      model:        null,
+      inputTokens:  0,
+      outputTokens: 0,
+      error:        null
+    }, null, 2), 'utf8');
+
+    return { runId, logPath, firedAt };
+  }
+
+  // ── runAgent ───────────────────────────────────────────────────────────────
+  // Accepts an optional preAllocated context ({ runId, logPath, firedAt })
+  // produced by queueAgent.  When present the existing queued log is promoted
+  // to 'running' in place rather than creating a new file.
+  async function runAgent(agent, preAllocated = null) {
     await agentStateManager.markAgentRun(agent.id).catch(() => {});
 
     await mkdir(runsDirectory, { recursive: true });
@@ -87,9 +128,9 @@ export async function createPackage({ rootDirectory }) {
     const safeAgentId = sanitizeFileStem(agent.id);
     if (!safeAgentId) return;
 
-    const timestamp = startedAt.replace(/[:.]/g, '-');
-    const runId     = `${safeAgentId}-${timestamp}`;
-    const logPath   = path.join(runsDirectory, `${safeAgentId}-${timestamp}.json`);
+    // Re-use the queued log file when available; otherwise create a new one.
+    const runId   = preAllocated?.runId   ?? `${safeAgentId}-${startedAt.replace(/[:.]/g, '-')}`;
+    const logPath = preAllocated?.logPath ?? path.join(runsDirectory, `${runId}.json`);
 
     const baseLog = {
       id:          runId,
@@ -98,7 +139,7 @@ export async function createPackage({ rootDirectory }) {
       agentAvatar: agent.avatar ?? null,
       prompt:      agent.prompt,
       schedule:    agent.schedule,
-      firedAt:     startedAt,
+      firedAt:     preAllocated?.firedAt ?? startedAt,
       startedAt
     };
 
@@ -148,7 +189,12 @@ export async function createPackage({ rootDirectory }) {
     console.info(`[Agents] Agent "${agent.name}" ${status} (schedule: ${agent.schedule?.type}).`);
   }
 
-  const scheduler = createAgentScheduler({ agentsDirectory, runAgent });
+  const scheduler = createAgentScheduler({ agentsDirectory, runAgent, queueAgent });
+
+  // Recover any runs that were interrupted by the app closing unexpectedly.
+  await agentStateManager.recoverInterruptedRuns().catch((err) =>
+    console.error('[Agents] Failed to recover interrupted runs:', err)
+  );
 
   scheduler.start().catch((err) =>
     console.error('[Agents] Scheduler start error:', err)

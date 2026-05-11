@@ -365,6 +365,22 @@
   color: var(--color-chat-text-muted);
 }
 
+.events-row__status--running {
+  background: rgba(var(--color-accent-rgb), 0.10);
+  color: var(--color-accent);
+  animation: events-status-running-pulse 2s ease-in-out infinite;
+}
+
+@keyframes events-status-running-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+.events-row__status--queued {
+  background: rgba(150, 125, 105, 0.10);
+  color: var(--color-chat-text-muted);
+}
+
 .events-row__meta {
   align-items: center;
   gap: 6px;

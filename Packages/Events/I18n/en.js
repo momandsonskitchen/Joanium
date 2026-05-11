@@ -51,7 +51,8 @@ const en = {
     success: 'Success',
     error: 'Error',
     skipped: 'Skipped',
-    running: 'Running'
+    running: 'Running',
+    queued: 'Queued'
   },
   types: {
     agent: 'Agent run',

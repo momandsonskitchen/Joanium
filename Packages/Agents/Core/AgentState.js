@@ -182,6 +182,47 @@ export function createAgentStateManager({ rootDirectory }) {
       await rm(runsDirectory, { recursive: true, force: true });
       await mkdir(runsDirectory, { recursive: true });
       return { ok: true };
+    },
+
+    // -------------------------------------------------------------------------
+    // recoverInterruptedRuns — called once at startup to fix up any run logs
+    // left in a 'running' or 'queued' state because the app was closed while
+    // an agent was active or waiting in the queue.
+    // -------------------------------------------------------------------------
+    async recoverInterruptedRuns() {
+      let files;
+      try {
+        await mkdir(runsDirectory, { recursive: true });
+        files = await readdir(runsDirectory);
+      } catch {
+        return;
+      }
+
+      for (const file of files) {
+        if (!file.endsWith('.json')) continue;
+        const filePath = path.join(runsDirectory, file);
+        try {
+          const raw = await readFile(filePath, 'utf8');
+          const run = JSON.parse(raw);
+
+          if (run.status !== 'running' && run.status !== 'queued') continue;
+
+          const reason = run.status === 'queued'
+            ? 'App closed before agent could start.'
+            : 'App closed while agent was running.';
+
+          const recovered = {
+            ...run,
+            status:     'error',
+            finishedAt: run.finishedAt ?? new Date().toISOString(),
+            error:      reason
+          };
+
+          await writeFile(filePath, `${JSON.stringify(recovered, null, 2)}\n`, 'utf8');
+        } catch {
+          // Skip corrupt or unreadable run files.
+        }
+      }
     }
   };
 }

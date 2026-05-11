@@ -26,7 +26,7 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function createAgentScheduler({ agentsDirectory, runAgent }) {
+export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) {
   let tickTimer      = null;
   let lastTickMinute = -1;
 
@@ -74,11 +74,30 @@ export function createAgentScheduler({ agentsDirectory, runAgent }) {
 
   // Run a list of agents one after another with a delay between each to
   // avoid hitting provider rate limits.
+  //
+  // When queueAgent is provided, agents that will have to wait (index > 0)
+  // get a 'queued' log written upfront so the Events feed shows them as
+  // pending immediately.  The pre-allocated { runId, logPath, firedAt } is
+  // forwarded to runAgent so it can promote the log to 'running' in place.
   async function runSequentially(agents) {
+    // Pre-write queued placeholders for every agent that will have to wait.
+    const preAllocated = new Map();
+    if (typeof queueAgent === 'function' && agents.length > 1) {
+      for (let i = 1; i < agents.length; i += 1) {
+        try {
+          const alloc = await queueAgent(agents[i]);
+          if (alloc) preAllocated.set(agents[i].id, alloc);
+        } catch {
+          // Pre-queuing is best-effort; failures must not block execution.
+        }
+      }
+    }
+
     for (let i = 0; i < agents.length; i += 1) {
       const agent = agents[i];
+      const alloc = preAllocated.get(agent.id) ?? null;
       try {
-        await runAgent(agent);
+        await runAgent(agent, alloc);
       } catch (err) {
         console.error(`[Agents] Failed to run agent "${agent.name}":`, err);
       }
