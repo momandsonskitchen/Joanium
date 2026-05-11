@@ -545,9 +545,20 @@ export function createAgentsPanel(strings) {
 
   // ── populateList ───────────────────────────────────────────────────────────
 
+  let _fetchGen = 0; // incremented on every fetch; stale results are discarded
+
   async function populateList(listEl, query = '') {
-    listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) listEl.append(createElement('div', 'agents-skeleton'));
+    _fetchGen++;
+    const gen = _fetchGen;
+
+    // Only reset to skeletons when the list isn't already in a loading state.
+    // This preserves the skeleton UI when the user navigates away and back
+    // while a fetch is still in-flight.
+    const alreadyLoading = !!listEl.querySelector('.agents-skeleton');
+    if (!alreadyLoading) {
+      listEl.replaceChildren();
+      for (let i = 0; i < 3; i++) listEl.append(createElement('div', 'agents-skeleton'));
+    }
 
     let agents;
     try {
@@ -555,6 +566,9 @@ export function createAgentsPanel(strings) {
     } catch {
       agents = [];
     }
+
+    // A newer call superseded this one — discard the stale result.
+    if (gen !== _fetchGen) return;
 
     const normalizedQuery = collapseWhitespace(query).toLowerCase();
     const filtered = normalizedQuery

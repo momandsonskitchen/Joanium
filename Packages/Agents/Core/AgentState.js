@@ -81,6 +81,7 @@ export function createAgentStateManager({ rootDirectory }) {
             schedule:  data.schedule  ?? { type: 'startup' },
             model:     data.model     ?? null,
             prompt:    data.prompt,
+            enabled:   data.enabled   ?? true,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             lastRunAt: data.lastRunAt ?? null
