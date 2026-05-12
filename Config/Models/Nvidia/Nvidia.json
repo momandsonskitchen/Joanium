@@ -38,22 +38,6 @@
         "output": 0.2
       }
     },
-    "moonshotai/kimi-k2-thinking": {
-      "name": "Kimi K2 Thinking",
-      "description": "MoonshotAI's reasoning variant with extended chain-of-thought via NVIDIA NIM",
-      "context_window": 131072,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 1,
-        "output": 3
-      }
-    },
     "deepseek-ai/deepseek-v3.2": {
       "name": "DeepSeek V3.2",
       "description": "DeepSeek's latest general-purpose flagship — top coding and reasoning via NVIDIA NIM",

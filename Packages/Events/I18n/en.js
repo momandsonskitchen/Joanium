@@ -45,7 +45,9 @@ const en = {
     tokens: 'Tokens',
     conversation: 'Conversation',
     target: 'Target',
-    externalId: 'Message ID'
+    externalId: 'Message ID',
+    toolUsed: 'Tool used.',
+    parameters: 'Parameters'
   },
   status: {
     success: 'Success',

@@ -39,6 +39,41 @@ function formatDetailDate(value) {
   }).format(toDate(value));
 }
 
+// ---------------------------------------------------------------------------
+// Tool-call block parser
+// Splits a response string into alternating text / joanium-tool segments.
+// ---------------------------------------------------------------------------
+
+function parseToolBlocks(text) {
+  const parts = [];
+  const re = /```(?:joanium-tool|joanium-terminal)\s*([\s\S]*?)```/gi;
+  let lastIndex = 0;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      const segment = text.slice(lastIndex, match.index);
+      if (segment.trim()) parts.push({ type: 'text', content: segment });
+    }
+    try {
+      const payload = JSON.parse(match[1].trim());
+      parts.push({
+        type: 'tool',
+        toolName: String(payload.tool ?? 'tool'),
+        params: payload.parameters ?? null
+      });
+    } catch {
+      // Malformed block — fall back to plain text so nothing is lost.
+      parts.push({ type: 'text', content: match[0] });
+    }
+    lastIndex = re.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    const tail = text.slice(lastIndex);
+    if (tail.trim()) parts.push({ type: 'text', content: tail });
+  }
+  return parts;
+}
+
 function compactText(value, limit = 150) {
   const text = String(value ?? '').replace(/\s+/g, ' ').trim();
   return text.length > limit ? `${text.slice(0, limit - 3)}...` : text;
@@ -273,6 +308,47 @@ export function createEventsPanel(strings) {
     }
   }
 
+  // ── createToolCallCard ──────────────────────────────────────────────────
+  // Renders a single joanium-tool/terminal block as a styled card widget,
+  // matching the chat view's terminal-call design language.
+
+  function createToolCallCard(toolName, params) {
+    const card = createElement('div', 'events-tool-call');
+
+    const header = createElement('div', 'events-tool-call__header');
+    const iconWrap = createElement('span', 'events-tool-call__icon');
+    iconWrap.append(createIcon('terminal', 'events-tool-call__icon-svg'));
+
+    const copy = createElement('div', 'events-tool-call__copy');
+    copy.append(
+      createElement('div', 'events-tool-call__label', toolName),
+      createElement('div', 'events-tool-call__sub', toolName)
+    );
+
+    const badge = createElement('span', 'events-tool-call__badge', strings.labels.toolUsed);
+    header.append(iconWrap, copy, badge);
+    card.append(header);
+
+    if (params && typeof params === 'object' && Object.keys(params).length > 0) {
+      const details = document.createElement('details');
+      details.className = 'events-tool-call__details';
+
+      const summary = createElement('summary', 'events-tool-call__summary');
+      summary.append(
+        createIcon('chevronDown', 'events-tool-call__chevron'),
+        createElement('span', '', strings.labels.parameters)
+      );
+
+      const pre = createElement('pre', 'events-tool-call__params',
+        JSON.stringify(params, null, 2));
+
+      details.append(summary, pre);
+      card.append(details);
+    }
+
+    return card;
+  }
+
   // ── createDetailSection ───────────────────────────────────────────────────
   // Generic section: label + markdown-rendered value.
 
@@ -319,10 +395,18 @@ export function createEventsPanel(strings) {
       section.append(thinkWrap);
     }
 
-    // Main response content rendered as markdown.
+    // Main response content — text segments rendered as markdown, tool call
+    // blocks rendered as styled tool call cards (matching the chat view).
     if (content.trim()) {
       const valueEl = createElement('div', 'events-detail__section-value');
-      valueEl.append(renderMarkdown(content));
+      const parts = parseToolBlocks(content);
+      for (const part of parts) {
+        if (part.type === 'tool') {
+          valueEl.append(createToolCallCard(part.toolName, part.params));
+        } else if (part.content.trim()) {
+          valueEl.append(renderMarkdown(part.content));
+        }
+      }
       section.append(valueEl);
     }
 
