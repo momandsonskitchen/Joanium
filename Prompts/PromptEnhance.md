@@ -1,0 +1,1 @@
+Rewrite the following prompt to be clearer, more specific, and more effective for an AI assistant. Preserve the original intent exactly. Return only the rewritten prompt — no preamble, no explanation, no quotes.

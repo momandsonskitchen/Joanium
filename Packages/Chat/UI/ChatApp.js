@@ -2723,24 +2723,10 @@ export async function createChatView(strings, {
     syncComposer();
 
     try {
-      const instruction = [
-        'Rewrite the following prompt to be clearer, more specific, and more effective for an AI assistant.',
-        'Preserve the original intent exactly.',
-        'Return only the rewritten prompt — no preamble, no explanation, no quotes.\n\n',
-        raw
-      ].join(' ');
-
-      const result = await invokeIpc('chat:complete-message', {
-        messages: [{ role: 'user', content: instruction }],
+      const result = await invokeIpc('chat:enhance-prompt', {
+        raw,
         providerId: activeProvider?.id ?? null,
-        modelId: activeModel?.id ?? null,
-        memoryContext: null,
-        projectInfo: null,
-        persona: null,
-        modeInstruction: null,
-        terminalTools: null,
-        toolsetTools: null,
-        isNewSession: false
+        modelId: activeModel?.id ?? null
       });
 
       const enhanced = result?.text?.trim();

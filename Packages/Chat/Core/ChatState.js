@@ -33,6 +33,10 @@ async function readSystemPromptFile(rootDirectory) {
   }
 }
 
+async function readEnhancePromptFile(rootDirectory) {
+  return (await readFile(path.join(rootDirectory, 'Prompts', 'PromptEnhance.md'), 'utf8')).trim();
+}
+
 async function buildBaseSystemPrompt(rootDirectory, user) {
   const prompt = await readSystemPromptFile(rootDirectory);
   const now = new Date();
@@ -817,6 +821,34 @@ export function createChatStateManager({ rootDirectory }) {
       });
 
       return { ...meta, text, thinking };
+    },
+
+    async enhancePrompt({ raw, providerId, modelId }) {
+      const instruction = await readEnhancePromptFile(rootDirectory);
+      const content = `${instruction}\n\n${raw}`;
+
+      const [user, providers] = await Promise.all([
+        readUserState(rootDirectory),
+        readProviderCatalog(rootDirectory)
+      ]);
+      const baseSystemPrompt = await buildBaseSystemPrompt(rootDirectory, user);
+
+      let text = '';
+      const meta = await requestChatCompletionStreamWithRetry({
+        user,
+        providers,
+        request: {
+          messages: [{ role: 'user', content }],
+          providerId: providerId ?? null,
+          modelId: modelId ?? null,
+          baseSystemPrompt
+        },
+        onChunk(chunk) {
+          if (chunk?.type === 'text' && chunk.text) text += chunk.text;
+        }
+      });
+
+      return { ...meta, text: text.trim() };
     },
 
   };

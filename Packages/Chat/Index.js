@@ -143,6 +143,27 @@ export async function createPackage({ rootDirectory }) {
         }
       },
       {
+        channel: 'chat:enhance-prompt',
+        handler: async (_event, { raw, providerId, modelId }) => {
+          const result = await chatStateManager.enhancePrompt({ raw, providerId, modelId });
+          const tokensIn  = estimateTokens(result?.charCountIn  ?? 0);
+          const tokensOut = estimateTokens(result?.charCountOut ?? 0);
+
+          if ((tokensIn + tokensOut) > 0) {
+            await usageTracker.recordExchange({
+              tokensIn,
+              tokensOut,
+              modelId:       result?.modelId       ?? null,
+              modelLabel:    result?.modelLabel    ?? null,
+              providerLabel: result?.providerLabel ?? null,
+              isNewSession:  false
+            });
+          }
+
+          return result;
+        }
+      },
+      {
         channel: 'chat:select-attachments',
         handler: async (event, options = {}) => {
           const allowImages = Boolean(options?.allowImages);
