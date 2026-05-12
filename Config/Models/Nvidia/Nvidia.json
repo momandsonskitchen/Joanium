@@ -22,22 +22,6 @@
         "output": 0.02
       }
     },
-    "minimaxai/minimax-m2.5": {
-      "name": "MiniMax M2.5",
-      "description": "MiniMax balanced flagship for reasoning and coding via NVIDIA NIM",
-      "context_window": 131072,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.01,
-        "output": 0.02
-      }
-    },
     "moonshotai/kimi-k2-instruct": {
       "name": "Kimi K2 Instruct",
       "description": "MoonshotAI's 1T MoE model — strong at agentic tasks and tool use via NVIDIA NIM",
