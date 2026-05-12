@@ -3177,22 +3177,17 @@ export async function createChatView(strings, {
   }
 
   function buildSubAgentTaskPrompt(task, coordinationGoal, index, total) {
-    return [
-      `You are sub-agent ${index + 1} of ${total} inside Joanium.`,
-      coordinationGoal ? `Team objective: ${coordinationGoal}` : '',
-      `Task title: ${task.title}`,
-      `Task goal: ${task.goal}`,
-      task.context ? `Extra context:\n${task.context}` : '',
-      task.deliverable ? `Expected handoff:\n${task.deliverable}` : '',
-      [
-        'Return a compact handoff for the coordinator with:',
-        '1. Key findings',
-        '2. Evidence, assumptions, or relevant references',
-        '3. Risks or uncertainties',
-        '4. Best next recommendation'
-      ].join('\n'),
-      'Use tools only for read-only investigation. Do not modify files, mutate external services, or claim you changed anything.'
-    ].filter(Boolean).join('\n\n');
+    return payload.subAgentPrompt
+      .replace('{index}', String(index + 1))
+      .replace('{total}', String(total))
+      .replace('{coordinationGoal}', coordinationGoal ? `Team objective: ${coordinationGoal}` : '')
+      .replace('{title}', task.title)
+      .replace('{goal}', task.goal)
+      .replace('{context}', task.context ? `Extra context:\n${task.context}` : '')
+      .replace('{deliverable}', task.deliverable ? `Expected handoff:\n${task.deliverable}` : '')
+      .split('\n')
+      .filter((line) => line.trim())
+      .join('\n');
   }
 
   function getSubAgentConversationContext() {
@@ -3249,8 +3244,9 @@ export async function createChatView(strings, {
     const toolsetTools = await loadToolsetPrompt();
     let usage = { input: 0, output: 0 };
     let lastMeta = {};
+    const MAX_SUB_AGENT_TOOL_CALLS = 10;
 
-    for (let depth = 0; depth <= MAX_TERMINAL_TOOL_CALLS; depth += 1) {
+    for (let depth = 0; depth <= MAX_SUB_AGENT_TOOL_CALLS; depth += 1) {
       const result = await invokeIpc('chat:complete-message', {
         messages: localMessages,
         providerId: activeProvider?.id ?? null,
@@ -3259,7 +3255,7 @@ export async function createChatView(strings, {
         projectInfo: buildProjectContext(activeProject) || null,
         persona: (getActivePersona?.() ?? activePersona)?.content || null,
         modeInstruction: getModeInstruction(),
-        terminalTools: strings.terminal.systemPrompt,
+        terminalTools: payload.terminalPrompt,
         toolsetTools: toolsetTools || null,
         isNewSession: false
       });
@@ -3283,7 +3279,7 @@ export async function createChatView(strings, {
         };
       }
 
-      if (depth >= MAX_TERMINAL_TOOL_CALLS) {
+      if (depth >= MAX_SUB_AGENT_TOOL_CALLS) {
         return {
           ...lastMeta,
           text: stripNativeToolCalls(parsedContent) || strings.terminal.unsupportedTool,
@@ -3300,6 +3296,9 @@ export async function createChatView(strings, {
           error: error?.message ?? String(error)
         }));
         modelResult = formatTerminalResultForModel(strings, terminalAction, terminalResult);
+        if (!terminalResult?.ok && terminalResult?.error) {
+          modelResult += '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
+        }
         localMessages.push({
           role: 'assistant',
           content: stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool
@@ -3317,6 +3316,9 @@ export async function createChatView(strings, {
               error: error?.message ?? String(error)
             }));
         modelResult = formatToolsetResultForModel(toolsetAction, toolsetResult);
+        if (!toolsetResult?.ok && toolsetResult?.error) {
+          modelResult += '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
+        }
         localMessages.push({
           role: 'assistant',
           content: stripNativeToolCalls(toolsetAction.visibleContent) || strings.tools.runningTool

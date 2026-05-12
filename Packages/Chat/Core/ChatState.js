@@ -37,6 +37,14 @@ async function readEnhancePromptFile(rootDirectory) {
   return (await readFile(path.join(rootDirectory, 'Prompts', 'PromptEnhance.md'), 'utf8')).trim();
 }
 
+async function readTerminalPromptFile(rootDirectory) {
+  return (await readFile(path.join(rootDirectory, 'Prompts', 'Terminal.md'), 'utf8')).trim();
+}
+
+async function readSubAgentPromptFile(rootDirectory) {
+  return (await readFile(path.join(rootDirectory, 'Prompts', 'SubAgent.md'), 'utf8')).trim();
+}
+
 async function buildBaseSystemPrompt(rootDirectory, user) {
   const prompt = await readSystemPromptFile(rootDirectory);
   const now = new Date();
@@ -769,12 +777,14 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
 export function createChatStateManager({ rootDirectory }) {
   return {
     async getBootstrapPayload() {
-      const [user, providers] = await Promise.all([
+      const [user, providers, terminalPrompt, subAgentPrompt] = await Promise.all([
         readUserState(rootDirectory),
-        readProviderCatalog(rootDirectory)
+        readProviderCatalog(rootDirectory),
+        readTerminalPromptFile(rootDirectory),
+        readSubAgentPromptFile(rootDirectory)
       ]);
 
-      return { user, providers };
+      return { user, providers, terminalPrompt, subAgentPrompt };
     },
     // Streaming entry point — resolves once the stream ends (or rejects on error).
     // onChunk({ type: 'text'|'thinking', text }) is called for every token.
