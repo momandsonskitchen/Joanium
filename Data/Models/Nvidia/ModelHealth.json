@@ -5,7 +5,7 @@
   },
   "deepseek-ai/deepseek-v3.2": {
     "status": "yellow",
-    "checkedAt": "2026-05-12T04:45:24.924Z"
+    "checkedAt": "2026-05-12T06:27:47.079Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -17,7 +17,7 @@
   },
   "moonshotai/kimi-k2-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-12T04:22:29.114Z"
+    "checkedAt": "2026-05-12T06:27:47.158Z"
   },
   "nvidia/nemotron-3-super-120b-a12b": {
     "status": "green",
@@ -37,14 +37,14 @@
   },
   "qwen/qwen3.5-397b-a17b": {
     "status": "yellow",
-    "checkedAt": "2026-05-12T04:45:39.861Z"
+    "checkedAt": "2026-05-12T06:25:45.699Z"
   },
   "qwen/qwen3-coder-480b-a35b-instruct": {
     "status": "green",
-    "checkedAt": "2026-05-11T05:29:09.167Z"
+    "checkedAt": "2026-05-12T05:53:14.452Z"
   },
   "moonshotai/kimi-k2.6": {
-    "status": "yellow",
-    "checkedAt": "2026-05-12T04:45:39.844Z"
+    "status": "green",
+    "checkedAt": "2026-05-12T05:53:13.422Z"
   }
 }

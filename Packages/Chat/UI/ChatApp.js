@@ -1771,6 +1771,7 @@ export async function createChatView(strings, {
   let pendingAttachments = [];
   let attachmentNoticeTimer = null;
   let isSending = false;
+  let isEnhancing = false;
   let isPrivate = false;
   let privateNoticeEl = null;
   let accText = '';
@@ -1822,6 +1823,8 @@ export async function createChatView(strings, {
   let slashMenu = null;
   let slashScroller = null;
   let sendButton = null;
+  let enhanceBtn = null;
+  let attachBtn = null;
   let thread = null;
   let title = null;
   let bubblesEl = null;
@@ -2712,6 +2715,50 @@ export async function createChatView(strings, {
     renderThread();
   }
 
+  async function enhancePrompt() {
+    const raw = draftValue.trim();
+    if (!raw || isEnhancing || isSending) return;
+
+    isEnhancing = true;
+    syncComposer();
+
+    try {
+      const instruction = [
+        'Rewrite the following prompt to be clearer, more specific, and more effective for an AI assistant.',
+        'Preserve the original intent exactly.',
+        'Return only the rewritten prompt — no preamble, no explanation, no quotes.\n\n',
+        raw
+      ].join(' ');
+
+      const result = await invokeIpc('chat:complete-message', {
+        messages: [{ role: 'user', content: instruction }],
+        providerId: activeProvider?.id ?? null,
+        modelId: activeModel?.id ?? null,
+        memoryContext: null,
+        projectInfo: null,
+        persona: null,
+        modeInstruction: null,
+        terminalTools: null,
+        toolsetTools: null,
+        isNewSession: true
+      });
+
+      const enhanced = result?.text?.trim();
+      if (enhanced) {
+        draftValue = enhanced;
+        syncComposer();
+        focusComposer();
+      } else {
+        showAttachmentNotice(strings.composer.enhanceFailed, 'warning');
+      }
+    } catch {
+      showAttachmentNotice(strings.composer.enhanceFailed, 'warning');
+    } finally {
+      isEnhancing = false;
+      syncComposer();
+    }
+  }
+
   function syncComposerFieldHeight() {
     if (!composerField) return;
     composerField.style.height = 'auto';
@@ -2735,13 +2782,35 @@ export async function createChatView(strings, {
         labelEl.hidden = false;
       }
     } else {
-      sendButton.disabled = false;
+      sendButton.disabled = isEnhancing;
       sendButton.classList.remove('chat-composer__send--stop');
       if (iconEl) iconEl.innerHTML = iconMarkup.send;
       if (labelEl) {
         labelEl.textContent = '';
         labelEl.hidden = true;
       }
+    }
+
+    if (enhanceBtn) {
+      const hasText = draftValue.trim().length > 0;
+      enhanceBtn.disabled = !hasText || isSending || isEnhancing;
+      enhanceBtn.classList.toggle('chat-composer__icon-button--active', isEnhancing);
+    }
+
+    if (modelButton) {
+      modelButton.disabled = isEnhancing;
+    }
+
+    if (attachBtn) {
+      attachBtn.disabled = isEnhancing;
+    }
+
+    if (composer) {
+      composer.classList.toggle('chat-composer--enhancing', isEnhancing);
+    }
+
+    if (composerField) {
+      composerField.disabled = isEnhancing;
     }
   }
 
@@ -3983,7 +4052,7 @@ export async function createChatView(strings, {
 
   const composerFooter = createElement('div', 'chat-composer__footer');
   const composerActions = createElement('div', 'chat-composer__actions');
-  const attachBtn = createElement('button', 'chat-composer__icon-button');
+  attachBtn = createElement('button', 'chat-composer__icon-button');
   attachBtn.type = 'button';
   attachBtn.setAttribute('aria-label', strings.composer.attachFiles);
   attachBtn.append(createIcon('paperclip', 'chat-composer__icon'));
@@ -3991,7 +4060,15 @@ export async function createChatView(strings, {
     void selectAttachments();
   });
 
-  composerActions.append(attachBtn);
+  enhanceBtn = createElement('button', 'chat-composer__icon-button');
+  enhanceBtn.type = 'button';
+  enhanceBtn.setAttribute('aria-label', strings.composer.enhancePrompt);
+  enhanceBtn.append(createIcon('aiSparkle', 'chat-composer__icon'));
+  enhanceBtn.addEventListener('click', () => {
+    void enhancePrompt();
+  });
+
+  composerActions.append(attachBtn, enhanceBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   modelButton = createElement('button', 'chat-composer__model');

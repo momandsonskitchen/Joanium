@@ -275,6 +275,12 @@ export const iconMarkup = {
     </svg>
   `,
 
+  aiSparkle: `
+    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M12 2C12 2 10.8 9.2 4 12C10.8 14.8 12 22 12 22C12 22 13.2 14.8 20 12C13.2 9.2 12 2 12 2Z"/>
+    </svg>
+  `,
+
   // ── Sidebar tabs ──────────────────────────────────────────────────────────
 
   tabChat: `
