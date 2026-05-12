@@ -37,3 +37,6 @@ jobs:
 
       - name: Markdown lint
         run: npm run lint:md
+
+      - name: Architecture check
+        run: npm run check:arch
