@@ -45,6 +45,8 @@ export function createDefaultUserState() {
       systemTray: false,
       keepAwake: false,
       completionSound: true,
+      autoMemoryUpdates: true,
+      autoUpdate: true,
       defaultView: 'chat',
       defaultModel: null,
     },
@@ -127,10 +129,14 @@ function sanitizeAvatarPath(candidate) {
 }
 
 function sanitizeActivePersona(candidate) {
-  if (!candidate || typeof candidate !== 'object') return { ...DEFAULT_ACTIVE_PERSONA };
+  if (!candidate || typeof candidate !== 'object') {
+    return { ...DEFAULT_ACTIVE_PERSONA };
+  }
   const namespace = sanitizeString(candidate.namespace);
   const filename = sanitizeString(candidate.filename);
-  if (!namespace || !filename) return { ...DEFAULT_ACTIVE_PERSONA };
+  if (!namespace || !filename) {
+    return { ...DEFAULT_ACTIVE_PERSONA };
+  }
   return { namespace, filename };
 }
 
@@ -188,7 +194,9 @@ function sanitizeConnectorDetails(details) {
 
 function sanitizeWindowState(candidate) {
   const defaults = createDefaultUserState().windowState;
-  if (!candidate || typeof candidate !== 'object') return defaults;
+  if (!candidate || typeof candidate !== 'object') {
+    return defaults;
+  }
   const bounds =
     candidate.bounds && typeof candidate.bounds === 'object' ? candidate.bounds : defaults.bounds;
   return {
@@ -231,7 +239,9 @@ function sanitizeDefaultModel(candidate) {
 
 function sanitizeAppSettings(candidate) {
   const defaults = createDefaultUserState().appSettings;
-  if (!candidate || typeof candidate !== 'object') return defaults;
+  if (!candidate || typeof candidate !== 'object') {
+    return defaults;
+  }
   const rawView = candidate.defaultView ?? candidate.default_view ?? defaults.defaultView;
   return {
     runOnStartup: Boolean(
@@ -242,6 +252,10 @@ function sanitizeAppSettings(candidate) {
     completionSound: Boolean(
       candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound,
     ),
+    autoMemoryUpdates: Boolean(
+      candidate.autoMemoryUpdates ?? candidate.auto_memory_updates ?? defaults.autoMemoryUpdates,
+    ),
+    autoUpdate: Boolean(candidate.autoUpdate ?? candidate.auto_update ?? defaults.autoUpdate),
     defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
   };
@@ -252,7 +266,9 @@ const MOTION_MODES = new Set(['full', 'reduced']);
 
 function sanitizeTheme(candidate) {
   const defaults = createDefaultUserState().theme;
-  if (!candidate || typeof candidate !== 'object') return defaults;
+  if (!candidate || typeof candidate !== 'object') {
+    return defaults;
+  }
   return {
     mode: THEME_MODES.has(candidate.mode) ? candidate.mode : defaults.mode,
     motion: MOTION_MODES.has(candidate.motion) ? candidate.motion : defaults.motion,
