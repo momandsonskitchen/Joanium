@@ -17,6 +17,8 @@
     "electron": "42.0.1",
     "electron-builder": "^26.9.1",
     "eslint": "10.3.0",
+    "jscpd": "4.0.5",
+    "markdownlint-cli": "0.44.0",
     "prettier": "3.5.3"
   },
   "main": "App.js",
@@ -24,8 +26,10 @@
     "start": "electron .",
     "build": "node Scripts/Build.mjs",
     "lint": "eslint .",
+    "lint:md": "markdownlint **/*.md --ignore node_modules",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "cpd": "jscpd Packages"
   },
   "keywords": [
     "joanium",

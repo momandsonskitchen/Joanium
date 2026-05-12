@@ -1,0 +1,20 @@
+{
+  "threshold": 15,
+  "reporters": ["console"],
+  "ignore": [
+    "node_modules/**",
+    "dist/**",
+    "Build/**",
+    "Data/**",
+    "Assets/**",
+    "Datasets/**",
+    "**/*.md",
+    "package-lock.json"
+  ],
+  "languages": {
+    "javascript": {
+      "minLines": 8,
+      "minTokens": 50
+    }
+  }
+}
