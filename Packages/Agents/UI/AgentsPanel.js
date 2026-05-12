@@ -207,10 +207,15 @@ export function createAgentsPanel(strings) {
 
       const img = document.createElement('img');
       img.src       = `file://${avatar.filePath.replace(/\\/g, '/')}`;
-      img.className = 'agents-form__avatar-img';
+      img.className = 'agents-form__avatar-img agents-form__avatar-img--loading';
       img.alt       = avatar.filename;
       img.draggable = false;
-      tile.append(img);
+
+      const spinner = createElement('span', 'agents-form__avatar-spinner');
+      img.addEventListener('load',  () => { spinner.remove(); img.classList.remove('agents-form__avatar-img--loading'); });
+      img.addEventListener('error', () => { spinner.remove(); img.classList.remove('agents-form__avatar-img--loading'); });
+
+      tile.append(spinner, img);
 
       tile.addEventListener('click', () => selectAvatar(avatar.filename));
       avatarGridEl.append(tile);

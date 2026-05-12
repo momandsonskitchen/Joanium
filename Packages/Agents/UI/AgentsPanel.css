@@ -173,6 +173,10 @@
   border: 2px solid transparent;
   padding: 0;
   overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.60);
   box-shadow:
     inset 0 0 0 1px rgba(170, 134, 104, 0.12),
@@ -223,6 +227,24 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.agents-form__avatar-img--loading {
+  opacity: 0;
+}
+
+.agents-form__avatar-spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(var(--color-accent-rgb), 0.18);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: agents-spin 0.65s linear infinite;
   pointer-events: none;
 }
 
