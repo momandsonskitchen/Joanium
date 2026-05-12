@@ -1,0 +1,18 @@
+# All files — default owner
+* @withinjoel
+
+# Core app
+App.js @withinjoel
+Packages/ @withinjoel
+
+# Config & build
+electron-builder.json @withinjoel
+Config/ @withinjoel
+Scripts/ @withinjoel
+
+# CI/CD
+.github/workflows/ @withinjoel
+
+# Security-sensitive
+SECURITY.md @withinjoel
+.npmrc @withinjoel
