@@ -7,8 +7,7 @@ const noCrossPackageImports = {
   meta: {
     type: 'problem',
     docs: {
-      description:
-        'Prevent imports across packages. Use Packages/Shared for shared code.',
+      description: 'Prevent imports across packages. Use Packages/Shared for shared code.',
     },
     messages: {
       crossPackage:
@@ -19,7 +18,9 @@ const noCrossPackageImports = {
   create(context) {
     const filePath = context.filename.replace(/\\/g, '/');
     const packageMatch = filePath.match(/\/Packages\/([^/]+)\//);
-    if (!packageMatch) return {};
+    if (!packageMatch) {
+      return {};
+    }
 
     const currentPackage = packageMatch[1];
     const allowed = new Set(['Shared', 'Boot']);
@@ -27,15 +28,21 @@ const noCrossPackageImports = {
     return {
       ImportDeclaration(node) {
         const source = node.source.value;
-        if (!source.startsWith('.')) return;
+        if (!source.startsWith('.')) {
+          return;
+        }
 
         const currentDir = path.dirname(context.filename);
         const resolved = path.resolve(currentDir, source).replace(/\\/g, '/');
         const importedMatch = resolved.match(/\/Packages\/([^/]+)\//);
-        if (!importedMatch) return;
+        if (!importedMatch) {
+          return;
+        }
 
         const importedPackage = importedMatch[1];
-        if (importedPackage === currentPackage || allowed.has(importedPackage)) return;
+        if (importedPackage === currentPackage || allowed.has(importedPackage)) {
+          return;
+        }
 
         context.report({
           node,
@@ -63,7 +70,9 @@ const noHardcodedStrings = {
   },
   create(context) {
     const filePath = context.filename.replace(/\\/g, '/');
-    if (!filePath.includes('/Packages/')) return {};
+    if (!filePath.includes('/Packages/')) {
+      return {};
+    }
 
     function isSentence(str) {
       return str.length > 20 && /[a-zA-Z]{4,}/.test(str) && /\s/.test(str.trim());
@@ -89,6 +98,30 @@ const noHardcodedStrings = {
 export default [
   {
     ignores: ['dist/**', 'node_modules/**', 'Data/**', 'Build/**'],
+  },
+  // Node.js scripts — allow console, process, and other Node globals
+  {
+    files: ['Scripts/**/*.mjs', 'Scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off',
+    },
   },
   {
     files: ['**/*.js', '**/*.mjs'],
@@ -129,8 +162,8 @@ export default [
       // ── Style / Best Practices ─────────────────────────────────────────────
       'no-var': 'error',
       'prefer-const': 'error',
-      'eqeqeq': ['error', 'always'],
-      'curly': ['error', 'all'],
+      eqeqeq: ['error', 'always'],
+      curly: ['error', 'all'],
       'no-console': 'warn',
       'no-alert': 'error',
       'prefer-template': 'error',
