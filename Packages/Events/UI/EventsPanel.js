@@ -445,7 +445,6 @@ export function createEventsPanel(strings) {
     const metaGrid = createElement('div', 'events-detail__meta');
     [
       createMetaItem(strings.labels.source, event.source),
-      createMetaItem(strings.labels.status, strings.status[event.status] ?? event.status),
       createMetaItem(strings.labels.started, formatDetailDate(event.timestamp)),
       createMetaItem(strings.labels.finished, formatDetailDate(event.finishedAt)),
       createMetaItem(strings.labels.provider, event.provider),
@@ -457,22 +456,6 @@ export function createEventsPanel(strings) {
     ].filter(Boolean).forEach((item) => metaGrid.append(item));
 
     detailEl.append(header, metaGrid);
-
-    // ── Streaming indicator for in-progress agent runs ──────────────────────────
-    if (event.status === 'running') {
-      const streamEl = createElement('div', 'events-detail__stream');
-      streamEl.append(createElement('span', 'events-detail__stream-dot'));
-
-      let label = strings.status.running;
-      if (event.streamTool) {
-        label += ` · ${event.streamTool}`;
-      }
-      if (event.streamDepth > 0) {
-        label += ` (${event.streamDepth})`;
-      }
-      streamEl.append(createElement('span', 'events-detail__stream-label', label));
-      detailEl.append(streamEl);
-    }
 
     const sections = event.type === 'channel'
       ? [
