@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import { collectSystemInfo } from './SystemInfo.js';
 
@@ -17,6 +18,7 @@ export function createAboutStateManager({ rootDirectory }) {
           version: packageJson.version ?? '',
           description: packageJson.description ?? '',
           author: packageJson.author ?? '',
+          logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href,
           system,
         };
       } catch {
@@ -25,6 +27,7 @@ export function createAboutStateManager({ rootDirectory }) {
           version: '',
           description: '',
           author: '',
+          logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href,
           system,
         };
       }

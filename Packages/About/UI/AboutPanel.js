@@ -4,13 +4,17 @@ import { iconMarkup } from '../../Shared/Icons/Icons.js';
 
 function formatBytes(bytes) {
   const value = Number(bytes) || 0;
-  if (value <= 0) return '';
+  if (value <= 0) {
+    return '';
+  }
   const gb = value / 1024 / 1024 / 1024;
   return `${gb.toFixed(gb >= 10 ? 0 : 1)} GB`;
 }
 
 function parseBuildDate(version) {
-  if (!version) return '';
+  if (!version) {
+    return '';
+  }
   // Format: YYYY.MMDD.build — e.g. "2026.430.1" → year=2026, month=4, day=30
   const match = /^(\d{4})\.(\d{1,4})\./.exec(version);
   if (match) {
@@ -40,6 +44,17 @@ export function createAboutPanel(strings) {
       formatText(strings.version, { version: info.version || '' }),
     );
     const descEl = createElement('p', 'chat-profile__about-desc', info.description || '');
+
+    // ── macOS-style app icon ───────────────────────────────────────────────
+    const iconWrap = createElement('div', 'chat-profile__about-icon-wrap');
+    const iconImg = document.createElement('img');
+    iconImg.className = 'chat-profile__about-icon';
+    iconImg.src = info.logoPath ?? '';
+    iconImg.alt = info.name || 'Joanium';
+    iconImg.draggable = false;
+    iconWrap.append(iconImg);
+    const iconReflect = createElement('div', 'chat-profile__about-icon-reflect');
+    iconWrap.append(iconReflect);
 
     // ── Social bar ─────────────────────────────────────────────────────────
     const socialBar = createElement('div', 'chat-profile__about-social');
@@ -144,7 +159,14 @@ export function createAboutPanel(strings) {
     const columnsRow = createElement('div', 'chat-profile__about-columns');
     columnsRow.append(leftCol, rightCol);
 
-    view.replaceChildren(nameEl, versionEl, descEl, socialBar, columnsRow);
+    // ── Hero: icon left, text right ───────────────────────────────────────
+    const heroText = createElement('div', 'chat-profile__about-hero-text');
+    heroText.append(nameEl, versionEl, descEl);
+
+    const heroRow = createElement('div', 'chat-profile__about-hero');
+    heroRow.append(iconWrap, heroText);
+
+    view.replaceChildren(heroRow, socialBar, columnsRow);
   }
 
   return {
