@@ -9,7 +9,7 @@ const en = {
   nameLabel: 'Template name',
   namePlaceholder: 'Summarize text',
   promptLabel: 'Prompt',
-  promptPlaceholder: 'Summarize the following text in 3 bullet points:\n\n{input}',
+  promptPlaceholder: 'Your prompt',
   save: 'Save Template',
   update: 'Update Template',
   cancel: 'Cancel',
