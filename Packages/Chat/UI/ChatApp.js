@@ -2740,7 +2740,7 @@ export async function createChatView(strings, {
         modeInstruction: null,
         terminalTools: null,
         toolsetTools: null,
-        isNewSession: true
+        isNewSession: false
       });
 
       const enhanced = result?.text?.trim();
