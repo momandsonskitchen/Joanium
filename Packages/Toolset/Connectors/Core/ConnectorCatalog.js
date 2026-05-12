@@ -6,14 +6,16 @@ function normalizeConnector(connector = {}) {
   const fields = noCredential
     ? []
     : Array.isArray(connector.fields) && connector.fields.length
-    ? connector.fields
-    : [{
-        key: credentialKey,
-        label: connector.credentialLabel ?? 'Credential',
-        placeholder: connector.credentialPlaceholder ?? '',
-        type: 'password',
-        required: !connector.optional
-      }];
+      ? connector.fields
+      : [
+          {
+            key: credentialKey,
+            label: connector.credentialLabel ?? 'Credential',
+            placeholder: connector.credentialPlaceholder ?? '',
+            type: 'password',
+            required: !connector.optional,
+          },
+        ];
 
   return {
     ...connector,
@@ -21,8 +23,8 @@ function normalizeConnector(connector = {}) {
     fields: fields.map((field) => ({
       type: 'password',
       required: !connector.optional,
-      ...field
-    }))
+      ...field,
+    })),
   };
 }
 

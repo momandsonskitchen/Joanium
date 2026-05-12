@@ -37,7 +37,7 @@ export function stripNativeTooltips() {
   observer.observe(document.documentElement, {
     attributes: true,
     subtree: true,
-    attributeFilter: ['title']
+    attributeFilter: ['title'],
   });
 
   return () => observer.disconnect();

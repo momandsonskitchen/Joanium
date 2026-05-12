@@ -3,11 +3,12 @@ const publicDataStrings = {
     {
       id: 'open_meteo',
       label: 'Open-Meteo',
-      description: 'Weather, hourly forecasts, weekly forecasts, air quality, sunrise, and sunset data.',
+      description:
+        'Weather, hourly forecasts, weekly forecasts, air quality, sunrise, and sunset data.',
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask about current weather, forecasts, air quality, or sunrise and sunset times.'
+      toolHint: 'Ask about current weather, forecasts, air quality, or sunrise and sunset times.',
     },
     {
       id: 'coingecko',
@@ -16,7 +17,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for crypto prices, top coins, trending assets, or coin search.'
+      toolHint: 'Ask for crypto prices, top coins, trending assets, or coin search.',
     },
     {
       id: 'exchange_rate',
@@ -25,7 +26,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask to convert currencies or list exchange rates from a base currency.'
+      toolHint: 'Ask to convert currencies or list exchange rates from a base currency.',
     },
     {
       id: 'treasury',
@@ -34,7 +35,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for US debt, Treasury rates, or daily cash-balance rows.'
+      toolHint: 'Ask for US debt, Treasury rates, or daily cash-balance rows.',
     },
     {
       id: 'fred',
@@ -43,16 +44,18 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for economic series such as GDP, UNRATE, CPIAUCSL, FEDFUNDS, DGS10, or SP500.'
+      toolHint: 'Ask for economic series such as GDP, UNRATE, CPIAUCSL, FEDFUNDS, DGS10, or SP500.',
     },
     {
       id: 'wikipedia',
       label: 'Wikipedia',
-      description: 'Article summaries, search results, full extracts, sections, random pages, and on-this-day facts.',
+      description:
+        'Article summaries, search results, full extracts, sections, random pages, and on-this-day facts.',
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for Wikipedia summaries, article search, sections, random articles, or on-this-day events.'
+      toolHint:
+        'Ask for Wikipedia summaries, article search, sections, random articles, or on-this-day events.',
     },
     {
       id: 'dictionary',
@@ -61,16 +64,17 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for the definition of an English word.'
+      toolHint: 'Ask for the definition of an English word.',
     },
     {
       id: 'restcountries',
       label: 'Country Info',
-      description: 'Country facts including capital, population, region, languages, and currencies.',
+      description:
+        'Country facts including capital, population, region, languages, and currencies.',
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for facts about a country or ISO country code.'
+      toolHint: 'Ask for facts about a country or ISO country code.',
     },
     {
       id: 'jokeapi',
@@ -79,7 +83,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for a joke, optionally by category.'
+      toolHint: 'Ask for a joke, optionally by category.',
     },
     {
       id: 'quotes',
@@ -88,7 +92,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for a quote by topic or tag.'
+      toolHint: 'Ask for a quote by topic or tag.',
     },
     {
       id: 'hackernews',
@@ -97,7 +101,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for Hacker News top, new, best, ask, show, or job stories.'
+      toolHint: 'Ask for Hacker News top, new, best, ask, show, or job stories.',
     },
     {
       id: 'wikimedia',
@@ -106,7 +110,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask to search reusable public images by topic.'
+      toolHint: 'Ask to search reusable public images by topic.',
     },
     {
       id: 'npm',
@@ -115,16 +119,17 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask to search npm, inspect a package, compare packages, or check downloads.'
+      toolHint: 'Ask to search npm, inspect a package, compare packages, or check downloads.',
     },
     {
       id: 'stackoverflow',
       label: 'Stack Overflow',
-      description: 'Question search, answers, hot questions, tag browsing, and similar-question lookup.',
+      description:
+        'Question search, answers, hot questions, tag browsing, and similar-question lookup.',
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask to search Stack Overflow for an error, question, tag, or answer set.'
+      toolHint: 'Ask to search Stack Overflow for an error, question, tag, or answer set.',
     },
     {
       id: 'nasa',
@@ -133,7 +138,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for NASA APOD or the current ISS location.'
+      toolHint: 'Ask for NASA APOD or the current ISS location.',
     },
     {
       id: 'cleanuri',
@@ -142,7 +147,7 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask to shorten a URL.'
+      toolHint: 'Ask to shorten a URL.',
     },
     {
       id: 'ipgeo',
@@ -151,27 +156,31 @@ const publicDataStrings = {
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask for IP geolocation or current public IP details.'
+      toolHint: 'Ask for IP geolocation or current public IP details.',
     },
     {
       id: 'openstreetmap',
       label: 'OpenStreetMap',
-      description: 'Forward geocoding, reverse geocoding, place search, postal-code lookup, and elevation.',
+      description:
+        'Forward geocoding, reverse geocoding, place search, postal-code lookup, and elevation.',
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask to geocode places, reverse geocode coordinates, search places, or get elevation.'
+      toolHint:
+        'Ask to geocode places, reverse geocode coordinates, search places, or get elevation.',
     },
     {
       id: 'url_metadata',
       label: 'URL Metadata',
-      description: 'Public metadata, QR code URL generation, RDAP registration, and redirect-chain checks.',
+      description:
+        'Public metadata, QR code URL generation, RDAP registration, and redirect-chain checks.',
       noCredential: true,
       optional: true,
       publicTool: true,
-      toolHint: 'Ask to inspect a URL, generate a QR code URL, check RDAP info, or trace redirects.'
-    }
-  ]
+      toolHint:
+        'Ask to inspect a URL, generate a QR code URL, check RDAP info, or trace redirects.',
+    },
+  ],
 };
 
 export default publicDataStrings;

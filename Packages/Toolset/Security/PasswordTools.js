@@ -1,10 +1,36 @@
 import { randomInt } from 'node:crypto';
 
 const WORDS = Object.freeze([
-  'amber', 'atlas', 'bright', 'cedar', 'cinder', 'comet', 'coral', 'delta',
-  'ember', 'forest', 'harbor', 'indigo', 'jasmine', 'keystone', 'lantern',
-  'marble', 'meadow', 'meteor', 'nectar', 'onyx', 'orbit', 'quartz',
-  'raven', 'river', 'signal', 'silver', 'summit', 'timber', 'violet', 'zenith'
+  'amber',
+  'atlas',
+  'bright',
+  'cedar',
+  'cinder',
+  'comet',
+  'coral',
+  'delta',
+  'ember',
+  'forest',
+  'harbor',
+  'indigo',
+  'jasmine',
+  'keystone',
+  'lantern',
+  'marble',
+  'meadow',
+  'meteor',
+  'nectar',
+  'onyx',
+  'orbit',
+  'quartz',
+  'raven',
+  'river',
+  'signal',
+  'silver',
+  'summit',
+  'timber',
+  'violet',
+  'zenith',
 ]);
 
 function clampInteger(value, fallback, min, max) {
@@ -30,7 +56,9 @@ export function generatePasswordValue(params = {}) {
   if (type === 'passphrase') {
     const wordCount = clampInteger(params.length, 4, 2, 10);
     for (let index = 0; index < count; index += 1) {
-      values.push(Array.from({ length: wordCount }, () => WORDS[randomInt(0, WORDS.length)]).join('-'));
+      values.push(
+        Array.from({ length: wordCount }, () => WORDS[randomInt(0, WORDS.length)]).join('-'),
+      );
     }
   } else if (type === 'pin') {
     const length = clampInteger(params.length, 6, 4, 20);
@@ -42,7 +70,11 @@ export function generatePasswordValue(params = {}) {
     const consonants = 'bcdfghjklmnpqrstvwxyz';
     const vowels = 'aeiou';
     for (let index = 0; index < count; index += 1) {
-      values.push(Array.from({ length }, (_, charIndex) => randomFrom(charIndex % 2 ? vowels : consonants)).join(''));
+      values.push(
+        Array.from({ length }, (_, charIndex) =>
+          randomFrom(charIndex % 2 ? vowels : consonants),
+        ).join(''),
+      );
     }
   } else {
     const length = clampInteger(params.length, 16, 4, 128);
@@ -57,7 +89,7 @@ export function generatePasswordValue(params = {}) {
       lowercase,
       includeUppercase ? uppercase : '',
       includeNumbers ? numbers : '',
-      includeSymbols ? symbols : ''
+      includeSymbols ? symbols : '',
     ].filter(Boolean);
     const allChars = requiredSets.join('');
 
@@ -72,5 +104,9 @@ export function generatePasswordValue(params = {}) {
     }
   }
 
-  return [`Generated ${type}${count === 1 ? '' : 's'}:`, '', ...values.map((value) => `- ${value}`)].join('\n');
+  return [
+    `Generated ${type}${count === 1 ? '' : 's'}:`,
+    '',
+    ...values.map((value) => `- ${value}`),
+  ].join('\n');
 }

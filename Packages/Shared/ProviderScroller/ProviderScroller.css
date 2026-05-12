@@ -1,4 +1,4 @@
-@import "../Common/Common.css";
+@import '../Common/Common.css';
 
 .joanium-provider-picker__viewport {
   margin-top: 18px;
@@ -86,7 +86,7 @@
 }
 
 .joanium-provider-tile__tick::before {
-  content: "";
+  content: '';
   width: 8px;
   height: 14px;
   border-right: 2px solid rgba(250, 242, 255, 1);

@@ -7,7 +7,7 @@ export function createToolPackage() {
     id: 'sub-agents',
     toolDefinitions: SUB_AGENT_TOOLS,
     toolHandlers: createSubAgentToolHandlers(),
-    promptSections: [buildSubAgentPromptSection()]
+    promptSections: [buildSubAgentPromptSection()],
   };
 }
 

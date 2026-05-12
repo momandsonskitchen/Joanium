@@ -4,10 +4,11 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 
 function createServerId(name) {
-  const stem = String(name || 'mcp-server')
-    .replace(/[^a-zA-Z0-9_-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '') || 'mcp-server';
+  const stem =
+    String(name || 'mcp-server')
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'mcp-server';
   return `${stem}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
@@ -34,7 +35,10 @@ export function createMCPPanel(strings) {
   let serverCache = [];
 
   const nameField = createField(strings.form.name, strings.form.namePlaceholder);
-  const descriptionField = createField(strings.form.description, strings.form.descriptionPlaceholder);
+  const descriptionField = createField(
+    strings.form.description,
+    strings.form.descriptionPlaceholder,
+  );
   const commandField = createField(strings.form.command, strings.form.commandPlaceholder);
   const argsField = createField(strings.form.args, strings.form.argsPlaceholder);
   const envField = createField(strings.form.env, strings.form.envPlaceholder, { multiline: true });
@@ -73,7 +77,7 @@ export function createMCPPanel(strings) {
       commandField.input,
       argsField.input,
       envField.input,
-      urlField.input
+      urlField.input,
     ]) {
       input.value = '';
     }
@@ -89,9 +93,8 @@ export function createMCPPanel(strings) {
     descriptionField.input.value = server.description ?? '';
     commandField.input.value = server.command ?? '';
     argsField.input.value = (server.args ?? []).join(' ');
-    envField.input.value = server.env && Object.keys(server.env).length
-      ? JSON.stringify(server.env, null, 2)
-      : '';
+    envField.input.value =
+      server.env && Object.keys(server.env).length ? JSON.stringify(server.env, null, 2) : '';
     urlField.input.value = server.url ?? '';
     syncTransportButtons();
     syncTransportFields();
@@ -144,7 +147,7 @@ export function createMCPPanel(strings) {
         command: collapseWhitespace(commandField.input.value),
         args: parseArgs(argsField.input.value),
         env: parseEnv(envField.input.value),
-        url: collapseWhitespace(urlField.input.value)
+        url: collapseWhitespace(urlField.input.value),
       };
 
       await invokeIpc('mcp:save-server', payload);
@@ -166,28 +169,36 @@ export function createMCPPanel(strings) {
     const copy = createElement('div', 'mcp-server__copy');
     copy.append(
       createElement('h4', 'mcp-server__name', server.name),
-      createElement('p', 'mcp-server__description', server.description || server.command || server.url || '')
+      createElement(
+        'p',
+        'mcp-server__description',
+        server.description || server.command || server.url || '',
+      ),
     );
     const badge = createElement(
       'span',
       `mcp-server__status ${server.connected ? 'mcp-server__status--connected' : ''}`,
-      server.connected ? strings.list.connected : strings.list.disconnected
+      server.connected ? strings.list.connected : strings.list.disconnected,
     );
     header.append(icon, copy, badge);
 
     const meta = createElement('div', 'mcp-server__meta');
     meta.append(
       createElement('span', 'mcp-server__meta-item', server.transport.toUpperCase()),
-      createElement('span', 'mcp-server__meta-item', formatText(strings.list.tools, {
-        count: String(server.toolCount ?? 0)
-      }))
+      createElement(
+        'span',
+        'mcp-server__meta-item',
+        formatText(strings.list.tools, {
+          count: String(server.toolCount ?? 0),
+        }),
+      ),
     );
 
     const actions = createElement('div', 'mcp-server__actions');
     const connectButton = createElement(
       'button',
       'mcp-server__button',
-      server.connected ? strings.list.disconnect : strings.list.connect
+      server.connected ? strings.list.disconnect : strings.list.connect,
     );
     connectButton.type = 'button';
     connectButton.addEventListener('click', async () => {
@@ -210,7 +221,10 @@ export function createMCPPanel(strings) {
     editButton.append(createIcon('pencil', 'mcp-server__button-icon'));
     editButton.addEventListener('click', () => applyServerToForm(server));
 
-    const deleteButton = createElement('button', 'mcp-server__icon-button mcp-server__icon-button--danger');
+    const deleteButton = createElement(
+      'button',
+      'mcp-server__icon-button mcp-server__icon-button--danger',
+    );
     deleteButton.type = 'button';
     deleteButton.setAttribute('aria-label', strings.list.delete);
     deleteButton.append(createIcon('trash', 'mcp-server__button-icon'));
@@ -238,7 +252,7 @@ export function createMCPPanel(strings) {
       item.append(
         createElement('div', 'mcp-tool__name', tool.name),
         createElement('div', 'mcp-tool__server', tool.serverName ?? ''),
-        createElement('p', 'mcp-tool__description', tool.description ?? '')
+        createElement('p', 'mcp-tool__description', tool.description ?? ''),
       );
       toolsEl.append(item);
     }
@@ -265,7 +279,11 @@ export function createMCPPanel(strings) {
   form.append(createElement('div', 'mcp-form__title', strings.form.newServer));
 
   const transportControls = createElement('div', 'mcp-segmented');
-  stdioButton = createElement('button', 'mcp-segmented__button mcp-segmented__button--active', strings.form.stdio);
+  stdioButton = createElement(
+    'button',
+    'mcp-segmented__button mcp-segmented__button--active',
+    strings.form.stdio,
+  );
   httpButton = createElement('button', 'mcp-segmented__button', strings.form.http);
   stdioButton.type = 'button';
   httpButton.type = 'button';
@@ -306,7 +324,7 @@ export function createMCPPanel(strings) {
     envField.wrap,
     urlField.wrap,
     actionRow,
-    feedbackEl
+    feedbackEl,
   );
 
   const content = createElement('section', 'mcp-content');

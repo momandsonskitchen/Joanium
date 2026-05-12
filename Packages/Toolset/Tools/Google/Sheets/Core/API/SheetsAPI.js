@@ -144,8 +144,8 @@ export async function duplicateSheet(
   { newSheetName: newSheetName, insertSheetIndex: insertSheetIndex } = {},
 ) {
   const req = { sourceSheetId: sheetId };
-  (null != newSheetName && (req.newSheetName = newSheetName),
-    null != insertSheetIndex && (req.insertSheetIndex = insertSheetIndex));
+  null != newSheetName && (req.newSheetName = newSheetName),
+    null != insertSheetIndex && (req.insertSheetIndex = insertSheetIndex);
   const data = await sheetsFetch(creds, `${SHEETS_BASE}/${spreadsheetId}:batchUpdate`, {
     method: 'POST',
     body: JSON.stringify({ requests: [{ duplicateSheet: req }] }),

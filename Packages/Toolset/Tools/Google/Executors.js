@@ -22,20 +22,76 @@ import { executeSlidesChatTool } from './Slides/Core/Chat/ChatExecutor.js';
 import { executeTasksChatTool } from './Tasks/Core/Chat/ChatExecutor.js';
 import { executeYouTubeChatTool } from './Youtube/Core/Chat/ChatExecutor.js';
 
-export { executeCalendarChatTool, executeContactsChatTool, executeDocsChatTool, executeDriveChatTool, executeFormsChatTool, executeGmailChatTool, executePhotosChatTool, executeSheetsChatTool, executeSlidesChatTool, executeTasksChatTool, executeYouTubeChatTool };
+export {
+  executeCalendarChatTool,
+  executeContactsChatTool,
+  executeDocsChatTool,
+  executeDriveChatTool,
+  executeFormsChatTool,
+  executeGmailChatTool,
+  executePhotosChatTool,
+  executeSheetsChatTool,
+  executeSlidesChatTool,
+  executeTasksChatTool,
+  executeYouTubeChatTool,
+};
 
 export function createGoogleConnectorToolHandlers({ rootDirectory }) {
   return {
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: CALENDAR_TOOLS, executeTool: executeCalendarChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: CONTACTS_TOOLS, executeTool: executeContactsChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: DOCS_TOOLS, executeTool: executeDocsChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: DRIVE_TOOLS, executeTool: executeDriveChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: FORMS_TOOLS, executeTool: executeFormsChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: GMAIL_TOOLS, executeTool: executeGmailChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: PHOTOS_TOOLS, executeTool: executePhotosChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: SHEETS_TOOLS, executeTool: executeSheetsChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: SLIDES_TOOLS, executeTool: executeSlidesChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: TASKS_TOOLS, executeTool: executeTasksChatTool }),
-    ...createConnectorToolHandlers({ rootDirectory, toolDefinitions: YOUTUBE_TOOLS, executeTool: executeYouTubeChatTool })
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: CALENDAR_TOOLS,
+      executeTool: executeCalendarChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: CONTACTS_TOOLS,
+      executeTool: executeContactsChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: DOCS_TOOLS,
+      executeTool: executeDocsChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: DRIVE_TOOLS,
+      executeTool: executeDriveChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: FORMS_TOOLS,
+      executeTool: executeFormsChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: GMAIL_TOOLS,
+      executeTool: executeGmailChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: PHOTOS_TOOLS,
+      executeTool: executePhotosChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: SHEETS_TOOLS,
+      executeTool: executeSheetsChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: SLIDES_TOOLS,
+      executeTool: executeSlidesChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: TASKS_TOOLS,
+      executeTool: executeTasksChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: YOUTUBE_TOOLS,
+      executeTool: executeYouTubeChatTool,
+    }),
   };
 }

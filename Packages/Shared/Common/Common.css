@@ -7,160 +7,128 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-
   /* ── Typography ─────────────────────────────────────────────────────── */
 
   --font-family:
-    "SF Pro Display",
-    "SF Pro Text",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
+    'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* ── Text colours ───────────────────────────────────────────────────── */
 
-  --color-text:             #1e0d28;                   /* primary body / headings   */
-  --color-text-label:       rgba(40, 15, 55, 0.82);    /* input / section labels    */
-  --color-text-secondary:   rgba(58, 20, 78, 0.72);    /* body descriptions         */
-  --color-text-muted:       rgba(60, 20, 80, 0.62);    /* helper / caption text     */
-  --color-text-placeholder: rgba(100, 55, 120, 0.45);  /* input placeholders        */
-  --color-text-accent:      #4a1e65;                   /* ghost buttons / links     */
-  --color-text-deep:        #2a1040;                   /* security card titles etc. */
-
+  --color-text: #1e0d28; /* primary body / headings   */
+  --color-text-label: rgba(40, 15, 55, 0.82); /* input / section labels    */
+  --color-text-secondary: rgba(58, 20, 78, 0.72); /* body descriptions         */
+  --color-text-muted: rgba(60, 20, 80, 0.62); /* helper / caption text     */
+  --color-text-placeholder: rgba(100, 55, 120, 0.45); /* input placeholders        */
+  --color-text-accent: #4a1e65; /* ghost buttons / links     */
+  --color-text-deep: #2a1040; /* security card titles etc. */
 
   /* ── Accent (primary purple) ────────────────────────────────────────── */
 
-  --color-accent:     #c874d9;
-  --color-accent-rgb: 200, 116, 217;   /* use as: rgba(var(--color-accent-rgb), α) */
-
+  --color-accent: #c874d9;
+  --color-accent-rgb: 200, 116, 217; /* use as: rgba(var(--color-accent-rgb), α) */
 
   /* ── Surface / background ───────────────────────────────────────────── */
 
-  --color-surface:          rgba(249, 244, 254, 0.82);   /* inputs, cards, tiles   */
-  --color-surface-raised:   rgba(250, 245, 254, 0.82);   /* slightly lighter cards */
-  --color-surface-focus:    rgba(249, 244, 254, 0.96);   /* focused input bg       */
-  --color-surface-tinted:   rgba(242, 224, 252, 0.88);   /* eyebrow, badge, close  */
+  --color-surface: rgba(249, 244, 254, 0.82); /* inputs, cards, tiles   */
+  --color-surface-raised: rgba(250, 245, 254, 0.82); /* slightly lighter cards */
+  --color-surface-focus: rgba(249, 244, 254, 0.96); /* focused input bg       */
+  --color-surface-tinted: rgba(242, 224, 252, 0.88); /* eyebrow, badge, close  */
   --color-surface-selected: linear-gradient(
     180deg,
     rgba(242, 224, 252, 0.96),
     rgba(247, 238, 254, 0.94)
-  );                                                      /* selected card bg       */
-
+  ); /* selected card bg       */
 
   /* ── Border colours ─────────────────────────────────────────────────── */
 
-  --color-border:          rgba(100, 55, 120, 0.08);   /* default subtle border   */
-  --color-border-hover:    rgba(105, 55, 125, 0.12);   /* hover border            */
-  --color-border-focus:    rgba(200, 116, 217, 0.34);  /* focus ring              */
-  --color-border-selected: rgba(200, 116, 217, 0.30);  /* selected border         */
-  --color-border-tinted:   rgba(200, 116, 217, 0.14);  /* security-card border    */
-  --color-border-modal:    rgba(108, 50, 132, 0.08);   /* modal header separator  */
-
+  --color-border: rgba(100, 55, 120, 0.08); /* default subtle border   */
+  --color-border-hover: rgba(105, 55, 125, 0.12); /* hover border            */
+  --color-border-focus: rgba(200, 116, 217, 0.34); /* focus ring              */
+  --color-border-selected: rgba(200, 116, 217, 0.3); /* selected border         */
+  --color-border-tinted: rgba(200, 116, 217, 0.14); /* security-card border    */
+  --color-border-modal: rgba(108, 50, 132, 0.08); /* modal header separator  */
 
   /* ── Shadow colours ─────────────────────────────────────────────────── */
 
-  --color-shadow:        rgba(80, 35, 105, 0.08);    /* base drop shadow tint   */
-  --color-shadow-deep:   rgba(80, 35, 105, 0.12);    /* heavier drop shadow     */
-  --color-shadow-accent: rgba(200, 116, 217, 0.14);  /* accent-coloured shadow  */
-
+  --color-shadow: rgba(80, 35, 105, 0.08); /* base drop shadow tint   */
+  --color-shadow-deep: rgba(80, 35, 105, 0.12); /* heavier drop shadow     */
+  --color-shadow-accent: rgba(200, 116, 217, 0.14); /* accent-coloured shadow  */
 
   /* ── Composite shadows (inset ring + drop-shadow) ───────────────────── */
 
-  --shadow-surface:
-    inset 0 0 0 1px var(--color-border),
-    0 16px 32px var(--color-shadow);
+  --shadow-surface: inset 0 0 0 1px var(--color-border), 0 16px 32px var(--color-shadow);
 
   --shadow-surface-hover:
-    inset 0 0 0 1px var(--color-border-hover),
-    0 22px 42px var(--color-shadow);
+    inset 0 0 0 1px var(--color-border-hover), 0 22px 42px var(--color-shadow);
 
-  --shadow-focus:
-    inset 0 0 0 1px var(--color-border-focus),
-    0 22px 40px var(--color-shadow-accent);
+  --shadow-focus: inset 0 0 0 1px var(--color-border-focus), 0 22px 40px var(--color-shadow-accent);
 
   --shadow-selected:
-    inset 0 0 0 1px var(--color-border-selected),
-    0 22px 42px rgba(var(--color-accent-rgb), 0.18);
+    inset 0 0 0 1px var(--color-border-selected), 0 22px 42px rgba(var(--color-accent-rgb), 0.18);
 
-  --shadow-card:
-    inset 0 0 0 1px var(--color-border),
-    0 18px 38px var(--color-shadow);
+  --shadow-card: inset 0 0 0 1px var(--color-border), 0 18px 38px var(--color-shadow);
 
-  --shadow-stage:
-    inset 0 0 0 1px rgba(110, 50, 135, 0.08),
-    0 26px 70px var(--color-shadow-deep);
+  --shadow-stage: inset 0 0 0 1px rgba(110, 50, 135, 0.08), 0 26px 70px var(--color-shadow-deep);
 
   --shadow-button-primary:
-    0 18px 44px rgba(var(--color-accent-rgb), 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    0 18px 44px rgba(var(--color-accent-rgb), 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.55);
 
   --shadow-button-secondary:
-    0 12px 30px rgba(75, 30, 100, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    0 12px 30px rgba(75, 30, 100, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.82);
 
-  --shadow-button-ghost:
-    inset 0 0 0 1px var(--color-border);
+  --shadow-button-ghost: inset 0 0 0 1px var(--color-border);
 
-  --shadow-modal:
-    inset 0 0 0 1px var(--color-border-modal),
-    0 32px 80px rgba(60, 22, 85, 0.16);
-
+  --shadow-modal: inset 0 0 0 1px var(--color-border-modal), 0 32px 80px rgba(60, 22, 85, 0.16);
 
   /* ── Border radius ──────────────────────────────────────────────────── */
 
-  --radius-xs:   12px;    /* checkbox marker, small option        */
-  --radius-sm:   14px;    /* toggle button, list option           */
-  --radius-md:   20px;    /* inputs, dropdowns, buttons           */
-  --radius-lg:   24px;    /* checkbox, security card              */
-  --radius-xl:   26px;    /* provider tile, tag card, feature card */
-  --radius-2xl:  28px;    /* provider detail card                 */
-  --radius-3xl:  30px;    /* modal panel                          */
-  --radius-4xl:  34px;    /* setup stage                          */
-  --radius-pill: 999px;   /* badges, eyebrow, tick, scrollbar     */
-
+  --radius-xs: 12px; /* checkbox marker, small option        */
+  --radius-sm: 14px; /* toggle button, list option           */
+  --radius-md: 20px; /* inputs, dropdowns, buttons           */
+  --radius-lg: 24px; /* checkbox, security card              */
+  --radius-xl: 26px; /* provider tile, tag card, feature card */
+  --radius-2xl: 28px; /* provider detail card                 */
+  --radius-3xl: 30px; /* modal panel                          */
+  --radius-4xl: 34px; /* setup stage                          */
+  --radius-pill: 999px; /* badges, eyebrow, tick, scrollbar     */
 
   /* ── Transitions ────────────────────────────────────────────────────── */
 
-  --transition-fast:   160ms ease;
-  --transition-base:   180ms ease;
-  --transition-slow:   220ms ease;
+  --transition-fast: 160ms ease;
+  --transition-base: 180ms ease;
+  --transition-slow: 220ms ease;
   --transition-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
-
 
   /* ══ Warm Dropdown Palette ════════════════════════════════════════════
      The standalone DropDown component uses a warm brown/orange palette
      intentionally distinct from the purple app theme.
      ═════════════════════════════════════════════════════════════════════ */
 
-  --dropdown-color-text:             #24150d;
-  --dropdown-color-text-label:       rgba(44, 27, 17, 0.82);
+  --dropdown-color-text: #24150d;
+  --dropdown-color-text-label: rgba(44, 27, 17, 0.82);
   --dropdown-color-text-placeholder: rgba(104, 81, 68, 0.45);
-  --dropdown-color-text-selected:    #3d2215;
-  --dropdown-color-chevron:          rgba(104, 81, 68, 0.55);
-  --dropdown-color-border:           rgba(112, 84, 66, 0.08);
-  --dropdown-color-border-hover:     rgba(112, 84, 66, 0.12);
-  --dropdown-color-border-focus:     rgba(240, 168, 128, 0.34);
-  --dropdown-color-shadow:           rgba(96, 67, 47, 0.08);
-  --dropdown-color-shadow-focus:     rgba(238, 168, 127, 0.14);
-  --dropdown-color-surface:          rgba(255, 250, 247, 0.82);
-  --dropdown-color-surface-panel:    rgba(255, 250, 247, 0.96);
-  --dropdown-color-option-hover:     rgba(255, 241, 232, 0.72);
-  --dropdown-color-option-selected:  linear-gradient(
+  --dropdown-color-text-selected: #3d2215;
+  --dropdown-color-chevron: rgba(104, 81, 68, 0.55);
+  --dropdown-color-border: rgba(112, 84, 66, 0.08);
+  --dropdown-color-border-hover: rgba(112, 84, 66, 0.12);
+  --dropdown-color-border-focus: rgba(240, 168, 128, 0.34);
+  --dropdown-color-shadow: rgba(96, 67, 47, 0.08);
+  --dropdown-color-shadow-focus: rgba(238, 168, 127, 0.14);
+  --dropdown-color-surface: rgba(255, 250, 247, 0.82);
+  --dropdown-color-surface-panel: rgba(255, 250, 247, 0.96);
+  --dropdown-color-option-hover: rgba(255, 241, 232, 0.72);
+  --dropdown-color-option-selected: linear-gradient(
     135deg,
     rgba(255, 237, 226, 0.9),
     rgba(255, 246, 240, 0.85)
   );
 
-
   /* ══ Scrollbar ════════════════════════════════════════════════════════ */
 
-  --scrollbar-width:       5px;
-  --scrollbar-track:       rgba(150, 105, 80, 0.08);
-  --scrollbar-thumb:       rgba(150, 105, 80, 0.28);
+  --scrollbar-width: 5px;
+  --scrollbar-track: rgba(150, 105, 80, 0.08);
+  --scrollbar-thumb: rgba(150, 105, 80, 0.28);
   --scrollbar-thumb-hover: rgba(150, 105, 80, 0.52);
-
 
   /* Chat shell */
 
@@ -210,7 +178,7 @@
   --color-chat-avatar-text: rgba(255, 255, 255, 0.96);
   --color-chat-dock-surface: rgba(255, 255, 255, 0.28);
   --color-chat-dock-divider: rgba(200, 116, 217, 0.15);
-  --color-chat-dock-icon: rgba(88, 44, 120, 0.50);
+  --color-chat-dock-icon: rgba(88, 44, 120, 0.5);
   --color-chat-dock-active-icon: rgba(88, 44, 120, 0.92);
   --color-chat-dock-emphasis-icon: rgba(255, 255, 255, 0.97);
   --color-chat-dock-hover-surface: rgba(255, 255, 255, 0.48);
@@ -233,80 +201,55 @@
   --color-chat-traffic-amber: #febc2e;
   --color-chat-traffic-green: #28c840;
 
-  --shadow-chat-shell:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
-    0 28px 60px rgba(91, 67, 46, 0.18);
+  --shadow-chat-shell: inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 28px 60px rgba(91, 67, 46, 0.18);
 
-  --shadow-chat-pill:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
-    0 8px 20px rgba(125, 95, 70, 0.06);
+  --shadow-chat-pill: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 8px 20px rgba(125, 95, 70, 0.06);
 
-  --shadow-chat-tab:
-    inset 0 0 0 1px rgba(194, 178, 160, 0.12),
-    0 8px 16px rgba(118, 90, 62, 0.08);
+  --shadow-chat-tab: inset 0 0 0 1px rgba(194, 178, 160, 0.12), 0 8px 16px rgba(118, 90, 62, 0.08);
 
   --shadow-chat-tab-bar:
-    inset 0 0 0 1px rgba(210, 196, 184, 0.22),
-    0 5px 12px rgba(118, 90, 62, 0.04);
+    inset 0 0 0 1px rgba(210, 196, 184, 0.22), 0 5px 12px rgba(118, 90, 62, 0.04);
 
   --shadow-chat-nav-hover:
-    inset 0 0 0 1px rgba(196, 176, 159, 0.2),
-    0 8px 14px rgba(118, 90, 62, 0.04);
+    inset 0 0 0 1px rgba(196, 176, 159, 0.2), 0 8px 14px rgba(118, 90, 62, 0.04);
 
   --shadow-chat-nav-active:
-    inset 0 0 0 1px rgba(205, 188, 171, 0.26),
-    0 10px 18px rgba(118, 90, 62, 0.06);
+    inset 0 0 0 1px rgba(205, 188, 171, 0.26), 0 10px 18px rgba(118, 90, 62, 0.06);
 
   --shadow-chat-nav-primary:
-    inset 0 0 0 1px rgba(210, 191, 171, 0.3),
-    0 10px 18px rgba(118, 90, 62, 0.05);
+    inset 0 0 0 1px rgba(210, 191, 171, 0.3), 0 10px 18px rgba(118, 90, 62, 0.05);
 
   --shadow-chat-nav-avatar:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 16px rgba(32, 24, 17, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 16px rgba(32, 24, 17, 0.18);
 
-  --shadow-chat-dock:
-    inset 0 0 0 1px rgba(220, 190, 240, 0.28),
-    0 8px 24px rgba(140, 90, 200, 0.10);
+  --shadow-chat-dock: inset 0 0 0 1px rgba(220, 190, 240, 0.28), 0 8px 24px rgba(140, 90, 200, 0.1);
 
   --shadow-chat-dock-hover:
-    inset 0 0 0 1px rgba(210, 180, 230, 0.22),
-    0 6px 14px rgba(140, 90, 180, 0.08);
+    inset 0 0 0 1px rgba(210, 180, 230, 0.22), 0 6px 14px rgba(140, 90, 180, 0.08);
 
   --shadow-chat-dock-active:
-    inset 0 0 0 1px rgba(205, 175, 225, 0.20),
-    0 6px 14px rgba(130, 90, 180, 0.08);
+    inset 0 0 0 1px rgba(205, 175, 225, 0.2), 0 6px 14px rgba(130, 90, 180, 0.08);
 
   --shadow-chat-dock-emphasis:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    0 8px 20px rgba(190, 90, 220, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 20px rgba(190, 90, 220, 0.28);
 
   --shadow-chat-dock-callout:
-    inset 0 0 0 1px rgba(210, 180, 230, 0.22),
-    0 8px 20px rgba(140, 90, 190, 0.10);
+    inset 0 0 0 1px rgba(210, 180, 230, 0.22), 0 8px 20px rgba(140, 90, 190, 0.1);
 
   --shadow-chat-input:
-    inset 0 0 0 1px rgba(170, 134, 104, 0.08),
-    0 14px 30px rgba(130, 95, 65, 0.09);
+    inset 0 0 0 1px rgba(170, 134, 104, 0.08), 0 14px 30px rgba(130, 95, 65, 0.09);
 
-  --shadow-chat-card:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.08),
-    0 8px 18px rgba(130, 95, 65, 0.07);
+  --shadow-chat-card: inset 0 0 0 1px rgba(175, 139, 104, 0.08), 0 8px 18px rgba(130, 95, 65, 0.07);
 
   --shadow-chat-card-hover:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.14),
-    0 12px 22px rgba(130, 95, 65, 0.1);
+    inset 0 0 0 1px rgba(175, 139, 104, 0.14), 0 12px 22px rgba(130, 95, 65, 0.1);
 
   --shadow-chat-user-bubble:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 14px 28px rgba(34, 28, 22, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 28px rgba(34, 28, 22, 0.18);
 
   --shadow-chat-error-bubble:
-    inset 0 0 0 1px rgba(196, 121, 109, 0.16),
-    0 10px 18px rgba(169, 90, 78, 0.08);
+    inset 0 0 0 1px rgba(196, 121, 109, 0.16), 0 10px 18px rgba(169, 90, 78, 0.08);
 
   --shadow-chat-send:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
-    0 10px 18px rgba(120, 120, 118, 0.12);
-
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 10px 18px rgba(120, 120, 118, 0.12);
 }

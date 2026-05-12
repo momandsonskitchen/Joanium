@@ -44,16 +44,16 @@ export function createAgentStateManager({ rootDirectory }) {
       await ensureDirectory();
       const now = new Date().toISOString();
       const record = {
-        id:        safeId,
-        name:      String(agent.name      ?? '').trim(),
-        avatar:    agent.avatar            ?? null,
-        schedule:  normalizeSchedule(agent.schedule),
-        model:     normalizeModel(agent.model),
-        prompt:    String(agent.prompt     ?? '').trim(),
-        enabled:   agent.enabled           ?? true,
-        createdAt: agent.createdAt         ?? now,
+        id: safeId,
+        name: String(agent.name ?? '').trim(),
+        avatar: agent.avatar ?? null,
+        schedule: normalizeSchedule(agent.schedule),
+        model: normalizeModel(agent.model),
+        prompt: String(agent.prompt ?? '').trim(),
+        enabled: agent.enabled ?? true,
+        createdAt: agent.createdAt ?? now,
         updatedAt: now,
-        lastRunAt: agent.lastRunAt         ?? null
+        lastRunAt: agent.lastRunAt ?? null,
       };
       await writeFile(agentFilePath(safeId), `${JSON.stringify(record, null, 2)}\n`, 'utf8');
       return record;
@@ -72,19 +72,19 @@ export function createAgentStateManager({ rootDirectory }) {
       for (const file of files) {
         if (!file.endsWith('.json')) continue;
         try {
-          const raw  = await readFile(path.join(agentsDirectory, file), 'utf8');
+          const raw = await readFile(path.join(agentsDirectory, file), 'utf8');
           const data = JSON.parse(raw);
           agents.push({
-            id:        data.id,
-            name:      data.name,
-            avatar:    data.avatar    ?? null,
-            schedule:  data.schedule  ?? { type: 'startup' },
-            model:     data.model     ?? null,
-            prompt:    data.prompt,
-            enabled:   data.enabled   ?? true,
+            id: data.id,
+            name: data.name,
+            avatar: data.avatar ?? null,
+            schedule: data.schedule ?? { type: 'startup' },
+            model: data.model ?? null,
+            prompt: data.prompt,
+            enabled: data.enabled ?? true,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
-            lastRunAt: data.lastRunAt ?? null
+            lastRunAt: data.lastRunAt ?? null,
           });
         } catch {
           // Skip corrupt or unreadable files silently.
@@ -92,7 +92,8 @@ export function createAgentStateManager({ rootDirectory }) {
       }
 
       return agents.sort(
-        (a, b) => new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0)
+        (a, b) =>
+          new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0),
       );
     },
 
@@ -107,7 +108,7 @@ export function createAgentStateManager({ rootDirectory }) {
 
     async markAgentRun(id) {
       try {
-        const raw    = await readFile(agentFilePath(id), 'utf8');
+        const raw = await readFile(agentFilePath(id), 'utf8');
         const record = JSON.parse(raw);
         record.lastRunAt = new Date().toISOString();
         record.updatedAt = record.lastRunAt;
@@ -138,9 +139,13 @@ export function createAgentStateManager({ rootDirectory }) {
             if (agent.id && agent.avatar) {
               agentAvatarMap.set(agent.id, agent.avatar);
             }
-          } catch { /* skip corrupt agent file */ }
+          } catch {
+            /* skip corrupt agent file */
+          }
         }
-      } catch { /* agents directory unreadable */ }
+      } catch {
+        /* agents directory unreadable */
+      }
 
       const runs = [];
 
@@ -168,15 +173,16 @@ export function createAgentStateManager({ rootDirectory }) {
             model: run.model ?? null,
             inputTokens: run.inputTokens ?? 0,
             outputTokens: run.outputTokens ?? 0,
-            source: run.source ?? 'agent'
+            source: run.source ?? 'agent',
           });
         } catch {
           // Skip corrupt run logs.
         }
       }
 
-      return runs.sort((a, b) =>
-        new Date(b.startedAt ?? b.finishedAt ?? 0) - new Date(a.startedAt ?? a.finishedAt ?? 0)
+      return runs.sort(
+        (a, b) =>
+          new Date(b.startedAt ?? b.finishedAt ?? 0) - new Date(a.startedAt ?? a.finishedAt ?? 0),
       );
     },
 
@@ -209,15 +215,16 @@ export function createAgentStateManager({ rootDirectory }) {
 
           if (run.status !== 'running' && run.status !== 'queued') continue;
 
-          const reason = run.status === 'queued'
-            ? 'App closed before agent could start.'
-            : 'App closed while agent was running.';
+          const reason =
+            run.status === 'queued'
+              ? 'App closed before agent could start.'
+              : 'App closed while agent was running.';
 
           const recovered = {
             ...run,
-            status:     'error',
+            status: 'error',
             finishedAt: run.finishedAt ?? new Date().toISOString(),
-            error:      reason
+            error: reason,
           };
 
           await writeFile(filePath, `${JSON.stringify(recovered, null, 2)}\n`, 'utf8');
@@ -225,7 +232,7 @@ export function createAgentStateManager({ rootDirectory }) {
           // Skip corrupt or unreadable run files.
         }
       }
-    }
+    },
   };
 }
 
@@ -243,9 +250,8 @@ function normalizeSchedule(raw) {
 
   const time = normalizeTime(raw.time);
   if (type === 'weekly') {
-    const day = typeof raw.day === 'number' && raw.day >= 0 && raw.day <= 6
-      ? Math.floor(raw.day)
-      : 1; // Monday default
+    const day =
+      typeof raw.day === 'number' && raw.day >= 0 && raw.day <= 6 ? Math.floor(raw.day) : 1; // Monday default
     return { type, time, day };
   }
 
@@ -255,7 +261,7 @@ function normalizeSchedule(raw) {
 function normalizeModel(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const providerId = typeof raw.providerId === 'string' ? raw.providerId.trim() : '';
-  const modelId    = typeof raw.modelId    === 'string' ? raw.modelId.trim()    : '';
+  const modelId = typeof raw.modelId === 'string' ? raw.modelId.trim() : '';
   if (!providerId || !modelId) return null;
   return { providerId, modelId };
 }

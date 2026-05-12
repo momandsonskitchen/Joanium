@@ -206,9 +206,9 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       const sid = requireParam(params, 'spreadsheet_id').trim(),
         sheetId = requireNumeric(params, 'sheet_id'),
         opts = {};
-      (params.new_sheet_name?.trim() && (opts.newSheetName = params.new_sheet_name.trim()),
+      params.new_sheet_name?.trim() && (opts.newSheetName = params.new_sheet_name.trim()),
         null != params.insert_sheet_index &&
-          (opts.insertSheetIndex = Number(params.insert_sheet_index)));
+          (opts.insertSheetIndex = Number(params.insert_sheet_index));
       const props = await SheetsAPI.duplicateSheet(credentials, sid, sheetId, opts);
       return [
         'Sheet duplicated',
@@ -422,15 +422,14 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
         find = requireParam(params, 'find'),
         replacement = params.replacement ?? '',
         opts = {};
-      (null != params.sheet_id && (opts.sheetId = Number(params.sheet_id)),
+      null != params.sheet_id && (opts.sheetId = Number(params.sheet_id)),
         null != params.match_case &&
           (opts.matchCase = !0 === params.match_case || 'true' === params.match_case),
         null != params.match_entire_cell &&
           (opts.matchEntireCell =
             !0 === params.match_entire_cell || 'true' === params.match_entire_cell),
         null != params.search_by_regex &&
-          (opts.searchByRegex =
-            !0 === params.search_by_regex || 'true' === params.search_by_regex));
+          (opts.searchByRegex = !0 === params.search_by_regex || 'true' === params.search_by_regex);
       const result = await SheetsAPI.findReplace(credentials, sid, find, replacement, opts);
       return [
         'Find & replace complete',

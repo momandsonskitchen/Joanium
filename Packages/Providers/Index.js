@@ -8,22 +8,21 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'providers:list-catalog',
-        handler: async () => providerStateManager.getCatalog()
+        handler: async () => providerStateManager.getCatalog(),
       },
       {
         channel: 'providers:list-configured',
-        handler: async () => providerStateManager.getConfigured()
+        handler: async () => providerStateManager.getConfigured(),
       },
       {
         channel: 'providers:save',
         handler: async (_event, providerId, incoming) =>
-          providerStateManager.saveProvider(providerId, incoming)
+          providerStateManager.saveProvider(providerId, incoming),
       },
       {
         channel: 'providers:remove',
-        handler: async (_event, providerId) =>
-          providerStateManager.removeProvider(providerId)
-      }
-    ]
+        handler: async (_event, providerId) => providerStateManager.removeProvider(providerId),
+      },
+    ],
   };
 }

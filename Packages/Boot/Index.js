@@ -29,7 +29,7 @@ export async function discoverPackages(packagesDirectory) {
 
     registry.set(entry.name, {
       id: entry.name,
-      entryPath
+      entryPath,
     });
   }
 
@@ -51,11 +51,7 @@ export function createBootLogger(logFilePath) {
     try {
       mkdirSync(path.dirname(logFilePath), { recursive: true });
       const suffix = details ? ` ${details}` : '';
-      appendFileSync(
-        logFilePath,
-        `[${new Date().toISOString()}] ${message}${suffix}\n`,
-        'utf8'
-      );
+      appendFileSync(logFilePath, `[${new Date().toISOString()}] ${message}${suffix}\n`, 'utf8');
     } catch {
       // Ignore logging failures during boot diagnostics.
     }

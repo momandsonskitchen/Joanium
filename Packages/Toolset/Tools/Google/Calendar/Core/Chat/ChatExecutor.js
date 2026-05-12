@@ -40,9 +40,9 @@ export async function executeCalendarChatTool(ctx, toolName, params = {}) {
     case 'calendar_list_events': {
       const calendarId = params.calendar_id?.trim() || 'primary',
         opts = {};
-      (params.time_min && (opts.timeMin = params.time_min),
+      params.time_min && (opts.timeMin = params.time_min),
         params.time_max && (opts.timeMax = params.time_max),
-        params.max_results && (opts.maxResults = Number(params.max_results)));
+        params.max_results && (opts.maxResults = Number(params.max_results));
       const events = await CalendarAPI.listEvents(credentials, calendarId, opts);
       return events.length
         ? `Calendar events - ${events.length} event${1 !== events.length ? 's' : ''}:\n\n${events.map((e, i) => formatEvent(e, i + 1)).join('\n\n')}`
@@ -65,7 +65,7 @@ export async function executeCalendarChatTool(ctx, toolName, params = {}) {
       if (!endDateTime && !all_day)
         try {
           const startDate = new Date(start_datetime);
-          (startDate.setHours(startDate.getHours() + 1), (endDateTime = startDate.toISOString()));
+          startDate.setHours(startDate.getHours() + 1), (endDateTime = startDate.toISOString());
         } catch {
           endDateTime = start_datetime;
         }
@@ -254,7 +254,7 @@ export async function executeCalendarChatTool(ctx, toolName, params = {}) {
       let endDateTime = end_datetime;
       if (!endDateTime) {
         const s = new Date(start_datetime);
-        (s.setHours(s.getHours() + 1), (endDateTime = s.toISOString()));
+        s.setHours(s.getHours() + 1), (endDateTime = s.toISOString());
       }
       const attendeeList = attendees
           ? String(attendees)

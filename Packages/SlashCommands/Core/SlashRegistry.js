@@ -3,9 +3,10 @@ import COMMANDS from './Commands.js';
 export function createSlashRegistry() {
   // Build a lookup map for O(1) mode instruction access.
   const modeInstructions = new Map(
-    COMMANDS
-      .filter((command) => command.type === 'mode')
-      .map((command) => [command.id, command.instruction ?? ''])
+    COMMANDS.filter((command) => command.type === 'mode').map((command) => [
+      command.id,
+      command.instruction ?? '',
+    ]),
   );
 
   return {
@@ -29,6 +30,6 @@ export function createSlashRegistry() {
     getModeInstruction(modeId) {
       if (!modeId) return null;
       return modeInstructions.get(modeId) ?? null;
-    }
+    },
   };
 }

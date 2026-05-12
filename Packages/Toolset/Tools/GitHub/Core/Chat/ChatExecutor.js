@@ -539,7 +539,7 @@ export async function executeGithubChatTool(ctx, toolName, params = {}) {
       if (!notifications.length) return 'No unread GitHub notifications.';
       const countsByRepo = notifications.reduce((result, item) => {
           const repoName = item.repository?.full_name || 'unknown';
-          return ((result[repoName] = (result[repoName] || 0) + 1), result);
+          return (result[repoName] = (result[repoName] || 0) + 1), result;
         }, {}),
         repoLines = Object.entries(countsByRepo)
           .sort((left, right) => right[1] - left[1])
@@ -585,7 +585,7 @@ export async function executeGithubChatTool(ctx, toolName, params = {}) {
           totalChars + content.length > 8e4)
         )
           break;
-        (loaded.push({ path: file.path, content: content }), (totalChars += content.length));
+        loaded.push({ path: file.path, content: content }), (totalChars += content.length);
       }
       const treeLines = allFiles
         .filter((item) => !SKIP_DIRS.has(item.path.split('/')[0]))
@@ -1703,9 +1703,9 @@ export async function executeGithubChatTool(ctx, toolName, params = {}) {
         p.required_pull_request_reviews)
       ) {
         const r = p.required_pull_request_reviews;
-        (lines.push(`PR reviews required: ${r.required_approving_review_count ?? 1} approver(s)`),
+        lines.push(`PR reviews required: ${r.required_approving_review_count ?? 1} approver(s)`),
           r.dismiss_stale_reviews && lines.push('Stale reviews dismissed on push'),
-          r.require_code_owner_reviews && lines.push('Code owner review required'));
+          r.require_code_owner_reviews && lines.push('Code owner review required');
       }
       return (
         lines.push(`Force push allowed: ${!p.allow_force_pushes?.enabled}`),
@@ -2713,16 +2713,14 @@ export async function executeGithubChatTool(ctx, toolName, params = {}) {
       const { username: username } = params;
       if (!username) throw new Error('Missing required param: username');
       return (
-        await GithubAPI.followUser(credentials, username),
-        `You are now following @${username}.`
+        await GithubAPI.followUser(credentials, username), `You are now following @${username}.`
       );
     }
     case 'github_unfollow_user': {
       const { username: username } = params;
       if (!username) throw new Error('Missing required param: username');
       return (
-        await GithubAPI.unfollowUser(credentials, username),
-        `You have unfollowed @${username}.`
+        await GithubAPI.unfollowUser(credentials, username), `You have unfollowed @${username}.`
       );
     }
     case 'github_get_issue_events': {
@@ -2775,10 +2773,7 @@ export async function executeGithubChatTool(ctx, toolName, params = {}) {
     case 'github_delete_gist': {
       const { gist_id: gist_id } = params;
       if (!gist_id) throw new Error('Missing required param: gist_id');
-      return (
-        await GithubAPI.deleteGist(credentials, gist_id),
-        `Gist ${gist_id} has been deleted.`
-      );
+      return await GithubAPI.deleteGist(credentials, gist_id), `Gist ${gist_id} has been deleted.`;
     }
     case 'github_transfer_issue': {
       const { owner: owner, repo: repo, issue_number: issue_number, new_owner: new_owner } = params;
@@ -3642,8 +3637,8 @@ export async function executeGithubChatTool(ctx, toolName, params = {}) {
       if (blob.content && 'base64' === blob.encoding)
         try {
           const decoded = Buffer.from(blob.content.replace(/\n/g, ''), 'base64').toString('utf-8');
-          ((preview = decoded.slice(0, 500)),
-            decoded.length > 500 && (preview += '\n...(truncated)'));
+          (preview = decoded.slice(0, 500)),
+            decoded.length > 500 && (preview += '\n...(truncated)');
         } catch {
           preview = '(binary content, cannot preview)';
         }

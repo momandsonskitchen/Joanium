@@ -8,38 +8,38 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'security:get-status',
-        handler: async () => security.getStatus()
+        handler: async () => security.getStatus(),
       },
       {
         channel: 'security:enable',
         handler: async (_event, password, secretQuestion, secretAnswer) =>
-          security.enable(password, secretQuestion, secretAnswer)
+          security.enable(password, secretQuestion, secretAnswer),
       },
       {
         channel: 'security:disable',
-        handler: async (_event, currentPassword) => security.disable(currentPassword)
+        handler: async (_event, currentPassword) => security.disable(currentPassword),
       },
       {
         channel: 'security:verify-password',
-        handler: async (_event, password) => security.verifyPassword(password)
+        handler: async (_event, password) => security.verifyPassword(password),
       },
       {
         channel: 'security:verify-answer',
-        handler: async (_event, answer) => security.verifyAnswer(answer)
+        handler: async (_event, answer) => security.verifyAnswer(answer),
       },
       {
         channel: 'security:get-auto-lock-timeout',
-        handler: async () => security.getAutoLockTimeout()
+        handler: async () => security.getAutoLockTimeout(),
       },
       {
         channel: 'security:set-auto-lock-timeout',
-        handler: async (_event, timeout) => security.setAutoLockTimeout(timeout)
+        handler: async (_event, timeout) => security.setAutoLockTimeout(timeout),
       },
       {
         channel: 'security:change-password',
         handler: async (_event, currentPassword, newPassword) =>
-          security.changePassword(currentPassword, newPassword)
-      }
-    ]
+          security.changePassword(currentPassword, newPassword),
+      },
+    ],
   };
 }

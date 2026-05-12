@@ -11,7 +11,7 @@ const en = {
   trigger: 'Triggers',
   namespace: 'Namespace',
   author: 'Author',
-  selectPrompt: 'Select a skill to read its content'
+  selectPrompt: 'Select a skill to read its content',
 };
 
 export default en;

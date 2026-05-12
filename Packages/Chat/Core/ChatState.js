@@ -22,7 +22,7 @@ const openAiCompatibleProviders = new Set([
   'openrouter',
   'perplexity',
   'together',
-  'xai'
+  'xai',
 ]);
 
 async function readSystemPromptFile(rootDirectory) {
@@ -49,7 +49,8 @@ async function buildBaseSystemPrompt(rootDirectory, user) {
   const prompt = await readSystemPromptFile(rootDirectory);
   const now = new Date();
   const displayName = collapseWhitespace(user?.profile?.name) || os.userInfo().username || 'User';
-  const locale = collapseWhitespace(user?.locale) || Intl.DateTimeFormat().resolvedOptions().locale || 'en';
+  const locale =
+    collapseWhitespace(user?.locale) || Intl.DateTimeFormat().resolvedOptions().locale || 'en';
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
 
   return [
@@ -60,7 +61,7 @@ async function buildBaseSystemPrompt(rootDirectory, user) {
     `- Timezone: ${timezone}`,
     `- Locale: ${locale}`,
     `- Platform: ${os.type()} ${os.release()} (${os.platform()} ${os.arch()})`,
-    `- Home directory: ${os.homedir()}`
+    `- Home directory: ${os.homedir()}`,
   ].join('\n');
 }
 
@@ -82,7 +83,11 @@ function sanitizeConversationMessages(candidateMessages) {
 
       // Carry image attachments through so provider functions can build
       // multimodal content blocks (base64 data lives only in-memory).
-      if (role === 'user' && Array.isArray(message?.imageAttachments) && message.imageAttachments.length > 0) {
+      if (
+        role === 'user' &&
+        Array.isArray(message?.imageAttachments) &&
+        message.imageAttachments.length > 0
+      ) {
         result.imageAttachments = message.imageAttachments;
       }
 
@@ -117,7 +122,9 @@ function sanitizeConversationMessages(candidateMessages) {
 }
 
 function buildProviderOrder(user, providers) {
-  const selectedProviderIds = Array.isArray(user?.providers?.selected) ? user.providers.selected : [];
+  const selectedProviderIds = Array.isArray(user?.providers?.selected)
+    ? user.providers.selected
+    : [];
   const providersById = new Map(providers.map((provider) => [provider.id, provider]));
   const orderedProviders = [];
   const seen = new Set();
@@ -146,7 +153,8 @@ function resolveProviderDetails(user, provider) {
 }
 
 function resolveProviderEndpoint(provider, providerDetails, modelId) {
-  const configuredEndpoint = collapseWhitespace(providerDetails?.endpoint) || collapseWhitespace(provider.endpoint);
+  const configuredEndpoint =
+    collapseWhitespace(providerDetails?.endpoint) || collapseWhitespace(provider.endpoint);
 
   if (!configuredEndpoint) {
     return '';
@@ -181,7 +189,11 @@ function canUseProvider(user, provider) {
 
 function resolveActiveProvider(user, providers) {
   const orderedProviders = buildProviderOrder(user, providers);
-  return orderedProviders.find((provider) => canUseProvider(user, provider)) ?? orderedProviders[0] ?? null;
+  return (
+    orderedProviders.find((provider) => canUseProvider(user, provider)) ??
+    orderedProviders[0] ??
+    null
+  );
 }
 
 function extractText(value) {
@@ -253,7 +265,7 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {
         port: parsed.port ? Number(parsed.port) : defaultPort,
         path: parsed.pathname + parsed.search,
         method,
-        headers
+        headers,
       },
       (res) => {
         const status = res.statusCode ?? 0;
@@ -273,9 +285,9 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {
               res.on('end', () => rs(Buffer.concat(parts).toString('utf8')));
               res.on('error', rj);
             });
-          }
+          },
         });
-      }
+      },
     );
 
     req.on('error', reject);
@@ -376,7 +388,15 @@ async function* parseSSE(nodeResponse) {
 // every text or thinking token that arrives.
 // ---------------------------------------------------------------------------
 
-async function streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk }) {
+async function streamGoogleMessage({
+  endpoint,
+  provider,
+  providerDetails,
+  model,
+  messages,
+  systemPrompt,
+  onChunk,
+}) {
   const apiKey = resolveCredential(provider, providerDetails);
 
   if (!apiKey) {
@@ -402,7 +422,7 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
       }
       return { role, parts };
     }),
-    generationConfig: { temperature: 0.7 }
+    generationConfig: { temperature: 0.7 },
   };
 
   if (systemPrompt) {
@@ -416,9 +436,9 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
     headers: {
       'content-type': 'application/json',
       'content-length': Buffer.byteLength(streamBodyStr),
-      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
+      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
     },
-    body: streamBodyStr
+    body: streamBodyStr,
   });
 
   if (!response.ok) {
@@ -441,7 +461,15 @@ async function streamGoogleMessage({ endpoint, provider, providerDetails, model,
   }
 }
 
-async function streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk }) {
+async function streamAnthropicMessage({
+  endpoint,
+  provider,
+  providerDetails,
+  model,
+  messages,
+  systemPrompt,
+  onChunk,
+}) {
   const apiKey = resolveCredential(provider, providerDetails);
 
   if (!apiKey) {
@@ -463,10 +491,13 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
       const content = [];
       if (message.content) content.push({ type: 'text', text: message.content });
       for (const img of message.imageAttachments) {
-        content.push({ type: 'image', source: { type: 'base64', media_type: img.mimeType, data: img.base64 } });
+        content.push({
+          type: 'image',
+          source: { type: 'base64', media_type: img.mimeType, data: img.base64 },
+        });
       }
       return { role: message.role, content };
-    })
+    }),
   };
 
   if (systemPrompt) {
@@ -487,9 +518,9 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
       'content-type': 'application/json',
       'content-length': Buffer.byteLength(streamReqBodyStr),
       'anthropic-version': '2023-06-01',
-      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`
+      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
     },
-    body: streamReqBodyStr
+    body: streamReqBodyStr,
   });
 
   if (!response.ok) {
@@ -518,7 +549,15 @@ async function streamAnthropicMessage({ endpoint, provider, providerDetails, mod
   }
 }
 
-async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt, onChunk }) {
+async function streamOpenAiCompatibleMessage({
+  endpoint,
+  provider,
+  providerDetails,
+  model,
+  messages,
+  systemPrompt,
+  onChunk,
+}) {
   const headers = { 'content-type': 'application/json' };
 
   if (provider.requiresApiKey) {
@@ -545,21 +584,24 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
       const content = [];
       if (message.content) content.push({ type: 'text', text: message.content });
       for (const img of message.imageAttachments) {
-        content.push({ type: 'image_url', image_url: { url: `data:${img.mimeType};base64,${img.base64}` } });
+        content.push({
+          type: 'image_url',
+          image_url: { url: `data:${img.mimeType};base64,${img.base64}` },
+        });
       }
       return { role: message.role, content };
     }),
     temperature: 0.7,
-    stream: true
+    stream: true,
   });
 
   const response = await nodeRequest(endpoint, {
     method: 'POST',
     headers: {
       ...headers,
-      'content-length': Buffer.byteLength(streamOaiBodyStr)
+      'content-length': Buffer.byteLength(streamOaiBodyStr),
     },
-    body: streamOaiBodyStr
+    body: streamOaiBodyStr,
   });
 
   if (!response.ok) {
@@ -599,13 +641,18 @@ async function streamOpenAiCompatibleMessage({ endpoint, provider, providerDetai
 // Retryable: 429, 500, 502, 503, 504 and network-level codes.
 // ---------------------------------------------------------------------------
 
-const MAX_ATTEMPTS  = 3;
+const MAX_ATTEMPTS = 3;
 const BASE_DELAY_MS = 800;
 
 const RETRYABLE_HTTP = new Set([429, 500, 502, 503, 504]);
 const RETRYABLE_CODES = new Set([
-  'ECONNRESET', 'ECONNREFUSED', 'ENOTFOUND',
-  'EPIPE', 'ETIMEDOUT', 'EAI_AGAIN', 'ENETUNREACH'
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'ENOTFOUND',
+  'EPIPE',
+  'ETIMEDOUT',
+  'EAI_AGAIN',
+  'ENETUNREACH',
 ]);
 
 function isRetryable(error) {
@@ -633,7 +680,12 @@ async function requestChatCompletionStreamWithRetry({ user, providers, request, 
     };
 
     try {
-      const result = await requestChatCompletionStream({ user, providers, request, onChunk: guardedChunk });
+      const result = await requestChatCompletionStream({
+        user,
+        providers,
+        request,
+        onChunk: guardedChunk,
+      });
 
       // If the stream ended cleanly but produced zero tokens, treat it as a
       // transient failure and retry — this is the root cause of "No response
@@ -662,7 +714,7 @@ async function requestChatCompletionStreamWithRetry({ user, providers, request, 
 }
 
 async function requestChatCompletionStream({ user, providers, request, onChunk }) {
-  const messages     = sanitizeConversationMessages(request?.messages);
+  const messages = sanitizeConversationMessages(request?.messages);
   const parts = [];
   if (typeof request?.baseSystemPrompt === 'string' && request.baseSystemPrompt.trim()) {
     parts.push(request.baseSystemPrompt.trim());
@@ -742,15 +794,19 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
     providerId: provider.id,
     providerLabel: provider.label,
     modelId: model.id,
-    modelLabel: model.name
+    modelLabel: model.name,
   };
 
   // Estimate input character count across all messages + system prompt.
-  const charCountIn = messages.reduce((sum, m) => {
-    const textCount = m.content?.length ?? 0;
-    const imageCount = (m.imageAttachments ?? []).reduce((s, img) => s + (img.base64?.length ?? 0), 0);
-    return sum + textCount + imageCount;
-  }, 0) + (systemPrompt?.length ?? 0);
+  const charCountIn =
+    messages.reduce((sum, m) => {
+      const textCount = m.content?.length ?? 0;
+      const imageCount = (m.imageAttachments ?? []).reduce(
+        (s, img) => s + (img.base64?.length ?? 0),
+        0,
+      );
+      return sum + textCount + imageCount;
+    }, 0) + (systemPrompt?.length ?? 0);
 
   // Wrap onChunk to accumulate output character count.
   let charCountOut = 0;
@@ -762,11 +818,35 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
   };
 
   if (provider.id === 'google') {
-    await streamGoogleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt: groundedSystemPrompt, onChunk: trackingChunk });
+    await streamGoogleMessage({
+      endpoint,
+      provider,
+      providerDetails,
+      model,
+      messages,
+      systemPrompt: groundedSystemPrompt,
+      onChunk: trackingChunk,
+    });
   } else if (provider.id === 'anthropic') {
-    await streamAnthropicMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt: groundedSystemPrompt, onChunk: trackingChunk });
+    await streamAnthropicMessage({
+      endpoint,
+      provider,
+      providerDetails,
+      model,
+      messages,
+      systemPrompt: groundedSystemPrompt,
+      onChunk: trackingChunk,
+    });
   } else if (openAiCompatibleProviders.has(provider.id)) {
-    await streamOpenAiCompatibleMessage({ endpoint, provider, providerDetails, model, messages, systemPrompt: groundedSystemPrompt, onChunk: trackingChunk });
+    await streamOpenAiCompatibleMessage({
+      endpoint,
+      provider,
+      providerDetails,
+      model,
+      messages,
+      systemPrompt: groundedSystemPrompt,
+      onChunk: trackingChunk,
+    });
   } else {
     throw new Error(`${provider.label} chat is not wired up yet.`);
   }
@@ -781,7 +861,7 @@ export function createChatStateManager({ rootDirectory }) {
         readUserState(rootDirectory),
         readProviderCatalog(rootDirectory),
         readTerminalPromptFile(rootDirectory),
-        readSubAgentPromptFile(rootDirectory)
+        readSubAgentPromptFile(rootDirectory),
       ]);
 
       return { user, providers, terminalPrompt, subAgentPrompt };
@@ -794,7 +874,7 @@ export function createChatStateManager({ rootDirectory }) {
       try {
         const [user, providers] = await Promise.all([
           readUserState(rootDirectory),
-          readProviderCatalog(rootDirectory)
+          readProviderCatalog(rootDirectory),
         ]);
         const baseSystemPrompt = await buildBaseSystemPrompt(rootDirectory, user);
 
@@ -802,7 +882,7 @@ export function createChatStateManager({ rootDirectory }) {
           user,
           providers,
           request: { ...request, baseSystemPrompt },
-          onChunk
+          onChunk,
         });
 
         onDone(meta);
@@ -814,7 +894,7 @@ export function createChatStateManager({ rootDirectory }) {
     async completeMessage(request) {
       const [user, providers] = await Promise.all([
         readUserState(rootDirectory),
-        readProviderCatalog(rootDirectory)
+        readProviderCatalog(rootDirectory),
       ]);
       const baseSystemPrompt = await buildBaseSystemPrompt(rootDirectory, user);
 
@@ -827,7 +907,7 @@ export function createChatStateManager({ rootDirectory }) {
         onChunk(chunk) {
           if (chunk?.type === 'text' && chunk.text) text += chunk.text;
           if (chunk?.type === 'thinking' && chunk.text) thinking += chunk.text;
-        }
+        },
       });
 
       return { ...meta, text, thinking };
@@ -839,7 +919,7 @@ export function createChatStateManager({ rootDirectory }) {
 
       const [user, providers] = await Promise.all([
         readUserState(rootDirectory),
-        readProviderCatalog(rootDirectory)
+        readProviderCatalog(rootDirectory),
       ]);
       const baseSystemPrompt = await buildBaseSystemPrompt(rootDirectory, user);
 
@@ -851,15 +931,14 @@ export function createChatStateManager({ rootDirectory }) {
           messages: [{ role: 'user', content }],
           providerId: providerId ?? null,
           modelId: modelId ?? null,
-          baseSystemPrompt
+          baseSystemPrompt,
         },
         onChunk(chunk) {
           if (chunk?.type === 'text' && chunk.text) text += chunk.text;
-        }
+        },
       });
 
       return { ...meta, text: text.trim() };
     },
-
   };
 }

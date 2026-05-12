@@ -6,7 +6,7 @@ export function createApiKeyInput({
   focusKey = '',
   revealLabel,
   hideLabel,
-  onInput
+  onInput,
 }) {
   const wrapper = document.createElement('label');
   wrapper.className = 'joanium-secret';
@@ -55,6 +55,6 @@ export function createApiKeyInput({
 
   return {
     element: wrapper,
-    input
+    input,
   };
 }

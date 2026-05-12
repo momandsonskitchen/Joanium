@@ -27,11 +27,11 @@ export function formatTask(task, index) {
 }
 function startOfDay(date = new Date()) {
   const d = new Date(date);
-  return (d.setHours(0, 0, 0, 0), d);
+  return d.setHours(0, 0, 0, 0), d;
 }
 function endOfDay(date = new Date()) {
   const d = new Date(date);
-  return (d.setHours(23, 59, 59, 999), d);
+  return d.setHours(23, 59, 59, 999), d;
 }
 export function isOverdue(task) {
   return !(!task.due || 'completed' === task.status) && new Date(task.due) < startOfDay();

@@ -11,7 +11,7 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'about:get-info',
-        handler: async () => aboutStateManager.getInfo()
+        handler: async () => aboutStateManager.getInfo(),
       },
       {
         channel: 'about:open-external',
@@ -22,8 +22,8 @@ export async function createPackage({ rootDirectory }) {
 
           shell.openExternal(url);
           return null;
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 }

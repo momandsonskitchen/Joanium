@@ -13,5 +13,7 @@ export function parseFrontmatter(content) {
 }
 
 export function stripFrontmatter(content) {
-  return String(content ?? '').replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '').trim();
+  return String(content ?? '')
+    .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '')
+    .trim();
 }

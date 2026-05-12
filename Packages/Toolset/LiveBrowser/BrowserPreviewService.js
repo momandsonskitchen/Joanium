@@ -25,7 +25,7 @@ export const LIVE_BROWSER_TOOL_NAMES = Object.freeze([
   'browser_back',
   'browser_forward',
   'browser_refresh',
-  'browser_screenshot'
+  'browser_screenshot',
 ]);
 
 const PAGE_HELPERS = `
@@ -186,20 +186,23 @@ function buildExtraHeaders(url, referrer = '') {
     'Sec-Fetch-Dest: document',
     'Sec-Fetch-Mode: navigate',
     `Sec-Fetch-Site: ${fetchSite}`,
-    'Sec-Fetch-User: ?1'
+    'Sec-Fetch-User: ?1',
   ].join('\n')}\n`;
 }
 
 function buildRequestHeaders(details) {
   const headers = { ...(details.requestHeaders ?? {}) };
   const resourceType = details.resourceType ?? '';
-  const referrer = headers.Referer || headers.referer || details.referrer || details.initiator || '';
+  const referrer =
+    headers.Referer || headers.referer || details.referrer || details.initiator || '';
 
   headers['User-Agent'] = BUILTIN_BROWSER_USER_AGENT;
-  headers.Accept = headers.Accept || headers.accept || (
-    ['mainFrame', 'subFrame'].includes(resourceType) ? NAVIGATION_ACCEPT : '*/*'
-  );
-  headers['Accept-Language'] = headers['Accept-Language'] || headers['accept-language'] || 'en-IN,en-US;q=0.9,en;q=0.8';
+  headers.Accept =
+    headers.Accept ||
+    headers.accept ||
+    (['mainFrame', 'subFrame'].includes(resourceType) ? NAVIGATION_ACCEPT : '*/*');
+  headers['Accept-Language'] =
+    headers['Accept-Language'] || headers['accept-language'] || 'en-IN,en-US;q=0.9,en;q=0.8';
   headers['Sec-CH-UA'] = headers['Sec-CH-UA'] || CHROME_CLIENT_HINTS;
   headers['Sec-CH-UA-Mobile'] = headers['Sec-CH-UA-Mobile'] || '?0';
   headers['Sec-CH-UA-Platform'] = headers['Sec-CH-UA-Platform'] || '"Windows"';
@@ -209,7 +212,8 @@ function buildRequestHeaders(details) {
     headers['Cache-Control'] = headers['Cache-Control'] || 'max-age=0';
     headers.Pragma = headers.Pragma || 'no-cache';
     headers['Upgrade-Insecure-Requests'] = headers['Upgrade-Insecure-Requests'] || '1';
-    headers['Sec-Fetch-Dest'] = headers['Sec-Fetch-Dest'] || (resourceType === 'mainFrame' ? 'document' : 'iframe');
+    headers['Sec-Fetch-Dest'] =
+      headers['Sec-Fetch-Dest'] || (resourceType === 'mainFrame' ? 'document' : 'iframe');
     headers['Sec-Fetch-Mode'] = headers['Sec-Fetch-Mode'] || 'navigate';
     headers['Sec-Fetch-User'] = headers['Sec-Fetch-User'] || '?1';
   }
@@ -233,7 +237,7 @@ function normalizeBounds(bounds) {
     x: Math.max(0, Math.round(Number(bounds.x) || 0)),
     y: Math.max(0, Math.round(Number(bounds.y) || 0)),
     width: Math.max(1, width),
-    height: Math.max(1, height)
+    height: Math.max(1, height),
   };
 }
 
@@ -255,12 +259,14 @@ function formatBrowserState(state) {
     `URL: ${state.url || '(no page loaded)'}`,
     `Visible: ${state.visible ? 'yes' : 'no'}`,
     `Loading: ${state.loading ? 'yes' : 'no'}`,
-    `Status: ${state.status || 'Ready'}`
+    `Status: ${state.status || 'Ready'}`,
   ].join('\n');
 }
 
 function safeScreenshotName(fileName = '') {
-  const rawName = String(fileName ?? '').trim() || `browser-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+  const rawName =
+    String(fileName ?? '').trim() ||
+    `browser-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
   const withExtension = rawName.toLowerCase().endsWith('.png') ? rawName : `${rawName}.png`;
   return withExtension.replace(/[<>:"/\\|?*\x00-\x1f]/g, '-');
 }
@@ -289,7 +295,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       x,
       y,
       width: Math.max(320, width - x - 28),
-      height: Math.max(320, height - y - 32)
+      height: Math.max(320, height - y - 32),
     };
   }
 
@@ -305,7 +311,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       status,
       loading,
       canGoBack: canGoBack(webContents),
-      canGoForward: canGoForward(webContents)
+      canGoForward: canGoForward(webContents),
     };
   }
 
@@ -399,13 +405,16 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       emitState();
     });
 
-    webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedUrl, isMainFrame) => {
-      if (!isMainFrame) return;
-      loading = false;
-      url = validatedUrl || url;
-      status = `Load failed (${errorCode}): ${errorDescription}`;
-      emitState();
-    });
+    webContents.on(
+      'did-fail-load',
+      (_event, errorCode, errorDescription, validatedUrl, isMainFrame) => {
+        if (!isMainFrame) return;
+        loading = false;
+        url = validatedUrl || url;
+        status = `Load failed (${errorCode}): ${errorDescription}`;
+        emitState();
+      },
+    );
 
     webContents.on('render-process-gone', () => {
       loading = false;
@@ -439,8 +448,8 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
-        backgroundThrottling: false
-      }
+        backgroundThrottling: false,
+      },
     });
     view.setBackgroundColor('#ffffff');
     view.setVisible(false);
@@ -464,7 +473,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     await webContents.loadURL(nextUrl, {
       userAgent: BUILTIN_BROWSER_USER_AGENT,
       extraHeaders: buildExtraHeaders(nextUrl, referrer),
-      ...(referrer ? { httpReferrer: referrer } : {})
+      ...(referrer ? { httpReferrer: referrer } : {}),
     });
     return getState();
   }
@@ -487,7 +496,8 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   }
 
   async function browserSnapshot(ownerWindow = null) {
-    const result = await executeOnPage(`
+    const result = await executeOnPage(
+      `
       (() => {
         ${PAGE_HELPERS}
         window.__joaniumBrowserTargets = {};
@@ -519,13 +529,15 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
           elements
         };
       })()
-    `, ownerWindow);
+    `,
+      ownerWindow,
+    );
 
     const lines = [
       `Page: ${result.title || '(untitled)'}`,
       `URL: ${result.url || url}`,
       '',
-      'Visible interactive elements:'
+      'Visible interactive elements:',
     ];
 
     if (result.elements?.length) {
@@ -547,7 +559,8 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
 
   async function browserGetText(params = {}, ownerWindow = null) {
     const target = String(params.target ?? '').trim();
-    const result = await executeOnPage(`
+    const result = await executeOnPage(
+      `
       (() => {
         ${PAGE_HELPERS}
         const target = ${JSON.stringify(target)};
@@ -555,7 +568,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         if (!element) return { ok: false, error: 'Element not found.' };
         return { ok: true, text: cleanText(element.innerText || element.textContent || element.value || '') };
       })()
-    `, ownerWindow);
+    `,
+      ownerWindow,
+    );
     if (!result?.ok) throw new Error(result?.error ?? 'Could not read browser text.');
     return result.text || '(no visible text)';
   }
@@ -563,7 +578,8 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   async function browserClick(params = {}, ownerWindow = null) {
     const target = String(params.target ?? '').trim();
     if (!target) throw new Error('Missing required parameter: target.');
-    const result = await executeOnPage(`
+    const result = await executeOnPage(
+      `
       (() => {
         ${PAGE_HELPERS}
         const element = resolveTarget(${JSON.stringify(target)});
@@ -573,7 +589,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         element.click();
         return { ok: true, label: getElementLabel(element), role: getRole(element) };
       })()
-    `, ownerWindow);
+    `,
+      ownerWindow,
+    );
     if (!result?.ok) throw new Error(result?.error ?? 'Click failed.');
     return `Clicked ${result.role || 'element'}: ${result.label || target}`;
   }
@@ -582,7 +600,8 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     const target = String(params.target ?? '').trim();
     const text = String(params.text ?? '');
     if (!target) throw new Error('Missing required parameter: target.');
-    const result = await executeOnPage(`
+    const result = await executeOnPage(
+      `
       (() => {
         ${PAGE_HELPERS}
         const element = resolveTarget(${JSON.stringify(target)}, { preferTextField: true });
@@ -598,7 +617,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         }
         return { ok: true, label: getElementLabel(element) };
       })()
-    `, ownerWindow);
+    `,
+      ownerWindow,
+    );
     if (!result?.ok) throw new Error(result?.error ?? 'Typing failed.');
     return `Typed into ${result.label || target}.`;
   }
@@ -608,13 +629,16 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     if (!key) throw new Error('Missing required parameter: key.');
 
     if (params.target) {
-      await executeOnPage(`
+      await executeOnPage(
+        `
         (() => {
           ${PAGE_HELPERS}
           const element = resolveTarget(${JSON.stringify(params.target)});
           if (element) element.focus?.();
         })()
-      `, ownerWindow);
+      `,
+        ownerWindow,
+      );
     }
 
     const webContents = await getPageWebContents(ownerWindow);
@@ -624,10 +648,13 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   }
 
   async function browserScroll(params = {}, ownerWindow = null) {
-    const direction = String(params.direction ?? 'down').trim().toLowerCase();
+    const direction = String(params.direction ?? 'down')
+      .trim()
+      .toLowerCase();
     const amount = Math.min(Math.max(Number(params.amount) || 600, 1), 5000);
     const target = String(params.target ?? '').trim();
-    const result = await executeOnPage(`
+    const result = await executeOnPage(
+      `
       (() => {
         ${PAGE_HELPERS}
         const target = ${JSON.stringify(target)};
@@ -645,7 +672,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         });
         return { ok: true, direction, amount };
       })()
-    `, ownerWindow);
+    `,
+      ownerWindow,
+    );
     if (!result?.ok) throw new Error(result?.error ?? 'Scroll failed.');
     return `Scrolled ${direction}${['top', 'bottom'].includes(direction) ? '' : ` by ${amount}px`}.`;
   }
@@ -653,7 +682,10 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   async function browserScreenshot(params = {}, ownerWindow = null) {
     const webContents = await getPageWebContents(ownerWindow);
     const image = await webContents.capturePage();
-    const directory = path.join(rootDirectory ? getWritableDataDirectory(rootDirectory) : os.tmpdir(), 'Screenshots');
+    const directory = path.join(
+      rootDirectory ? getWritableDataDirectory(rootDirectory) : os.tmpdir(),
+      'Screenshots',
+    );
     await mkdir(directory, { recursive: true });
     const filePath = path.join(directory, safeScreenshotName(params.file_name ?? params.fileName));
     await writeFile(filePath, image.toPNG());
@@ -808,6 +840,6 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       sessionConfigured = false;
       emitState();
       return getState();
-    }
+    },
   };
 }

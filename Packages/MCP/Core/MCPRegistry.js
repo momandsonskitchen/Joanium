@@ -49,7 +49,7 @@ class MCPSession extends EventEmitter {
     return this.request('initialize', {
       protocolVersion: PROTOCOL_VERSION,
       capabilities: { tools: {}, resources: {} },
-      clientInfo: CLIENT_INFO
+      clientInfo: CLIENT_INFO,
     });
   }
 
@@ -80,7 +80,7 @@ class StdioMCPSession extends MCPSession {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env, ...env },
       shell: process.platform === 'win32',
-      windowsHide: true
+      windowsHide: true,
     });
 
     createInterface({ input: this.process.stdout }).on('line', (line) => {
@@ -132,9 +132,9 @@ class HttpMCPSession extends MCPSession {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json'
+        Accept: 'application/json',
       },
-      body: JSON.stringify({ jsonrpc: '2.0', id, method, params })
+      body: JSON.stringify({ jsonrpc: '2.0', id, method, params }),
     });
 
     if (!response.ok) {
@@ -180,7 +180,7 @@ export function createMCPRegistry() {
         session = new StdioMCPSession({
           command: config.command,
           args: config.args ?? [],
-          env: config.env ?? {}
+          env: config.env ?? {},
         });
       }
 
@@ -192,8 +192,8 @@ export function createMCPRegistry() {
         meta: {
           id: config.id,
           name: config.name,
-          transport: config.transport
-        }
+          transport: config.transport,
+        },
       });
 
       return { tools, toolCount: tools.length };
@@ -219,7 +219,7 @@ export function createMCPRegistry() {
     listConnected() {
       return [...servers.values()].map((entry) => ({
         ...entry.meta,
-        toolCount: entry.tools.length
+        toolCount: entry.tools.length,
       }));
     },
 
@@ -228,8 +228,8 @@ export function createMCPRegistry() {
         entry.tools.map((tool) => ({
           ...tool,
           serverId,
-          serverName: entry.meta.name
-        }))
+          serverName: entry.meta.name,
+        })),
       );
     },
 
@@ -239,6 +239,6 @@ export function createMCPRegistry() {
       const hasTool = entry.tools.some((tool) => tool.name === toolName);
       if (!hasTool) throw new Error(`MCP tool "${toolName}" was not found.`);
       return renderToolResult(await entry.session.callTool(toolName, args));
-    }
+    },
   };
 }

@@ -22,23 +22,23 @@ export function createDefaultUserState() {
       dateOfBirth: {
         day: '',
         month: '',
-        year: ''
-      }
+        year: '',
+      },
     },
     customInstructions: '',
     providers: {
       selected: [],
-      details: {}
+      details: {},
     },
     connectors: {
-      details: {}
+      details: {},
     },
     usageModes: [],
     activePersona: { ...DEFAULT_ACTIVE_PERSONA },
     windowState: {
       bounds: { width: 1460, height: 960, x: null, y: null },
       isMaximized: true,
-      isFullScreen: false
+      isFullScreen: false,
     },
     appSettings: {
       runOnStartup: false,
@@ -46,12 +46,12 @@ export function createDefaultUserState() {
       keepAwake: false,
       completionSound: true,
       defaultView: 'chat',
-      defaultModel: null
+      defaultModel: null,
     },
     theme: {
       mode: 'system',
-      motion: 'full'
-    }
+      motion: 'full',
+    },
   };
 }
 
@@ -64,39 +64,50 @@ export function mergeUserStates(baseState, nextState = {}) {
       ...(nextState.profile ?? {}),
       dateOfBirth: {
         ...baseState.profile.dateOfBirth,
-        ...(nextState.profile?.dateOfBirth ?? {})
-      }
+        ...(nextState.profile?.dateOfBirth ?? {}),
+      },
     },
     providers: {
       ...baseState.providers,
       ...(nextState.providers ?? {}),
       details: {
         ...baseState.providers.details,
-        ...(nextState.providers?.details ?? {})
-      }
+        ...(nextState.providers?.details ?? {}),
+      },
     },
     connectors: {
       ...baseState.connectors,
       ...(nextState.connectors ?? {}),
       details: {
         ...baseState.connectors.details,
-        ...(nextState.connectors?.details ?? {})
-      }
+        ...(nextState.connectors?.details ?? {}),
+      },
     },
-    customInstructions: nextState.customInstructions !== undefined
-      ? nextState.customInstructions
-      : baseState.customInstructions,
+    customInstructions:
+      nextState.customInstructions !== undefined
+        ? nextState.customInstructions
+        : baseState.customInstructions,
     usageModes: Array.isArray(nextState.usageModes) ? nextState.usageModes : baseState.usageModes,
-    activePersona: nextState.activePersona !== undefined ? nextState.activePersona : baseState.activePersona,
-    windowState: (nextState.windowState !== undefined && nextState.windowState !== null && typeof nextState.windowState === 'object')
-      ? { ...baseState.windowState, ...nextState.windowState }
-      : baseState.windowState,
-    appSettings: (nextState.appSettings !== undefined && nextState.appSettings !== null && typeof nextState.appSettings === 'object')
-      ? { ...baseState.appSettings, ...nextState.appSettings }
-      : baseState.appSettings,
-    theme: (nextState.theme !== undefined && nextState.theme !== null && typeof nextState.theme === 'object')
-      ? { ...baseState.theme, ...nextState.theme }
-      : baseState.theme
+    activePersona:
+      nextState.activePersona !== undefined ? nextState.activePersona : baseState.activePersona,
+    windowState:
+      nextState.windowState !== undefined &&
+      nextState.windowState !== null &&
+      typeof nextState.windowState === 'object'
+        ? { ...baseState.windowState, ...nextState.windowState }
+        : baseState.windowState,
+    appSettings:
+      nextState.appSettings !== undefined &&
+      nextState.appSettings !== null &&
+      typeof nextState.appSettings === 'object'
+        ? { ...baseState.appSettings, ...nextState.appSettings }
+        : baseState.appSettings,
+    theme:
+      nextState.theme !== undefined &&
+      nextState.theme !== null &&
+      typeof nextState.theme === 'object'
+        ? { ...baseState.theme, ...nextState.theme }
+        : baseState.theme,
   };
 }
 
@@ -118,7 +129,7 @@ function sanitizeAvatarPath(candidate) {
 function sanitizeActivePersona(candidate) {
   if (!candidate || typeof candidate !== 'object') return { ...DEFAULT_ACTIVE_PERSONA };
   const namespace = sanitizeString(candidate.namespace);
-  const filename  = sanitizeString(candidate.filename);
+  const filename = sanitizeString(candidate.filename);
   if (!namespace || !filename) return { ...DEFAULT_ACTIVE_PERSONA };
   return { namespace, filename };
 }
@@ -178,30 +189,40 @@ function sanitizeConnectorDetails(details) {
 function sanitizeWindowState(candidate) {
   const defaults = createDefaultUserState().windowState;
   if (!candidate || typeof candidate !== 'object') return defaults;
-  const bounds = (candidate.bounds && typeof candidate.bounds === 'object') ? candidate.bounds : defaults.bounds;
+  const bounds =
+    candidate.bounds && typeof candidate.bounds === 'object' ? candidate.bounds : defaults.bounds;
   return {
     bounds: {
       width: Number.isFinite(bounds.width) ? bounds.width : defaults.bounds.width,
       height: Number.isFinite(bounds.height) ? bounds.height : defaults.bounds.height,
       x: Number.isFinite(bounds.x) ? bounds.x : defaults.bounds.x,
-      y: Number.isFinite(bounds.y) ? bounds.y : defaults.bounds.y
+      y: Number.isFinite(bounds.y) ? bounds.y : defaults.bounds.y,
     },
     isMaximized: Boolean(candidate.isMaximized ?? defaults.isMaximized),
-    isFullScreen: Boolean(candidate.isFullScreen ?? defaults.isFullScreen)
+    isFullScreen: Boolean(candidate.isFullScreen ?? defaults.isFullScreen),
   };
 }
 
 const VALID_DEFAULT_VIEWS = new Set([
-  'chat', 'history', 'projects', 'agents', 'skills',
-  'personas', 'marketplace', 'events', 'usage'
+  'chat',
+  'history',
+  'projects',
+  'agents',
+  'skills',
+  'personas',
+  'marketplace',
+  'events',
+  'usage',
 ]);
 
 function sanitizeDefaultModel(candidate) {
   if (
     candidate &&
     typeof candidate === 'object' &&
-    typeof candidate.providerId === 'string' && candidate.providerId.trim() &&
-    typeof candidate.modelId === 'string' && candidate.modelId.trim()
+    typeof candidate.providerId === 'string' &&
+    candidate.providerId.trim() &&
+    typeof candidate.modelId === 'string' &&
+    candidate.modelId.trim()
   ) {
     return { providerId: candidate.providerId.trim(), modelId: candidate.modelId.trim() };
   }
@@ -213,12 +234,16 @@ function sanitizeAppSettings(candidate) {
   if (!candidate || typeof candidate !== 'object') return defaults;
   const rawView = candidate.defaultView ?? candidate.default_view ?? defaults.defaultView;
   return {
-    runOnStartup: Boolean(candidate.runOnStartup ?? candidate.run_on_startup ?? defaults.runOnStartup),
+    runOnStartup: Boolean(
+      candidate.runOnStartup ?? candidate.run_on_startup ?? defaults.runOnStartup,
+    ),
     systemTray: Boolean(candidate.systemTray ?? candidate.system_tray ?? defaults.systemTray),
     keepAwake: Boolean(candidate.keepAwake ?? candidate.keep_awake ?? defaults.keepAwake),
-    completionSound: Boolean(candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound),
+    completionSound: Boolean(
+      candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound,
+    ),
     defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView,
-    defaultModel: sanitizeDefaultModel(candidate.defaultModel)
+    defaultModel: sanitizeDefaultModel(candidate.defaultModel),
   };
 }
 
@@ -230,7 +255,7 @@ function sanitizeTheme(candidate) {
   if (!candidate || typeof candidate !== 'object') return defaults;
   return {
     mode: THEME_MODES.has(candidate.mode) ? candidate.mode : defaults.mode,
-    motion: MOTION_MODES.has(candidate.motion) ? candidate.motion : defaults.motion
+    motion: MOTION_MODES.has(candidate.motion) ? candidate.motion : defaults.motion,
   };
 }
 
@@ -251,22 +276,24 @@ export function sanitizeIncomingUserState(candidateState) {
       dateOfBirth: {
         day: sanitizeString(candidateState?.profile?.dateOfBirth?.day),
         month: sanitizeString(candidateState?.profile?.dateOfBirth?.month),
-        year: sanitizeString(candidateState?.profile?.dateOfBirth?.year)
-      }
+        year: sanitizeString(candidateState?.profile?.dateOfBirth?.year),
+      },
     },
-    customInstructions: sanitizeString(candidateState?.customInstructions ?? candidateState?.custom_instructions),
+    customInstructions: sanitizeString(
+      candidateState?.customInstructions ?? candidateState?.custom_instructions,
+    ),
     providers: {
       selected: sanitizeArray(candidateState?.providers?.selected),
-      details: sanitizeDetails(candidateState?.providers?.details)
+      details: sanitizeDetails(candidateState?.providers?.details),
     },
     connectors: {
-      details: sanitizeConnectorDetails(candidateState?.connectors?.details)
+      details: sanitizeConnectorDetails(candidateState?.connectors?.details),
     },
     usageModes: sanitizeArray(candidateState?.usageModes),
     activePersona: sanitizeActivePersona(candidateState?.activePersona),
     windowState: sanitizeWindowState(candidateState?.windowState),
     appSettings: sanitizeAppSettings(candidateState?.appSettings),
-    theme: sanitizeTheme(candidateState?.theme)
+    theme: sanitizeTheme(candidateState?.theme),
   });
 }
 

@@ -12,7 +12,7 @@ function getTrayIconPath(rootDirectory) {
 function getTargetWindow() {
   return lastWindow && !lastWindow.isDestroyed()
     ? lastWindow
-    : BrowserWindow.getAllWindows().find((windowRef) => !windowRef.isDestroyed()) ?? null;
+    : (BrowserWindow.getAllWindows().find((windowRef) => !windowRef.isDestroyed()) ?? null);
 }
 
 function showWindow() {
@@ -35,20 +35,22 @@ export function enableTray(rootDirectory, windowRef = null) {
 
   tray = new Tray(getTrayIconPath(rootDirectory));
   tray.setToolTip('Joanium');
-  tray.setContextMenu(Menu.buildFromTemplate([
-    {
-      label: 'Show Joanium',
-      click: showWindow
-    },
-    { type: 'separator' },
-    {
-      label: 'Quit',
-      click: () => {
-        disableTray();
-        app.quit();
-      }
-    }
-  ]));
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      {
+        label: 'Show Joanium',
+        click: showWindow,
+      },
+      { type: 'separator' },
+      {
+        label: 'Quit',
+        click: () => {
+          disableTray();
+          app.quit();
+        },
+      },
+    ]),
+  );
   tray.on('double-click', showWindow);
 }
 

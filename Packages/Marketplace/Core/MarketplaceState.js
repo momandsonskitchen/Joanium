@@ -22,13 +22,13 @@ export function createMarketplaceStateManager({ rootDirectory }) {
    */
   async function installItem({ type, publisher, filename, markdown }) {
     const safePublisher = sanitizePathSegment(publisher);
-    const safeFilename  = sanitizeMarkdownFilename(filename);
+    const safeFilename = sanitizeMarkdownFilename(filename);
 
     if (!safePublisher) throw new Error('Invalid publisher name.');
-    if (!safeFilename)  throw new Error('Invalid filename.');
+    if (!safeFilename) throw new Error('Invalid filename.');
 
-    const root   = type === 'personas' ? 'Personas' : 'Skills';
-    const dir    = path.join(getWritableResourceDirectory(rootDirectory, root), safePublisher);
+    const root = type === 'personas' ? 'Personas' : 'Skills';
+    const dir = path.join(getWritableResourceDirectory(rootDirectory, root), safePublisher);
     const filePath = path.join(dir, safeFilename);
 
     await mkdir(dir, { recursive: true });

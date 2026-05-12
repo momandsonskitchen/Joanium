@@ -36,22 +36,24 @@ export function mountLockScreen(strings, initialStatus) {
 
     // ── Overlay ───────────────────────────────────────────────────────────
     const overlay = createElement('div', 'lock-screen');
-    const card    = createElement('div', 'lock-screen__card');
+    const card = createElement('div', 'lock-screen__card');
 
     // ── Avatar ────────────────────────────────────────────────────────────
     const avatar = createElement('div', 'lock-screen__avatar');
-    avatar.append(makeSvg(`
+    avatar.append(
+      makeSvg(`
       <rect x="3" y="11" width="18" height="11" rx="2"/>
       <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-    `));
+    `),
+    );
 
     // ── Text ──────────────────────────────────────────────────────────────
-    const titleEl    = createElement('h1', 'lock-screen__title', strings.lockTitle);
-    const subtitleEl = createElement('p',  'lock-screen__subtitle', strings.lockSubtitle);
+    const titleEl = createElement('h1', 'lock-screen__title', strings.lockTitle);
+    const subtitleEl = createElement('p', 'lock-screen__subtitle', strings.lockSubtitle);
 
     // ── Rate-limit banner ─────────────────────────────────────────────────
-    const rateLimitBanner   = createElement('div', 'lock-screen__rate-limit');
-    rateLimitBanner.hidden  = true;
+    const rateLimitBanner = createElement('div', 'lock-screen__rate-limit');
+    rateLimitBanner.hidden = true;
 
     function startCountdown(lockedUntil) {
       clearInterval(countdownInterval);
@@ -62,13 +64,13 @@ export function mountLockScreen(strings, initialStatus) {
         if (remaining <= 0) {
           clearInterval(countdownInterval);
           rateLimitBanner.hidden = true;
-          unlockBtn.disabled     = false;
-          answerBtn.disabled     = false;
+          unlockBtn.disabled = false;
+          answerBtn.disabled = false;
           return;
         }
         rateLimitBanner.textContent = strings.lockRateLimitMsg.replace(
           '{time}',
-          formatCountdown(remaining)
+          formatCountdown(remaining),
         );
         unlockBtn.disabled = true;
         answerBtn.disabled = true;
@@ -81,45 +83,63 @@ export function mountLockScreen(strings, initialStatus) {
     // ── Password section ──────────────────────────────────────────────────
     const passwordSection = createElement('div', 'lock-screen__section');
 
-    const passwordWrap  = createElement('div', 'lock-screen__input-wrap');
+    const passwordWrap = createElement('div', 'lock-screen__input-wrap');
     const passwordInput = createElement('input', 'lock-screen__input');
-    passwordInput.type         = 'password';
-    passwordInput.placeholder  = strings.lockPasswordPlaceholder;
+    passwordInput.type = 'password';
+    passwordInput.placeholder = strings.lockPasswordPlaceholder;
     passwordInput.autocomplete = 'current-password';
     passwordWrap.append(passwordInput);
 
-    const passwordError   = createElement('p', 'lock-screen__error');
-    passwordError.hidden  = true;
+    const passwordError = createElement('p', 'lock-screen__error');
+    passwordError.hidden = true;
 
-    const unlockBtn = createElement('button', 'lock-screen__btn lock-screen__btn--primary', strings.lockUnlockBtn);
-    unlockBtn.type  = 'button';
+    const unlockBtn = createElement(
+      'button',
+      'lock-screen__btn lock-screen__btn--primary',
+      strings.lockUnlockBtn,
+    );
+    unlockBtn.type = 'button';
 
-    const forgotBtn = createElement('button', 'lock-screen__btn lock-screen__btn--ghost', strings.lockForgotBtn);
-    forgotBtn.type  = 'button';
+    const forgotBtn = createElement(
+      'button',
+      'lock-screen__btn lock-screen__btn--ghost',
+      strings.lockForgotBtn,
+    );
+    forgotBtn.type = 'button';
 
     passwordSection.append(passwordWrap, passwordError, unlockBtn, forgotBtn);
 
     // ── Secret-question section ───────────────────────────────────────────
-    const answerSection  = createElement('div', 'lock-screen__section');
+    const answerSection = createElement('div', 'lock-screen__section');
 
-    const questionLabel  = createElement('p', 'lock-screen__question-label',
-      initialStatus.secretQuestion ?? ''
+    const questionLabel = createElement(
+      'p',
+      'lock-screen__question-label',
+      initialStatus.secretQuestion ?? '',
     );
 
-    const answerWrap  = createElement('div', 'lock-screen__input-wrap');
+    const answerWrap = createElement('div', 'lock-screen__input-wrap');
     const answerInput = createElement('input', 'lock-screen__input');
-    answerInput.type        = 'text';
+    answerInput.type = 'text';
     answerInput.placeholder = strings.lockAnswerPlaceholder;
     answerWrap.append(answerInput);
 
-    const answerError   = createElement('p', 'lock-screen__error');
-    answerError.hidden  = true;
+    const answerError = createElement('p', 'lock-screen__error');
+    answerError.hidden = true;
 
-    const answerBtn = createElement('button', 'lock-screen__btn lock-screen__btn--primary', strings.lockAnswerBtn);
-    answerBtn.type  = 'button';
+    const answerBtn = createElement(
+      'button',
+      'lock-screen__btn lock-screen__btn--primary',
+      strings.lockAnswerBtn,
+    );
+    answerBtn.type = 'button';
 
-    const backBtn   = createElement('button', 'lock-screen__btn lock-screen__btn--ghost', strings.lockBackBtn);
-    backBtn.type    = 'button';
+    const backBtn = createElement(
+      'button',
+      'lock-screen__btn lock-screen__btn--ghost',
+      strings.lockBackBtn,
+    );
+    backBtn.type = 'button';
 
     answerSection.append(questionLabel, answerWrap, answerError, answerBtn, backBtn);
     answerSection.hidden = true;
@@ -128,19 +148,19 @@ export function mountLockScreen(strings, initialStatus) {
 
     forgotBtn.addEventListener('click', () => {
       passwordSection.hidden = true;
-      answerSection.hidden   = false;
-      passwordError.hidden   = true;
-      answerInput.value      = '';
-      answerError.hidden     = true;
+      answerSection.hidden = false;
+      passwordError.hidden = true;
+      answerInput.value = '';
+      answerError.hidden = true;
       requestAnimationFrame(() => answerInput.focus());
     });
 
     backBtn.addEventListener('click', () => {
-      answerSection.hidden   = true;
+      answerSection.hidden = true;
       passwordSection.hidden = false;
-      answerError.hidden     = true;
-      passwordInput.value    = '';
-      passwordError.hidden   = true;
+      answerError.hidden = true;
+      passwordInput.value = '';
+      passwordError.hidden = true;
       requestAnimationFrame(() => passwordInput.focus());
     });
 
@@ -150,7 +170,7 @@ export function mountLockScreen(strings, initialStatus) {
       const pw = passwordInput.value;
       if (!pw) return;
 
-      unlockBtn.disabled   = true;
+      unlockBtn.disabled = true;
       passwordError.hidden = true;
 
       try {
@@ -166,13 +186,13 @@ export function mountLockScreen(strings, initialStatus) {
           startCountdown(result.lockedUntil);
         } else {
           passwordError.textContent = strings.lockWrongPassword;
-          passwordError.hidden      = false;
-          passwordInput.value       = '';
+          passwordError.hidden = false;
+          passwordInput.value = '';
           passwordInput.focus();
         }
       } catch {
         passwordError.textContent = strings.lockWrongPassword;
-        passwordError.hidden      = false;
+        passwordError.hidden = false;
       } finally {
         if (rateLimitBanner.hidden) {
           unlockBtn.disabled = false;
@@ -204,12 +224,12 @@ export function mountLockScreen(strings, initialStatus) {
         }
 
         answerError.textContent = strings.lockWrongAnswer;
-        answerError.hidden      = false;
-        answerInput.value       = '';
+        answerError.hidden = false;
+        answerInput.value = '';
         answerInput.focus();
       } catch {
         answerError.textContent = strings.lockWrongAnswer;
-        answerError.hidden      = false;
+        answerError.hidden = false;
       } finally {
         answerBtn.disabled = false;
       }
@@ -222,14 +242,7 @@ export function mountLockScreen(strings, initialStatus) {
 
     // ── Assemble ──────────────────────────────────────────────────────────
 
-    card.append(
-      avatar,
-      titleEl,
-      subtitleEl,
-      rateLimitBanner,
-      passwordSection,
-      answerSection
-    );
+    card.append(avatar, titleEl, subtitleEl, rateLimitBanner, passwordSection, answerSection);
     overlay.append(card);
     document.body.append(overlay);
 

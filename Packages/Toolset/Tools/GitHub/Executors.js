@@ -8,6 +8,6 @@ export function createGitHubConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeGithubChatTool
+    executeTool: executeGithubChatTool,
   });
 }

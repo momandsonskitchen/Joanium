@@ -53,7 +53,7 @@
 
 .connectors-card--connected {
   box-shadow:
-    inset 0 0 0 1px rgba(76, 163, 112, 0.20),
+    inset 0 0 0 1px rgba(76, 163, 112, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.84),
     0 14px 32px rgba(70, 135, 90, 0.08);
 }
@@ -72,7 +72,7 @@
   border-radius: 15px;
   color: var(--color-chat-text-secondary);
   background: rgba(255, 255, 255, 0.58);
-  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.1);
   font-size: 12px;
   line-height: 1.45;
 }
@@ -103,7 +103,7 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.72);
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     0 4px 12px rgba(80, 60, 45, 0.08);
 }
 
@@ -159,7 +159,7 @@
   white-space: nowrap;
   color: var(--color-chat-text-muted);
   background: rgba(255, 255, 255, 0.66);
-  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.1);
 }
 
 .connectors-card__status--active {

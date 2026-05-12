@@ -9,11 +9,11 @@ const en = {
   avatarRandom: 'Random',
   scheduleLabel: 'When to run',
   scheduleTypes: {
-    startup:  'On app startup',
-    daily:    'Every day',
-    weekly:   'Every week',
+    startup: 'On app startup',
+    daily: 'Every day',
+    weekly: 'Every week',
     weekdays: 'Every weekday',
-    weekends: 'Every weekend'
+    weekends: 'Every weekend',
   },
   timeLabel: 'At what time',
   timePlaceholder: '09:00',
@@ -25,12 +25,12 @@ const en = {
     3: 'Wednesday',
     4: 'Thursday',
     5: 'Friday',
-    6: 'Saturday'
+    6: 'Saturday',
   },
   modelLabel: 'Model',
   modelDefault: 'Use default model',
   promptLabel: 'Prompt',
-  promptPlaceholder: 'Write a short summary of today\'s tasks and send it to me.',
+  promptPlaceholder: "Write a short summary of today's tasks and send it to me.",
   save: 'Save Agent',
   update: 'Update Agent',
   cancel: 'Cancel',
@@ -51,10 +51,11 @@ const en = {
   scheduleWeekdays: 'Every weekday at {time}',
   scheduleWeekends: 'Every weekend at {time}',
   gateway: {
-    agentContext: 'You are an autonomous Joanium agent running a scheduled task. You have full agentic capabilities: terminal tools, live browser tools, connector tools, memory context, and MCP-backed tools. Use tools whenever they help you complete the task, then return a clear result.',
-    errorPrefix:  'Agent encountered an error: {message}',
-    noProvider:   'No AI provider is configured. Open Settings and add a provider first.'
-  }
+    agentContext:
+      'You are an autonomous Joanium agent running a scheduled task. You have full agentic capabilities: terminal tools, live browser tools, connector tools, memory context, and MCP-backed tools. Use tools whenever they help you complete the task, then return a clear result.',
+    errorPrefix: 'Agent encountered an error: {message}',
+    noProvider: 'No AI provider is configured. Open Settings and add a provider first.',
+  },
 };
 
 export default en;

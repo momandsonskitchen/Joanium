@@ -8,12 +8,12 @@
 const en = {
   panel: {
     groups: {
-      actions:    'Actions',
-      modes:      'Modes',
-      navigation: 'Navigation'
+      actions: 'Actions',
+      modes: 'Modes',
+      navigation: 'Navigation',
     },
-    empty: 'No slash commands registered.'
-  }
+    empty: 'No slash commands registered.',
+  },
 };
 
 export default en;

@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createLinearToolHandlers({ rootDirectory }),
-      ...createLinearConnectorToolHandlers({ rootDirectory })
+      ...createLinearConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildLinearPromptSection()]
+    promptSections: [buildLinearPromptSection()],
   };
 }
 

@@ -8,7 +8,7 @@ export async function createPackage({ rootDirectory }) {
   const usesOverlayControls = process.platform !== 'darwin';
   const overlayOptions = {
     height: 48,
-    color: '#00000000'
+    color: '#00000000',
   };
 
   if (process.platform === 'win32') {
@@ -38,14 +38,14 @@ export async function createPackage({ rootDirectory }) {
       'Security',
       'Themes',
       'MCP',
-      'Providers'
+      'Providers',
     ],
     rendererPath: path.join(shellDirectory, 'UI', 'App.html'),
     preloadPath: path.join(shellDirectory, 'UI', 'Preload.js'),
     window: {
       title: 'Joanium',
       titleBarStyle: 'hidden',
-      ...(usesOverlayControls ? { titleBarOverlay: overlayOptions } : {})
+      ...(usesOverlayControls ? { titleBarOverlay: overlayOptions } : {}),
     },
     ipcHandlers: [
       {
@@ -53,8 +53,8 @@ export async function createPackage({ rootDirectory }) {
         handler: async () => {
           const user = await readUserState(rootDirectory);
           return { user };
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 }

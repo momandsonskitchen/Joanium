@@ -5,7 +5,7 @@ const en = {
     active: 'Active channels',
     configured: 'Configured',
     total: 'Available channels',
-    empty: 'No channel is connected yet.'
+    empty: 'No channel is connected yet.',
   },
   history: {
     title: 'Reply history',
@@ -14,14 +14,16 @@ const en = {
     clear: 'Clear',
     delete: 'Delete',
     success: 'Sent',
-    error: 'Error'
+    error: 'Error',
   },
   gateway: {
     noProvider: 'No AI provider is configured yet. Open Joanium settings and add a provider first.',
     timeout: 'Sorry, the response took too long. Please try again.',
     errorPrefix: 'Sorry, something went wrong: {message}',
-    channelContext: 'You are replying to {from} through {channel}. Keep the reply concise unless the request needs detail.',
-    agentContext: 'You have the same agentic capabilities as the main chat, including terminal tools, live browser tools, connector tools, memory context, and MCP-backed tools when available. Use tools when they are needed, then answer with the result.'
+    channelContext:
+      'You are replying to {from} through {channel}. Keep the reply concise unless the request needs detail.',
+    agentContext:
+      'You have the same agentic capabilities as the main chat, including terminal tools, live browser tools, connector tools, memory context, and MCP-backed tools when available. Use tools when they are needed, then answer with the result.',
   },
   common: {
     expand: 'Expand',
@@ -49,7 +51,7 @@ const en = {
     validationFailed: 'Validation failed.',
     saveFailed: 'Could not save the channel.',
     disconnectFailed: 'Could not disconnect the channel.',
-    toggleFailed: 'Could not update the channel state.'
+    toggleFailed: 'Could not update the channel state.',
   },
   feedback: {
     telegramConnected: 'Telegram is connected. Message your bot to test it.',
@@ -61,14 +63,14 @@ const en = {
     paused: 'Channel paused.',
     tokenVerified: 'Bot verified: {value}',
     accountVerified: 'Account verified: {value}',
-    slackVerified: 'Slack verified: {value}'
+    slackVerified: 'Slack verified: {value}',
   },
   fields: {
     botToken: 'Bot token',
     accountSid: 'Account SID',
     authToken: 'Auth token',
     sandboxNumber: 'Sandbox number',
-    channelId: 'Channel ID'
+    channelId: 'Channel ID',
   },
   placeholders: {
     telegramToken: '1234567890:ABCdef...',
@@ -78,7 +80,7 @@ const en = {
     discordToken: 'Your bot token',
     discordChannel: '123456789012345678',
     slackToken: 'xoxb-your-token',
-    slackChannel: 'C0123456789'
+    slackChannel: 'C0123456789',
   },
   channels: {
     telegram: {
@@ -88,8 +90,8 @@ const en = {
       steps: [
         'Open Telegram and message @BotFather.',
         'Create a bot with /newbot and copy the bot token.',
-        'Paste the token here, connect, then message your bot once.'
-      ]
+        'Paste the token here, connect, then message your bot once.',
+      ],
     },
     whatsapp: {
       name: 'WhatsApp',
@@ -99,8 +101,8 @@ const en = {
       steps: [
         'Create or open a Twilio sandbox.',
         'Copy the Account SID, Auth Token, and sandbox number.',
-        'Join the sandbox from your phone, then connect here.'
-      ]
+        'Join the sandbox from your phone, then connect here.',
+      ],
     },
     discord: {
       name: 'Discord',
@@ -109,8 +111,8 @@ const en = {
       steps: [
         'Create a Discord application and add a bot.',
         'Enable Message Content Intent for the bot.',
-        'Invite the bot with read and send permissions, then paste the channel ID.'
-      ]
+        'Invite the bot with read and send permissions, then paste the channel ID.',
+      ],
     },
     slack: {
       name: 'Slack',
@@ -119,10 +121,10 @@ const en = {
       steps: [
         'Create a Slack app with a bot user.',
         'Copy the Bot User OAuth Token.',
-        'Invite the bot to the channel, then paste the channel ID.'
-      ]
-    }
-  }
+        'Invite the bot to the channel, then paste the channel ID.',
+      ],
+    },
+  },
 };
 
 export default en;

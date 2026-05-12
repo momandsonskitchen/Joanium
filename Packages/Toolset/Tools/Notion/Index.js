@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createNotionToolHandlers({ rootDirectory }),
-      ...createNotionConnectorToolHandlers({ rootDirectory })
+      ...createNotionConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildNotionPromptSection()]
+    promptSections: [buildNotionPromptSection()],
   };
 }
 

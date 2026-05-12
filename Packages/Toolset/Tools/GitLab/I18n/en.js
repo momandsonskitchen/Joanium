@@ -11,23 +11,23 @@ const gitLabStrings = {
         label: 'Personal access token',
         placeholder: 'glpat-...',
         type: 'password',
-        required: true
+        required: true,
       },
       {
         key: 'baseUrl',
         label: 'GitLab base URL',
         placeholder: 'https://gitlab.com',
         type: 'text',
-        required: false
-      }
-    ]
+        required: false,
+      },
+    ],
   },
   tools: [
     {
       name: 'gitlab_get_current_user',
       description: 'Get the authenticated GitLab user.',
       category: 'gitlab',
-      parameters: {}
+      parameters: {},
     },
     {
       name: 'gitlab_list_projects',
@@ -35,16 +35,24 @@ const gitLabStrings = {
       category: 'gitlab',
       parameters: {
         query: { type: 'string', required: false, description: 'Optional project search query.' },
-        limit: { type: 'number', required: false, description: 'Maximum projects, default 20, max 50.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum projects, default 20, max 50.',
+        },
+      },
     },
     {
       name: 'gitlab_get_project',
       description: 'Get GitLab project metadata by numeric ID or full path.',
       category: 'gitlab',
       parameters: {
-        project: { type: 'string', required: true, description: 'Project ID or full path such as group/repo.' }
-      }
+        project: {
+          type: 'string',
+          required: true,
+          description: 'Project ID or full path such as group/repo.',
+        },
+      },
     },
     {
       name: 'gitlab_list_issues',
@@ -52,9 +60,17 @@ const gitLabStrings = {
       category: 'gitlab',
       parameters: {
         project: { type: 'string', required: true, description: 'Project ID or full path.' },
-        state: { type: 'string', required: false, description: 'opened, closed, or all. Defaults to opened.' },
-        limit: { type: 'number', required: false, description: 'Maximum issues, default 10, max 50.' }
-      }
+        state: {
+          type: 'string',
+          required: false,
+          description: 'opened, closed, or all. Defaults to opened.',
+        },
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum issues, default 10, max 50.',
+        },
+      },
     },
     {
       name: 'gitlab_list_merge_requests',
@@ -62,9 +78,17 @@ const gitLabStrings = {
       category: 'gitlab',
       parameters: {
         project: { type: 'string', required: true, description: 'Project ID or full path.' },
-        state: { type: 'string', required: false, description: 'opened, closed, merged, or all. Defaults to opened.' },
-        limit: { type: 'number', required: false, description: 'Maximum merge requests, default 10, max 50.' }
-      }
+        state: {
+          type: 'string',
+          required: false,
+          description: 'opened, closed, merged, or all. Defaults to opened.',
+        },
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum merge requests, default 10, max 50.',
+        },
+      },
     },
     {
       name: 'gitlab_get_file',
@@ -73,8 +97,12 @@ const gitLabStrings = {
       parameters: {
         project: { type: 'string', required: true, description: 'Project ID or full path.' },
         file_path: { type: 'string', required: true, description: 'Path inside the repository.' },
-        ref: { type: 'string', required: false, description: 'Branch, tag, or commit SHA. Defaults to main.' }
-      }
+        ref: {
+          type: 'string',
+          required: false,
+          description: 'Branch, tag, or commit SHA. Defaults to main.',
+        },
+      },
     },
     {
       name: 'gitlab_list_commits',
@@ -83,8 +111,12 @@ const gitLabStrings = {
       parameters: {
         project: { type: 'string', required: true, description: 'Project ID or full path.' },
         ref: { type: 'string', required: false, description: 'Optional branch or tag.' },
-        limit: { type: 'number', required: false, description: 'Maximum commits, default 10, max 50.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum commits, default 10, max 50.',
+        },
+      },
     },
     {
       name: 'gitlab_create_issue',
@@ -93,11 +125,15 @@ const gitLabStrings = {
       parameters: {
         project: { type: 'string', required: true, description: 'Project ID or full path.' },
         title: { type: 'string', required: true, description: 'Issue title.' },
-        description: { type: 'string', required: false, description: 'Issue description in Markdown.' },
-        labels: { type: 'string', required: false, description: 'Comma-separated labels.' }
-      }
-    }
-  ]
+        description: {
+          type: 'string',
+          required: false,
+          description: 'Issue description in Markdown.',
+        },
+        labels: { type: 'string', required: false, description: 'Comma-separated labels.' },
+      },
+    },
+  ],
 };
 
 export default gitLabStrings;

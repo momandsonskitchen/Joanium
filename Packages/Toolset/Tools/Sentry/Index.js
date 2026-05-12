@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createSentryToolHandlers({ rootDirectory }),
-      ...createSentryConnectorToolHandlers({ rootDirectory })
+      ...createSentryConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildSentryPromptSection()]
+    promptSections: [buildSentryPromptSection()],
   };
 }
 

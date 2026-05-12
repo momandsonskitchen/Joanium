@@ -2,7 +2,7 @@
    Skills/UI/SkillsPanel.css
    ══════════════════════════════════════════════════════════════════════ */
 
-@import "../../Shared/PanelHeader/PanelHeader.css";
+@import '../../Shared/PanelHeader/PanelHeader.css';
 
 .chat-skills {
   position: absolute;
@@ -49,7 +49,7 @@
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.58);
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
     0 10px 28px rgba(130, 95, 65, 0.07);
   backdrop-filter: blur(12px) saturate(1.4);
@@ -90,13 +90,13 @@
 }
 
 .chat-skills__card:hover {
-  background: rgba(255, 255, 255, 0.60);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .chat-skills__card--active {
-  background: rgba(255, 255, 255, 0.80);
+  background: rgba(255, 255, 255, 0.8);
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     0 4px 10px rgba(130, 95, 65, 0.07);
 }
 
@@ -203,8 +203,12 @@
   animation: chat-history-shimmer 1.4s ease-in-out infinite;
 }
 
-.chat-skills__skeleton:nth-child(2) { animation-delay: 0.12s; }
-.chat-skills__skeleton:nth-child(3) { animation-delay: 0.24s; }
+.chat-skills__skeleton:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.chat-skills__skeleton:nth-child(3) {
+  animation-delay: 0.24s;
+}
 
 /* Empty state */
 
@@ -253,7 +257,7 @@
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.58);
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
     0 10px 28px rgba(130, 95, 65, 0.07);
   backdrop-filter: blur(12px) saturate(1.4);

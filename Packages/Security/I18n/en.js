@@ -66,12 +66,12 @@ const en = {
   autoLockLabel: 'Auto-lock',
   autoLockDesc: 'Lock automatically after a period of inactivity.',
   autoLockNever: 'Never',
-  autoLock1Min:  '1 minute',
-  autoLock5Min:  '5 minutes',
+  autoLock1Min: '1 minute',
+  autoLock5Min: '5 minutes',
   autoLock10Min: '10 minutes',
   autoLock15Min: '15 minutes',
   autoLock30Min: '30 minutes',
-  autoLock1Hr:   '1 hour'
+  autoLock1Hr: '1 hour',
 };
 
 export default en;

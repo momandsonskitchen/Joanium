@@ -8,6 +8,6 @@ export function createLinearConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeLinearChatTool
+    executeTool: executeLinearChatTool,
   });
 }

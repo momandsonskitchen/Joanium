@@ -26,20 +26,20 @@ export async function getFreshCreds(credentials = {}) {
       client_id: clientId,
       client_secret: clientSecret,
       refresh_token: refreshToken,
-      grant_type: 'refresh_token'
-    })
+      grant_type: 'refresh_token',
+    }),
   });
 
   const data = await response.json().catch(() => null);
   if (!response.ok || !data?.access_token) {
     throw new Error(
-      `Google token refresh failed: ${data?.error_description ?? data?.error ?? response.statusText}`
+      `Google token refresh failed: ${data?.error_description ?? data?.error ?? response.statusText}`,
     );
   }
 
   tokenCache.set(cacheKey, {
     accessToken: data.access_token,
-    expiresAt: Date.now() + ((data.expires_in ?? 3600) * 1000) - 60_000
+    expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000 - 60_000,
   });
 
   return { ...credentials, accessToken: data.access_token };

@@ -27,7 +27,7 @@ const en = {
   show: 'Show credential',
   hide: 'Hide credential',
   expand: 'Expand',
-  collapse: 'Collapse'
+  collapse: 'Collapse',
 };
 
 export default en;

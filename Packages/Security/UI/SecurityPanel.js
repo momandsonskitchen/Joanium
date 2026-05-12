@@ -7,7 +7,7 @@ import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
 
 function showFeedback(el, text, isError = false) {
   el.textContent = text;
-  el.className   = isError
+  el.className = isError
     ? 'security-panel__feedback security-panel__feedback--error'
     : 'security-panel__feedback security-panel__feedback--ok';
   el.hidden = !text;
@@ -15,7 +15,7 @@ function showFeedback(el, text, isError = false) {
 
 function clearFeedback(el) {
   el.textContent = '';
-  el.hidden      = true;
+  el.hidden = true;
 }
 
 function capitalise(str) {
@@ -26,12 +26,15 @@ function capitalise(str) {
 // ── Status badge ──────────────────────────────────────────────────────────────
 
 function buildStatusBadge(enabled, strings) {
-  const badge  = createElement('div',
-    `security-panel__status-badge${enabled ? ' security-panel__status-badge--on' : ''}`
+  const badge = createElement(
+    'div',
+    `security-panel__status-badge${enabled ? ' security-panel__status-badge--on' : ''}`,
   );
-  const dot    = createElement('span', 'security-panel__status-dot');
-  const textEl = createElement('span', 'security-panel__status-text',
-    enabled ? strings.statusEnabled : strings.statusDisabled
+  const dot = createElement('span', 'security-panel__status-dot');
+  const textEl = createElement(
+    'span',
+    'security-panel__status-text',
+    enabled ? strings.statusEnabled : strings.statusDisabled,
   );
   badge.append(dot, textEl);
   return badge;
@@ -41,12 +44,12 @@ function buildStatusBadge(enabled, strings) {
 
 const TIMEOUT_OPTIONS = [
   { value: 'never', labelKey: 'autoLockNever' },
-  { value: '1min',  labelKey: 'autoLock1Min'  },
-  { value: '5min',  labelKey: 'autoLock5Min'  },
+  { value: '1min', labelKey: 'autoLock1Min' },
+  { value: '5min', labelKey: 'autoLock5Min' },
   { value: '10min', labelKey: 'autoLock10Min' },
   { value: '15min', labelKey: 'autoLock15Min' },
   { value: '30min', labelKey: 'autoLock30Min' },
-  { value: '1hr',   labelKey: 'autoLock1Hr'   },
+  { value: '1hr', labelKey: 'autoLock1Hr' },
 ];
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -63,66 +66,114 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
     body.replaceChildren();
 
     // Top card — status + description + enable button
-    const topCard   = createElement('div', 'security-panel__card');
-    const badge     = buildStatusBadge(false, strings);
-    const desc      = createElement('p', 'security-panel__desc', strings.statusDisabledDesc);
-    const enableBtn = createElement('button', 'security-panel__btn security-panel__btn--primary', strings.enableBtn);
-    enableBtn.type  = 'button';
+    const topCard = createElement('div', 'security-panel__card');
+    const badge = buildStatusBadge(false, strings);
+    const desc = createElement('p', 'security-panel__desc', strings.statusDisabledDesc);
+    const enableBtn = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--primary',
+      strings.enableBtn,
+    );
+    enableBtn.type = 'button';
     topCard.append(badge, desc, enableBtn);
     body.append(topCard);
 
     // Inline enable form (shown in a separate card below)
-    const formCard  = createElement('div', 'security-panel__card security-panel__card--form');
+    const formCard = createElement('div', 'security-panel__card security-panel__card--form');
     formCard.hidden = true;
 
-    const formTitle   = createElement('p', 'security-panel__form-title', strings.setupTitle);
-    const passwordBox = createInputBoxLite({ label: strings.newPasswordLabel,     placeholder: strings.newPasswordPlaceholder,     type: 'password' });
-    const confirmBox  = createInputBoxLite({ label: strings.confirmPasswordLabel,  placeholder: strings.confirmPasswordPlaceholder,  type: 'password' });
-    const questionBox = createInputBoxLite({ label: strings.secretQuestionLabel,   placeholder: strings.secretQuestionPlaceholder,   type: 'text'     });
-    const answerBox   = createInputBoxLite({ label: strings.secretAnswerLabel,     placeholder: strings.secretAnswerPlaceholder,     type: 'password' });
+    const formTitle = createElement('p', 'security-panel__form-title', strings.setupTitle);
+    const passwordBox = createInputBoxLite({
+      label: strings.newPasswordLabel,
+      placeholder: strings.newPasswordPlaceholder,
+      type: 'password',
+    });
+    const confirmBox = createInputBoxLite({
+      label: strings.confirmPasswordLabel,
+      placeholder: strings.confirmPasswordPlaceholder,
+      type: 'password',
+    });
+    const questionBox = createInputBoxLite({
+      label: strings.secretQuestionLabel,
+      placeholder: strings.secretQuestionPlaceholder,
+      type: 'text',
+    });
+    const answerBox = createInputBoxLite({
+      label: strings.secretAnswerLabel,
+      placeholder: strings.secretAnswerPlaceholder,
+      type: 'password',
+    });
 
-    const feedback  = createElement('p', 'security-panel__feedback');
+    const feedback = createElement('p', 'security-panel__feedback');
     feedback.hidden = true;
 
     const formActions = createElement('div', 'security-panel__form-actions');
-    const submitBtn   = createElement('button', 'security-panel__btn security-panel__btn--primary', strings.enableConfirmBtn);
-    submitBtn.type    = 'button';
-    const cancelBtn   = createElement('button', 'security-panel__btn security-panel__btn--ghost',   strings.cancelBtn);
-    cancelBtn.type    = 'button';
+    const submitBtn = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--primary',
+      strings.enableConfirmBtn,
+    );
+    submitBtn.type = 'button';
+    const cancelBtn = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--ghost',
+      strings.cancelBtn,
+    );
+    cancelBtn.type = 'button';
     formActions.append(submitBtn, cancelBtn);
 
-    formCard.append(formTitle, passwordBox.element, confirmBox.element, questionBox.element, answerBox.element, feedback, formActions);
+    formCard.append(
+      formTitle,
+      passwordBox.element,
+      confirmBox.element,
+      questionBox.element,
+      answerBox.element,
+      feedback,
+      formActions,
+    );
     body.append(formCard);
 
     // Show form
     enableBtn.addEventListener('click', () => {
-      formCard.hidden  = false;
+      formCard.hidden = false;
       enableBtn.hidden = true;
       requestAnimationFrame(() => passwordBox.input.focus());
     });
 
     // Hide form
     cancelBtn.addEventListener('click', () => {
-      formCard.hidden  = true;
+      formCard.hidden = true;
       enableBtn.hidden = false;
       passwordBox.input.value = '';
-      confirmBox.input.value  = '';
+      confirmBox.input.value = '';
       questionBox.input.value = '';
-      answerBox.input.value   = '';
+      answerBox.input.value = '';
       clearFeedback(feedback);
     });
 
     // Submit
     submitBtn.addEventListener('click', async () => {
       const password = passwordBox.input.value;
-      const confirm  = confirmBox.input.value;
+      const confirm = confirmBox.input.value;
       const question = questionBox.input.value.trim();
-      const answer   = answerBox.input.value.trim();
+      const answer = answerBox.input.value.trim();
 
-      if (password.length < 6) { showFeedback(feedback, strings.errorPasswordTooShort, true); return; }
-      if (password !== confirm)  { showFeedback(feedback, strings.errorPasswordMismatch,  true); return; }
-      if (!question)             { showFeedback(feedback, strings.errorMissingQuestion,   true); return; }
-      if (!answer)               { showFeedback(feedback, strings.errorMissingAnswer,     true); return; }
+      if (password.length < 6) {
+        showFeedback(feedback, strings.errorPasswordTooShort, true);
+        return;
+      }
+      if (password !== confirm) {
+        showFeedback(feedback, strings.errorPasswordMismatch, true);
+        return;
+      }
+      if (!question) {
+        showFeedback(feedback, strings.errorMissingQuestion, true);
+        return;
+      }
+      if (!answer) {
+        showFeedback(feedback, strings.errorMissingAnswer, true);
+        return;
+      }
 
       submitBtn.disabled = true;
       clearFeedback(feedback);
@@ -133,7 +184,11 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
           renderEnabled();
           onSecurityChanged?.();
         } else {
-          showFeedback(feedback, strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric, true);
+          showFeedback(
+            feedback,
+            strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric,
+            true,
+          );
         }
       } catch {
         showFeedback(feedback, strings.errorGeneric, true);
@@ -154,57 +209,110 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
     const card = createElement('div', 'security-panel__card');
 
     const badge = buildStatusBadge(true, strings);
-    const desc  = createElement('p', 'security-panel__desc', strings.statusEnabledDesc);
+    const desc = createElement('p', 'security-panel__desc', strings.statusEnabledDesc);
 
     // ── Button row ────────────────────────────────────────────────────────
-    const btnRow     = createElement('div', 'security-panel__btn-row');
-    const changeBtn  = createElement('button', 'security-panel__btn security-panel__btn--secondary', strings.changePasswordBtn);
-    changeBtn.type   = 'button';
-    const disableBtn = createElement('button', 'security-panel__btn security-panel__btn--danger', strings.disableBtn);
-    disableBtn.type  = 'button';
+    const btnRow = createElement('div', 'security-panel__btn-row');
+    const changeBtn = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--secondary',
+      strings.changePasswordBtn,
+    );
+    changeBtn.type = 'button';
+    const disableBtn = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--danger',
+      strings.disableBtn,
+    );
+    disableBtn.type = 'button';
     btnRow.append(changeBtn, disableBtn);
 
     // ── Change-password inline form ───────────────────────────────────────
-    const changeForm    = createElement('div', 'security-panel__inline-form');
-    changeForm.hidden   = true;
-    const changeTitle   = createElement('p', 'security-panel__form-title', strings.changeTitle);
-    const currentBoxC   = createInputBoxLite({ label: strings.currentPasswordLabel, placeholder: strings.currentPasswordPlaceholder, type: 'password' });
-    const newBoxC       = createInputBoxLite({ label: strings.newPasswordLabel,     placeholder: strings.newPasswordPlaceholder,     type: 'password' });
-    const confirmBoxC   = createInputBoxLite({ label: strings.confirmPasswordLabel, placeholder: strings.confirmPasswordPlaceholder, type: 'password' });
+    const changeForm = createElement('div', 'security-panel__inline-form');
+    changeForm.hidden = true;
+    const changeTitle = createElement('p', 'security-panel__form-title', strings.changeTitle);
+    const currentBoxC = createInputBoxLite({
+      label: strings.currentPasswordLabel,
+      placeholder: strings.currentPasswordPlaceholder,
+      type: 'password',
+    });
+    const newBoxC = createInputBoxLite({
+      label: strings.newPasswordLabel,
+      placeholder: strings.newPasswordPlaceholder,
+      type: 'password',
+    });
+    const confirmBoxC = createInputBoxLite({
+      label: strings.confirmPasswordLabel,
+      placeholder: strings.confirmPasswordPlaceholder,
+      type: 'password',
+    });
     const changeFeedback = createElement('p', 'security-panel__feedback');
     changeFeedback.hidden = true;
-    const changeActions  = createElement('div', 'security-panel__form-actions');
-    const changeSubmit   = createElement('button', 'security-panel__btn security-panel__btn--primary', strings.changeConfirmBtn);
-    changeSubmit.type    = 'button';
-    const changeCancelBtn = createElement('button', 'security-panel__btn security-panel__btn--ghost', strings.cancelBtn);
-    changeCancelBtn.type  = 'button';
+    const changeActions = createElement('div', 'security-panel__form-actions');
+    const changeSubmit = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--primary',
+      strings.changeConfirmBtn,
+    );
+    changeSubmit.type = 'button';
+    const changeCancelBtn = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--ghost',
+      strings.cancelBtn,
+    );
+    changeCancelBtn.type = 'button';
     changeActions.append(changeSubmit, changeCancelBtn);
-    changeForm.append(changeTitle, currentBoxC.element, newBoxC.element, confirmBoxC.element, changeFeedback, changeActions);
+    changeForm.append(
+      changeTitle,
+      currentBoxC.element,
+      newBoxC.element,
+      confirmBoxC.element,
+      changeFeedback,
+      changeActions,
+    );
 
     // ── Disable inline form ───────────────────────────────────────────────
-    const disableForm    = createElement('div', 'security-panel__inline-form');
-    disableForm.hidden   = true;
-    const disableTitle   = createElement('p', 'security-panel__form-title', strings.disableTitle);
-    const disableDesc    = createElement('p', 'security-panel__form-desc',  strings.disableDesc);
-    const currentBoxD    = createInputBoxLite({ label: strings.currentPasswordLabel, placeholder: strings.currentPasswordPlaceholder, type: 'password' });
+    const disableForm = createElement('div', 'security-panel__inline-form');
+    disableForm.hidden = true;
+    const disableTitle = createElement('p', 'security-panel__form-title', strings.disableTitle);
+    const disableDesc = createElement('p', 'security-panel__form-desc', strings.disableDesc);
+    const currentBoxD = createInputBoxLite({
+      label: strings.currentPasswordLabel,
+      placeholder: strings.currentPasswordPlaceholder,
+      type: 'password',
+    });
     const disableFeedback = createElement('p', 'security-panel__feedback');
     disableFeedback.hidden = true;
-    const disableActions  = createElement('div', 'security-panel__form-actions');
-    const disableSubmit   = createElement('button', 'security-panel__btn security-panel__btn--danger', strings.disableConfirmBtn);
-    disableSubmit.type    = 'button';
-    const disableCancelBtn = createElement('button', 'security-panel__btn security-panel__btn--ghost', strings.cancelBtn);
-    disableCancelBtn.type  = 'button';
+    const disableActions = createElement('div', 'security-panel__form-actions');
+    const disableSubmit = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--danger',
+      strings.disableConfirmBtn,
+    );
+    disableSubmit.type = 'button';
+    const disableCancelBtn = createElement(
+      'button',
+      'security-panel__btn security-panel__btn--ghost',
+      strings.cancelBtn,
+    );
+    disableCancelBtn.type = 'button';
     disableActions.append(disableSubmit, disableCancelBtn);
-    disableForm.append(disableTitle, disableDesc, currentBoxD.element, disableFeedback, disableActions);
+    disableForm.append(
+      disableTitle,
+      disableDesc,
+      currentBoxD.element,
+      disableFeedback,
+      disableActions,
+    );
 
     // ── Toggle helpers ────────────────────────────────────────────────────
 
     function showBtnRow() {
-      btnRow.hidden       = false;
-      changeForm.hidden   = true;
-      disableForm.hidden  = true;
+      btnRow.hidden = false;
+      changeForm.hidden = true;
+      disableForm.hidden = true;
       currentBoxC.input.value = '';
-      newBoxC.input.value     = '';
+      newBoxC.input.value = '';
       confirmBoxC.input.value = '';
       currentBoxD.input.value = '';
       clearFeedback(changeFeedback);
@@ -212,16 +320,16 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
     }
 
     changeBtn.addEventListener('click', () => {
-      btnRow.hidden      = true;
-      changeForm.hidden  = false;
+      btnRow.hidden = true;
+      changeForm.hidden = false;
       disableForm.hidden = true;
       requestAnimationFrame(() => currentBoxC.input.focus());
     });
 
     disableBtn.addEventListener('click', () => {
-      btnRow.hidden      = true;
+      btnRow.hidden = true;
       disableForm.hidden = false;
-      changeForm.hidden  = true;
+      changeForm.hidden = true;
       requestAnimationFrame(() => currentBoxD.input.focus());
     });
 
@@ -232,11 +340,17 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
 
     changeSubmit.addEventListener('click', async () => {
       const current = currentBoxC.input.value;
-      const newPw   = newBoxC.input.value;
+      const newPw = newBoxC.input.value;
       const confirm = confirmBoxC.input.value;
 
-      if (newPw.length < 6)    { showFeedback(changeFeedback, strings.errorPasswordTooShort, true); return; }
-      if (newPw !== confirm)    { showFeedback(changeFeedback, strings.errorPasswordMismatch,  true); return; }
+      if (newPw.length < 6) {
+        showFeedback(changeFeedback, strings.errorPasswordTooShort, true);
+        return;
+      }
+      if (newPw !== confirm) {
+        showFeedback(changeFeedback, strings.errorPasswordMismatch, true);
+        return;
+      }
 
       changeSubmit.disabled = true;
       clearFeedback(changeFeedback);
@@ -247,7 +361,11 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
           showFeedback(changeFeedback, strings.successPasswordChanged, false);
           setTimeout(() => renderEnabled(), 1200);
         } else {
-          showFeedback(changeFeedback, strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric, true);
+          showFeedback(
+            changeFeedback,
+            strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric,
+            true,
+          );
         }
       } catch {
         showFeedback(changeFeedback, strings.errorGeneric, true);
@@ -270,7 +388,11 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
           renderDisabled();
           onSecurityChanged?.();
         } else {
-          showFeedback(disableFeedback, strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric, true);
+          showFeedback(
+            disableFeedback,
+            strings[`error${capitalise(result.error)}`] ?? strings.errorGeneric,
+            true,
+          );
         }
       } catch {
         showFeedback(disableFeedback, strings.errorGeneric, true);
@@ -284,11 +406,15 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
 
     // ── Auto-lock timeout card ─────────────────────────────────────────────
 
-    const autoLockCard   = createElement('div', 'security-panel__card');
-    const autoLockRow    = createElement('div', 'security-panel__setting-row');
-    const autoLockText   = createElement('div', 'security-panel__setting-text');
-    const autoLockLabel  = createElement('p', 'security-panel__setting-label', strings.autoLockLabel);
-    const autoLockDesc   = createElement('p', 'security-panel__setting-desc',  strings.autoLockDesc);
+    const autoLockCard = createElement('div', 'security-panel__card');
+    const autoLockRow = createElement('div', 'security-panel__setting-row');
+    const autoLockText = createElement('div', 'security-panel__setting-text');
+    const autoLockLabel = createElement(
+      'p',
+      'security-panel__setting-label',
+      strings.autoLockLabel,
+    );
+    const autoLockDesc = createElement('p', 'security-panel__setting-desc', strings.autoLockDesc);
     autoLockText.append(autoLockLabel, autoLockDesc);
 
     const timeoutSelect = createDropDownLite({
@@ -301,12 +427,16 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
         } catch {
           // Non-fatal.
         }
-      }
+      },
     });
 
     invokeIpc('security:get-auto-lock-timeout')
-      .then((current) => { timeoutSelect.setValue(current ?? 'never'); })
-      .catch(() => { timeoutSelect.setValue('never'); });
+      .then((current) => {
+        timeoutSelect.setValue(current ?? 'never');
+      })
+      .catch(() => {
+        timeoutSelect.setValue('never');
+      });
 
     autoLockRow.append(autoLockText, timeoutSelect.element);
     autoLockCard.append(autoLockRow);

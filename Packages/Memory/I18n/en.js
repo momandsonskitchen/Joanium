@@ -15,7 +15,7 @@ const en = {
   saving: 'Saving',
   saveFailed: 'Save failed',
   editorLabel: 'Memory Content',
-  emptyEditor: 'Choose a memory file from the list.'
+  emptyEditor: 'Choose a memory file from the list.',
 };
 
 export default en;

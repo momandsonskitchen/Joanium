@@ -16,7 +16,7 @@ const GOOGLE_OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/presentations',
   'https://www.googleapis.com/auth/spreadsheets',
   'https://www.googleapis.com/auth/tasks',
-  'https://www.googleapis.com/auth/youtube.force-ssl'
+  'https://www.googleapis.com/auth/youtube.force-ssl',
 ].join(' ');
 
 function startCallbackServer() {
@@ -34,14 +34,17 @@ function startCallbackServer() {
 
 function waitForCode(server) {
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      server.close();
-      reject(new Error('Google sign-in timed out. Please try again.'));
-    }, 5 * 60 * 1000); // 5 min
+    const timeout = setTimeout(
+      () => {
+        server.close();
+        reject(new Error('Google sign-in timed out. Please try again.'));
+      },
+      5 * 60 * 1000,
+    ); // 5 min
 
     server.on('request', (req, res) => {
       const url = new URL(req.url, 'http://127.0.0.1');
-      const code  = url.searchParams.get('code');
+      const code = url.searchParams.get('code');
       const error = url.searchParams.get('error');
 
       // Respond with a close-tab page before resolving/rejecting
@@ -96,21 +99,23 @@ export async function startGoogleOAuthFlow({ clientId, clientSecret }) {
       client_id: clientId,
       client_secret: clientSecret,
       redirect_uri: redirectUri,
-      grant_type: 'authorization_code'
-    })
+      grant_type: 'authorization_code',
+    }),
   });
 
   const data = await response.json().catch(() => null);
 
   if (!response.ok || !data?.refresh_token) {
     throw new Error(
-      data?.error_description ?? data?.error ?? 'Token exchange failed — ensure the app type is Desktop in Google Cloud Console.'
+      data?.error_description ??
+        data?.error ??
+        'Token exchange failed — ensure the app type is Desktop in Google Cloud Console.',
     );
   }
 
   return {
     refreshToken: data.refresh_token,
     accessToken: data.access_token,
-    expiresIn: data.expires_in ?? 3600
+    expiresIn: data.expires_in ?? 3600,
   };
 }

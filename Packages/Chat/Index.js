@@ -1,20 +1,24 @@
 import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
 import { createModelHealthChecker } from './Core/ModelHealthCheck.js';
-import { getSupportedAttachmentExtensions, getImageAttachmentExtensions, readAttachmentFiles } from './Core/ChatAttachments.js';
+import {
+  getSupportedAttachmentExtensions,
+  getImageAttachmentExtensions,
+  readAttachmentFiles,
+} from './Core/ChatAttachments.js';
 import { createUsageTracker, estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 export async function createPackage({ rootDirectory }) {
-  const chatStateManager  = createChatStateManager({ rootDirectory });
-  const healthChecker      = createModelHealthChecker({ rootDirectory });
-  const usageTracker       = createUsageTracker({ rootDirectory });
+  const chatStateManager = createChatStateManager({ rootDirectory });
+  const healthChecker = createModelHealthChecker({ rootDirectory });
+  const usageTracker = createUsageTracker({ rootDirectory });
 
   return {
     id: 'Chat',
     ipcHandlers: [
       {
         channel: 'chat:bootstrap',
-        handler: async () => chatStateManager.getBootstrapPayload()
+        handler: async () => chatStateManager.getBootstrapPayload(),
       },
       {
         channel: 'chat:stream-message',
@@ -32,37 +36,39 @@ export async function createPackage({ rootDirectory }) {
                 }
 
                 // Record usage — fire-and-forget, non-blocking.
-                const tokensIn  = estimateTokens(meta?.charCountIn  ?? 0);
+                const tokensIn = estimateTokens(meta?.charCountIn ?? 0);
                 const tokensOut = estimateTokens(meta?.charCountOut ?? 0);
-                if ((tokensIn + tokensOut) > 0) {
-                  usageTracker.recordExchange({
-                    tokensIn,
-                    tokensOut,
-                    modelId:       meta?.modelId       ?? null,
-                    modelLabel:    meta?.modelLabel    ?? null,
-                    providerLabel: meta?.providerLabel ?? null,
-                    isNewSession:  Boolean(request?.isNewSession)
-                  }).catch(() => {});
+                if (tokensIn + tokensOut > 0) {
+                  usageTracker
+                    .recordExchange({
+                      tokensIn,
+                      tokensOut,
+                      modelId: meta?.modelId ?? null,
+                      modelLabel: meta?.modelLabel ?? null,
+                      providerLabel: meta?.providerLabel ?? null,
+                      isNewSession: Boolean(request?.isNewSession),
+                    })
+                    .catch(() => {});
                 }
               },
               onError: (error) => {
                 if (!event.sender.isDestroyed()) {
                   event.sender.send('chat:stream-error', {
-                    message: error?.message ?? String(error)
+                    message: error?.message ?? String(error),
                   });
                 }
-              }
+              },
             })
             .catch((error) => {
               if (!event.sender.isDestroyed()) {
                 event.sender.send('chat:stream-error', {
-                  message: error?.message ?? String(error)
+                  message: error?.message ?? String(error),
                 });
               }
             });
 
           return null;
-        }
+        },
       },
 
       // ── Agent streaming ──────────────────────────────────────────────────────
@@ -87,81 +93,83 @@ export async function createPackage({ rootDirectory }) {
                   event.sender.send('agents:stream-done', { streamId, ...meta });
                 }
 
-                const tokensIn  = estimateTokens(meta?.charCountIn  ?? 0);
+                const tokensIn = estimateTokens(meta?.charCountIn ?? 0);
                 const tokensOut = estimateTokens(meta?.charCountOut ?? 0);
-                if ((tokensIn + tokensOut) > 0) {
-                  usageTracker.recordExchange({
-                    tokensIn,
-                    tokensOut,
-                    modelId:       meta?.modelId       ?? null,
-                    modelLabel:    meta?.modelLabel    ?? null,
-                    providerLabel: meta?.providerLabel ?? null,
-                    isNewSession:  Boolean(request?.isNewSession)
-                  }).catch(() => {});
+                if (tokensIn + tokensOut > 0) {
+                  usageTracker
+                    .recordExchange({
+                      tokensIn,
+                      tokensOut,
+                      modelId: meta?.modelId ?? null,
+                      modelLabel: meta?.modelLabel ?? null,
+                      providerLabel: meta?.providerLabel ?? null,
+                      isNewSession: Boolean(request?.isNewSession),
+                    })
+                    .catch(() => {});
                 }
               },
               onError: (error) => {
                 if (!event.sender.isDestroyed()) {
                   event.sender.send('agents:stream-error', {
                     streamId,
-                    message: error?.message ?? String(error)
+                    message: error?.message ?? String(error),
                   });
                 }
-              }
+              },
             })
             .catch((error) => {
               if (!event.sender.isDestroyed()) {
                 event.sender.send('agents:stream-error', {
                   streamId,
-                  message: error?.message ?? String(error)
+                  message: error?.message ?? String(error),
                 });
               }
             });
 
           return null;
-        }
+        },
       },
       {
         channel: 'chat:complete-message',
         handler: async (_event, request) => {
           const result = await chatStateManager.completeMessage(request);
-          const tokensIn  = estimateTokens(result?.charCountIn  ?? 0);
+          const tokensIn = estimateTokens(result?.charCountIn ?? 0);
           const tokensOut = estimateTokens(result?.charCountOut ?? 0);
 
-          if ((tokensIn + tokensOut) > 0) {
+          if (tokensIn + tokensOut > 0) {
             await usageTracker.recordExchange({
               tokensIn,
               tokensOut,
-              modelId:       result?.modelId       ?? null,
-              modelLabel:    result?.modelLabel    ?? null,
+              modelId: result?.modelId ?? null,
+              modelLabel: result?.modelLabel ?? null,
               providerLabel: result?.providerLabel ?? null,
-              isNewSession:  Boolean(request?.isNewSession)
+              isNewSession: Boolean(request?.isNewSession),
             });
           }
 
           return result;
-        }
+        },
       },
       {
         channel: 'chat:enhance-prompt',
         handler: async (_event, { raw, providerId, modelId }) => {
           const result = await chatStateManager.enhancePrompt({ raw, providerId, modelId });
-          const tokensIn  = estimateTokens(result?.charCountIn  ?? 0);
+          const tokensIn = estimateTokens(result?.charCountIn ?? 0);
           const tokensOut = estimateTokens(result?.charCountOut ?? 0);
 
-          if ((tokensIn + tokensOut) > 0) {
+          if (tokensIn + tokensOut > 0) {
             await usageTracker.recordExchange({
               tokensIn,
               tokensOut,
-              modelId:       result?.modelId       ?? null,
-              modelLabel:    result?.modelLabel    ?? null,
+              modelId: result?.modelId ?? null,
+              modelLabel: result?.modelLabel ?? null,
               providerLabel: result?.providerLabel ?? null,
-              isNewSession:  false
+              isNewSession: false,
             });
           }
 
           return result;
-        }
+        },
       },
       {
         channel: 'chat:select-attachments',
@@ -174,7 +182,10 @@ export async function createPackage({ rootDirectory }) {
           const filters = [];
 
           if (allowImages) {
-            filters.push({ name: 'All supported files', extensions: [...imgExtensions, ...docExtensions] });
+            filters.push({
+              name: 'All supported files',
+              extensions: [...imgExtensions, ...docExtensions],
+            });
             filters.push({ name: 'Images', extensions: imgExtensions });
           }
 
@@ -182,7 +193,7 @@ export async function createPackage({ rootDirectory }) {
 
           const result = await dialog.showOpenDialog(window, {
             properties: ['openFile', 'multiSelections'],
-            filters
+            filters,
           });
 
           if (result.canceled) {
@@ -190,7 +201,7 @@ export async function createPackage({ rootDirectory }) {
           }
 
           return readAttachmentFiles(result.filePaths, { allowImages });
-        }
+        },
       },
       // ── Model health ─────────────────────────────────────────────────────────
       {
@@ -198,14 +209,14 @@ export async function createPackage({ rootDirectory }) {
         handler: async () => {
           const { providers } = await chatStateManager.getBootstrapPayload();
           return healthChecker.getHealthMap(providers);
-        }
+        },
       },
       {
         channel: 'chat:health-probe',
         handler: async (event, providerId, modelId) => {
           const { user, providers } = await chatStateManager.getBootstrapPayload();
           const provider = providers.find((p) => p.id === providerId);
-          const model    = provider?.models?.find((m) => m.id === modelId);
+          const model = provider?.models?.find((m) => m.id === modelId);
           if (!provider || !model) return null;
 
           const providerDetails = user?.providers?.details?.[providerId] ?? {};
@@ -216,8 +227,8 @@ export async function createPackage({ rootDirectory }) {
           }
 
           return result;
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 }

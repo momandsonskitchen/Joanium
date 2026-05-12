@@ -14,19 +14,19 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'projects:save-project',
-        handler: async (_event, project) => projectStateManager.saveProject(project)
+        handler: async (_event, project) => projectStateManager.saveProject(project),
       },
       {
         channel: 'projects:list-projects',
-        handler: async () => projectStateManager.listProjects()
+        handler: async () => projectStateManager.listProjects(),
       },
       {
         channel: 'projects:load-project',
-        handler: async (_event, id) => projectStateManager.loadProject(id)
+        handler: async (_event, id) => projectStateManager.loadProject(id),
       },
       {
         channel: 'projects:delete-project',
-        handler: async (_event, id) => projectStateManager.deleteProject(id)
+        handler: async (_event, id) => projectStateManager.deleteProject(id),
       },
       {
         channel: 'projects:select-cover',
@@ -37,23 +37,23 @@ export async function createPackage({ rootDirectory }) {
             filters: [
               {
                 name: 'Images',
-                extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'avif', 'svg']
-              }
-            ]
+                extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'avif', 'svg'],
+              },
+            ],
           });
           return result.canceled ? null : (result.filePaths[0] ?? null);
-        }
+        },
       },
       {
         channel: 'projects:select-directory',
         handler: async (event) => {
           const window = event.sender.getOwnerBrowserWindow();
           const result = await dialog.showOpenDialog(window, {
-            properties: ['openDirectory']
+            properties: ['openDirectory'],
           });
           return result.canceled ? null : (result.filePaths[0] ?? null);
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 }

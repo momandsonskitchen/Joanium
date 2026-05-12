@@ -18,7 +18,7 @@ export function createThemePanel(strings) {
   const modeButtons = [
     createSegmentedOption(strings.mode.system, 'system', 'mode'),
     createSegmentedOption(strings.mode.light, 'light', 'mode'),
-    createSegmentedOption(strings.mode.dark, 'dark', 'mode')
+    createSegmentedOption(strings.mode.dark, 'dark', 'mode'),
   ];
   modeControls.append(...modeButtons);
   modeGroup.append(modeControls, createElement('p', 'theme-card__hint', strings.helper.system));
@@ -28,7 +28,7 @@ export function createThemePanel(strings) {
   const motionControls = createElement('div', 'theme-segmented');
   const motionButtons = [
     createSegmentedOption(strings.motion.full, 'full', 'motion'),
-    createSegmentedOption(strings.motion.reduced, 'reduced', 'motion')
+    createSegmentedOption(strings.motion.reduced, 'reduced', 'motion'),
   ];
   motionControls.append(...motionButtons);
   motionGroup.append(motionControls, createElement('p', 'theme-card__hint', strings.helper.motion));

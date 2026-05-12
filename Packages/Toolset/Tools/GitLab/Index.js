@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createGitLabToolHandlers({ rootDirectory }),
-      ...createGitLabConnectorToolHandlers({ rootDirectory })
+      ...createGitLabConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildGitLabPromptSection()]
+    promptSections: [buildGitLabPromptSection()],
   };
 }
 

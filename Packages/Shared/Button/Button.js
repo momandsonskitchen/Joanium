@@ -5,7 +5,7 @@ export function createButton({
   disabled = false,
   leadingIcon = '',
   trailingIcon = '',
-  onClick
+  onClick,
 }) {
   const button = document.createElement('button');
   button.type = 'button';

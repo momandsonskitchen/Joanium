@@ -47,7 +47,7 @@ function getChannelIconPath(channelName) {
     telegram: 'Telegram',
     whatsapp: 'WhatsApp',
     discord: 'Discord',
-    slack: 'Slack'
+    slack: 'Slack',
   };
   return `../../../Assets/Icons/${names[channelName]}.png`;
 }
@@ -74,7 +74,9 @@ export function createChannelsPanel(strings) {
     refs.card.classList.toggle('channels-card--connected', configured);
     refs.card.classList.toggle('channels-card--paused', configured && !enabled);
     refs.status.textContent = configured
-      ? (enabled ? strings.common.active : strings.common.paused)
+      ? enabled
+        ? strings.common.active
+        : strings.common.paused
       : strings.common.notConnected;
     refs.status.className = `channels-card__status ${configured && enabled ? 'channels-card__status--active' : ''}`;
     refs.toggle.checked = enabled;
@@ -224,40 +226,60 @@ export function createChannelsPanel(strings) {
 
   async function validateChannel(channelName, payload) {
     if (channelName === 'telegram' && payload.botToken) {
-      const result = await invokeIpc('channels:validate', channelName, { botToken: payload.botToken });
-      setFeedback(channelName, formatText(strings.feedback.tokenVerified, {
-        value: result.username ? `@${result.username}` : strings.channels.telegram.name
-      }), 'success');
+      const result = await invokeIpc('channels:validate', channelName, {
+        botToken: payload.botToken,
+      });
+      setFeedback(
+        channelName,
+        formatText(strings.feedback.tokenVerified, {
+          value: result.username ? `@${result.username}` : strings.channels.telegram.name,
+        }),
+        'success',
+      );
     }
 
     if (channelName === 'whatsapp' && payload.accountSid && payload.authToken) {
       const result = await invokeIpc('channels:validate', channelName, {
         accountSid: payload.accountSid,
-        authToken: payload.authToken
+        authToken: payload.authToken,
       });
-      setFeedback(channelName, formatText(strings.feedback.accountVerified, {
-        value: result.friendlyName ?? strings.channels.whatsapp.name
-      }), 'success');
+      setFeedback(
+        channelName,
+        formatText(strings.feedback.accountVerified, {
+          value: result.friendlyName ?? strings.channels.whatsapp.name,
+        }),
+        'success',
+      );
     }
 
     if (channelName === 'discord' && payload.botToken) {
       const result = await invokeIpc('channels:validate', channelName, {
         botToken: payload.botToken,
-        channelId: payload.channelId
+        channelId: payload.channelId,
       });
-      setFeedback(channelName, formatText(strings.feedback.tokenVerified, {
-        value: result.channelName || (result.username ? `@${result.username}` : strings.channels.discord.name)
-      }), 'success');
+      setFeedback(
+        channelName,
+        formatText(strings.feedback.tokenVerified, {
+          value:
+            result.channelName ||
+            (result.username ? `@${result.username}` : strings.channels.discord.name),
+        }),
+        'success',
+      );
     }
 
     if (channelName === 'slack' && payload.botToken) {
       const result = await invokeIpc('channels:validate', channelName, {
         botToken: payload.botToken,
-        channelId: payload.channelId
+        channelId: payload.channelId,
       });
-      setFeedback(channelName, formatText(strings.feedback.slackVerified, {
-        value: result.channelName || result.team || result.name || strings.channels.slack.name
-      }), 'success');
+      setFeedback(
+        channelName,
+        formatText(strings.feedback.slackVerified, {
+          value: result.channelName || result.team || result.name || strings.channels.slack.name,
+        }),
+        'success',
+      );
     }
   }
 
@@ -310,7 +332,11 @@ export function createChannelsPanel(strings) {
     try {
       const config = await invokeIpc('channels:toggle', channelName, enabled);
       setCardState(channelName, config);
-      setFeedback(channelName, enabled ? strings.feedback.enabled : strings.feedback.paused, 'success');
+      setFeedback(
+        channelName,
+        enabled ? strings.feedback.enabled : strings.feedback.paused,
+        'success',
+      );
       await populate();
     } catch (error) {
       refs.toggle.checked = !enabled;
@@ -320,7 +346,9 @@ export function createChannelsPanel(strings) {
 
   function createSetupSteps(channelName) {
     const steps = createElement('div', 'channels-card__steps');
-    steps.append(createElement('div', 'channels-card__steps-title', strings.channels[channelName].setupTitle));
+    steps.append(
+      createElement('div', 'channels-card__steps-title', strings.channels[channelName].setupTitle),
+    );
 
     const list = createElement('ol', 'channels-card__steps-list');
     for (const step of strings.channels[channelName].steps) {
@@ -380,7 +408,7 @@ export function createChannelsPanel(strings) {
       const botToken = createSecretField({
         label: strings.fields.botToken,
         placeholder: strings.placeholders.telegramToken,
-        strings
+        strings,
       });
       inputs.botToken = botToken.input;
       secretFields.botToken = botToken.input;
@@ -393,16 +421,16 @@ export function createChannelsPanel(strings) {
       const accountSid = createSecretField({
         label: strings.fields.accountSid,
         placeholder: strings.placeholders.whatsappSid,
-        strings
+        strings,
       });
       const authToken = createSecretField({
         label: strings.fields.authToken,
         placeholder: strings.placeholders.whatsappToken,
-        strings
+        strings,
       });
       const fromNumber = createField({
         label: strings.fields.sandboxNumber,
-        placeholder: strings.placeholders.whatsappNumber
+        placeholder: strings.placeholders.whatsappNumber,
       });
       inputs.accountSid = accountSid.input;
       inputs.authToken = authToken.input;
@@ -422,31 +450,42 @@ export function createChannelsPanel(strings) {
       const row = createElement('div', 'channels-card__field-row');
       const botToken = createSecretField({
         label: strings.fields.botToken,
-        placeholder: channelName === 'discord'
-          ? strings.placeholders.discordToken
-          : strings.placeholders.slackToken,
-        strings
+        placeholder:
+          channelName === 'discord'
+            ? strings.placeholders.discordToken
+            : strings.placeholders.slackToken,
+        strings,
       });
       const channelId = createField({
         label: strings.fields.channelId,
-        placeholder: channelName === 'discord'
-          ? strings.placeholders.discordChannel
-          : strings.placeholders.slackChannel
+        placeholder:
+          channelName === 'discord'
+            ? strings.placeholders.discordChannel
+            : strings.placeholders.slackChannel,
       });
       inputs.botToken = botToken.input;
       inputs.channelId = channelId.input;
       secretFields.botToken = botToken.input;
-      placeholders.botToken = channelName === 'discord'
-        ? strings.placeholders.discordToken
-        : strings.placeholders.slackToken;
+      placeholders.botToken =
+        channelName === 'discord'
+          ? strings.placeholders.discordToken
+          : strings.placeholders.slackToken;
       row.append(botToken.wrap, channelId.wrap);
       form.append(row);
     }
 
     const actions = createElement('div', 'channels-card__actions');
-    const disconnect = createElement('button', 'channels-card__secondary', strings.common.disconnect);
+    const disconnect = createElement(
+      'button',
+      'channels-card__secondary',
+      strings.common.disconnect,
+    );
     const connect = createElement('button', 'channels-card__primary');
-    const connectLabel = createElement('span', 'channels-card__primary-label', strings.common.connect);
+    const connectLabel = createElement(
+      'span',
+      'channels-card__primary-label',
+      strings.common.connect,
+    );
     disconnect.type = 'button';
     connect.type = 'button';
     disconnect.hidden = true;
@@ -473,7 +512,9 @@ export function createChannelsPanel(strings) {
       // Close all cards
       for (const [, r] of cardRefs) {
         r.card.classList.remove('channels-card--open');
-        r.card.querySelector('.channels-card__expand')?.setAttribute('aria-label', strings.common.expand);
+        r.card
+          .querySelector('.channels-card__expand')
+          ?.setAttribute('aria-label', strings.common.expand);
       }
       // Open this one only if it was closed
       if (!isOpen) {
@@ -493,7 +534,7 @@ export function createChannelsPanel(strings) {
       connect,
       connectLabel,
       disconnect,
-      feedback
+      feedback,
     });
     return card;
   }

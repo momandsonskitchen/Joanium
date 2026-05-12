@@ -8,6 +8,6 @@ export function createNotionConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeNotionChatTool
+    executeTool: executeNotionChatTool,
   });
 }

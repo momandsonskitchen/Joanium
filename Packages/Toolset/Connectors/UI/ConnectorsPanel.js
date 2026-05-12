@@ -6,38 +6,38 @@ import defaultStrings from '../I18n/en.js';
 
 // ── Icon map: connector id → filename in Assets/Icons/ ──────────────────────
 const ICON_MAP = {
-  github:       'Github',
-  openweather:  'OpenWeatherMap',
-  open_meteo:    'OpenMeteo',
-  coingecko:     'CoinGecko',
-  google:       'Google',
-  gmail:        'Gmail',
-  drive:        'Drive',
-  calendar:     'Calendar',
-  notion:       'Notion',
-  slack:        'Slack',
-  discord:      'Discord',
-  telegram:     'Telegram',
-  spotify:      'Spotify',
-  stripe:       'Stripe',
-  supabase:     'Supabase',
-  vercel:       'Vercel',
-  netlify:      'Netlify',
-  gitlab:       'Gitlab',
-  jira:         'Jira',
-  linear:       'Linear',
-  hubspot:      'Hubspot',
-  sentry:       'Sentry',
-  figma:        'Figma',
-  unsplash:     'Unsplash',
-  wikipedia:    'Wikipedia',
-  wikimedia:    'Wikipedia',
-  nasa:         'Nasa',
-  perplexity:   'Perplexity',
-  youtube:      'Youtube',
-  whatsapp:     'WhatsApp',
-  cloudflare:   'Cloudflare',
-  hackernews:   'HackerNews',
+  github: 'Github',
+  openweather: 'OpenWeatherMap',
+  open_meteo: 'OpenMeteo',
+  coingecko: 'CoinGecko',
+  google: 'Google',
+  gmail: 'Gmail',
+  drive: 'Drive',
+  calendar: 'Calendar',
+  notion: 'Notion',
+  slack: 'Slack',
+  discord: 'Discord',
+  telegram: 'Telegram',
+  spotify: 'Spotify',
+  stripe: 'Stripe',
+  supabase: 'Supabase',
+  vercel: 'Vercel',
+  netlify: 'Netlify',
+  gitlab: 'Gitlab',
+  jira: 'Jira',
+  linear: 'Linear',
+  hubspot: 'Hubspot',
+  sentry: 'Sentry',
+  figma: 'Figma',
+  unsplash: 'Unsplash',
+  wikipedia: 'Wikipedia',
+  wikimedia: 'Wikipedia',
+  nasa: 'Nasa',
+  perplexity: 'Perplexity',
+  youtube: 'Youtube',
+  whatsapp: 'WhatsApp',
+  cloudflare: 'Cloudflare',
+  hackernews: 'HackerNews',
 };
 
 function getConnectorIconPath(connectorId) {
@@ -77,13 +77,15 @@ function createCredentialField({ fieldConfig, strings }) {
 function getConnectorFields(connector) {
   return Array.isArray(connector.fields) && connector.fields.length
     ? connector.fields
-    : [{
-        key: connector.credentialKey,
-        label: connector.credentialLabel,
-        placeholder: connector.credentialPlaceholder,
-        type: 'password',
-        required: !connector.optional
-      }];
+    : [
+        {
+          key: connector.credentialKey,
+          label: connector.credentialLabel,
+          placeholder: connector.credentialPlaceholder,
+          type: 'password',
+          required: !connector.optional,
+        },
+      ];
 }
 
 function getVisibleFields(connector) {
@@ -91,7 +93,9 @@ function getVisibleFields(connector) {
 }
 
 function isPublicConnector(connector) {
-  return connector.publicTool === true || connector.noCredential === true || connector.noKey === true;
+  return (
+    connector.publicTool === true || connector.noCredential === true || connector.noKey === true
+  );
 }
 
 export function createConnectorsPanel(strings = defaultStrings) {
@@ -139,7 +143,13 @@ export function createConnectorsPanel(strings = defaultStrings) {
       const input = ref.inputs.get(field.key);
       credentials[field.key] = input.value.trim();
       const fieldHasSavedCredential = input.placeholder === strings.savedSecret;
-      if (field.required !== false && !credentials[field.key] && !connector.optional && !fieldHasSavedCredential && !firstMissingInput) {
+      if (
+        field.required !== false &&
+        !credentials[field.key] &&
+        !connector.optional &&
+        !fieldHasSavedCredential &&
+        !firstMissingInput
+      ) {
         firstMissingInput = input;
       }
       if (
@@ -219,7 +229,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const copy = createElement('div', 'connectors-card__copy');
     copy.append(
       createElement('h3', 'connectors-card__title', connector.label),
-      createElement('p', 'connectors-card__description', connector.description)
+      createElement('p', 'connectors-card__description', connector.description),
     );
 
     const status = createElement('span', 'connectors-card__status', strings.notConnected);
@@ -245,7 +255,9 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const remove = createElement('button', 'connectors-card__secondary', strings.disconnect);
     remove.type = 'button';
     remove.hidden = true;
-    remove.addEventListener('click', () => { void removeConnector(connector); });
+    remove.addEventListener('click', () => {
+      void removeConnector(connector);
+    });
 
     let save;
     let saveLabel;
@@ -306,7 +318,9 @@ export function createConnectorsPanel(strings = defaultStrings) {
       saveLabel = createElement('span', 'connectors-card__primary-label', strings.save);
       save.type = 'button';
       save.append(saveLabel);
-      save.addEventListener('click', () => { void saveConnector(connector); });
+      save.addEventListener('click', () => {
+        void saveConnector(connector);
+      });
     }
 
     actions.append(remove, save);
@@ -324,7 +338,9 @@ export function createConnectorsPanel(strings = defaultStrings) {
       // Close all cards
       for (const [, ref] of refs) {
         ref.card.classList.remove('connectors-card--open');
-        ref.card.querySelector('.connectors-card__expand')?.setAttribute('aria-label', strings.expand);
+        ref.card
+          .querySelector('.connectors-card__expand')
+          ?.setAttribute('aria-label', strings.expand);
       }
       // Open this one only if it was closed
       if (!isOpen) {
@@ -339,7 +355,10 @@ export function createConnectorsPanel(strings = defaultStrings) {
   }
 
   function createPublicConnectorCard(connector) {
-    const card = createElement('article', 'connectors-card connectors-card--connected connectors-card--public');
+    const card = createElement(
+      'article',
+      'connectors-card connectors-card--connected connectors-card--public',
+    );
     const header = createElement('div', 'connectors-card__header');
     const badge = createElement('div', 'connectors-card__badge');
     const iconPath = getConnectorIconPath(connector.id);
@@ -357,10 +376,14 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const copy = createElement('div', 'connectors-card__copy');
     copy.append(
       createElement('h3', 'connectors-card__title', connector.label),
-      createElement('p', 'connectors-card__description', connector.description)
+      createElement('p', 'connectors-card__description', connector.description),
     );
 
-    const status = createElement('span', 'connectors-card__status connectors-card__status--active', strings.available);
+    const status = createElement(
+      'span',
+      'connectors-card__status connectors-card__status--active',
+      strings.available,
+    );
     header.append(badge, copy, status);
     card.append(header);
 
@@ -377,7 +400,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const header = createElement('div', 'connectors-section__header');
     header.append(
       createElement('h3', 'connectors-section__title', title),
-      createElement('p', 'connectors-section__subtitle', subtitle)
+      createElement('p', 'connectors-section__subtitle', subtitle),
     );
     const mount = createElement('div', 'connectors-section__grid');
     section.append(header, mount);

@@ -8,8 +8,8 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'usage:get-data',
-        handler: async () => usageTracker.getUsageData()
-      }
-    ]
+        handler: async () => usageTracker.getUsageData(),
+      },
+    ],
   };
 }

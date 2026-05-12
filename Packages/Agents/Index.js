@@ -19,8 +19,8 @@ const agentsPackageDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export async function createPackage({ rootDirectory }) {
   const agentStateManager = createAgentStateManager({ rootDirectory });
-  const agentsDirectory   = path.join(getWritableDataDirectory(rootDirectory), 'Agents');
-  const avatarsDirectory  = path.join(rootDirectory, 'Assets', 'Agents');
+  const agentsDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Agents');
+  const avatarsDirectory = path.join(rootDirectory, 'Assets', 'Agents');
 
   // Image extensions we accept for avatars.
   const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']);
@@ -69,7 +69,7 @@ export async function createPackage({ rootDirectory }) {
         return;
       }
 
-      const id    = randomUUID();
+      const id = randomUUID();
       // 30-minute ceiling — long agents (e.g. workspace audits) need time.
       const timer = setTimeout(() => {
         pendingRuns.delete(id);
@@ -77,17 +77,23 @@ export async function createPackage({ rootDirectory }) {
       }, 1_800_000);
 
       pendingRuns.set(id, {
-        resolve: (result) => { clearTimeout(timer); resolve(result); },
-        reject:  (error)  => { clearTimeout(timer); reject(error);  },
-        logPath: logPath ?? null
+        resolve: (result) => {
+          clearTimeout(timer);
+          resolve(result);
+        },
+        reject: (error) => {
+          clearTimeout(timer);
+          reject(error);
+        },
+        logPath: logPath ?? null,
       });
 
       window.webContents.send('agents:run-with-tools', {
         id,
-        agentName:  agent.name,
-        prompt:     agent.prompt,
+        agentName: agent.name,
+        prompt: agent.prompt,
         providerId: agent.model?.providerId ?? null,
-        modelId:    agent.model?.modelId    ?? null
+        modelId: agent.model?.modelId ?? null,
       });
     });
   }
@@ -101,33 +107,41 @@ export async function createPackage({ rootDirectory }) {
   // the same file to 'running' without creating a duplicate entry.
   async function queueAgent(agent) {
     await mkdir(runsDirectory, { recursive: true });
-    const firedAt     = new Date().toISOString();
+    const firedAt = new Date().toISOString();
     const safeAgentId = sanitizeFileStem(agent.id);
     if (!safeAgentId) return null;
 
     const timestamp = firedAt.replace(/[:.]/g, '-');
-    const runId     = `${safeAgentId}-${timestamp}`;
-    const logPath   = path.join(runsDirectory, `${runId}.json`);
+    const runId = `${safeAgentId}-${timestamp}`;
+    const logPath = path.join(runsDirectory, `${runId}.json`);
 
-    await writeFile(logPath, JSON.stringify({
-      id:           runId,
-      agentId:      agent.id,
-      agentName:    agent.name,
-      agentAvatar:  agent.avatar ?? null,
-      prompt:       agent.prompt,
-      schedule:     agent.schedule,
-      firedAt,
-      startedAt:    null,
-      status:       'queued',
-      finishedAt:   null,
-      fullResponse: '',
-      thinking:     '',
-      provider:     null,
-      model:        null,
-      inputTokens:  0,
-      outputTokens: 0,
-      error:        null
-    }, null, 2), 'utf8');
+    await writeFile(
+      logPath,
+      JSON.stringify(
+        {
+          id: runId,
+          agentId: agent.id,
+          agentName: agent.name,
+          agentAvatar: agent.avatar ?? null,
+          prompt: agent.prompt,
+          schedule: agent.schedule,
+          firedAt,
+          startedAt: null,
+          status: 'queued',
+          finishedAt: null,
+          fullResponse: '',
+          thinking: '',
+          provider: null,
+          model: null,
+          inputTokens: 0,
+          outputTokens: 0,
+          error: null,
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
 
     return { runId, logPath, firedAt };
   }
@@ -140,67 +154,83 @@ export async function createPackage({ rootDirectory }) {
     await agentStateManager.markAgentRun(agent.id).catch(() => {});
 
     await mkdir(runsDirectory, { recursive: true });
-    const startedAt   = new Date().toISOString();
+    const startedAt = new Date().toISOString();
     const safeAgentId = sanitizeFileStem(agent.id);
     if (!safeAgentId) return;
 
     // Re-use the queued log file when available; otherwise create a new one.
-    const runId   = preAllocated?.runId   ?? `${safeAgentId}-${startedAt.replace(/[:.]/g, '-')}`;
+    const runId = preAllocated?.runId ?? `${safeAgentId}-${startedAt.replace(/[:.]/g, '-')}`;
     const logPath = preAllocated?.logPath ?? path.join(runsDirectory, `${runId}.json`);
 
     const baseLog = {
-      id:          runId,
-      agentId:     agent.id,
-      agentName:   agent.name,
+      id: runId,
+      agentId: agent.id,
+      agentName: agent.name,
       agentAvatar: agent.avatar ?? null,
-      prompt:      agent.prompt,
-      schedule:    agent.schedule,
-      firedAt:     preAllocated?.firedAt ?? startedAt,
-      startedAt
+      prompt: agent.prompt,
+      schedule: agent.schedule,
+      firedAt: preAllocated?.firedAt ?? startedAt,
+      startedAt,
     };
 
     // Write a 'running' entry so Events shows the agent is active while the
     // tool loop is in progress.
-    await writeFile(logPath, JSON.stringify({
-      ...baseLog,
-      status:       'running',
-      finishedAt:   null,
-      fullResponse: '',
-      thinking:     '',
-      provider:     null,
-      model:        null,
-      inputTokens:  0,
-      outputTokens: 0,
-      error:        null
-    }, null, 2), 'utf8').catch(() => {});
+    await writeFile(
+      logPath,
+      JSON.stringify(
+        {
+          ...baseLog,
+          status: 'running',
+          finishedAt: null,
+          fullResponse: '',
+          thinking: '',
+          provider: null,
+          model: null,
+          inputTokens: 0,
+          outputTokens: 0,
+          error: null,
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    ).catch(() => {});
 
     // ── Delegate to the renderer tool loop ────────────────────────────────
-    let aiResult     = null;
-    let status       = 'success';
+    let aiResult = null;
+    let status = 'success';
     let errorMessage = null;
 
     try {
       aiResult = await requestAgentRun(agent, logPath);
     } catch (err) {
-      status       = 'error';
+      status = 'error';
       errorMessage = err?.message ?? String(err);
       console.error(`[Agents] Agent "${agent.name}" failed:`, err);
     }
 
     const finishedAt = new Date().toISOString();
 
-    await writeFile(logPath, JSON.stringify({
-      ...baseLog,
-      status,
-      finishedAt,
-      fullResponse: aiResult?.text          ?? '',
-      thinking:     aiResult?.thinking      ?? '',
-      provider:     aiResult?.providerLabel ?? null,
-      model:        aiResult?.modelLabel    ?? null,
-      inputTokens:  estimateTokens(aiResult?.charCountIn  ?? 0),
-      outputTokens: estimateTokens(aiResult?.charCountOut ?? 0),
-      error:        errorMessage
-    }, null, 2), 'utf8');
+    await writeFile(
+      logPath,
+      JSON.stringify(
+        {
+          ...baseLog,
+          status,
+          finishedAt,
+          fullResponse: aiResult?.text ?? '',
+          thinking: aiResult?.thinking ?? '',
+          provider: aiResult?.providerLabel ?? null,
+          model: aiResult?.modelLabel ?? null,
+          inputTokens: estimateTokens(aiResult?.charCountIn ?? 0),
+          outputTokens: estimateTokens(aiResult?.charCountOut ?? 0),
+          error: errorMessage,
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
 
     console.info(`[Agents] Agent "${agent.name}" ${status} (schedule: ${agent.schedule?.type}).`);
   }
@@ -208,13 +238,13 @@ export async function createPackage({ rootDirectory }) {
   const scheduler = createAgentScheduler({ agentsDirectory, runAgent, queueAgent });
 
   // Recover any runs that were interrupted by the app closing unexpectedly.
-  await agentStateManager.recoverInterruptedRuns().catch((err) =>
-    console.error('[Agents] Failed to recover interrupted runs:', err)
-  );
+  await agentStateManager
+    .recoverInterruptedRuns()
+    .catch((err) => console.error('[Agents] Failed to recover interrupted runs:', err));
 
-  scheduler.start({ onReady: waitForRendererReady }).catch((err) =>
-    console.error('[Agents] Scheduler start error:', err)
-  );
+  scheduler
+    .start({ onReady: waitForRendererReady })
+    .catch((err) => console.error('[Agents] Scheduler start error:', err));
 
   // ── IPC Handlers ──────────────────────────────────────────────────────────
 
@@ -230,7 +260,7 @@ export async function createPackage({ rootDirectory }) {
         handler: () => {
           resolveRendererReady?.();
           return { ok: true };
-        }
+        },
       },
 
       // ── Tool-loop reply from AgentGateway (renderer) ─────────────────────
@@ -242,7 +272,7 @@ export async function createPackage({ rootDirectory }) {
           pendingRuns.delete(id);
           pending.resolve(result);
           return { ok: true };
-        }
+        },
       },
 
       // ── Streaming progress from AgentGateway (renderer) ──────────────────
@@ -256,17 +286,25 @@ export async function createPackage({ rootDirectory }) {
           try {
             const raw = await readFile(pending.logPath, 'utf8');
             const log = JSON.parse(raw);
-            await writeFile(pending.logPath, JSON.stringify({
-              ...log,
-              fullResponse: text     ?? '',
-              streamTool:  toolName ?? null,
-              streamDepth: depth    ?? 0
-            }, null, 2), 'utf8');
+            await writeFile(
+              pending.logPath,
+              JSON.stringify(
+                {
+                  ...log,
+                  fullResponse: text ?? '',
+                  streamTool: toolName ?? null,
+                  streamDepth: depth ?? 0,
+                },
+                null,
+                2,
+              ),
+              'utf8',
+            );
             return { ok: true };
           } catch {
             return { ok: false };
           }
-        }
+        },
       },
 
       // ── Standard agent CRUD + run / list operations ──────────────────────
@@ -284,25 +322,25 @@ export async function createPackage({ rootDirectory }) {
             .filter((f) => IMAGE_EXTS.has(path.extname(f).toLowerCase()))
             .map((filename) => ({
               filename,
-              filePath: path.join(avatarsDirectory, filename)
+              filePath: path.join(avatarsDirectory, filename),
             }));
-        }
+        },
       },
       {
         channel: 'agents:save-agent',
-        handler: async (_event, agent) => agentStateManager.saveAgent(agent)
+        handler: async (_event, agent) => agentStateManager.saveAgent(agent),
       },
       {
         channel: 'agents:list-agents',
-        handler: async () => agentStateManager.listAgents()
+        handler: async () => agentStateManager.listAgents(),
       },
       {
         channel: 'agents:load-agent',
-        handler: async (_event, id) => agentStateManager.loadAgent(id)
+        handler: async (_event, id) => agentStateManager.loadAgent(id),
       },
       {
         channel: 'agents:delete-agent',
-        handler: async (_event, id) => agentStateManager.deleteAgent(id)
+        handler: async (_event, id) => agentStateManager.deleteAgent(id),
       },
       {
         channel: 'agents:run-agent',
@@ -310,16 +348,16 @@ export async function createPackage({ rootDirectory }) {
           const agent = await agentStateManager.loadAgent(id);
           await runAgent(agent);
           return { success: true };
-        }
+        },
       },
       {
         channel: 'agents:list-runs',
-        handler: async () => agentStateManager.listRuns()
+        handler: async () => agentStateManager.listRuns(),
       },
       {
         channel: 'agents:clear-runs',
-        handler: async () => agentStateManager.clearRuns()
-      }
-    ]
+        handler: async () => agentStateManager.clearRuns(),
+      },
+    ],
   };
 }

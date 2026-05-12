@@ -29,7 +29,7 @@ export function normalizeSubAgentTasks(rawTasks, { maxTasks = 8 } = {}) {
           title: `Sub-agent ${index + 1}`,
           goal,
           context: '',
-          deliverable: ''
+          deliverable: '',
         };
       }
 
@@ -38,7 +38,9 @@ export function normalizeSubAgentTasks(rawTasks, { maxTasks = 8 } = {}) {
       const title = String(task.title ?? task.name ?? `Sub-agent ${index + 1}`).trim();
       const goal = String(task.goal ?? task.objective ?? task.task ?? task.prompt ?? '').trim();
       const context = String(task.context ?? task.notes ?? task.background ?? '').trim();
-      const deliverable = String(task.deliverable ?? task.output ?? task.success_criteria ?? '').trim();
+      const deliverable = String(
+        task.deliverable ?? task.output ?? task.success_criteria ?? '',
+      ).trim();
 
       if (!goal) return null;
 
@@ -47,7 +49,7 @@ export function normalizeSubAgentTasks(rawTasks, { maxTasks = 8 } = {}) {
         title: truncate(title || `Sub-agent ${index + 1}`, 140),
         goal: truncate(goal, 1600),
         context: truncate(context, 1600),
-        deliverable: truncate(deliverable, 1000)
+        deliverable: truncate(deliverable, 1000),
       };
     })
     .filter(Boolean)

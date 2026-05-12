@@ -84,7 +84,7 @@ async function bootstrap() {
       } catch {
         // Non-fatal.
       }
-    }
+    },
   });
   autoLockTimer.start();
 
@@ -109,12 +109,12 @@ async function bootstrap() {
   let avatarImg = null;
   const channelGateway = createChannelGateway(strings.channels, {
     chatStrings: strings.chat,
-    getActivePersona: () => activePersona
+    getActivePersona: () => activePersona,
   });
 
   const agentGateway = createAgentGateway(strings.agents, {
     chatStrings: strings.chat,
-    getActivePersona: () => activePersona
+    getActivePersona: () => activePersona,
   });
 
   const routeViews = new Map();
@@ -148,15 +148,17 @@ async function bootstrap() {
   }
 
   function setActiveProject(project) {
-    activeProject = project ? {
-      id: project.id,
-      name: project.name ?? '',
-      icon: project.icon ?? '',
-      info: project.info ?? '',
-      folderPath: project.folderPath ?? project.rootPath ?? '',
-      rootPath: project.rootPath ?? project.folderPath ?? '',
-      coverImagePath: project.coverImagePath ?? ''
-    } : null;
+    activeProject = project
+      ? {
+          id: project.id,
+          name: project.name ?? '',
+          icon: project.icon ?? '',
+          info: project.info ?? '',
+          folderPath: project.folderPath ?? project.rootPath ?? '',
+          rootPath: project.rootPath ?? project.folderPath ?? '',
+          coverImagePath: project.coverImagePath ?? '',
+        }
+      : null;
 
     chatView?.setActiveProject(activeProject);
   }
@@ -181,12 +183,12 @@ async function bootstrap() {
         onActivePersonaChange: setActivePersona,
         getProfile: () => profile,
         onNavigate: showRoute,
-        onOpenSettings: showSettingsPanel
+        onOpenSettings: showSettingsPanel,
       });
       canvas.append(chatView.element);
       routeViews.set('chat', {
         element: chatView.element,
-        onShow: () => chatView.focusComposer()
+        onShow: () => chatView.focusComposer(),
       });
     }
 
@@ -200,7 +202,7 @@ async function bootstrap() {
       create: async () => {
         await ensureChatView();
         return routeViews.get('chat');
-      }
+      },
     },
     {
       id: 'history',
@@ -220,7 +222,7 @@ async function bootstrap() {
             chat.focusComposer();
           },
           getCurrentSessionId: () => chatView?.getCurrentSessionId() ?? null,
-          getActiveProject: () => activeProject
+          getActiveProject: () => activeProject,
         });
         const element = panel.build();
         canvas.append(element);
@@ -229,9 +231,9 @@ async function bootstrap() {
           onShow: async () => {
             element._search.clear();
             await panel.populateList(element._contentEl);
-          }
+          },
         };
-      }
+      },
     },
     {
       id: 'projects',
@@ -245,15 +247,15 @@ async function bootstrap() {
             await showRoute('chat');
             chat.focusComposer();
           },
-          getActiveProject: () => activeProject
+          getActiveProject: () => activeProject,
         });
         const element = panel.build();
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
         };
-      }
+      },
     },
     {
       id: 'memory',
@@ -264,9 +266,9 @@ async function bootstrap() {
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.onShow()
+          onShow: () => panel.onShow(),
         };
-      }
+      },
     },
     {
       id: 'templates',
@@ -277,9 +279,9 @@ async function bootstrap() {
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
         };
-      }
+      },
     },
     {
       id: 'agents',
@@ -290,9 +292,9 @@ async function bootstrap() {
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
         };
-      }
+      },
     },
     {
       id: 'skills',
@@ -303,9 +305,9 @@ async function bootstrap() {
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
         };
-      }
+      },
     },
     {
       id: 'personas',
@@ -313,15 +315,15 @@ async function bootstrap() {
       create: async () => {
         const panel = createPersonasPanel(strings.personas, {
           getActivePersona: () => activePersona,
-          onActivatePersona: setActivePersona
+          onActivatePersona: setActivePersona,
         });
         const element = panel.build();
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
         };
-      }
+      },
     },
     {
       id: 'marketplace',
@@ -332,9 +334,9 @@ async function bootstrap() {
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim())
+          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
         };
-      }
+      },
     },
     {
       id: 'events',
@@ -345,9 +347,9 @@ async function bootstrap() {
         canvas.append(element);
         return {
           element,
-          onShow: () => panel.populate()
+          onShow: () => panel.populate(),
         };
-      }
+      },
     },
     {
       id: 'usage',
@@ -357,10 +359,10 @@ async function bootstrap() {
         canvas.append(panel.element);
         return {
           element: panel.element,
-          onShow:  () => panel.onShow()
+          onShow: () => panel.onShow(),
         };
-      }
-    }
+      },
+    },
   ];
 
   const routeById = new Map(routeDefinitions.map((route) => [route.id, route]));
@@ -448,7 +450,11 @@ async function bootstrap() {
     } else {
       if (avatarImg) {
         // Switching from photo → initials
-        avatarInitials = createElement('span', 'chat-sidebar__avatar-initials', getInitials(profile.name));
+        avatarInitials = createElement(
+          'span',
+          'chat-sidebar__avatar-initials',
+          getInitials(profile.name),
+        );
         sidebarAvatar.replaceChildren(avatarInitials);
         avatarImg = null;
       } else if (avatarInitials) {
@@ -484,17 +490,17 @@ async function bootstrap() {
     const mainHeading = createElement('h2', 'chat-settings__main-heading');
 
     const pageLabels = {
-      user:       strings.settings.nav.user,
-      app:        strings.settings.nav.app,
-      channels:   strings.settings.nav.channels,
+      user: strings.settings.nav.user,
+      app: strings.settings.nav.app,
+      channels: strings.settings.nav.channels,
       connectors: strings.settings.nav.connectors,
-      providers:  strings.settings.nav.providers,
+      providers: strings.settings.nav.providers,
       appearance: strings.settings.nav.appearance,
-      mcp:        strings.settings.nav.mcp,
-      shortcuts:     strings.settings.nav.shortcuts,
+      mcp: strings.settings.nav.mcp,
+      shortcuts: strings.settings.nav.shortcuts,
       slashCommands: strings.settings.nav.slashCommands,
-      security:      strings.settings.nav.security,
-      about:         strings.settings.nav.about
+      security: strings.settings.nav.security,
+      about: strings.settings.nav.about,
     };
 
     header.append(createElement('h2', 'chat-settings__title', strings.settings.title));
@@ -512,17 +518,19 @@ async function bootstrap() {
       }
 
       if (id === 'user') {
-        main.append(createUserPanel(strings.user, {
-          getProfile: () => profile,
-          onProfileSaved: (savedProfile) => {
-            profile = savedProfile ?? profile;
-            syncAvatar();
-          },
-          onAvatarChanged: (avatarPath) => {
-            profile = { ...profile, avatarPath };
-            syncAvatar();
-          }
-        }));
+        main.append(
+          createUserPanel(strings.user, {
+            getProfile: () => profile,
+            onProfileSaved: (savedProfile) => {
+              profile = savedProfile ?? profile;
+              syncAvatar();
+            },
+            onAvatarChanged: (avatarPath) => {
+              profile = { ...profile, avatarPath };
+              syncAvatar();
+            },
+          }),
+        );
       }
 
       if (id === 'app') {
@@ -564,9 +572,13 @@ async function bootstrap() {
         main.append(createMCPPanel(strings.mcp));
       }
       if (id === 'security') {
-        main.append(createSecurityPanel(strings.security, {
-          onSecurityChanged: () => { void autoLockTimer.refresh(); }
-        }));
+        main.append(
+          createSecurityPanel(strings.security, {
+            onSecurityChanged: () => {
+              void autoLockTimer.refresh();
+            },
+          }),
+        );
       }
 
       if (id === 'about') {
@@ -577,17 +589,17 @@ async function bootstrap() {
     }
 
     for (const menu of [
-      { id: 'user',      label: strings.settings.nav.user,      icon: iconMarkup.tabPersonas },
-      { id: 'app',       label: strings.settings.nav.app,       icon: iconMarkup.power       },
-      { id: 'channels',   label: strings.settings.nav.channels,   icon: iconMarkup.tabChannels },
-      { id: 'connectors', label: strings.settings.nav.connectors, icon: iconMarkup.network     },
-      { id: 'providers',  label: strings.settings.nav.providers,  icon: iconMarkup.verified    },
+      { id: 'user', label: strings.settings.nav.user, icon: iconMarkup.tabPersonas },
+      { id: 'app', label: strings.settings.nav.app, icon: iconMarkup.power },
+      { id: 'channels', label: strings.settings.nav.channels, icon: iconMarkup.tabChannels },
+      { id: 'connectors', label: strings.settings.nav.connectors, icon: iconMarkup.network },
+      { id: 'providers', label: strings.settings.nav.providers, icon: iconMarkup.verified },
       { id: 'appearance', label: strings.settings.nav.appearance, icon: iconMarkup.palette },
-      { id: 'mcp',       label: strings.settings.nav.mcp,       icon: iconMarkup.network     },
-      { id: 'shortcuts',     label: strings.settings.nav.shortcuts,     icon: iconMarkup.keyboard    },
-      { id: 'slashCommands',  label: strings.settings.nav.slashCommands,  icon: iconMarkup.terminal    },
-      { id: 'security',       label: strings.settings.nav.security,       icon: iconMarkup.lock        },
-      { id: 'about',     label: strings.settings.nav.about,     icon: iconMarkup.info        }
+      { id: 'mcp', label: strings.settings.nav.mcp, icon: iconMarkup.network },
+      { id: 'shortcuts', label: strings.settings.nav.shortcuts, icon: iconMarkup.keyboard },
+      { id: 'slashCommands', label: strings.settings.nav.slashCommands, icon: iconMarkup.terminal },
+      { id: 'security', label: strings.settings.nav.security, icon: iconMarkup.lock },
+      { id: 'about', label: strings.settings.nav.about, icon: iconMarkup.info },
     ]) {
       const item = createElement('button', 'chat-settings__nav-item');
       item.type = 'button';
@@ -614,7 +626,7 @@ async function bootstrap() {
     const isActive = route.id === activeRouteId;
     const tab = createElement(
       'button',
-      `chat-sidebar__tab${isActive ? ' chat-sidebar__tab--active' : ''}`
+      `chat-sidebar__tab${isActive ? ' chat-sidebar__tab--active' : ''}`,
     );
     tab.type = 'button';
     tab.setAttribute('aria-label', strings.tabs[route.id]);
@@ -654,7 +666,11 @@ async function bootstrap() {
     avatarImg.alt = '';
     sidebarAvatar.append(avatarImg);
   } else {
-    avatarInitials = createElement('span', 'chat-sidebar__avatar-initials', getInitials(profile.name));
+    avatarInitials = createElement(
+      'span',
+      'chat-sidebar__avatar-initials',
+      getInitials(profile.name),
+    );
     sidebarAvatar.append(avatarInitials);
   }
 
@@ -698,68 +714,92 @@ async function bootstrap() {
         chat.clearConversation();
         await showRoute('chat');
         chat.focusComposer();
-      }
+      },
     },
     {
       id: 'history',
       combo: { ctrl: true, key: 'h' },
-      handler: () => { void showRoute('history'); }
+      handler: () => {
+        void showRoute('history');
+      },
     },
     {
       id: 'events',
       combo: { ctrl: true, key: 'e' },
-      handler: () => { void showRoute('events'); }
+      handler: () => {
+        void showRoute('events');
+      },
     },
     {
       id: 'projects',
       combo: { ctrl: true, shift: true, key: 'r' },
-      handler: () => { void showRoute('projects'); }
+      handler: () => {
+        void showRoute('projects');
+      },
     },
     {
       id: 'memory',
       combo: { ctrl: true, shift: true, key: 'm' },
-      handler: () => { void showRoute('memory'); }
+      handler: () => {
+        void showRoute('memory');
+      },
     },
     {
       id: 'templates',
       combo: { ctrl: true, key: 't' },
-      handler: () => { void showRoute('templates'); }
+      handler: () => {
+        void showRoute('templates');
+      },
     },
     {
       id: 'agents',
       combo: { ctrl: true, shift: true, key: 'g' },
-      handler: () => { void showRoute('agents'); }
+      handler: () => {
+        void showRoute('agents');
+      },
     },
     {
       id: 'skills',
       combo: { ctrl: true, shift: true, key: 's' },
-      handler: () => { void showRoute('skills'); }
+      handler: () => {
+        void showRoute('skills');
+      },
     },
     {
       id: 'personas',
       combo: { ctrl: true, shift: true, key: 'p' },
-      handler: () => { void showRoute('personas'); }
+      handler: () => {
+        void showRoute('personas');
+      },
     },
     {
       id: 'marketplace',
       combo: { ctrl: true, key: 'm' },
-      handler: () => { void showRoute('marketplace'); }
+      handler: () => {
+        void showRoute('marketplace');
+      },
     },
     {
       id: 'usage',
       combo: { ctrl: true, key: 'u' },
-      handler: () => { void showRoute('usage'); }
+      handler: () => {
+        void showRoute('usage');
+      },
     },
     {
       id: 'settings',
       combo: { ctrl: true, key: ',' },
-      handler: () => { void showSettingsPanel(); }
+      handler: () => {
+        void showSettingsPanel();
+      },
     },
     {
       id: 'channels',
       combo: { ctrl: true, shift: true, key: 'l' },
-      handler: () => { void showSettingsPanel(); }
-    }
+      handler: () => {
+        void showSettingsPanel();
+      },
+    },
   ]);
 }
 

@@ -19,9 +19,9 @@ export function registerShortcuts(definitions) {
   function matches(e, combo) {
     return (
       e.key.toLowerCase() === combo.key.toLowerCase() &&
-      !!e.ctrlKey  === !!combo.ctrl  &&
+      !!e.ctrlKey === !!combo.ctrl &&
       !!e.shiftKey === !!combo.shift &&
-      !!e.altKey   === !!combo.alt
+      !!e.altKey === !!combo.alt
     );
   }
 
@@ -40,6 +40,6 @@ export function registerShortcuts(definitions) {
   return {
     destroy() {
       document.removeEventListener('keydown', onKeyDown);
-    }
+    },
   };
 }

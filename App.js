@@ -13,7 +13,7 @@ function writeBootLog(message, details = '') {
     appendFileSync(
       path.join(logDirectory, 'electron-app.log'),
       `[${new Date().toISOString()}] ${message}${suffix}\n`,
-      'utf8'
+      'utf8',
     );
   } catch {
     // Ignore logging failures during boot diagnostics.

@@ -2,13 +2,13 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 
 // Maps persisted setting keys to milliseconds. Zero means disabled.
 const TIMEOUT_MS = {
-  never:   0,
-  '1min':  1  * 60_000,
-  '5min':  5  * 60_000,
+  never: 0,
+  '1min': 1 * 60_000,
+  '5min': 5 * 60_000,
   '10min': 10 * 60_000,
   '15min': 15 * 60_000,
   '30min': 30 * 60_000,
-  '1hr':   60 * 60_000
+  '1hr': 60 * 60_000,
 };
 
 const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'mousedown', 'wheel', 'touchstart'];
@@ -28,9 +28,9 @@ const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'mousedown', 'wheel', 'touchsta
 //   - the user enables or disables the lock
 
 export function createAutoLockTimer({ onLock }) {
-  let timerId   = null;
+  let timerId = null;
   let currentMs = 0;
-  let armed     = false;
+  let armed = false;
 
   // ── Timer control ────────────────────────────────────────────────────────
 
@@ -91,7 +91,7 @@ export function createAutoLockTimer({ onLock }) {
 
         const setting = await invokeIpc('security:get-auto-lock-timeout');
         currentMs = TIMEOUT_MS[setting] ?? 0;
-        armed     = true;
+        armed = true;
         arm();
       } catch {
         // Non-fatal — security package may not be available.
@@ -109,6 +109,6 @@ export function createAutoLockTimer({ onLock }) {
       armed = false;
       clearTimer();
       detachListeners();
-    }
+    },
   };
 }

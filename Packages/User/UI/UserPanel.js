@@ -103,7 +103,11 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   avatarCard.append(avatarPreview, avatarCardBody);
 
   avatarBtns.append(uploadBtn, removeBtn);
-  const avatarHeading = createElement('p', 'chat-settings__field-label', strings.avatarLabel ?? 'Profile Picture');
+  const avatarHeading = createElement(
+    'p',
+    'chat-settings__field-label',
+    strings.avatarLabel ?? 'Profile Picture',
+  );
   avatarSection.append(avatarHeading, avatarCard);
 
   // ── Name ──────────────────────────────────────────────────────────────────
@@ -114,7 +118,7 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
     placeholder: strings.namePlaceholder,
     onInput: (value) => {
       draft.name = value;
-    }
+    },
   });
 
   // ── Date of Birth ─────────────────────────────────────────────────────────
@@ -137,7 +141,11 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
   yearBox.input.value = draft.year;
   dobRow.append(dayBox.element, monthBox.element, yearBox.element);
 
-  const instructionsLabel = createElement('label', 'chat-settings__field-label', strings.instructionsLabel);
+  const instructionsLabel = createElement(
+    'label',
+    'chat-settings__field-label',
+    strings.instructionsLabel,
+  );
   const instructionsTextarea = createElement('textarea', 'chat-settings__instructions-textarea');
   instructionsTextarea.placeholder = strings.instructionsPlaceholder;
   instructionsTextarea.setAttribute('aria-label', strings.instructionsLabel);
@@ -145,10 +153,12 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
     draftInstructions = instructionsTextarea.value;
   });
 
-  void invokeIpc('user:get-custom-instructions').then((value) => {
-    draftInstructions = value ?? '';
-    instructionsTextarea.value = draftInstructions;
-  }).catch(() => {});
+  void invokeIpc('user:get-custom-instructions')
+    .then((value) => {
+      draftInstructions = value ?? '';
+      instructionsTextarea.value = draftInstructions;
+    })
+    .catch(() => {});
 
   // ── Save ──────────────────────────────────────────────────────────────────
 
@@ -167,10 +177,10 @@ export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarC
           dateOfBirth: {
             day: draft.day,
             month: draft.month,
-            year: draft.year
-          }
+            year: draft.year,
+          },
         }),
-        invokeIpc('user:save-custom-instructions', draftInstructions)
+        invokeIpc('user:save-custom-instructions', draftInstructions),
       ]);
 
       draft = createDraft(savedProfile);
@@ -212,7 +222,7 @@ function createDraft(profile) {
     name: profile?.name ?? '',
     day: dateOfBirth.day ?? '',
     month: dateOfBirth.month ?? '',
-    year: dateOfBirth.year ?? ''
+    year: dateOfBirth.year ?? '',
   };
 }
 
@@ -227,7 +237,7 @@ function createDateBox(placeholder, maxLength, onChange) {
       if (box.input.value !== cleaned) {
         box.input.value = cleaned;
       }
-    }
+    },
   });
 
   return box;

@@ -8,24 +8,27 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'personas:list-personas',
-        handler: async () => personasStateManager.listPersonas()
+        handler: async () => personasStateManager.listPersonas(),
       },
       {
         channel: 'personas:load-persona',
-        handler: async (_event, namespace, filename) => personasStateManager.loadPersona(namespace, filename)
+        handler: async (_event, namespace, filename) =>
+          personasStateManager.loadPersona(namespace, filename),
       },
       {
         channel: 'personas:delete-persona',
-        handler: async (_event, namespace, filename) => personasStateManager.deletePersona(namespace, filename)
+        handler: async (_event, namespace, filename) =>
+          personasStateManager.deletePersona(namespace, filename),
       },
       {
         channel: 'personas:get-active-persona',
-        handler: async () => personasStateManager.getActivePersona()
+        handler: async () => personasStateManager.getActivePersona(),
       },
       {
         channel: 'personas:set-active-persona',
-        handler: async (_event, namespace, filename) => personasStateManager.setActivePersonaRef(namespace, filename)
-      }
-    ]
+        handler: async (_event, namespace, filename) =>
+          personasStateManager.setActivePersonaRef(namespace, filename),
+      },
+    ],
   };
 }

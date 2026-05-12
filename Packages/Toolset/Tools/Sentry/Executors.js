@@ -8,6 +8,6 @@ export function createSentryConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeSentryChatTool
+    executeTool: executeSentryChatTool,
   });
 }

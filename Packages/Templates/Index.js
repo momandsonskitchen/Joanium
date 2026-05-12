@@ -13,20 +13,20 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'templates:save-template',
-        handler: async (_event, template) => templateStateManager.saveTemplate(template)
+        handler: async (_event, template) => templateStateManager.saveTemplate(template),
       },
       {
         channel: 'templates:list-templates',
-        handler: async () => templateStateManager.listTemplates()
+        handler: async () => templateStateManager.listTemplates(),
       },
       {
         channel: 'templates:load-template',
-        handler: async (_event, id) => templateStateManager.loadTemplate(id)
+        handler: async (_event, id) => templateStateManager.loadTemplate(id),
       },
       {
         channel: 'templates:delete-template',
-        handler: async (_event, id) => templateStateManager.deleteTemplate(id)
-      }
-    ]
+        handler: async (_event, id) => templateStateManager.deleteTemplate(id),
+      },
+    ],
   };
 }

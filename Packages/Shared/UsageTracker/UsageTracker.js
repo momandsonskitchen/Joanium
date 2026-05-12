@@ -23,25 +23,25 @@ function getUsageFilePath(rootDirectory) {
 
 function todayKey() {
   const now = new Date();
-  const y   = now.getFullYear();
-  const m   = String(now.getMonth() + 1).padStart(2, '0');
-  const d   = String(now.getDate()).padStart(2, '0');
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
 export function createEmptyUsageStore() {
   return {
     // daily[YYYY-MM-DD] = { tokensIn, tokensOut, messages }
-    daily:  {},
+    daily: {},
     // models[modelId]   = { tokensIn, tokensOut, messages, label, providerLabel }
     models: {},
     // running totals across all time
     totals: {
-      tokensIn:  0,
+      tokensIn: 0,
       tokensOut: 0,
-      messages:  0,
-      sessions:  0
-    }
+      messages: 0,
+      sessions: 0,
+    },
   };
 }
 
@@ -52,9 +52,9 @@ function sanitizeNumber(v) {
 function sanitizeDailyEntry(entry) {
   if (!entry || typeof entry !== 'object') return { tokensIn: 0, tokensOut: 0, messages: 0 };
   return {
-    tokensIn:  sanitizeNumber(entry.tokensIn),
+    tokensIn: sanitizeNumber(entry.tokensIn),
     tokensOut: sanitizeNumber(entry.tokensOut),
-    messages:  sanitizeNumber(entry.messages)
+    messages: sanitizeNumber(entry.messages),
   };
 }
 
@@ -63,11 +63,11 @@ function sanitizeModelEntry(entry) {
     return { tokensIn: 0, tokensOut: 0, messages: 0, label: '', providerLabel: '' };
   }
   return {
-    tokensIn:      sanitizeNumber(entry.tokensIn),
-    tokensOut:     sanitizeNumber(entry.tokensOut),
-    messages:      sanitizeNumber(entry.messages),
-    label:         typeof entry.label         === 'string' ? entry.label         : '',
-    providerLabel: typeof entry.providerLabel === 'string' ? entry.providerLabel : ''
+    tokensIn: sanitizeNumber(entry.tokensIn),
+    tokensOut: sanitizeNumber(entry.tokensOut),
+    messages: sanitizeNumber(entry.messages),
+    label: typeof entry.label === 'string' ? entry.label : '',
+    providerLabel: typeof entry.providerLabel === 'string' ? entry.providerLabel : '',
   };
 }
 
@@ -90,10 +90,10 @@ function sanitizeRawStore(raw) {
 
   if (raw?.totals && typeof raw.totals === 'object') {
     store.totals = {
-      tokensIn:  sanitizeNumber(raw.totals.tokensIn),
+      tokensIn: sanitizeNumber(raw.totals.tokensIn),
       tokensOut: sanitizeNumber(raw.totals.tokensOut),
-      messages:  sanitizeNumber(raw.totals.messages),
-      sessions:  sanitizeNumber(raw.totals.sessions)
+      messages: sanitizeNumber(raw.totals.messages),
+      sessions: sanitizeNumber(raw.totals.sessions),
     };
   }
 
@@ -122,45 +122,53 @@ async function persistStore(rootDirectory, store) {
 // ---------------------------------------------------------------------------
 
 export function createUsageTracker({ rootDirectory }) {
-
   /**
    * Record one completed AI exchange.
    * @param {{ tokensIn: number, tokensOut: number, modelId: string|null,
    *           modelLabel: string|null, providerLabel: string|null,
    *           isNewSession: boolean }} params
    */
-  async function recordExchange({ tokensIn, tokensOut, modelId, modelLabel, providerLabel, isNewSession }) {
+  async function recordExchange({
+    tokensIn,
+    tokensOut,
+    modelId,
+    modelLabel,
+    providerLabel,
+    isNewSession,
+  }) {
     const store = await readRawStore(rootDirectory);
-    const day   = todayKey();
+    const day = todayKey();
 
     // Daily bucket
     if (!store.daily[day]) {
       store.daily[day] = { tokensIn: 0, tokensOut: 0, messages: 0 };
     }
-    store.daily[day].tokensIn  += tokensIn;
+    store.daily[day].tokensIn += tokensIn;
     store.daily[day].tokensOut += tokensOut;
-    store.daily[day].messages  += 1;
+    store.daily[day].messages += 1;
 
     // Per-model bucket
     if (modelId) {
       if (!store.models[modelId]) {
         store.models[modelId] = {
-          tokensIn: 0, tokensOut: 0, messages: 0,
-          label:         modelLabel    ?? modelId,
-          providerLabel: providerLabel ?? ''
+          tokensIn: 0,
+          tokensOut: 0,
+          messages: 0,
+          label: modelLabel ?? modelId,
+          providerLabel: providerLabel ?? '',
         };
       }
-      store.models[modelId].tokensIn  += tokensIn;
+      store.models[modelId].tokensIn += tokensIn;
       store.models[modelId].tokensOut += tokensOut;
-      store.models[modelId].messages  += 1;
-      if (modelLabel)    store.models[modelId].label         = modelLabel;
+      store.models[modelId].messages += 1;
+      if (modelLabel) store.models[modelId].label = modelLabel;
       if (providerLabel) store.models[modelId].providerLabel = providerLabel;
     }
 
     // Running totals
-    store.totals.tokensIn  += tokensIn;
+    store.totals.tokensIn += tokensIn;
     store.totals.tokensOut += tokensOut;
-    store.totals.messages  += 1;
+    store.totals.messages += 1;
     if (isNewSession) store.totals.sessions += 1;
 
     await persistStore(rootDirectory, store);

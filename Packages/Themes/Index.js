@@ -8,12 +8,12 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'themes:get',
-        handler: async () => themeStateManager.readThemeState()
+        handler: async () => themeStateManager.readThemeState(),
       },
       {
         channel: 'themes:save',
-        handler: async (_event, state) => themeStateManager.writeThemeState(state)
-      }
-    ]
+        handler: async (_event, state) => themeStateManager.writeThemeState(state),
+      },
+    ],
   };
 }

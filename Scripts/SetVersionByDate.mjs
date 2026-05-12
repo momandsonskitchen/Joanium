@@ -17,13 +17,13 @@ import fs from 'fs';
 import path from 'path';
 
 function dateBase(date) {
-  const year  = date.getFullYear();
+  const year = date.getFullYear();
   const month = date.getMonth() + 1;
-  const day   = date.getDate();
+  const day = date.getDate();
   return `${year}.${month * 100 + day}`;
 }
 
-const repoRoot    = process.cwd();
+const repoRoot = process.cwd();
 const manifestPath = path.join(repoRoot, 'package.json');
 
 // Open via descriptor to avoid a TOCTOU race (CWE-367).
@@ -42,7 +42,7 @@ const base = dateBase(new Date()); // e.g. "2026.406"
 
 try {
   const manifestRaw = fs.readFileSync(fd, 'utf8');
-  const manifest    = JSON.parse(manifestRaw);
+  const manifest = JSON.parse(manifestRaw);
   const prevVersion = manifest.version ?? ''; // e.g. "2026.406.0"
 
   // Same day → keep existing patch (idempotent local builds).

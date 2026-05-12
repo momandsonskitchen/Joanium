@@ -66,7 +66,7 @@ export function mountBirthdayCard(strings, { profile }) {
   markShownToday();
 
   const firstName = (profile.name ?? '').split(' ')[0].trim() || profile.name;
-  const age       = calculateAge(profile.dateOfBirth);
+  const age = calculateAge(profile.dateOfBirth);
   const hasAvatar = Boolean(profile.avatarPath);
 
   // ── Overlay ──────────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ export function mountBirthdayCard(strings, { profile }) {
   // Avatar — only rendered when the user has set a photo
   if (hasAvatar) {
     const avatarWrap = createElement('div', 'birthday-avatar');
-    const avatarImg  = createElement('img', 'birthday-avatar-img');
+    const avatarImg = createElement('img', 'birthday-avatar-img');
     avatarImg.src = toFileUrl(profile.avatarPath) + '?t=' + Date.now();
     avatarImg.alt = '';
     avatarWrap.append(avatarImg);
@@ -102,7 +102,7 @@ export function mountBirthdayCard(strings, { profile }) {
     const ageBadge = createElement(
       'span',
       'birthday-age-badge',
-      formatText(strings.turningAge, { age: String(age) })
+      formatText(strings.turningAge, { age: String(age) }),
     );
     card.append(ageBadge);
   }

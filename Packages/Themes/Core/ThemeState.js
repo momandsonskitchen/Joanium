@@ -2,7 +2,7 @@ import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js
 
 const DEFAULT_THEME_STATE = Object.freeze({
   mode: 'system',
-  motion: 'full'
+  motion: 'full',
 });
 
 const THEME_MODES = new Set(['system', 'light', 'dark']);
@@ -29,6 +29,6 @@ export function createThemeStateManager({ rootDirectory }) {
 
   return {
     readThemeState,
-    writeThemeState
+    writeThemeState,
   };
 }

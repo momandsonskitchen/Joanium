@@ -30,20 +30,20 @@ export async function createPackage({ rootDirectory }) {
           return servers.map((server) => ({
             ...server,
             connected: registry.isConnected(server.id),
-            toolCount: connected.find((item) => item.id === server.id)?.toolCount ?? 0
+            toolCount: connected.find((item) => item.id === server.id)?.toolCount ?? 0,
           }));
-        }
+        },
       },
       {
         channel: 'mcp:save-server',
-        handler: async (_event, serverConfig) => stateManager.saveServer(serverConfig)
+        handler: async (_event, serverConfig) => stateManager.saveServer(serverConfig),
       },
       {
         channel: 'mcp:remove-server',
         handler: async (_event, id) => {
           await registry.disconnect(id);
           return stateManager.removeServer(id);
-        }
+        },
       },
       {
         channel: 'mcp:set-enabled',
@@ -56,9 +56,9 @@ export async function createPackage({ rootDirectory }) {
           }
           return {
             ...server,
-            connected: registry.isConnected(server.id)
+            connected: registry.isConnected(server.id),
           };
-        }
+        },
       },
       {
         channel: 'mcp:connect-server',
@@ -68,23 +68,24 @@ export async function createPackage({ rootDirectory }) {
           if (!server) throw new Error('MCP server not found.');
           const result = await registry.connect(server);
           return { ok: true, ...result };
-        }
+        },
       },
       {
         channel: 'mcp:disconnect-server',
         handler: async (_event, id) => {
           await registry.disconnect(id);
           return { ok: true };
-        }
+        },
       },
       {
         channel: 'mcp:list-tools',
-        handler: async () => registry.listTools()
+        handler: async () => registry.listTools(),
       },
       {
         channel: 'mcp:call-tool',
-        handler: async (_event, serverId, toolName, args) => registry.callTool(serverId, toolName, args)
-      }
-    ]
+        handler: async (_event, serverId, toolName, args) =>
+          registry.callTool(serverId, toolName, args),
+      },
+    ],
   };
 }

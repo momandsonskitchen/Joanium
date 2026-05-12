@@ -6,7 +6,6 @@ import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
-
 export function createSkillsPanel(strings) {
   let panel = null;
   let _listEl = null;
@@ -23,13 +22,13 @@ export function createSkillsPanel(strings) {
     const body = createElement('div', 'chat-skills__body');
 
     // Left column — frosted-glass card containing search + scrollable list
-    const listCol  = createElement('div', 'chat-skills__list-col');
+    const listCol = createElement('div', 'chat-skills__list-col');
     const listCard = createElement('div', 'chat-skills__list-card');
 
     const searchWrap = createElement('div', 'chat-skills__list-search');
     _search = createSearchBar({
       placeholder: strings.searchPlaceholder,
-      onChange: (value) => void populateList(_listEl, value.trim())
+      onChange: (value) => void populateList(_listEl, value.trim()),
     });
     _search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(_search.element);
@@ -42,7 +41,11 @@ export function createSkillsPanel(strings) {
     const viewerCol = createElement('div', 'chat-skills__viewer-col');
     _viewerEl = createElement('div', 'chat-skills__viewer-card');
     _viewerEl.append(
-      createElement('div', 'chat-skills__viewer-empty', strings.selectPrompt ?? 'Select a skill to read its content')
+      createElement(
+        'div',
+        'chat-skills__viewer-empty',
+        strings.selectPrompt ?? 'Select a skill to read its content',
+      ),
     );
     viewerCol.append(_viewerEl);
 
@@ -71,10 +74,11 @@ export function createSkillsPanel(strings) {
 
     const q = collapseWhitespace(query).toLowerCase();
     const filtered = q
-      ? skills.filter(s =>
-          collapseWhitespace(s.name).toLowerCase().includes(q) ||
-          collapseWhitespace(s.description).toLowerCase().includes(q) ||
-          collapseWhitespace(s.namespace).toLowerCase().includes(q)
+      ? skills.filter(
+          (s) =>
+            collapseWhitespace(s.name).toLowerCase().includes(q) ||
+            collapseWhitespace(s.description).toLowerCase().includes(q) ||
+            collapseWhitespace(s.namespace).toLowerCase().includes(q),
         )
       : skills;
 
@@ -84,7 +88,11 @@ export function createSkillsPanel(strings) {
       const empty = createElement('div', 'chat-skills__empty');
       empty.append(
         createElement('p', 'chat-skills__empty-title', q ? strings.noResults : strings.empty),
-        createElement('p', 'chat-skills__empty-hint', q ? strings.noResultsHint : strings.emptyHint)
+        createElement(
+          'p',
+          'chat-skills__empty-hint',
+          q ? strings.noResultsHint : strings.emptyHint,
+        ),
       );
       listEl.append(empty);
       return;
@@ -117,7 +125,7 @@ export function createSkillsPanel(strings) {
     const author = createElement('div', 'chat-skills__viewer-author');
     author.append(
       createElement('span', 'chat-skills__viewer-author-label', strings.author ?? 'Author'),
-      createElement('span', 'chat-skills__viewer-author-value', fullSkill.namespace)
+      createElement('span', 'chat-skills__viewer-author-value', fullSkill.namespace),
     );
     headerLeft.append(author);
     header.append(headerLeft);
@@ -125,11 +133,11 @@ export function createSkillsPanel(strings) {
 
     // ── Trigger meta ───────────────────────────────────────────────────────
     if (fullSkill.trigger) {
-      const meta    = createElement('div', 'chat-skills__viewer-meta');
+      const meta = createElement('div', 'chat-skills__viewer-meta');
       const trigger = createElement('div', 'chat-skills__viewer-trigger');
       trigger.append(
         createElement('span', 'chat-skills__viewer-trigger-label', strings.trigger),
-        createElement('span', 'chat-skills__viewer-trigger-value', fullSkill.trigger)
+        createElement('span', 'chat-skills__viewer-trigger-value', fullSkill.trigger),
       );
       meta.append(trigger);
       _viewerEl.append(meta);
@@ -144,7 +152,9 @@ export function createSkillsPanel(strings) {
   function buildCard(skill, listEl) {
     const card = createElement('div', 'chat-skills__card');
     card.addEventListener('click', () => {
-      listEl.querySelectorAll('.chat-skills__card--active').forEach(el => el.classList.remove('chat-skills__card--active'));
+      listEl
+        .querySelectorAll('.chat-skills__card--active')
+        .forEach((el) => el.classList.remove('chat-skills__card--active'));
       card.classList.add('chat-skills__card--active');
       void populateViewer(skill);
     });
@@ -157,7 +167,10 @@ export function createSkillsPanel(strings) {
 
     const actions = createElement('div', 'chat-skills__card-actions');
     if (!skill.protected) {
-      const deleteBtn = createElement('button', 'chat-skills__card-btn chat-skills__card-btn--danger');
+      const deleteBtn = createElement(
+        'button',
+        'chat-skills__card-btn chat-skills__card-btn--danger',
+      );
       deleteBtn.type = 'button';
       deleteBtn.setAttribute('aria-label', strings.delete);
       deleteBtn.append(createIcon('trash', 'chat-skills__card-btn-icon'));
@@ -179,6 +192,6 @@ export function createSkillsPanel(strings) {
 
   return {
     build,
-    populateList
+    populateList,
   };
 }

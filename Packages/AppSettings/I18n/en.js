@@ -6,47 +6,47 @@ const en = {
   options: {
     runOnStartup: {
       label: 'Open at login',
-      description: 'Start Joanium automatically when you sign in.'
+      description: 'Start Joanium automatically when you sign in.',
     },
     systemTray: {
       label: 'Keep in system tray',
-      description: 'Keep Joanium running after the last window is closed.'
+      description: 'Keep Joanium running after the last window is closed.',
     },
     keepAwake: {
       label: 'Keep awake',
-      description: 'Prevent the app process from being suspended while Joanium is running.'
+      description: 'Prevent the app process from being suspended while Joanium is running.',
     },
     completionSound: {
       label: 'Completion sound',
-      description: 'Play a sound when a response finishes.'
-    }
+      description: 'Play a sound when a response finishes.',
+    },
   },
   defaultView: {
     label: 'Default view',
     description: 'The view shown when Joanium opens.',
     views: {
-      chat:        'Chat',
-      history:     'History',
-      projects:    'Projects',
-      agents:      'Agents',
-      skills:      'Skills',
-      personas:    'Personas',
+      chat: 'Chat',
+      history: 'History',
+      projects: 'Projects',
+      agents: 'Agents',
+      skills: 'Skills',
+      personas: 'Personas',
       marketplace: 'Marketplace',
-      events:      'Events',
-      usage:       'Usage'
-    }
+      events: 'Events',
+      usage: 'Usage',
+    },
   },
   defaultModel: {
     label: 'Default model',
-    description: 'The AI model used by default when starting a new conversation.'
+    description: 'The AI model used by default when starting a new conversation.',
   },
   runtime: {
     title: 'Runtime',
     tray: 'Tray',
     keepAwake: 'Keep awake',
     active: 'Active',
-    inactive: 'Inactive'
-  }
+    inactive: 'Inactive',
+  },
 };
 
 export default en;

@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createJiraToolHandlers({ rootDirectory }),
-      ...createJiraConnectorToolHandlers({ rootDirectory })
+      ...createJiraConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildJiraPromptSection()]
+    promptSections: [buildJiraPromptSection()],
   };
 }
 

@@ -37,7 +37,7 @@
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.58);
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
     0 10px 28px rgba(130, 95, 65, 0.07);
   backdrop-filter: blur(14px) saturate(1.35);
@@ -46,7 +46,7 @@
 
 .providers-card--connected {
   box-shadow:
-    inset 0 0 0 1px rgba(76, 163, 112, 0.20),
+    inset 0 0 0 1px rgba(76, 163, 112, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
     0 12px 30px rgba(70, 135, 90, 0.08);
 }
@@ -71,7 +71,7 @@
   flex-shrink: 0;
   background: var(--provider-glow, rgba(255, 255, 255, 0.72));
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     0 4px 12px rgba(80, 60, 45, 0.08);
 }
 
@@ -121,12 +121,12 @@
 }
 
 .providers-card__type--cloud {
-  background: rgba(130, 100, 230, 0.10);
+  background: rgba(130, 100, 230, 0.1);
   color: rgba(100, 70, 200, 0.85);
 }
 
 .providers-card__type--local {
-  background: rgba(44, 171, 104, 0.10);
+  background: rgba(44, 171, 104, 0.1);
   color: #218556;
 }
 
@@ -143,7 +143,7 @@
   align-items: center;
   padding: 0 9px;
   border-radius: var(--radius-pill);
-  background: rgba(140, 120, 105, 0.10);
+  background: rgba(140, 120, 105, 0.1);
   color: var(--color-chat-text-muted);
   font-size: 11px;
   font-weight: 650;
@@ -164,7 +164,9 @@
   border-radius: 10px;
   color: var(--color-chat-text-muted);
   flex-shrink: 0;
-  transition: background-color 140ms ease, color 140ms ease;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
 }
 
 .providers-card__expand:hover {
@@ -248,7 +250,9 @@
     0 5px 12px rgba(130, 95, 65, 0.04);
   color: var(--color-chat-text-title);
   font-size: 13px;
-  transition: background-color 140ms ease, box-shadow 140ms ease;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .providers-field__input::placeholder {
@@ -258,7 +262,7 @@
 .providers-field__input:focus {
   background: rgba(255, 255, 255, 0.86);
   box-shadow:
-    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.30),
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.3),
     0 10px 24px rgba(130, 95, 65, 0.07);
 }
 
@@ -319,7 +323,10 @@
   font-size: 13px;
   font-weight: 650;
   letter-spacing: -0.01em;
-  transition: transform 120ms ease, opacity 140ms ease, background-color 140ms ease;
+  transition:
+    transform 120ms ease,
+    opacity 140ms ease,
+    background-color 140ms ease;
 }
 
 .providers-card__primary {
@@ -351,6 +358,12 @@
   line-height: 1.35;
 }
 
-.providers-card__feedback--info    { color: var(--color-chat-text-muted); }
-.providers-card__feedback--success { color: #218556; }
-.providers-card__feedback--error   { color: #b14539; }
+.providers-card__feedback--info {
+  color: var(--color-chat-text-muted);
+}
+.providers-card__feedback--success {
+  color: #218556;
+}
+.providers-card__feedback--error {
+  color: #b14539;
+}

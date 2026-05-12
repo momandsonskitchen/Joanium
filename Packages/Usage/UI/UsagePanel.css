@@ -305,7 +305,9 @@
   width: 100%;
   height: 18px;
   border-radius: 3px;
-  transition: transform 100ms ease, opacity 100ms ease;
+  transition:
+    transform 100ms ease,
+    opacity 100ms ease;
   cursor: default;
 }
 
@@ -336,7 +338,7 @@
 
 .usage-heatmap__cell--l4 {
   background: rgba(var(--color-accent-rgb), 0.92);
-  box-shadow: 0 0 6px rgba(var(--color-accent-rgb), 0.40);
+  box-shadow: 0 0 6px rgba(var(--color-accent-rgb), 0.4);
 }
 
 .usage-heatmap__legend {
@@ -386,7 +388,8 @@
 
 /* ── Model breakdown table ────────────────────────────────────────────────── */
 
-.usage-models {}
+.usage-models {
+}
 
 .usage-models__table {
   border-radius: 16px;
@@ -469,7 +472,7 @@
   margin-top: 5px;
   height: 3px;
   border-radius: 2px;
-  background: rgba(var(--color-accent-rgb), 0.10);
+  background: rgba(var(--color-accent-rgb), 0.1);
   overflow: hidden;
 }
 
@@ -497,7 +500,7 @@
   font-weight: 640;
   letter-spacing: -0.01em;
   color: rgba(var(--color-accent-rgb), 1);
-  background: rgba(var(--color-accent-rgb), 0.10);
+  background: rgba(var(--color-accent-rgb), 0.1);
 }
 
 .usage-models__empty {

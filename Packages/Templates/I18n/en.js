@@ -21,7 +21,7 @@ const en = {
   emptyHint: 'Add your first template to get started.',
   edit: 'Edit',
   delete: 'Delete',
-  created: 'Created {date}'
+  created: 'Created {date}',
 };
 
 export default en;

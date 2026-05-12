@@ -1,5 +1,5 @@
-@import "../../Shared/SearchBar/SearchBar.css";
-@import "../../Shared/PanelHeader/PanelHeader.css";
+@import '../../Shared/SearchBar/SearchBar.css';
+@import '../../Shared/PanelHeader/PanelHeader.css';
 
 .chat-history {
   position: absolute;
@@ -31,7 +31,7 @@
 }
 
 .chat-history__new-btn:hover {
-  opacity: 0.90;
+  opacity: 0.9;
   transform: translateY(-1px);
   box-shadow:
     0 22px 52px rgba(var(--color-accent-rgb), 0.34),
@@ -77,16 +77,16 @@
 .chat-history .joanium-search__input {
   background: rgba(255, 255, 255, 0.72);
   box-shadow:
-    inset 0 0 0 1px rgba(170, 134, 104, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    inset 0 0 0 1px rgba(170, 134, 104, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
     0 4px 14px rgba(130, 95, 65, 0.06);
 }
 
 .chat-history .joanium-search__input:focus {
-  background: rgba(255, 255, 255, 0.90);
+  background: rgba(255, 255, 255, 0.9);
   box-shadow:
     inset 0 0 0 1.5px rgba(170, 134, 104, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 6px 22px rgba(130, 95, 65, 0.08);
 }
 
@@ -95,12 +95,12 @@
 }
 
 .chat-history .joanium-search__clear {
-  background: rgba(220, 200, 180, 0.30);
+  background: rgba(220, 200, 180, 0.3);
   color: var(--color-chat-text-muted);
 }
 
 .chat-history .joanium-search__clear:hover {
-  background: rgba(200, 180, 158, 0.40);
+  background: rgba(200, 180, 158, 0.4);
   color: var(--color-chat-text-secondary);
 }
 
@@ -122,12 +122,21 @@
   animation: chat-history-shimmer 1.4s ease-in-out infinite;
 }
 
-.chat-history__skeleton:nth-child(2) { animation-delay: 0.12s; }
-.chat-history__skeleton:nth-child(3) { animation-delay: 0.24s; }
+.chat-history__skeleton:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.chat-history__skeleton:nth-child(3) {
+  animation-delay: 0.24s;
+}
 
 @keyframes chat-history-shimmer {
-  0%, 100% { opacity: 0.45; }
-  50%       { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ── Date group sections ────────────────────────────────────────────────── */
@@ -168,7 +177,9 @@
 
 .chat-history__card:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-chat-card), 0 6px 20px rgba(100, 60, 140, 0.08);
+  box-shadow:
+    var(--shadow-chat-card),
+    0 6px 20px rgba(100, 60, 140, 0.08);
 }
 
 /* Body — primary click target */

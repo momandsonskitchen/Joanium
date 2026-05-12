@@ -9,7 +9,7 @@ export function createToolPackage({ rootDirectory }) {
     connectors: [strings.connector],
     toolDefinitions: TOOL_DEFINITIONS,
     toolHandlers: createOpenWeatherToolHandlers({ rootDirectory }),
-    promptSections: [buildOpenWeatherPromptSection()]
+    promptSections: [buildOpenWeatherPromptSection()],
   };
 }
 

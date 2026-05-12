@@ -1,4 +1,4 @@
-@import "../Common/Common.css";
+@import '../Common/Common.css';
 
 /* ════════════════════════════════════════════════════════════════════════════
    Joanium Custom Scrollbar  —  Single Source of Truth
@@ -20,7 +20,6 @@
       same thin pill-shaped accent-purple look without JS overhead.
    ════════════════════════════════════════════════════════════════════════════ */
 
-
 /* ── Accent-purple scrollbar design tokens ───────────────────────────────────
    Extracted from the Usage panel scrollbar design (image reference).
    Override in a theme block (e.g. ThemePanel dark mode) via:
@@ -28,11 +27,10 @@
    ──────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --scrollbar-accent-track:       rgba(200, 116, 217, 0.07);
-  --scrollbar-accent-thumb:       rgba(200, 116, 217, 0.30);
+  --scrollbar-accent-track: rgba(200, 116, 217, 0.07);
+  --scrollbar-accent-thumb: rgba(200, 116, 217, 0.3);
   --scrollbar-accent-thumb-hover: rgba(200, 116, 217, 0.54);
 }
-
 
 /* ── 1. JS-injected scrollbar ────────────────────────────────────────────────
    attachCustomScrollbar() injects .joanium-custom-scrollbar (track) and
@@ -70,7 +68,6 @@
 .joanium-custom-scrollbar__thumb.is-dragging {
   background: var(--scrollbar-accent-thumb-hover);
 }
-
 
 /* ── 2. Native CSS scrollbar ─────────────────────────────────────────────────
    .joanium-scrollbar — utility class, apply to any overflow-y:auto element.
@@ -187,7 +184,6 @@
 .md-pre::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-accent-thumb-hover);
 }
-
 
 /* ── 3. Hidden scrollbars ────────────────────────────────────────────────────
    Elements that scroll internally but must never show a scrollbar track.

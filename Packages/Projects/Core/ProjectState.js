@@ -17,7 +17,7 @@ export function createProjectStateManager({ rootDirectory }) {
         ...project,
         id: safeId,
         folderPath,
-        rootPath: folderPath
+        rootPath: folderPath,
       };
       const projectDir = path.join(projectsDirectory, safeId);
       await mkdir(path.join(projectDir, 'Chats'), { recursive: true });
@@ -26,8 +26,9 @@ export function createProjectStateManager({ rootDirectory }) {
         const resolvedProjectDir = path.resolve(projectDir).toLowerCase();
         const resolvedCoverPath = path.resolve(record.coverImagePath).toLowerCase();
         const projectDirPrefix = `${resolvedProjectDir}${path.sep}`;
-        const isExternal = resolvedCoverPath !== resolvedProjectDir
-          && !resolvedCoverPath.startsWith(projectDirPrefix);
+        const isExternal =
+          resolvedCoverPath !== resolvedProjectDir &&
+          !resolvedCoverPath.startsWith(projectDirPrefix);
 
         if (isExternal) {
           try {
@@ -82,7 +83,7 @@ export function createProjectStateManager({ rootDirectory }) {
             rootPath: project.rootPath ?? project.folderPath ?? '',
             coverImagePath: project.coverImagePath ?? '',
             createdAt: project.createdAt,
-            updatedAt: project.updatedAt
+            updatedAt: project.updatedAt,
           });
         } catch {
           // Skip corrupt files silently.
@@ -90,7 +91,8 @@ export function createProjectStateManager({ rootDirectory }) {
       }
 
       return projects.sort(
-        (a, b) => new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0)
+        (a, b) =>
+          new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0),
       );
     },
 
@@ -118,6 +120,6 @@ export function createProjectStateManager({ rootDirectory }) {
         const filePath = path.join(projectsDirectory, `${safeId}.json`);
         await unlink(filePath).catch(() => {});
       }
-    }
+    },
   };
 }

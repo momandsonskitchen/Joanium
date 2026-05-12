@@ -1,14 +1,14 @@
-@import "../../Shared/Common/Common.css";
-@import "../../Shared/Button/Button.css";
-@import "../../Shared/Checkbox/Checkbox.css";
-@import "../../Shared/InputBox/InputBox.css";
-@import "../../Shared/ApiKeyInput/ApiKeyInput.css";
-@import "../../Shared/ProviderScroller/ProviderScroller.css";
-@import "../../Shared/CustomScrollbar/CustomScrollbar.css";
-@import "../../Shared/TagSelector/TagSelector.css";
-@import "../../Shared/DropDown/DropDown.css";
-@import "../../Shared/Modal/Modal.css";
-@import "../../Shared/LogoLoader/LogoLoader.css";
+@import '../../Shared/Common/Common.css';
+@import '../../Shared/Button/Button.css';
+@import '../../Shared/Checkbox/Checkbox.css';
+@import '../../Shared/InputBox/InputBox.css';
+@import '../../Shared/ApiKeyInput/ApiKeyInput.css';
+@import '../../Shared/ProviderScroller/ProviderScroller.css';
+@import '../../Shared/CustomScrollbar/CustomScrollbar.css';
+@import '../../Shared/TagSelector/TagSelector.css';
+@import '../../Shared/DropDown/DropDown.css';
+@import '../../Shared/Modal/Modal.css';
+@import '../../Shared/LogoLoader/LogoLoader.css';
 
 :root {
   color-scheme: light;
@@ -42,7 +42,7 @@ body {
 
 body::before,
 body::after {
-  content: "";
+  content: '';
   position: fixed;
   border-radius: var(--radius-pill);
   filter: blur(22px);

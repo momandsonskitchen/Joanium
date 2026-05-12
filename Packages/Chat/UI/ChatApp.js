@@ -1,4 +1,12 @@
-import { getTimeGreetings, isBirthdayToday, getBirthdayGreeting, isChristmasToday, getChristmasGreeting, isNewYearToday, getNewYearGreeting } from '../../../Datasets/Messages.js';
+import {
+  getTimeGreetings,
+  isBirthdayToday,
+  getBirthdayGreeting,
+  isChristmasToday,
+  getChristmasGreeting,
+  isNewYearToday,
+  getNewYearGreeting,
+} from '../../../Datasets/Messages.js';
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
@@ -8,7 +16,11 @@ import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js';
-import { initCompletionSound, markCompletionSoundAborted, playCompletionSound } from './CompletionSound.js';
+import {
+  initCompletionSound,
+  markCompletionSoundAborted,
+  playCompletionSound,
+} from './CompletionSound.js';
 
 function getFirstName(name, fallback) {
   const normalized = collapseWhitespace(name);
@@ -45,16 +57,21 @@ function stripMarkdown(text) {
  */
 function stripNativeToolCalls(text) {
   if (!text) return text;
-  return text
-    // Namespaced XML tags: <vendor:anything>...</vendor:anything>
-    .replace(/<[a-z][a-z0-9]*:[a-z][a-z0-9_-]*[\s\S]*?<\/[a-z][a-z0-9]*:[a-z][a-z0-9_-]*>/gi, '')
-    // Common unnamespaced tool-call wrapper elements (complete pairs only)
-    .replace(/<(?:tool_call|tool_use|function_call|invoke|tool_calls)[^>]*>[\s\S]*?<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi, '')
-    // Orphaned opening tags of the same set (mid-stream cutoff)
-    .replace(/<(?:tool_call|tool_use|function_call|invoke|tool_calls)[^>]*>/gi, '')
-    // Orphaned closing tags
-    .replace(/<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi, '')
-    .trim();
+  return (
+    text
+      // Namespaced XML tags: <vendor:anything>...</vendor:anything>
+      .replace(/<[a-z][a-z0-9]*:[a-z][a-z0-9_-]*[\s\S]*?<\/[a-z][a-z0-9]*:[a-z][a-z0-9_-]*>/gi, '')
+      // Common unnamespaced tool-call wrapper elements (complete pairs only)
+      .replace(
+        /<(?:tool_call|tool_use|function_call|invoke|tool_calls)[^>]*>[\s\S]*?<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi,
+        '',
+      )
+      // Orphaned opening tags of the same set (mid-stream cutoff)
+      .replace(/<(?:tool_call|tool_use|function_call|invoke|tool_calls)[^>]*>/gi, '')
+      // Orphaned closing tags
+      .replace(/<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi, '')
+      .trim()
+  );
 }
 
 /**
@@ -142,7 +159,11 @@ function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, strings })
   }
 
   if (durationMs > 0 && strings) {
-    const durationEl = createElement('span', 'chat-message__duration', formatText(strings.composer.workedFor, { duration: formatDuration(durationMs) }));
+    const durationEl = createElement(
+      'span',
+      'chat-message__duration',
+      formatText(strings.composer.workedFor, { duration: formatDuration(durationMs) }),
+    );
     actions.append(durationEl);
   }
 
@@ -157,8 +178,10 @@ function createMessageElement(message, strings, { onCopy, onRetry } = {}) {
       `chat-message--${message.role}`,
       message.streaming ? 'chat-message--streaming' : '',
       message.error ? 'chat-message--error' : '',
-      message.stopped ? 'chat-message--stopped' : ''
-    ].filter(Boolean).join(' ')
+      message.stopped ? 'chat-message--stopped' : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
   );
 
   if (message.role === 'assistant') {
@@ -169,7 +192,7 @@ function createMessageElement(message, strings, { onCopy, onRetry } = {}) {
     const thinkingSummary = createElement('summary', 'chat-message__thinking-summary');
     thinkingSummary.append(
       createIcon('thinking', 'chat-message__thinking-icon'),
-      createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+      createElement('span', 'chat-message__thinking-label', strings.composer.reasoning),
     );
     thinkingWrap.append(thinkingSummary);
 
@@ -212,10 +235,14 @@ function createMessageElement(message, strings, { onCopy, onRetry } = {}) {
     article.append(createTerminalCallElement(message.terminal, strings));
   }
 
-  if (!message.streaming && !message.pending && typeof onCopy === 'function' && typeof onRetry === 'function') {
-    const onSpeak = message.role === 'assistant'
-      ? (btn) => speakText(message.content, btn)
-      : undefined;
+  if (
+    !message.streaming &&
+    !message.pending &&
+    typeof onCopy === 'function' &&
+    typeof onRetry === 'function'
+  ) {
+    const onSpeak =
+      message.role === 'assistant' ? (btn) => speakText(message.content, btn) : undefined;
     article.append(createMessageActions({ onCopy, onRetry, onSpeak }));
   }
 
@@ -279,12 +306,14 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
   const card = lastAssistant.querySelector('.chat-subagent-call');
   if (!card) return;
 
-  const doneCount = subAgents.filter((a) => a.status === 'completed' || a.status === 'failed').length;
+  const doneCount = subAgents.filter(
+    (a) => a.status === 'completed' || a.status === 'failed',
+  ).length;
   const countEl = card.querySelector('.chat-subagent-call__count');
   if (countEl) {
     countEl.textContent = formatText(strings.tools.subAgentsCountProgress, {
       done: String(doneCount),
-      total: String(subAgents.length)
+      total: String(subAgents.length),
     });
   }
 
@@ -298,7 +327,8 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
     row.className = `chat-subagent-call__agent chat-subagent-call__agent--${agentStatus}`;
 
     const dot = row.querySelector('.chat-subagent-call__agent-status');
-    if (dot) dot.className = `chat-subagent-call__agent-status chat-subagent-call__agent-status--${agentStatus}`;
+    if (dot)
+      dot.className = `chat-subagent-call__agent-status chat-subagent-call__agent-status--${agentStatus}`;
 
     const badge = row.querySelector('.chat-subagent-call__agent-badge');
     if (badge) {
@@ -313,7 +343,11 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
 
     if (agent.prompt && !body.querySelector('.chat-subagent-call__agent-prompt')) {
       const promptSection = createElement('div', 'chat-subagent-call__agent-section');
-      const promptTitle = createElement('h4', 'chat-subagent-call__agent-section-title', strings.tools.subAgentPromptSection);
+      const promptTitle = createElement(
+        'h4',
+        'chat-subagent-call__agent-section-title',
+        strings.tools.subAgentPromptSection,
+      );
       const promptEl = renderMarkdown(agent.prompt, 'chat-subagent-call__agent-prompt');
       promptSection.append(promptTitle, promptEl);
       body.prepend(promptSection);
@@ -325,10 +359,16 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
       const { content: parsedOutput, thinking: outputThinking } = parseThinkingFromText(rawOutput);
 
       if (!outputSection) {
-        outputSection = createElement('div', 'chat-subagent-call__agent-section chat-subagent-call__agent-output-section');
+        outputSection = createElement(
+          'div',
+          'chat-subagent-call__agent-section chat-subagent-call__agent-output-section',
+        );
         const isError = Boolean(agent.error && !agent.output);
-        const sectionTitle = createElement('h4', 'chat-subagent-call__agent-section-title',
-          isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection);
+        const sectionTitle = createElement(
+          'h4',
+          'chat-subagent-call__agent-section-title',
+          isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection,
+        );
         outputSection.append(sectionTitle);
         if (outputThinking) {
           const thinkWrap = document.createElement('details');
@@ -336,7 +376,7 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
           const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
           thinkSummary.append(
             createIcon('thinking', 'chat-message__thinking-icon'),
-            createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+            createElement('span', 'chat-message__thinking-label', strings.composer.reasoning),
           );
           thinkWrap.append(thinkSummary);
           const thinkBody = createElement('div', 'chat-message__thinking-body');
@@ -344,7 +384,12 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
           thinkWrap.append(thinkBody);
           outputSection.append(thinkWrap);
         }
-        outputSection.append(renderMarkdown((parsedOutput || rawOutput).trimStart(), 'chat-subagent-call__agent-output'));
+        outputSection.append(
+          renderMarkdown(
+            (parsedOutput || rawOutput).trimStart(),
+            'chat-subagent-call__agent-output',
+          ),
+        );
         body.append(outputSection);
       } else {
         // Update thinking block if it exists, or create if thinking newly arrived
@@ -356,13 +401,15 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
             const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
             thinkSummary.append(
               createIcon('thinking', 'chat-message__thinking-icon'),
-              createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+              createElement('span', 'chat-message__thinking-label', strings.composer.reasoning),
             );
             thinkWrap.append(thinkSummary);
             const thinkBody = createElement('div', 'chat-message__thinking-body');
             thinkBody.append(createElement('p', 'chat-message__thinking-text', outputThinking));
             thinkWrap.append(thinkBody);
-            const sectionTitle = outputSection.querySelector('.chat-subagent-call__agent-section-title');
+            const sectionTitle = outputSection.querySelector(
+              '.chat-subagent-call__agent-section-title',
+            );
             if (sectionTitle) sectionTitle.after(thinkWrap);
             else outputSection.prepend(thinkWrap);
           } else {
@@ -372,7 +419,10 @@ function updateSubAgentCard(threadEl, subAgents, strings) {
         }
         // Re-render output markdown with fresh content
         const existing = outputSection.querySelector('.chat-subagent-call__agent-output');
-        const fresh = renderMarkdown((parsedOutput || rawOutput).trimStart(), 'chat-subagent-call__agent-output');
+        const fresh = renderMarkdown(
+          (parsedOutput || rawOutput).trimStart(),
+          'chat-subagent-call__agent-output',
+        );
         if (existing) existing.replaceWith(fresh);
         else outputSection.append(fresh);
       }
@@ -404,8 +454,10 @@ function createAssistantGroupElement(items, strings, { onCopy, onRetry } = {}) {
       'chat-message--assistant',
       isStreaming ? 'chat-message--streaming' : '',
       lastMessage.error ? 'chat-message--error' : '',
-      lastMessage.stopped ? 'chat-message--stopped' : ''
-    ].filter(Boolean).join(' ')
+      lastMessage.stopped ? 'chat-message--stopped' : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
   );
 
   for (const { message } of items) {
@@ -417,7 +469,7 @@ function createAssistantGroupElement(items, strings, { onCopy, onRetry } = {}) {
     const thinkingSummary = createElement('summary', 'chat-message__thinking-summary');
     thinkingSummary.append(
       createIcon('thinking', 'chat-message__thinking-icon'),
-      createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+      createElement('span', 'chat-message__thinking-label', strings.composer.reasoning),
     );
     thinkingWrap.append(thinkingSummary);
     const thinkingBody = createElement('div', 'chat-message__thinking-body');
@@ -452,7 +504,15 @@ function createAssistantGroupElement(items, strings, { onCopy, onRetry } = {}) {
   // Action buttons — only after the entire response is complete
   if (!isStreaming && typeof onCopy === 'function' && typeof onRetry === 'function') {
     const onSpeak = (btn) => speakText(lastMessage.content, btn);
-    article.append(createMessageActions({ onCopy, onRetry, onSpeak, durationMs: lastMessage.durationMs, strings }));
+    article.append(
+      createMessageActions({
+        onCopy,
+        onRetry,
+        onSpeak,
+        durationMs: lastMessage.durationMs,
+        strings,
+      }),
+    );
   }
 
   return article;
@@ -463,7 +523,7 @@ function getPreferredProvider(payload) {
   const byId = new Map(payload.providers.map((provider) => [provider.id, provider]));
   const ordered = [
     ...selectedIds.map((id) => byId.get(id)).filter(Boolean),
-    ...payload.providers.filter((provider) => !selectedIds.includes(provider.id))
+    ...payload.providers.filter((provider) => !selectedIds.includes(provider.id)),
   ];
 
   return (
@@ -510,9 +570,16 @@ function createModelPickerPanel({ providers, userProviderDetails, strings, onSel
       option._pickerProviderId = provider.id;
       option._pickerModelId = model.id;
 
-      const dot = createElement('span', 'chat-model-picker__health-dot chat-model-picker__health-dot--unknown');
+      const dot = createElement(
+        'span',
+        'chat-model-picker__health-dot chat-model-picker__health-dot--unknown',
+      );
       dot.setAttribute('aria-label', strings.composer.healthYellow);
-      const label = createElement('span', 'chat-model-picker__option-label', model.name ?? model.id);
+      const label = createElement(
+        'span',
+        'chat-model-picker__option-label',
+        model.name ?? model.id,
+      );
       option.append(dot, label);
       dotRefs.set(`${provider.id}/${model.id}`, dot);
 
@@ -527,8 +594,8 @@ function createModelPickerPanel({ providers, userProviderDetails, strings, onSel
   }
 
   function healthLabel(status) {
-    if (status === 'green')  return strings.composer.healthGreen;
-    if (status === 'red')    return strings.composer.healthRed;
+    if (status === 'green') return strings.composer.healthGreen;
+    if (status === 'red') return strings.composer.healthRed;
     return strings.composer.healthYellow;
   }
 
@@ -547,19 +614,21 @@ function createModelPickerPanel({ providers, userProviderDetails, strings, onSel
 
   // Fetch cached health immediately, then kick off background probes for
   // any model whose status is still unknown / stale.
-  invokeIpc('chat:health-get').then((healthMap) => {
-    applyHealthMap(healthMap);
+  invokeIpc('chat:health-get')
+    .then((healthMap) => {
+      applyHealthMap(healthMap);
 
-    // Fire a background probe for every yellow model.
-    for (const provider of readyProviders) {
-      for (const model of provider.models) {
-        const key = `${provider.id}/${model.id}`;
-        if ((healthMap[key] ?? 'yellow') === 'yellow') {
-          void invokeIpc('chat:health-probe', provider.id, model.id);
+      // Fire a background probe for every yellow model.
+      for (const provider of readyProviders) {
+        for (const model of provider.models) {
+          const key = `${provider.id}/${model.id}`;
+          if ((healthMap[key] ?? 'yellow') === 'yellow') {
+            void invokeIpc('chat:health-probe', provider.id, model.id);
+          }
         }
       }
-    }
-  }).catch(() => {});
+    })
+    .catch(() => {});
 
   // Live updates arriving while the picker is open.
   const disposeHealthListener = onIpc('chat:health-update', ({ key, status }) => {
@@ -574,7 +643,7 @@ function createModelPickerPanel({ providers, userProviderDetails, strings, onSel
     dispose() {
       disposeHealthListener();
       scrollbar.dispose();
-    }
+    },
   };
 }
 
@@ -614,7 +683,7 @@ function toAttachmentSummary(attachment) {
     kind: attachment.kind ?? '',
     size: attachment.size ?? 0,
     lines: attachment.lines ?? 0,
-    truncated: Boolean(attachment.truncated)
+    truncated: Boolean(attachment.truncated),
   };
 }
 
@@ -626,7 +695,7 @@ function buildAttachmentContext(strings, attachments) {
   const blocks = textAttachments.map((attachment, index) => {
     const header = formatText(strings.composer.attachmentContextItem, {
       index: String(index + 1),
-      name: attachment.name ?? strings.composer.unknownAttachment
+      name: attachment.name ?? strings.composer.unknownAttachment,
     });
     const summary = attachment.summary
       ? formatText(strings.composer.attachmentContextSummary, { summary: attachment.summary })
@@ -662,7 +731,11 @@ function createAttachmentPill(attachment, strings, { removable = false, onRemove
     badge = createElement('span', 'chat-attachment__badge', getFileExtension(attachment.name));
   }
   const body = createElement('span', 'chat-attachment__body');
-  const name = createElement('span', 'chat-attachment__name', attachment.name || strings.composer.unknownAttachment);
+  const name = createElement(
+    'span',
+    'chat-attachment__name',
+    attachment.name || strings.composer.unknownAttachment,
+  );
   const metaParts = [attachment.summary, formatBytes(attachment.size)].filter(Boolean);
   const meta = createElement('span', 'chat-attachment__meta', metaParts.join(' - '));
 
@@ -675,8 +748,8 @@ function createAttachmentPill(attachment, strings, { removable = false, onRemove
     removeButton.setAttribute(
       'aria-label',
       formatText(strings.composer.removeAttachmentNamed, {
-        name: attachment.name || strings.composer.unknownAttachment
-      })
+        name: attachment.name || strings.composer.unknownAttachment,
+      }),
     );
     removeButton.append(createIcon('close', 'chat-attachment__remove-icon'));
     removeButton.addEventListener('click', () => onRemove?.(attachment.id));
@@ -695,7 +768,7 @@ const DEFAULT_BROWSER_PREVIEW_STATE = Object.freeze({
   status: '',
   loading: false,
   canGoBack: false,
-  canGoForward: false
+  canGoForward: false,
 });
 
 function normalizeBrowserPreviewState(state = {}) {
@@ -723,7 +796,10 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
   const header = createElement('div', 'browser-preview__header');
   const identity = createElement('div', 'browser-preview__identity');
   const eyebrow = createElement('div', 'browser-preview__eyebrow');
-  eyebrow.append(createIcon('globe', 'browser-preview__eyebrow-icon'), createElement('span', '', strings.eyebrow));
+  eyebrow.append(
+    createIcon('globe', 'browser-preview__eyebrow-icon'),
+    createElement('span', '', strings.eyebrow),
+  );
   const title = createElement('h2', 'browser-preview__title', strings.title);
   const urlLabel = createElement('div', 'browser-preview__url', strings.emptyUrl);
   identity.append(eyebrow, title, urlLabel);
@@ -749,7 +825,10 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
   header.append(identity, controls);
 
   const statusRow = createElement('div', 'browser-preview__status-row');
-  const statusDot = createElement('span', 'browser-preview__status-dot browser-preview__status-dot--idle');
+  const statusDot = createElement(
+    'span',
+    'browser-preview__status-dot browser-preview__status-dot--idle',
+  );
   const statusText = createElement('span', 'browser-preview__status', strings.ready);
   statusRow.append(statusDot, statusText);
 
@@ -760,7 +839,7 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
   empty.append(
     createIcon('globe', 'browser-preview__empty-icon'),
     createElement('strong', 'browser-preview__empty-title', strings.emptyTitle),
-    createElement('span', 'browser-preview__empty-copy', strings.emptyCopy)
+    createElement('span', 'browser-preview__empty-copy', strings.emptyCopy),
   );
   mount.append(viewport, empty);
   panel.append(header, statusRow, mount);
@@ -781,14 +860,12 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
           x: Math.round(rect.x),
           y: Math.round(rect.y),
           width: Math.round(rect.width),
-          height: Math.round(rect.height)
+          height: Math.round(rect.height),
         };
       }
     }
 
-    const boundsKey = bounds
-      ? `${bounds.x}:${bounds.y}:${bounds.width}:${bounds.height}`
-      : 'null';
+    const boundsKey = bounds ? `${bounds.x}:${bounds.y}:${bounds.width}:${bounds.height}` : 'null';
     if (boundsKey === lastBoundsKey) return;
     lastBoundsKey = boundsKey;
     await invokeIpc('browser-preview:set-bounds', bounds).catch(() => {
@@ -814,7 +891,8 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
 
     title.textContent = currentState.title || strings.title;
     urlLabel.textContent = currentState.url || strings.emptyUrl;
-    statusText.textContent = currentState.status || (currentState.loading ? strings.loading : strings.ready);
+    statusText.textContent =
+      currentState.status || (currentState.loading ? strings.loading : strings.ready);
     setTone(browserPreviewTone(currentState));
 
     backButton.disabled = !currentState.canGoBack;
@@ -834,14 +912,18 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
     void invokeIpc('browser-preview:reload');
   });
   closeButton.addEventListener('click', () => {
-    void invokeIpc('browser-preview:close').then(applyState).catch(() => {});
+    void invokeIpc('browser-preview:close')
+      .then(applyState)
+      .catch(() => {});
   });
   return {
     element: panel,
     start() {
       disposeStateListener = onIpc('browser-preview:state', applyState);
       window.addEventListener('resize', scheduleBoundsSync);
-      invokeIpc('browser-preview:get-state').then(applyState).catch(() => applyState(DEFAULT_BROWSER_PREVIEW_STATE));
+      invokeIpc('browser-preview:get-state')
+        .then(applyState)
+        .catch(() => applyState(DEFAULT_BROWSER_PREVIEW_STATE));
     },
     stop() {
       disposeStateListener?.();
@@ -857,7 +939,7 @@ function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
     // Re-attach the native view — called when the user returns to chat.
     resume() {
       void invokeIpc('browser-preview:resume');
-    }
+    },
   };
 }
 
@@ -883,7 +965,7 @@ const SUPPORTED_TERMINAL_TOOLS = new Set([
   'git_push_sync',
   'run_project_checks',
   'start_local_server',
-  'read_terminal_output'
+  'read_terminal_output',
 ]);
 
 function parseJsonToolBlock(text, blockRegex) {
@@ -897,7 +979,7 @@ function parseJsonToolBlock(text, blockRegex) {
   try {
     return {
       payload: JSON.parse(match[1].trim()),
-      visibleContent: rawText.replace(match[0], '').trim()
+      visibleContent: rawText.replace(match[0], '').trim(),
     };
   } catch {
     return null;
@@ -918,7 +1000,7 @@ function parseTerminalToolRequest(text) {
       tool,
       payload: parsed.payload,
       unsupported: true,
-      visibleContent: parsed.visibleContent
+      visibleContent: parsed.visibleContent,
     };
   }
 
@@ -926,7 +1008,7 @@ function parseTerminalToolRequest(text) {
     tool,
     payload: parsed.payload,
     unsupported: false,
-    visibleContent: parsed.visibleContent
+    visibleContent: parsed.visibleContent,
   };
 }
 
@@ -937,7 +1019,7 @@ function parseToolsetToolRequest(text) {
   return {
     tool: String(parsed.payload?.tool ?? '').trim(),
     payload: parsed.payload,
-    visibleContent: parsed.visibleContent
+    visibleContent: parsed.visibleContent,
   };
 }
 
@@ -970,22 +1052,39 @@ function getTerminalActionSummary(action, strings) {
 function createSubAgentCallElement(terminal, strings) {
   const status = terminal.status ?? 'running';
   const subAgents = terminal.subAgents ?? [];
-  const doneCount = subAgents.filter((a) => a.status === 'completed' || a.status === 'failed').length;
+  const doneCount = subAgents.filter(
+    (a) => a.status === 'completed' || a.status === 'failed',
+  ).length;
 
-  const card = createElement('section', `chat-terminal-call chat-terminal-call--${status} chat-subagent-call`);
+  const card = createElement(
+    'section',
+    `chat-terminal-call chat-terminal-call--${status} chat-subagent-call`,
+  );
 
   const header = createElement('div', 'chat-terminal-call__header');
   const identity = createElement('div', 'chat-terminal-call__identity');
   const icon = createIcon('tabAgents', 'chat-terminal-call__icon');
   const copy = createElement('div', 'chat-terminal-call__copy');
-  const label = createElement('div', 'chat-terminal-call__label', terminal.label || strings.tools.subAgentsLabel);
+  const label = createElement(
+    'div',
+    'chat-terminal-call__label',
+    terminal.label || strings.tools.subAgentsLabel,
+  );
   const count = createElement('div', 'chat-subagent-call__count');
-  count.textContent = subAgents.length > 0
-    ? formatText(strings.tools.subAgentsCountProgress, { done: String(doneCount), total: String(subAgents.length) })
-    : (terminal.statusLabel ?? strings.tools.subAgentsRunning);
+  count.textContent =
+    subAgents.length > 0
+      ? formatText(strings.tools.subAgentsCountProgress, {
+          done: String(doneCount),
+          total: String(subAgents.length),
+        })
+      : (terminal.statusLabel ?? strings.tools.subAgentsRunning);
   copy.append(label, count);
   identity.append(icon, copy);
-  const statusEl = createElement('span', 'chat-terminal-call__status', terminal.statusLabel ?? status);
+  const statusEl = createElement(
+    'span',
+    'chat-terminal-call__status',
+    terminal.statusLabel ?? status,
+  );
   header.append(identity, statusEl);
   card.append(header);
 
@@ -998,7 +1097,10 @@ function createSubAgentCallElement(terminal, strings) {
       details.className = `chat-subagent-call__agent chat-subagent-call__agent--${agentStatus}`;
 
       const summary = createElement('summary', 'chat-subagent-call__agent-summary');
-      const statusDot = createElement('span', `chat-subagent-call__agent-status chat-subagent-call__agent-status--${agentStatus}`);
+      const statusDot = createElement(
+        'span',
+        `chat-subagent-call__agent-status chat-subagent-call__agent-status--${agentStatus}`,
+      );
 
       const info = createElement('div', 'chat-subagent-call__agent-info');
       const title = createElement('div', 'chat-subagent-call__agent-title', agent.title || '');
@@ -1020,27 +1122,38 @@ function createSubAgentCallElement(terminal, strings) {
 
       if (agent.prompt) {
         const promptSection = createElement('div', 'chat-subagent-call__agent-section');
-        const promptTitle = createElement('h4', 'chat-subagent-call__agent-section-title', strings.tools.subAgentPromptSection);
+        const promptTitle = createElement(
+          'h4',
+          'chat-subagent-call__agent-section-title',
+          strings.tools.subAgentPromptSection,
+        );
         const promptEl = renderMarkdown(agent.prompt, 'chat-subagent-call__agent-prompt');
         promptSection.append(promptTitle, promptEl);
         body.append(promptSection);
       }
 
       if (agent.output || agent.error) {
-        const outputSection = createElement('div', 'chat-subagent-call__agent-section chat-subagent-call__agent-output-section');
+        const outputSection = createElement(
+          'div',
+          'chat-subagent-call__agent-section chat-subagent-call__agent-output-section',
+        );
         const isError = Boolean(agent.error && !agent.output);
-        const sectionTitle = createElement('h4', 'chat-subagent-call__agent-section-title',
-          isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection);
+        const sectionTitle = createElement(
+          'h4',
+          'chat-subagent-call__agent-section-title',
+          isError ? strings.tools.subAgentErrorSection : strings.tools.subAgentOutputSection,
+        );
         outputSection.append(sectionTitle);
         const rawOutput = agent.output || agent.error || '';
-        const { content: parsedOutput, thinking: outputThinking } = parseThinkingFromText(rawOutput);
+        const { content: parsedOutput, thinking: outputThinking } =
+          parseThinkingFromText(rawOutput);
         if (outputThinking) {
           const thinkWrap = document.createElement('details');
           thinkWrap.className = 'chat-message__thinking';
           const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
           thinkSummary.append(
             createIcon('thinking', 'chat-message__thinking-icon'),
-            createElement('span', 'chat-message__thinking-label', strings.composer.reasoning)
+            createElement('span', 'chat-message__thinking-label', strings.composer.reasoning),
           );
           thinkWrap.append(thinkSummary);
           const thinkBody = createElement('div', 'chat-message__thinking-body');
@@ -1048,7 +1161,12 @@ function createSubAgentCallElement(terminal, strings) {
           thinkWrap.append(thinkBody);
           outputSection.append(thinkWrap);
         }
-        outputSection.append(renderMarkdown((parsedOutput || rawOutput).trimStart(), 'chat-subagent-call__agent-output'));
+        outputSection.append(
+          renderMarkdown(
+            (parsedOutput || rawOutput).trimStart(),
+            'chat-subagent-call__agent-output',
+          ),
+        );
         body.append(outputSection);
       }
 
@@ -1076,16 +1194,20 @@ function createTerminalCallElement(terminal, strings) {
   const label = createElement(
     'div',
     'chat-terminal-call__label',
-    terminal.label || strings.terminal.title
+    terminal.label || strings.terminal.title,
   );
   const command = createElement(
     'div',
     'chat-terminal-call__command',
-    terminal.command || terminal.summary || ''
+    terminal.command || terminal.summary || '',
   );
   copy.append(label, command);
   identity.append(icon, copy);
-  const statusEl = createElement('span', 'chat-terminal-call__status', terminal.statusLabel ?? status);
+  const statusEl = createElement(
+    'span',
+    'chat-terminal-call__status',
+    terminal.statusLabel ?? status,
+  );
   header.append(identity, statusEl);
   card.append(header);
 
@@ -1096,7 +1218,7 @@ function createTerminalCallElement(terminal, strings) {
     const summary = createElement('summary', 'chat-terminal-call__details-summary');
     summary.append(
       createIcon('chevronDown', 'chat-terminal-call__details-icon'),
-      createElement('span', '', strings.terminal.outputLabel)
+      createElement('span', '', strings.terminal.outputLabel),
     );
     const pre = createElement('pre', 'chat-terminal-call__output', output);
     details.append(summary, pre);
@@ -1110,7 +1232,7 @@ function formatTerminalResultForModel(strings, action, result) {
   const payload = action?.payload ?? {};
   const lines = [
     strings.terminal.resultHeader,
-    `Tool: ${getTerminalToolLabel(strings, action.tool)}`
+    `Tool: ${getTerminalToolLabel(strings, action.tool)}`,
   ];
 
   if (payload.command) lines.push(`Command: ${payload.command}`);
@@ -1163,7 +1285,7 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       isRunning: false,
       commandHistory: [],
       historyIndex: -1,
-      currentInput: ''
+      currentInput: '',
     };
   }
 
@@ -1311,13 +1433,16 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       const result = await invokeIpc('terminal:spawn-command', {
         command: nextCommand,
         cwd,
-        allowRisky: false
+        allowRisky: false,
       });
 
       if (!result?.ok) {
         tab.activeProcessId = null;
         setRunning(false);
-        setStatus(result?.error ?? strings.terminal.defaultError, result?.risk?.blocked ? 'danger' : 'warning');
+        setStatus(
+          result?.error ?? strings.terminal.defaultError,
+          result?.risk?.blocked ? 'danger' : 'warning',
+        );
         appendOutput(`${result?.error ?? strings.terminal.defaultError}\n`);
         return;
       }
@@ -1358,7 +1483,10 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
       const code = payload.code ?? 0;
       tab.activeProcessId = null;
       tab.isRunning = false;
-      appendOutputForTab(tabIndex, `${formatText(strings.terminal.processExited, { code: String(code) })}\n`);
+      appendOutputForTab(
+        tabIndex,
+        `${formatText(strings.terminal.processExited, { code: String(code) })}\n`,
+      );
       if (tabIndex === activeTabIndex) {
         setRunning(false);
         setStatus(strings.terminal.finished, code === 0 ? 'success' : 'danger');
@@ -1404,16 +1532,29 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     const headerActions = createElement('div', 'chat-terminal-drawer__header-actions');
     statusText = createElement('span', 'chat-terminal-drawer__status', strings.terminal.idle);
 
-    const copyButton = createElement('button', 'chat-terminal-drawer__output-button', strings.terminal.copy);
+    const copyButton = createElement(
+      'button',
+      'chat-terminal-drawer__output-button',
+      strings.terminal.copy,
+    );
     copyButton.type = 'button';
     copyButton.addEventListener('click', () => {
-      navigator.clipboard.writeText(getActiveTab()?.outputValue ?? '').then(() => {
-        copyButton.textContent = strings.terminal.copied;
-        setTimeout(() => { copyButton.textContent = strings.terminal.copy; }, 1200);
-      }).catch(() => {});
+      navigator.clipboard
+        .writeText(getActiveTab()?.outputValue ?? '')
+        .then(() => {
+          copyButton.textContent = strings.terminal.copied;
+          setTimeout(() => {
+            copyButton.textContent = strings.terminal.copy;
+          }, 1200);
+        })
+        .catch(() => {});
     });
 
-    const clearButton = createElement('button', 'chat-terminal-drawer__output-button', strings.terminal.clear);
+    const clearButton = createElement(
+      'button',
+      'chat-terminal-drawer__output-button',
+      strings.terminal.clear,
+    );
     clearButton.type = 'button';
     clearButton.addEventListener('click', () => {
       replaceOutput('');
@@ -1579,7 +1720,7 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
     setOpen,
     isOpen() {
       return isOpen;
-    }
+    },
   };
 }
 
@@ -1592,12 +1733,12 @@ function createChatTerminalPanel(strings, { onOpenChange } = {}) {
 // ---------------------------------------------------------------------------
 
 const DIAG_ICON_CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polyline points="20 6 9 17 4 12"/></svg>`;
-const DIAG_ICON_WARN  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-const DIAG_ICON_SPIN  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
+const DIAG_ICON_WARN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const DIAG_ICON_SPIN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
 
 function diagIconClass(tone) {
-  if (tone === 'spin')  return 'chat-diag__icon chat-diag__icon--spin';
-  if (tone === 'warn')  return 'chat-diag__icon chat-diag__icon--warn';
+  if (tone === 'spin') return 'chat-diag__icon chat-diag__icon--spin';
+  if (tone === 'warn') return 'chat-diag__icon chat-diag__icon--warn';
   if (tone === 'error') return 'chat-diag__icon chat-diag__icon--error';
   return 'chat-diag__icon';
 }
@@ -1615,7 +1756,7 @@ function createDiagnosticPanel(strings) {
 
   function addItem(text, tone = 'ok') {
     if (!itemsContainer) return { update() {} };
-    const item   = createElement('div', 'chat-diag__item');
+    const item = createElement('div', 'chat-diag__item');
     const iconEl = createElement('span', diagIconClass(tone));
     iconEl.innerHTML = diagIconSvg(tone);
     const textEl = createElement('span', 'chat-diag__text', text);
@@ -1624,10 +1765,10 @@ function createDiagnosticPanel(strings) {
     activeWrap?.scrollIntoView({ block: 'end', behavior: 'smooth' });
     return {
       update(nextText, nextTone = 'ok') {
-        iconEl.className   = diagIconClass(nextTone);
-        iconEl.innerHTML   = diagIconSvg(nextTone);
+        iconEl.className = diagIconClass(nextTone);
+        iconEl.innerHTML = diagIconSvg(nextTone);
         textEl.textContent = nextText;
-      }
+      },
     };
   }
 
@@ -1639,7 +1780,7 @@ function createDiagnosticPanel(strings) {
 
     activeWrap = wrap;
     const label = wrap.querySelector('.chat-message__thinking-label');
-    const body  = wrap.querySelector('.chat-message__thinking-body');
+    const body = wrap.querySelector('.chat-message__thinking-body');
     if (!body) return;
 
     // Save the original label text so we can restore it if real thinking arrives.
@@ -1651,23 +1792,25 @@ function createDiagnosticPanel(strings) {
     // Mark status mode so updateLastStreamingMessage knows to exit gracefully.
     wrap.dataset.statusMode = 'true';
     wrap.hidden = false;
-    wrap.open   = true;
+    wrap.open = true;
 
     // Replace the thinking body with a fresh items container.
     itemsContainer = createElement('div', 'chat-diag');
     body.replaceChildren(itemsContainer);
 
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      itemsContainer?.classList.add('chat-diag--visible');
-      wrap.scrollIntoView({ block: 'end', behavior: 'smooth' });
-    }));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        itemsContainer?.classList.add('chat-diag--visible');
+        wrap.scrollIntoView({ block: 'end', behavior: 'smooth' });
+      }),
+    );
   }
 
   function hide() {
     if (!activeWrap) return;
 
     const label = activeWrap.querySelector('.chat-message__thinking-label');
-    const body  = activeWrap.querySelector('.chat-message__thinking-body');
+    const body = activeWrap.querySelector('.chat-message__thinking-body');
 
     // Restore original label.
     if (label?.dataset.originalText) {
@@ -1677,11 +1820,11 @@ function createDiagnosticPanel(strings) {
 
     // Exit status mode and collapse the block.
     delete activeWrap.dataset.statusMode;
-    activeWrap.open   = false;
+    activeWrap.open = false;
     activeWrap.hidden = true;
     if (body) body.replaceChildren(createElement('p', 'chat-message__thinking-text', ''));
 
-    activeWrap     = null;
+    activeWrap = null;
     itemsContainer = null;
   }
 
@@ -1707,8 +1850,9 @@ async function measureFetch(url, timeoutMs = 6000) {
 // Extract just the protocol + host from a provider endpoint string so we can
 // do a lightweight reachability probe without needing auth.
 function resolveProviderBaseUrl(provider, userProviderDetails) {
-  const details  = userProviderDetails?.[provider.id] ?? {};
-  const endpoint = collapseWhitespace(details.endpoint) || collapseWhitespace(provider.endpoint) || '';
+  const details = userProviderDetails?.[provider.id] ?? {};
+  const endpoint =
+    collapseWhitespace(details.endpoint) || collapseWhitespace(provider.endpoint) || '';
   if (!endpoint) return null;
   try {
     const url = new URL(endpoint.replace('{model}', 'probe'));
@@ -1718,20 +1862,23 @@ function resolveProviderBaseUrl(provider, userProviderDetails) {
   }
 }
 
-export async function createChatView(strings, {
-  getActiveProject,
-  onActiveProjectChange,
-  getActivePersona,
-  onActivePersonaChange,
-  getProfile,
-  onNavigate,
-  onOpenSettings
-} = {}) {
+export async function createChatView(
+  strings,
+  {
+    getActiveProject,
+    onActiveProjectChange,
+    getActivePersona,
+    onActivePersonaChange,
+    getProfile,
+    onNavigate,
+    onOpenSettings,
+  } = {},
+) {
   initCompletionSound();
 
   const [payload, appSettings] = await Promise.all([
     invokeIpc('chat:bootstrap'),
-    invokeIpc('app-settings:get').catch(() => null)
+    invokeIpc('app-settings:get').catch(() => null),
   ]);
   const view = createElement('div', 'chat-view');
   const profile = getProfile?.() ?? payload.user?.profile ?? {};
@@ -1739,7 +1886,7 @@ export async function createChatView(strings, {
   const hour = new Date().getHours();
   const isBirthday = isBirthdayToday(profile.dateOfBirth);
   const isChristmas = !isBirthday && isChristmasToday();
-  const isNewYear  = !isBirthday && !isChristmas && isNewYearToday();
+  const isNewYear = !isBirthday && !isChristmas && isNewYearToday();
   const greetings = getTimeGreetings(hour, firstName);
 
   // Resolve the active provider/model. A user-configured default model (set
@@ -1763,7 +1910,8 @@ export async function createChatView(strings, {
   if (!activeProvider) {
     activeProvider = getPreferredProvider(payload);
     activeModel = activeProvider?.models?.[0] ?? null;
-    activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
+    activeModelLabel =
+      activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
   }
   let activePersona = getActivePersona?.() ?? null;
   let activeProject = getActiveProject?.() ?? null;
@@ -1870,7 +2018,7 @@ export async function createChatView(strings, {
       changed = true;
       return {
         ...message,
-        terminal: updater(message.terminal)
+        terminal: updater(message.terminal),
       };
     });
 
@@ -1886,7 +2034,7 @@ export async function createChatView(strings, {
         ...terminal,
         status: 'running',
         statusLabel: strings.terminal.running,
-        output: appendTerminalCardOutput(terminal.output, payload?.text ?? '')
+        output: appendTerminalCardOutput(terminal.output, payload?.text ?? ''),
       }));
     });
 
@@ -1895,9 +2043,10 @@ export async function createChatView(strings, {
       updateTerminalProcessCard(payload?.processId, (terminal) => ({
         ...terminal,
         status: payload?.code === 0 ? 'completed' : 'failed',
-        statusLabel: payload?.code === 0 ? strings.terminal.completedTool : strings.terminal.failedTool,
+        statusLabel:
+          payload?.code === 0 ? strings.terminal.completedTool : strings.terminal.failedTool,
         output: appendTerminalCardOutput(terminal.output, exitLine),
-        exitCode: payload?.code ?? 0
+        exitCode: payload?.code ?? 0,
       }));
     });
   }
@@ -1934,15 +2083,17 @@ export async function createChatView(strings, {
     attachmentsEl.hidden = pendingAttachments.length === 0;
 
     for (const attachment of pendingAttachments) {
-      attachmentsEl.append(createAttachmentPill(attachment, strings, {
-        removable: true,
-        onRemove(id) {
-          pendingAttachments = pendingAttachments.filter((item) => item.id !== id);
-          renderPendingAttachments();
-          syncComposer();
-          focusComposer();
-        }
-      }));
+      attachmentsEl.append(
+        createAttachmentPill(attachment, strings, {
+          removable: true,
+          onRemove(id) {
+            pendingAttachments = pendingAttachments.filter((item) => item.id !== id);
+            renderPendingAttachments();
+            syncComposer();
+            focusComposer();
+          },
+        }),
+      );
     }
   }
 
@@ -1966,15 +2117,15 @@ export async function createChatView(strings, {
       if (rejected.length > 0) {
         showAttachmentNotice(
           formatText(strings.composer.attachmentRejected, { count: String(rejected.length) }),
-          'warning'
+          'warning',
         );
       }
     } catch (error) {
       showAttachmentNotice(
         formatText(strings.composer.attachmentFailed, {
-          message: error?.message ?? String(error)
+          message: error?.message ?? String(error),
         }),
-        'warning'
+        'warning',
       );
     } finally {
       focusComposer();
@@ -1996,7 +2147,9 @@ export async function createChatView(strings, {
 
     const now = new Date().toISOString();
     const sessionMessages = messages
-      .filter((message) => !message.hidden && !message.streaming && !message.pending && message.content)
+      .filter(
+        (message) => !message.hidden && !message.streaming && !message.pending && message.content,
+      )
       .map(({ role, content, thinking, modelContent, attachments, terminal }) => {
         const entry = { role, content };
         if (thinking) entry.thinking = thinking;
@@ -2011,7 +2164,7 @@ export async function createChatView(strings, {
       title: truncate(collapseWhitespace(firstUser.content), 60),
       createdAt: sessionCreatedAt ?? now,
       updatedAt: now,
-      messages: sessionMessages
+      messages: sessionMessages,
     };
 
     if (activeProject?.id) {
@@ -2024,9 +2177,7 @@ export async function createChatView(strings, {
   function buildProjectContext(project) {
     if (!project) return '';
 
-    const lines = [
-      formatText(strings.projects.systemContextName, { name: project.name ?? '' })
-    ];
+    const lines = [formatText(strings.projects.systemContextName, { name: project.name ?? '' })];
     const info = collapseWhitespace(project.info);
     const folder = collapseWhitespace(project.folderPath ?? project.rootPath);
 
@@ -2066,15 +2217,17 @@ export async function createChatView(strings, {
   }
 
   function applyActiveProject(project) {
-    activeProject = project ? {
-      id: project.id,
-      name: project.name ?? '',
-      icon: project.icon ?? '',
-      info: project.info ?? '',
-      folderPath: project.folderPath ?? project.rootPath ?? '',
-      rootPath: project.rootPath ?? project.folderPath ?? '',
-      coverImagePath: project.coverImagePath ?? ''
-    } : null;
+    activeProject = project
+      ? {
+          id: project.id,
+          name: project.name ?? '',
+          icon: project.icon ?? '',
+          info: project.info ?? '',
+          folderPath: project.folderPath ?? project.rootPath ?? '',
+          rootPath: project.rootPath ?? project.folderPath ?? '',
+          coverImagePath: project.coverImagePath ?? '',
+        }
+      : null;
     syncActiveProjectPill();
   }
 
@@ -2088,7 +2241,9 @@ export async function createChatView(strings, {
   }
 
   function parseGitStatusOutput(stdout = '') {
-    const lines = String(stdout ?? '').split(/\r?\n/).filter(Boolean);
+    const lines = String(stdout ?? '')
+      .split(/\r?\n/)
+      .filter(Boolean);
     const header = lines[0] ?? '';
     const branchMatch = header.match(/^## (?:No commits yet on )?(.+?)(?:\.\.\.|\s|$)/);
     const aheadMatch = header.match(/ahead (\d+)/);
@@ -2099,7 +2254,7 @@ export async function createChatView(strings, {
       branch: branchMatch?.[1]?.trim() || strings.git.unknownBranch,
       dirty,
       ahead: aheadMatch ? Number(aheadMatch[1]) : 0,
-      behind: behindMatch ? Number(behindMatch[1]) : 0
+      behind: behindMatch ? Number(behindMatch[1]) : 0,
     };
   }
 
@@ -2111,7 +2266,15 @@ export async function createChatView(strings, {
   }
 
   function syncGitBarView() {
-    if (!gitBarEl || !gitBranchEl || !gitMetaEl || !gitStatusDotEl || !gitPrimaryBtn || !gitSecondaryBtn) return;
+    if (
+      !gitBarEl ||
+      !gitBranchEl ||
+      !gitMetaEl ||
+      !gitStatusDotEl ||
+      !gitPrimaryBtn ||
+      !gitSecondaryBtn
+    )
+      return;
 
     if (!activeProject || !gitState) {
       gitBarEl.hidden = true;
@@ -2127,8 +2290,10 @@ export async function createChatView(strings, {
 
     const meta = [];
     meta.push(gitState.dirty ? strings.git.dirty : strings.git.clean);
-    if (gitState.ahead > 0) meta.push(formatText(strings.git.ahead, { count: String(gitState.ahead) }));
-    if (gitState.behind > 0) meta.push(formatText(strings.git.behind, { count: String(gitState.behind) }));
+    if (gitState.ahead > 0)
+      meta.push(formatText(strings.git.ahead, { count: String(gitState.ahead) }));
+    if (gitState.behind > 0)
+      meta.push(formatText(strings.git.behind, { count: String(gitState.behind) }));
     gitMetaEl.textContent = meta.join(' · ');
 
     const primaryAction = gitState.dirty ? 'diff' : gitState.ahead > 0 ? 'push' : 'pull';
@@ -2179,10 +2344,14 @@ export async function createChatView(strings, {
   }
 
   function appendGitResultMessage(label, command, result) {
-    const output = [result?.stdout, result?.stderr].map((value) => String(value ?? '').trim()).filter(Boolean).join('\n\n')
-      || result?.hint
-      || result?.error
-      || strings.git.emptyOutput;
+    const output =
+      [result?.stdout, result?.stderr]
+        .map((value) => String(value ?? '').trim())
+        .filter(Boolean)
+        .join('\n\n') ||
+      result?.hint ||
+      result?.error ||
+      strings.git.emptyOutput;
 
     messages = [
       ...messages,
@@ -2196,9 +2365,9 @@ export async function createChatView(strings, {
           statusLabel: result?.ok ? strings.terminal.completedTool : strings.terminal.failedTool,
           output,
           error: result?.ok ? null : result?.error,
-          exitCode: result?.exitCode ?? 0
-        }
-      }
+          exitCode: result?.exitCode ?? 0,
+        },
+      },
     ];
 
     renderThread();
@@ -2218,7 +2387,7 @@ export async function createChatView(strings, {
       status: 'terminal:git-status',
       diff: 'terminal:git-diff',
       pull: 'terminal:git-pull',
-      push: 'terminal:git-push'
+      push: 'terminal:git-push',
     }[action];
 
     if (!channel) return;
@@ -2227,12 +2396,21 @@ export async function createChatView(strings, {
     try {
       const result = await invokeIpc(channel, {
         workingDir,
-        allowRisky: action === 'pull' || action === 'push'
+        allowRisky: action === 'pull' || action === 'push',
       });
-      appendGitResultMessage(strings.git.resultLabels[action], strings.git.commands[action], result);
+      appendGitResultMessage(
+        strings.git.resultLabels[action],
+        strings.git.commands[action],
+        result,
+      );
 
       if (action === 'pull' || action === 'push') {
-        showAttachmentNotice(result?.ok ? strings.git.actionComplete : (result?.hint || result?.error || strings.git.actionFailed), result?.ok ? 'info' : 'warning');
+        showAttachmentNotice(
+          result?.ok
+            ? strings.git.actionComplete
+            : result?.hint || result?.error || strings.git.actionFailed,
+          result?.ok ? 'info' : 'warning',
+        );
       }
 
       await refreshProjectGitStatus({ silent: true });
@@ -2258,9 +2436,10 @@ export async function createChatView(strings, {
 
     projectPill.hidden = false;
     projectNameEl.textContent = activeProject.name;
-    projectMetaEl.textContent = collapseWhitespace(activeProject.info)
-      || collapseWhitespace(activeProject.folderPath ?? activeProject.rootPath)
-      || strings.projects.activeHint;
+    projectMetaEl.textContent =
+      collapseWhitespace(activeProject.info) ||
+      collapseWhitespace(activeProject.folderPath ?? activeProject.rootPath) ||
+      strings.projects.activeHint;
     void refreshProjectGitStatus({ silent: true });
     restartGitStatusTimer();
   }
@@ -2278,7 +2457,7 @@ export async function createChatView(strings, {
             : [],
           terminal: message.terminal ?? null,
           thinking: message.thinking ?? '',
-          streaming: false
+          streaming: false,
         }))
         .filter((message) => message.content);
 
@@ -2303,8 +2482,9 @@ export async function createChatView(strings, {
     if (!modelPickerPanel) return;
 
     for (const option of modelPickerPanel.querySelectorAll('.chat-model-picker__option')) {
-      const isActive = option._pickerProviderId === activeProvider?.id
-        && option._pickerModelId === activeModel?.id;
+      const isActive =
+        option._pickerProviderId === activeProvider?.id &&
+        option._pickerModelId === activeModel?.id;
       option.classList.toggle('chat-model-picker__option--active', isActive);
       const existing = option.querySelector('.chat-model-picker__check');
       if (isActive && !existing) {
@@ -2322,24 +2502,24 @@ export async function createChatView(strings, {
     }
 
     if (!modelPickerPanel) {
-        const picker = createModelPickerPanel({
-          providers: payload.providers,
-          userProviderDetails: payload.user?.providers?.details ?? {},
-          strings,
-          onSelect(provider, model) {
-            activeProvider = provider;
-            activeModel = model;
-            activeModelLabel = model.name ?? model.id;
-            userOverrodeModel = true;
-            const labelEl = triggerButton.querySelector('.chat-composer__model-label');
-            if (labelEl) labelEl.textContent = activeModelLabel;
-            syncPickerActiveStates();
-            closeModelPicker();
-          }
-        });
-        modelPickerPanel   = picker.element;
-        modelPickerDispose = picker.dispose;
-      }
+      const picker = createModelPickerPanel({
+        providers: payload.providers,
+        userProviderDetails: payload.user?.providers?.details ?? {},
+        strings,
+        onSelect(provider, model) {
+          activeProvider = provider;
+          activeModel = model;
+          activeModelLabel = model.name ?? model.id;
+          userOverrodeModel = true;
+          const labelEl = triggerButton.querySelector('.chat-composer__model-label');
+          if (labelEl) labelEl.textContent = activeModelLabel;
+          syncPickerActiveStates();
+          closeModelPicker();
+        },
+      });
+      modelPickerPanel = picker.element;
+      modelPickerDispose = picker.dispose;
+    }
 
     syncPickerActiveStates();
     modelPickerOpen = true;
@@ -2386,7 +2566,7 @@ export async function createChatView(strings, {
       const rawCommands = await invokeIpc('slash-commands:list');
       baseCommands = (Array.isArray(rawCommands) ? rawCommands : []).map((command) => ({
         ...command,
-        id: normalizeSlashId(command.id)
+        id: normalizeSlashId(command.id),
       }));
     } catch {
       // SlashCommands package unavailable — palette still works for templates and agents.
@@ -2405,7 +2585,7 @@ export async function createChatView(strings, {
           description: template.prompt.slice(0, 90),
           type: 'template',
           icon: 'tabTemplates',
-          prompt: template.prompt
+          prompt: template.prompt,
         });
       }
     } catch {
@@ -2423,7 +2603,7 @@ export async function createChatView(strings, {
           description: agent.prompt.slice(0, 90),
           type: 'agent',
           icon: 'tabAgents',
-          prompt: agent.prompt
+          prompt: agent.prompt,
         });
       }
     } catch {
@@ -2454,11 +2634,11 @@ export async function createChatView(strings, {
     }
 
     const groups = [
-      ['action',   strings.slash.sections.actions],
-      ['mode',     strings.slash.sections.modes],
+      ['action', strings.slash.sections.actions],
+      ['mode', strings.slash.sections.modes],
       ['navigate', strings.slash.sections.navigate],
       ['template', strings.slash.sections.templates],
-      ['agent',    strings.slash.sections.agents]
+      ['agent', strings.slash.sections.agents],
     ];
 
     let globalIndex = 0;
@@ -2471,7 +2651,7 @@ export async function createChatView(strings, {
       for (const command of commands) {
         const item = createElement(
           'button',
-          `chat-slash-menu__item${globalIndex === slashSelectedIndex ? ' chat-slash-menu__item--active' : ''}`
+          `chat-slash-menu__item${globalIndex === slashSelectedIndex ? ' chat-slash-menu__item--active' : ''}`,
         );
         item.type = 'button';
         item._slashIndex = globalIndex;
@@ -2484,14 +2664,18 @@ export async function createChatView(strings, {
         label.append(
           createElement('span', 'chat-slash-menu__slash', '/'),
           createElement('span', 'chat-slash-menu__id', command.id),
-          createElement('span', 'chat-slash-menu__name', command.label)
+          createElement('span', 'chat-slash-menu__name', command.label),
         );
-        const description = createElement('span', 'chat-slash-menu__description', command.description || '');
+        const description = createElement(
+          'span',
+          'chat-slash-menu__description',
+          command.description || '',
+        );
         copy.append(label, description);
         const badge = createElement(
           'span',
           `chat-slash-menu__badge chat-slash-menu__badge--${command.type}`,
-          strings.slash.badges[command.type] ?? command.type
+          strings.slash.badges[command.type] ?? command.type,
         );
         item.append(icon, copy, badge);
         item.addEventListener('mouseenter', () => {
@@ -2533,11 +2717,16 @@ export async function createChatView(strings, {
     }
 
     await ensureSlashCommandsLoaded();
-    slashFilteredCommands = slashCommands.filter((command) => (
-      command.id.includes(query) ||
-      String(command.label ?? '').toLowerCase().includes(query) ||
-      String(command.description ?? '').toLowerCase().includes(query)
-    ));
+    slashFilteredCommands = slashCommands.filter(
+      (command) =>
+        command.id.includes(query) ||
+        String(command.label ?? '')
+          .toLowerCase()
+          .includes(query) ||
+        String(command.description ?? '')
+          .toLowerCase()
+          .includes(query),
+    );
     slashSelectedIndex = 0;
     renderSlashMenu();
   }
@@ -2621,7 +2810,9 @@ export async function createChatView(strings, {
         activeMode = command.id;
         activeModeInstruction = null;
         invokeIpc('slash-commands:get-mode-instruction', command.id)
-          .then((instruction) => { activeModeInstruction = instruction ?? null; })
+          .then((instruction) => {
+            activeModeInstruction = instruction ?? null;
+          })
           .catch(() => {});
       }
       focusComposer();
@@ -2704,7 +2895,7 @@ export async function createChatView(strings, {
         streaming: false,
         stopped: true,
         providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
+        modelLabel: activeModelLabel,
       };
     });
     accText = '';
@@ -2726,7 +2917,7 @@ export async function createChatView(strings, {
       const result = await invokeIpc('chat:enhance-prompt', {
         raw,
         providerId: activeProvider?.id ?? null,
-        modelId: activeModel?.id ?? null
+        modelId: activeModel?.id ?? null,
       });
 
       const enhanced = result?.text?.trim();
@@ -2856,7 +3047,7 @@ export async function createChatView(strings, {
 
       const preview = truncate(
         collapseWhitespace(msgEl.querySelector('.chat-message__bubble')?.textContent ?? ''),
-        38
+        38,
       );
 
       dot.addEventListener('mouseenter', () => {
@@ -2892,7 +3083,10 @@ export async function createChatView(strings, {
 
     userMsgs.forEach((msgEl, i) => {
       const dist = Math.abs(msgEl.offsetTop - scrollMid);
-      if (dist < minDist) { minDist = dist; activeIdx = i; }
+      if (dist < minDist) {
+        minDist = dist;
+        activeIdx = i;
+      }
     });
 
     dots.forEach((dot, i) => {
@@ -2929,79 +3123,82 @@ export async function createChatView(strings, {
       .filter(({ message }) => !message.hidden);
 
     // Group consecutive assistant messages so the entire tool-loop response
-  // (think → call tool → think → answer) renders as one article with blocks
-  // in the order they were generated, matching Claude.ai behaviour.
-  const renderGroups = [];
-  let assistantGroup = null;
+    // (think → call tool → think → answer) renders as one article with blocks
+    // in the order they were generated, matching Claude.ai behaviour.
+    const renderGroups = [];
+    let assistantGroup = null;
 
-  for (const item of visibleMessages) {
-    if (item.message.role === 'assistant') {
-      if (!assistantGroup) assistantGroup = [];
-      assistantGroup.push(item);
-    } else {
-      if (assistantGroup) {
-        renderGroups.push({ type: 'assistant', items: assistantGroup });
-        assistantGroup = null;
-      }
-      renderGroups.push({ type: 'user', items: [item] });
-    }
-  }
-  if (assistantGroup) renderGroups.push({ type: 'assistant', items: assistantGroup });
-
-  thread.replaceChildren(...renderGroups.map((group) => {
-    if (group.type === 'user') {
-      const { message, index } = group.items[0];
-      const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
-      const onRetry = () => {
-        if (isSending) return;
-        const userMessage = messages[index];
-        if (!userMessage?.content) return;
-        messages = messages.slice(0, index);
-        draftValue = '';
-        pendingAttachments = [];
-        renderPendingAttachments();
-        renderThread();
-        void submitPrompt({
-          content: userMessage.content,
-          modelContent: userMessage.modelContent,
-          attachments: userMessage.attachments ?? [],
-          imageAttachments: userMessage.imageAttachments ?? []
-        });
-      };
-      return createMessageElement(message, strings, { onCopy, onRetry });
-    }
-
-    // Assistant group — find the preceding user message for retry
-    const firstIndex = group.items[0].index;
-    const lastMessage = group.items[group.items.length - 1].message;
-    const onCopy = () => navigator.clipboard.writeText(lastMessage.content ?? '').catch(() => {});
-    const onRetry = () => {
-      if (isSending) return;
-      let userIndex = -1;
-      for (let candidate = firstIndex - 1; candidate >= 0; candidate -= 1) {
-        if (messages[candidate]?.role === 'user' && !messages[candidate]?.hidden) {
-          userIndex = candidate;
-          break;
+    for (const item of visibleMessages) {
+      if (item.message.role === 'assistant') {
+        if (!assistantGroup) assistantGroup = [];
+        assistantGroup.push(item);
+      } else {
+        if (assistantGroup) {
+          renderGroups.push({ type: 'assistant', items: assistantGroup });
+          assistantGroup = null;
         }
+        renderGroups.push({ type: 'user', items: [item] });
       }
-      if (userIndex < 0) return;
-      const userMessage = messages[userIndex];
-      if (!userMessage?.content) return;
-      messages = messages.slice(0, userIndex);
-      draftValue = '';
-      pendingAttachments = [];
-      renderPendingAttachments();
-      renderThread();
-      void submitPrompt({
-        content: userMessage.content,
-        modelContent: userMessage.modelContent,
-        attachments: userMessage.attachments ?? [],
-        imageAttachments: userMessage.imageAttachments ?? []
-      });
-    };
+    }
+    if (assistantGroup) renderGroups.push({ type: 'assistant', items: assistantGroup });
 
-    return createAssistantGroupElement(group.items, strings, { onCopy, onRetry });
-  }));
+    thread.replaceChildren(
+      ...renderGroups.map((group) => {
+        if (group.type === 'user') {
+          const { message, index } = group.items[0];
+          const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
+          const onRetry = () => {
+            if (isSending) return;
+            const userMessage = messages[index];
+            if (!userMessage?.content) return;
+            messages = messages.slice(0, index);
+            draftValue = '';
+            pendingAttachments = [];
+            renderPendingAttachments();
+            renderThread();
+            void submitPrompt({
+              content: userMessage.content,
+              modelContent: userMessage.modelContent,
+              attachments: userMessage.attachments ?? [],
+              imageAttachments: userMessage.imageAttachments ?? [],
+            });
+          };
+          return createMessageElement(message, strings, { onCopy, onRetry });
+        }
+
+        // Assistant group — find the preceding user message for retry
+        const firstIndex = group.items[0].index;
+        const lastMessage = group.items[group.items.length - 1].message;
+        const onCopy = () =>
+          navigator.clipboard.writeText(lastMessage.content ?? '').catch(() => {});
+        const onRetry = () => {
+          if (isSending) return;
+          let userIndex = -1;
+          for (let candidate = firstIndex - 1; candidate >= 0; candidate -= 1) {
+            if (messages[candidate]?.role === 'user' && !messages[candidate]?.hidden) {
+              userIndex = candidate;
+              break;
+            }
+          }
+          if (userIndex < 0) return;
+          const userMessage = messages[userIndex];
+          if (!userMessage?.content) return;
+          messages = messages.slice(0, userIndex);
+          draftValue = '';
+          pendingAttachments = [];
+          renderPendingAttachments();
+          renderThread();
+          void submitPrompt({
+            content: userMessage.content,
+            modelContent: userMessage.modelContent,
+            attachments: userMessage.attachments ?? [],
+            imageAttachments: userMessage.imageAttachments ?? [],
+          });
+        };
+
+        return createAssistantGroupElement(group.items, strings, { onCopy, onRetry });
+      }),
+    );
 
     requestAnimationFrame(() => {
       if (!userScrolledUp) scroll.scrollTop = scroll.scrollHeight;
@@ -3045,7 +3242,7 @@ export async function createChatView(strings, {
         command: payload.command,
         cwd: await resolveTerminalCwd(payload.working_directory ?? payload.cwd),
         timeout: resolveTerminalTimeout(payload),
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
@@ -3055,7 +3252,7 @@ export async function createChatView(strings, {
 
     if (action.tool === 'inspect_workspace') {
       return invokeIpc('terminal:inspect-workspace', {
-        rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory)
+        rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory),
       });
     }
 
@@ -3063,39 +3260,39 @@ export async function createChatView(strings, {
       return invokeIpc('terminal:search-workspace', {
         rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory),
         query: payload.query,
-        maxResults: payload.max_results
+        maxResults: payload.max_results,
       });
     }
 
     if (action.tool === 'read_local_file') {
       return invokeIpc('terminal:read-file', {
         filePath: payload.path,
-        maxLines: payload.max_lines
+        maxLines: payload.max_lines,
       });
     }
 
     if (action.tool === 'list_directory') {
       return invokeIpc('terminal:list-directory', {
-        dirPath: payload.path || await resolveTerminalCwd(payload.working_directory)
+        dirPath: payload.path || (await resolveTerminalCwd(payload.working_directory)),
       });
     }
 
     if (action.tool === 'git_status') {
       return invokeIpc('terminal:git-status', {
-        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path)
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
       });
     }
 
     if (action.tool === 'git_diff') {
       return invokeIpc('terminal:git-diff', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
-        staged: payload.staged === true
+        staged: payload.staged === true,
       });
     }
 
     if (action.tool === 'git_branches') {
       return invokeIpc('terminal:git-branches', {
-        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path)
+        workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
       });
     }
 
@@ -3103,7 +3300,7 @@ export async function createChatView(strings, {
       return invokeIpc('terminal:git-create-branch', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
         branch: payload.branch,
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
@@ -3111,7 +3308,7 @@ export async function createChatView(strings, {
       return invokeIpc('terminal:git-checkout-branch', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
         branch: payload.branch,
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
@@ -3119,14 +3316,14 @@ export async function createChatView(strings, {
       return invokeIpc('terminal:git-delete-branch', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
         branch: payload.branch,
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
     if (action.tool === 'git_pull') {
       return invokeIpc('terminal:git-pull', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
@@ -3134,21 +3331,21 @@ export async function createChatView(strings, {
       return invokeIpc('terminal:git-commit', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
         message: payload.message,
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
     if (action.tool === 'git_push') {
       return invokeIpc('terminal:git-push', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
     if (action.tool === 'git_push_sync') {
       return invokeIpc('terminal:git-push-sync', {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
@@ -3157,7 +3354,7 @@ export async function createChatView(strings, {
         workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
         includeLint: payload.include_lint !== false,
         includeTest: payload.include_test !== false,
-        includeBuild: payload.include_build !== false
+        includeBuild: payload.include_build !== false,
       });
     }
 
@@ -3165,12 +3362,15 @@ export async function createChatView(strings, {
       return invokeIpc('terminal:spawn-command', {
         command: payload.command,
         cwd: await resolveTerminalCwd(payload.working_directory ?? payload.cwd),
-        allowRisky: payload.allow_risky === true
+        allowRisky: payload.allow_risky === true,
       });
     }
 
     if (action.tool === 'read_terminal_output') {
-      return invokeIpc('terminal:read-output', payload.process_id ?? payload.processId ?? payload.pid);
+      return invokeIpc(
+        'terminal:read-output',
+        payload.process_id ?? payload.processId ?? payload.pid,
+      );
     }
 
     return { ok: false, error: strings.terminal.unsupportedTool };
@@ -3192,12 +3392,14 @@ export async function createChatView(strings, {
 
   function getSubAgentConversationContext() {
     return messages
-      .filter((message) => !message.hidden && !message.streaming && !message.pending && message.content)
+      .filter(
+        (message) => !message.hidden && !message.streaming && !message.pending && message.content,
+      )
       .filter((message) => message.role === 'user' || message.role === 'assistant')
       .slice(-8)
       .map((message) => ({
         role: message.role,
-        content: message.modelContent || message.content
+        content: message.modelContent || message.content,
       }));
   }
 
@@ -3205,7 +3407,10 @@ export async function createChatView(strings, {
     const lines = [strings.tools.subAgentsResultHeader];
 
     if (coordinationGoal) {
-      lines.push('', formatText(strings.tools.subAgentsCoordinationGoal, { goal: coordinationGoal }));
+      lines.push(
+        '',
+        formatText(strings.tools.subAgentsCoordinationGoal, { goal: coordinationGoal }),
+      );
     }
 
     tasks.forEach((task, index) => {
@@ -3214,13 +3419,15 @@ export async function createChatView(strings, {
         '',
         formatText(strings.tools.subAgentsTaskHeader, {
           index: String(index + 1),
-          title: task.title
+          title: task.title,
         }),
-        formatText(strings.tools.subAgentsGoal, { goal: task.goal })
+        formatText(strings.tools.subAgentsGoal, { goal: task.goal }),
       );
 
       if (task.deliverable) {
-        lines.push(formatText(strings.tools.subAgentsDeliverable, { deliverable: task.deliverable }));
+        lines.push(
+          formatText(strings.tools.subAgentsDeliverable, { deliverable: task.deliverable }),
+        );
       }
 
       if (result.ok) {
@@ -3238,8 +3445,8 @@ export async function createChatView(strings, {
       ...conversationContext,
       {
         role: 'user',
-        content: prompt
-      }
+        content: prompt,
+      },
     ];
     const toolsetTools = await loadToolsetPrompt();
     let usage = { input: 0, output: 0 };
@@ -3257,12 +3464,12 @@ export async function createChatView(strings, {
         modeInstruction: getModeInstruction(),
         terminalTools: payload.terminalPrompt,
         toolsetTools: toolsetTools || null,
-        isNewSession: false
+        isNewSession: false,
       });
 
       usage = {
         input: usage.input + (result?.charCountIn ?? 0),
-        output: usage.output + (result?.charCountOut ?? 0)
+        output: usage.output + (result?.charCountOut ?? 0),
       };
       lastMeta = result ?? {};
 
@@ -3275,7 +3482,7 @@ export async function createChatView(strings, {
           ...lastMeta,
           text: parsedContent || strings.composer.emptyResponse,
           charCountIn: usage.input,
-          charCountOut: usage.output
+          charCountOut: usage.output,
         };
       }
 
@@ -3284,7 +3491,7 @@ export async function createChatView(strings, {
           ...lastMeta,
           text: stripNativeToolCalls(parsedContent) || strings.terminal.unsupportedTool,
           charCountIn: usage.input,
-          charCountOut: usage.output
+          charCountOut: usage.output,
         };
       }
 
@@ -3293,41 +3500,45 @@ export async function createChatView(strings, {
       if (terminalAction) {
         const terminalResult = await executeTerminalTool(terminalAction).catch((error) => ({
           ok: false,
-          error: error?.message ?? String(error)
+          error: error?.message ?? String(error),
         }));
         modelResult = formatTerminalResultForModel(strings, terminalAction, terminalResult);
         if (!terminalResult?.ok && terminalResult?.error) {
-          modelResult += '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
+          modelResult +=
+            '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
         }
         localMessages.push({
           role: 'assistant',
-          content: stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool
+          content:
+            stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool,
         });
       } else {
-        const toolsetResult = toolsetAction.tool === 'spawn_sub_agents'
-          ? {
-              ok: false,
-              tool: toolsetAction.tool,
-              error: 'Nested sub-agents are not available inside a sub-agent task.'
-            }
-          : await executeToolsetTool(toolsetAction).catch((error) => ({
-              ok: false,
-              tool: toolsetAction.tool,
-              error: error?.message ?? String(error)
-            }));
+        const toolsetResult =
+          toolsetAction.tool === 'spawn_sub_agents'
+            ? {
+                ok: false,
+                tool: toolsetAction.tool,
+                error: 'Nested sub-agents are not available inside a sub-agent task.',
+              }
+            : await executeToolsetTool(toolsetAction).catch((error) => ({
+                ok: false,
+                tool: toolsetAction.tool,
+                error: error?.message ?? String(error),
+              }));
         modelResult = formatToolsetResultForModel(toolsetAction, toolsetResult);
         if (!toolsetResult?.ok && toolsetResult?.error) {
-          modelResult += '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
+          modelResult +=
+            '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
         }
         localMessages.push({
           role: 'assistant',
-          content: stripNativeToolCalls(toolsetAction.visibleContent) || strings.tools.runningTool
+          content: stripNativeToolCalls(toolsetAction.visibleContent) || strings.tools.runningTool,
         });
       }
 
       localMessages.push({
         role: 'user',
-        content: modelResult
+        content: modelResult,
       });
     }
 
@@ -3336,7 +3547,7 @@ export async function createChatView(strings, {
       charCountIn: usage.input,
       charCountOut: usage.output,
       providerLabel: lastMeta.providerLabel ?? '',
-      modelLabel: lastMeta.modelLabel ?? ''
+      modelLabel: lastMeta.modelLabel ?? '',
     };
   }
 
@@ -3348,53 +3559,55 @@ export async function createChatView(strings, {
       return {
         ok: false,
         tool: action.tool,
-        error: strings.tools.subAgentsNoTasks
+        error: strings.tools.subAgentsNoTasks,
       };
     }
 
     const coordinationGoal = collapseWhitespace(
-      payload.parameters?.coordination_goal
-      ?? payload.coordination_goal
-      ?? strings.tools.subAgentFallbackGoal
+      payload.parameters?.coordination_goal ??
+        payload.coordination_goal ??
+        strings.tools.subAgentFallbackGoal,
     );
     const conversationContext = getSubAgentConversationContext();
     const memoryContext = await loadMemoryContext();
 
-    const results = await Promise.all(tasks.map(async (task, index) => {
-      const prompt = buildSubAgentTaskPrompt(task, coordinationGoal, index, tasks.length);
-      onProgress?.(index, { status: 'running', prompt });
+    const results = await Promise.all(
+      tasks.map(async (task, index) => {
+        const prompt = buildSubAgentTaskPrompt(task, coordinationGoal, index, tasks.length);
+        onProgress?.(index, { status: 'running', prompt });
 
-      try {
-        const result = await runSubAgentConversation({
-          conversationContext,
-          prompt,
-          memoryContext
-        });
+        try {
+          const result = await runSubAgentConversation({
+            conversationContext,
+            prompt,
+            memoryContext,
+          });
 
-        const agentResult = {
-          ok: true,
-          text: String(result?.text ?? '').trim() || strings.composer.emptyResponse,
-          usage: {
-            input: result?.charCountIn ?? 0,
-            output: result?.charCountOut ?? 0
-          },
-          providerLabel: result?.providerLabel ?? '',
-          modelLabel: result?.modelLabel ?? ''
-        };
-        onProgress?.(index, { status: 'completed', output: agentResult.text });
-        return agentResult;
-      } catch (error) {
-        const agentResult = { ok: false, error: error?.message ?? String(error) };
-        onProgress?.(index, { status: 'failed', error: agentResult.error });
-        return agentResult;
-      }
-    }));
+          const agentResult = {
+            ok: true,
+            text: String(result?.text ?? '').trim() || strings.composer.emptyResponse,
+            usage: {
+              input: result?.charCountIn ?? 0,
+              output: result?.charCountOut ?? 0,
+            },
+            providerLabel: result?.providerLabel ?? '',
+            modelLabel: result?.modelLabel ?? '',
+          };
+          onProgress?.(index, { status: 'completed', output: agentResult.text });
+          return agentResult;
+        } catch (error) {
+          const agentResult = { ok: false, error: error?.message ?? String(error) };
+          onProgress?.(index, { status: 'failed', error: agentResult.error });
+          return agentResult;
+        }
+      }),
+    );
 
     return {
       ok: results.some((result) => result.ok),
       tool: action.tool,
       output: formatSubAgentOutput(tasks, results, coordinationGoal),
-      results
+      results,
     };
   }
 
@@ -3406,15 +3619,12 @@ export async function createChatView(strings, {
     const payload = action?.payload ?? {};
     return invokeIpc('toolset:execute-tool', {
       tool: action.tool,
-      parameters: payload.parameters ?? {}
+      parameters: payload.parameters ?? {},
     });
   }
 
   function formatToolsetResultForModel(action, result) {
-    const lines = [
-      'Built-in tool result',
-      `Tool: ${action.tool}`
-    ];
+    const lines = ['Built-in tool result', `Tool: ${action.tool}`];
 
     if (result?.output) lines.push(`Output:\n${result.output}`);
     if (result?.error) lines.push(`Error:\n${result.error}`);
@@ -3423,9 +3633,9 @@ export async function createChatView(strings, {
   }
 
   function updateLastAssistantMessage(updater) {
-    messages = messages.map((message, index) => (
-      index !== messages.length - 1 ? message : updater(message)
-    ));
+    messages = messages.map((message, index) =>
+      index !== messages.length - 1 ? message : updater(message),
+    );
   }
 
   function buildTerminalDisplayOutput(result) {
@@ -3437,10 +3647,14 @@ export async function createChatView(strings, {
     if (result?.hint) parts.push(result.hint);
     if (result?.category) parts.push(`Category: ${result.category}`);
     if (result?.current || Array.isArray(result?.branches)) {
-      parts.push([
-        result.current ? `Current branch: ${result.current}` : '',
-        Array.isArray(result.branches) ? `Branches:\n${result.branches.join('\n')}` : ''
-      ].filter(Boolean).join('\n'));
+      parts.push(
+        [
+          result.current ? `Current branch: ${result.current}` : '',
+          Array.isArray(result.branches) ? `Branches:\n${result.branches.join('\n')}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      );
     }
     if (Array.isArray(result?.matches)) parts.push(JSON.stringify(result.matches, null, 2));
     if (Array.isArray(result?.entries)) parts.push(JSON.stringify(result.entries, null, 2));
@@ -3464,14 +3678,20 @@ export async function createChatView(strings, {
     const isBlocked = Boolean(result?.risk?.blocked);
     const ok = result?.ok !== false && !result?.error;
     const isRunningProcess = ok && result?.running === true && result?.processId;
-    const status = isBlocked ? 'blocked' : isRunningProcess ? 'running' : ok ? 'completed' : 'failed';
+    const status = isBlocked
+      ? 'blocked'
+      : isRunningProcess
+        ? 'running'
+        : ok
+          ? 'completed'
+          : 'failed';
     const statusLabel = isBlocked
       ? strings.terminal.blockedTool
       : isRunningProcess
         ? strings.terminal.running
         : ok
-        ? strings.terminal.completedTool
-        : strings.terminal.failedTool;
+          ? strings.terminal.completedTool
+          : strings.terminal.failedTool;
     const modelResult = formatTerminalResultForModel(strings, action, result);
 
     updateLastAssistantMessage((message) => ({
@@ -3482,8 +3702,8 @@ export async function createChatView(strings, {
         statusLabel,
         processId: result?.processId ?? message.terminal?.processId ?? null,
         output: buildTerminalDisplayOutput(result),
-        exitCode: result?.exitCode
-      }
+        exitCode: result?.exitCode,
+      },
     }));
 
     messages = [
@@ -3492,7 +3712,7 @@ export async function createChatView(strings, {
         role: 'user',
         content: strings.terminal.hiddenResultLabel,
         modelContent: modelResult,
-        hidden: true
+        hidden: true,
       },
       {
         role: 'assistant',
@@ -3500,8 +3720,8 @@ export async function createChatView(strings, {
         thinking: '',
         streaming: true,
         providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
-      }
+        modelLabel: activeModelLabel,
+      },
     ];
 
     accText = '';
@@ -3513,21 +3733,23 @@ export async function createChatView(strings, {
       isNewSession: false,
       terminalDepth: terminalDepth + 1,
       runToken,
-      generationStartTime
+      generationStartTime,
     });
   }
 
   async function continueAfterToolsetTool(action, terminalDepth, runToken, generationStartTime) {
     // ── Sub-agents: special-cased for live per-task progress ─────────────────
     if (action.tool === 'spawn_sub_agents') {
-      const initTasks = normalizeSubAgentTasks(action.payload?.parameters?.tasks ?? action.payload?.tasks);
+      const initTasks = normalizeSubAgentTasks(
+        action.payload?.parameters?.tasks ?? action.payload?.tasks,
+      );
       let currentSubAgents = initTasks.map((task) => ({
         title: task.title,
         goal: task.goal,
         prompt: '',
         status: 'queued',
         output: '',
-        error: ''
+        error: '',
       }));
 
       updateLastAssistantMessage((message) => ({
@@ -3536,15 +3758,17 @@ export async function createChatView(strings, {
           ...(message.terminal ?? {}),
           status: 'running',
           statusLabel: strings.tools.subAgentsRunning,
-          subAgents: currentSubAgents
-        }
+          subAgents: currentSubAgents,
+        },
       }));
       syncComposer();
       renderThread();
 
       const onProgress = (index, agentState) => {
         if (runToken !== generationToken) return;
-        currentSubAgents = currentSubAgents.map((a, i) => (i === index ? { ...a, ...agentState } : a));
+        currentSubAgents = currentSubAgents.map((a, i) =>
+          i === index ? { ...a, ...agentState } : a,
+        );
         updateSubAgentCard(thread, currentSubAgents, strings);
       };
 
@@ -3578,14 +3802,26 @@ export async function createChatView(strings, {
           status: subAgentOk ? 'completed' : 'failed',
           statusLabel: subAgentOk ? strings.tools.subAgentsComplete : strings.tools.subAgentsFailed,
           output: subAgentResult?.output ?? subAgentResult?.error ?? '',
-          subAgents: currentSubAgents
-        }
+          subAgents: currentSubAgents,
+        },
       }));
 
       messages = [
         ...messages,
-        { role: 'user', content: strings.tools.hiddenResultLabel, modelContent: subAgentModelResult, hidden: true },
-        { role: 'assistant', content: '', thinking: '', streaming: true, providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
+        {
+          role: 'user',
+          content: strings.tools.hiddenResultLabel,
+          modelContent: subAgentModelResult,
+          hidden: true,
+        },
+        {
+          role: 'assistant',
+          content: '',
+          thinking: '',
+          streaming: true,
+          providerLabel: activeProvider?.label ?? 'AI',
+          modelLabel: activeModelLabel,
+        },
       ];
 
       accText = '';
@@ -3593,7 +3829,12 @@ export async function createChatView(strings, {
       syncComposer();
       renderThread();
 
-      await startAssistantStream({ isNewSession: false, terminalDepth: terminalDepth + 1, runToken, generationStartTime });
+      await startAssistantStream({
+        isNewSession: false,
+        terminalDepth: terminalDepth + 1,
+        runToken,
+        generationStartTime,
+      });
       return;
     }
 
@@ -3617,14 +3858,26 @@ export async function createChatView(strings, {
         ...(message.terminal ?? {}),
         status: ok ? 'completed' : 'failed',
         statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
-        output: result?.output ?? result?.error ?? ''
-      }
+        output: result?.output ?? result?.error ?? '',
+      },
     }));
 
     messages = [
       ...messages,
-      { role: 'user', content: strings.tools.hiddenResultLabel, modelContent: modelResult, hidden: true },
-      { role: 'assistant', content: '', thinking: '', streaming: true, providerLabel: activeProvider?.label ?? 'AI', modelLabel: activeModelLabel }
+      {
+        role: 'user',
+        content: strings.tools.hiddenResultLabel,
+        modelContent: modelResult,
+        hidden: true,
+      },
+      {
+        role: 'assistant',
+        content: '',
+        thinking: '',
+        streaming: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel,
+      },
     ];
 
     accText = '';
@@ -3632,14 +3885,19 @@ export async function createChatView(strings, {
     syncComposer();
     renderThread();
 
-    await startAssistantStream({ isNewSession: false, terminalDepth: terminalDepth + 1, runToken, generationStartTime });
+    await startAssistantStream({
+      isNewSession: false,
+      terminalDepth: terminalDepth + 1,
+      runToken,
+      generationStartTime,
+    });
   }
 
   async function startAssistantStream({
     isNewSession,
     terminalDepth = 0,
     runToken,
-    generationStartTime
+    generationStartTime,
   }) {
     removeStreamListeners();
 
@@ -3665,12 +3923,12 @@ export async function createChatView(strings, {
           : null;
         const provRef = diagPanel.addItem(
           strings.diag.checkingProvider.replace('AI provider', provLabel),
-          'spin'
+          'spin',
         );
 
         const [netResult, provResult] = await Promise.all([
           measureFetch('https://dns.google/resolve?name=google.com&type=A'),
-          provBaseUrl ? measureFetch(provBaseUrl) : Promise.resolve(null)
+          provBaseUrl ? measureFetch(provBaseUrl) : Promise.resolve(null),
         ]);
 
         if (runToken !== generationToken) return;
@@ -3693,140 +3951,160 @@ export async function createChatView(strings, {
       }, 10_000);
     }
 
-    streamDisposers.push(onIpc('chat:stream-chunk', (chunk) => {
-      if (runToken !== generationToken) return;
-      if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
-      if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
-      const { content: displayContent, thinking: inlineThinking } = parseThinkingFromText(accText);
-      const displayThinking = accThinking || inlineThinking;
-      updateLastStreamingMessage(thread, { content: displayContent, thinking: displayThinking });
-      scheduleScrollToBottom();
-    }));
+    streamDisposers.push(
+      onIpc('chat:stream-chunk', (chunk) => {
+        if (runToken !== generationToken) return;
+        if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
+        if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
+        const { content: displayContent, thinking: inlineThinking } =
+          parseThinkingFromText(accText);
+        const displayThinking = accThinking || inlineThinking;
+        updateLastStreamingMessage(thread, { content: displayContent, thinking: displayThinking });
+        scheduleScrollToBottom();
+      }),
+    );
 
-    streamDisposers.push(onIpc('chat:stream-done', (meta) => {
-      if (runToken !== generationToken) return;
-      clearTimeout(diagTimer);
-      diagTimer = null;
-      diagPanel?.hide();
-      removeStreamListeners();
-      const { content: parsedContent, thinking: inlineThinking } = parseThinkingFromText(accText);
-      const terminalAction = parseTerminalToolRequest(parsedContent);
-      const toolsetAction = terminalAction ? null : parseToolsetToolRequest(parsedContent);
+    streamDisposers.push(
+      onIpc('chat:stream-done', (meta) => {
+        if (runToken !== generationToken) return;
+        clearTimeout(diagTimer);
+        diagTimer = null;
+        diagPanel?.hide();
+        removeStreamListeners();
+        const { content: parsedContent, thinking: inlineThinking } = parseThinkingFromText(accText);
+        const terminalAction = parseTerminalToolRequest(parsedContent);
+        const toolsetAction = terminalAction ? null : parseToolsetToolRequest(parsedContent);
 
-      if ((terminalAction || toolsetAction) && terminalDepth >= MAX_TERMINAL_TOOL_CALLS) {
-        const action = terminalAction || toolsetAction;
-        updateLastAssistantMessage((message) => ({
-          ...message,
+        if ((terminalAction || toolsetAction) && terminalDepth >= MAX_TERMINAL_TOOL_CALLS) {
+          const action = terminalAction || toolsetAction;
+          updateLastAssistantMessage((message) => ({
+            ...message,
+            role: 'assistant',
+            content: action.visibleContent || strings.terminal.unsupportedTool,
+            thinking: accThinking || inlineThinking,
+            streaming: false,
+            error: true,
+            providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+            modelLabel: meta?.modelLabel ?? activeModelLabel,
+          }));
+          isSending = false;
+          void saveCurrentSession();
+          void playCompletionSound(generationStartTime);
+          syncComposer();
+          renderThread();
+          return;
+        }
+
+        if (terminalAction) {
+          const label = getTerminalToolLabel(strings, terminalAction.tool);
+          updateLastAssistantMessage((message) => ({
+            ...message,
+            role: 'assistant',
+            content:
+              stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool,
+            thinking: accThinking || inlineThinking,
+            streaming: false,
+            providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+            modelLabel: meta?.modelLabel ?? activeModelLabel,
+            terminal: {
+              label,
+              command: getTerminalActionSummary(terminalAction, strings),
+              status: terminalAction.unsupported ? 'failed' : 'running',
+              statusLabel: terminalAction.unsupported
+                ? strings.terminal.unsupportedTool
+                : strings.terminal.running,
+            },
+          }));
+          syncComposer();
+          renderThread();
+
+          if (terminalAction.unsupported) {
+            isSending = false;
+            void saveCurrentSession();
+            void playCompletionSound(generationStartTime);
+            syncComposer();
+            return;
+          }
+
+          void continueAfterTerminalTool(
+            terminalAction,
+            terminalDepth,
+            runToken,
+            generationStartTime,
+          );
+          return;
+        }
+
+        if (toolsetAction) {
+          const isSubAgentAction = toolsetAction.tool === 'spawn_sub_agents';
+          updateLastAssistantMessage((message) => ({
+            ...message,
+            role: 'assistant',
+            content:
+              stripNativeToolCalls(toolsetAction.visibleContent) ||
+              (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
+            thinking: accThinking || inlineThinking,
+            streaming: false,
+            providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
+            modelLabel: meta?.modelLabel ?? activeModelLabel,
+            terminal: {
+              label: isSubAgentAction ? strings.tools.subAgentsLabel : toolsetAction.tool,
+              command: toolsetAction.tool,
+              status: 'running',
+              statusLabel: strings.terminal.running,
+            },
+          }));
+          syncComposer();
+          renderThread();
+          void continueAfterToolsetTool(
+            toolsetAction,
+            terminalDepth,
+            runToken,
+            generationStartTime,
+          );
+          return;
+        }
+
+        const isEmpty = !parsedContent && !accThinking;
+        updateLastAssistantMessage(() => ({
           role: 'assistant',
-          content: action.visibleContent || strings.terminal.unsupportedTool,
+          content: parsedContent || strings.composer.emptyResponse,
           thinking: accThinking || inlineThinking,
           streaming: false,
-          error: true,
+          empty: isEmpty,
+          durationMs: Date.now() - generationStartTime,
           providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-          modelLabel: meta?.modelLabel ?? activeModelLabel
+          modelLabel: meta?.modelLabel ?? activeModelLabel,
         }));
         isSending = false;
         void saveCurrentSession();
         void playCompletionSound(generationStartTime);
         syncComposer();
         renderThread();
-        return;
-      }
+      }),
+    );
 
-      if (terminalAction) {
-        const label = getTerminalToolLabel(strings, terminalAction.tool);
-        updateLastAssistantMessage((message) => ({
-          ...message,
+    streamDisposers.push(
+      onIpc('chat:stream-error', (error) => {
+        if (runToken !== generationToken) return;
+        clearTimeout(diagTimer);
+        diagTimer = null;
+        diagPanel?.hide();
+        removeStreamListeners();
+        updateLastAssistantMessage(() => ({
           role: 'assistant',
-          content: stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool,
-          thinking: accThinking || inlineThinking,
+          content: error?.message || strings.composer.responseError,
+          thinking: accThinking,
           streaming: false,
-          providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-          modelLabel: meta?.modelLabel ?? activeModelLabel,
-          terminal: {
-            label,
-            command: getTerminalActionSummary(terminalAction, strings),
-            status: terminalAction.unsupported ? 'failed' : 'running',
-            statusLabel: terminalAction.unsupported
-              ? strings.terminal.unsupportedTool
-              : strings.terminal.running
-          }
+          error: true,
+          providerLabel: activeProvider?.label ?? 'AI',
+          modelLabel: activeModelLabel,
         }));
+        isSending = false;
         syncComposer();
         renderThread();
-
-        if (terminalAction.unsupported) {
-          isSending = false;
-          void saveCurrentSession();
-          void playCompletionSound(generationStartTime);
-          syncComposer();
-          return;
-        }
-
-        void continueAfterTerminalTool(terminalAction, terminalDepth, runToken, generationStartTime);
-        return;
-      }
-
-      if (toolsetAction) {
-        const isSubAgentAction = toolsetAction.tool === 'spawn_sub_agents';
-        updateLastAssistantMessage((message) => ({
-          ...message,
-          role: 'assistant',
-          content: stripNativeToolCalls(toolsetAction.visibleContent) || (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
-          thinking: accThinking || inlineThinking,
-          streaming: false,
-          providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-          modelLabel: meta?.modelLabel ?? activeModelLabel,
-          terminal: {
-            label: isSubAgentAction ? strings.tools.subAgentsLabel : toolsetAction.tool,
-            command: toolsetAction.tool,
-            status: 'running',
-            statusLabel: strings.terminal.running
-          }
-        }));
-        syncComposer();
-        renderThread();
-        void continueAfterToolsetTool(toolsetAction, terminalDepth, runToken, generationStartTime);
-        return;
-      }
-
-      const isEmpty = !parsedContent && !accThinking;
-      updateLastAssistantMessage(() => ({
-        role: 'assistant',
-        content: parsedContent || strings.composer.emptyResponse,
-        thinking: accThinking || inlineThinking,
-        streaming: false,
-        empty: isEmpty,
-        durationMs: Date.now() - generationStartTime,
-        providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
-        modelLabel: meta?.modelLabel ?? activeModelLabel
-      }));
-      isSending = false;
-      void saveCurrentSession();
-      void playCompletionSound(generationStartTime);
-      syncComposer();
-      renderThread();
-    }));
-
-    streamDisposers.push(onIpc('chat:stream-error', (error) => {
-      if (runToken !== generationToken) return;
-      clearTimeout(diagTimer);
-      diagTimer = null;
-      diagPanel?.hide();
-      removeStreamListeners();
-      updateLastAssistantMessage(() => ({
-        role: 'assistant',
-        content: error?.message || strings.composer.responseError,
-        thinking: accThinking,
-        streaming: false,
-        error: true,
-        providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
-      }));
-      isSending = false;
-      syncComposer();
-      renderThread();
-    }));
+      }),
+    );
 
     const historyToSend = messages
       .slice(0, -1)
@@ -3840,7 +4118,7 @@ export async function createChatView(strings, {
       });
     const [memoryContext, toolsetTools] = await Promise.all([
       loadMemoryContext(),
-      loadToolsetPrompt()
+      loadToolsetPrompt(),
     ]);
 
     if (runToken !== generationToken) return;
@@ -3855,7 +4133,7 @@ export async function createChatView(strings, {
       modeInstruction: getModeInstruction(),
       terminalTools: strings.terminal.systemPrompt,
       toolsetTools: toolsetTools || null,
-      isNewSession
+      isNewSession,
     });
   }
 
@@ -3870,7 +4148,7 @@ export async function createChatView(strings, {
       : pendingAttachments.map((a) =>
           a.kind === 'image'
             ? { ...toAttachmentSummary(a), mimeType: a.mimeType, base64: a.base64 }
-            : toAttachmentSummary(a)
+            : toAttachmentSummary(a),
         );
 
     // Text-only attachments used to build the model context block.
@@ -3885,8 +4163,9 @@ export async function createChatView(strings, {
           .filter((a) => a.kind === 'image')
           .map((a) => ({ mimeType: a.mimeType, base64: a.base64 }));
 
-    const prompt = String(resend?.content ?? draftValue).trim()
-      || (allDisplayAttachments.length ? strings.composer.attachmentOnlyPrompt : '');
+    const prompt =
+      String(resend?.content ?? draftValue).trim() ||
+      (allDisplayAttachments.length ? strings.composer.attachmentOnlyPrompt : '');
 
     if ((!prompt && allDisplayAttachments.length === 0) || isSending) return;
 
@@ -3896,8 +4175,8 @@ export async function createChatView(strings, {
       sessionCreatedAt = new Date().toISOString();
     }
 
-    const modelContent = resend?.modelContent
-      || buildModelContent(strings, prompt, textAttachments);
+    const modelContent =
+      resend?.modelContent || buildModelContent(strings, prompt, textAttachments);
 
     messages = [
       ...messages,
@@ -3906,7 +4185,7 @@ export async function createChatView(strings, {
         content: prompt,
         modelContent,
         attachments: allDisplayAttachments,
-        imageAttachments: imageAttachmentsData
+        imageAttachments: imageAttachmentsData,
       },
       {
         role: 'assistant',
@@ -3914,8 +4193,8 @@ export async function createChatView(strings, {
         thinking: '',
         streaming: true,
         providerLabel: activeProvider?.label ?? 'AI',
-        modelLabel: activeModelLabel
-      }
+        modelLabel: activeModelLabel,
+      },
     ];
 
     draftValue = '';
@@ -3935,7 +4214,7 @@ export async function createChatView(strings, {
       isNewSession,
       terminalDepth: 0,
       runToken,
-      generationStartTime
+      generationStartTime,
     });
   }
 
@@ -3944,10 +4223,10 @@ export async function createChatView(strings, {
   const rawGreeting = isBirthday
     ? getBirthdayGreeting(firstName)
     : isChristmas
-    ? getChristmasGreeting(firstName)
-    : isNewYear
-    ? getNewYearGreeting(firstName)
-    : greetings[Math.floor(Math.random() * greetings.length)];
+      ? getChristmasGreeting(firstName)
+      : isNewYear
+        ? getNewYearGreeting(firstName)
+        : greetings[Math.floor(Math.random() * greetings.length)];
   const greeting = rawGreeting.replace(/\s(\S+\s*)$/, '\u00A0$1');
   title = createElement('h1', 'chat-stage__title', greeting);
   thread = createElement('section', 'chat-thread');
@@ -3958,7 +4237,10 @@ export async function createChatView(strings, {
   for (const { icon, label, prompt, submit } of getRandomSuggestions()) {
     const btn = createElement('button', 'chat-prompt-bubble');
     btn.type = 'button';
-    btn.append(createIcon(icon, 'chat-prompt-bubble__icon'), createElement('span', 'chat-prompt-bubble__label', label));
+    btn.append(
+      createIcon(icon, 'chat-prompt-bubble__icon'),
+      createElement('span', 'chat-prompt-bubble__label', label),
+    );
     btn.addEventListener('click', () => {
       setDraftValue(prompt);
       if (submit) void submitPrompt();
@@ -4063,7 +4345,7 @@ export async function createChatView(strings, {
   modelButton.type = 'button';
   modelButton.append(
     createElement('span', 'chat-composer__model-label', activeModelLabel),
-    createIcon('chevronDown', 'chat-composer__model-icon')
+    createIcon('chevronDown', 'chat-composer__model-icon'),
   );
   modelButton.addEventListener('click', (event) => {
     event.stopPropagation();
@@ -4099,24 +4381,39 @@ export async function createChatView(strings, {
   diagPanel = createDiagnosticPanel(strings);
   privateNoticeEl = createElement('div', 'chat-composer__private-notice');
   privateNoticeEl.hidden = true;
-  privateNoticeEl.append(createIcon('lock', 'chat-composer__private-notice-icon'), createElement('span', '', strings.composer.privateNotice));
-  composer.append(projectPill, gitBarEl, attachmentsEl, attachmentNotice, privateNoticeEl, composerField, composerFooter, slashMenu);
+  privateNoticeEl.append(
+    createIcon('lock', 'chat-composer__private-notice-icon'),
+    createElement('span', '', strings.composer.privateNotice),
+  );
+  composer.append(
+    projectPill,
+    gitBarEl,
+    attachmentsEl,
+    attachmentNotice,
+    privateNoticeEl,
+    composerField,
+    composerFooter,
+    slashMenu,
+  );
   scroll.append(title, bubblesEl, thread);
   bottom.append(composer);
   const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {
     onVisibilityChange: (visible) => {
       view.classList.toggle('chat-view--browser-preview', visible);
-    }
+    },
   });
   terminalPanel = createChatTerminalPanel(strings, {
     onOpenChange: (open) => {
       view.classList.toggle('chat-view--terminal', open);
-    }
+    },
   });
   const privateBtn = createElement('button', 'chat-private-btn');
   privateBtn.type = 'button';
   privateBtn.setAttribute('aria-label', 'Toggle private chat');
-  privateBtn.append(createIcon('lock', 'chat-private-btn__icon'), createElement('span', 'chat-private-btn__label', 'Private'));
+  privateBtn.append(
+    createIcon('lock', 'chat-private-btn__icon'),
+    createElement('span', 'chat-private-btn__label', 'Private'),
+  );
   privateBtn.addEventListener('click', () => {
     isPrivate = !isPrivate;
     privateBtn.classList.toggle('chat-private-btn--active', isPrivate);
@@ -4130,9 +4427,13 @@ export async function createChatView(strings, {
   track.append(trackLabel);
   view.append(track);
   scroll.addEventListener('scroll', () => updateTrackActive(), { passive: true });
-  scroll.addEventListener('scroll', () => {
-    userScrolledUp = !isNearBottom();
-  }, { passive: true });
+  scroll.addEventListener(
+    'scroll',
+    () => {
+      userScrolledUp = !isNearBottom();
+    },
+    { passive: true },
+  );
   browserPreview.start();
   wireTerminalProcessCards();
 
@@ -4150,7 +4451,7 @@ export async function createChatView(strings, {
   function applyDefaultModelFromSettings(settings) {
     const dm = settings?.defaultModel;
     const dmProvider = dm?.providerId
-      ? payload.providers.find((p) => p.id === dm.providerId) ?? null
+      ? (payload.providers.find((p) => p.id === dm.providerId) ?? null)
       : null;
     const dmModel = dmProvider?.models?.find((m) => m.id === dm?.modelId) ?? null;
 
@@ -4162,7 +4463,8 @@ export async function createChatView(strings, {
       // Default model was cleared or is no longer available — fall back.
       activeProvider = getPreferredProvider(payload);
       activeModel = activeProvider?.models?.[0] ?? null;
-      activeModelLabel = activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
+      activeModelLabel =
+        activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
     }
 
     // Sync the composer button label.
@@ -4198,6 +4500,6 @@ export async function createChatView(strings, {
     // BrowserView bounds so it reappears in the correct position.
     resumeBrowserPreview() {
       browserPreview.resume();
-    }
+    },
   };
 }

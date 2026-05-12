@@ -36,13 +36,15 @@ export async function listNamespacedMarkdown(baseDirectory, mapItem) {
       }
 
       const id = `${namespace.name}/${file.name}`;
-      items.push(mapItem({
-        id,
-        namespace: namespace.name,
-        filename: file.name,
-        frontmatter: parseFrontmatter(content),
-        content
-      }));
+      items.push(
+        mapItem({
+          id,
+          namespace: namespace.name,
+          filename: file.name,
+          frontmatter: parseFrontmatter(content),
+          content,
+        }),
+      );
     }
   }
 
@@ -61,6 +63,6 @@ export async function loadNamespacedMarkdown(baseDirectory, namespace, filename,
     namespace: safeNamespace,
     filename: safeFilename,
     frontmatter: parseFrontmatter(content),
-    content: stripFrontmatter(content)
+    content: stripFrontmatter(content),
   });
 }

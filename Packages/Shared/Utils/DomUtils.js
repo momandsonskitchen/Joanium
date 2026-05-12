@@ -1,7 +1,7 @@
 export function formatText(template, replacements) {
   return Object.entries(replacements).reduce(
     (result, [key, value]) => result.replaceAll(`{${key}}`, value),
-    template
+    template,
   );
 }
 

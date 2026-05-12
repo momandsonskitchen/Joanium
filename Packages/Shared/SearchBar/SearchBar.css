@@ -1,4 +1,4 @@
-@import "../Common/Common.css";
+@import '../Common/Common.css';
 
 /* ══════════════════════════════════════════════════════════════════════════
    Joanium — SearchBar shared component
@@ -57,7 +57,7 @@
   letter-spacing: -0.012em;
   box-shadow:
     inset 0 0 0 1px rgba(180, 120, 210, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
     0 4px 14px rgba(80, 35, 105, 0.07);
   transition:
     background-color var(--transition-base),
@@ -74,7 +74,7 @@
   background: rgba(255, 255, 255, 0.82);
   box-shadow:
     inset 0 0 0 1.5px var(--color-border-focus),
-    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 6px 22px var(--color-shadow-accent);
 }
 
@@ -115,7 +115,7 @@
 }
 
 .joanium-search__clear:active {
-  transform: scale(0.90);
+  transform: scale(0.9);
 }
 
 .joanium-search__clear-icon {

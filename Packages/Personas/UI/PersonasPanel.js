@@ -6,15 +6,14 @@ import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
-
 // ---------------------------------------------------------------------------
 // Panel factory
 // ---------------------------------------------------------------------------
 
 export function createPersonasPanel(strings, { getActivePersona, onActivatePersona }) {
-  let panel    = null;
-  let _listEl  = null;
-  let _search  = null;
+  let panel = null;
+  let _listEl = null;
+  let _search = null;
   let _viewerEl = null;
 
   // ── build ────────────────────────────────────────────────────────────────
@@ -30,13 +29,13 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     const body = createElement('div', 'chat-personas__body');
 
     // Left column — frosted-glass card containing search + scrollable list
-    const listCol  = createElement('div', 'chat-personas__list-col');
+    const listCol = createElement('div', 'chat-personas__list-col');
     const listCard = createElement('div', 'chat-personas__list-card');
 
     const searchWrap = createElement('div', 'chat-personas__list-search');
     _search = createSearchBar({
       placeholder: strings.searchPlaceholder,
-      onChange: (value) => void populateList(_listEl, value.trim())
+      onChange: (value) => void populateList(_listEl, value.trim()),
     });
     _search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(_search.element);
@@ -49,7 +48,11 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     const viewerCol = createElement('div', 'chat-personas__viewer-col');
     _viewerEl = createElement('div', 'chat-personas__viewer-card');
     _viewerEl.append(
-      createElement('div', 'chat-personas__viewer-empty', strings.selectPrompt ?? 'Select a persona to read its content')
+      createElement(
+        'div',
+        'chat-personas__viewer-empty',
+        strings.selectPrompt ?? 'Select a persona to read its content',
+      ),
     );
     viewerCol.append(_viewerEl);
 
@@ -57,8 +60,8 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     panel.append(body);
 
     // Expose sub-elements for external callers (e.g. populateList on mount)
-    panel._listEl   = _listEl;
-    panel._search   = _search;
+    panel._listEl = _listEl;
+    panel._search = _search;
     panel._viewerEl = _viewerEl;
 
     return panel;
@@ -81,12 +84,13 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
       personas = [];
     }
 
-    const q        = collapseWhitespace(query).toLowerCase();
+    const q = collapseWhitespace(query).toLowerCase();
     const filtered = q
-      ? personas.filter(p =>
-          collapseWhitespace(p.name).toLowerCase().includes(q)        ||
-          collapseWhitespace(p.description).toLowerCase().includes(q) ||
-          collapseWhitespace(p.namespace).toLowerCase().includes(q)
+      ? personas.filter(
+          (p) =>
+            collapseWhitespace(p.name).toLowerCase().includes(q) ||
+            collapseWhitespace(p.description).toLowerCase().includes(q) ||
+            collapseWhitespace(p.namespace).toLowerCase().includes(q),
         )
       : personas;
 
@@ -95,8 +99,12 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     if (filtered.length === 0) {
       const empty = createElement('div', 'chat-personas__empty');
       empty.append(
-        createElement('p', 'chat-personas__empty-title', q ? strings.noResults    : strings.empty),
-        createElement('p', 'chat-personas__empty-hint',  q ? strings.noResultsHint : strings.emptyHint)
+        createElement('p', 'chat-personas__empty-title', q ? strings.noResults : strings.empty),
+        createElement(
+          'p',
+          'chat-personas__empty-hint',
+          q ? strings.noResultsHint : strings.emptyHint,
+        ),
       );
       listEl.append(empty);
       return;
@@ -123,7 +131,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     _viewerEl.replaceChildren();
 
     const activePersona = getActivePersona();
-    const isActive      = activePersona?.id === persona.id;
+    const isActive = activePersona?.id === persona.id;
 
     // ── Viewer header ──────────────────────────────────────────────────────
     const header = createElement('div', 'chat-personas__viewer-header');
@@ -134,15 +142,15 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     const author = createElement('div', 'chat-personas__viewer-author');
     author.append(
       createElement('span', 'chat-personas__viewer-author-label', strings.author ?? 'Author'),
-      createElement('span', 'chat-personas__viewer-author-value', fullPersona.namespace)
+      createElement('span', 'chat-personas__viewer-author-value', fullPersona.namespace),
     );
     headerLeft.append(author);
 
     const activateBtn = createElement(
       'button',
-      `chat-personas__viewer-activate${isActive ? ' chat-personas__viewer-activate--active' : ''}`
+      `chat-personas__viewer-activate${isActive ? ' chat-personas__viewer-activate--active' : ''}`,
     );
-    activateBtn.type        = 'button';
+    activateBtn.type = 'button';
     activateBtn.textContent = isActive ? strings.active : strings.activate;
     activateBtn.addEventListener('click', async () => {
       onActivatePersona(isActive ? null : fullPersona);
@@ -163,16 +171,17 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
 
   function buildCard(persona, listEl) {
     const activePersona = getActivePersona();
-    const isActive      = activePersona?.id === persona.id;
+    const isActive = activePersona?.id === persona.id;
 
     const card = createElement(
       'div',
-      `chat-personas__card${isActive ? ' chat-personas__card--active' : ''}`
+      `chat-personas__card${isActive ? ' chat-personas__card--active' : ''}`,
     );
 
     card.addEventListener('click', () => {
-      listEl.querySelectorAll('.chat-personas__card--active')
-        .forEach(el => el.classList.remove('chat-personas__card--active'));
+      listEl
+        .querySelectorAll('.chat-personas__card--active')
+        .forEach((el) => el.classList.remove('chat-personas__card--active'));
       card.classList.add('chat-personas__card--active');
       void populateViewer(persona);
     });
@@ -196,7 +205,10 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     const actions = createElement('div', 'chat-personas__card-actions');
 
     if (!persona.protected) {
-      const deleteBtn = createElement('button', 'chat-personas__card-btn chat-personas__card-btn--danger');
+      const deleteBtn = createElement(
+        'button',
+        'chat-personas__card-btn chat-personas__card-btn--danger',
+      );
       deleteBtn.type = 'button';
       deleteBtn.setAttribute('aria-label', strings.delete);
       deleteBtn.append(createIcon('trash', 'chat-personas__card-btn-icon'));

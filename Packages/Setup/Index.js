@@ -17,21 +17,22 @@ export async function createPackage({ rootDirectory }) {
     rendererPath: path.join(setupDirectory, 'UI', 'Index.html'),
     preloadPath: path.join(setupDirectory, 'UI', 'Preload.js'),
     window: {
-      title: 'Joanium'
+      title: 'Joanium',
     },
     ipcHandlers: [
       {
         channel: 'setup:bootstrap',
-        handler: async () => setupStateManager.getBootstrapPayload()
+        handler: async () => setupStateManager.getBootstrapPayload(),
       },
       {
         channel: 'setup:save-draft',
-        handler: async (_event, draftState) => setupStateManager.saveDraft(draftState)
+        handler: async (_event, draftState) => setupStateManager.saveDraft(draftState),
       },
       {
         channel: 'setup:complete',
-        handler: async (_event, completedState) => setupStateManager.completeOnboarding(completedState)
-      }
-    ]
+        handler: async (_event, completedState) =>
+          setupStateManager.completeOnboarding(completedState),
+      },
+    ],
   };
 }

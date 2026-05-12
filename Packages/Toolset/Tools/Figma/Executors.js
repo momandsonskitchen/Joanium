@@ -8,6 +8,6 @@ export function createFigmaConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeFigmaChatTool
+    executeTool: executeFigmaChatTool,
   });
 }

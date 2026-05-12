@@ -8,6 +8,6 @@ export function createGitLabConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeGitlabChatTool
+    executeTool: executeGitlabChatTool,
   });
 }

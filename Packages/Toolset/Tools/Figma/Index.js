@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createFigmaToolHandlers({ rootDirectory }),
-      ...createFigmaConnectorToolHandlers({ rootDirectory })
+      ...createFigmaConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildFigmaPromptSection()]
+    promptSections: [buildFigmaPromptSection()],
   };
 }
 

@@ -9,8 +9,8 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'marketplace:install-item',
         handler: async (_event, type, publisher, filename, markdown) =>
-          marketplaceStateManager.installItem({ type, publisher, filename, markdown })
-      }
-    ]
+          marketplaceStateManager.installItem({ type, publisher, filename, markdown }),
+      },
+    ],
   };
 }

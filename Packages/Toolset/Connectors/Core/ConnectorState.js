@@ -2,7 +2,7 @@ import { readUserState, writeUserState } from '../../../Shared/UserData/UserData
 import {
   CONNECTOR_CATALOG,
   createConnectorCatalog,
-  getConnectorDefinition
+  getConnectorDefinition,
 } from './ConnectorCatalog.js';
 
 function sanitizeCredential(value) {
@@ -26,7 +26,9 @@ function hasCredential(connector, details = {}) {
 }
 
 function hasAnySavedCredential(connector, details = {}) {
-  return getConnectorFields(connector).some((field) => Boolean(sanitizeCredential(details[field.key])));
+  return getConnectorFields(connector).some((field) =>
+    Boolean(sanitizeCredential(details[field.key])),
+  );
 }
 
 function getSavedCredentialKeys(connector, details = {}) {
@@ -35,7 +37,10 @@ function getSavedCredentialKeys(connector, details = {}) {
     .map((field) => field.key);
 }
 
-export function createConnectorStateManager({ rootDirectory, connectorCatalog = CONNECTOR_CATALOG }) {
+export function createConnectorStateManager({
+  rootDirectory,
+  connectorCatalog = CONNECTOR_CATALOG,
+}) {
   const catalog = createConnectorCatalog(connectorCatalog);
 
   async function readState() {
@@ -53,7 +58,7 @@ export function createConnectorStateManager({ rootDirectory, connectorCatalog = 
       configured: hasCredential(connector, details),
       credentialSaved: hasAnySavedCredential(connector, details),
       savedCredentialKeys: getSavedCredentialKeys(connector, details),
-      credentialKey: connector.credentialKey
+      credentialKey: connector.credentialKey,
     };
   }
 
@@ -69,9 +74,10 @@ export function createConnectorStateManager({ rootDirectory, connectorCatalog = 
       if (!connector) throw new Error('Unknown connector.');
 
       const fields = getConnectorFields(connector);
-      const incomingCredentials = incoming.credentials && typeof incoming.credentials === 'object'
-        ? incoming.credentials
-        : { [connector.credentialKey]: incoming.credential };
+      const incomingCredentials =
+        incoming.credentials && typeof incoming.credentials === 'object'
+          ? incoming.credentials
+          : { [connector.credentialKey]: incoming.credential };
 
       await writeState((state) => {
         const currentDetails = state.connectors?.details ?? {};
@@ -100,9 +106,9 @@ export function createConnectorStateManager({ rootDirectory, connectorCatalog = 
             ...(state.connectors ?? {}),
             details: {
               ...currentDetails,
-              [connectorId]: nextDetails
-            }
-          }
+              [connectorId]: nextDetails,
+            },
+          },
         };
       });
 
@@ -118,9 +124,9 @@ export function createConnectorStateManager({ rootDirectory, connectorCatalog = 
           connectors: {
             ...(state.connectors ?? {}),
             details: Object.fromEntries(
-              Object.entries(currentDetails).filter(([id]) => id !== connectorId)
-            )
-          }
+              Object.entries(currentDetails).filter(([id]) => id !== connectorId),
+            ),
+          },
         };
       });
       return { ok: true };
@@ -139,12 +145,12 @@ export function createConnectorStateManager({ rootDirectory, connectorCatalog = 
           ...state,
           connectors: {
             ...(state.connectors ?? {}),
-            details: { ...currentDetails, [connectorId]: nextDetails }
-          }
+            details: { ...currentDetails, [connectorId]: nextDetails },
+          },
         };
       });
       const updated = await this.listConnectors();
       return updated.find((item) => item.id === connectorId) ?? null;
-    }
+    },
   };
 }

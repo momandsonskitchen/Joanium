@@ -33,7 +33,7 @@ export async function listAllContacts(creds) {
       maxResults: 1e3,
       pageToken: pageToken,
     });
-    (allContacts.push(...contacts), (pageToken = nextPageToken));
+    allContacts.push(...contacts), (pageToken = nextPageToken);
   } while (pageToken);
   return allContacts;
 }
@@ -104,7 +104,7 @@ export async function bulkDeleteContacts(creds, resourceNames = []) {
   const results = [];
   for (const rn of resourceNames)
     try {
-      (await deleteContact(creds, rn), results.push({ ok: !0, resourceName: rn }));
+      await deleteContact(creds, rn), results.push({ ok: !0, resourceName: rn });
     } catch (err) {
       results.push({ ok: !1, resourceName: rn, error: err.message });
     }
@@ -241,8 +241,8 @@ export async function findDuplicates(creds) {
   for (const c of all) {
     const email = c.emailAddresses?.[0]?.value?.toLowerCase(),
       name = c.names?.[0]?.displayName?.toLowerCase();
-    (email && (emailMap.has(email) || emailMap.set(email, []), emailMap.get(email).push(c)),
-      name && (nameMap.has(name) || nameMap.set(name, []), nameMap.get(name).push(c)));
+    email && (emailMap.has(email) || emailMap.set(email, []), emailMap.get(email).push(c)),
+      name && (nameMap.has(name) || nameMap.set(name, []), nameMap.get(name).push(c));
   }
   const groups = [];
   for (const [key, contacts] of emailMap)

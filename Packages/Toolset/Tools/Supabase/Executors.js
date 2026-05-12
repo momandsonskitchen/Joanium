@@ -8,6 +8,6 @@ export function createSupabaseConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeSupabaseChatTool
+    executeTool: executeSupabaseChatTool,
   });
 }

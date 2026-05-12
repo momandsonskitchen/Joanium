@@ -37,7 +37,9 @@ async function openWeatherCurrent(rootDirectory, params = {}) {
   }
 
   const location = requireText(params.location ?? params.query ?? params.city, 'location');
-  const units = ['standard', 'metric', 'imperial'].includes(String(params.units ?? '').toLowerCase())
+  const units = ['standard', 'metric', 'imperial'].includes(
+    String(params.units ?? '').toLowerCase(),
+  )
     ? String(params.units).toLowerCase()
     : 'metric';
   const url = new URL(OPENWEATHER_API);
@@ -57,7 +59,7 @@ async function openWeatherCurrent(rootDirectory, params = {}) {
     `Feels like: ${Math.round(data.main?.feels_like ?? 0)} deg ${temperatureUnit}`,
     `Humidity: ${data.main?.humidity ?? '(unknown)'}%`,
     `Wind: ${data.wind?.speed ?? '(unknown)'} ${speedUnit}`,
-    `Pressure: ${data.main?.pressure ?? '(unknown)'} hPa`
+    `Pressure: ${data.main?.pressure ?? '(unknown)'} hPa`,
   ].join('\n');
 }
 
@@ -65,6 +67,6 @@ export function createOpenWeatherToolHandlers({ rootDirectory }) {
   return {
     openweather_current(params = {}) {
       return openWeatherCurrent(rootDirectory, params);
-    }
+    },
   };
 }

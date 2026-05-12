@@ -29,40 +29,40 @@ export async function createPackage({ rootDirectory }) {
           return {
             telegram: path.join(iconsDirectory, 'Telegram.png'),
             whatsapp: path.join(iconsDirectory, 'WhatsApp.png'),
-            discord:  path.join(iconsDirectory, 'Discord.png'),
-            slack:    path.join(iconsDirectory, 'Slack.png')
+            discord: path.join(iconsDirectory, 'Discord.png'),
+            slack: path.join(iconsDirectory, 'Slack.png'),
           };
-        }
+        },
       },
       {
         channel: 'channels:list',
-        handler: async () => channelStateManager.getAllChannels()
+        handler: async () => channelStateManager.getAllChannels(),
       },
       {
         channel: 'channels:get',
-        handler: async (_event, name) => channelStateManager.getSafeChannel(name)
+        handler: async (_event, name) => channelStateManager.getSafeChannel(name),
       },
       {
         channel: 'channels:save',
-        handler: async (_event, name, config) => channelStateManager.saveChannel(name, config)
+        handler: async (_event, name, config) => channelStateManager.saveChannel(name, config),
       },
       {
         channel: 'channels:remove',
-        handler: async (_event, name) => channelStateManager.removeChannel(name)
+        handler: async (_event, name) => channelStateManager.removeChannel(name),
       },
       {
         channel: 'channels:toggle',
-        handler: async (_event, name, enabled) => channelStateManager.toggleChannel(name, enabled)
+        handler: async (_event, name, enabled) => channelStateManager.toggleChannel(name, enabled),
       },
       {
         channel: 'channels:validate',
         handler: async (_event, name, credentials = {}) => {
-          const savedConfig = await channelStateManager.getChannel(name) ?? {};
+          const savedConfig = (await channelStateManager.getChannel(name)) ?? {};
 
           if (name === 'telegram') {
             const botToken = requireCredential(
               resolveCredentialValue(credentials.botToken, savedConfig.botToken),
-              'Bot token'
+              'Bot token',
             );
             return channelRuntime.validateTelegram(botToken);
           }
@@ -70,11 +70,11 @@ export async function createPackage({ rootDirectory }) {
           if (name === 'whatsapp') {
             const accountSid = requireCredential(
               resolveCredentialValue(credentials.accountSid, savedConfig.accountSid),
-              'Account SID'
+              'Account SID',
             );
             const authToken = requireCredential(
               resolveCredentialValue(credentials.authToken, savedConfig.authToken),
-              'Auth token'
+              'Auth token',
             );
             return channelRuntime.validateWhatsApp(accountSid, authToken);
           }
@@ -82,11 +82,11 @@ export async function createPackage({ rootDirectory }) {
           if (name === 'discord') {
             const botToken = requireCredential(
               resolveCredentialValue(credentials.botToken, savedConfig.botToken),
-              'Bot token'
+              'Bot token',
             );
             const channelId = requireCredential(
               resolveCredentialValue(credentials.channelId, savedConfig.channelId),
-              'Channel ID'
+              'Channel ID',
             );
             const bot = await channelRuntime.validateDiscord(botToken);
             const channel = await channelRuntime.validateDiscordChannel(botToken, channelId);
@@ -96,11 +96,11 @@ export async function createPackage({ rootDirectory }) {
           if (name === 'slack') {
             const botToken = requireCredential(
               resolveCredentialValue(credentials.botToken, savedConfig.botToken),
-              'Bot token'
+              'Bot token',
             );
             const channelId = requireCredential(
               resolveCredentialValue(credentials.channelId, savedConfig.channelId),
-              'Channel ID'
+              'Channel ID',
             );
             const bot = await channelRuntime.validateSlack(botToken);
             const channel = await channelRuntime.validateSlackChannel(botToken, channelId);
@@ -108,28 +108,28 @@ export async function createPackage({ rootDirectory }) {
           }
 
           throw new Error('Unknown channel.');
-        }
+        },
       },
       {
         channel: 'channels:reply',
-        handler: async (_event, id, text) => ({ ok: channelRuntime.resolveReply(id, text) })
+        handler: async (_event, id, text) => ({ ok: channelRuntime.resolveReply(id, text) }),
       },
       {
         channel: 'channels:save-message',
-        handler: async (_event, message) => channelStateManager.saveMessage(message)
+        handler: async (_event, message) => channelStateManager.saveMessage(message),
       },
       {
         channel: 'channels:list-messages',
-        handler: async () => channelStateManager.listMessages()
+        handler: async () => channelStateManager.listMessages(),
       },
       {
         channel: 'channels:delete-message',
-        handler: async (_event, id) => channelStateManager.deleteMessage(id)
+        handler: async (_event, id) => channelStateManager.deleteMessage(id),
       },
       {
         channel: 'channels:clear-messages',
-        handler: async () => channelStateManager.clearMessages()
-      }
-    ]
+        handler: async () => channelStateManager.clearMessages(),
+      },
+    ],
   };
 }

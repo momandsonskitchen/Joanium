@@ -8,7 +8,8 @@ const en = {
   folderPlaceholder: 'No folder selected',
   selectFolder: 'Select folder',
   infoLabel: 'Project context',
-  infoPlaceholder: 'Describe what this project is about — the AI will keep this context in mind while you work inside it…',
+  infoPlaceholder:
+    'Describe what this project is about — the AI will keep this context in mind while you work inside it…',
   coverLabel: 'Cover image',
   coverHint: 'Add a cover image',
   changeCover: 'Change cover',
@@ -31,7 +32,8 @@ const en = {
   systemContextName: 'Project name: {name}',
   systemContextInfo: 'Project context: {info}',
   systemContextFolder: 'Project workspace folder: {folder}',
-  systemContextGit: 'Use the project workspace folder as the default working directory for terminal, git status, git diff, and project checks.'
+  systemContextGit:
+    'Use the project workspace folder as the default working directory for terminal, git status, git diff, and project checks.',
 };
 
 export default en;

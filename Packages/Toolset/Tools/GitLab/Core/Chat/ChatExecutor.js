@@ -339,8 +339,7 @@ export async function executeGitlabChatTool(ctx, toolName, params = {}) {
     }
     case 'gitlab_mark_notifications_read':
       return (
-        await GitlabAPI.markAllNotificationsRead(credentials),
-        'All GitLab todos marked as done.'
+        await GitlabAPI.markAllNotificationsRead(credentials), 'All GitLab todos marked as done.'
       );
     case 'gitlab_get_repo_stats': {
       const { owner: owner, repo: repo } = params;
@@ -539,7 +538,7 @@ export async function executeGitlabChatTool(ctx, toolName, params = {}) {
       if (!notifications.length) return 'No pending GitLab todos/notifications.';
       const countsByRepo = notifications.reduce((result, item) => {
           const repoName = item.repository?.full_name || 'unknown';
-          return ((result[repoName] = (result[repoName] || 0) + 1), result);
+          return (result[repoName] = (result[repoName] || 0) + 1), result;
         }, {}),
         repoLines = Object.entries(countsByRepo)
           .sort((left, right) => right[1] - left[1])
@@ -585,7 +584,7 @@ export async function executeGitlabChatTool(ctx, toolName, params = {}) {
           totalChars + content.length > 8e4)
         )
           break;
-        (loaded.push({ path: file.path, content: content }), (totalChars += content.length));
+        loaded.push({ path: file.path, content: content }), (totalChars += content.length);
       }
       const treeLines = allFiles
         .filter((item) => !SKIP_DIRS.has(item.path.split('/')[0]))
@@ -2688,16 +2687,14 @@ export async function executeGitlabChatTool(ctx, toolName, params = {}) {
       const { username: username } = params;
       if (!username) throw new Error('Missing required param: username');
       return (
-        await GitlabAPI.followUser(credentials, username),
-        `You are now following @${username}.`
+        await GitlabAPI.followUser(credentials, username), `You are now following @${username}.`
       );
     }
     case 'gitlab_unfollow_user': {
       const { username: username } = params;
       if (!username) throw new Error('Missing required param: username');
       return (
-        await GitlabAPI.unfollowUser(credentials, username),
-        `You have unfollowed @${username}.`
+        await GitlabAPI.unfollowUser(credentials, username), `You have unfollowed @${username}.`
       );
     }
     case 'gitlab_get_issue_events': {
@@ -2744,8 +2741,7 @@ export async function executeGitlabChatTool(ctx, toolName, params = {}) {
       const { gist_id: gist_id } = params;
       if (!gist_id) throw new Error('Missing required param: gist_id');
       return (
-        await GitlabAPI.deleteGist(credentials, gist_id),
-        `Snippet ${gist_id} has been deleted.`
+        await GitlabAPI.deleteGist(credentials, gist_id), `Snippet ${gist_id} has been deleted.`
       );
     }
     case 'gitlab_transfer_issue': {

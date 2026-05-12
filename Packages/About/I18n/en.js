@@ -10,7 +10,7 @@ const en = {
   timezone: 'Time Zone',
   runtime: 'Runtime',
   sponsor: 'Sponsor',
-  sponsorUrl: 'https://github.com/sponsors/withinjoel'
+  sponsorUrl: 'https://github.com/sponsors/withinjoel',
 };
 
 export default en;

@@ -70,8 +70,8 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
   // Position the portalled panel directly below the trigger using fixed coords.
   function positionPanel() {
     const rect = trigger.getBoundingClientRect();
-    panel.style.left  = `${rect.left}px`;
-    panel.style.top   = `${rect.bottom + 8}px`;
+    panel.style.left = `${rect.left}px`;
+    panel.style.top = `${rect.bottom + 8}px`;
     panel.style.width = `${rect.width}px`;
   }
 
@@ -124,6 +124,6 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
       window.removeEventListener('scroll', onScrollOrResize, { capture: true });
       window.removeEventListener('resize', onScrollOrResize);
       panel.remove();
-    }
+    },
   };
 }

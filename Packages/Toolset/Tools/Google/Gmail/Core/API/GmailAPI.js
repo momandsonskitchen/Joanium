@@ -347,7 +347,7 @@ export async function getMessageFull(creds, messageId) {
   );
 }
 export async function deleteMessage(creds, messageId) {
-  return (await gmailFetch(creds, `${GMAIL_BASE}/messages/${messageId}`, { method: 'DELETE' }), !0);
+  return await gmailFetch(creds, `${GMAIL_BASE}/messages/${messageId}`, { method: 'DELETE' }), !0;
 }
 export async function batchDeleteByQuery(creds, query, maxResults = 50) {
   const messages =
@@ -371,7 +371,7 @@ export async function listAttachments(creds, messageId) {
     attachments = [],
     walk = (parts = []) => {
       for (const part of parts)
-        (part.filename &&
+        part.filename &&
           part.body?.attachmentId &&
           attachments.push({
             attachmentId: part.body.attachmentId,
@@ -379,9 +379,9 @@ export async function listAttachments(creds, messageId) {
             mimeType: part.mimeType,
             size: part.body.size ?? 0,
           }),
-          part.parts && walk(part.parts));
+          part.parts && walk(part.parts);
     };
-  return (walk(detail.payload.parts ?? []), attachments);
+  return walk(detail.payload.parts ?? []), attachments;
 }
 export async function listThreads(creds, query = '', maxResults = 10) {
   const q = query ? `&q=${encodeURIComponent(query)}` : '',
@@ -451,7 +451,7 @@ export async function listDrafts(creds, maxResults = 10) {
   );
 }
 export async function deleteDraft(creds, draftId) {
-  return (await gmailFetch(creds, `${GMAIL_BASE}/drafts/${draftId}`, { method: 'DELETE' }), !0);
+  return await gmailFetch(creds, `${GMAIL_BASE}/drafts/${draftId}`, { method: 'DELETE' }), !0;
 }
 export async function sendDraft(creds, draftId) {
   const fresh = await getFreshGoogleCreds(creds),
@@ -538,7 +538,7 @@ export async function createFilter(
   });
 }
 export async function deleteLabel(creds, labelId) {
-  return (await gmailFetch(creds, `${GMAIL_BASE}/labels/${labelId}`, { method: 'DELETE' }), !0);
+  return await gmailFetch(creds, `${GMAIL_BASE}/labels/${labelId}`, { method: 'DELETE' }), !0;
 }
 export async function renameLabel(creds, labelId, newName) {
   return gmailFetch(creds, `${GMAIL_BASE}/labels/${labelId}`, {

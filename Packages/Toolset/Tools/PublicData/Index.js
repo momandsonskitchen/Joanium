@@ -9,7 +9,7 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: TOOL_DEFINITIONS,
     toolHandlers: createPublicDataToolHandlers({ rootDirectory }),
     promptSections: [buildPublicDataPromptSection()],
-    connectors: strings.connectors
+    connectors: strings.connectors,
   };
 }
 

@@ -6,22 +6,26 @@ const linearStrings = {
     credentialLabel: 'Personal API key',
     credentialPlaceholder: 'lin_api_...',
     credentialKey: 'token',
-    optional: false
+    optional: false,
   },
   tools: [
     {
       name: 'linear_get_viewer',
       description: 'Get the authenticated Linear user.',
       category: 'linear',
-      parameters: {}
+      parameters: {},
     },
     {
       name: 'linear_list_teams',
       description: 'List Linear teams.',
       category: 'linear',
       parameters: {
-        limit: { type: 'number', required: false, description: 'Maximum teams, default 25, max 50.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum teams, default 25, max 50.',
+        },
+      },
     },
     {
       name: 'linear_list_my_issues',
@@ -29,8 +33,12 @@ const linearStrings = {
       category: 'linear',
       parameters: {
         state: { type: 'string', required: false, description: 'Optional state name filter.' },
-        limit: { type: 'number', required: false, description: 'Maximum issues, default 10, max 25.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum issues, default 10, max 25.',
+        },
+      },
     },
     {
       name: 'linear_search_issues',
@@ -38,16 +46,24 @@ const linearStrings = {
       category: 'linear',
       parameters: {
         query: { type: 'string', required: true, description: 'Search query.' },
-        limit: { type: 'number', required: false, description: 'Maximum issues, default 10, max 25.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum issues, default 10, max 25.',
+        },
+      },
     },
     {
       name: 'linear_get_issue',
       description: 'Get a Linear issue by ID or identifier.',
       category: 'linear',
       parameters: {
-        issue_id: { type: 'string', required: true, description: 'Issue UUID or identifier such as ENG-123.' }
-      }
+        issue_id: {
+          type: 'string',
+          required: true,
+          description: 'Issue UUID or identifier such as ENG-123.',
+        },
+      },
     },
     {
       name: 'linear_create_issue',
@@ -57,8 +73,8 @@ const linearStrings = {
         team_id: { type: 'string', required: true, description: 'Linear team ID.' },
         title: { type: 'string', required: true, description: 'Issue title.' },
         description: { type: 'string', required: false, description: 'Issue description.' },
-        priority: { type: 'number', required: false, description: 'Priority 0-4.' }
-      }
+        priority: { type: 'number', required: false, description: 'Priority 0-4.' },
+      },
     },
     {
       name: 'linear_add_comment',
@@ -66,10 +82,10 @@ const linearStrings = {
       category: 'linear',
       parameters: {
         issue_id: { type: 'string', required: true, description: 'Issue UUID or identifier.' },
-        body: { type: 'string', required: true, description: 'Comment body.' }
-      }
-    }
-  ]
+        body: { type: 'string', required: true, description: 'Comment body.' },
+      },
+    },
+  ],
 };
 
 export default linearStrings;

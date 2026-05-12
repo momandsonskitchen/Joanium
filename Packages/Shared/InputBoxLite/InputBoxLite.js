@@ -11,7 +11,7 @@ export function createInputBoxLite({
   labelClassName = '',
   descriptionClassName = '',
   onInput,
-  onKeyDown
+  onKeyDown,
 }) {
   const wrapper = document.createElement('div');
   wrapper.className = 'joanium-input-lite';
@@ -49,7 +49,7 @@ export function createInputBoxLite({
   if (!label && !description) {
     return {
       element: field,
-      input: field
+      input: field,
     };
   }
 
@@ -64,6 +64,6 @@ export function createInputBoxLite({
 
   return {
     element: wrapper,
-    input: field
+    input: field,
   };
 }

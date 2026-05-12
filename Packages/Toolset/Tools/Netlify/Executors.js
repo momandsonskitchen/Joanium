@@ -8,6 +8,6 @@ export function createNetlifyConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeNetlifyChatTool
+    executeTool: executeNetlifyChatTool,
   });
 }

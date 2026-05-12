@@ -99,10 +99,17 @@ export function createSearchBar({ placeholder = '', onChange, onClear, onKeyDown
 
   // ── Public API ────────────────────────────────────────────────────────
   return {
-    element:  wrap,
-    getValue: ()  => input.value,
-    setValue: (v) => { input.value = String(v ?? ''); syncClearVisibility(); },
-    clear:    ()  => { input.value = ''; syncClearVisibility(); onChange?.(''); },
-    focus:    ()  => input.focus()
+    element: wrap,
+    getValue: () => input.value,
+    setValue: (v) => {
+      input.value = String(v ?? '');
+      syncClearVisibility();
+    },
+    clear: () => {
+      input.value = '';
+      syncClearVisibility();
+      onChange?.('');
+    },
+    focus: () => input.focus(),
   };
 }

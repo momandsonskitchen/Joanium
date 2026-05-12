@@ -80,9 +80,9 @@ export async function executeTasksChatTool(ctx, toolName, params = {}) {
       if (!task_list_id?.trim()) throw new Error('Missing required param: task_list_id');
       if (!task_id?.trim()) throw new Error('Missing required param: task_id');
       const updates = {};
-      (void 0 !== title && (updates.title = title),
+      void 0 !== title && (updates.title = title),
         void 0 !== notes && (updates.notes = notes),
-        void 0 !== due && (updates.due = new Date(due).toISOString()));
+        void 0 !== due && (updates.due = new Date(due).toISOString());
       const task = await TasksAPI.updateTask(credentials, task_list_id, task_id, updates);
       return [
         'Task updated',
@@ -444,13 +444,13 @@ export async function executeTasksChatTool(ctx, toolName, params = {}) {
       function renderTask(t, indent = '') {
         const checkbox = 'completed' === t.status ? '[x]' : '[ ]',
           due = t.due ? ` _(due ${formatDue(t.due)})_` : '';
-        (lines.push(`${indent}- ${checkbox} **${t.title ?? '(Untitled)'}**${due}`),
+        lines.push(`${indent}- ${checkbox} **${t.title ?? '(Untitled)'}**${due}`),
           include_notes &&
             t.notes &&
             t.notes.split('\n').forEach((note) => lines.push(`${indent}  > ${note}`)),
-          children.filter((c) => c.parent === t.id).forEach((c) => renderTask(c, indent + '  ')));
+          children.filter((c) => c.parent === t.id).forEach((c) => renderTask(c, indent + '  '));
       }
-      return (topLevel.forEach((t) => renderTask(t)), lines.join('\n'));
+      return topLevel.forEach((t) => renderTask(t)), lines.join('\n');
     }
     default:
       throw new Error(`Unknown Tasks tool: ${toolName}`);

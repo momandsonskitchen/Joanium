@@ -28,7 +28,10 @@ export function parseJsonObject(value, fallback = {}) {
 
 export function parseCommaList(value = '') {
   if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
-  return String(value).split(',').map((item) => item.trim()).filter(Boolean);
+  return String(value)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 export function formatDate(value) {
@@ -39,7 +42,7 @@ export function formatDate(value) {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   } catch {
     return String(value);
@@ -60,7 +63,12 @@ export async function readConnectorDetails(rootDirectory, connectorId) {
   return state.connectors?.details?.[connectorId] ?? {};
 }
 
-export async function requireConnectorCredentials(rootDirectory, connectorId, keys = ['token'], label = connectorId) {
+export async function requireConnectorCredentials(
+  rootDirectory,
+  connectorId,
+  keys = ['token'],
+  label = connectorId,
+) {
   const details = await readConnectorDetails(rootDirectory, connectorId);
   const missing = keys.find((key) => !String(details[key] ?? '').trim());
   if (missing) throw new Error(`${label} is not configured in Settings > Connectors.`);
@@ -77,12 +85,13 @@ export async function readJsonResponse(response) {
   }
 
   if (!response.ok) {
-    const message = data?.message
-      || data?.error
-      || data?.error_description
-      || data?.errors?.[0]?.message
-      || rawText
-      || response.statusText;
+    const message =
+      data?.message ||
+      data?.error ||
+      data?.error_description ||
+      data?.errors?.[0]?.message ||
+      rawText ||
+      response.statusText;
     throw new Error(`${response.status} ${response.statusText}: ${message}`);
   }
 
@@ -90,11 +99,13 @@ export async function readJsonResponse(response) {
 }
 
 export async function fetchJson(url, { headers = {}, ...options } = {}) {
-  return readJsonResponse(await fetch(url, {
-    ...options,
-    headers: {
-      accept: 'application/json',
-      ...headers
-    }
-  }));
+  return readJsonResponse(
+    await fetch(url, {
+      ...options,
+      headers: {
+        accept: 'application/json',
+        ...headers,
+      },
+    }),
+  );
 }

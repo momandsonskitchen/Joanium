@@ -19,15 +19,15 @@ import path from 'node:path';
 // provider and triggering 429 rate-limit errors.
 // ---------------------------------------------------------------------------
 
-const TICK_INTERVAL_MS   = 60_000; // re-check every minute
-const BETWEEN_RUNS_DELAY = 5_000;  // 5 s gap between consecutive agent runs
+const TICK_INTERVAL_MS = 60_000; // re-check every minute
+const BETWEEN_RUNS_DELAY = 5_000; // 5 s gap between consecutive agent runs
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) {
-  let tickTimer      = null;
+  let tickTimer = null;
   let lastTickMinute = -1;
 
   // ── Internal helpers ──────────────────────────────────────────────────────
@@ -56,19 +56,24 @@ export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) 
   function shouldRunNow(schedule, now) {
     if (!schedule) return false;
 
-    const hh  = now.getHours();
-    const mm  = now.getMinutes();
+    const hh = now.getHours();
+    const mm = now.getMinutes();
     const dow = now.getDay(); // 0=Sun … 6=Sat
 
     const [schedH, schedM] = (schedule.time ?? '09:00').split(':').map(Number);
     const timeMatches = hh === schedH && mm === schedM;
 
     switch (schedule.type) {
-      case 'daily':    return timeMatches;
-      case 'weekly':   return timeMatches && dow === (schedule.day ?? 1);
-      case 'weekdays': return timeMatches && dow >= 1 && dow <= 5;
-      case 'weekends': return timeMatches && (dow === 0 || dow === 6);
-      default:         return false;
+      case 'daily':
+        return timeMatches;
+      case 'weekly':
+        return timeMatches && dow === (schedule.day ?? 1);
+      case 'weekdays':
+        return timeMatches && dow >= 1 && dow <= 5;
+      case 'weekends':
+        return timeMatches && (dow === 0 || dow === 6);
+      default:
+        return false;
     }
   }
 
@@ -110,7 +115,7 @@ export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) 
   }
 
   async function tick() {
-    const now           = new Date();
+    const now = new Date();
     const currentMinute = now.getHours() * 60 + now.getMinutes();
 
     // Only fire once per minute even if the timer drifts slightly.
@@ -118,7 +123,7 @@ export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) 
     lastTickMinute = currentMinute;
 
     const agents = await loadAllAgents();
-    const due    = agents.filter((agent) => {
+    const due = agents.filter((agent) => {
       if (agent.enabled === false) return false;
       if (!agent.schedule || agent.schedule.type === 'startup') return false;
       return shouldRunNow(agent.schedule, now);
@@ -141,9 +146,9 @@ export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) 
         await onReady();
       }
 
-      const agents        = await loadAllAgents();
+      const agents = await loadAllAgents();
       const startupAgents = agents.filter(
-        (agent) => agent.enabled !== false && agent.schedule?.type === 'startup'
+        (agent) => agent.enabled !== false && agent.schedule?.type === 'startup',
       );
 
       if (startupAgents.length > 0) {
@@ -161,6 +166,6 @@ export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) 
         clearInterval(tickTimer);
         tickTimer = null;
       }
-    }
+    },
   };
 }

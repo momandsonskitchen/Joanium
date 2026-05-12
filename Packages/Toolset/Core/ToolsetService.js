@@ -3,16 +3,34 @@ import strings from '../I18n/en.js';
 import { generatePasswordValue } from '../Security/PasswordTools.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
-const DAYS = Object.freeze(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
+const DAYS = Object.freeze([
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+]);
 const MONTHS = Object.freeze([
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]);
 const SEASONS_NORTH = Object.freeze([
   { name: 'Winter', months: [12, 1, 2] },
   { name: 'Spring', months: [3, 4, 5] },
   { name: 'Summer', months: [6, 7, 8] },
-  { name: 'Autumn', months: [9, 10, 11] }
+  { name: 'Autumn', months: [9, 10, 11] },
 ]);
 const ZODIAC = Object.freeze([
   ['Capricorn', [12, 22], [1, 19]],
@@ -26,7 +44,7 @@ const ZODIAC = Object.freeze([
   ['Virgo', [8, 23], [9, 22]],
   ['Libra', [9, 23], [10, 22]],
   ['Scorpio', [10, 23], [11, 21]],
-  ['Sagittarius', [11, 22], [12, 21]]
+  ['Sagittarius', [11, 22], [12, 21]],
 ]);
 
 const LINEAR_UNITS = [
@@ -56,7 +74,7 @@ const LINEAR_UNITS = [
   ['m/s', 'speed', 1, ['mps', 'meter per second', 'meters per second']],
   ['km/h', 'speed', 0.2777777778, ['kmh', 'kph', 'kilometer per hour', 'kilometers per hour']],
   ['mph', 'speed', 0.44704, ['mile per hour', 'miles per hour']],
-  ['knot', 'speed', 0.5144444444, ['knots', 'kt', 'kts']]
+  ['knot', 'speed', 0.5144444444, ['knots', 'kt', 'kts']],
 ];
 
 const UNIT_LOOKUP = new Map();
@@ -74,7 +92,7 @@ const TEMP_UNITS = new Map([
   ['f', 'f'],
   ['fahrenheit', 'f'],
   ['k', 'k'],
-  ['kelvin', 'k']
+  ['kelvin', 'k'],
 ]);
 const TRACKING_PARAMS = new Set([
   'utm_source',
@@ -97,7 +115,7 @@ const TRACKING_PARAMS = new Set([
   'source',
   'affiliate_id',
   'partner_id',
-  'click_id'
+  'click_id',
 ]);
 const GEOHASH_BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 
@@ -107,20 +125,26 @@ function clampInteger(value, fallback, min, max) {
 }
 
 function requireInteger(value, label = 'amount') {
-  if (value == null || String(value).trim?.() === '') throw new Error(`Missing required parameter: ${label}.`);
+  if (value == null || String(value).trim?.() === '')
+    throw new Error(`Missing required parameter: ${label}.`);
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) throw new Error(strings.errors.invalidNumber);
   return Math.round(parsed);
 }
 
 function normalizeUnitKey(value = '') {
-  return String(value).trim().toLowerCase().replaceAll('.', '').replace(/\s+/g, '').replace(/deg|degree|degrees/g, '');
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replaceAll('.', '')
+    .replace(/\s+/g, '')
+    .replace(/deg|degree|degrees/g, '');
 }
 
 function formatNumber(value, precision = 6) {
   if (!Number.isFinite(value)) return String(value);
   return Number(value.toFixed(precision)).toLocaleString('en-US', {
-    maximumFractionDigits: precision
+    maximumFractionDigits: precision,
   });
 }
 
@@ -146,10 +170,10 @@ function parseDate(value) {
   const day = Number(match[3]);
   const date = new Date(year, month - 1, day);
   if (
-    !Number.isFinite(date.getTime())
-    || date.getFullYear() !== year
-    || date.getMonth() !== month - 1
-    || date.getDate() !== day
+    !Number.isFinite(date.getTime()) ||
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
   ) {
     throw new Error(strings.errors.invalidDate);
   }
@@ -171,7 +195,11 @@ function parseTime(value, required = false) {
   if (!match) throw new Error(strings.errors.invalidTime);
   const hours = Number(match[1]);
   const minutes = Number(match[2]);
-  return { hours, minutes, text: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}` };
+  return {
+    hours,
+    minutes,
+    text: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
+  };
 }
 
 function dateSerial(date) {
@@ -190,7 +218,7 @@ function toISO(date) {
   return [
     date.getFullYear(),
     String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0')
+    String(date.getDate()).padStart(2, '0'),
   ].join('-');
 }
 
@@ -232,7 +260,9 @@ function addMonthsToDate(date, amount) {
   const months = Math.round(Number(amount));
   if (!Number.isFinite(months)) throw new Error(strings.errors.invalidNumber);
   const target = new Date(date.getFullYear(), date.getMonth() + months, 1);
-  target.setDate(Math.min(date.getDate(), daysInMonth(target.getFullYear(), target.getMonth() + 1)));
+  target.setDate(
+    Math.min(date.getDate(), daysInMonth(target.getFullYear(), target.getMonth() + 1)),
+  );
   return startOfLocalDay(target);
 }
 
@@ -240,7 +270,9 @@ function addYearsToDate(date, amount) {
   const years = Math.round(Number(amount));
   if (!Number.isFinite(years)) throw new Error(strings.errors.invalidNumber);
   const target = new Date(date.getFullYear() + years, date.getMonth(), 1);
-  target.setDate(Math.min(date.getDate(), daysInMonth(target.getFullYear(), target.getMonth() + 1)));
+  target.setDate(
+    Math.min(date.getDate(), daysInMonth(target.getFullYear(), target.getMonth() + 1)),
+  );
   return startOfLocalDay(target);
 }
 
@@ -278,8 +310,12 @@ function addBusinessDaysToDate(date, amount) {
 }
 
 function resolveWeekday(value) {
-  const input = String(value ?? '').trim().toLowerCase();
-  const index = DAYS.findIndex((day) => day.toLowerCase() === input || day.toLowerCase().slice(0, 3) === input);
+  const input = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  const index = DAYS.findIndex(
+    (day) => day.toLowerCase() === input || day.toLowerCase().slice(0, 3) === input,
+  );
   if (index < 0) throw new Error(strings.errors.invalidWeekday);
   return index;
 }
@@ -308,7 +344,7 @@ function getDetailedDateDifference(firstDate, secondDate) {
     totalDays,
     totalWeeks: (totalDays / 7).toFixed(1),
     totalHours,
-    totalMinutes: totalHours * 60
+    totalMinutes: totalHours * 60,
   };
 }
 
@@ -324,13 +360,15 @@ function getNthWeekdayOfMonth(year, month, nth, weekdayIndex) {
   }
   const offset = (weekdayIndex - new Date(year, month - 1, 1).getDay() + 7) % 7;
   const result = new Date(year, month - 1, 1 + offset + 7 * (requested - 1));
-  if (result.getMonth() !== month - 1) throw new Error(`There is no ${requested} occurrence of ${DAYS[weekdayIndex]} in that month.`);
+  if (result.getMonth() !== month - 1)
+    throw new Error(`There is no ${requested} occurrence of ${DAYS[weekdayIndex]} in that month.`);
   return startOfLocalDay(result);
 }
 
 function getLunarPhase(date) {
   const knownNewMoon = new Date('2000-01-06T18:14:00Z');
-  const phase = ((((date.getTime() - knownNewMoon.getTime()) / 864e5) % 29.53059) + 29.53059) % 29.53059;
+  const phase =
+    ((((date.getTime() - knownNewMoon.getTime()) / 864e5) % 29.53059) + 29.53059) % 29.53059;
   const phases = [
     [1.85, 'New Moon'],
     [7.38, 'Waxing Crescent'],
@@ -339,7 +377,7 @@ function getLunarPhase(date) {
     [16.61, 'Full Moon'],
     [22.15, 'Waning Gibbous'],
     [23.99, 'Last Quarter'],
-    [29.53059, 'Waning Crescent']
+    [29.53059, 'Waning Crescent'],
   ];
   const phaseName = phases.find(([limit]) => phase < limit)?.[1] ?? 'New Moon';
   const illumination = Math.round(50 * (1 - Math.cos((phase / 29.53059) * 2 * Math.PI)));
@@ -348,12 +386,12 @@ function getLunarPhase(date) {
     phaseName,
     phase: phase.toFixed(2),
     illumination,
-    daysUntilFull: daysUntilFull.toFixed(1)
+    daysUntilFull: daysUntilFull.toFixed(1),
   };
 }
 
 function progressBar(percent, length = 20) {
-  const filled = Math.round(Math.min(100, Math.max(0, percent)) / 100 * length);
+  const filled = Math.round((Math.min(100, Math.max(0, percent)) / 100) * length);
   return `[${'#'.repeat(filled)}${'-'.repeat(length - filled)}]`;
 }
 
@@ -383,7 +421,9 @@ function localToUTC(dateValue, timeValue, timezone) {
   const zone = assertTimezone(timezone);
   const date = parseRequiredDate(dateValue);
   const { hours, minutes } = parseTime(timeValue, true);
-  const approxUtc = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0));
+  const approxUtc = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes, 0),
+  );
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: zone,
     year: 'numeric',
@@ -392,7 +432,7 @@ function localToUTC(dateValue, timeValue, timezone) {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hourCycle: 'h23'
+    hourCycle: 'h23',
   }).formatToParts(approxUtc);
   const localAsUtc = Date.UTC(
     getTimezonePartValue(parts, 'year'),
@@ -400,7 +440,7 @@ function localToUTC(dateValue, timeValue, timezone) {
     getTimezonePartValue(parts, 'day'),
     getTimezonePartValue(parts, 'hour') % 24,
     getTimezonePartValue(parts, 'minute'),
-    getTimezonePartValue(parts, 'second')
+    getTimezonePartValue(parts, 'second'),
   );
   return new Date(approxUtc.getTime() - (localAsUtc - approxUtc.getTime()));
 }
@@ -414,14 +454,14 @@ function formatInTimezone(date, timezone) {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   }).format(date);
 }
 
 function getTimezoneOffsetLabel(date, timezone) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: assertTimezone(timezone),
-    timeZoneName: 'shortOffset'
+    timeZoneName: 'shortOffset',
   }).formatToParts(date);
   return parts.find((part) => part.type === 'timeZoneName')?.value ?? timezone;
 }
@@ -430,7 +470,7 @@ function getLocalHourInTimezone(date, timezone) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: assertTimezone(timezone),
     hour: '2-digit',
-    hourCycle: 'h23'
+    hourCycle: 'h23',
   }).formatToParts(date);
   return getTimezonePartValue(parts, 'hour') % 24;
 }
@@ -536,7 +576,7 @@ class ExpressionParser {
           atan: Math.atan,
           log: Math.log10,
           ln: Math.log,
-          exp: Math.exp
+          exp: Math.exp,
         }[identifier];
         if (!fn) throw new Error(`Unknown function "${identifier}".`);
         return fn(argument);
@@ -593,14 +633,11 @@ function evaluateExpression(expression) {
 }
 
 function convertTemperature(value, fromUnit, toUnit) {
-  const celsius = fromUnit === 'c'
-    ? value
-    : fromUnit === 'f'
-      ? (value - 32) * 5 / 9
-      : value - 273.15;
+  const celsius =
+    fromUnit === 'c' ? value : fromUnit === 'f' ? ((value - 32) * 5) / 9 : value - 273.15;
 
   if (toUnit === 'c') return celsius;
-  if (toUnit === 'f') return celsius * 9 / 5 + 32;
+  if (toUnit === 'f') return (celsius * 9) / 5 + 32;
   return celsius + 273.15;
 }
 
@@ -622,7 +659,7 @@ function convertUnits(params) {
     return [
       `Category: temperature`,
       `Input: ${formatNumber(value, precision)} ${fromInput}`,
-      `Output: ${formatNumber(converted, precision)} ${toInput}`
+      `Output: ${formatNumber(converted, precision)} ${toInput}`,
     ].join('\n');
   }
 
@@ -633,11 +670,11 @@ function convertUnits(params) {
   if (fromUnit.category !== toUnit.category) {
     throw new Error(`Cannot convert ${fromUnit.category} to ${toUnit.category}.`);
   }
-  const converted = value * fromUnit.factor / toUnit.factor;
+  const converted = (value * fromUnit.factor) / toUnit.factor;
   return [
     `Category: ${fromUnit.category}`,
     `Input: ${formatNumber(value, precision)} ${fromUnit.canonical}`,
-    `Output: ${formatNumber(converted, precision)} ${toUnit.canonical}`
+    `Output: ${formatNumber(converted, precision)} ${toUnit.canonical}`,
   ].join('\n');
 }
 
@@ -647,14 +684,16 @@ function sortJsonValue(value) {
   return Object.fromEntries(
     Object.keys(value)
       .sort((a, b) => a.localeCompare(b))
-      .map((key) => [key, sortJsonValue(value[key])])
+      .map((key) => [key, sortJsonValue(value[key])]),
   );
 }
 
 function wordsFromText(text) {
-  return String(text)
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .match(/[\p{L}\p{N}]+/gu) ?? [];
+  return (
+    String(text)
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .match(/[\p{L}\p{N}]+/gu) ?? []
+  );
 }
 
 function capitalizeWord(word) {
@@ -671,9 +710,13 @@ function convertTextCase(text, targetCase) {
     case 'title':
       return words.map(capitalizeWord).join(' ');
     case 'sentence':
-      return String(text).toLowerCase().replace(/(^\s*\p{L}|[.!?]\s*\p{L})/gu, (match) => match.toUpperCase());
+      return String(text)
+        .toLowerCase()
+        .replace(/(^\s*\p{L}|[.!?]\s*\p{L})/gu, (match) => match.toUpperCase());
     case 'camel':
-      return words.length ? words[0].toLowerCase() + words.slice(1).map(capitalizeWord).join('') : '';
+      return words.length
+        ? words[0].toLowerCase() + words.slice(1).map(capitalizeWord).join('')
+        : '';
     case 'pascal':
       return words.map(capitalizeWord).join('');
     case 'snake':
@@ -692,7 +735,10 @@ function getTextStats(text) {
   const words = input.match(/[\p{L}\p{N}]+(?:['-][\p{L}\p{N}]+)*/gu) ?? [];
   const lines = input.length ? input.split(/\r?\n/).length : 0;
   const paragraphs = input.trim() ? input.trim().split(/\r?\n\s*\r?\n+/).length : 0;
-  const sentences = input.split(/[.!?]+/u).map((part) => part.trim()).filter(Boolean).length;
+  const sentences = input
+    .split(/[.!?]+/u)
+    .map((part) => part.trim())
+    .filter(Boolean).length;
   const totalWordCharacters = words.reduce((sum, word) => sum + word.length, 0);
   return [
     `Characters: ${input.length}`,
@@ -702,12 +748,14 @@ function getTextStats(text) {
     `Sentences: ${sentences}`,
     `Paragraphs: ${paragraphs}`,
     `Average word length: ${words.length ? (totalWordCharacters / words.length).toFixed(2) : '0.00'}`,
-    `Estimated reading time: ${words.length ? (words.length / 200).toFixed(2) : '0.00'} min`
+    `Estimated reading time: ${words.length ? (words.length / 200).toFixed(2) : '0.00'} min`,
   ].join('\n');
 }
 
 function calculateDate(params) {
-  const operation = String(params.operation ?? '').trim().toLowerCase();
+  const operation = String(params.operation ?? '')
+    .trim()
+    .toLowerCase();
   if (!operation) throw new Error(strings.errors.missingOperation);
   const primaryDate = parseDate(params.date);
 
@@ -719,7 +767,7 @@ function calculateDate(params) {
         `Date: ${formatDate(primaryDate)}`,
         `Day: ${DAYS[primaryDate.getDay()]}`,
         `Day number in year: ${getDayOfYear(primaryDate)}`,
-        `Week number: ${getWeekNumber(primaryDate)}`
+        `Week number: ${getWeekNumber(primaryDate)}`,
       ].join('\n');
 
     case 'days_between': {
@@ -736,7 +784,7 @@ function calculateDate(params) {
         plural(days, 'day'),
         `About ${(days / 7).toFixed(1)} weeks`,
         `About ${(days / 30.44).toFixed(1)} months`,
-        `About ${(days / 365.25).toFixed(2)} years`
+        `About ${(days / 365.25).toFixed(2)} years`,
       ].join('\n');
     }
 
@@ -748,7 +796,7 @@ function calculateDate(params) {
         '',
         `Start: ${formatDate(primaryDate)}`,
         `Result: ${formatDate(result)}`,
-        `ISO: ${toISO(result)}`
+        `ISO: ${toISO(result)}`,
       ].join('\n');
     }
 
@@ -760,7 +808,7 @@ function calculateDate(params) {
         '',
         `Start: ${formatDate(primaryDate)}`,
         `Result: ${formatDate(result)}`,
-        `ISO: ${toISO(result)}`
+        `ISO: ${toISO(result)}`,
       ].join('\n');
     }
 
@@ -772,7 +820,7 @@ function calculateDate(params) {
         '',
         `Start: ${formatDate(primaryDate)}`,
         `Result: ${formatDate(result)}`,
-        `ISO: ${toISO(result)}`
+        `ISO: ${toISO(result)}`,
       ].join('\n');
     }
 
@@ -784,7 +832,7 @@ function calculateDate(params) {
         '',
         `Start: ${formatDate(primaryDate)}`,
         `Result: ${formatDate(result)}`,
-        `ISO: ${toISO(result)}`
+        `ISO: ${toISO(result)}`,
       ].join('\n');
     }
 
@@ -800,9 +848,13 @@ function calculateDate(params) {
         '',
         `Target: ${formatDate(primaryDate)}`,
         days > 0 ? `${plural(days, 'day')} from now` : `${plural(absDays, 'day')} ago`,
-        weeks > 0 ? `${plural(weeks, 'week')}${remDays > 0 ? ` and ${plural(remDays, 'day')}` : ''}` : '',
-        `Today: ${formatDate(today)}`
-      ].filter(Boolean).join('\n');
+        weeks > 0
+          ? `${plural(weeks, 'week')}${remDays > 0 ? ` and ${plural(remDays, 'day')}` : ''}`
+          : '',
+        `Today: ${formatDate(today)}`,
+      ]
+        .filter(Boolean)
+        .join('\n');
     }
 
     case 'date_info': {
@@ -820,12 +872,14 @@ function calculateDate(params) {
         `Leap year: ${leap ? 'Yes' : 'No'}`,
         `Zodiac sign: ${getZodiac(primaryDate.getMonth() + 1, primaryDate.getDate())}`,
         `Unix timestamp: ${Math.floor(primaryDate.getTime() / 1000)}`,
-        `ISO 8601: ${toISO(primaryDate)}`
+        `ISO 8601: ${toISO(primaryDate)}`,
       ].join('\n');
     }
 
     default:
-      throw new Error('Unknown date operation. Use day_of_week, days_between, add_days, subtract_days, add_months, add_years, countdown, or date_info.');
+      throw new Error(
+        'Unknown date operation. Use day_of_week, days_between, add_days, subtract_days, add_months, add_years, countdown, or date_info.',
+      );
   }
 }
 
@@ -842,7 +896,7 @@ function convertTimezone(params) {
     `      ${formatInTimezone(utcMoment, fromTimezone)}`,
     '',
     `To: ${toTimezone} (${getTimezoneOffsetLabel(utcMoment, toTimezone)})`,
-    `    ${formatInTimezone(utcMoment, toTimezone)}`
+    `    ${formatInTimezone(utcMoment, toTimezone)}`,
   ].join('\n');
 }
 
@@ -862,8 +916,10 @@ function checkWeekend(params) {
     weekend ? `Day: ${DAYS[day]}` : `Days until weekend: ${6 - day}`,
     weekend && day === 6 ? `Tomorrow: ${formatDate(addDaysToDate(date, 1))}` : '',
     !weekend ? `Next Saturday: ${formatDate(nextSaturday)}` : '',
-    !weekend ? `Next Sunday: ${formatDate(nextSunday)}` : ''
-  ].filter(Boolean).join('\n');
+    !weekend ? `Next Sunday: ${formatDate(nextSunday)}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 function businessDaysBetween(params) {
@@ -883,7 +939,7 @@ function businessDaysBetween(params) {
     plural(businessDays, 'business day'),
     `Weekend days: ${weekendDays}`,
     `Total calendar days: ${totalCalendarDays}`,
-    `About ${(businessDays / 5).toFixed(1)} work weeks`
+    `About ${(businessDays / 5).toFixed(1)} work weeks`,
   ].join('\n');
 }
 
@@ -898,14 +954,18 @@ function addBusinessDays(params) {
     `Result: ${formatDate(result)}`,
     `ISO: ${toISO(result)}`,
     '',
-    'Skips weekends. Public holidays are not included.'
+    'Skips weekends. Public holidays are not included.',
   ].join('\n');
 }
 
 function nextWeekdayOccurrence(params) {
   const weekdayIndex = resolveWeekday(params.weekday);
   const date = parseDate(params.date);
-  const isPrevious = ['previous', 'prev', 'back'].includes(String(params.direction ?? 'next').trim().toLowerCase());
+  const isPrevious = ['previous', 'prev', 'back'].includes(
+    String(params.direction ?? 'next')
+      .trim()
+      .toLowerCase(),
+  );
   const result = new Date(date);
   const step = isPrevious ? -1 : 1;
   do {
@@ -919,14 +979,15 @@ function nextWeekdayOccurrence(params) {
     `Result: ${formatDate(result)}`,
     `ISO: ${toISO(result)}`,
     '',
-    `${plural(daysAway, 'day')} ${isPrevious ? 'before' : 'from reference date'}`
+    `${plural(daysAway, 'day')} ${isPrevious ? 'before' : 'from reference date'}`,
   ].join('\n');
 }
 
 function calculateAge(params) {
   const birth = parseRequiredDate(params.date);
   const target = parseDate(params.date2);
-  if (compareLocalDates(birth, target) > 0) throw new Error('Birth or start date cannot be after the target date.');
+  if (compareLocalDates(birth, target) > 0)
+    throw new Error('Birth or start date cannot be after the target date.');
   const diff = getDetailedDateDifference(birth, target);
   let nextBirthday = new Date(target.getFullYear(), birth.getMonth(), birth.getDate());
   if (compareLocalDates(nextBirthday, target) <= 0) nextBirthday = addYearsToDate(nextBirthday, 1);
@@ -944,7 +1005,7 @@ function calculateAge(params) {
     `Total months: ${(diff.totalDays / 30.44).toFixed(1)}`,
     '',
     `Next annual date: ${formatDate(nextBirthday)}`,
-    `Days until next annual date: ${daysToNext}`
+    `Days until next annual date: ${daysToNext}`,
   ].join('\n');
 }
 
@@ -958,7 +1019,8 @@ function parseBirthday(value) {
   const day = Number(fullMatch?.[3] ?? shortMatch[2]);
   const probeYear = year ?? 2000;
   const probe = new Date(probeYear, month - 1, day);
-  if (probe.getMonth() !== month - 1 || probe.getDate() !== day) throw new Error(strings.errors.invalidDate);
+  if (probe.getMonth() !== month - 1 || probe.getDate() !== day)
+    throw new Error(strings.errors.invalidDate);
   return { year, month, day };
 }
 
@@ -976,25 +1038,42 @@ function daysUntilBirthday(params) {
     `Next occurrence: ${formatDate(next)}`,
     '',
     daysUntil === 0 ? 'It is today.' : `${plural(daysUntil, 'day')} away`,
-    year ? `Turning: ${next.getFullYear() - year}` : ''
-  ].filter(Boolean).join('\n');
+    year ? `Turning: ${next.getFullYear() - year}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 function getSeason(params) {
   const date = parseDate(params.date);
-  const southern = String(params.hemisphere ?? 'northern').trim().toLowerCase().startsWith('s');
+  const southern = String(params.hemisphere ?? 'northern')
+    .trim()
+    .toLowerCase()
+    .startsWith('s');
   const month = date.getMonth() + 1;
   const northSeason = SEASONS_NORTH.find((season) => season.months.includes(month));
   const seasonName = southern
     ? { Winter: 'Summer', Spring: 'Autumn', Summer: 'Winter', Autumn: 'Spring' }[northSeason.name]
     : northSeason.name;
   const starts = southern
-    ? [['Autumn', 3], ['Winter', 6], ['Spring', 9], ['Summer', 12]]
-    : [['Spring', 3], ['Summer', 6], ['Autumn', 9], ['Winter', 12]];
+    ? [
+        ['Autumn', 3],
+        ['Winter', 6],
+        ['Spring', 9],
+        ['Summer', 12],
+      ]
+    : [
+        ['Spring', 3],
+        ['Summer', 6],
+        ['Autumn', 9],
+        ['Winter', 12],
+      ];
   const nextStart = starts
     .map(([name, startMonth]) => ({ name, date: new Date(date.getFullYear(), startMonth - 1, 1) }))
-    .find((entry) => compareLocalDates(entry.date, date) > 0)
-    ?? { name: starts[0][0], date: new Date(date.getFullYear() + 1, starts[0][1] - 1, 1) };
+    .find((entry) => compareLocalDates(entry.date, date) > 0) ?? {
+    name: starts[0][0],
+    date: new Date(date.getFullYear() + 1, starts[0][1] - 1, 1),
+  };
   return [
     'Season Info',
     '',
@@ -1002,7 +1081,7 @@ function getSeason(params) {
     `Hemisphere: ${southern ? 'Southern' : 'Northern'}`,
     `Season: ${seasonName}`,
     `Next season: ${nextStart.name} on ${formatDate(nextStart.date)}`,
-    `Days until next season: ${dayDifference(date, nextStart.date)}`
+    `Days until next season: ${dayDifference(date, nextStart.date)}`,
   ].join('\n');
 }
 
@@ -1014,7 +1093,8 @@ function getMonthInfo(params) {
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month - 1, totalDays);
   const counts = new Array(7).fill(0);
-  for (let day = 1; day <= totalDays; day += 1) counts[new Date(year, month - 1, day).getDay()] += 1;
+  for (let day = 1; day <= totalDays; day += 1)
+    counts[new Date(year, month - 1, day).getDay()] += 1;
   const weekendDays = counts[0] + counts[6];
   const weekdayCounts = DAYS.map((dayName, index) => `- ${dayName}: ${counts[index]}`).join('\n');
   return [
@@ -1030,7 +1110,7 @@ function getMonthInfo(params) {
     `Weekend days: ${weekendDays}`,
     '',
     'Weekday breakdown:',
-    weekdayCounts
+    weekdayCounts,
   ].join('\n');
 }
 
@@ -1042,7 +1122,7 @@ function getQuarterInfo(params) {
   const totalDays = dayDifference(start, end) + 1;
   const elapsed = dayDifference(start, date) + 1;
   const remaining = totalDays - elapsed;
-  const percent = elapsed / totalDays * 100;
+  const percent = (elapsed / totalDays) * 100;
   return [
     'Quarter Info',
     '',
@@ -1054,7 +1134,7 @@ function getQuarterInfo(params) {
     `Total days: ${totalDays}`,
     `Days elapsed: ${elapsed}`,
     `Days remaining: ${remaining}`,
-    `Progress: ${percent.toFixed(1)}% ${progressBar(percent)}`
+    `Progress: ${percent.toFixed(1)}% ${progressBar(percent)}`,
   ].join('\n');
 }
 
@@ -1070,13 +1150,16 @@ function getLunarPhaseInfo(params) {
     `Days into cycle: ${phase.phase} of 29.53`,
     `Days until full moon: about ${phase.daysUntilFull}`,
     '',
-    'Approximate result based on the mean synodic month.'
+    'Approximate result based on the mean synodic month.',
   ].join('\n');
 }
 
 function getWeekBounds(params) {
   const date = parseDate(params.date);
-  const startOnMonday = String(params.week_start ?? 'sunday').trim().toLowerCase().startsWith('m');
+  const startOnMonday = String(params.week_start ?? 'sunday')
+    .trim()
+    .toLowerCase()
+    .startsWith('m');
   const day = date.getDay();
   const startOffset = startOnMonday ? (day === 0 ? -6 : 1 - day) : -day;
   const start = addDaysToDate(date, startOffset);
@@ -1084,7 +1167,9 @@ function getWeekBounds(params) {
   const rows = [];
   for (let index = 0; index < 7; index += 1) {
     const current = addDaysToDate(start, index);
-    rows.push(`${toISO(current) === toISO(date) ? '>' : ' '} ${DAYS[current.getDay()].padEnd(9)} ${toISO(current)}`);
+    rows.push(
+      `${toISO(current) === toISO(date) ? '>' : ' '} ${DAYS[current.getDay()].padEnd(9)} ${toISO(current)}`,
+    );
   }
   return [
     'Week Bounds',
@@ -1094,7 +1179,7 @@ function getWeekBounds(params) {
     `Start: ${formatDate(start)}`,
     `End: ${formatDate(end)}`,
     '',
-    rows.join('\n')
+    rows.join('\n'),
   ].join('\n');
 }
 
@@ -1104,7 +1189,7 @@ function getMonthBounds(params) {
   const last = new Date(date.getFullYear(), date.getMonth() + 1, 0);
   const totalDays = last.getDate();
   const elapsed = date.getDate();
-  const percent = elapsed / totalDays * 100;
+  const percent = (elapsed / totalDays) * 100;
   return [
     `Month Bounds: ${MONTHS[date.getMonth()]} ${date.getFullYear()}`,
     '',
@@ -1113,7 +1198,7 @@ function getMonthBounds(params) {
     `Total days: ${totalDays}`,
     `Day of month: ${elapsed}`,
     `Days remaining: ${totalDays - elapsed}`,
-    `Month progress: ${percent.toFixed(1)}% ${progressBar(percent)}`
+    `Month progress: ${percent.toFixed(1)}% ${progressBar(percent)}`,
   ].join('\n');
 }
 
@@ -1122,7 +1207,7 @@ function getYearProgress(params) {
   const year = date.getFullYear();
   const daysInYear = isLeapYear(year) ? 366 : 365;
   const elapsed = getDayOfYear(date);
-  const percent = elapsed / daysInYear * 100;
+  const percent = (elapsed / daysInYear) * 100;
   return [
     `Year Progress: ${year}`,
     '',
@@ -1134,7 +1219,7 @@ function getYearProgress(params) {
     `Progress: ${percent.toFixed(2)}% ${progressBar(percent)}`,
     '',
     `Year start: ${formatDate(new Date(year, 0, 1))}`,
-    `Year end: ${formatDate(new Date(year, 11, 31))}`
+    `Year end: ${formatDate(new Date(year, 11, 31))}`,
   ].join('\n');
 }
 
@@ -1155,7 +1240,7 @@ function detailedDifference(params) {
     `Total days: ${diff.totalDays.toLocaleString()}`,
     `Total weeks: ${diff.totalWeeks}`,
     `Total hours: ${diff.totalHours.toLocaleString()}`,
-    `Total minutes: ${diff.totalMinutes.toLocaleString()}`
+    `Total minutes: ${diff.totalMinutes.toLocaleString()}`,
   ].join('\n');
 }
 
@@ -1163,12 +1248,17 @@ function nthWeekdayOfMonth(params) {
   const referenceDate = parseDate(params.date);
   const weekdayIndex = resolveWeekday(params.weekday);
   const nth = requireInteger(params.nth, 'nth');
-  const result = getNthWeekdayOfMonth(referenceDate.getFullYear(), referenceDate.getMonth() + 1, nth, weekdayIndex);
+  const result = getNthWeekdayOfMonth(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth() + 1,
+    nth,
+    weekdayIndex,
+  );
   return [
     `${nth === -1 ? 'Last' : ordinal(nth)} ${DAYS[weekdayIndex]} of ${MONTHS[referenceDate.getMonth()]} ${referenceDate.getFullYear()}`,
     '',
     `Result: ${formatDate(result)}`,
-    `ISO: ${toISO(result)}`
+    `ISO: ${toISO(result)}`,
   ].join('\n');
 }
 
@@ -1192,7 +1282,9 @@ function timezoneOverlap(params) {
       overlapEnd = utcHour;
     }
     if (zone1Business || zone2Business) {
-      rows.push(`${String(hour1).padStart(2, '0')}:00 ${timezone1} | ${String(hour2).padStart(2, '0')}:00 ${timezone2}${overlap ? ' | overlap' : ''}`);
+      rows.push(
+        `${String(hour1).padStart(2, '0')}:00 ${timezone1} | ${String(hour2).padStart(2, '0')}:00 ${timezone2}${overlap ? ' | overlap' : ''}`,
+      );
     }
   }
 
@@ -1205,10 +1297,14 @@ function timezoneOverlap(params) {
     `Zone 1: ${timezone1}`,
     `Zone 2: ${timezone2}`,
     '',
-    overlapHours > 0 ? `${plural(overlapHours, 'hour')} of overlap` : 'No overlapping business hours on this date.',
+    overlapHours > 0
+      ? `${plural(overlapHours, 'hour')} of overlap`
+      : 'No overlapping business hours on this date.',
     rows.length ? '' : '',
-    rows.join('\n')
-  ].filter(Boolean).join('\n');
+    rows.join('\n'),
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 function centuryDecadeInfo(params) {
@@ -1228,12 +1324,14 @@ function centuryDecadeInfo(params) {
     '',
     `Decade ends: ${decade + 9}`,
     `Century ends: ${century * 100}`,
-    `Millennium ends: ${millennium * 1000}`
+    `Millennium ends: ${millennium * 1000}`,
   ].join('\n');
 }
 
 function unixConverter(params) {
-  const operation = String(params.operation ?? '').trim().toLowerCase();
+  const operation = String(params.operation ?? '')
+    .trim()
+    .toLowerCase();
   if (!operation) throw new Error(strings.errors.missingOperation);
   if (operation === 'to_unix') {
     const date = parseRequiredDate(params.date);
@@ -1243,11 +1341,12 @@ function unixConverter(params) {
       `Date: ${formatDate(date)}`,
       `Unix seconds: ${Math.floor(date.getTime() / 1000)}`,
       `Unix milliseconds: ${date.getTime()}`,
-      `ISO 8601: ${date.toISOString()}`
+      `ISO 8601: ${date.toISOString()}`,
     ].join('\n');
   }
   if (operation === 'from_unix') {
-    if (params.unix_timestamp == null) throw new Error('Missing required parameter: unix_timestamp.');
+    if (params.unix_timestamp == null)
+      throw new Error('Missing required parameter: unix_timestamp.');
     const timestamp = Number(params.unix_timestamp);
     if (!Number.isFinite(timestamp)) throw new Error(strings.errors.invalidNumber);
     const date = new Date(Math.abs(timestamp) > 1e10 ? timestamp : timestamp * 1000);
@@ -1259,7 +1358,7 @@ function unixConverter(params) {
       `Date UTC: ${date.toUTCString()}`,
       `Date local: ${date.toString()}`,
       `ISO 8601: ${date.toISOString()}`,
-      `Local date: ${toISO(date)}`
+      `Local date: ${toISO(date)}`,
     ].join('\n');
   }
   throw new Error('Unknown operation. Use to_unix or from_unix.');
@@ -1288,16 +1387,21 @@ function timeUntilDateTime(params) {
     '',
     `Event: ${toISO(date)} at ${text}${timezone ? ` (${timezone})` : ''}`,
     `${totalDays}d ${remHours}h ${remMinutes}m ${remSeconds}s`,
-    weeks > 0 ? `${plural(weeks, 'week')}, ${plural(remDays, 'day')}, ${plural(remHours, 'hour')}` : '',
+    weeks > 0
+      ? `${plural(weeks, 'week')}, ${plural(remDays, 'day')}, ${plural(remHours, 'hour')}`
+      : '',
     '',
     `Total hours: ${totalHours.toLocaleString()}`,
     `Total minutes: ${totalMinutes.toLocaleString()}`,
-    `Total seconds: ${totalSeconds.toLocaleString()}`
-  ].filter(Boolean).join('\n');
+    `Total seconds: ${totalSeconds.toLocaleString()}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 function requireTextParam(params, key) {
-  if (params[key] == null || String(params[key]).trim() === '') throw new Error(`Missing required parameter: ${key}.`);
+  if (params[key] == null || String(params[key]).trim() === '')
+    throw new Error(`Missing required parameter: ${key}.`);
   return String(params[key]);
 }
 
@@ -1320,9 +1424,12 @@ function parseQueryParamEntries(value) {
     if (!trimmed) return [];
     try {
       const parsed = JSON.parse(trimmed);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return Object.entries(parsed);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed))
+        return Object.entries(parsed);
     } catch {
-      return [...new URLSearchParams(trimmed.startsWith('?') ? trimmed.slice(1) : trimmed).entries()];
+      return [
+        ...new URLSearchParams(trimmed.startsWith('?') ? trimmed.slice(1) : trimmed).entries(),
+      ];
     }
   }
   if (value && typeof value === 'object' && !Array.isArray(value)) return Object.entries(value);
@@ -1341,7 +1448,7 @@ function parseUrl(params) {
     `Pathname: ${url.pathname || '/'}`,
     `Search: ${url.search || '(none)'}`,
     `Hash: ${url.hash || '(none)'}`,
-    `Origin: ${url.origin}`
+    `Origin: ${url.origin}`,
   ].join('\n');
 }
 
@@ -1354,7 +1461,7 @@ function extractQueryParams(params) {
     '',
     ...entries.map(([key, value]) => `- ${key} = ${value}`),
     '',
-    `From: ${input}`
+    `From: ${input}`,
   ].join('\n');
 }
 
@@ -1376,7 +1483,7 @@ function addUtmParams(params) {
     medium: 'utm_medium',
     campaign: 'utm_campaign',
     term: 'utm_term',
-    content: 'utm_content'
+    content: 'utm_content',
   };
   for (const [inputKey, queryKey] of Object.entries(mapping)) {
     if (params[inputKey] != null && String(params[inputKey]).trim() !== '') {
@@ -1403,7 +1510,7 @@ function removeTrackingParams(params) {
     `Before: ${input}`,
     `After: ${url.toString()}`,
     '',
-    `Removed (${removed.length}): ${removed.join(', ')}`
+    `Removed (${removed.length}): ${removed.join(', ')}`,
   ].join('\n');
 }
 
@@ -1432,7 +1539,7 @@ function extractDomain(params) {
     '',
     `Full hostname: ${hostname}`,
     `Bare domain: ${bareDomain}`,
-    `Returned: ${returned}`
+    `Returned: ${returned}`,
   ].join('\n');
 }
 
@@ -1451,9 +1558,17 @@ function slugifyToUrl(params) {
 
 function extractUrlsFromText(params) {
   const text = requireTextParam(params, 'text');
-  const urls = [...new Set((text.match(/https?:\/\/[^\s"'<>)\]]+/gi) ?? []).map((url) => url.replace(/[.,;:!?]+$/u, '')))];
+  const urls = [
+    ...new Set(
+      (text.match(/https?:\/\/[^\s"'<>)\]]+/gi) ?? []).map((url) => url.replace(/[.,;:!?]+$/u, '')),
+    ),
+  ];
   if (!urls.length) return 'No URLs found in the provided text.';
-  return [`URLs Found (${urls.length})`, '', ...urls.map((url, index) => `${index + 1}. ${url}`)].join('\n');
+  return [
+    `URLs Found (${urls.length})`,
+    '',
+    ...urls.map((url, index) => `${index + 1}. ${url}`),
+  ].join('\n');
 }
 
 function compareUrls(params) {
@@ -1461,7 +1576,8 @@ function compareUrls(params) {
   const inputB = requireTextParam(params, 'url_b');
   const urlA = parseUrlValue(inputA);
   const urlB = parseUrlValue(inputB);
-  const row = (label, left, right) => `${left === right ? 'same' : 'diff'} ${label.padEnd(9)}: ${left || '(none)'}${left === right ? '' : ` -> ${right || '(none)'}`}`;
+  const row = (label, left, right) =>
+    `${left === right ? 'same' : 'diff'} ${label.padEnd(9)}: ${left || '(none)'}${left === right ? '' : ` -> ${right || '(none)'}`}`;
   return [
     'URL Comparison',
     '',
@@ -1473,7 +1589,7 @@ function compareUrls(params) {
     row('Port', urlA.port, urlB.port),
     row('Pathname', urlA.pathname, urlB.pathname),
     row('Search', urlA.search, urlB.search),
-    row('Hash', urlA.hash, urlB.hash)
+    row('Hash', urlA.hash, urlB.hash),
   ].join('\n');
 }
 
@@ -1498,18 +1614,29 @@ function urlToHtmlLink(params) {
   parseUrlValue(input);
   const label = String(params.label ?? input).trim() || input;
   const extra = toBoolean(params.open_new_tab) ? ' target="_blank" rel="noopener noreferrer"' : '';
-  return ['HTML Link', '', `<a href="${escapeHtml(input)}"${extra}>${escapeHtml(label)}</a>`].join('\n');
+  return ['HTML Link', '', `<a href="${escapeHtml(input)}"${extra}>${escapeHtml(label)}</a>`].join(
+    '\n',
+  );
 }
 
 function urlToBase64(params) {
   const value = requireTextParam(params, 'value');
-  const action = String(params.action ?? 'encode').trim().toLowerCase();
+  const action = String(params.action ?? 'encode')
+    .trim()
+    .toLowerCase();
   if (action === 'decode') {
-    const decoded = Buffer.from(value.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+    const decoded = Buffer.from(value.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString(
+      'utf8',
+    );
     return ['Base64 to URL', '', `Input: ${value}`, `Decoded: ${decoded}`].join('\n');
   }
   if (action !== 'encode') throw new Error('action must be encode or decode.');
-  return ['URL to Base64', '', `Input: ${value}`, `Encoded: ${Buffer.from(value, 'utf8').toString('base64')}`].join('\n');
+  return [
+    'URL to Base64',
+    '',
+    `Input: ${value}`,
+    `Encoded: ${Buffer.from(value, 'utf8').toString('base64')}`,
+  ].join('\n');
 }
 
 function countUrlParams(params) {
@@ -1523,7 +1650,7 @@ function countUrlParams(params) {
     `URL: ${input}`,
     `Total: ${entries.length}`,
     `Unique keys: ${new Set(keys).size}`,
-    `Duplicates: ${duplicateKeys.length ? duplicateKeys.join(', ') : 'none'}`
+    `Duplicates: ${duplicateKeys.length ? duplicateKeys.join(', ') : 'none'}`,
   ].join('\n');
 }
 
@@ -1536,23 +1663,25 @@ function requireNumberParam(params, key) {
 function requireCoordinate(params, latKey, lonKey) {
   const lat = requireNumberParam(params, latKey);
   const lon = requireNumberParam(params, lonKey);
-  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) throw new Error(strings.errors.invalidCoordinate);
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180)
+    throw new Error(strings.errors.invalidCoordinate);
   return { lat, lon };
 }
 
 function toRadians(degrees) {
-  return degrees * Math.PI / 180;
+  return (degrees * Math.PI) / 180;
 }
 
 function toDegrees(radians) {
-  return radians * 180 / Math.PI;
+  return (radians * 180) / Math.PI;
 }
 
 function haversineKm(lat1, lon1, lat2, lon2) {
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);
-  const a = Math.sin(dLat / 2) ** 2
-    + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
   return 12742 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -1561,8 +1690,9 @@ function bearingDegrees(lat1, lon1, lat2, lon2) {
   const lat2Rad = toRadians(lat2);
   const deltaLon = toRadians(lon2 - lon1);
   const y = Math.sin(deltaLon) * Math.cos(lat2Rad);
-  const x = Math.cos(lat1Rad) * Math.sin(lat2Rad)
-    - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(deltaLon);
+  const x =
+    Math.cos(lat1Rad) * Math.sin(lat2Rad) -
+    Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(deltaLon);
   return (toDegrees(Math.atan2(y, x)) + 360) % 360;
 }
 
@@ -1586,7 +1716,7 @@ function getDistance(params) {
     `${(kilometers * 0.539957).toFixed(3)} nautical miles`,
     '',
     `Initial bearing: ${bearing.toFixed(1)} degrees (${cardinalDirection(bearing)})`,
-    'Method: Haversine formula with Earth radius 6371 km.'
+    'Method: Haversine formula with Earth radius 6371 km.',
   ].join('\n');
 }
 
@@ -1599,10 +1729,9 @@ function getMidpoint(params) {
   const lon2 = toRadians(pointB.lon);
   const bx = Math.cos(lat2) * Math.cos(lon2 - lon1);
   const by = Math.cos(lat2) * Math.sin(lon2 - lon1);
-  const midLat = toDegrees(Math.atan2(
-    Math.sin(lat1) + Math.sin(lat2),
-    Math.sqrt((Math.cos(lat1) + bx) ** 2 + by ** 2)
-  ));
+  const midLat = toDegrees(
+    Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + bx) ** 2 + by ** 2)),
+  );
   const midLon = ((toDegrees(lon1 + Math.atan2(by, Math.cos(lat1) + bx)) + 540) % 360) - 180;
   const roundedLat = Number(midLat.toFixed(6));
   const roundedLon = Number(midLon.toFixed(6));
@@ -1614,7 +1743,7 @@ function getMidpoint(params) {
     '',
     `Midpoint: ${roundedLat}, ${roundedLon}`,
     `Distance from each endpoint: about ${haversineKm(pointA.lat, pointA.lon, roundedLat, roundedLon).toFixed(1)} km`,
-    'Method: Spherical 3D vector midpoint.'
+    'Method: Spherical 3D vector midpoint.',
   ].join('\n');
 }
 
@@ -1632,7 +1761,7 @@ function checkPointInRadius(params) {
     `Point: ${point.lat}, ${point.lon}`,
     `Radius: ${radiusKm} km`,
     `Distance: ${distance.toFixed(3)} km`,
-    `${inside ? 'Inside' : 'Outside'} the radius by ${Math.abs(distance - radiusKm).toFixed(3)} km`
+    `${inside ? 'Inside' : 'Outside'} the radius by ${Math.abs(distance - radiusKm).toFixed(3)} km`,
   ].join('\n');
 }
 
@@ -1640,9 +1769,13 @@ function convertDmsToDd(params) {
   const degrees = requireNumberParam(params, 'degrees');
   const minutes = requireNumberParam(params, 'minutes');
   const seconds = requireNumberParam(params, 'seconds');
-  const direction = String(params.direction ?? '').trim().toUpperCase();
-  if (!['N', 'S', 'E', 'W'].includes(direction)) throw new Error('direction must be N, S, E, or W.');
-  if (minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) throw new Error('minutes and seconds must be between 0 and 60.');
+  const direction = String(params.direction ?? '')
+    .trim()
+    .toUpperCase();
+  if (!['N', 'S', 'E', 'W'].includes(direction))
+    throw new Error('direction must be N, S, E, or W.');
+  if (minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60)
+    throw new Error('minutes and seconds must be between 0 and 60.');
   const unsigned = Math.abs(degrees) + minutes / 60 + seconds / 3600;
   const decimal = ['S', 'W'].includes(direction) ? -unsigned : unsigned;
   return [
@@ -1650,15 +1783,20 @@ function convertDmsToDd(params) {
     '',
     `Input: ${degrees} deg ${minutes}' ${seconds}" ${direction}`,
     `Output: ${decimal.toFixed(8)} degrees`,
-    `Axis: ${['N', 'S'].includes(direction) ? 'Latitude' : 'Longitude'}`
+    `Axis: ${['N', 'S'].includes(direction) ? 'Latitude' : 'Longitude'}`,
   ].join('\n');
 }
 
 function convertDdToDms(params) {
   const decimal = requireNumberParam(params, 'decimal');
-  const axis = String(params.axis ?? '').trim().toLowerCase();
+  const axis = String(params.axis ?? '')
+    .trim()
+    .toLowerCase();
   if (!['lat', 'lon'].includes(axis)) throw new Error('axis must be lat or lon.');
-  if ((axis === 'lat' && (decimal < -90 || decimal > 90)) || (axis === 'lon' && (decimal < -180 || decimal > 180))) {
+  if (
+    (axis === 'lat' && (decimal < -90 || decimal > 90)) ||
+    (axis === 'lon' && (decimal < -180 || decimal > 180))
+  ) {
     throw new Error(strings.errors.invalidCoordinate);
   }
   const absolute = Math.abs(decimal);
@@ -1666,12 +1804,12 @@ function convertDdToDms(params) {
   const minutesFloat = (absolute - degrees) * 60;
   const minutes = Math.floor(minutesFloat);
   const seconds = (minutesFloat - minutes) * 60;
-  const direction = axis === 'lat' ? (decimal >= 0 ? 'N' : 'S') : (decimal >= 0 ? 'E' : 'W');
+  const direction = axis === 'lat' ? (decimal >= 0 ? 'N' : 'S') : decimal >= 0 ? 'E' : 'W';
   return [
     'Decimal Degrees to DMS',
     '',
     `Input: ${decimal} degrees (${axis === 'lat' ? 'Latitude' : 'Longitude'})`,
-    `Output: ${degrees} deg ${minutes}' ${seconds.toFixed(4)}" ${direction}`
+    `Output: ${degrees} deg ${minutes}' ${seconds.toFixed(4)}" ${direction}`,
   ].join('\n');
 }
 
@@ -1716,7 +1854,9 @@ function encodeGeohashValue(lat, lon, precision = 9) {
 }
 
 function decodeGeohashValue(hash) {
-  const input = String(hash ?? '').trim().toLowerCase();
+  const input = String(hash ?? '')
+    .trim()
+    .toLowerCase();
   if (!input) throw new Error(strings.errors.invalidGeohash);
   let evenBit = true;
   let minLat = -90;
@@ -1725,7 +1865,8 @@ function decodeGeohashValue(hash) {
   let maxLon = 180;
   for (const char of input) {
     const charIndex = GEOHASH_BASE32.indexOf(char);
-    if (charIndex < 0) throw new Error(`${strings.errors.invalidGeohash} Invalid character: ${char}.`);
+    if (charIndex < 0)
+      throw new Error(`${strings.errors.invalidGeohash} Invalid character: ${char}.`);
     for (let bit = 4; bit >= 0; bit -= 1) {
       const bitValue = (charIndex >> bit) & 1;
       if (evenBit) {
@@ -1745,7 +1886,7 @@ function decodeGeohashValue(hash) {
     lon: (minLon + maxLon) / 2,
     latErr: (maxLat - minLat) / 2,
     lonErr: (maxLon - minLon) / 2,
-    bounds: { minLat, maxLat, minLon, maxLon }
+    bounds: { minLat, maxLat, minLon, maxLon },
   };
 }
 
@@ -1767,7 +1908,7 @@ function encodeGeohash(params) {
     `Input: ${point.lat}, ${point.lon}`,
     `Precision: ${precision} chars`,
     `Geohash: ${hash}`,
-    `Approximate accuracy: ${formatGeoErrorMeters(decoded.latErr, decoded.lonErr)}`
+    `Approximate accuracy: ${formatGeoErrorMeters(decoded.latErr, decoded.lonErr)}`,
   ].join('\n');
 }
 
@@ -1783,7 +1924,7 @@ function decodeGeohash(params) {
     '',
     'Bounding box:',
     `SW: ${decoded.bounds.minLat.toFixed(6)}, ${decoded.bounds.minLon.toFixed(6)}`,
-    `NE: ${decoded.bounds.maxLat.toFixed(6)}, ${decoded.bounds.maxLon.toFixed(6)}`
+    `NE: ${decoded.bounds.maxLat.toFixed(6)}, ${decoded.bounds.maxLon.toFixed(6)}`,
   ].join('\n');
 }
 
@@ -1792,7 +1933,8 @@ function getMapUrl(params) {
   const hasLon = params.lon != null && String(params.lon).trim?.() !== '';
   const query = String(params.query ?? '').trim();
   const zoom = clampInteger(params.zoom, 14, 1, 19);
-  if ((!hasLat && !hasLon) && !query) throw new Error('Provide either lat/lon coordinates or a place query.');
+  if (!hasLat && !hasLon && !query)
+    throw new Error('Provide either lat/lon coordinates or a place query.');
   const lines = ['Map URLs', ''];
   if (hasLat || hasLon) {
     const point = requireCoordinate(params, 'lat', 'lon');
@@ -1806,7 +1948,7 @@ function getMapUrl(params) {
       `https://maps.google.com/?q=${point.lat},${point.lon}&z=${zoom}`,
       '',
       'Apple Maps:',
-      `https://maps.apple.com/?ll=${point.lat},${point.lon}&z=${zoom}`
+      `https://maps.apple.com/?ll=${point.lat},${point.lon}&z=${zoom}`,
     );
   }
   if (query) {
@@ -1822,7 +1964,7 @@ function getMapUrl(params) {
       `https://maps.google.com/?q=${encoded}`,
       '',
       'Apple Maps search:',
-      `https://maps.apple.com/?q=${encoded}`
+      `https://maps.apple.com/?q=${encoded}`,
     );
   }
   return lines.join('\n');
@@ -1842,11 +1984,9 @@ function buildToolsPrompt(tools, promptSections = []) {
         .join(', ');
       return `- ${tool.name}: ${tool.description}${params ? ` Parameters: ${params}.` : ''}`;
     }),
-    ...promptSections
-      .map((section) => String(section ?? '').trim())
-      .filter(Boolean),
+    ...promptSections.map((section) => String(section ?? '').trim()).filter(Boolean),
     'IMPORTANT: Use only the joanium-tool code block format shown above. Do not use any other tool invocation format — no XML tags, no JSON outside a code block, no provider-specific or model-specific markup of any kind.',
-    'After the tool result is returned, give the user the final answer.'
+    'After the tool result is returned, give the user the final answer.',
   ].join('\n');
 }
 
@@ -1858,14 +1998,21 @@ function mergeToolDefinitions(...toolGroups) {
   return [...byName.values()];
 }
 
-export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], promptSections = [] } = {}) {
+export function createToolsetService({
+  toolHandlers = {},
+  toolDefinitions = [],
+  promptSections = [],
+} = {}) {
   const tools = mergeToolDefinitions(strings.tools, toolDefinitions);
   const handlers = {
     calculate_expression(params) {
       const expression = String(params.expression ?? '').trim();
       if (!expression) throw new Error(strings.errors.missingExpression);
       const precision = clampInteger(params.precision, 6, 0, 12);
-      return [`Expression: ${expression}`, `Result: ${formatNumber(evaluateExpression(expression), precision)}`].join('\n');
+      return [
+        `Expression: ${expression}`,
+        `Result: ${formatNumber(evaluateExpression(expression), precision)}`,
+      ].join('\n');
     },
     convert_units: convertUnits,
     get_time_in_timezone(params) {
@@ -1883,12 +2030,14 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], 
           hour: 'numeric',
           minute: '2-digit',
           second: '2-digit',
-          timeZoneName: 'short'
+          timeZoneName: 'short',
         });
       } catch {
         throw new Error(strings.errors.invalidTimezone);
       }
-      return [`Timezone: ${timezone}`, `Current local time: ${formatter.format(new Date())}`].join('\n');
+      return [`Timezone: ${timezone}`, `Current local time: ${formatter.format(new Date())}`].join(
+        '\n',
+      );
     },
     calculate_date: calculateDate,
     convert_timezone: convertTimezone,
@@ -1941,7 +2090,11 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], 
         const value = randomUUID();
         return uppercase ? value.toUpperCase() : value;
       });
-      return [`Generated ${count} UUID${count === 1 ? '' : 's'}:`, '', ...values.map((value) => `- ${value}`)].join('\n');
+      return [
+        `Generated ${count} UUID${count === 1 ? '' : 's'}:`,
+        '',
+        ...values.map((value) => `- ${value}`),
+      ].join('\n');
     },
     hash_text(params) {
       if (params.text == null) throw new Error(strings.errors.missingText);
@@ -1950,7 +2103,7 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], 
       return [
         `Algorithm: ${algorithm}`,
         `Characters: ${String(params.text).length}`,
-        `Hash: ${createHash(algorithm).update(String(params.text)).digest('hex')}`
+        `Hash: ${createHash(algorithm).update(String(params.text)).digest('hex')}`,
       ].join('\n');
     },
     encode_base64(params) {
@@ -1958,7 +2111,10 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], 
       return Buffer.from(String(params.text), 'utf8').toString('base64');
     },
     decode_base64(params) {
-      const base64 = String(params.base64 ?? '').replace(/-/g, '+').replace(/_/g, '/').replace(/\s+/g, '');
+      const base64 = String(params.base64 ?? '')
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+        .replace(/\s+/g, '');
       if (!base64) throw new Error(strings.errors.invalidBase64);
       try {
         return Buffer.from(base64, 'base64').toString('utf8');
@@ -1980,14 +2136,19 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], 
     },
     convert_text_case(params) {
       if (params.text == null) throw new Error(strings.errors.missingText);
-      return convertTextCase(String(params.text), String(params.target_case ?? '').trim().toLowerCase());
+      return convertTextCase(
+        String(params.text),
+        String(params.target_case ?? '')
+          .trim()
+          .toLowerCase(),
+      );
     },
     get_text_stats(params) {
       if (params.text == null) throw new Error(strings.errors.missingText);
       return getTextStats(params.text);
     },
     generate_password: generatePasswordValue,
-    ...toolHandlers
+    ...toolHandlers,
   };
 
   return {
@@ -1995,7 +2156,7 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], 
       return {
         ok: true,
         tools,
-        systemPrompt: buildToolsPrompt(tools, promptSections)
+        systemPrompt: buildToolsPrompt(tools, promptSections),
       };
     },
     async executeTool(payload = {}, context = {}) {
@@ -2007,6 +2168,6 @@ export function createToolsetService({ toolHandlers = {}, toolDefinitions = [], 
       } catch (error) {
         return { ok: false, tool, error: error?.message ?? String(error) };
       }
-    }
+    },
   };
 }

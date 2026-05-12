@@ -8,7 +8,7 @@ const en = {
     show: 'Show',
     hide: 'Hide',
     cloudBadge: 'Cloud',
-    localBadge: 'Local'
+    localBadge: 'Local',
   },
   flow: {
     validation: {
@@ -16,8 +16,8 @@ const en = {
       name: 'Enter the name you want Joanium to use.',
       dob: 'Enter a real date of birth.',
       providers: 'Choose at least one provider, pick its model, and finish its setup.',
-      usage: 'Pick at least one way you plan to use Joanium.'
-    }
+      usage: 'Pick at least one way you plan to use Joanium.',
+    },
   },
   consent: {
     eyebrow: 'Personal AI, without the setup mess',
@@ -28,7 +28,7 @@ const en = {
     checkboxDescription:
       'Your profile and provider credentials stay on this device unless you connect a cloud model.',
     reviewPrefix: 'Read the',
-    termsLink: 'Terms & Conditions'
+    termsLink: 'Terms & Conditions',
   },
   name: {
     title: 'What should Joanium call you?',
@@ -36,7 +36,7 @@ const en = {
       'This name appears in greetings, suggestions, and the first-run workspace so the app feels personal from the start.',
     inputLabel: 'Your name',
     inputPlaceholder: 'Enter your first name',
-    helper: 'You can change this later in settings.'
+    helper: 'You can change this later in settings.',
   },
   dob: {
     title: 'When were you born?',
@@ -61,8 +61,8 @@ const en = {
       { value: '09', label: 'September' },
       { value: '10', label: 'October' },
       { value: '11', label: 'November' },
-      { value: '12', label: 'December' }
-    ]
+      { value: '12', label: 'December' },
+    ],
   },
   providers: {
     title: 'Choose the AI providers you will actually use',
@@ -80,7 +80,7 @@ const en = {
     localEndpointPlaceholder: 'Enter the local server URL',
     localEndpointHelper:
       'Use the default local address unless you changed it in your local model app.',
-    setupLabel: 'Connection'
+    setupLabel: 'Connection',
   },
   usage: {
     title: 'What will you use Joanium for?',
@@ -98,54 +98,54 @@ const en = {
       { id: 'data', label: '📊 Data & Analytics' },
       { id: 'legal', label: '⚖️ Legal' },
       { id: 'healthcare', label: '🏥 Healthcare' },
-      { id: 'education', label: '🎓 Education' }
-    ]
+      { id: 'education', label: '🎓 Education' },
+    ],
   },
   welcome: {
     title: 'Hey! {name}, welcome to {appName}!',
     description:
-      'You\'re all set. {appName} is ready to think alongside you — here\'s what makes it different.',
+      "You're all set. {appName} is ready to think alongside you — here's what makes it different.",
     features: [
       {
         icon: '🧠',
         title: 'Thinks with you, not for you',
-        body: 'Joanium doesn\'t just answer questions. It reasons through problems with you, adapts to your style, and gets sharper the more you use it.'
+        body: "Joanium doesn't just answer questions. It reasons through problems with you, adapts to your style, and gets sharper the more you use it.",
       },
       {
         icon: '🔀',
         title: 'Any model, your choice',
-        body: 'Switch between Claude, GPT, Gemini, Mistral and more without losing context. Use the best model for the job — not just the one that\'s trendy.'
+        body: "Switch between Claude, GPT, Gemini, Mistral and more without losing context. Use the best model for the job — not just the one that's trendy.",
       },
       {
         icon: '🔒',
         title: 'Private by design',
-        body: 'Your setup, keys, and history live on your device. Nothing is sent anywhere unless you initiate it. No telemetry, no cloud sync unless you want it.'
+        body: 'Your setup, keys, and history live on your device. Nothing is sent anywhere unless you initiate it. No telemetry, no cloud sync unless you want it.',
       },
       {
         icon: '⚡',
         title: 'Built for real work',
-        body: 'Joanium is tuned for the work you actually do — coding, writing, research, designing — not generic chat. Your workspace adapts to your goals.'
+        body: 'Joanium is tuned for the work you actually do — coding, writing, research, designing — not generic chat. Your workspace adapts to your goals.',
       },
       {
         icon: '🧩',
         title: 'Grows with you',
-        body: 'Add providers, switch models, and expand capabilities over time. Joanium is modular — new packages plug straight in without redoing setup.'
+        body: 'Add providers, switch models, and expand capabilities over time. Joanium is modular — new packages plug straight in without redoing setup.',
       },
       {
         icon: '🎯',
         title: 'No noise, just signal',
-        body: 'No feeds, no distractions, no upsells. Just a focused workspace that helps you think clearly and ship faster.'
-      }
-    ]
+        body: 'No feeds, no distractions, no upsells. Just a focused workspace that helps you think clearly and ship faster.',
+      },
+    ],
   },
   documents: {
     terms: {
-      title: 'Terms & Conditions'
-    }
+      title: 'Terms & Conditions',
+    },
   },
   paths: {
-    localDataFile: 'Data/User.json'
-  }
+    localDataFile: 'Data/User.json',
+  },
 };
 
 export default en;

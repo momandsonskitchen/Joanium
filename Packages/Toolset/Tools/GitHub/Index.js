@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createGitHubToolHandlers({ rootDirectory }),
-      ...createGitHubConnectorToolHandlers({ rootDirectory })
+      ...createGitHubConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildGitHubPromptSection()]
+    promptSections: [buildGitHubPromptSection()],
   };
 }
 

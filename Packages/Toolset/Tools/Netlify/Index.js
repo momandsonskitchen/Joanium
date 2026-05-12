@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createNetlifyToolHandlers({ rootDirectory }),
-      ...createNetlifyConnectorToolHandlers({ rootDirectory })
+      ...createNetlifyConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildNetlifyPromptSection()]
+    promptSections: [buildNetlifyPromptSection()],
   };
 }
 

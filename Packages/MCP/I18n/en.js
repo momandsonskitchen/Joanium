@@ -20,7 +20,7 @@ const en = {
     envPlaceholder: '{ "API_KEY": "..." }',
     urlPlaceholder: 'http://127.0.0.1:8787',
     stdio: 'Stdio',
-    http: 'HTTP'
+    http: 'HTTP',
   },
   list: {
     title: 'Configured servers',
@@ -31,12 +31,12 @@ const en = {
     connect: 'Connect',
     disconnect: 'Disconnect',
     edit: 'Edit',
-    delete: 'Delete'
+    delete: 'Delete',
   },
   tools: {
     title: 'Available tools',
     empty: 'Connect a server to see its tools.',
-    refresh: 'Refresh tools'
+    refresh: 'Refresh tools',
   },
   feedback: {
     saved: 'Server saved.',
@@ -45,8 +45,8 @@ const en = {
     urlRequired: 'URL is required for HTTP transport.',
     urlInvalid: 'URL must start with http:// or https://',
     saveFailed: 'Could not save the server.',
-    connectFailed: 'Could not connect the server.'
-  }
+    connectFailed: 'Could not connect the server.',
+  },
 };
 
 export default en;

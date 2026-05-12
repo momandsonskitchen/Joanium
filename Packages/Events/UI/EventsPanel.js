@@ -23,7 +23,7 @@ function formatDate(value) {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
-    minute: '2-digit'
+    minute: '2-digit',
   }).format(toDate(value));
 }
 
@@ -35,7 +35,7 @@ function formatDetailDate(value) {
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    second: '2-digit'
+    second: '2-digit',
   }).format(toDate(value));
 }
 
@@ -59,7 +59,7 @@ function parseToolBlocks(text) {
       parts.push({
         type: 'tool',
         toolName: String(payload.tool ?? 'tool'),
-        params: payload.parameters ?? null
+        params: payload.parameters ?? null,
       });
     } catch {
       // Malformed block — fall back to plain text so nothing is lost.
@@ -75,7 +75,9 @@ function parseToolBlocks(text) {
 }
 
 function compactText(value, limit = 150) {
-  const text = String(value ?? '').replace(/\s+/g, ' ').trim();
+  const text = String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
   return text.length > limit ? `${text.slice(0, limit - 3)}...` : text;
 }
 
@@ -86,7 +88,8 @@ function channelLabel(strings, channelName) {
 function scheduleLabel(schedule, fallback) {
   if (!schedule || typeof schedule !== 'object') return fallback;
   if (schedule.type === 'startup') return fallback;
-  if (schedule.type === 'weekly') return `${schedule.type} ${schedule.day ?? ''} ${schedule.time ?? ''}`.trim();
+  if (schedule.type === 'weekly')
+    return `${schedule.type} ${schedule.day ?? ''} ${schedule.time ?? ''}`.trim();
   return `${schedule.type ?? fallback} ${schedule.time ?? ''}`.trim();
 }
 
@@ -114,12 +117,13 @@ function normalizeAgentRun(run, strings, index) {
     streamDepth: run.streamDepth ?? 0,
     avatarUrl: toFileUrl(run.agentAvatarPath ?? null),
     channelKey: null,
-    raw: run
+    raw: run,
   };
 }
 
 function normalizeChannelMessage(message, strings, index) {
-  const timestamp = message.receivedAt ?? message.timestamp ?? message.repliedAt ?? new Date().toISOString();
+  const timestamp =
+    message.receivedAt ?? message.timestamp ?? message.repliedAt ?? new Date().toISOString();
   const status = message.error || message.status === 'error' ? 'error' : 'success';
   const source = channelLabel(strings, message.channel);
 
@@ -142,7 +146,7 @@ function normalizeChannelMessage(message, strings, index) {
     externalId: message.externalId ?? null,
     avatarUrl: null, // resolved after channel icon paths are loaded
     channelKey: message.channel ?? null,
-    raw: message
+    raw: message,
   };
 }
 
@@ -181,7 +185,7 @@ export function createEventsPanel(strings) {
     const [agentRuns, channelMessages, rawIconPaths] = await Promise.all([
       invokeIpc('agents:list-runs').catch(() => []),
       invokeIpc('channels:list-messages').catch(() => []),
-      invokeIpc('channels:icon-paths').catch(() => ({}))
+      invokeIpc('channels:icon-paths').catch(() => ({})),
     ]);
 
     // Build a channel-name → file:// URL map from the raw OS paths.
@@ -192,20 +196,22 @@ export function createEventsPanel(strings) {
     }
 
     const normalized = [
-      ...(Array.isArray(agentRuns) ? agentRuns.map((run, index) => normalizeAgentRun(run, strings, index)) : []),
-      ...(Array.isArray(channelMessages) ? channelMessages.map((message, index) => {
-        const event = normalizeChannelMessage(message, strings, index);
-        // Resolve the channel icon URL now that we have the paths map.
-        if (event.channelKey && channelIconUrls[event.channelKey]) {
-          event.avatarUrl = channelIconUrls[event.channelKey];
-        }
-        return event;
-      }) : [])
+      ...(Array.isArray(agentRuns)
+        ? agentRuns.map((run, index) => normalizeAgentRun(run, strings, index))
+        : []),
+      ...(Array.isArray(channelMessages)
+        ? channelMessages.map((message, index) => {
+            const event = normalizeChannelMessage(message, strings, index);
+            // Resolve the channel icon URL now that we have the paths map.
+            if (event.channelKey && channelIconUrls[event.channelKey]) {
+              event.avatarUrl = channelIconUrls[event.channelKey];
+            }
+            return event;
+          })
+        : []),
     ];
 
-    return normalized
-      .sort((a, b) => toDate(b.timestamp) - toDate(a.timestamp))
-      .slice(0, 240);
+    return normalized.sort((a, b) => toDate(b.timestamp) - toDate(a.timestamp)).slice(0, 240);
   }
 
   function updateStats() {
@@ -225,7 +231,7 @@ export function createEventsPanel(strings) {
     return createElement(
       'span',
       `events-row__status events-row__status--${event.status}`,
-      strings.status[event.status] ?? event.status
+      strings.status[event.status] ?? event.status,
     );
   }
 
@@ -252,7 +258,7 @@ export function createEventsPanel(strings) {
   function createEventRow(event) {
     const row = createElement(
       'button',
-      `events-row events-row--${event.type}${event.id === selectedId ? ' events-row--active' : ''}`
+      `events-row events-row--${event.type}${event.id === selectedId ? ' events-row--active' : ''}`,
     );
     row.type = 'button';
 
@@ -261,17 +267,14 @@ export function createEventsPanel(strings) {
 
     const body = createElement('span', 'events-row__body');
     const top = createElement('span', 'events-row__top');
-    top.append(
-      createElement('span', 'events-row__title', event.title),
-      createStatusBadge(event)
-    );
+    top.append(createElement('span', 'events-row__title', event.title), createStatusBadge(event));
     body.append(top);
 
     const meta = createElement('span', 'events-row__meta');
     meta.append(
       createElement('span', 'events-row__type', strings.types[event.type]),
       createElement('span', 'events-row__dot', ''),
-      createElement('span', 'events-row__time', formatDate(event.timestamp))
+      createElement('span', 'events-row__time', formatDate(event.timestamp)),
     );
     body.append(meta);
 
@@ -281,7 +284,11 @@ export function createEventsPanel(strings) {
     }
 
     if (event.type === 'channel' && event.secondary) {
-      const replyEl = createElement('span', 'events-row__reply-preview', compactText(event.secondary, 120));
+      const replyEl = createElement(
+        'span',
+        'events-row__reply-preview',
+        compactText(event.secondary, 120),
+      );
       body.append(replyEl);
     }
 
@@ -322,7 +329,7 @@ export function createEventsPanel(strings) {
     const copy = createElement('div', 'events-tool-call__copy');
     copy.append(
       createElement('div', 'events-tool-call__label', toolName),
-      createElement('div', 'events-tool-call__sub', toolName)
+      createElement('div', 'events-tool-call__sub', toolName),
     );
 
     const badge = createElement('span', 'events-tool-call__badge', strings.labels.toolUsed);
@@ -336,11 +343,10 @@ export function createEventsPanel(strings) {
       const summary = createElement('summary', 'events-tool-call__summary');
       summary.append(
         createIcon('chevronDown', 'events-tool-call__chevron'),
-        createElement('span', '', strings.labels.parameters)
+        createElement('span', '', strings.labels.parameters),
       );
 
-      const pre = createElement('pre', 'events-tool-call__params',
-        JSON.stringify(params, null, 2));
+      const pre = createElement('pre', 'events-tool-call__params', JSON.stringify(params, null, 2));
 
       details.append(summary, pre);
       card.append(details);
@@ -354,13 +360,13 @@ export function createEventsPanel(strings) {
 
   function createDetailSection(label, value, className = '') {
     if (value === null || value === undefined || String(value).trim() === '') return null;
-    const section = createElement('div', `events-detail__section${className ? ` ${className}` : ''}`);
+    const section = createElement(
+      'div',
+      `events-detail__section${className ? ` ${className}` : ''}`,
+    );
     const valueEl = createElement('div', 'events-detail__section-value');
     valueEl.append(renderMarkdown(String(value)));
-    section.append(
-      createElement('div', 'events-detail__section-label', label),
-      valueEl
-    );
+    section.append(createElement('div', 'events-detail__section-label', label), valueEl);
     return section;
   }
 
@@ -373,7 +379,10 @@ export function createEventsPanel(strings) {
 
     const { content, thinking } = parseThinkingFromText(String(value));
 
-    const section = createElement('div', `events-detail__section${className ? ` ${className}` : ''}`);
+    const section = createElement(
+      'div',
+      `events-detail__section${className ? ` ${className}` : ''}`,
+    );
     section.append(createElement('div', 'events-detail__section-label', label));
 
     // Reasoning block — only when the model emitted inline thinking.
@@ -384,7 +393,7 @@ export function createEventsPanel(strings) {
       const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
       thinkSummary.append(
         createIcon('thinking', 'chat-message__thinking-icon'),
-        createElement('span', 'chat-message__thinking-label', strings.labels.reasoning)
+        createElement('span', 'chat-message__thinking-label', strings.labels.reasoning),
       );
       thinkWrap.append(thinkSummary);
 
@@ -418,7 +427,7 @@ export function createEventsPanel(strings) {
     const item = createElement('div', 'events-detail__meta-item');
     item.append(
       createElement('span', 'events-detail__meta-label', label),
-      createElement('span', 'events-detail__meta-value', String(value))
+      createElement('span', 'events-detail__meta-value', String(value)),
     );
     return item;
   }
@@ -438,7 +447,7 @@ export function createEventsPanel(strings) {
     const titleWrap = createElement('div', 'events-detail__title-wrap');
     titleWrap.append(
       createElement('div', 'events-detail__eyebrow', strings.types[event.type]),
-      createElement('h3', 'events-detail__title', event.title)
+      createElement('h3', 'events-detail__title', event.title),
     );
     header.append(badge, titleWrap, createStatusBadge(event));
 
@@ -449,26 +458,44 @@ export function createEventsPanel(strings) {
       createMetaItem(strings.labels.finished, formatDetailDate(event.finishedAt)),
       createMetaItem(strings.labels.provider, event.provider),
       createMetaItem(strings.labels.model, event.model),
-      createMetaItem(strings.labels.tokens, event.tokensIn || event.tokensOut ? String(Number(event.tokensIn ?? 0) + Number(event.tokensOut ?? 0)) : ''),
+      createMetaItem(
+        strings.labels.tokens,
+        event.tokensIn || event.tokensOut
+          ? String(Number(event.tokensIn ?? 0) + Number(event.tokensOut ?? 0))
+          : '',
+      ),
       createMetaItem(strings.labels.conversation, event.conversationId),
       createMetaItem(strings.labels.target, event.targetId),
-      createMetaItem(strings.labels.externalId, event.externalId)
-    ].filter(Boolean).forEach((item) => metaGrid.append(item));
+      createMetaItem(strings.labels.externalId, event.externalId),
+    ]
+      .filter(Boolean)
+      .forEach((item) => metaGrid.append(item));
 
     detailEl.append(header, metaGrid);
 
-    const sections = event.type === 'channel'
-      ? [
-        createDetailSection(strings.labels.inbound, event.primary),
-        createResponseSection(strings.labels.reply, event.secondary),
-        createDetailSection(strings.labels.error, event.error, 'events-detail__section--error')
-      ]
-      : [
-        createDetailSection(strings.labels.prompt, event.primary),
-        event.raw?.thinking ? createDetailSection(strings.labels.thinking, event.raw.thinking, 'events-detail__section--thinking') : null,
-        createResponseSection(strings.labels.response, event.secondary, event.status === 'running' ? 'events-detail__section--live' : ''),
-        createDetailSection(strings.labels.error, event.error, 'events-detail__section--error')
-      ];
+    const sections =
+      event.type === 'channel'
+        ? [
+            createDetailSection(strings.labels.inbound, event.primary),
+            createResponseSection(strings.labels.reply, event.secondary),
+            createDetailSection(strings.labels.error, event.error, 'events-detail__section--error'),
+          ]
+        : [
+            createDetailSection(strings.labels.prompt, event.primary),
+            event.raw?.thinking
+              ? createDetailSection(
+                  strings.labels.thinking,
+                  event.raw.thinking,
+                  'events-detail__section--thinking',
+                )
+              : null,
+            createResponseSection(
+              strings.labels.response,
+              event.secondary,
+              event.status === 'running' ? 'events-detail__section--live' : '',
+            ),
+            createDetailSection(strings.labels.error, event.error, 'events-detail__section--error'),
+          ];
 
     for (const section of sections.filter(Boolean)) {
       detailEl.append(section);
@@ -501,7 +528,7 @@ export function createEventsPanel(strings) {
   async function clearEvents() {
     await Promise.all([
       invokeIpc('agents:clear-runs').catch(() => null),
-      invokeIpc('channels:clear-messages').catch(() => null)
+      invokeIpc('channels:clear-messages').catch(() => null),
     ]);
     selectedId = null;
     await populate();
@@ -521,18 +548,18 @@ export function createEventsPanel(strings) {
     // ── Header ───────────────────────────────────────────────────────────────
     const header = createPanelHeader({
       title: strings.title,
-      subtitle: strings.subtitle
+      subtitle: strings.subtitle,
     });
 
     // ── Stats ─────────────────────────────────────────────────────────────────
     const stats = createElement('div', 'events-stats');
-    const total   = buildStat(strings.stats.total);
+    const total = buildStat(strings.stats.total);
     const success = buildStat(strings.stats.success);
-    const errors  = buildStat(strings.stats.errors);
+    const errors = buildStat(strings.stats.errors);
     const sources = buildStat(strings.stats.sources);
-    statTotal   = total.value;
+    statTotal = total.value;
     statSuccess = success.value;
-    statErrors  = errors.value;
+    statErrors = errors.value;
     statSources = sources.value;
     stats.append(total.tile, success.tile, errors.tile, sources.tile);
 
@@ -542,7 +569,7 @@ export function createEventsPanel(strings) {
       const button = createElement(
         'button',
         `events-filter__button${filter === activeFilter ? ' events-filter__button--active' : ''}`,
-        strings.filters[filter]
+        strings.filters[filter],
       );
       button.type = 'button';
       button.addEventListener('click', () => {
@@ -558,7 +585,9 @@ export function createEventsPanel(strings) {
     clearButton.type = 'button';
     clearButton.setAttribute('aria-label', strings.actions.clearAll);
     clearButton.textContent = strings.actions.clear;
-    clearButton.addEventListener('click', () => { void clearEvents(); });
+    clearButton.addEventListener('click', () => {
+      void clearEvents();
+    });
     filters.append(clearButton);
 
     const body = createElement('div', 'events__body');

@@ -8,6 +8,6 @@ export function createJiraConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeJiraChatTool
+    executeTool: executeJiraChatTool,
   });
 }

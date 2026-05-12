@@ -24,7 +24,7 @@ export function createConnectorCredentialHelpers({
   credentialKey = 'token',
   validateCredentials,
   requiredErrorMessage = 'Connector not connected',
-  notConnectedErrorMessage = requiredErrorMessage
+  notConnectedErrorMessage = requiredErrorMessage,
 } = {}) {
   const isValidCredential = createCredentialValidator(credentialKey, validateCredentials);
 
@@ -57,7 +57,7 @@ export function createConnectorCredentialHelpers({
     getCredentials,
     requireCredentials,
     notConnected,
-    withCredentials
+    withCredentials,
   });
 }
 
@@ -73,7 +73,10 @@ export async function runCredentialedChatTool(ctx, getCredentials, notConnected,
 
 export function parseCommaList(value = '') {
   if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
-  return String(value).split(',').map((item) => item.trim()).filter(Boolean);
+  return String(value)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 export function formatDate(value, fallback = 'unknown date') {

@@ -7,11 +7,12 @@ import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 function createTemplateId(name) {
-  const sanitized = (name || 'Template').trim()
-    .replace(/[^a-zA-Z0-9]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    || 'Template';
+  const sanitized =
+    (name || 'Template')
+      .trim()
+      .replace(/[^a-zA-Z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'Template';
   const unique = Math.random().toString(36).slice(2, 7).padEnd(5, '0');
   return `${sanitized}-${unique}`;
 }
@@ -29,10 +30,10 @@ function createTemplateId(name) {
 
 export function createTemplatesPanel(strings) {
   // Panel-scoped draft state
-  let draftTemplateCommand    = '';
-  let draftTemplateName       = '';
-  let draftTemplatePrompt     = '';
-  let editingTemplateId       = null;
+  let draftTemplateCommand = '';
+  let draftTemplateName = '';
+  let draftTemplatePrompt = '';
+  let editingTemplateId = null;
   let editingTemplateCreatedAt = null;
 
   // Reference to the built panel element — set after build() is called.
@@ -68,10 +69,16 @@ export function createTemplatesPanel(strings) {
     if (filtered.length === 0) {
       const empty = createElement('div', 'chat-templates__empty');
       empty.append(
-        createElement('p', 'chat-templates__empty-title',
-          normalizedQuery ? strings.noResults : strings.empty),
-        createElement('p', 'chat-templates__empty-hint',
-          normalizedQuery ? strings.noResultsHint : strings.emptyHint)
+        createElement(
+          'p',
+          'chat-templates__empty-title',
+          normalizedQuery ? strings.noResults : strings.empty,
+        ),
+        createElement(
+          'p',
+          'chat-templates__empty-hint',
+          normalizedQuery ? strings.noResultsHint : strings.emptyHint,
+        ),
       );
       listEl.append(empty);
       return;
@@ -89,15 +96,15 @@ export function createTemplatesPanel(strings) {
 
     const commandBadge = createElement('div', 'chat-templates__card-command', template.command);
 
-    const body     = createElement('div', 'chat-templates__card-body');
-    const nameEl   = createElement('div', 'chat-templates__card-name', template.name);
+    const body = createElement('div', 'chat-templates__card-body');
+    const nameEl = createElement('div', 'chat-templates__card-name', template.name);
     const promptEl = createElement('div', 'chat-templates__card-prompt', template.prompt);
     body.append(nameEl, promptEl);
 
-    const actions  = createElement('div', 'chat-templates__card-actions');
+    const actions = createElement('div', 'chat-templates__card-actions');
 
     const editBtn = createElement('button', 'chat-templates__card-btn');
-    editBtn.type  = 'button';
+    editBtn.type = 'button';
     editBtn.setAttribute('aria-label', strings.edit);
     editBtn.append(createIcon('pencil', 'chat-templates__card-btn-icon'));
     editBtn.addEventListener('click', async (e) => {
@@ -110,8 +117,11 @@ export function createTemplatesPanel(strings) {
       }
     });
 
-    const deleteBtn = createElement('button', 'chat-templates__card-btn chat-templates__card-btn--danger');
-    deleteBtn.type  = 'button';
+    const deleteBtn = createElement(
+      'button',
+      'chat-templates__card-btn chat-templates__card-btn--danger',
+    );
+    deleteBtn.type = 'button';
     deleteBtn.setAttribute('aria-label', strings.delete);
     deleteBtn.append(createIcon('trash', 'chat-templates__card-btn-icon'));
     deleteBtn.addEventListener('click', async (e) => {
@@ -145,7 +155,11 @@ export function createTemplatesPanel(strings) {
 
     // ── Left: form ────────────────────────────────────────────────────────
     const formCol = createElement('div', 'chat-templates__form-col');
-    const formHeading = createElement('p', 'chat-templates__form-heading', strings.newTemplateHeading);
+    const formHeading = createElement(
+      'p',
+      'chat-templates__form-heading',
+      strings.newTemplateHeading,
+    );
     formCol.append(formHeading);
 
     const formCard = createElement('div', 'chat-templates__form-card');
@@ -160,7 +174,7 @@ export function createTemplatesPanel(strings) {
       onInput: (value) => {
         draftTemplateCommand = value;
         syncTemplateSaveBtn();
-      }
+      },
     });
 
     const nameBox = createInputBoxLite({
@@ -171,17 +185,17 @@ export function createTemplatesPanel(strings) {
       onInput: (value) => {
         draftTemplateName = value;
         syncTemplateSaveBtn();
-      }
+      },
     });
 
     const promptLabel = createElement('label', 'chat-templates__field-label', strings.promptLabel);
     const promptTextarea = document.createElement('textarea');
-    promptTextarea.className   = 'chat-templates__prompt-textarea';
+    promptTextarea.className = 'chat-templates__prompt-textarea';
     promptTextarea.placeholder = strings.promptPlaceholder;
-    promptTextarea.rows        = 6;
+    promptTextarea.rows = 6;
     promptTextarea.style.webkitUserSelect = 'text';
-    promptTextarea.style.userSelect       = 'text';
-    promptTextarea.style.cursor           = 'text';
+    promptTextarea.style.userSelect = 'text';
+    promptTextarea.style.cursor = 'text';
     promptTextarea.addEventListener('input', (e) => {
       draftTemplatePrompt = e.target.value;
       syncTemplateSaveBtn();
@@ -199,40 +213,39 @@ export function createTemplatesPanel(strings) {
     saveBtn.textContent = strings.save;
 
     function syncTemplateSaveBtn() {
-      saveBtn.disabled = !draftTemplateCommand.trim() || !draftTemplateName.trim() || !draftTemplatePrompt.trim();
+      saveBtn.disabled =
+        !draftTemplateCommand.trim() || !draftTemplateName.trim() || !draftTemplatePrompt.trim();
     }
 
     function syncTemplateFormChrome() {
       formHeading.textContent = editingTemplateId
         ? strings.editTemplateHeading
         : strings.newTemplateHeading;
-      saveBtn.textContent = editingTemplateId
-        ? strings.update
-        : strings.save;
+      saveBtn.textContent = editingTemplateId ? strings.update : strings.save;
     }
 
     function resetTemplateForm() {
-      editingTemplateId        = null;
+      editingTemplateId = null;
       editingTemplateCreatedAt = null;
-      draftTemplateCommand     = '';
-      draftTemplateName        = '';
-      draftTemplatePrompt      = '';
-      commandBox.input.value   = '';
-      nameBox.input.value      = '';
-      promptTextarea.value     = '';
+      draftTemplateCommand = '';
+      draftTemplateName = '';
+      draftTemplatePrompt = '';
+      commandBox.input.value = '';
+      nameBox.input.value = '';
+      promptTextarea.value = '';
       syncTemplateFormChrome();
       syncTemplateSaveBtn();
     }
 
     function applyTemplateToForm(template) {
-      editingTemplateId        = template.id;
+      editingTemplateId = template.id;
       editingTemplateCreatedAt = template.createdAt ?? null;
-      draftTemplateCommand     = template.command ?? '';
-      draftTemplateName        = template.name ?? '';
-      draftTemplatePrompt      = template.prompt ?? '';
-      commandBox.input.value   = draftTemplateCommand;
-      nameBox.input.value      = draftTemplateName;
-      promptTextarea.value     = draftTemplatePrompt;
+      draftTemplateCommand = template.command ?? '';
+      draftTemplateName = template.name ?? '';
+      draftTemplatePrompt = template.prompt ?? '';
+      commandBox.input.value = draftTemplateCommand;
+      nameBox.input.value = draftTemplateName;
+      promptTextarea.value = draftTemplatePrompt;
       syncTemplateFormChrome();
       syncTemplateSaveBtn();
       commandBox.input.focus();
@@ -241,18 +254,18 @@ export function createTemplatesPanel(strings) {
 
     saveBtn.addEventListener('click', async () => {
       const command = draftTemplateCommand.trim();
-      const name    = draftTemplateName.trim();
-      const prompt  = draftTemplatePrompt.trim();
+      const name = draftTemplateName.trim();
+      const prompt = draftTemplatePrompt.trim();
       if (!command || !name || !prompt) return;
 
       const now = new Date().toISOString();
       const template = {
-        id:        editingTemplateId ?? createTemplateId(name),
+        id: editingTemplateId ?? createTemplateId(name),
         name,
         command,
         prompt,
         createdAt: editingTemplateCreatedAt ?? now,
-        updatedAt: now
+        updatedAt: now,
       };
 
       try {
@@ -269,12 +282,7 @@ export function createTemplatesPanel(strings) {
     cancelBtn.addEventListener('click', resetTemplateForm);
 
     formActions.append(cancelBtn, saveBtn);
-    formCard.append(
-      commandBox.element,
-      nameBox.element,
-      promptLabel, promptTextarea,
-      formActions
-    );
+    formCard.append(commandBox.element, nameBox.element, promptLabel, promptTextarea, formActions);
     formCol.append(formCard);
 
     // ── Right: list ───────────────────────────────────────────────────────
@@ -284,7 +292,7 @@ export function createTemplatesPanel(strings) {
     const searchWrap = createElement('div', 'chat-templates__list-search');
     const search = createSearchBar({
       placeholder: strings.searchPlaceholder,
-      onChange: (value) => void populateList(listContent, value.trim())
+      onChange: (value) => void populateList(listContent, value.trim()),
     });
     search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(search.element);
@@ -295,8 +303,8 @@ export function createTemplatesPanel(strings) {
     body.append(formCol, listCol);
     panel.append(body);
 
-    panel._listEl    = listContent;
-    panel._search    = search;
+    panel._listEl = listContent;
+    panel._search = search;
     panel._startEdit = applyTemplateToForm;
     panel._resetForm = resetTemplateForm;
     syncTemplateFormChrome();

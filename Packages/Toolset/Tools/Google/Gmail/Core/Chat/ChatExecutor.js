@@ -87,8 +87,7 @@ export async function executeGmailChatTool(ctx, toolName, params = {}) {
       const { messageId: messageId } = params;
       if (!messageId) throw new Error('Missing required param: messageId');
       return (
-        await GmailAPI.markAsRead(credentials, messageId),
-        `Message ${messageId} marked as read.`
+        await GmailAPI.markAsRead(credentials, messageId), `Message ${messageId} marked as read.`
       );
     }
     case 'gmail_mark_as_unread': {
@@ -111,8 +110,7 @@ export async function executeGmailChatTool(ctx, toolName, params = {}) {
       const { messageId: messageId } = params;
       if (!messageId) throw new Error('Missing required param: messageId');
       return (
-        await GmailAPI.trashMessage(credentials, messageId),
-        `Message ${messageId} moved to trash.`
+        await GmailAPI.trashMessage(credentials, messageId), `Message ${messageId} moved to trash.`
       );
     }
     case 'gmail_get_inbox_stats': {
@@ -192,8 +190,8 @@ export async function executeGmailChatTool(ctx, toolName, params = {}) {
       const { name: name, text_color: text_color, background_color: background_color } = params;
       if (!name) throw new Error('Missing required param: name');
       const colors = {};
-      (text_color && (colors.textColor = text_color),
-        background_color && (colors.backgroundColor = background_color));
+      text_color && (colors.textColor = text_color),
+        background_color && (colors.backgroundColor = background_color);
       const label = await GmailAPI.createLabel(credentials, name, colors);
       return [`Label created: "${name}"`, label?.id ? `Label ID: ${label.id}` : '']
         .filter(Boolean)
@@ -355,17 +353,13 @@ export async function executeGmailChatTool(ctx, toolName, params = {}) {
       const { draftId: draftId } = params;
       if (!draftId) throw new Error('Missing required param: draftId');
       return (
-        await GmailAPI.deleteDraft(credentials, draftId),
-        `Draft ${draftId} permanently deleted.`
+        await GmailAPI.deleteDraft(credentials, draftId), `Draft ${draftId} permanently deleted.`
       );
     }
     case 'gmail_send_draft': {
       const { draftId: draftId } = params;
       if (!draftId) throw new Error('Missing required param: draftId');
-      return (
-        await GmailAPI.sendDraft(credentials, draftId),
-        `Draft ${draftId} sent successfully.`
-      );
+      return await GmailAPI.sendDraft(credentials, draftId), `Draft ${draftId} sent successfully.`;
     }
     case 'gmail_get_vacation': {
       const v = await GmailAPI.getVacationResponder(credentials);

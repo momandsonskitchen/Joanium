@@ -10,9 +10,8 @@ import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 // ---------------------------------------------------------------------------
 
 const MARKETPLACE_API_BASE = 'https://www.joanium.com/api/marketplace';
-const PAGE_LIMIT           = 30;   // items per page
-const SCROLL_THRESHOLD_PX  = 140;  // px from bottom before next page loads
-
+const PAGE_LIMIT = 30; // items per page
+const SCROLL_THRESHOLD_PX = 140; // px from bottom before next page loads
 
 // ---------------------------------------------------------------------------
 // API helpers — run in the renderer (Electron has no CORS restrictions)
@@ -20,15 +19,15 @@ const SCROLL_THRESHOLD_PX  = 140;  // px from bottom before next page loads
 
 async function fetchItems({ type, search = '', page = 1, limit = PAGE_LIMIT }) {
   const url = new URL(`${MARKETPLACE_API_BASE}/items`);
-  url.searchParams.set('type',   type);
-  url.searchParams.set('sort',   'az');
+  url.searchParams.set('type', type);
+  url.searchParams.set('sort', 'az');
   url.searchParams.set('filter', 'all');
-  url.searchParams.set('page',   String(page));
-  url.searchParams.set('limit',  String(limit));
+  url.searchParams.set('page', String(page));
+  url.searchParams.set('limit', String(limit));
   if (search) url.searchParams.set('q', search);
 
   const response = await fetch(url.toString(), {
-    headers: { Accept: 'application/json' }
+    headers: { Accept: 'application/json' },
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
@@ -44,7 +43,7 @@ async function fetchItemDetail(type, publisher, filename) {
 async function downloadMarkdown(type, publisher, filename) {
   const url = `${MARKETPLACE_API_BASE}/download/${encodeURIComponent(type)}/${encodeURIComponent(publisher)}/${encodeURIComponent(filename)}`;
   const response = await fetch(url, {
-    headers: { Accept: 'text/markdown, text/plain;q=0.9, */*;q=0.8' }
+    headers: { Accept: 'text/markdown, text/plain;q=0.9, */*;q=0.8' },
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.text();
@@ -55,18 +54,18 @@ async function downloadMarkdown(type, publisher, filename) {
 // ---------------------------------------------------------------------------
 
 export function createMarketplacePanel(strings) {
-  let panel       = null;
-  let _listEl     = null;
-  let _search     = null;
-  let _viewerEl   = null;
+  let panel = null;
+  let _listEl = null;
+  let _search = null;
+  let _viewerEl = null;
   let _activeType = 'skills';
   let _activeCard = null;
 
   // ── Pagination state — reset on every new query / type switch ────────────
-  let _currentQuery    = '';
-  let _currentPage     = 1;
-  let _hasMore         = false;
-  let _isFetchingMore  = false;
+  let _currentQuery = '';
+  let _currentPage = 1;
+  let _hasMore = false;
+  let _isFetchingMore = false;
   // Generation counter: incremented on every fresh populateList call so that
   // in-flight fetchMore calls from a previous query are silently discarded.
   let _fetchGeneration = 0;
@@ -90,12 +89,15 @@ export function createMarketplacePanel(strings) {
     const headerText = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
 
     // Type toggle (Skills | Personas)
-    const toggle      = createElement('div', 'marketplace__toggle');
-    const skillsBtn   = createElement('button', 'marketplace__toggle-btn marketplace__toggle-btn--active');
+    const toggle = createElement('div', 'marketplace__toggle');
+    const skillsBtn = createElement(
+      'button',
+      'marketplace__toggle-btn marketplace__toggle-btn--active',
+    );
     const personasBtn = createElement('button', 'marketplace__toggle-btn');
-    skillsBtn.type    = 'button';
-    personasBtn.type  = 'button';
-    skillsBtn.textContent   = strings.skillsLabel;
+    skillsBtn.type = 'button';
+    personasBtn.type = 'button';
+    skillsBtn.textContent = strings.skillsLabel;
     personasBtn.textContent = strings.personasLabel;
 
     skillsBtn.addEventListener('click', () => {
@@ -127,13 +129,13 @@ export function createMarketplacePanel(strings) {
     const body = createElement('div', 'marketplace__body');
 
     // Left column — frosted-glass card: search + list
-    const listCol  = createElement('div', 'marketplace__list-col');
+    const listCol = createElement('div', 'marketplace__list-col');
     const listCard = createElement('div', 'marketplace__list-card');
 
     const searchWrap = createElement('div', 'marketplace__list-search');
     _search = createSearchBar({
       placeholder: strings.searchPlaceholder,
-      onChange: (value) => void populateList(_listEl, value.trim())
+      onChange: (value) => void populateList(_listEl, value.trim()),
     });
     _search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(_search.element);
@@ -162,8 +164,8 @@ export function createMarketplacePanel(strings) {
     panel.append(body);
 
     // Expose internals for ChatApp to call populateList on mount
-    panel._listEl   = _listEl;
-    panel._search   = _search;
+    panel._listEl = _listEl;
+    panel._search = _search;
     panel._viewerEl = _viewerEl;
 
     return panel;
@@ -174,9 +176,7 @@ export function createMarketplacePanel(strings) {
   function resetViewer() {
     if (!_viewerEl) return;
     _viewerEl.replaceChildren();
-    _viewerEl.append(
-      createElement('div', 'marketplace__viewer-empty', strings.selectPrompt)
-    );
+    _viewerEl.append(createElement('div', 'marketplace__viewer-empty', strings.selectPrompt));
   }
 
   // ── populateList — fetches page 1, resets all pagination state ────────────
@@ -189,9 +189,9 @@ export function createMarketplacePanel(strings) {
     _fetchGeneration += 1;
     const generation = _fetchGeneration;
 
-    _currentQuery   = query;
-    _currentPage    = 1;
-    _hasMore        = false;
+    _currentQuery = query;
+    _currentPage = 1;
+    _hasMore = false;
     _isFetchingMore = false;
 
     listEl.replaceChildren();
@@ -210,7 +210,7 @@ export function createMarketplacePanel(strings) {
       const err = createElement('div', 'marketplace__empty');
       err.append(
         createElement('p', 'marketplace__empty-title', strings.loadFailed),
-        createElement('p', 'marketplace__empty-hint',  strings.loadFailedHint)
+        createElement('p', 'marketplace__empty-hint', strings.loadFailedHint),
       );
       listEl.append(err);
       return;
@@ -219,7 +219,7 @@ export function createMarketplacePanel(strings) {
     if (generation !== _fetchGeneration) return; // stale — a newer query replaced us
 
     const items = Array.isArray(data?.items) ? data.items : [];
-    _hasMore     = Boolean(data?.hasMore);
+    _hasMore = Boolean(data?.hasMore);
     _currentPage = Number(data?.page ?? 1);
 
     listEl.replaceChildren();
@@ -227,8 +227,12 @@ export function createMarketplacePanel(strings) {
     if (items.length === 0) {
       const empty = createElement('div', 'marketplace__empty');
       empty.append(
-        createElement('p', 'marketplace__empty-title', query ? strings.noResults     : strings.empty),
-        createElement('p', 'marketplace__empty-hint',  query ? strings.noResultsHint : strings.emptyHint)
+        createElement('p', 'marketplace__empty-title', query ? strings.noResults : strings.empty),
+        createElement(
+          'p',
+          'marketplace__empty-hint',
+          query ? strings.noResultsHint : strings.emptyHint,
+        ),
       );
       listEl.append(empty);
       return;
@@ -248,7 +252,7 @@ export function createMarketplacePanel(strings) {
     if (!_hasMore || _isFetchingMore) return;
 
     const generation = _fetchGeneration;
-    _isFetchingMore  = true;
+    _isFetchingMore = true;
 
     // Replace sentinel with inline skeletons while loading
     const sentinel = listEl.querySelector('.marketplace__load-sentinel');
@@ -265,12 +269,12 @@ export function createMarketplacePanel(strings) {
     let data;
     try {
       data = await fetchItems({
-        type:   _activeType,
+        type: _activeType,
         search: _currentQuery,
-        page:   _currentPage + 1
+        page: _currentPage + 1,
       });
     } catch {
-      skeletons.forEach(sk => sk.remove());
+      skeletons.forEach((sk) => sk.remove());
       _isFetchingMore = false;
       if (generation === _fetchGeneration) {
         listEl.append(buildLoadMoreSentinel()); // keep sentinel so retry is possible
@@ -278,13 +282,13 @@ export function createMarketplacePanel(strings) {
       return;
     }
 
-    skeletons.forEach(sk => sk.remove());
+    skeletons.forEach((sk) => sk.remove());
     _isFetchingMore = false;
 
     if (generation !== _fetchGeneration) return; // stale
 
     const items = Array.isArray(data?.items) ? data.items : [];
-    _hasMore     = Boolean(data?.hasMore);
+    _hasMore = Boolean(data?.hasMore);
     _currentPage = Number(data?.page ?? _currentPage + 1);
 
     for (const item of items) {
@@ -325,7 +329,7 @@ export function createMarketplacePanel(strings) {
 
     _viewerEl.replaceChildren();
 
-    const itemId      = detail.id ?? `${_activeType}/${detail.publisher}/${detail.filename}`;
+    const itemId = detail.id ?? `${_activeType}/${detail.publisher}/${detail.filename}`;
     const isInstalled = _installedIds.has(itemId);
 
     // ── Viewer header ─────────────────────────────────────────────────────
@@ -340,7 +344,7 @@ export function createMarketplacePanel(strings) {
       const badge = createElement('span', 'marketplace__verified-badge');
       badge.append(
         createIcon('verified', 'marketplace__verified-icon'),
-        createElement('span', 'marketplace__verified-label', strings.verified)
+        createElement('span', 'marketplace__verified-label', strings.verified),
       );
       nameRow.append(badge);
     }
@@ -349,7 +353,7 @@ export function createMarketplacePanel(strings) {
     const metaRow = createElement('div', 'marketplace__viewer-meta-row');
     metaRow.append(
       createElement('span', 'marketplace__viewer-author-label', strings.author),
-      createElement('span', 'marketplace__viewer-author-value', detail.publisher ?? item.publisher)
+      createElement('span', 'marketplace__viewer-author-value', detail.publisher ?? item.publisher),
     );
 
     if (detail.downloads) {
@@ -373,10 +377,10 @@ export function createMarketplacePanel(strings) {
 
     // Install button
     const installBtn = createElement('button', 'marketplace__install-btn');
-    installBtn.type  = 'button';
+    installBtn.type = 'button';
 
     function renderInstallDefault() {
-      installBtn.disabled  = false;
+      installBtn.disabled = false;
       installBtn.className = 'marketplace__install-btn';
       installBtn.replaceChildren();
       installBtn.append(createIcon('download', 'marketplace__install-btn-icon'));
@@ -384,15 +388,17 @@ export function createMarketplacePanel(strings) {
     }
 
     function renderInstalling() {
-      installBtn.disabled  = true;
+      installBtn.disabled = true;
       installBtn.className = 'marketplace__install-btn marketplace__install-btn--installing';
       installBtn.replaceChildren();
       installBtn.append(createElement('span', 'marketplace__install-spinner'));
-      installBtn.append(createElement('span', 'marketplace__install-btn-label', strings.installing));
+      installBtn.append(
+        createElement('span', 'marketplace__install-btn-label', strings.installing),
+      );
     }
 
     function renderInstalled() {
-      installBtn.disabled  = true;
+      installBtn.disabled = true;
       installBtn.className = 'marketplace__install-btn marketplace__install-btn--installed';
       installBtn.replaceChildren();
       installBtn.append(createIcon('check', 'marketplace__install-btn-icon'));
@@ -400,10 +406,12 @@ export function createMarketplacePanel(strings) {
     }
 
     function renderError() {
-      installBtn.disabled  = false;
+      installBtn.disabled = false;
       installBtn.className = 'marketplace__install-btn marketplace__install-btn--error';
       installBtn.replaceChildren();
-      installBtn.append(createElement('span', 'marketplace__install-btn-label', strings.installFailed));
+      installBtn.append(
+        createElement('span', 'marketplace__install-btn-label', strings.installFailed),
+      );
       setTimeout(() => renderInstallDefault(), 2500);
     }
 
@@ -426,7 +434,7 @@ export function createMarketplacePanel(strings) {
           _activeType,
           detail.publisher,
           detail.filename,
-          markdown
+          markdown,
         );
         _installedIds.add(itemId);
         renderInstalled();
@@ -441,16 +449,17 @@ export function createMarketplacePanel(strings) {
     _viewerEl.append(header);
 
     // Trigger / personality tag
-    const tagValue = _activeType === 'personas'
-      ? (detail.personality ?? detail.meta?.personality ?? '')
-      : (detail.trigger     ?? detail.meta?.trigger     ?? '');
+    const tagValue =
+      _activeType === 'personas'
+        ? (detail.personality ?? detail.meta?.personality ?? '')
+        : (detail.trigger ?? detail.meta?.trigger ?? '');
 
     if (tagValue) {
-      const tagRow   = createElement('div', 'marketplace__viewer-tag-row');
+      const tagRow = createElement('div', 'marketplace__viewer-tag-row');
       const tagLabel = _activeType === 'personas' ? strings.personality : strings.trigger;
       tagRow.append(
         createElement('span', 'marketplace__viewer-tag-label', tagLabel),
-        createElement('span', 'marketplace__viewer-tag-value', tagValue)
+        createElement('span', 'marketplace__viewer-tag-value', tagValue),
       );
       _viewerEl.append(tagRow);
     }
@@ -474,7 +483,7 @@ export function createMarketplacePanel(strings) {
 
   function buildItemCard(item) {
     const itemId = item.id ?? `${_activeType}/${item.publisher}/${item.filename}`;
-    const card   = createElement('div', 'marketplace__card');
+    const card = createElement('div', 'marketplace__card');
 
     if (_installedIds.has(itemId)) card.classList.add('marketplace__card--installed');
 

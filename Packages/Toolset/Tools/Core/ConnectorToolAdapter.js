@@ -10,7 +10,7 @@ function createConnectorEngine(rootDirectory, state) {
       const nextUpdates = Object.fromEntries(
         Object.entries(updates)
           .filter(([, value]) => value !== undefined && value !== null)
-          .map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value])
+          .map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value]),
       );
 
       if (Object.keys(nextUpdates).length === 0) {
@@ -25,16 +25,16 @@ function createConnectorEngine(rootDirectory, state) {
             ...(state.connectors?.details ?? {}),
             [connectorId]: {
               ...(state.connectors?.details?.[connectorId] ?? {}),
-              ...nextUpdates
-            }
-          }
-        }
+              ...nextUpdates,
+            },
+          },
+        },
       });
 
       state.connectors.details[connectorId] ??= {};
       Object.assign(state.connectors.details[connectorId], nextUpdates);
       return this.getCredentials(connectorId);
-    }
+    },
   };
 }
 
@@ -51,7 +51,7 @@ export async function createConnectorToolContext(rootDirectory) {
   state.connectors ??= {};
   state.connectors.details ??= {};
   return {
-    connectorEngine: createConnectorEngine(rootDirectory, state)
+    connectorEngine: createConnectorEngine(rootDirectory, state),
   };
 }
 
@@ -64,13 +64,17 @@ export function createConnectorToolHandlers({ rootDirectory, toolDefinitions = [
       .map((tool) => [
         tool.name,
         async (params = {}) => {
-          const result = await executeTool(await createConnectorToolContext(rootDirectory), tool.name, params);
+          const result = await executeTool(
+            await createConnectorToolContext(rootDirectory),
+            tool.name,
+            params,
+          );
           if (result && typeof result === 'object' && result.ok === false) {
             throw new Error(result.error ?? 'Tool failed.');
           }
           return typeof result === 'string' ? result : JSON.stringify(result, null, 2);
-        }
-      ])
+        },
+      ]),
   );
 }
 

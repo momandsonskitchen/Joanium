@@ -18,7 +18,7 @@ const providerPalette = {
   openrouter: { tint: '#c7a8ff', glow: '#f3ecff' },
   perplexity: { tint: '#8fc7ff', glow: '#eaf5ff' },
   together: { tint: '#ff9a9a', glow: '#ffebeb' },
-  xai: { tint: '#c9b6a8', glow: '#f4eee9' }
+  xai: { tint: '#c9b6a8', glow: '#f4eee9' },
 };
 
 const providerIconMap = {
@@ -37,13 +37,13 @@ const providerIconMap = {
   openrouter: 'OpenRouter.png',
   perplexity: 'Perplexity.png',
   together: 'Together.png',
-  xai: 'xAI.png'
+  xai: 'xAI.png',
 };
 
 function summarizeModels(models) {
   const modelList = Object.entries(models ?? {}).map(([id, model]) => ({
     id,
-    ...model
+    ...model,
   }));
   const featuredModels = modelList.slice(0, 3).map((model) => model.name);
   const summary = modelList[0]?.description ?? '';
@@ -52,12 +52,14 @@ function summarizeModels(models) {
     models: modelList,
     modelCount: modelList.length,
     featuredModels,
-    summary
+    summary,
   };
 }
 
 function buildProviderRecord(providerConfiguration, rootDirectory) {
-  const { models, modelCount, featuredModels, summary } = summarizeModels(providerConfiguration.models);
+  const { models, modelCount, featuredModels, summary } = summarizeModels(
+    providerConfiguration.models,
+  );
   const providerId = providerConfiguration.provider;
   const palette = providerPalette[providerId] ?? { tint: '#d0b4a2', glow: '#f7ede7' };
   const isLocal = providerConfiguration.requires_api_key === false;
@@ -84,16 +86,16 @@ function buildProviderRecord(providerConfiguration, rootDirectory) {
           {
             key: 'endpoint',
             kind: 'url',
-            defaultValue: providerConfiguration.endpoint
-          }
+            defaultValue: providerConfiguration.endpoint,
+          },
         ]
       : [
           {
             key: 'apiKey',
             kind: 'secret',
-            defaultValue: ''
-          }
-        ]
+            defaultValue: '',
+          },
+        ],
   };
 }
 
@@ -110,7 +112,7 @@ export async function readProviderCatalog(rootDirectory) {
       const providerContents = await readFile(providerPath, 'utf8');
       const providerConfiguration = JSON.parse(providerContents);
       return buildProviderRecord(providerConfiguration, rootDirectory);
-    })
+    }),
   );
 
   return providers;

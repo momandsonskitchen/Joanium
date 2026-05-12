@@ -31,17 +31,32 @@
 
 /* First heading gets no top margin */
 .md-root > .md-h:first-child,
-.md-root > *:first-child { margin-top: 0; }
+.md-root > *:first-child {
+  margin-top: 0;
+}
 
 /* Adjacent headings tighten */
-.md-h + .md-h { margin-top: 6px; }
+.md-h + .md-h {
+  margin-top: 6px;
+}
 
-.md-h1 { font-size: 21px; }
-.md-h2 { font-size: 17px; }
-.md-h3 { font-size: 15px; }
-.md-h4 { font-size: 13.5px; }
+.md-h1 {
+  font-size: 21px;
+}
+.md-h2 {
+  font-size: 17px;
+}
+.md-h3 {
+  font-size: 15px;
+}
+.md-h4 {
+  font-size: 13.5px;
+}
 .md-h5,
-.md-h6 { font-size: 13px; font-weight: 600; }
+.md-h6 {
+  font-size: 13px;
+  font-weight: 600;
+}
 
 /* ── Paragraphs ─────────────────────────────────────────────────────────── */
 
@@ -50,7 +65,9 @@
   color: var(--color-chat-text-secondary);
 }
 
-.md-p:last-child { margin-bottom: 0; }
+.md-p:last-child {
+  margin-bottom: 0;
+}
 
 /* ── Inline code ────────────────────────────────────────────────────────── */
 
@@ -59,7 +76,7 @@
   font-size: 11.5px;
   padding: 1px 5px 2px;
   border-radius: 5px;
-  background: rgba(170, 134, 104, 0.10);
+  background: rgba(170, 134, 104, 0.1);
   color: var(--color-chat-text-title);
   letter-spacing: 0;
   line-height: 1;
@@ -72,14 +89,16 @@
   margin: 12px 0;
   border-radius: 10px;
   background: rgba(22, 18, 14, 0.05);
-  border: 1px solid rgba(170, 134, 104, 0.10);
+  border: 1px solid rgba(170, 134, 104, 0.1);
   padding: 12px 16px;
   overflow-x: auto;
   max-height: 500px;
   overflow-y: auto;
 }
 
-.md-pre:last-child { margin-bottom: 0; }
+.md-pre:last-child {
+  margin-bottom: 0;
+}
 
 .md-pre code {
   font-family: var(--font-mono, ui-monospace, 'Cascadia Code', monospace);
@@ -99,10 +118,12 @@
   border-radius: 10px;
   overflow: hidden;
   max-width: 800px;
-  border: 1px solid rgba(170, 134, 104, 0.10);
+  border: 1px solid rgba(170, 134, 104, 0.1);
 }
 
-.md-codeblock:last-child { margin-bottom: 0; }
+.md-codeblock:last-child {
+  margin-bottom: 0;
+}
 
 .md-codeblock__header {
   display: flex;
@@ -177,7 +198,9 @@
   margin: 0;
 }
 
-.md-blockquote:last-child { margin-bottom: 0; }
+.md-blockquote:last-child {
+  margin-bottom: 0;
+}
 
 /* ── Lists ──────────────────────────────────────────────────────────────── */
 
@@ -191,11 +214,15 @@
 }
 
 .md-ul:last-child,
-.md-ol:last-child { margin-bottom: 0; }
+.md-ol:last-child {
+  margin-bottom: 0;
+}
 
 /* Unordered — custom bullet */
 
-.md-ul { list-style: none; }
+.md-ul {
+  list-style: none;
+}
 
 .md-ul .md-li {
   display: flex;

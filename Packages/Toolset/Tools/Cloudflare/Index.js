@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createCloudflareToolHandlers({ rootDirectory }),
-      ...createCloudflareConnectorToolHandlers({ rootDirectory })
+      ...createCloudflareConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildCloudflarePromptSection()]
+    promptSections: [buildCloudflarePromptSection()],
   };
 }
 

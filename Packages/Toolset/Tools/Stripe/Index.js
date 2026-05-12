@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createStripeToolHandlers({ rootDirectory }),
-      ...createStripeConnectorToolHandlers({ rootDirectory })
+      ...createStripeConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildStripePromptSection()]
+    promptSections: [buildStripePromptSection()],
   };
 }
 

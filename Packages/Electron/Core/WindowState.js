@@ -24,7 +24,7 @@ function clampBounds(rawBounds = {}, options = {}) {
     x: Math.round(isFiniteNumber(rawBounds.x) ? rawBounds.x : primaryWorkArea.x),
     y: Math.round(isFiniteNumber(rawBounds.y) ? rawBounds.y : primaryWorkArea.y),
     width,
-    height
+    height,
   };
   const display = screen.getDisplayMatching(probe);
   const workArea = display?.workArea ?? primaryWorkArea;
@@ -41,7 +41,7 @@ function clampBounds(rawBounds = {}, options = {}) {
       : centeredX,
     y: isFiniteNumber(rawBounds.y)
       ? Math.min(Math.max(Math.round(rawBounds.y), workArea.y), maxY)
-      : centeredY
+      : centeredY,
   };
 }
 
@@ -49,7 +49,7 @@ function createDefaultState(options = {}) {
   return {
     bounds: clampBounds(options.defaultBounds ?? DEFAULT_BOUNDS, options),
     isMaximized: true,
-    isFullScreen: false
+    isFullScreen: false,
   };
 }
 
@@ -61,7 +61,7 @@ function normalizeState(candidate, options = {}) {
   return {
     bounds: clampBounds(candidate.bounds ?? {}, options),
     isMaximized: candidate.isMaximized === true,
-    isFullScreen: candidate.isFullScreen === true
+    isFullScreen: candidate.isFullScreen === true,
   };
 }
 
@@ -97,7 +97,7 @@ async function writeWindowState(rootDirectory, browserWindow, options = {}) {
   const nextWindowState = {
     bounds: getPersistableBounds(browserWindow, options),
     isMaximized: browserWindow.isMaximized(),
-    isFullScreen: browserWindow.isFullScreen()
+    isFullScreen: browserWindow.isFullScreen(),
   };
 
   const userState = await readUserState(rootDirectory);

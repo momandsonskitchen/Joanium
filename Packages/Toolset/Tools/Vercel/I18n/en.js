@@ -2,11 +2,12 @@ const vercelStrings = {
   connector: {
     id: 'vercel',
     label: 'Vercel',
-    description: 'Projects, deployments, domains, teams, and environment variables through the Vercel API.',
+    description:
+      'Projects, deployments, domains, teams, and environment variables through the Vercel API.',
     credentialLabel: 'Personal access token',
     credentialPlaceholder: 'Vercel access token',
     credentialKey: 'token',
-    optional: false
+    optional: false,
   },
   tools: [
     {
@@ -15,8 +16,12 @@ const vercelStrings = {
       category: 'vercel',
       parameters: {
         team_id: { type: 'string', required: false, description: 'Optional Vercel team ID.' },
-        limit: { type: 'number', required: false, description: 'Maximum projects, default 20, max 50.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum projects, default 20, max 50.',
+        },
+      },
     },
     {
       name: 'vercel_get_project',
@@ -24,18 +29,26 @@ const vercelStrings = {
       category: 'vercel',
       parameters: {
         project_id: { type: 'string', required: true, description: 'Project ID or name.' },
-        team_id: { type: 'string', required: false, description: 'Optional Vercel team ID.' }
-      }
+        team_id: { type: 'string', required: false, description: 'Optional Vercel team ID.' },
+      },
     },
     {
       name: 'vercel_list_deployments',
       description: 'List Vercel deployments.',
       category: 'vercel',
       parameters: {
-        project_id: { type: 'string', required: false, description: 'Optional project ID or name.' },
+        project_id: {
+          type: 'string',
+          required: false,
+          description: 'Optional project ID or name.',
+        },
         team_id: { type: 'string', required: false, description: 'Optional Vercel team ID.' },
-        limit: { type: 'number', required: false, description: 'Maximum deployments, default 10, max 50.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum deployments, default 10, max 50.',
+        },
+      },
     },
     {
       name: 'vercel_get_deployment',
@@ -43,8 +56,8 @@ const vercelStrings = {
       category: 'vercel',
       parameters: {
         deployment_id: { type: 'string', required: true, description: 'Deployment ID or URL.' },
-        team_id: { type: 'string', required: false, description: 'Optional Vercel team ID.' }
-      }
+        team_id: { type: 'string', required: false, description: 'Optional Vercel team ID.' },
+      },
     },
     {
       name: 'vercel_list_domains',
@@ -52,10 +65,14 @@ const vercelStrings = {
       category: 'vercel',
       parameters: {
         team_id: { type: 'string', required: false, description: 'Optional Vercel team ID.' },
-        limit: { type: 'number', required: false, description: 'Maximum domains, default 20, max 50.' }
-      }
-    }
-  ]
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum domains, default 20, max 50.',
+        },
+      },
+    },
+  ],
 };
 
 export default vercelStrings;

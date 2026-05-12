@@ -10,7 +10,7 @@ function normalizeConnector(connector = {}) {
   return {
     optional: false,
     credentialKey: 'token',
-    ...connector
+    ...connector,
   };
 }
 
@@ -18,15 +18,14 @@ function normalizeToolPackage(toolPackage = {}) {
   return {
     id: toolPackage.id ?? '',
     toolDefinitions: Array.isArray(toolPackage.toolDefinitions) ? toolPackage.toolDefinitions : [],
-    toolHandlers: toolPackage.toolHandlers && typeof toolPackage.toolHandlers === 'object'
-      ? toolPackage.toolHandlers
-      : {},
-    promptSections: Array.isArray(toolPackage.promptSections)
-      ? toolPackage.promptSections
-      : [],
+    toolHandlers:
+      toolPackage.toolHandlers && typeof toolPackage.toolHandlers === 'object'
+        ? toolPackage.toolHandlers
+        : {},
+    promptSections: Array.isArray(toolPackage.promptSections) ? toolPackage.promptSections : [],
     connectors: Array.isArray(toolPackage.connectors)
       ? toolPackage.connectors.map(normalizeConnector).filter(Boolean)
-      : []
+      : [],
   };
 }
 
@@ -39,7 +38,9 @@ export async function discoverToolPackages({ rootDirectory } = {}) {
     if (NON_PACKAGE_DIRECTORIES.has(entry.name)) continue;
 
     const packageIndex = path.join(toolsDirectory, entry.name, 'Index.js');
-    const hasIndex = await access(packageIndex).then(() => true).catch(() => false);
+    const hasIndex = await access(packageIndex)
+      .then(() => true)
+      .catch(() => false);
     if (!hasIndex) continue;
 
     const imported = await import(pathToFileURL(packageIndex).href).catch(() => null);
@@ -53,10 +54,13 @@ export async function discoverToolPackages({ rootDirectory } = {}) {
     packages,
     toolDefinitions: packages.flatMap((toolPackage) => toolPackage.toolDefinitions),
     promptSections: packages.flatMap((toolPackage) => toolPackage.promptSections),
-    toolHandlers: packages.reduce((handlers, toolPackage) => ({
-      ...handlers,
-      ...toolPackage.toolHandlers
-    }), {}),
-    connectors: packages.flatMap((toolPackage) => toolPackage.connectors)
+    toolHandlers: packages.reduce(
+      (handlers, toolPackage) => ({
+        ...handlers,
+        ...toolPackage.toolHandlers,
+      }),
+      {},
+    ),
+    connectors: packages.flatMap((toolPackage) => toolPackage.connectors),
   };
 }

@@ -37,7 +37,7 @@ function sanitizeEnv(value) {
   return Object.fromEntries(
     Object.entries(value)
       .map(([key, val]) => [sanitizeString(key), sanitizeString(val)])
-      .filter(([key]) => key)
+      .filter(([key]) => key),
   );
 }
 
@@ -55,7 +55,7 @@ export function sanitizeServerConfig(candidate = {}) {
     command: transport === 'stdio' ? sanitizeString(candidate.command) : '',
     args: transport === 'stdio' ? sanitizeArgs(candidate.args) : [],
     env: transport === 'stdio' ? sanitizeEnv(candidate.env) : {},
-    url: transport === 'http' ? sanitizeString(candidate.url) : ''
+    url: transport === 'http' ? sanitizeString(candidate.url) : '',
   };
 }
 
@@ -78,7 +78,7 @@ export function createMCPStateManager({ rootDirectory }) {
     await writeFile(
       serversFilePath,
       `${JSON.stringify({ servers: safeServers }, null, 2)}\n`,
-      'utf8'
+      'utf8',
     );
     return safeServers;
   }
@@ -118,6 +118,6 @@ export function createMCPStateManager({ rootDirectory }) {
       server.enabled = Boolean(enabled);
       await writeServers(servers);
       return server;
-    }
+    },
   };
 }

@@ -6,7 +6,7 @@ const CHANNEL_LABELS = Object.freeze({
   telegram: 'Telegram',
   whatsapp: 'WhatsApp',
   discord: 'Discord',
-  slack: 'Slack'
+  slack: 'Slack',
 });
 
 const RECOVERY_DELAYS = Object.freeze([1000, 3000, 5000, 10000, 15000, 30000]);
@@ -18,7 +18,7 @@ const RUNTIME_ERROR_PATTERNS = Object.freeze([
   /econnreset/i,
   /socket hang up/i,
   /etimedout/i,
-  /session closed/i
+  /session closed/i,
 ]);
 
 function splitIntoChunks(value, maxLength) {
@@ -62,13 +62,14 @@ function sanitizeRequestTarget(input) {
 }
 
 function attachRequestContext(error, input, init) {
-  const wrapped = error && typeof error === 'object'
-    ? error
-    : new Error(error instanceof Error ? error.message : String(error ?? 'Unknown error'));
+  const wrapped =
+    error && typeof error === 'object'
+      ? error
+      : new Error(error instanceof Error ? error.message : String(error ?? 'Unknown error'));
 
   wrapped.channelRequest = {
     method: String(init?.method ?? 'GET').toUpperCase(),
-    target: sanitizeRequestTarget(input)
+    target: sanitizeRequestTarget(input),
   };
   return wrapped;
 }
@@ -119,7 +120,7 @@ async function sendTelegram(botToken, chatId, text) {
     const response = await channelFetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: chunk })
+      body: JSON.stringify({ chat_id: chatId, text: chunk }),
     });
 
     if (!response.ok) {
@@ -139,10 +140,10 @@ async function sendWhatsApp(config, to, text) {
         method: 'POST',
         headers: {
           Authorization: auth,
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body
-      }
+        body,
+      },
     );
 
     if (!response.ok) {
@@ -154,14 +155,17 @@ async function sendWhatsApp(config, to, text) {
 
 async function sendDiscord(botToken, channelId, text) {
   for (const chunk of splitIntoChunks(text, 1990)) {
-    const response = await channelFetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bot ${botToken}`
+    const response = await channelFetch(
+      `https://discord.com/api/v10/channels/${channelId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bot ${botToken}`,
+        },
+        body: JSON.stringify({ content: chunk }),
       },
-      body: JSON.stringify({ content: chunk })
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
@@ -176,9 +180,9 @@ async function sendSlack(botToken, channelId, text) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${botToken}`
+        Authorization: `Bearer ${botToken}`,
       },
-      body: JSON.stringify({ channel: channelId, text: chunk })
+      body: JSON.stringify({ channel: channelId, text: chunk }),
     });
 
     if (!response.ok) {
@@ -253,7 +257,7 @@ export function createChannelRuntime({ channelStateManager }) {
 
     if (attempts) {
       console.info(
-        `[Channels] ${label} recovered after ${attempts} restart attempt${attempts === 1 ? '' : 's'}${lastError ? `. Last error: ${lastError}` : ''}`
+        `[Channels] ${label} recovered after ${attempts} restart attempt${attempts === 1 ? '' : 's'}${lastError ? `. Last error: ${lastError}` : ''}`,
       );
     }
   }
@@ -268,7 +272,10 @@ export function createChannelRuntime({ channelStateManager }) {
     state.timer = setTimeout(() => {
       state.timer = null;
       restartChannel(channelName).catch((error) => {
-        console.error(`[Channels] ${CHANNEL_LABELS[channelName]} restart failed:`, getErrorMessage(error));
+        console.error(
+          `[Channels] ${CHANNEL_LABELS[channelName]} restart failed:`,
+          getErrorMessage(error),
+        );
         scheduleRecovery(channelName);
       });
     }, delay);
@@ -332,7 +339,7 @@ export function createChannelRuntime({ channelStateManager }) {
         reject: (error) => {
           clearTimeout(timer);
           reject(error);
-        }
+        },
       });
 
       window.webContents.send('channels:incoming', {
@@ -340,7 +347,7 @@ export function createChannelRuntime({ channelStateManager }) {
         channelName,
         from,
         text,
-        metadata
+        metadata,
       });
     });
   }
@@ -360,9 +367,12 @@ export function createChannelRuntime({ channelStateManager }) {
       try {
         const baseUrl = `https://api.telegram.org/bot${config.botToken}`;
         const offset = (config.lastUpdateId ?? 0) + 1;
-        const response = await channelFetch(`${baseUrl}/getUpdates?offset=${offset}&timeout=2&limit=10`, {
-          signal: abortController.signal
-        });
+        const response = await channelFetch(
+          `${baseUrl}/getUpdates?offset=${offset}&timeout=2&limit=10`,
+          {
+            signal: abortController.signal,
+          },
+        );
 
         if (!response.ok) {
           throw new Error(`Telegram getUpdates HTTP ${response.status}`);
@@ -380,7 +390,7 @@ export function createChannelRuntime({ channelStateManager }) {
             chatId: update.message.chat.id,
             text: update.message.text,
             from: update.message.from?.first_name ?? 'User',
-            receivedAt: toIso(update.message?.date ? update.message.date * 1000 : null)
+            receivedAt: toIso(update.message?.date ? update.message.date * 1000 : null),
           }));
       } finally {
         clearTimeout(timeout);
@@ -404,11 +414,12 @@ export function createChannelRuntime({ channelStateManager }) {
       void (async () => {
         let typingInterval = null;
         try {
-          const sendTyping = () => channelFetch(`https://api.telegram.org/bot${config.botToken}/sendChatAction`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ chat_id: message.chatId, action: 'typing' })
-          }).catch(() => {});
+          const sendTyping = () =>
+            channelFetch(`https://api.telegram.org/bot${config.botToken}/sendChatAction`, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ chat_id: message.chatId, action: 'typing' }),
+            }).catch(() => {});
 
           void sendTyping();
           typingInterval = setInterval(sendTyping, 4500);
@@ -417,7 +428,7 @@ export function createChannelRuntime({ channelStateManager }) {
             targetId: String(message.chatId),
             conversationId: String(message.chatId),
             receivedAt: message.receivedAt,
-            systemPrompt: config.systemPrompt ?? ''
+            systemPrompt: config.systemPrompt ?? '',
           });
 
           clearInterval(typingInterval);
@@ -464,7 +475,7 @@ export function createChannelRuntime({ channelStateManager }) {
           from: message.from,
           to: message.to,
           text: message.body,
-          receivedAt: toIso(message.date_created)
+          receivedAt: toIso(message.date_created),
         });
       }
 
@@ -488,7 +499,7 @@ export function createChannelRuntime({ channelStateManager }) {
             targetId: message.to,
             conversationId: message.from,
             receivedAt: message.receivedAt,
-            systemPrompt: config.systemPrompt ?? ''
+            systemPrompt: config.systemPrompt ?? '',
           });
           await sendWhatsApp(config, message.from, reply);
         } catch (error) {
@@ -509,12 +520,12 @@ export function createChannelRuntime({ channelStateManager }) {
     try {
       const url = `https://discord.com/api/v10/channels/${config.channelId}/messages?limit=10${config.lastMessageId ? `&after=${config.lastMessageId}` : ''}`;
       const response = await channelFetch(url, {
-        headers: { Authorization: `Bot ${config.botToken}` }
+        headers: { Authorization: `Bot ${config.botToken}` },
       });
 
       if (response.status === 403) {
         throw new Error(
-          `Discord 403: Bot cannot access channel ${config.channelId}. Make sure the bot is invited and has View Channel, Read Message History, and Send Messages permissions.`
+          `Discord 403: Bot cannot access channel ${config.channelId}. Make sure the bot is invited and has View Channel, Read Message History, and Send Messages permissions.`,
         );
       }
 
@@ -529,15 +540,15 @@ export function createChannelRuntime({ channelStateManager }) {
       const data = await response.json();
       messages = Array.isArray(data)
         ? data
-          .filter((message) => !message.author?.bot && message.content?.trim())
-          .map((message) => ({
-            id: message.id,
-            channelId: message.channel_id,
-            text: message.content,
-            from: message.author?.username ?? 'User',
-            receivedAt: toIso(message.timestamp)
-          }))
-          .reverse()
+            .filter((message) => !message.author?.bot && message.content?.trim())
+            .map((message) => ({
+              id: message.id,
+              channelId: message.channel_id,
+              text: message.content,
+              from: message.author?.username ?? 'User',
+              receivedAt: toIso(message.timestamp),
+            }))
+            .reverse()
         : [];
     } catch (error) {
       handlePollFailure('discord', error);
@@ -556,10 +567,11 @@ export function createChannelRuntime({ channelStateManager }) {
       void (async () => {
         let typingInterval = null;
         try {
-          const sendTyping = () => channelFetch(`https://discord.com/api/v10/channels/${message.channelId}/typing`, {
-            method: 'POST',
-            headers: { Authorization: `Bot ${config.botToken}` }
-          }).catch(() => {});
+          const sendTyping = () =>
+            channelFetch(`https://discord.com/api/v10/channels/${message.channelId}/typing`, {
+              method: 'POST',
+              headers: { Authorization: `Bot ${config.botToken}` },
+            }).catch(() => {});
 
           void sendTyping();
           typingInterval = setInterval(sendTyping, 9000);
@@ -568,7 +580,7 @@ export function createChannelRuntime({ channelStateManager }) {
             targetId: message.channelId,
             conversationId: message.channelId,
             receivedAt: message.receivedAt,
-            systemPrompt: config.systemPrompt ?? ''
+            systemPrompt: config.systemPrompt ?? '',
           });
 
           clearInterval(typingInterval);
@@ -596,7 +608,7 @@ export function createChannelRuntime({ channelStateManager }) {
 
       if (!botUserId) {
         const authResponse = await channelFetch('https://slack.com/api/auth.test', {
-          headers: { Authorization: `Bearer ${config.botToken}` }
+          headers: { Authorization: `Bearer ${config.botToken}` },
         });
         const authData = await authResponse.json().catch(() => ({}));
         if (authData.ok) {
@@ -606,7 +618,7 @@ export function createChannelRuntime({ channelStateManager }) {
 
       const url = `https://slack.com/api/conversations.history?channel=${config.channelId}&limit=10${config.lastMessageTs ? `&oldest=${config.lastMessageTs}` : ''}`;
       const response = await channelFetch(url, {
-        headers: { Authorization: `Bearer ${config.botToken}` }
+        headers: { Authorization: `Bearer ${config.botToken}` },
       });
 
       if (!response.ok) {
@@ -617,13 +629,13 @@ export function createChannelRuntime({ channelStateManager }) {
       if (!data.ok) {
         if (data.error === 'channel_not_found') {
           throw new Error(
-            `Slack channel_not_found: Channel ID "${config.channelId}" is invalid or the bot cannot see it.`
+            `Slack channel_not_found: Channel ID "${config.channelId}" is invalid or the bot cannot see it.`,
           );
         }
 
         if (data.error === 'not_in_channel') {
           throw new Error(
-            `Slack not_in_channel: Invite the bot to channel ${config.channelId} before enabling replies.`
+            `Slack not_in_channel: Invite the bot to channel ${config.channelId} before enabling replies.`,
           );
         }
 
@@ -631,19 +643,20 @@ export function createChannelRuntime({ channelStateManager }) {
       }
 
       messages = (data.messages ?? [])
-        .filter((message) => (
-          message.type === 'message'
-          && !message.subtype
-          && !message.bot_id
-          && (!botUserId || message.user !== botUserId)
-          && message.text?.trim()
-        ))
+        .filter(
+          (message) =>
+            message.type === 'message' &&
+            !message.subtype &&
+            !message.bot_id &&
+            (!botUserId || message.user !== botUserId) &&
+            message.text?.trim(),
+        )
         .map((message) => ({
           ts: message.ts,
           channelId: config.channelId,
           text: message.text,
           from: message.user || 'User',
-          receivedAt: toIso(Number.parseFloat(message.ts) * 1000)
+          receivedAt: toIso(Number.parseFloat(message.ts) * 1000),
         }))
         .reverse();
     } catch (error) {
@@ -667,7 +680,7 @@ export function createChannelRuntime({ channelStateManager }) {
             targetId: message.channelId,
             conversationId: message.channelId,
             receivedAt: message.receivedAt,
-            systemPrompt: config.systemPrompt ?? ''
+            systemPrompt: config.systemPrompt ?? '',
           });
           await sendSlack(config.botToken, config.channelId, reply);
         } catch (error) {
@@ -749,15 +762,18 @@ export function createChannelRuntime({ channelStateManager }) {
       }
       return {
         username: data.result?.username ?? '',
-        firstName: data.result?.first_name ?? ''
+        firstName: data.result?.first_name ?? '',
       };
     },
 
     async validateWhatsApp(accountSid, authToken) {
       const auth = `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`;
-      const response = await channelFetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}.json`, {
-        headers: { Authorization: auth }
-      });
+      const response = await channelFetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${accountSid}.json`,
+        {
+          headers: { Authorization: auth },
+        },
+      );
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message ?? 'Invalid Twilio credentials.');
@@ -767,7 +783,7 @@ export function createChannelRuntime({ channelStateManager }) {
 
     async validateDiscord(botToken) {
       const response = await channelFetch('https://discord.com/api/v10/users/@me', {
-        headers: { Authorization: `Bot ${botToken}` }
+        headers: { Authorization: `Bot ${botToken}` },
       });
       if (!response.ok) {
         throw new Error('Invalid Discord bot token.');
@@ -778,12 +794,12 @@ export function createChannelRuntime({ channelStateManager }) {
 
     async validateDiscordChannel(botToken, channelId) {
       const response = await channelFetch(`https://discord.com/api/v10/channels/${channelId}`, {
-        headers: { Authorization: `Bot ${botToken}` }
+        headers: { Authorization: `Bot ${botToken}` },
       });
 
       if (response.status === 403) {
         throw new Error(
-          `Bot cannot access channel ${channelId}. Invite the bot and grant View Channel, Read Message History, and Send Messages permissions.`
+          `Bot cannot access channel ${channelId}. Invite the bot and grant View Channel, Read Message History, and Send Messages permissions.`,
         );
       }
 
@@ -805,7 +821,7 @@ export function createChannelRuntime({ channelStateManager }) {
 
     async validateSlack(botToken) {
       const response = await channelFetch('https://slack.com/api/auth.test', {
-        headers: { Authorization: `Bearer ${botToken}` }
+        headers: { Authorization: `Bearer ${botToken}` },
       });
       const data = await response.json();
       if (!response.ok || !data.ok) {
@@ -813,14 +829,14 @@ export function createChannelRuntime({ channelStateManager }) {
       }
       return {
         name: data.user ?? '',
-        team: data.team ?? ''
+        team: data.team ?? '',
       };
     },
 
     async validateSlackChannel(botToken, channelId) {
       const response = await channelFetch(
         `https://slack.com/api/conversations.info?channel=${encodeURIComponent(channelId)}`,
-        { headers: { Authorization: `Bearer ${botToken}` } }
+        { headers: { Authorization: `Bearer ${botToken}` } },
       );
 
       if (!response.ok) {
@@ -831,7 +847,7 @@ export function createChannelRuntime({ channelStateManager }) {
       if (!data.ok) {
         if (data.error === 'channel_not_found') {
           throw new Error(
-            'Channel not found. Make sure the Channel ID is correct and starts with C for public channels.'
+            'Channel not found. Make sure the Channel ID is correct and starts with C for public channels.',
           );
         }
 
@@ -848,8 +864,8 @@ export function createChannelRuntime({ channelStateManager }) {
 
       return {
         channelName: data.channel?.name ?? channelId,
-        isMember: data.channel?.is_member ?? true
+        isMember: data.channel?.is_member ?? true,
       };
-    }
+    },
   };
 }

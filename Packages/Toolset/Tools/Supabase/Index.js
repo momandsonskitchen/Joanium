@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createSupabaseToolHandlers({ rootDirectory }),
-      ...createSupabaseConnectorToolHandlers({ rootDirectory })
+      ...createSupabaseConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildSupabasePromptSection()]
+    promptSections: [buildSupabasePromptSection()],
   };
 }
 

@@ -18,12 +18,11 @@
  * @returns {{ dispose(): void }} Call dispose() to remove the scrollbar and
  *                                clean up all listeners / observers.
  */
-export function attachCustomScrollbar(container, scroller, {
-  top    = 12,
-  bottom = 12,
-  right  = 8,
-  minThumb = 32,
-} = {}) {
+export function attachCustomScrollbar(
+  container,
+  scroller,
+  { top = 12, bottom = 12, right = 8, minThumb = 32 } = {},
+) {
   /* ── ensure container is a positioning context ── */
   if (getComputedStyle(container).position === 'static') {
     container.style.position = 'relative';
@@ -58,12 +57,12 @@ export function attachCustomScrollbar(container, scroller, {
 
     track.style.display = '';
 
-    const trackH  = track.clientHeight;
-    const thumbH  = Math.max((scroller.clientHeight / scroller.scrollHeight) * trackH, minThumb);
+    const trackH = track.clientHeight;
+    const thumbH = Math.max((scroller.clientHeight / scroller.scrollHeight) * trackH, minThumb);
     const maxOffset = trackH - thumbH;
-    const progress  = scroller.scrollTop / scrollable;
+    const progress = scroller.scrollTop / scrollable;
 
-    thumb.style.height    = `${thumbH}px`;
+    thumb.style.height = `${thumbH}px`;
     thumb.style.transform = `translateY(${progress * maxOffset}px)`;
   }
 
@@ -84,15 +83,15 @@ export function attachCustomScrollbar(container, scroller, {
   container.addEventListener('wheel', onWheel, { passive: false });
 
   /* ── drag-to-scroll ── */
-  let dragging        = false;
-  let dragStartY      = 0;
+  let dragging = false;
+  let dragStartY = 0;
   let dragStartScroll = 0;
 
   thumb.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    dragging        = true;
-    dragStartY      = e.clientY;
+    dragging = true;
+    dragStartY = e.clientY;
     dragStartScroll = scroller.scrollTop;
     thumb.classList.add('is-dragging');
     thumb.setPointerCapture(e.pointerId);
@@ -101,7 +100,7 @@ export function attachCustomScrollbar(container, scroller, {
   thumb.addEventListener('pointermove', (e) => {
     if (!dragging) return;
     const scrollable = scroller.scrollHeight - scroller.clientHeight;
-    const maxOffset  = track.clientHeight - thumb.offsetHeight;
+    const maxOffset = track.clientHeight - thumb.offsetHeight;
     if (maxOffset <= 0) return;
     const delta = e.clientY - dragStartY;
     scroller.scrollTop = dragStartScroll + (delta / maxOffset) * scrollable;
@@ -111,7 +110,7 @@ export function attachCustomScrollbar(container, scroller, {
     dragging = false;
     thumb.classList.remove('is-dragging');
   };
-  thumb.addEventListener('pointerup',     stopDrag);
+  thumb.addEventListener('pointerup', stopDrag);
   thumb.addEventListener('pointercancel', stopDrag);
 
   /* ── passive scroll listener (does NOT block scroll thread) ── */

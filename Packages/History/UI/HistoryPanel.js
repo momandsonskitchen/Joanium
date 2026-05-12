@@ -11,22 +11,22 @@ import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 function getSessionGroup(isoString) {
   const date = new Date(isoString);
-  const now  = new Date();
-  const startOfToday     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay       = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-  if (startOfDay.getTime() === startOfToday.getTime())     return 'today';
+  if (startOfDay.getTime() === startOfToday.getTime()) return 'today';
   if (startOfDay.getTime() === startOfYesterday.getTime()) return 'yesterday';
   return 'earlier';
 }
 
 function formatSessionTime(isoString) {
   const date = new Date(isoString);
-  const now  = new Date();
-  const startOfToday     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay       = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
   if (startOfDay.getTime() >= startOfToday.getTime()) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -56,20 +56,17 @@ function formatSessionTime(isoString) {
 //   populateList() — re-fetches and re-renders session cards into the panel
 // ---------------------------------------------------------------------------
 
-export function createHistoryPanel(strings, {
-  onNewChat,
-  onLoadSession,
-  getCurrentSessionId,
-  getActiveProject
-} = {}) {
-
+export function createHistoryPanel(
+  strings,
+  { onNewChat, onLoadSession, getCurrentSessionId, getActiveProject } = {},
+) {
   // ── Session card — inline rename helper ────────────────────────────────
 
   function startInlineRename(session, titleEl, contentEl, query) {
     const input = document.createElement('input');
     input.className = 'chat-history__card-title-input';
-    input.type      = 'text';
-    input.value     = session.title || '';
+    input.type = 'text';
+    input.value = session.title || '';
     input.style.webkitAppRegion = 'no-drag';
     input.style.webkitUserSelect = 'text';
     input.style.userSelect = 'text';
@@ -84,12 +81,7 @@ export function createHistoryPanel(strings, {
       const newTitle = input.value.trim();
       if (save && newTitle && newTitle !== session.title) {
         try {
-          await invokeIpc(
-            'history:rename-session',
-            session.id,
-            newTitle,
-            getActiveProject?.()?.id
-          );
+          await invokeIpc('history:rename-session', session.id, newTitle, getActiveProject?.()?.id);
         } catch (err) {
           console.error('[Joanium] Failed to rename session:', err);
         }
@@ -100,8 +92,14 @@ export function createHistoryPanel(strings, {
     const blurHandler = () => void finish(true);
     input.addEventListener('blur', blurHandler);
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter')  { e.preventDefault(); void finish(true); }
-      if (e.key === 'Escape') { e.preventDefault(); void finish(false); }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        void finish(true);
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        void finish(false);
+      }
     });
 
     titleEl.replaceWith(input);
@@ -116,15 +114,22 @@ export function createHistoryPanel(strings, {
 
     // Body — main click target
     const body = createElement('button', 'chat-history__card-body');
-    body.type  = 'button';
+    body.type = 'button';
 
     const msgCount = session.messageCount ?? 0;
-    const msgLabel = msgCount === 1
-      ? strings.oneMessage
-      : formatText(strings.messages, { count: msgCount });
+    const msgLabel =
+      msgCount === 1 ? strings.oneMessage : formatText(strings.messages, { count: msgCount });
 
-    const titleEl = createElement('div', 'chat-history__card-title', session.title || strings.appName);
-    const metaEl  = createElement('div', 'chat-history__card-meta', `${msgLabel} · ${formatSessionTime(session.updatedAt)}`);
+    const titleEl = createElement(
+      'div',
+      'chat-history__card-title',
+      session.title || strings.appName,
+    );
+    const metaEl = createElement(
+      'div',
+      'chat-history__card-meta',
+      `${msgLabel} · ${formatSessionTime(session.updatedAt)}`,
+    );
     body.append(titleEl, metaEl);
     body.addEventListener('click', () => void onLoadSession?.(session.id));
 
@@ -132,8 +137,11 @@ export function createHistoryPanel(strings, {
     const actions = createElement('div', 'chat-history__card-actions');
 
     // Pin / Unpin
-    const pinBtn  = createElement('button', `chat-history__card-btn${session.pinned ? ' chat-history__card-btn--pinned' : ''}`);
-    pinBtn.type   = 'button';
+    const pinBtn = createElement(
+      'button',
+      `chat-history__card-btn${session.pinned ? ' chat-history__card-btn--pinned' : ''}`,
+    );
+    pinBtn.type = 'button';
     pinBtn.setAttribute('aria-label', session.pinned ? strings.unpin : strings.pin);
     pinBtn.append(createIcon(session.pinned ? 'pinFill' : 'pin', 'chat-history__card-btn-icon'));
     pinBtn.addEventListener('click', async (e) => {
@@ -143,7 +151,7 @@ export function createHistoryPanel(strings, {
           'history:pin-session',
           session.id,
           !session.pinned,
-          getActiveProject?.()?.id
+          getActiveProject?.()?.id,
         );
       } catch (err) {
         console.error('[Joanium] Failed to pin session:', err);
@@ -152,8 +160,8 @@ export function createHistoryPanel(strings, {
     });
 
     // Rename
-    const renameBtn  = createElement('button', 'chat-history__card-btn');
-    renameBtn.type   = 'button';
+    const renameBtn = createElement('button', 'chat-history__card-btn');
+    renameBtn.type = 'button';
     renameBtn.setAttribute('aria-label', strings.rename);
     renameBtn.append(createIcon('pencil', 'chat-history__card-btn-icon'));
     renameBtn.addEventListener('click', (e) => {
@@ -162,18 +170,17 @@ export function createHistoryPanel(strings, {
     });
 
     // Delete
-    const deleteBtn  = createElement('button', 'chat-history__card-btn chat-history__card-btn--danger');
-    deleteBtn.type   = 'button';
+    const deleteBtn = createElement(
+      'button',
+      'chat-history__card-btn chat-history__card-btn--danger',
+    );
+    deleteBtn.type = 'button';
     deleteBtn.setAttribute('aria-label', strings.deleteChat);
     deleteBtn.append(createIcon('trash', 'chat-history__card-btn-icon'));
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {
-        await invokeIpc(
-          'history:delete-session',
-          session.id,
-          getActiveProject?.()?.id
-        );
+        await invokeIpc('history:delete-session', session.id, getActiveProject?.()?.id);
         // If the deleted session is currently open, clear the conversation
         if (session.id === getCurrentSessionId?.()) {
           onNewChat?.();
@@ -203,7 +210,11 @@ export function createHistoryPanel(strings, {
     // Filter by query — title match, case-insensitive
     const q = collapseWhitespace(query).toLowerCase();
     const sessions = q
-      ? allSessions.filter((s) => collapseWhitespace(s.title ?? '').toLowerCase().includes(q))
+      ? allSessions.filter((s) =>
+          collapseWhitespace(s.title ?? '')
+            .toLowerCase()
+            .includes(q),
+        )
       : allSessions;
 
     contentEl.replaceChildren();
@@ -212,7 +223,7 @@ export function createHistoryPanel(strings, {
       const empty = createElement('div', 'chat-history__empty');
       empty.append(
         createElement('p', 'chat-history__empty-title', strings.empty),
-        createElement('p', 'chat-history__empty-hint',  strings.emptyHint)
+        createElement('p', 'chat-history__empty-hint', strings.emptyHint),
       );
       contentEl.append(empty);
       return;
@@ -222,7 +233,7 @@ export function createHistoryPanel(strings, {
       const empty = createElement('div', 'chat-history__empty');
       empty.append(
         createElement('p', 'chat-history__empty-title', strings.noResults),
-        createElement('p', 'chat-history__empty-hint',  strings.noResultsHint)
+        createElement('p', 'chat-history__empty-hint', strings.noResultsHint),
       );
       contentEl.append(empty);
       return;
@@ -239,10 +250,10 @@ export function createHistoryPanel(strings, {
     }
 
     const groupLabels = {
-      pinned:    strings.pinned,
-      today:     strings.today,
+      pinned: strings.pinned,
+      today: strings.today,
       yesterday: strings.yesterday,
-      earlier:   strings.earlier
+      earlier: strings.earlier,
     };
 
     for (const [groupKey, groupSessions] of Object.entries(groups)) {
@@ -269,17 +280,20 @@ export function createHistoryPanel(strings, {
     const header = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
 
     // Search bar + New Chat button row
-    const searchWrap  = createElement('div', 'chat-history__search-wrap');
+    const searchWrap = createElement('div', 'chat-history__search-wrap');
     const searchInner = createElement('div', 'chat-history__search-inner');
 
     const newBtn = createElement('button', 'chat-history__new-btn');
-    newBtn.type  = 'button';
-    newBtn.append(createIcon('tabChat', 'chat-history__new-icon'), createElement('span', 'chat-history__new-label', strings.newChat));
+    newBtn.type = 'button';
+    newBtn.append(
+      createIcon('tabChat', 'chat-history__new-icon'),
+      createElement('span', 'chat-history__new-label', strings.newChat),
+    );
     newBtn.addEventListener('click', () => onNewChat?.());
 
     const search = createSearchBar({
       placeholder: strings.search,
-      onChange:    (value) => void populateList(contentEl, value.trim())
+      onChange: (value) => void populateList(contentEl, value.trim()),
     });
 
     search.element.style.webkitAppRegion = 'no-drag';
@@ -294,7 +308,7 @@ export function createHistoryPanel(strings, {
 
     // Expose internal refs used by the caller (ChatApp) for refresh + search clear
     panel._contentEl = contentEl;
-    panel._search    = search;
+    panel._search = search;
 
     return panel;
   }

@@ -27,10 +27,7 @@
  */
 function renderInline(text) {
   // 1. Escape HTML special chars
-  let out = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  let out = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   // 2. Inline code  `code`  — must run before bold/italic so backticks win
   out = out.replace(/`([^`]+)`/g, '<code class="md-code-inline">$1</code>');
@@ -133,7 +130,7 @@ function parseBlocks(lines) {
       blocks.push({
         type: 'heading',
         level: headingMatch[1].length,
-        text: headingMatch[2].trim()
+        text: headingMatch[2].trim(),
       });
       i++;
       continue;
@@ -175,11 +172,7 @@ function parseBlocks(lines) {
     // ── Table  | col | col | separator row ─────────────────────────────
     // A table starts with a pipe-leading line whose NEXT line is a GFM
     // separator (only pipes, dashes, colons, and spaces).
-    if (
-      /^\|/.test(line) &&
-      i + 1 < lines.length &&
-      /^\|?[\s|:*-]+\|?\s*$/.test(lines[i + 1])
-    ) {
+    if (/^\|/.test(line) && i + 1 < lines.length && /^\|?[\s|:*-]+\|?\s*$/.test(lines[i + 1])) {
       const headers = parseTableRow(line);
       i++; // consume separator
       const alignments = parseTableAlignments(lines[i]);
@@ -197,11 +190,7 @@ function parseBlocks(lines) {
     // Collect consecutive non-blank lines that aren't block-level openers.
     const paraLines = [];
     const blockOpener = /^(#{1,6}\s|```|>\s?|[-*+]\s|\d+\.\s|(-{3,}|\*{3,}|_{3,})\s*$)/;
-    while (
-      i < lines.length &&
-      lines[i].trim() !== '' &&
-      !blockOpener.test(lines[i])
-    ) {
+    while (i < lines.length && lines[i].trim() !== '' && !blockOpener.test(lines[i])) {
       paraLines.push(lines[i]);
       i++;
     }
@@ -230,7 +219,6 @@ function buildDom(blocks) {
 
   for (const block of blocks) {
     switch (block.type) {
-
       case 'heading': {
         const el = document.createElement(`h${block.level}`);
         el.className = `md-h md-h${block.level}`;
@@ -269,21 +257,47 @@ function buildDom(blocks) {
         copyBtn.type = 'button';
         copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span>`;
         copyBtn.addEventListener('click', () => {
-          navigator.clipboard.writeText(block.code).then(() => {
-            copyBtn.querySelector('span').textContent = 'Copied!';
-            copyBtn.classList.add('md-codeblock__btn--success');
-            setTimeout(() => {
-              copyBtn.querySelector('span').textContent = 'Copy';
-              copyBtn.classList.remove('md-codeblock__btn--success');
-            }, 1800);
-          }).catch(() => {});
+          navigator.clipboard
+            .writeText(block.code)
+            .then(() => {
+              copyBtn.querySelector('span').textContent = 'Copied!';
+              copyBtn.classList.add('md-codeblock__btn--success');
+              setTimeout(() => {
+                copyBtn.querySelector('span').textContent = 'Copy';
+                copyBtn.classList.remove('md-codeblock__btn--success');
+              }, 1800);
+            })
+            .catch(() => {});
         });
 
         // Download button
         const dlBtn = document.createElement('button');
         dlBtn.className = 'md-codeblock__btn';
         dlBtn.type = 'button';
-        const extMap = { js: 'js', javascript: 'js', ts: 'ts', typescript: 'ts', py: 'py', python: 'py', css: 'css', html: 'html', json: 'json', sh: 'sh', bash: 'sh', cpp: 'cpp', c: 'c', java: 'java', rs: 'rs', rust: 'rs', go: 'go', sql: 'sql', md: 'md', yaml: 'yaml', yml: 'yml', xml: 'xml' };
+        const extMap = {
+          js: 'js',
+          javascript: 'js',
+          ts: 'ts',
+          typescript: 'ts',
+          py: 'py',
+          python: 'py',
+          css: 'css',
+          html: 'html',
+          json: 'json',
+          sh: 'sh',
+          bash: 'sh',
+          cpp: 'cpp',
+          c: 'c',
+          java: 'java',
+          rs: 'rs',
+          rust: 'rs',
+          go: 'go',
+          sql: 'sql',
+          md: 'md',
+          yaml: 'yaml',
+          yml: 'yml',
+          xml: 'xml',
+        };
         const ext = extMap[block.lang?.toLowerCase()] ?? 'txt';
         dlBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download</span>`;
         dlBtn.addEventListener('click', () => {
@@ -301,7 +315,7 @@ function buildDom(blocks) {
         wrap.append(header);
 
         // ── Code area ──────────────────────────────────────────────────
-        const pre  = document.createElement('pre');
+        const pre = document.createElement('pre');
         pre.className = 'md-pre';
         const code = document.createElement('code');
         code.className = `md-code${block.lang ? ` language-${block.lang}` : ''}`;
@@ -314,19 +328,19 @@ function buildDom(blocks) {
       }
 
       case 'blockquote': {
-        const bq     = document.createElement('blockquote');
+        const bq = document.createElement('blockquote');
         bq.className = 'md-blockquote';
-        const inner  = buildDom(parseBlocks(block.lines));
+        const inner = buildDom(parseBlocks(block.lines));
         bq.append(inner);
         frag.append(bq);
         break;
       }
 
       case 'ul': {
-        const ul  = document.createElement('ul');
+        const ul = document.createElement('ul');
         ul.className = 'md-ul';
         for (const item of block.items) {
-          const li  = document.createElement('li');
+          const li = document.createElement('li');
           li.className = 'md-li';
           li.innerHTML = renderInline(item);
           ul.append(li);
@@ -336,10 +350,10 @@ function buildDom(blocks) {
       }
 
       case 'ol': {
-        const ol  = document.createElement('ol');
+        const ol = document.createElement('ol');
         ol.className = 'md-ol';
         for (const item of block.items) {
-          const li  = document.createElement('li');
+          const li = document.createElement('li');
           li.className = 'md-li';
           li.innerHTML = renderInline(item);
           ol.append(li);
@@ -390,7 +404,7 @@ function buildDom(blocks) {
       }
 
       case 'hr': {
-        const hr  = document.createElement('hr');
+        const hr = document.createElement('hr');
         hr.className = 'md-hr';
         frag.append(hr);
         break;
@@ -416,9 +430,9 @@ function buildDom(blocks) {
  * @returns {HTMLDivElement}  Ready-to-append DOM element.
  */
 export function renderMarkdown(markdown, extra = '') {
-  const lines  = (markdown ?? '').split(/\r?\n/);
+  const lines = (markdown ?? '').split(/\r?\n/);
   const blocks = parseBlocks(lines);
-  const dom    = buildDom(blocks);
+  const dom = buildDom(blocks);
 
   const root = document.createElement('div');
   root.className = ['md-root', extra].filter(Boolean).join(' ');

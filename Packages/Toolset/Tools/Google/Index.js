@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createGoogleToolHandlers({ rootDirectory }),
-      ...createGoogleConnectorToolHandlers({ rootDirectory })
+      ...createGoogleConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildGooglePromptSection()]
+    promptSections: [buildGooglePromptSection()],
   };
 }
 

@@ -2,37 +2,47 @@ const githubStrings = {
   connector: {
     id: 'github',
     label: 'GitHub',
-    description: 'Repository, issue, pull request, workflow, and user lookup through the GitHub API.',
+    description:
+      'Repository, issue, pull request, workflow, and user lookup through the GitHub API.',
     credentialLabel: 'Personal access token',
     credentialPlaceholder: 'github_pat_...',
     credentialKey: 'token',
-    optional: true
+    optional: true,
   },
   tools: [
     {
       name: 'github_get_repository',
-      description: 'Fetch GitHub repository metadata. Uses the GitHub connector token when configured.',
+      description:
+        'Fetch GitHub repository metadata. Uses the GitHub connector token when configured.',
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
-        repo: { type: 'string', required: true, description: 'Repository name.' }
-      }
+        repo: { type: 'string', required: true, description: 'Repository name.' },
+      },
     },
     {
       name: 'github_get_user',
       description: 'Fetch a GitHub user or organization profile.',
       category: 'github',
       parameters: {
-        username: { type: 'string', required: true, description: 'GitHub username or organization login.' }
-      }
+        username: {
+          type: 'string',
+          required: true,
+          description: 'GitHub username or organization login.',
+        },
+      },
     },
     {
       name: 'github_list_repos',
       description: 'List repositories visible to the configured GitHub token.',
       category: 'github',
       parameters: {
-        limit: { type: 'number', required: false, description: 'Maximum repositories, default 20, max 50.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum repositories, default 20, max 50.',
+        },
+      },
     },
     {
       name: 'github_list_issues',
@@ -41,9 +51,17 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        state: { type: 'string', required: false, description: 'open, closed, or all. Defaults to open.' },
-        limit: { type: 'number', required: false, description: 'Maximum results, default 10, max 30.' }
-      }
+        state: {
+          type: 'string',
+          required: false,
+          description: 'open, closed, or all. Defaults to open.',
+        },
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum results, default 10, max 30.',
+        },
+      },
     },
     {
       name: 'github_get_issues',
@@ -52,9 +70,17 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        state: { type: 'string', required: false, description: 'open, closed, or all. Defaults to open.' },
-        limit: { type: 'number', required: false, description: 'Maximum results, default 10, max 30.' }
-      }
+        state: {
+          type: 'string',
+          required: false,
+          description: 'open, closed, or all. Defaults to open.',
+        },
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum results, default 10, max 30.',
+        },
+      },
     },
     {
       name: 'github_get_pull_requests',
@@ -63,9 +89,17 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        state: { type: 'string', required: false, description: 'open, closed, or all. Defaults to open.' },
-        limit: { type: 'number', required: false, description: 'Maximum results, default 10, max 30.' }
-      }
+        state: {
+          type: 'string',
+          required: false,
+          description: 'open, closed, or all. Defaults to open.',
+        },
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum results, default 10, max 30.',
+        },
+      },
     },
     {
       name: 'github_get_file',
@@ -75,8 +109,12 @@ const githubStrings = {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
         filePath: { type: 'string', required: true, description: 'Path inside the repository.' },
-        ref: { type: 'string', required: false, description: 'Optional branch, tag, or commit SHA.' }
-      }
+        ref: {
+          type: 'string',
+          required: false,
+          description: 'Optional branch, tag, or commit SHA.',
+        },
+      },
     },
     {
       name: 'github_get_file_tree',
@@ -85,9 +123,17 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        ref: { type: 'string', required: false, description: 'Optional branch, tag, or commit SHA.' },
-        limit: { type: 'number', required: false, description: 'Maximum paths to show, default 100, max 300.' }
-      }
+        ref: {
+          type: 'string',
+          required: false,
+          description: 'Optional branch, tag, or commit SHA.',
+        },
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum paths to show, default 100, max 300.',
+        },
+      },
     },
     {
       name: 'github_get_commits',
@@ -97,8 +143,12 @@ const githubStrings = {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
         branch: { type: 'string', required: false, description: 'Optional branch or SHA.' },
-        limit: { type: 'number', required: false, description: 'Maximum commits, default 10, max 30.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum commits, default 10, max 30.',
+        },
+      },
     },
     {
       name: 'github_list_branches',
@@ -107,8 +157,12 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        limit: { type: 'number', required: false, description: 'Maximum branches, default 30, max 100.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum branches, default 30, max 100.',
+        },
+      },
     },
     {
       name: 'github_get_releases',
@@ -117,8 +171,12 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        limit: { type: 'number', required: false, description: 'Maximum releases, default 5, max 20.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum releases, default 5, max 20.',
+        },
+      },
     },
     {
       name: 'github_get_latest_release',
@@ -126,8 +184,8 @@ const githubStrings = {
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
-        repo: { type: 'string', required: true, description: 'Repository name.' }
-      }
+        repo: { type: 'string', required: true, description: 'Repository name.' },
+      },
     },
     {
       name: 'github_get_contributors',
@@ -136,8 +194,12 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        limit: { type: 'number', required: false, description: 'Maximum contributors, default 20, max 50.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum contributors, default 20, max 50.',
+        },
+      },
     },
     {
       name: 'github_get_languages',
@@ -145,8 +207,8 @@ const githubStrings = {
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
-        repo: { type: 'string', required: true, description: 'Repository name.' }
-      }
+        repo: { type: 'string', required: true, description: 'Repository name.' },
+      },
     },
     {
       name: 'github_get_topics',
@@ -154,8 +216,8 @@ const githubStrings = {
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
-        repo: { type: 'string', required: true, description: 'Repository name.' }
-      }
+        repo: { type: 'string', required: true, description: 'Repository name.' },
+      },
     },
     {
       name: 'github_get_readme',
@@ -164,8 +226,12 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        ref: { type: 'string', required: false, description: 'Optional branch, tag, or commit SHA.' }
-      }
+        ref: {
+          type: 'string',
+          required: false,
+          description: 'Optional branch, tag, or commit SHA.',
+        },
+      },
     },
     {
       name: 'github_search_code',
@@ -175,8 +241,12 @@ const githubStrings = {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
         query: { type: 'string', required: true, description: 'Code search query.' },
-        limit: { type: 'number', required: false, description: 'Maximum results, default 10, max 30.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum results, default 10, max 30.',
+        },
+      },
     },
     {
       name: 'github_get_pr_details',
@@ -185,8 +255,8 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        pr_number: { type: 'number', required: true, description: 'Pull request number.' }
-      }
+        pr_number: { type: 'number', required: true, description: 'Pull request number.' },
+      },
     },
     {
       name: 'github_get_pr_diff',
@@ -195,8 +265,8 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        pr_number: { type: 'number', required: true, description: 'Pull request number.' }
-      }
+        pr_number: { type: 'number', required: true, description: 'Pull request number.' },
+      },
     },
     {
       name: 'github_get_pr_checks',
@@ -205,8 +275,8 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        pr_number: { type: 'number', required: true, description: 'Pull request number.' }
-      }
+        pr_number: { type: 'number', required: true, description: 'Pull request number.' },
+      },
     },
     {
       name: 'github_get_workflow_runs',
@@ -217,8 +287,12 @@ const githubStrings = {
         repo: { type: 'string', required: true, description: 'Repository name.' },
         branch: { type: 'string', required: false, description: 'Optional branch filter.' },
         event: { type: 'string', required: false, description: 'Optional GitHub event filter.' },
-        limit: { type: 'number', required: false, description: 'Maximum runs, default 10, max 30.' }
-      }
+        limit: {
+          type: 'number',
+          required: false,
+          description: 'Maximum runs, default 10, max 30.',
+        },
+      },
     },
     {
       name: 'github_create_issue',
@@ -229,12 +303,13 @@ const githubStrings = {
         repo: { type: 'string', required: true, description: 'Repository name.' },
         title: { type: 'string', required: true, description: 'Issue title.' },
         body: { type: 'string', required: false, description: 'Issue body in Markdown.' },
-        labels: { type: 'string', required: false, description: 'Comma-separated label names.' }
-      }
+        labels: { type: 'string', required: false, description: 'Comma-separated label names.' },
+      },
     },
     {
       name: 'github_update_issue',
-      description: 'Update a GitHub issue title, body, state, labels, or assignees. Requires a configured GitHub token.',
+      description:
+        'Update a GitHub issue title, body, state, labels, or assignees. Requires a configured GitHub token.',
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
@@ -243,9 +318,17 @@ const githubStrings = {
         title: { type: 'string', required: false, description: 'New title.' },
         body: { type: 'string', required: false, description: 'New body in Markdown.' },
         state: { type: 'string', required: false, description: 'open or closed.' },
-        labels: { type: 'string', required: false, description: 'Comma-separated label names to set.' },
-        assignees: { type: 'string', required: false, description: 'Comma-separated usernames to set.' }
-      }
+        labels: {
+          type: 'string',
+          required: false,
+          description: 'Comma-separated label names to set.',
+        },
+        assignees: {
+          type: 'string',
+          required: false,
+          description: 'Comma-separated usernames to set.',
+        },
+      },
     },
     {
       name: 'github_close_issue',
@@ -254,8 +337,8 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        issue_number: { type: 'number', required: true, description: 'Issue number.' }
-      }
+        issue_number: { type: 'number', required: true, description: 'Issue number.' },
+      },
     },
     {
       name: 'github_reopen_issue',
@@ -264,8 +347,8 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        issue_number: { type: 'number', required: true, description: 'Issue number.' }
-      }
+        issue_number: { type: 'number', required: true, description: 'Issue number.' },
+      },
     },
     {
       name: 'github_comment_on_issue',
@@ -274,9 +357,13 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        issue_number: { type: 'number', required: true, description: 'Issue or pull request number.' },
-        body: { type: 'string', required: true, description: 'Comment body in Markdown.' }
-      }
+        issue_number: {
+          type: 'number',
+          required: true,
+          description: 'Issue or pull request number.',
+        },
+        body: { type: 'string', required: true, description: 'Comment body in Markdown.' },
+      },
     },
     {
       name: 'github_create_pull_request',
@@ -289,8 +376,8 @@ const githubStrings = {
         head: { type: 'string', required: true, description: 'Source branch.' },
         base: { type: 'string', required: true, description: 'Target branch.' },
         body: { type: 'string', required: false, description: 'Pull request body in Markdown.' },
-        draft: { type: 'boolean', required: false, description: 'Open as a draft pull request.' }
-      }
+        draft: { type: 'boolean', required: false, description: 'Open as a draft pull request.' },
+      },
     },
     {
       name: 'github_close_pull_request',
@@ -299,44 +386,67 @@ const githubStrings = {
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        pr_number: { type: 'number', required: true, description: 'Pull request number.' }
-      }
+        pr_number: { type: 'number', required: true, description: 'Pull request number.' },
+      },
     },
     {
       name: 'github_add_labels',
-      description: 'Add labels to a GitHub issue or pull request. Requires a configured GitHub token.',
+      description:
+        'Add labels to a GitHub issue or pull request. Requires a configured GitHub token.',
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        issue_number: { type: 'number', required: true, description: 'Issue or pull request number.' },
-        labels: { type: 'string', required: true, description: 'Comma-separated label names.' }
-      }
+        issue_number: {
+          type: 'number',
+          required: true,
+          description: 'Issue or pull request number.',
+        },
+        labels: { type: 'string', required: true, description: 'Comma-separated label names.' },
+      },
     },
     {
       name: 'github_add_assignees',
-      description: 'Assign users to a GitHub issue or pull request. Requires a configured GitHub token.',
+      description:
+        'Assign users to a GitHub issue or pull request. Requires a configured GitHub token.',
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        issue_number: { type: 'number', required: true, description: 'Issue or pull request number.' },
-        assignees: { type: 'string', required: true, description: 'Comma-separated GitHub usernames.' }
-      }
+        issue_number: {
+          type: 'number',
+          required: true,
+          description: 'Issue or pull request number.',
+        },
+        assignees: {
+          type: 'string',
+          required: true,
+          description: 'Comma-separated GitHub usernames.',
+        },
+      },
     },
     {
       name: 'github_trigger_workflow',
-      description: 'Trigger a GitHub Actions workflow dispatch. Requires a configured GitHub token.',
+      description:
+        'Trigger a GitHub Actions workflow dispatch. Requires a configured GitHub token.',
       category: 'github',
       parameters: {
         owner: { type: 'string', required: true, description: 'Repository owner or organization.' },
         repo: { type: 'string', required: true, description: 'Repository name.' },
-        workflow_id: { type: 'string', required: true, description: 'Workflow file name or numeric ID.' },
-        ref: { type: 'string', required: false, description: 'Branch or tag to run. Defaults to main.' },
-        inputs: { type: 'string', required: false, description: 'JSON object of workflow inputs.' }
-      }
-    }
-  ]
+        workflow_id: {
+          type: 'string',
+          required: true,
+          description: 'Workflow file name or numeric ID.',
+        },
+        ref: {
+          type: 'string',
+          required: false,
+          description: 'Branch or tag to run. Defaults to main.',
+        },
+        inputs: { type: 'string', required: false, description: 'JSON object of workflow inputs.' },
+      },
+    },
+  ],
 };
 
 export default githubStrings;

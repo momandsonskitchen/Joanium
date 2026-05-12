@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createSpotifyToolHandlers({ rootDirectory }),
-      ...createSpotifyConnectorToolHandlers({ rootDirectory })
+      ...createSpotifyConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildSpotifyPromptSection()]
+    promptSections: [buildSpotifyPromptSection()],
   };
 }
 

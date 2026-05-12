@@ -8,6 +8,6 @@ export function createSpotifyConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeSpotifyChatTool
+    executeTool: executeSpotifyChatTool,
   });
 }

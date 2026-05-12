@@ -22,12 +22,12 @@ export function createTemplateStateManager({ rootDirectory }) {
       const filePath = path.join(templatesDirectory, `${safeId}.json`);
       const now = new Date().toISOString();
       const record = {
-        id:        safeId,
-        name:      String(template.name ?? '').trim(),
-        command:   normalizeCommand(template.command),
-        prompt:    String(template.prompt ?? '').trim(),
+        id: safeId,
+        name: String(template.name ?? '').trim(),
+        command: normalizeCommand(template.command),
+        prompt: String(template.prompt ?? '').trim(),
         createdAt: template.createdAt ?? now,
-        updatedAt: now
+        updatedAt: now,
       };
       await writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
       return record;
@@ -49,12 +49,12 @@ export function createTemplateStateManager({ rootDirectory }) {
           const raw = await readFile(path.join(templatesDirectory, file), 'utf8');
           const template = JSON.parse(raw);
           templates.push({
-            id:        template.id,
-            name:      template.name,
-            command:   template.command,
-            prompt:    template.prompt,
+            id: template.id,
+            name: template.name,
+            command: template.command,
+            prompt: template.prompt,
             createdAt: template.createdAt,
-            updatedAt: template.updatedAt
+            updatedAt: template.updatedAt,
           });
         } catch {
           // Skip corrupt or unreadable files silently.
@@ -62,7 +62,8 @@ export function createTemplateStateManager({ rootDirectory }) {
       }
 
       return templates.sort(
-        (a, b) => new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0)
+        (a, b) =>
+          new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0),
       );
     },
 
@@ -79,7 +80,7 @@ export function createTemplateStateManager({ rootDirectory }) {
       if (!safeId) throw new Error('A valid template id is required.');
       const filePath = path.join(templatesDirectory, `${safeId}.json`);
       await unlink(filePath);
-    }
+    },
   };
 }
 

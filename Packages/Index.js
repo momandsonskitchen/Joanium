@@ -6,7 +6,7 @@ const packagesDirectory = path.dirname(fileURLToPath(import.meta.url));
 const rootDirectory = path.resolve(packagesDirectory, '..');
 
 const writeBootLog = createBootLogger(
-  path.join(rootDirectory, 'Build', 'Logs', 'electron-boot.log')
+  path.join(rootDirectory, 'Build', 'Logs', 'electron-boot.log'),
 );
 
 export async function bootstrapApplication() {
@@ -33,7 +33,7 @@ export async function bootstrapApplication() {
     const packageInstance = await packageModule.createPackage({
       rootDirectory,
       packagesDirectory,
-      registry
+      registry,
     });
 
     const companions = packageInstance.ipcCompanions ?? [];
@@ -42,7 +42,7 @@ export async function bootstrapApplication() {
       const companion = await createPackage(companionId, new Set(seenPackageIds));
       packageInstance.ipcHandlers = [
         ...(packageInstance.ipcHandlers ?? []),
-        ...(companion.ipcHandlers ?? [])
+        ...(companion.ipcHandlers ?? []),
       ];
       writeBootLog('bootstrapApplication:companion-merged', companionId);
     }
@@ -68,7 +68,7 @@ export async function bootstrapApplication() {
   await electronModule.bootElectron({
     rootDirectory,
     entryPackage,
-    loadPackage: createPackage
+    loadPackage: createPackage,
   });
   writeBootLog('bootstrapApplication:bootElectron-resolved');
 }

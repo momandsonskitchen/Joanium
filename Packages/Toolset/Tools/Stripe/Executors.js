@@ -8,6 +8,6 @@ export function createStripeConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeStripeChatTool
+    executeTool: executeStripeChatTool,
   });
 }

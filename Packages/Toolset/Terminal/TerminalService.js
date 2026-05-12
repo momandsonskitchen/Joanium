@@ -30,7 +30,7 @@ const WORKSPACE_SKIP_DIRS = new Set([
   'obj',
   'vendor',
   'tmp',
-  'temp'
+  'temp',
 ]);
 
 const TEXT_EXTENSIONS = new Set([
@@ -68,23 +68,55 @@ const TEXT_EXTENSIONS = new Set([
   '.hpp',
   '.vue',
   '.svelte',
-  '.astro'
+  '.astro',
 ]);
 
 const COMMAND_RISK_RULES = [
   { level: 'critical', pattern: /\brm\s+-rf\s+\/(?!\w)/i, reason: 'Deletes the filesystem root.' },
   { level: 'critical', pattern: /\b(format|mkfs)\b/i, reason: 'Formats a disk or filesystem.' },
   { level: 'critical', pattern: /\bdd\s+if=.*of=\/dev/i, reason: 'Writes raw data to a device.' },
-  { level: 'critical', pattern: /\b(shutdown|reboot|halt)\b/i, reason: 'Shuts down or reboots the machine.' },
-  { level: 'critical', pattern: /\b(del|erase)\b\s+\/(s|q)/i, reason: 'Bulk-deletes files through the shell.' },
-  { level: 'critical', pattern: /\bRemove-Item\b.*-Recurse.*-Force/i, reason: 'Force-removes files recursively.' },
-  { level: 'high', pattern: /\bgit\s+reset\s+--hard\b/i, reason: 'Discards Git changes permanently.' },
-  { level: 'high', pattern: /\bgit\s+clean\s+-f/i, reason: 'Deletes untracked files from the repository.' },
+  {
+    level: 'critical',
+    pattern: /\b(shutdown|reboot|halt)\b/i,
+    reason: 'Shuts down or reboots the machine.',
+  },
+  {
+    level: 'critical',
+    pattern: /\b(del|erase)\b\s+\/(s|q)/i,
+    reason: 'Bulk-deletes files through the shell.',
+  },
+  {
+    level: 'critical',
+    pattern: /\bRemove-Item\b.*-Recurse.*-Force/i,
+    reason: 'Force-removes files recursively.',
+  },
+  {
+    level: 'high',
+    pattern: /\bgit\s+reset\s+--hard\b/i,
+    reason: 'Discards Git changes permanently.',
+  },
+  {
+    level: 'high',
+    pattern: /\bgit\s+clean\s+-f/i,
+    reason: 'Deletes untracked files from the repository.',
+  },
   { level: 'high', pattern: /\bgit\s+push\b.*--force/i, reason: 'Rewrites remote Git history.' },
-  { level: 'high', pattern: /\bdocker\s+(system\s+prune|rm|rmi|compose\s+down)\b/i, reason: 'Deletes or mutates Docker resources.' },
+  {
+    level: 'high',
+    pattern: /\bdocker\s+(system\s+prune|rm|rmi|compose\s+down)\b/i,
+    reason: 'Deletes or mutates Docker resources.',
+  },
   { level: 'high', pattern: /\brm\s+-rf\b/i, reason: 'Recursively deletes files.' },
-  { level: 'medium', pattern: /\bgit\s+(push|merge|tag)\b/i, reason: 'Mutates Git history or a remote repository.' },
-  { level: 'medium', pattern: /\b(npm|pnpm|yarn|bun)\s+publish\b/i, reason: 'Publishes a package.' }
+  {
+    level: 'medium',
+    pattern: /\bgit\s+(push|merge|tag)\b/i,
+    reason: 'Mutates Git history or a remote repository.',
+  },
+  {
+    level: 'medium',
+    pattern: /\b(npm|pnpm|yarn|bun)\s+publish\b/i,
+    reason: 'Publishes a package.',
+  },
 ];
 
 const GIT_ERROR_CATEGORY = Object.freeze({
@@ -95,7 +127,7 @@ const GIT_ERROR_CATEGORY = Object.freeze({
   NOTHING: 'nothing',
   NOT_REPO: 'not_repo',
   NETWORK: 'network',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 });
 
 function truncateText(text, maxLength = OUTPUT_LIMIT) {
@@ -124,72 +156,89 @@ function normalizeGitError(stderr = '', stdout = '') {
   if (/nothing to commit|nothing added to commit|no changes added/.test(text)) {
     return {
       category: GIT_ERROR_CATEGORY.NOTHING,
-      hint: 'Nothing to commit. The working tree is clean.'
+      hint: 'Nothing to commit. The working tree is clean.',
     };
   }
   if (/already up.to.date/.test(text)) {
     return { category: GIT_ERROR_CATEGORY.NOTHING, hint: 'Already up to date.' };
   }
-  if (/authentication failed|could not read username|permission denied|invalid credentials|http 401|http 403/.test(text)) {
+  if (
+    /authentication failed|could not read username|permission denied|invalid credentials|http 401|http 403/.test(
+      text,
+    )
+  ) {
     return {
       category: GIT_ERROR_CATEGORY.AUTH,
-      hint: 'Authentication failed. Re-enter credentials or check SSH/token access.'
+      hint: 'Authentication failed. Re-enter credentials or check SSH/token access.',
     };
   }
   if (/no upstream|set.upstream|has no tracked branch|does not track/.test(text)) {
     return {
       category: GIT_ERROR_CATEGORY.NO_UPSTREAM,
-      hint: 'The current branch has no upstream. Push with upstream tracking.'
+      hint: 'The current branch has no upstream. Push with upstream tracking.',
     };
   }
   if (/non-fast-forward|fetch first|tip of your current branch is behind/.test(text)) {
     return {
       category: GIT_ERROR_CATEGORY.DIVERGED,
-      hint: 'The remote has commits that are not present locally.'
+      hint: 'The remote has commits that are not present locally.',
     };
   }
   if (/conflict|automatic merge failed|merge conflict/.test(text)) {
     return {
       category: GIT_ERROR_CATEGORY.CONFLICT,
-      hint: 'A merge conflict was detected.'
+      hint: 'A merge conflict was detected.',
     };
   }
   if (/not a git repository/.test(text)) {
     return {
       category: GIT_ERROR_CATEGORY.NOT_REPO,
-      hint: 'This folder is not a Git repository.'
+      hint: 'This folder is not a Git repository.',
     };
   }
   if (/unable to connect|could not resolve host|timed out|ssl|connection refused/.test(text)) {
     return {
       category: GIT_ERROR_CATEGORY.NETWORK,
-      hint: 'Network error. Check the connection and remote URL.'
+      hint: 'Network error. Check the connection and remote URL.',
     };
   }
-  return { category: GIT_ERROR_CATEGORY.UNKNOWN, hint: String(stderr || stdout || 'Unknown Git error.').trim() };
+  return {
+    category: GIT_ERROR_CATEGORY.UNKNOWN,
+    hint: String(stderr || stdout || 'Unknown Git error.').trim(),
+  };
 }
 
 function runGitArgs(args, workingDir, opts = {}) {
   const timeout = opts.timeout ?? 60_000;
   return new Promise((resolve) => {
-    execFile('git', args, { cwd: workingDir, timeout, maxBuffer: OUTPUT_LIMIT }, (error, stdout, stderr) => {
-      const exitCode = typeof error?.code === 'number' ? error.code : 0;
-      if (!error) {
-        resolve({ ok: true, stdout: truncateText(stdout), stderr: truncateText(stderr), exitCode });
-        return;
-      }
+    execFile(
+      'git',
+      args,
+      { cwd: workingDir, timeout, maxBuffer: OUTPUT_LIMIT },
+      (error, stdout, stderr) => {
+        const exitCode = typeof error?.code === 'number' ? error.code : 0;
+        if (!error) {
+          resolve({
+            ok: true,
+            stdout: truncateText(stdout),
+            stderr: truncateText(stderr),
+            exitCode,
+          });
+          return;
+        }
 
-      const { category, hint } = normalizeGitError(stderr, stdout);
-      resolve({
-        ok: false,
-        stdout: truncateText(stdout),
-        stderr: truncateText(stderr),
-        exitCode,
-        category,
-        hint,
-        error: hint
-      });
-    });
+        const { category, hint } = normalizeGitError(stderr, stdout);
+        resolve({
+          ok: false,
+          stdout: truncateText(stdout),
+          stderr: truncateText(stderr),
+          exitCode,
+          category,
+          hint,
+          error: hint,
+        });
+      },
+    );
   });
 }
 
@@ -199,7 +248,9 @@ function severityRank(level) {
 
 function getShellPath() {
   return process.platform === 'win32'
-    ? (process.env.PSModulePath ? 'powershell.exe' : 'powershell.exe')
+    ? process.env.PSModulePath
+      ? 'powershell.exe'
+      : 'powershell.exe'
     : process.env.SHELL || '/bin/bash';
 }
 
@@ -210,12 +261,12 @@ function buildExecInvocation(command) {
   if (process.platform === 'win32') {
     return {
       cmd: `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command ${JSON.stringify(command)}`,
-      options: { shell: false }
+      options: { shell: false },
     };
   }
   return {
     cmd: command,
-    options: { shell: process.env.SHELL || '/bin/bash', env: { ...process.env, FORCE_COLOR: '1' } }
+    options: { shell: process.env.SHELL || '/bin/bash', env: { ...process.env, FORCE_COLOR: '1' } },
   };
 }
 
@@ -282,7 +333,8 @@ function detectPackageManager(rootPath, entryNames) {
   if (names.has('pnpm-lock.yaml')) return 'pnpm';
   if (names.has('yarn.lock')) return 'yarn';
   if (names.has('bun.lockb') || names.has('bun.lock')) return 'bun';
-  if (names.has('package-lock.json') || fs.existsSync(path.join(rootPath, 'package.json'))) return 'npm';
+  if (names.has('package-lock.json') || fs.existsSync(path.join(rootPath, 'package.json')))
+    return 'npm';
   return '';
 }
 
@@ -325,7 +377,7 @@ export function assessCommandRisk(command = '') {
     level,
     reasons,
     blocked: level === 'critical',
-    requiresOptIn: level === 'high'
+    requiresOptIn: level === 'high',
   };
 }
 
@@ -337,7 +389,10 @@ export function createTerminalService({ rootDirectory }) {
   function appendProcessBuffer(processId, text) {
     const previous = processBuffers.get(processId) ?? '';
     const next = previous + text;
-    processBuffers.set(processId, next.length > BUFFER_LIMIT ? next.slice(next.length - BUFFER_LIMIT) : next);
+    processBuffers.set(
+      processId,
+      next.length > BUFFER_LIMIT ? next.slice(next.length - BUFFER_LIMIT) : next,
+    );
   }
 
   function sendToRenderer(sender, channel, payload) {
@@ -360,7 +415,10 @@ export function createTerminalService({ rootDirectory }) {
     }
 
     const cwd = resolveDirectory(payload.cwd, fallbackDirectory);
-    const timeout = Math.min(Math.max(Number(payload.timeout) || DEFAULT_TIMEOUT, 1000), MAX_TIMEOUT);
+    const timeout = Math.min(
+      Math.max(Number(payload.timeout) || DEFAULT_TIMEOUT, 1000),
+      MAX_TIMEOUT,
+    );
 
     return new Promise((resolve) => {
       const { cmd, options } = buildExecInvocation(payload.command);
@@ -370,7 +428,7 @@ export function createTerminalService({ rootDirectory }) {
           cwd,
           timeout,
           maxBuffer: OUTPUT_LIMIT * 4,
-          ...options
+          ...options,
         },
         (error, stdout, stderr) => {
           resolve({
@@ -381,9 +439,9 @@ export function createTerminalService({ rootDirectory }) {
             stderr: truncateText(stderr || ''),
             exitCode: typeof error?.code === 'number' ? error.code : 0,
             timedOut: Boolean(error?.killed),
-            risk
+            risk,
           });
-        }
+        },
       );
     });
   }
@@ -408,13 +466,13 @@ export function createTerminalService({ rootDirectory }) {
       child = spawn(
         'powershell.exe',
         ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', payload.command],
-        { cwd, env: { ...process.env } }
+        { cwd, env: { ...process.env } },
       );
     } else {
       child = spawn(payload.command, {
         cwd,
         shell: true,
-        env: { ...process.env, FORCE_COLOR: '1' }
+        env: { ...process.env, FORCE_COLOR: '1' },
       });
     }
 
@@ -427,7 +485,7 @@ export function createTerminalService({ rootDirectory }) {
       sendToRenderer(sender, 'terminal:process-output', {
         processId,
         stream: streamName,
-        text
+        text,
       });
     };
 
@@ -438,7 +496,7 @@ export function createTerminalService({ rootDirectory }) {
       sendToRenderer(sender, 'terminal:process-output', {
         processId,
         stream: 'stderr',
-        text: `${error.message}\n`
+        text: `${error.message}\n`,
       });
     });
     child.once('exit', (code, signal) => {
@@ -447,7 +505,7 @@ export function createTerminalService({ rootDirectory }) {
         processId,
         code,
         signal,
-        running: false
+        running: false,
       });
     });
 
@@ -485,7 +543,7 @@ export function createTerminalService({ rootDirectory }) {
       ok: true,
       processId,
       buffer,
-      running: activeProcesses.has(processId)
+      running: activeProcesses.has(processId),
     };
   }
 
@@ -501,21 +559,22 @@ export function createTerminalService({ rootDirectory }) {
     if (stat.size > MAX_FILE_SIZE) {
       return {
         ok: false,
-        error: `File too large (${Math.round(stat.size / 1024)} KB > ${Math.round(MAX_FILE_SIZE / 1024)} KB limit).`
+        error: `File too large (${Math.round(stat.size / 1024)} KB > ${Math.round(MAX_FILE_SIZE / 1024)} KB limit).`,
       };
     }
 
     const lines = fs.readFileSync(resolvedPath, 'utf8').split('\n');
     const maxLines = Math.min(Math.max(Number(payload.maxLines) || 200, 1), 2000);
     const slicedLines = lines.slice(0, maxLines);
-    const note = lines.length > maxLines ? `\n...(showing ${maxLines} of ${lines.length} lines)` : '';
+    const note =
+      lines.length > maxLines ? `\n...(showing ${maxLines} of ${lines.length} lines)` : '';
 
     return {
       ok: true,
       path: resolvedPath,
       content: slicedLines.join('\n') + note,
       totalLines: lines.length,
-      sizeBytes: stat.size
+      sizeBytes: stat.size,
     };
   }
 
@@ -533,9 +592,11 @@ export function createTerminalService({ rootDirectory }) {
       .map((entry) => ({
         name: entry.name,
         type: entry.isDirectory() ? 'dir' : entry.isFile() ? 'file' : 'other',
-        size: entry.isFile() ? fs.statSync(path.join(resolvedPath, entry.name)).size : null
+        size: entry.isFile() ? fs.statSync(path.join(resolvedPath, entry.name)).size : null,
       }))
-      .sort((a, b) => (a.type !== b.type ? (a.type === 'dir' ? -1 : 1) : a.name.localeCompare(b.name)));
+      .sort((a, b) =>
+        a.type !== b.type ? (a.type === 'dir' ? -1 : 1) : a.name.localeCompare(b.name),
+      );
 
     return { ok: true, path: resolvedPath, entries: items, count: items.length };
   }
@@ -576,7 +637,7 @@ export function createTerminalService({ rootDirectory }) {
           matches.push({
             path: path.relative(root, filePath),
             lineNumber: index + 1,
-            line: line.trim().slice(0, 240)
+            line: line.trim().slice(0, 240),
           });
           if (matches.length >= maxResults) break;
         }
@@ -599,22 +660,28 @@ export function createTerminalService({ rootDirectory }) {
       .readdirSync(root, { withFileTypes: true })
       .map((entry) => ({
         name: entry.name,
-        type: entry.isDirectory() ? 'dir' : entry.isFile() ? 'file' : 'other'
+        type: entry.isDirectory() ? 'dir' : entry.isFile() ? 'file' : 'other',
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
     const entryNames = entries.map((entry) => entry.name);
     const packageJson = readJson(path.join(root, 'package.json'));
     const packageManager = detectPackageManager(root, entryNames);
     const scripts = packageJson?.scripts ?? {};
-    const dependencies = { ...(packageJson?.dependencies ?? {}), ...(packageJson?.devDependencies ?? {}) };
+    const dependencies = {
+      ...(packageJson?.dependencies ?? {}),
+      ...(packageJson?.devDependencies ?? {}),
+    };
     const frameworks = Object.keys(dependencies).filter((name) =>
-      ['react', 'next', 'vue', 'svelte', 'electron', 'express', 'vite'].includes(name)
+      ['react', 'next', 'vue', 'svelte', 'electron', 'express', 'vite'].includes(name),
     );
     const languages = [];
 
     if (packageJson) languages.push('javascript');
     if (fs.existsSync(path.join(root, 'tsconfig.json'))) languages.push('typescript');
-    if (fs.existsSync(path.join(root, 'pyproject.toml')) || fs.existsSync(path.join(root, 'requirements.txt'))) {
+    if (
+      fs.existsSync(path.join(root, 'pyproject.toml')) ||
+      fs.existsSync(path.join(root, 'requirements.txt'))
+    ) {
       languages.push('python');
     }
     if (fs.existsSync(path.join(root, 'Cargo.toml'))) languages.push('rust');
@@ -632,9 +699,9 @@ export function createTerminalService({ rootDirectory }) {
         notes: [
           scripts.dev || scripts.start ? 'Has a development/start workflow.' : '',
           scripts.test ? 'Has a test script.' : '',
-          scripts.build ? 'Has a build script.' : ''
-        ].filter(Boolean)
-      }
+          scripts.build ? 'Has a build script.' : '',
+        ].filter(Boolean),
+      },
     };
   }
 
@@ -652,18 +719,36 @@ export function createTerminalService({ rootDirectory }) {
 
     if (summary.packageManager && Object.keys(scripts).length > 0) {
       if (payload.includeLint !== false && scripts.lint) {
-        commands.push({ label: 'lint', command: buildPackageScriptCommand(summary.packageManager, 'lint') });
+        commands.push({
+          label: 'lint',
+          command: buildPackageScriptCommand(summary.packageManager, 'lint'),
+        });
       }
-      if (payload.includeTest !== false && scripts.test && !/no test specified/i.test(scripts.test)) {
-        commands.push({ label: 'test', command: buildPackageScriptCommand(summary.packageManager, 'test') });
+      if (
+        payload.includeTest !== false &&
+        scripts.test &&
+        !/no test specified/i.test(scripts.test)
+      ) {
+        commands.push({
+          label: 'test',
+          command: buildPackageScriptCommand(summary.packageManager, 'test'),
+        });
       }
       if (payload.includeBuild !== false && scripts.build) {
-        commands.push({ label: 'build', command: buildPackageScriptCommand(summary.packageManager, 'build') });
+        commands.push({
+          label: 'build',
+          command: buildPackageScriptCommand(summary.packageManager, 'build'),
+        });
       }
     }
 
     if (commands.length === 0) {
-      return { ok: false, error: 'No runnable lint, test, or build commands were detected.', summary, commands: [] };
+      return {
+        ok: false,
+        error: 'No runnable lint, test, or build commands were detected.',
+        summary,
+        commands: [],
+      };
     }
 
     const results = [];
@@ -672,7 +757,7 @@ export function createTerminalService({ rootDirectory }) {
         command: command.command,
         cwd: summary.path,
         timeout: command.label === 'build' ? 120_000 : 90_000,
-        allowRisky: false
+        allowRisky: false,
       });
       results.push({ ...command, ...result, passed: result.exitCode === 0 && !result.timedOut });
     }
@@ -680,7 +765,7 @@ export function createTerminalService({ rootDirectory }) {
     return {
       ok: results.every((result) => result.passed),
       summary,
-      commands: results
+      commands: results,
     };
   }
 
@@ -691,7 +776,7 @@ export function createTerminalService({ rootDirectory }) {
       command: 'git status --short --branch',
       cwd: payload.workingDir,
       timeout: 20_000,
-      allowRisky: true
+      allowRisky: true,
     });
   }
 
@@ -710,15 +795,22 @@ export function createTerminalService({ rootDirectory }) {
     if (directoryError) return directoryError;
     const [current, branches] = await Promise.all([
       runGitArgs(['rev-parse', '--abbrev-ref', 'HEAD'], payload.workingDir, { timeout: 20_000 }),
-      runGitArgs(['branch', '--format=%(refname:short)'], payload.workingDir, { timeout: 20_000 })
+      runGitArgs(['branch', '--format=%(refname:short)'], payload.workingDir, { timeout: 20_000 }),
     ]);
     if (!current.ok && !branches.ok) {
-      return { ok: false, category: GIT_ERROR_CATEGORY.NOT_REPO, error: 'This folder is not a Git repository.' };
+      return {
+        ok: false,
+        category: GIT_ERROR_CATEGORY.NOT_REPO,
+        error: 'This folder is not a Git repository.',
+      };
     }
     return {
       ok: true,
       current: current.stdout.trim(),
-      branches: branches.stdout.split('\n').map((branch) => branch.trim()).filter(Boolean)
+      branches: branches.stdout
+        .split('\n')
+        .map((branch) => branch.trim())
+        .filter(Boolean),
     };
   }
 
@@ -729,7 +821,9 @@ export function createTerminalService({ rootDirectory }) {
     if (optInError) return optInError;
     const branchError = requireString(payload.branch, 'No branch name provided.');
     if (branchError) return branchError;
-    return runGitArgs(['checkout', '-b', String(payload.branch).trim()], payload.workingDir, { timeout: 60_000 });
+    return runGitArgs(['checkout', '-b', String(payload.branch).trim()], payload.workingDir, {
+      timeout: 60_000,
+    });
   }
 
   async function gitCheckoutBranch(payload = {}) {
@@ -739,7 +833,9 @@ export function createTerminalService({ rootDirectory }) {
     if (optInError) return optInError;
     const branchError = requireString(payload.branch, 'No branch name provided.');
     if (branchError) return branchError;
-    return runGitArgs(['checkout', String(payload.branch).trim()], payload.workingDir, { timeout: 60_000 });
+    return runGitArgs(['checkout', String(payload.branch).trim()], payload.workingDir, {
+      timeout: 60_000,
+    });
   }
 
   async function gitDeleteBranch(payload = {}) {
@@ -749,7 +845,9 @@ export function createTerminalService({ rootDirectory }) {
     if (optInError) return optInError;
     const branchError = requireString(payload.branch, 'No branch name provided.');
     if (branchError) return branchError;
-    return runGitArgs(['branch', '-D', String(payload.branch).trim()], payload.workingDir, { timeout: 60_000 });
+    return runGitArgs(['branch', '-D', String(payload.branch).trim()], payload.workingDir, {
+      timeout: 60_000,
+    });
   }
 
   async function gitPull(payload = {}) {
@@ -757,8 +855,12 @@ export function createTerminalService({ rootDirectory }) {
     if (directoryError) return directoryError;
     const optInError = requireGitMutationOptIn(payload, 'Pulling from a Git remote');
     if (optInError) return optInError;
-    const result = await runGitArgs(['pull', '--no-rebase'], payload.workingDir, { timeout: 60_000 });
-    return !result.ok && result.category === GIT_ERROR_CATEGORY.NOTHING ? { ...result, ok: true } : result;
+    const result = await runGitArgs(['pull', '--no-rebase'], payload.workingDir, {
+      timeout: 60_000,
+    });
+    return !result.ok && result.category === GIT_ERROR_CATEGORY.NOTHING
+      ? { ...result, ok: true }
+      : result;
   }
 
   async function gitCommit(payload = {}) {
@@ -769,22 +871,30 @@ export function createTerminalService({ rootDirectory }) {
     const messageError = requireString(payload.message, 'No commit message provided.');
     if (messageError) return messageError;
 
-    const status = await runGitArgs(['status', '--porcelain'], payload.workingDir, { timeout: 20_000 });
+    const status = await runGitArgs(['status', '--porcelain'], payload.workingDir, {
+      timeout: 20_000,
+    });
     if (!status.ok) return status;
     if (!status.stdout.trim()) {
       return {
         ok: true,
         noop: true,
         category: GIT_ERROR_CATEGORY.NOTHING,
-        hint: 'Nothing to commit. The working tree is clean.'
+        hint: 'Nothing to commit. The working tree is clean.',
       };
     }
 
     const add = await runGitArgs(['add', '-A'], payload.workingDir, { timeout: 60_000 });
     if (!add.ok) return add;
 
-    const commit = await runGitArgs(['commit', '-m', String(payload.message).trim()], payload.workingDir, { timeout: MAX_TIMEOUT });
-    return !commit.ok && commit.category === GIT_ERROR_CATEGORY.NOTHING ? { ...commit, ok: true, noop: true } : commit;
+    const commit = await runGitArgs(
+      ['commit', '-m', String(payload.message).trim()],
+      payload.workingDir,
+      { timeout: MAX_TIMEOUT },
+    );
+    return !commit.ok && commit.category === GIT_ERROR_CATEGORY.NOTHING
+      ? { ...commit, ok: true, noop: true }
+      : commit;
   }
 
   async function gitPush(payload = {}) {
@@ -800,7 +910,9 @@ export function createTerminalService({ rootDirectory }) {
     }
     if (result.category !== GIT_ERROR_CATEGORY.DIVERGED) return result;
 
-    await runGitArgs(['rebase', '--abort'], payload.workingDir, { timeout: 20_000 }).catch(() => {});
+    await runGitArgs(['rebase', '--abort'], payload.workingDir, { timeout: 20_000 }).catch(
+      () => {},
+    );
     const pull = await runGitArgs(['pull', '--no-rebase'], payload.workingDir, { timeout: 60_000 });
     if (!pull.ok && pull.category !== GIT_ERROR_CATEGORY.NOTHING) return pull;
     result = await runGitArgs(['push'], payload.workingDir, { timeout: 60_000 });
@@ -815,12 +927,14 @@ export function createTerminalService({ rootDirectory }) {
     const optInError = requireGitMutationOptIn(payload, 'Pulling and pushing Git changes');
     if (optInError) return optInError;
 
-    await runGitArgs(['rebase', '--abort'], payload.workingDir, { timeout: 20_000 }).catch(() => {});
+    await runGitArgs(['rebase', '--abort'], payload.workingDir, { timeout: 20_000 }).catch(
+      () => {},
+    );
     const pull = await runGitArgs(['pull', '--no-rebase'], payload.workingDir, { timeout: 60_000 });
     if (
-      !pull.ok
-      && pull.category !== GIT_ERROR_CATEGORY.NOTHING
-      && pull.category !== GIT_ERROR_CATEGORY.NO_UPSTREAM
+      !pull.ok &&
+      pull.category !== GIT_ERROR_CATEGORY.NOTHING &&
+      pull.category !== GIT_ERROR_CATEGORY.NO_UPSTREAM
     ) {
       return pull;
     }
@@ -840,7 +954,7 @@ export function createTerminalService({ rootDirectory }) {
       command: `git diff ${stagedFlag}--stat --patch --minimal --color=never`,
       cwd: payload.workingDir,
       timeout: 30_000,
-      allowRisky: true
+      allowRisky: true,
     });
   }
 
@@ -854,7 +968,11 @@ export function createTerminalService({ rootDirectory }) {
     } else {
       fs.writeFileSync(resolvedPath, payload.content ?? '', 'utf8');
     }
-    return { ok: true, path: resolvedPath, bytes: Buffer.byteLength(payload.content ?? '', 'utf8') };
+    return {
+      ok: true,
+      path: resolvedPath,
+      bytes: Buffer.byteLength(payload.content ?? '', 'utf8'),
+    };
   }
 
   function deleteItem(payload = {}) {
@@ -870,7 +988,7 @@ export function createTerminalService({ rootDirectory }) {
 
   function resolveDirectoryChange(payload = {}) {
     const current = String(payload.cwd ?? '').trim() || os.homedir();
-    const target  = String(payload.target ?? '').trim();
+    const target = String(payload.target ?? '').trim();
 
     // bare `cd` or `cd ~` → home
     const resolved =
@@ -916,6 +1034,6 @@ export function createTerminalService({ rootDirectory }) {
     gitPushSync,
     writeFile,
     deleteItem,
-    resolveDirectoryChange
+    resolveDirectoryChange,
   };
 }

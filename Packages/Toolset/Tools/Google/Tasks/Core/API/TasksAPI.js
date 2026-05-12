@@ -16,8 +16,7 @@ export async function createTaskList(creds, title) {
 }
 export async function deleteTaskList(creds, taskListId) {
   return (
-    await tasksFetch(creds, `${TASKS_BASE}/users/@me/lists/${taskListId}`, { method: 'DELETE' }),
-    !0
+    await tasksFetch(creds, `${TASKS_BASE}/users/@me/lists/${taskListId}`, { method: 'DELETE' }), !0
   );
 }
 export async function listTasks(
@@ -80,10 +79,7 @@ export async function deleteTask(creds, taskListId, taskId) {
   );
 }
 export async function clearCompleted(creds, taskListId = '@default') {
-  return (
-    await tasksFetch(creds, `${TASKS_BASE}/lists/${taskListId}/clear`, { method: 'POST' }),
-    !0
-  );
+  return await tasksFetch(creds, `${TASKS_BASE}/lists/${taskListId}/clear`, { method: 'POST' }), !0;
 }
 export async function moveTaskToList(
   creds,
@@ -99,7 +95,7 @@ export async function moveTaskToList(
       due: task.due ?? null,
       parent: parent,
     });
-  return (await deleteTask(creds, sourceListId, taskId), newTask);
+  return await deleteTask(creds, sourceListId, taskId), newTask;
 }
 export async function createSubtask(
   creds,
@@ -141,8 +137,8 @@ export async function reorderTask(
   { previousTaskId: previousTaskId = null, parentTaskId: parentTaskId = null } = {},
 ) {
   const params = new URLSearchParams();
-  (previousTaskId && params.set('previous', previousTaskId),
-    parentTaskId && params.set('parent', parentTaskId));
+  previousTaskId && params.set('previous', previousTaskId),
+    parentTaskId && params.set('parent', parentTaskId);
   const qs = params.toString() ? `?${params}` : '';
   return tasksFetch(creds, `${TASKS_BASE}/lists/${taskListId}/tasks/${taskId}/move${qs}`, {
     method: 'POST',

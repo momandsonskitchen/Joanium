@@ -15,7 +15,7 @@ const SUPPORTED_TERMINAL_TOOLS = new Set([
   'git_diff',
   'run_project_checks',
   'start_local_server',
-  'read_terminal_output'
+  'read_terminal_output',
 ]);
 
 function stripThinking(text) {
@@ -37,7 +37,7 @@ function parseJsonToolBlock(text, blockRegex) {
   try {
     return {
       payload: JSON.parse(match[1].trim()),
-      visibleContent: rawText.replace(match[0], '').trim()
+      visibleContent: rawText.replace(match[0], '').trim(),
     };
   } catch {
     return null;
@@ -53,7 +53,7 @@ function parseTerminalToolRequest(text) {
     tool,
     payload: parsed.payload,
     unsupported: !SUPPORTED_TERMINAL_TOOLS.has(tool),
-    visibleContent: parsed.visibleContent
+    visibleContent: parsed.visibleContent,
   };
 }
 
@@ -64,7 +64,7 @@ function parseToolsetToolRequest(text) {
   return {
     tool: String(parsed.payload?.tool ?? '').trim(),
     payload: parsed.payload,
-    visibleContent: parsed.visibleContent
+    visibleContent: parsed.visibleContent,
   };
 }
 
@@ -101,7 +101,7 @@ async function executeTerminalTool(action) {
       command: payload.command,
       cwd: await resolveTerminalCwd(payload.working_directory ?? payload.cwd),
       timeout: resolveTerminalTimeout(payload),
-      allowRisky: payload.allow_risky === true
+      allowRisky: payload.allow_risky === true,
     });
   }
 
@@ -111,7 +111,7 @@ async function executeTerminalTool(action) {
 
   if (action.tool === 'inspect_workspace') {
     return invokeIpc('terminal:inspect-workspace', {
-      rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory)
+      rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory),
     });
   }
 
@@ -119,33 +119,33 @@ async function executeTerminalTool(action) {
     return invokeIpc('terminal:search-workspace', {
       rootPath: await resolveTerminalCwd(payload.path ?? payload.working_directory),
       query: payload.query,
-      maxResults: payload.max_results
+      maxResults: payload.max_results,
     });
   }
 
   if (action.tool === 'read_local_file') {
     return invokeIpc('terminal:read-file', {
       filePath: payload.path,
-      maxLines: payload.max_lines
+      maxLines: payload.max_lines,
     });
   }
 
   if (action.tool === 'list_directory') {
     return invokeIpc('terminal:list-directory', {
-      dirPath: payload.path || await resolveTerminalCwd(payload.working_directory)
+      dirPath: payload.path || (await resolveTerminalCwd(payload.working_directory)),
     });
   }
 
   if (action.tool === 'git_status') {
     return invokeIpc('terminal:git-status', {
-      workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path)
+      workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
     });
   }
 
   if (action.tool === 'git_diff') {
     return invokeIpc('terminal:git-diff', {
       workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
-      staged: payload.staged === true
+      staged: payload.staged === true,
     });
   }
 
@@ -154,7 +154,7 @@ async function executeTerminalTool(action) {
       workingDir: await resolveTerminalCwd(payload.working_directory ?? payload.path),
       includeLint: payload.include_lint !== false,
       includeTest: payload.include_test !== false,
-      includeBuild: payload.include_build !== false
+      includeBuild: payload.include_build !== false,
     });
   }
 
@@ -162,12 +162,15 @@ async function executeTerminalTool(action) {
     return invokeIpc('terminal:spawn-command', {
       command: payload.command,
       cwd: await resolveTerminalCwd(payload.working_directory ?? payload.cwd),
-      allowRisky: payload.allow_risky === true
+      allowRisky: payload.allow_risky === true,
     });
   }
 
   if (action.tool === 'read_terminal_output') {
-    return invokeIpc('terminal:read-output', payload.process_id ?? payload.processId ?? payload.pid);
+    return invokeIpc(
+      'terminal:read-output',
+      payload.process_id ?? payload.processId ?? payload.pid,
+    );
   }
 
   return { ok: false, error: `Unsupported terminal tool: ${action.tool || 'unknown'}` };
@@ -177,16 +180,13 @@ async function executeToolsetTool(action) {
   const payload = action?.payload ?? {};
   return invokeIpc('toolset:execute-tool', {
     tool: action.tool,
-    parameters: payload.parameters ?? {}
+    parameters: payload.parameters ?? {},
   });
 }
 
 function formatTerminalResultForModel(action, result) {
   const payload = action?.payload ?? {};
-  const lines = [
-    'Terminal tool result',
-    `Tool: ${action.tool || 'unknown'}`
-  ];
+  const lines = ['Terminal tool result', `Tool: ${action.tool || 'unknown'}`];
 
   if (payload.command) lines.push(`Command: ${payload.command}`);
   if (result?.cwd) lines.push(`Working directory: ${result.cwd}`);
@@ -199,8 +199,10 @@ function formatTerminalResultForModel(action, result) {
   if (result?.stdout) lines.push(`STDOUT:\n${result.stdout}`);
   if (result?.stderr) lines.push(`STDERR:\n${result.stderr}`);
   if (result?.summary) lines.push(`Summary:\n${JSON.stringify(result.summary, null, 2)}`);
-  if (Array.isArray(result?.matches)) lines.push(`Matches:\n${JSON.stringify(result.matches, null, 2)}`);
-  if (Array.isArray(result?.entries)) lines.push(`Entries:\n${JSON.stringify(result.entries, null, 2)}`);
+  if (Array.isArray(result?.matches))
+    lines.push(`Matches:\n${JSON.stringify(result.matches, null, 2)}`);
+  if (Array.isArray(result?.entries))
+    lines.push(`Entries:\n${JSON.stringify(result.entries, null, 2)}`);
   if (result?.content) lines.push(`Content:\n${result.content}`);
   if (result?.buffer) lines.push(`Output buffer:\n${result.buffer}`);
 
@@ -212,10 +214,7 @@ function formatTerminalResultForModel(action, result) {
 }
 
 function formatToolsetResultForModel(action, result) {
-  const lines = [
-    'Built-in tool result',
-    `Tool: ${action.tool || 'unknown'}`
-  ];
+  const lines = ['Built-in tool result', `Tool: ${action.tool || 'unknown'}`];
 
   if (result?.output) lines.push(`Output:\n${result.output}`);
   if (result?.error) lines.push(`Error:\n${result.error}`);
@@ -246,7 +245,7 @@ async function runChannelAgent({
   memoryContext,
   terminalTools,
   toolsetTools,
-  isNewSession
+  isNewSession,
 }) {
   let provider = null;
   let model = null;
@@ -262,7 +261,7 @@ async function runChannelAgent({
       terminalTools,
       toolsetTools,
       isNewSession: isNewSession && depth === 0,
-      source: 'channel'
+      source: 'channel',
     });
 
     provider = result?.providerLabel ?? result?.providerId ?? provider;
@@ -283,7 +282,7 @@ async function runChannelAgent({
         text: action.visibleContent || 'I could not finish the requested tool workflow.',
         thinking: finalThinking,
         provider,
-        model
+        model,
       };
     }
 
@@ -305,7 +304,7 @@ async function runChannelAgent({
     workingMessages = [
       ...workingMessages,
       { role: 'assistant', content: visibleContent },
-      { role: 'user', content: modelResult }
+      { role: 'user', content: modelResult },
     ];
   }
 
@@ -313,7 +312,7 @@ async function runChannelAgent({
     text: finalText || 'I could not finish the requested tool workflow.',
     thinking: finalThinking,
     provider,
-    model
+    model,
   };
 }
 
@@ -332,7 +331,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
     error = null,
     metadata = {},
     provider = null,
-    model = null
+    model = null,
   }) {
     const repliedAt = new Date().toISOString();
     await invokeIpc('channels:save-message', {
@@ -349,7 +348,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
       timestamp: repliedAt,
       externalId: metadata?.externalId ?? null,
       targetId: metadata?.targetId ?? null,
-      conversationId: metadata?.conversationId ?? null
+      conversationId: metadata?.conversationId ?? null,
     }).catch(() => {});
   }
 
@@ -358,7 +357,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
     const activePersona = getActivePersona?.() ?? null;
     const [memoryContext, loadedToolsetPrompt] = await Promise.all([
       loadMemoryContext(),
-      toolsetPrompt === null ? loadToolsetPrompt() : Promise.resolve(toolsetPrompt)
+      toolsetPrompt === null ? loadToolsetPrompt() : Promise.resolve(toolsetPrompt),
     ]);
     toolsetPrompt = loadedToolsetPrompt;
 
@@ -367,9 +366,9 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
       metadata.systemPrompt ?? '',
       formatText(strings.gateway.channelContext, {
         from: from || 'User',
-        channel: channelLabel
+        channel: channelLabel,
       }),
-      strings.gateway.agentContext ?? ''
+      strings.gateway.agentContext ?? '',
     ].filter((part) => String(part ?? '').trim());
 
     try {
@@ -379,7 +378,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
         memoryContext,
         terminalTools: chatStrings.terminal?.systemPrompt ?? '',
         toolsetTools: toolsetPrompt || '',
-        isNewSession: false
+        isNewSession: false,
       });
 
       const reply = stripThinking(result?.text ?? '') || strings.gateway.noProvider;
@@ -391,15 +390,16 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
         status: 'success',
         metadata,
         provider: result?.providerLabel ?? result?.providerId ?? null,
-        model: result?.modelLabel ?? result?.modelId ?? null
+        model: result?.modelLabel ?? result?.modelId ?? null,
       });
       await invokeIpc('channels:reply', id, reply);
     } catch (error) {
-      const reply = error?.name === 'AbortError'
-        ? strings.gateway.timeout
-        : formatText(strings.gateway.errorPrefix, {
-          message: error?.message ?? String(error ?? 'Unknown error')
-        });
+      const reply =
+        error?.name === 'AbortError'
+          ? strings.gateway.timeout
+          : formatText(strings.gateway.errorPrefix, {
+              message: error?.message ?? String(error ?? 'Unknown error'),
+            });
 
       await saveMessage({
         channelName,
@@ -408,7 +408,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
         reply,
         status: 'error',
         error: error?.message ?? String(error ?? 'Unknown error'),
-        metadata
+        metadata,
       });
       await invokeIpc('channels:reply', id, reply).catch(() => {});
     }
@@ -419,9 +419,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
       if (started) return;
       started = true;
       dispose = onIpc('channels:incoming', (payload) => {
-        chain = chain
-          .catch(() => {})
-          .then(() => processIncoming(payload));
+        chain = chain.catch(() => {}).then(() => processIncoming(payload));
       });
     },
 
@@ -429,6 +427,6 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
       dispose?.();
       dispose = null;
       started = false;
-    }
+    },
   };
 }

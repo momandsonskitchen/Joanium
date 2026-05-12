@@ -1,4 +1,4 @@
-@import "../Common/Common.css";
+@import '../Common/Common.css';
 
 .joanium-dialog-box {
   position: fixed;
@@ -87,7 +87,9 @@
 
 .joanium-dialog-box__panel[data-variant='destructive'] .joanium-dialog-box__button--confirm {
   background: linear-gradient(135deg, #f5b8b8 0%, #d45a5a 100%);
-  box-shadow: 0 18px 44px rgba(180, 60, 60, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 18px 44px rgba(180, 60, 60, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 @keyframes dialog-box-enter {

@@ -1,16 +1,12 @@
 export default [
   {
-    ignores: [
-      'dist/**',
-      'node_modules/**',
-      'Data/**'
-    ]
+    ignores: ['dist/**', 'node_modules/**', 'Data/**'],
   },
   {
     files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'module'
-    }
-  }
+      sourceType: 'module',
+    },
+  },
 ];

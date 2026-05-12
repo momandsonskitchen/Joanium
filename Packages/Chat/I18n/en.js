@@ -28,7 +28,7 @@ const en = {
     workedFor: 'Worked for {duration}',
     healthGreen: 'Model is available',
     healthYellow: 'Checking availability...',
-    healthRed: 'Model may be discontinued or unavailable'
+    healthRed: 'Model may be discontinued or unavailable',
   },
   diag: {
     statusLabel: 'Status',
@@ -41,7 +41,7 @@ const en = {
     providerUnreachable: 'AI provider: Unreachable',
     providerSlow: 'The AI provider is taking longer than usual to respond',
     providerNoEndpoint: 'AI provider: Status unknown',
-    checkSettings: 'Check your API key or provider settings'
+    checkSettings: 'Check your API key or provider settings',
   },
   projects: {
     activeHint: 'This project context will be used in new chats.',
@@ -49,7 +49,8 @@ const en = {
     systemContextName: 'Project name: {name}',
     systemContextInfo: 'Project context: {info}',
     systemContextFolder: 'Project workspace folder: {folder}',
-    systemContextGit: 'Use the project workspace folder as the default working directory for terminal, git status, git diff, and project checks.'
+    systemContextGit:
+      'Use the project workspace folder as the default working directory for terminal, git status, git diff, and project checks.',
   },
   browserPreview: {
     eyebrow: 'Browser',
@@ -65,7 +66,7 @@ const en = {
     reload: 'Reload',
     close: 'Close preview',
     emptyTitle: 'No browser page yet',
-    emptyCopy: 'Open a URL here, or let browser tools show their work in this panel.'
+    emptyCopy: 'Open a URL here, or let browser tools show their work in this panel.',
   },
   terminal: {
     open: 'Open terminal',
@@ -82,7 +83,8 @@ const en = {
     copied: 'Copied',
     clear: 'Clear',
     allowRisky: 'Allow high-risk command',
-    allowRiskyDescription: 'Required for commands that can mutate files, Git history, or local services.',
+    allowRiskyDescription:
+      'Required for commands that can mutate files, Git history, or local services.',
     quickCommands: 'Quick commands',
     gitStatus: 'Git status',
     gitDiff: 'Git diff',
@@ -132,9 +134,9 @@ const en = {
       git_push_sync: 'Git pull and push',
       run_project_checks: 'Run project checks',
       start_local_server: 'Start local server',
-      read_terminal_output: 'Read terminal output'
+      read_terminal_output: 'Read terminal output',
     },
-    systemPrompt: ''
+    systemPrompt: '',
   },
   tools: {
     runningTool: 'Running a built-in tool...',
@@ -146,7 +148,8 @@ const en = {
     subAgentsRunning: 'Running sub-agents...',
     subAgentsComplete: 'Sub-agents completed.',
     subAgentsFailed: 'Sub-agents failed.',
-    subAgentFallbackGoal: 'Help the coordinator finish the user request by combining focused delegated handoffs.',
+    subAgentFallbackGoal:
+      'Help the coordinator finish the user request by combining focused delegated handoffs.',
     subAgentsResultHeader: 'Sub-agent handoffs',
     subAgentsCoordinationGoal: 'Coordination goal: {goal}',
     subAgentsNoTasks: 'No valid sub-agent tasks were provided.',
@@ -162,7 +165,7 @@ const en = {
     subAgentStatusFailed: 'Failed',
     subAgentPromptSection: 'Prompt',
     subAgentOutputSection: 'Output',
-    subAgentErrorSection: 'Error'
+    subAgentErrorSection: 'Error',
   },
   git: {
     refresh: 'Refresh git status',
@@ -180,20 +183,20 @@ const en = {
       diff: 'View diff',
       push: 'Push',
       pull: 'Pull',
-      status: 'Status'
+      status: 'Status',
     },
     resultLabels: {
       diff: 'Git diff',
       push: 'Git push',
       pull: 'Git pull',
-      status: 'Git status'
+      status: 'Git status',
     },
     commands: {
       diff: 'git diff',
       push: 'git push',
       pull: 'git pull',
-      status: 'git status'
-    }
+      status: 'git status',
+    },
   },
   slash: {
     label: 'Slash commands',
@@ -203,16 +206,16 @@ const en = {
       modes: 'Modes',
       navigate: 'Navigate',
       templates: 'Templates',
-      agents: 'Agents'
+      agents: 'Agents',
     },
     badges: {
       action: 'Action',
       mode: 'Mode',
       navigate: 'Nav',
       template: 'Template',
-      agent: 'Agent'
-    }
-  }
+      agent: 'Agent',
+    },
+  },
 };
 
 export default en;

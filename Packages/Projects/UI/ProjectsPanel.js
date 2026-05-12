@@ -7,11 +7,12 @@ import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 function createProjectId(name) {
-  const sanitized = (name || 'Project').trim()
-    .replace(/[^a-zA-Z0-9]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    || 'Project';
+  const sanitized =
+    (name || 'Project')
+      .trim()
+      .replace(/[^a-zA-Z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'Project';
   const unique = Math.random().toString(36).slice(2, 7).padEnd(5, '0');
   return `${sanitized}-${unique}`;
 }
@@ -47,12 +48,12 @@ function getProjectCoverUrl(coverImagePath) {
 
 export function createProjectsPanel(strings, { onOpenProject, getActiveProject }) {
   // Panel-scoped draft state
-  let draftName           = '';
-  let draftIcon           = '📁';
-  let draftInfo           = '';
+  let draftName = '';
+  let draftIcon = '📁';
+  let draftInfo = '';
   let draftCoverImagePath = '';
-  let draftFolderPath     = '';
-  let editingProjectId        = null;
+  let draftFolderPath = '';
+  let editingProjectId = null;
   let editingProjectCreatedAt = null;
 
   // Reference to the built panel element — set after build() is called.
@@ -88,10 +89,16 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     if (filteredProjects.length === 0) {
       const empty = createElement('div', 'chat-projects__empty');
       empty.append(
-        createElement('p', 'chat-projects__empty-title',
-          normalizedQuery ? strings.noResults : strings.empty),
-        createElement('p', 'chat-projects__empty-hint',
-          normalizedQuery ? strings.noResultsHint : strings.emptyHint)
+        createElement(
+          'p',
+          'chat-projects__empty-title',
+          normalizedQuery ? strings.noResults : strings.empty,
+        ),
+        createElement(
+          'p',
+          'chat-projects__empty-hint',
+          normalizedQuery ? strings.noResultsHint : strings.emptyHint,
+        ),
       );
       listEl.append(empty);
       return;
@@ -109,14 +116,14 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     const isActiveProject = activeProject?.id === project.id;
     const card = createElement(
       'div',
-      `chat-projects__card${isActiveProject ? ' chat-projects__card--active' : ''}`
+      `chat-projects__card${isActiveProject ? ' chat-projects__card--active' : ''}`,
     );
 
     const coverUrl = getProjectCoverUrl(project.coverImagePath);
     const iconEl = createElement(
       'div',
       `chat-projects__card-icon${coverUrl ? ' chat-projects__card-icon--image' : ''}`,
-      coverUrl ? '' : (project.icon || '📁')
+      coverUrl ? '' : project.icon || '📁',
     );
 
     if (coverUrl) {
@@ -127,12 +134,20 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       iconEl.append(coverImage);
     }
 
-    const body   = createElement('div', 'chat-projects__card-body');
+    const body = createElement('div', 'chat-projects__card-body');
     const nameEl = createElement('div', 'chat-projects__card-name', project.name);
-    const dateStr = new Date(project.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    const dateStr = new Date(project.createdAt).toLocaleDateString([], {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
     const metaWrap = createElement('div', 'chat-projects__card-meta-wrap');
     metaWrap.append(
-      createElement('div', 'chat-projects__card-meta', formatText(strings.created, { date: dateStr }))
+      createElement(
+        'div',
+        'chat-projects__card-meta',
+        formatText(strings.created, { date: dateStr }),
+      ),
     );
 
     body.append(nameEl, metaWrap);
@@ -150,7 +165,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
     const openBtn = createElement(
       'button',
-      `chat-projects__open-btn${isActiveProject ? ' chat-projects__open-btn--active' : ''}`
+      `chat-projects__open-btn${isActiveProject ? ' chat-projects__open-btn--active' : ''}`,
     );
     openBtn.type = 'button';
     openBtn.textContent = isActiveProject ? strings.active : strings.open;
@@ -175,8 +190,11 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       }
     });
 
-    const deleteBtn = createElement('button', 'chat-projects__card-btn chat-projects__card-btn--danger');
-    deleteBtn.type  = 'button';
+    const deleteBtn = createElement(
+      'button',
+      'chat-projects__card-btn chat-projects__card-btn--danger',
+    );
+    deleteBtn.type = 'button';
     deleteBtn.setAttribute('aria-label', strings.delete);
     deleteBtn.append(createIcon('trash', 'chat-projects__card-btn-icon'));
     deleteBtn.addEventListener('click', async (e) => {
@@ -200,7 +218,9 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     });
 
     actions.append(editBtn, deleteBtn);
-    card.addEventListener('click', () => { void openProject(); });
+    card.addEventListener('click', () => {
+      void openProject();
+    });
     card.append(iconEl, body, openBtn, actions);
     return card;
   }
@@ -219,7 +239,11 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
     // ── Left: form ────────────────────────────────────────────────────────
     const formCol = createElement('div', 'chat-projects__form-col');
-    const formHeading = createElement('p', 'chat-projects__form-heading', strings.newProjectHeading);
+    const formHeading = createElement(
+      'p',
+      'chat-projects__form-heading',
+      strings.newProjectHeading,
+    );
     formCol.append(formHeading);
 
     // Name input
@@ -231,12 +255,12 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       onInput: (value) => {
         draftName = value;
         syncSaveBtn();
-      }
+      },
     });
 
     // Folder row
     const folderLabel = createElement('label', 'chat-projects__info-label', strings.folderLabel);
-    const folderRow   = createElement('div', 'chat-projects__folder-row');
+    const folderRow = createElement('div', 'chat-projects__folder-row');
     const folderBox = createInputBoxLite({
       className: 'chat-projects__folder-input',
       placeholder: strings.folderPlaceholder,
@@ -263,8 +287,8 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
     // Cover zone
     const coverLabel = createElement('label', 'chat-projects__info-label', strings.coverLabel);
-    const coverZone  = createElement('button', 'chat-projects__cover-zone');
-    coverZone.type   = 'button';
+    const coverZone = createElement('button', 'chat-projects__cover-zone');
+    coverZone.type = 'button';
     coverZone.setAttribute('aria-label', strings.coverHint);
 
     const coverPreview = document.createElement('img');
@@ -274,13 +298,13 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     const coverPlaceholder = createElement('div', 'chat-projects__cover-placeholder');
     coverPlaceholder.append(
       createIcon('imageUpload', 'chat-projects__cover-icon'),
-      createElement('span', 'chat-projects__cover-hint', strings.coverHint)
+      createElement('span', 'chat-projects__cover-hint', strings.coverHint),
     );
 
     const coverOverlay = createElement('div', 'chat-projects__cover-overlay');
     coverOverlay.append(
       createIcon('imageUpload', 'chat-projects__cover-icon'),
-      createElement('span', 'chat-projects__cover-hint', strings.changeCover)
+      createElement('span', 'chat-projects__cover-hint', strings.changeCover),
     );
 
     coverZone.append(coverPreview, coverPlaceholder, coverOverlay);
@@ -303,25 +327,27 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     });
 
     // Info textarea
-    const infoLabel    = createElement('label', 'chat-projects__info-label', strings.infoLabel);
+    const infoLabel = createElement('label', 'chat-projects__info-label', strings.infoLabel);
     const infoTextarea = document.createElement('textarea');
-    infoTextarea.className   = 'chat-projects__info-textarea';
+    infoTextarea.className = 'chat-projects__info-textarea';
     infoTextarea.placeholder = strings.infoPlaceholder;
-    infoTextarea.rows        = 5;
+    infoTextarea.rows = 5;
     infoTextarea.style.webkitUserSelect = 'text';
-    infoTextarea.style.userSelect       = 'text';
-    infoTextarea.style.cursor           = 'text';
-    infoTextarea.addEventListener('input', (e) => { draftInfo = e.target.value; });
+    infoTextarea.style.userSelect = 'text';
+    infoTextarea.style.cursor = 'text';
+    infoTextarea.addEventListener('input', (e) => {
+      draftInfo = e.target.value;
+    });
 
     // Action buttons
     const formActions = createElement('div', 'chat-projects__form-actions');
 
     const cancelBtn = createElement('button', 'chat-projects__btn-cancel');
-    cancelBtn.type  = 'button';
+    cancelBtn.type = 'button';
     cancelBtn.textContent = strings.cancel;
 
     const saveBtn = createElement('button', 'chat-projects__btn-save');
-    saveBtn.type     = 'button';
+    saveBtn.type = 'button';
     saveBtn.disabled = true;
     saveBtn.textContent = strings.save;
 
@@ -333,38 +359,36 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       formHeading.textContent = editingProjectId
         ? strings.editProjectHeading
         : strings.newProjectHeading;
-      saveBtn.textContent = editingProjectId
-        ? strings.update
-        : strings.save;
+      saveBtn.textContent = editingProjectId ? strings.update : strings.save;
     }
 
     function resetProjectForm() {
-      editingProjectId        = null;
+      editingProjectId = null;
       editingProjectCreatedAt = null;
-      draftName           = '';
-      draftIcon           = '📁';
-      draftInfo           = '';
+      draftName = '';
+      draftIcon = '📁';
+      draftInfo = '';
       draftCoverImagePath = '';
-      draftFolderPath     = '';
+      draftFolderPath = '';
       nameBox.input.value = '';
       folderBox.input.value = '';
-      infoTextarea.value  = '';
+      infoTextarea.value = '';
       syncCoverZone();
       syncFormChrome();
       syncSaveBtn();
     }
 
     function applyProjectToForm(project) {
-      editingProjectId        = project.id;
+      editingProjectId = project.id;
       editingProjectCreatedAt = project.createdAt ?? null;
-      draftName           = project.name ?? '';
-      draftIcon           = project.icon ?? '📁';
-      draftInfo           = project.info ?? '';
+      draftName = project.name ?? '';
+      draftIcon = project.icon ?? '📁';
+      draftInfo = project.info ?? '';
       draftCoverImagePath = project.coverImagePath ?? '';
-      draftFolderPath     = project.folderPath ?? '';
+      draftFolderPath = project.folderPath ?? '';
       nameBox.input.value = draftName;
       folderBox.input.value = draftFolderPath;
-      infoTextarea.value  = draftInfo;
+      infoTextarea.value = draftInfo;
       syncCoverZone();
       syncFormChrome();
       syncSaveBtn();
@@ -378,14 +402,14 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
       const now = new Date().toISOString();
       const project = {
-        id:             editingProjectId ?? createProjectId(name),
+        id: editingProjectId ?? createProjectId(name),
         name,
-        icon:           draftIcon,
-        info:           draftInfo.trim(),
-        folderPath:     draftFolderPath.trim(),
+        icon: draftIcon,
+        info: draftInfo.trim(),
+        folderPath: draftFolderPath.trim(),
         coverImagePath: draftCoverImagePath.trim(),
-        createdAt:      editingProjectCreatedAt ?? now,
-        updatedAt:      now
+        createdAt: editingProjectCreatedAt ?? now,
+        updatedAt: now,
       };
 
       try {
@@ -411,7 +435,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       coverZone,
       infoLabel,
       infoTextarea,
-      formActions
+      formActions,
     );
     formCol.append(formCard);
 
@@ -422,7 +446,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     const searchWrap = createElement('div', 'chat-projects__list-search');
     const search = createSearchBar({
       placeholder: strings.searchPlaceholder,
-      onChange: (value) => void populateList(listContent, value.trim())
+      onChange: (value) => void populateList(listContent, value.trim()),
     });
     search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(search.element);
@@ -433,8 +457,8 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     body.append(formCol, listCol);
     panel.append(body);
 
-    panel._listEl    = listContent;
-    panel._search    = search;
+    panel._listEl = listContent;
+    panel._search = search;
     panel._startEdit = applyProjectToForm;
     panel._resetForm = resetProjectForm;
     syncFormChrome();

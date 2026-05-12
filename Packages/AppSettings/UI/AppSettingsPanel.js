@@ -22,7 +22,7 @@ function buildModelOptions(providers, userProviderDetails) {
     for (const model of provider.models) {
       options.push({
         value: `${provider.id}/${model.id}`,
-        label: `${provider.label} — ${model.name ?? model.id}`
+        label: `${provider.label} — ${model.name ?? model.id}`,
       });
     }
   }
@@ -42,7 +42,7 @@ function decodeModelValue(value) {
   if (slashIndex < 0) return null;
   return {
     providerId: value.slice(0, slashIndex),
-    modelId: value.slice(slashIndex + 1)
+    modelId: value.slice(slashIndex + 1),
   };
 }
 
@@ -53,8 +53,6 @@ export function createAppSettingsPanel(strings) {
   let settings = null;
   let defaultViewDropdown = null;
   let defaultModelDropdown = null;
-
-
 
   function setStatus(message, tone = 'ok') {
     status.textContent = message;
@@ -108,7 +106,7 @@ export function createAppSettingsPanel(strings) {
     // Fetch app settings and provider catalog in parallel.
     const [nextSettings, bootstrap] = await Promise.all([
       invokeIpc('app-settings:get'),
-      invokeIpc('chat:bootstrap').catch(() => ({ providers: [], user: {} }))
+      invokeIpc('chat:bootstrap').catch(() => ({ providers: [], user: {} })),
     ]);
 
     settings = nextSettings;
@@ -119,18 +117,31 @@ export function createAppSettingsPanel(strings) {
     defaultModelDropdown = null;
 
     // ── Default view row ───────────────────────────────────────────────────
-    const viewOptions = Object.entries(strings.defaultView.views).map(([value, label]) => ({ value, label }));
+    const viewOptions = Object.entries(strings.defaultView.views).map(([value, label]) => ({
+      value,
+      label,
+    }));
     defaultViewDropdown = createDropDown({
       label: '',
       options: viewOptions,
       selectedValue: settings.defaultView ?? 'chat',
-      onChange: (value) => { void updateDefaultView(value); }
+      onChange: (value) => {
+        void updateDefaultView(value);
+      },
     });
 
     const dropdownRow = createElement('div', 'app-settings__dropdown-row');
     const dropdownMeta = createElement('div', 'app-settings__dropdown-meta');
-    const dropdownLabel = createElement('span', 'app-settings__dropdown-label', strings.defaultView.label);
-    const dropdownDesc = createElement('span', 'app-settings__dropdown-desc', strings.defaultView.description);
+    const dropdownLabel = createElement(
+      'span',
+      'app-settings__dropdown-label',
+      strings.defaultView.label,
+    );
+    const dropdownDesc = createElement(
+      'span',
+      'app-settings__dropdown-desc',
+      strings.defaultView.description,
+    );
     dropdownMeta.append(dropdownLabel, dropdownDesc);
     dropdownRow.append(dropdownMeta, defaultViewDropdown.element);
     options.append(dropdownRow);
@@ -149,13 +160,26 @@ export function createAppSettingsPanel(strings) {
       label: '',
       options: modelOptions,
       selectedValue: currentModelValue,
-      onChange: (value) => { void updateDefaultModel(value); }
+      onChange: (value) => {
+        void updateDefaultModel(value);
+      },
     });
 
-    const modelRow = createElement('div', 'app-settings__dropdown-row app-settings__dropdown-row--wide');
+    const modelRow = createElement(
+      'div',
+      'app-settings__dropdown-row app-settings__dropdown-row--wide',
+    );
     const modelMeta = createElement('div', 'app-settings__dropdown-meta');
-    const modelLabel = createElement('span', 'app-settings__dropdown-label', strings.defaultModel.label);
-    const modelDesc = createElement('span', 'app-settings__dropdown-desc', strings.defaultModel.description);
+    const modelLabel = createElement(
+      'span',
+      'app-settings__dropdown-label',
+      strings.defaultModel.label,
+    );
+    const modelDesc = createElement(
+      'span',
+      'app-settings__dropdown-desc',
+      strings.defaultModel.description,
+    );
     modelMeta.append(modelLabel, modelDesc);
     modelRow.append(modelMeta, defaultModelDropdown.element);
     options.append(modelRow);
@@ -169,7 +193,7 @@ export function createAppSettingsPanel(strings) {
         checked: Boolean(settings[key]),
         onChange: (checked) => {
           void updateSetting(key, checked, checkbox.element);
-        }
+        },
       });
       options.append(checkbox.element);
     }

@@ -28,7 +28,8 @@ function isValidDate({ day, month, year }) {
 
 function providerHasRequirements(provider, details) {
   for (const requirement of provider.requirements) {
-    const value = typeof details?.[requirement.key] === 'string' ? details[requirement.key].trim() : '';
+    const value =
+      typeof details?.[requirement.key] === 'string' ? details[requirement.key].trim() : '';
 
     if (!value) {
       return false;
@@ -136,6 +137,6 @@ export function serializeSetupState(state, providersById) {
     lastCompletedStep: calculateLastCompletedStep(state, providersById),
     profile: cloneState(state.profile),
     providers: cloneState(state.providers),
-    usageModes: [...state.usageModes]
+    usageModes: [...state.usageModes],
   };
 }

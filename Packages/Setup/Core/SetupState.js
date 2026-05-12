@@ -5,7 +5,7 @@ import {
   mergeUserStates,
   readUserState,
   sanitizeIncomingUserState,
-  writeUserState
+  writeUserState,
 } from '../../Shared/UserData/UserData.js';
 
 export function createSetupStateManager({ rootDirectory }) {
@@ -13,13 +13,13 @@ export function createSetupStateManager({ rootDirectory }) {
     async getBootstrapPayload() {
       const [state, providers] = await Promise.all([
         readUserState(rootDirectory),
-        readProviderCatalog(rootDirectory)
+        readProviderCatalog(rootDirectory),
       ]);
 
       return {
         state,
         providers,
-        logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href
+        logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href,
       };
     },
     async getLaunchPackageId() {
@@ -39,6 +39,6 @@ export function createSetupStateManager({ rootDirectory }) {
       mergedState.onboardingCompleted = true;
       mergedState.completedAt = new Date().toISOString();
       return writeUserState(rootDirectory, mergedState);
-    }
+    },
   };
 }

@@ -6,16 +6,16 @@ import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js'
 // ── Crypto constants ────────────────────────────────────────────────────────
 // 210,000 PBKDF2-SHA512 iterations — matches OWASP 2024 recommendation.
 const HASH_ITERATIONS = 210_000;
-const HASH_LENGTH     = 64;      // bytes → 128-char hex string
-const HASH_DIGEST     = 'sha512';
-const SALT_BYTES      = 32;      // 256-bit random salt per credential
+const HASH_LENGTH = 64; // bytes → 128-char hex string
+const HASH_DIGEST = 'sha512';
+const SALT_BYTES = 32; // 256-bit random salt per credential
 
 // ── Rate-limiting schedule ──────────────────────────────────────────────────
 const LOCKOUT_SCHEDULE = [
-  { minAttempts:  3, durationMs:       30_000 }, //  30 seconds
-  { minAttempts:  5, durationMs:  5 * 60_000  }, //   5 minutes
-  { minAttempts:  7, durationMs: 15 * 60_000  }, //  15 minutes
-  { minAttempts: 10, durationMs: 60 * 60_000  }, //   1 hour
+  { minAttempts: 3, durationMs: 30_000 }, //  30 seconds
+  { minAttempts: 5, durationMs: 5 * 60_000 }, //   5 minutes
+  { minAttempts: 7, durationMs: 15 * 60_000 }, //  15 minutes
+  { minAttempts: 10, durationMs: 60 * 60_000 }, //   1 hour
 ];
 
 // ── Crypto helpers ──────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ function createDefaultSecurity() {
     secretAnswerSalt: null,
     failedPasswordAttempts: 0,
     lockedUntil: null,
-    autoLockTimeout: 'never'
+    autoLockTimeout: 'never',
   };
 }
 
@@ -95,18 +95,16 @@ export function createSecurityStateManager({ rootDirectory }) {
   return {
     async getStatus() {
       const state = await readSecurity();
-      const now   = Date.now();
+      const now = Date.now();
       const isCurrentlyLocked =
-        state.enabled &&
-        state.lockedUntil !== null &&
-        now < state.lockedUntil;
+        state.enabled && state.lockedUntil !== null && now < state.lockedUntil;
 
       return {
-        enabled:        state.enabled,
-        locked:         isCurrentlyLocked,
-        lockedUntil:    isCurrentlyLocked ? state.lockedUntil : null,
+        enabled: state.enabled,
+        locked: isCurrentlyLocked,
+        lockedUntil: isCurrentlyLocked ? state.lockedUntil : null,
         failedAttempts: state.failedPasswordAttempts,
-        secretQuestion: state.enabled ? state.secretQuestion : null
+        secretQuestion: state.enabled ? state.secretQuestion : null,
       };
     },
 
@@ -121,8 +119,8 @@ export function createSecurityStateManager({ rootDirectory }) {
         return { success: false, error: 'missingAnswer' };
       }
 
-      const passwordSalt     = generateSalt();
-      const passwordHash     = hashValue(password, passwordSalt);
+      const passwordSalt = generateSalt();
+      const passwordHash = hashValue(password, passwordSalt);
       const secretAnswerSalt = generateSalt();
       // Normalise answer: trim + lowercase so casing doesn't matter.
       const secretAnswerHash = hashValue(secretAnswer.trim().toLowerCase(), secretAnswerSalt);
@@ -137,7 +135,7 @@ export function createSecurityStateManager({ rootDirectory }) {
         secretAnswerHash,
         secretAnswerSalt,
         failedPasswordAttempts: 0,
-        lockedUntil: null
+        lockedUntil: null,
       });
 
       return { success: true };
@@ -164,10 +162,10 @@ export function createSecurityStateManager({ rootDirectory }) {
       // Still within a lockout window — reject immediately.
       if (state.lockedUntil !== null && now < state.lockedUntil) {
         return {
-          success:        false,
-          locked:         true,
-          lockedUntil:    state.lockedUntil,
-          failedAttempts: state.failedPasswordAttempts
+          success: false,
+          locked: true,
+          lockedUntil: state.lockedUntil,
+          failedAttempts: state.failedPasswordAttempts,
         };
       }
 
@@ -179,21 +177,21 @@ export function createSecurityStateManager({ rootDirectory }) {
       }
 
       // Increment failure counter and apply lockout.
-      const nextAttempts    = state.failedPasswordAttempts + 1;
-      const lockDuration    = getLockoutDuration(nextAttempts);
+      const nextAttempts = state.failedPasswordAttempts + 1;
+      const lockDuration = getLockoutDuration(nextAttempts);
       const nextLockedUntil = lockDuration > 0 ? now + lockDuration : null;
 
       await writeSecurity({
         ...state,
         failedPasswordAttempts: nextAttempts,
-        lockedUntil:            nextLockedUntil
+        lockedUntil: nextLockedUntil,
       });
 
       return {
-        success:        false,
-        locked:         nextLockedUntil !== null,
-        lockedUntil:    nextLockedUntil,
-        failedAttempts: nextAttempts
+        success: false,
+        locked: nextLockedUntil !== null,
+        lockedUntil: nextLockedUntil,
+        failedAttempts: nextAttempts,
       };
     },
 
@@ -204,7 +202,7 @@ export function createSecurityStateManager({ rootDirectory }) {
       const ok = verifyValue(
         answer.trim().toLowerCase(),
         state.secretAnswerHash,
-        state.secretAnswerSalt
+        state.secretAnswerSalt,
       );
 
       if (ok) {
@@ -250,10 +248,10 @@ export function createSecurityStateManager({ rootDirectory }) {
         passwordHash,
         passwordSalt,
         failedPasswordAttempts: 0,
-        lockedUntil:            null
+        lockedUntil: null,
       });
 
       return { success: true };
-    }
+    },
   };
 }

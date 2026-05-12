@@ -8,12 +8,12 @@ export async function createPackage() {
     ipcHandlers: [
       {
         channel: 'slash-commands:list',
-        handler: async () => registry.listCommands()
+        handler: async () => registry.listCommands(),
       },
       {
         channel: 'slash-commands:get-mode-instruction',
-        handler: async (_event, modeId) => registry.getModeInstruction(modeId)
-      }
-    ]
+        handler: async (_event, modeId) => registry.getModeInstruction(modeId),
+      },
+    ],
   };
 }

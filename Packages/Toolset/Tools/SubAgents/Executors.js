@@ -11,8 +11,8 @@ export function createSubAgentToolHandlers() {
       return [
         'Sub-agent delegation is executed by the Chat package so it can reuse the active conversation, selected model, persona, and project context.',
         `Queued tasks: ${tasks.length}`,
-        ...tasks.map((task, index) => `${index + 1}. ${task.title}: ${task.goal}`)
+        ...tasks.map((task, index) => `${index + 1}. ${task.title}: ${task.goal}`),
       ].join('\n');
-    }
+    },
   };
 }

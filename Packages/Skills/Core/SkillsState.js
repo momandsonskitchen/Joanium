@@ -2,39 +2,34 @@ import path from 'node:path';
 import { unlink } from 'node:fs/promises';
 import {
   listNamespacedMarkdown,
-  loadNamespacedMarkdown
+  loadNamespacedMarkdown,
 } from '../../Shared/Markdown/MarkdownLibrary.js';
 import { sanitizeMarkdownFilename, sanitizePathSegment } from '../../Shared/Storage/SafePath.js';
 import {
   getBundledResourceDirectory,
-  getWritableResourceDirectory
+  getWritableResourceDirectory,
 } from '../../Shared/Storage/ResourcePaths.js';
 
 export function createSkillsStateManager({ rootDirectory }) {
   const bundledSkillsDir = getBundledResourceDirectory(rootDirectory, 'Skills');
   const writableSkillsDir = getWritableResourceDirectory(rootDirectory, 'Skills');
-  const skillsDirs = [...new Set([
-    path.resolve(bundledSkillsDir),
-    path.resolve(writableSkillsDir)
-  ])];
+  const skillsDirs = [
+    ...new Set([path.resolve(bundledSkillsDir), path.resolve(writableSkillsDir)]),
+  ];
 
   async function listSkillsFrom(skillsDir) {
-    const bundledOnly = path.resolve(skillsDir) === path.resolve(bundledSkillsDir)
-      && path.resolve(bundledSkillsDir) !== path.resolve(writableSkillsDir);
+    const bundledOnly =
+      path.resolve(skillsDir) === path.resolve(bundledSkillsDir) &&
+      path.resolve(bundledSkillsDir) !== path.resolve(writableSkillsDir);
 
-    return listNamespacedMarkdown(skillsDir, ({
-      id,
-      namespace,
-      filename,
-      frontmatter
-    }) => ({
+    return listNamespacedMarkdown(skillsDir, ({ id, namespace, filename, frontmatter }) => ({
       id,
       namespace,
       filename,
       name: frontmatter.name || filename.replace(/\.md$/, ''),
       description: frontmatter.description || '',
       trigger: frontmatter.trigger || '',
-      protected: bundledOnly
+      protected: bundledOnly,
     }));
   }
 
@@ -53,23 +48,24 @@ export function createSkillsStateManager({ rootDirectory }) {
 
   async function loadSkill(namespace, filename) {
     let lastError;
-    for (const skillsDir of [...new Set([path.resolve(writableSkillsDir), path.resolve(bundledSkillsDir)])]) {
+    for (const skillsDir of [
+      ...new Set([path.resolve(writableSkillsDir), path.resolve(bundledSkillsDir)]),
+    ]) {
       try {
-        return await loadNamespacedMarkdown(skillsDir, namespace, filename, ({
-          id,
-          namespace: safeNamespace,
-          filename: safeFilename,
-          frontmatter,
-          content
-        }) => ({
-          id,
-          namespace: safeNamespace,
-          filename: safeFilename,
-          name: frontmatter.name || safeFilename.replace(/\.md$/, ''),
-          description: frontmatter.description || '',
-          trigger: frontmatter.trigger || '',
-          content
-        }));
+        return await loadNamespacedMarkdown(
+          skillsDir,
+          namespace,
+          filename,
+          ({ id, namespace: safeNamespace, filename: safeFilename, frontmatter, content }) => ({
+            id,
+            namespace: safeNamespace,
+            filename: safeFilename,
+            name: frontmatter.name || safeFilename.replace(/\.md$/, ''),
+            description: frontmatter.description || '',
+            trigger: frontmatter.trigger || '',
+            content,
+          }),
+        );
       } catch (error) {
         lastError = error;
       }

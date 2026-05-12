@@ -58,7 +58,7 @@
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.58);
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
     0 10px 28px rgba(130, 95, 65, 0.07);
   backdrop-filter: blur(12px) saturate(1.4);
@@ -101,7 +101,7 @@
   background: rgba(255, 255, 255, 0.54);
   color: var(--color-chat-text-title);
   box-shadow:
-    inset 0 0 0 1px rgba(170, 134, 104, 0.10),
+    inset 0 0 0 1px rgba(170, 134, 104, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.82);
   transition:
     transform 140ms ease,
@@ -114,7 +114,7 @@
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.92);
   box-shadow:
-    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.20),
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.2),
     0 8px 20px rgba(130, 95, 65, 0.08);
 }
 
@@ -140,7 +140,7 @@
 .chat-memory__skeleton {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.46);
-  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.1);
 }
 
 .chat-memory__skeleton {
@@ -256,8 +256,8 @@
   color: var(--color-chat-text-title);
   box-shadow:
     inset 0 0 0 1px rgba(170, 134, 104, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.90);
-  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
   font-size: 13px;
   line-height: 1.62;
   -webkit-user-select: text;

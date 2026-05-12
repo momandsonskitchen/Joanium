@@ -13,16 +13,12 @@ import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js'
 
 export function createHistoryStateManager({ rootDirectory }) {
   const dataDirectory = getWritableDataDirectory(rootDirectory);
-  const chatsDirectory    = path.join(dataDirectory, 'Chats');
+  const chatsDirectory = path.join(dataDirectory, 'Chats');
   const projectsDirectory = path.join(dataDirectory, 'Projects');
 
   function getChatsDirectory(projectId) {
     if (!projectId) return chatsDirectory;
-    return path.join(
-      projectsDirectory,
-      sanitizeFileStem(projectId),
-      'Chats'
-    );
+    return path.join(projectsDirectory, sanitizeFileStem(projectId), 'Chats');
   }
 
   async function saveSession(session) {
@@ -52,15 +48,15 @@ export function createHistoryStateManager({ rootDirectory }) {
     for (const file of files) {
       if (!file.endsWith('.json')) continue;
       try {
-        const raw     = await readFile(path.join(targetDir, file), 'utf8');
+        const raw = await readFile(path.join(targetDir, file), 'utf8');
         const session = JSON.parse(raw);
         sessions.push({
-          id:           session.id,
-          title:        session.title,
-          pinned:       session.pinned ?? false,
-          createdAt:    session.createdAt,
-          updatedAt:    session.updatedAt,
-          messageCount: Array.isArray(session.messages) ? session.messages.length : 0
+          id: session.id,
+          title: session.title,
+          pinned: session.pinned ?? false,
+          createdAt: session.createdAt,
+          updatedAt: session.updatedAt,
+          messageCount: Array.isArray(session.messages) ? session.messages.length : 0,
         });
       } catch {
         // Skip corrupt or unreadable files silently
@@ -75,43 +71,43 @@ export function createHistoryStateManager({ rootDirectory }) {
   }
 
   async function loadSession(id, projectId) {
-    const safeId    = sanitizeFileStem(id);
+    const safeId = sanitizeFileStem(id);
     if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
-    const filePath  = path.join(targetDir, `${safeId}.json`);
-    const raw       = await readFile(filePath, 'utf8');
+    const filePath = path.join(targetDir, `${safeId}.json`);
+    const raw = await readFile(filePath, 'utf8');
     return JSON.parse(raw);
   }
 
   async function deleteSession(id, projectId) {
-    const safeId    = sanitizeFileStem(id);
+    const safeId = sanitizeFileStem(id);
     if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
-    const filePath  = path.join(targetDir, `${safeId}.json`);
+    const filePath = path.join(targetDir, `${safeId}.json`);
     await unlink(filePath);
   }
 
   async function renameSession(id, newTitle, projectId) {
-    const safeId    = sanitizeFileStem(id);
+    const safeId = sanitizeFileStem(id);
     if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
-    const filePath  = path.join(targetDir, `${safeId}.json`);
-    const raw       = await readFile(filePath, 'utf8');
-    const session   = JSON.parse(raw);
-    session.title     = String(newTitle).trim() || session.title;
+    const filePath = path.join(targetDir, `${safeId}.json`);
+    const raw = await readFile(filePath, 'utf8');
+    const session = JSON.parse(raw);
+    session.title = String(newTitle).trim() || session.title;
     session.updatedAt = new Date().toISOString();
     await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
     return session;
   }
 
   async function pinSession(id, pinned, projectId) {
-    const safeId    = sanitizeFileStem(id);
+    const safeId = sanitizeFileStem(id);
     if (!safeId) throw new Error('A valid session id is required.');
     const targetDir = getChatsDirectory(projectId);
-    const filePath  = path.join(targetDir, `${safeId}.json`);
-    const raw       = await readFile(filePath, 'utf8');
-    const session   = JSON.parse(raw);
-    session.pinned  = Boolean(pinned);
+    const filePath = path.join(targetDir, `${safeId}.json`);
+    const raw = await readFile(filePath, 'utf8');
+    const session = JSON.parse(raw);
+    session.pinned = Boolean(pinned);
     await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
     return session;
   }
@@ -122,6 +118,6 @@ export function createHistoryStateManager({ rootDirectory }) {
     loadSession,
     deleteSession,
     renameSession,
-    pinSession
+    pinSession,
   };
 }

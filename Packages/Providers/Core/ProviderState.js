@@ -33,10 +33,7 @@ export function createProviderStateManager({ rootDirectory }) {
     },
 
     async getConfigured() {
-      const [state, catalog] = await Promise.all([
-        readState(),
-        readProviderCatalog(rootDirectory)
-      ]);
+      const [state, catalog] = await Promise.all([readState(), readProviderCatalog(rootDirectory)]);
 
       return catalog.map((provider) => {
         const details = state.providers.details[provider.id] ?? {};
@@ -44,9 +41,11 @@ export function createProviderStateManager({ rootDirectory }) {
         return {
           ...provider,
           configured: isSelected && isProviderConfigured(provider, details),
-          apiKeySaved: isSelected && typeof details.apiKey === 'string' && details.apiKey.length > 0,
-          endpointSaved: isSelected && typeof details.endpoint === 'string' && details.endpoint.length > 0,
-          savedEndpoint: isSelected ? (details.endpoint ?? '') : ''
+          apiKeySaved:
+            isSelected && typeof details.apiKey === 'string' && details.apiKey.length > 0,
+          endpointSaved:
+            isSelected && typeof details.endpoint === 'string' && details.endpoint.length > 0,
+          savedEndpoint: isSelected ? (details.endpoint ?? '') : '',
         };
       });
     },
@@ -81,8 +80,8 @@ export function createProviderStateManager({ rootDirectory }) {
           ...state,
           providers: {
             selected,
-            details: { ...state.providers.details, [providerId]: nextDetails }
-          }
+            details: { ...state.providers.details, [providerId]: nextDetails },
+          },
         };
       });
 
@@ -109,11 +108,11 @@ export function createProviderStateManager({ rootDirectory }) {
         providers: {
           selected: state.providers.selected.filter((id) => id !== providerId),
           details: Object.fromEntries(
-            Object.entries(state.providers.details).filter(([id]) => id !== providerId)
-          )
-        }
+            Object.entries(state.providers.details).filter(([id]) => id !== providerId),
+          ),
+        },
       }));
       return { ok: true };
-    }
+    },
   };
 }

@@ -4,7 +4,7 @@ import { createBootLogger } from '../Boot/Index.js';
 import {
   applyWindowState,
   attachWindowStatePersistence,
-  readWindowState
+  readWindowState,
 } from './Core/WindowState.js';
 
 // Prevent Chromium from throttling timers, IPC, and JS execution when the
@@ -22,7 +22,10 @@ app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
 
 // Speed up GPU channel establishment so the first frame renders immediately
 // when the user switches back to the app after a long absence.
-app.commandLine.appendSwitch('enable-features', 'EarlyEstablishGpuChannel,EstablishGpuChannelAsync');
+app.commandLine.appendSwitch(
+  'enable-features',
+  'EarlyEstablishGpuChannel,EstablishGpuChannelAsync',
+);
 
 let mainWindow = null;
 let currentPackage = null;
@@ -31,7 +34,7 @@ let registeredChannels = new Set();
 let navigationSequence = Promise.resolve();
 
 const writeBootLog = createBootLogger(
-  path.join(process.cwd(), 'Build', 'Logs', 'electron-boot.log')
+  path.join(process.cwd(), 'Build', 'Logs', 'electron-boot.log'),
 );
 
 function registerIpcHandlers(handlerDefinitions = []) {
@@ -71,9 +74,9 @@ async function createMainWindow(entryPackage) {
       sandbox: false,
       nodeIntegration: false,
       spellcheck: false,
-      backgroundThrottling: false
+      backgroundThrottling: false,
     },
-    ...entryPackage.window
+    ...entryPackage.window,
   });
   applyWindowState(browserWindow, windowState);
   attachWindowStatePersistence(browserWindow, rootDirectory);
@@ -114,18 +117,21 @@ async function createMainWindow(entryPackage) {
   browserWindow.webContents.on('did-finish-load', () => {
     writeBootLog('webContents:did-finish-load');
   });
-  browserWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedUrl) => {
-    writeBootLog(
-      'webContents:did-fail-load',
-      JSON.stringify({ errorCode, errorDescription, validatedUrl })
-    );
-    console.error('Renderer failed to load:', {
-      errorCode,
-      errorDescription,
-      validatedUrl
-    });
-    ensureVisible();
-  });
+  browserWindow.webContents.on(
+    'did-fail-load',
+    (_event, errorCode, errorDescription, validatedUrl) => {
+      writeBootLog(
+        'webContents:did-fail-load',
+        JSON.stringify({ errorCode, errorDescription, validatedUrl }),
+      );
+      console.error('Renderer failed to load:', {
+        errorCode,
+        errorDescription,
+        validatedUrl,
+      });
+      ensureVisible();
+    },
+  );
   browserWindow.webContents.on('render-process-gone', (_event, details) => {
     writeBootLog('webContents:render-process-gone', JSON.stringify(details));
     console.error('Renderer process exited:', details);
@@ -150,9 +156,9 @@ async function createMainWindow(entryPackage) {
       const key = input.key.toLowerCase();
       const ctrl = input.control || input.meta;
 
-      const isReload     = ctrl && !input.shift && key === 'r';
-      const isHardReload = ctrl &&  input.shift && key === 'r';
-      const isF5         = key === 'f5';
+      const isReload = ctrl && !input.shift && key === 'r';
+      const isHardReload = ctrl && input.shift && key === 'r';
+      const isF5 = key === 'f5';
 
       if (isReload || isHardReload || isF5) {
         event.preventDefault();

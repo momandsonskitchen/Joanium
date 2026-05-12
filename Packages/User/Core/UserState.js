@@ -27,7 +27,7 @@ export function createUserStateManager({ rootDirectory }) {
     async saveCustomInstructions(customInstructions) {
       const current = await readUserState(rootDirectory);
       const next = mergeUserStates(current, {
-        customInstructions: String(customInstructions ?? '').trim()
+        customInstructions: String(customInstructions ?? '').trim(),
       });
       await writeUserState(rootDirectory, next);
       return next.customInstructions;
@@ -49,7 +49,7 @@ export function createUserStateManager({ rootDirectory }) {
 
       const current = await readUserState(rootDirectory);
       const next = mergeUserStates(current, {
-        profile: { ...current.profile, avatarPath: targetPath }
+        profile: { ...current.profile, avatarPath: targetPath },
       });
       await writeUserState(rootDirectory, next);
       return targetPath;
@@ -64,9 +64,9 @@ export function createUserStateManager({ rootDirectory }) {
       }
 
       const next = mergeUserStates(current, {
-        profile: { ...current.profile, avatarPath: null }
+        profile: { ...current.profile, avatarPath: null },
       });
       await writeUserState(rootDirectory, next);
-    }
+    },
   };
 }

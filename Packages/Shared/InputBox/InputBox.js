@@ -9,7 +9,7 @@ export function createInputBox({
   maxLength,
   autoFocus = false,
   onInput,
-  onKeyDown
+  onKeyDown,
 }) {
   const wrapper = document.createElement('label');
   wrapper.className = 'joanium-input';
@@ -58,6 +58,6 @@ export function createInputBox({
 
   return {
     element: wrapper,
-    input: field
+    input: field,
   };
 }

@@ -33,7 +33,7 @@ const en = {
     skills: 'Skills',
     personas: 'Personas',
     marketplace: 'Marketplace',
-    usage: 'Usage'
+    usage: 'Usage',
   },
   profile: 'Settings',
   settings: {
@@ -46,31 +46,31 @@ const en = {
       providers: 'AI Providers',
       appearance: 'Appearance',
       mcp: 'MCP',
-      shortcuts:     'Shortcuts',
+      shortcuts: 'Shortcuts',
       slashCommands: 'Slash Commands',
-      security:      'Security',
-      about:         'About'
-    }
+      security: 'Security',
+      about: 'About',
+    },
   },
   shortcuts: {
     groups: {
-      navigation: 'Navigation'
+      navigation: 'Navigation',
     },
     items: {
-      newChat:     'New Chat',
-      history:     'History',
-      channels:    'Channels',
-      events:      'Events',
-      projects:    'Projects',
-      memory:      'Memory',
-      templates:   'Templates',
-      agents:      'Agents',
-      skills:      'Skills',
-      personas:    'Personas',
+      newChat: 'New Chat',
+      history: 'History',
+      channels: 'Channels',
+      events: 'Events',
+      projects: 'Projects',
+      memory: 'Memory',
+      templates: 'Templates',
+      agents: 'Agents',
+      skills: 'Skills',
+      personas: 'Personas',
       marketplace: 'Marketplace',
-      usage:       'Usage',
-      settings:    'Settings'
-    }
+      usage: 'Usage',
+      settings: 'Settings',
+    },
   },
   chat,
   channels,
@@ -92,7 +92,7 @@ const en = {
   user,
   about,
   appSettings,
-  security
+  security,
 };
 
 export default en;

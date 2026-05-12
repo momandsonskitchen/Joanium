@@ -46,8 +46,16 @@ export function createMemoryPanel(strings) {
     if (filtered.length === 0) {
       const empty = createElement('div', 'chat-memory__empty');
       empty.append(
-        createElement('p', 'chat-memory__empty-title', normalizedQuery ? strings.noResults : strings.empty),
-        createElement('p', 'chat-memory__empty-hint', normalizedQuery ? strings.noResultsHint : strings.emptyHint)
+        createElement(
+          'p',
+          'chat-memory__empty-title',
+          normalizedQuery ? strings.noResults : strings.empty,
+        ),
+        createElement(
+          'p',
+          'chat-memory__empty-hint',
+          normalizedQuery ? strings.noResultsHint : strings.emptyHint,
+        ),
       );
       listEl.append(empty);
       return;
@@ -61,14 +69,18 @@ export function createMemoryPanel(strings) {
   function buildMemoryCard(memory) {
     const card = createElement(
       'button',
-      `chat-memory__card${activeFilename === memory.filename ? ' chat-memory__card--active' : ''}`
+      `chat-memory__card${activeFilename === memory.filename ? ' chat-memory__card--active' : ''}`,
     );
     card.type = 'button';
     card.append(
       createElement('span', 'chat-memory__card-title', memory.title),
-      createElement('span', 'chat-memory__card-meta', formatText(strings.stats, {
-        lines: String(memory.lineCount ?? 0)
-      }))
+      createElement(
+        'span',
+        'chat-memory__card-meta',
+        formatText(strings.stats, {
+          lines: String(memory.lineCount ?? 0),
+        }),
+      ),
     );
     card.addEventListener('click', () => {
       void loadMemory(memory.filename);
@@ -162,7 +174,9 @@ export function createMemoryPanel(strings) {
     const searchWrap = createElement('div', 'chat-memory__search');
     search = createSearchBar({
       placeholder: strings.searchPlaceholder,
-      onChange: (value) => { void populateList(value.trim()); }
+      onChange: (value) => {
+        void populateList(value.trim());
+      },
     });
     searchWrap.append(search.element);
     listEl = createElement('div', 'chat-memory__list');
@@ -177,8 +191,13 @@ export function createMemoryPanel(strings) {
     saveButton = createElement('button', 'chat-memory__save');
     saveButton.type = 'button';
     saveButton.disabled = true;
-    saveButton.append(createIcon('check', 'chat-memory__save-icon'), createElement('span', 'chat-memory__save-label', strings.save));
-    saveButton.addEventListener('click', () => { void saveMemory(); });
+    saveButton.append(
+      createIcon('check', 'chat-memory__save-icon'),
+      createElement('span', 'chat-memory__save-label', strings.save),
+    );
+    saveButton.addEventListener('click', () => {
+      void saveMemory();
+    });
     editorHeader.append(editorMeta, saveButton);
 
     editor = createElement('textarea', 'chat-memory__editor');
@@ -194,6 +213,6 @@ export function createMemoryPanel(strings) {
 
   return {
     build,
-    onShow: () => populateList(search?.getValue().trim() ?? '')
+    onShow: () => populateList(search?.getValue().trim() ?? ''),
   };
 }

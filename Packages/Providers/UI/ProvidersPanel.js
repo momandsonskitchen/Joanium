@@ -56,8 +56,8 @@ export function createProvidersPanel(strings) {
   }
 
   function refreshDisconnectGuards() {
-    const configuredCount = [...cardRefs.values()].filter(
-      (refs) => refs.card.classList.contains('providers-card--connected')
+    const configuredCount = [...cardRefs.values()].filter((refs) =>
+      refs.card.classList.contains('providers-card--connected'),
     ).length;
 
     for (const refs of cardRefs.values()) {
@@ -148,9 +148,10 @@ export function createProvidersPanel(strings) {
       refreshDisconnectGuards();
       setFeedback(providerId, strings.disconnected_feedback, 'info');
     } catch (error) {
-      const message = error?.message === 'last_provider'
-        ? strings.lastProvider
-        : (error?.message ?? strings.disconnectFailed);
+      const message =
+        error?.message === 'last_provider'
+          ? strings.lastProvider
+          : (error?.message ?? strings.disconnectFailed);
       setFeedback(providerId, message, 'error');
     }
   }
@@ -177,14 +178,14 @@ export function createProvidersPanel(strings) {
     const titleRow = createElement('div', 'providers-card__title-row');
     titleRow.append(createElement('h3', 'providers-card__title', provider.label));
 
-    const typePill = createElement('span', `providers-card__type providers-card__type--${provider.type}`,
-      provider.type === 'local' ? strings.local : strings.cloud
+    const typePill = createElement(
+      'span',
+      `providers-card__type providers-card__type--${provider.type}`,
+      provider.type === 'local' ? strings.local : strings.cloud,
     );
     titleRow.append(typePill);
 
-    const meta = createElement('p', 'providers-card__meta',
-      strings.models(provider.modelCount)
-    );
+    const meta = createElement('p', 'providers-card__meta', strings.models(provider.modelCount));
     titleWrap.append(titleRow, meta);
 
     const status = createElement('span', 'providers-card__status', strings.notConnected);
@@ -207,14 +208,14 @@ export function createProvidersPanel(strings) {
       const field = createSecretField({
         label: strings.apiKeyLabel,
         placeholder: strings.apiKeyPlaceholder,
-        strings
+        strings,
       });
       apiKeyInput = field.input;
       bodyInner.append(field.wrap);
     } else {
       const field = createTextField({
         label: strings.endpointLabel,
-        placeholder: provider.requirements?.[0]?.defaultValue ?? 'http://localhost:11434'
+        placeholder: provider.requirements?.[0]?.defaultValue ?? 'http://localhost:11434',
       });
       endpointInput = field.input;
       bodyInner.append(field.wrap);
@@ -228,8 +229,12 @@ export function createProvidersPanel(strings) {
     connectBtn.type = 'button';
     disconnect.hidden = true;
 
-    disconnect.addEventListener('click', () => { void disconnectProvider(provider.id); });
-    connectBtn.addEventListener('click', () => { void connectProvider(provider.id); });
+    disconnect.addEventListener('click', () => {
+      void disconnectProvider(provider.id);
+    });
+    connectBtn.addEventListener('click', () => {
+      void connectProvider(provider.id);
+    });
     connectBtn.append(connectLabel);
     actions.append(disconnect, connectBtn);
 
@@ -263,7 +268,7 @@ export function createProvidersPanel(strings) {
       connectLabel,
       feedback,
       apiKeyInput,
-      endpointInput
+      endpointInput,
     });
 
     return card;

@@ -32,8 +32,8 @@ export function createPanelHeader({ title, subtitle, actions = [] } = {}) {
 
   const copy = createElement('div', 'panel-header__copy');
   copy.append(
-    createElement('h2', 'panel-header__title',    title),
-    createElement('p',  'panel-header__subtitle', subtitle)
+    createElement('h2', 'panel-header__title', title),
+    createElement('p', 'panel-header__subtitle', subtitle),
   );
 
   header.append(copy, ...actions);

@@ -8,6 +8,6 @@ export function createCloudflareConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeCloudflareChatTool
+    executeTool: executeCloudflareChatTool,
   });
 }

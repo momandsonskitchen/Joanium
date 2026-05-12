@@ -27,12 +27,12 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
             return void lines.push(`\n— ${q.title || 'Section'} —`);
           if (['IMAGE', 'VIDEO'].includes(q.type)) return;
           const reqFlag = q.required ? ' *(required)*' : '';
-          (lines.push(`\n${i + 1}. **${q.title || '(Untitled question)'}**${reqFlag}`),
+          lines.push(`\n${i + 1}. **${q.title || '(Untitled question)'}**${reqFlag}`),
             lines.push(`   Type: ${typeLabel(q.type)}`),
             q.description && lines.push(`   Description: ${q.description}`),
             q.options?.length && lines.push(`   Options: ${q.options.join(' · ')}`),
             q.scale && lines.push(`   Scale: ${q.scale.low} – ${q.scale.high}`),
-            q.questionId && lines.push(`   Question ID: \`${q.questionId}\``));
+            q.questionId && lines.push(`   Question ID: \`${q.questionId}\``);
         }),
         lines.filter((v) => null != v).join('\n')
       );
@@ -122,14 +122,14 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       for (const [qId, answer] of Object.entries(resp.answers ?? {})) {
         const qTitle = qMap[qId] ?? qId,
           value = FormsAPI.extractAnswerValue(answer);
-        (lines.push(`\nQ: ${qTitle}`),
+        lines.push(`\nQ: ${qTitle}`),
           lines.push(`A: ${value}`),
           answer.grade &&
             (lines.push(
               `   Score: ${answer.grade.score ?? 0} / ${answer.grade.questionScore?.maxPoints ?? '?'}`,
             ),
             void 0 !== answer.grade.correct &&
-              lines.push('   Correct: ' + (answer.grade.correct ? 'Yes' : 'No'))));
+              lines.push('   Correct: ' + (answer.grade.correct ? 'Yes' : 'No')));
       }
       return lines.filter(Boolean).join('\n');
     }
@@ -166,8 +166,8 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
           '── Answers ──',
         ];
       for (const [qId, answer] of Object.entries(latest.answers ?? {}))
-        (lines.push(`\nQ: ${qMap[qId] ?? qId}`),
-          lines.push(`A: ${FormsAPI.extractAnswerValue(answer)}`));
+        lines.push(`\nQ: ${qMap[qId] ?? qId}`),
+          lines.push(`A: ${FormsAPI.extractAnswerValue(answer)}`);
       return lines.filter(Boolean).join('\n');
     }
     case 'forms_get_first_response': {
@@ -194,8 +194,8 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
           '── Answers ──',
         ];
       for (const [qId, answer] of Object.entries(first.answers ?? {}))
-        (lines.push(`\nQ: ${qMap[qId] ?? qId}`),
-          lines.push(`A: ${FormsAPI.extractAnswerValue(answer)}`));
+        lines.push(`\nQ: ${qMap[qId] ?? qId}`),
+          lines.push(`A: ${FormsAPI.extractAnswerValue(answer)}`);
       return lines.filter(Boolean).join('\n');
     }
     case 'forms_get_responses_in_range': {
@@ -341,10 +341,10 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
         if (['IMAGE', 'VIDEO'].includes(q.type)) continue;
         qNum++;
         const reqFlag = q.required ? ' *(required)*' : '';
-        (lines.push(`${qNum}. **${q.title || '(Untitled)'}**${reqFlag} — ${typeLabel(q.type)}`),
+        lines.push(`${qNum}. **${q.title || '(Untitled)'}**${reqFlag} — ${typeLabel(q.type)}`),
           q.options?.length && lines.push(`   Options: ${q.options.join(' · ')}`),
           q.scale && lines.push(`   Scale: ${q.scale.low} – ${q.scale.high}`),
-          q.questionId && lines.push(`   ID: \`${q.questionId}\``));
+          q.questionId && lines.push(`   ID: \`${q.questionId}\``);
       }
       return lines.join('\n');
     }
@@ -364,14 +364,14 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       ];
       return (
         matches.forEach((q, i) => {
-          (lines.push(`${i + 1}. **${q.title}**`),
+          lines.push(`${i + 1}. **${q.title}**`),
             lines.push(`   Type: ${typeLabel(q.type)}`),
             lines.push('   Required: ' + (q.required ? 'Yes' : 'No')),
             q.description && lines.push(`   Description: ${q.description}`),
             q.options?.length && lines.push(`   Options: ${q.options.join(' · ')}`),
             q.scale && lines.push(`   Scale: ${q.scale.low} – ${q.scale.high}`),
             q.questionId && lines.push(`   Question ID: \`${q.questionId}\``),
-            lines.push(''));
+            lines.push('');
         }),
         lines.join('\n')
       );
@@ -407,7 +407,7 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       for (const [option, count] of sorted) {
         const pct = ((count / answered) * 100).toFixed(1),
           bar = '█'.repeat(Math.round((count / answered) * 20));
-        (lines.push(`${option}`), lines.push(`  ${bar} ${count} (${pct}%)`));
+        lines.push(`${option}`), lines.push(`  ${bar} ${count} (${pct}%)`);
       }
       return lines.join('\n');
     }
@@ -665,10 +665,10 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
         const valA = FormsAPI.extractAnswerValue(respA.answers?.[q.questionId]),
           valB = FormsAPI.extractAnswerValue(respB.answers?.[q.questionId]),
           same = valA === valB;
-        (lines.push(`**${q.title || '(Untitled)'}**${same ? ' ✓' : ''}`),
+        lines.push(`**${q.title || '(Untitled)'}**${same ? ' ✓' : ''}`),
           lines.push(`  A: ${valA}`),
           lines.push(`  B: ${valB}`),
-          lines.push(''));
+          lines.push('');
       }
       return lines.join('\n');
     }
@@ -777,8 +777,8 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
           pct = ((answered / total) * 100).toFixed(1),
           bar = '█'.repeat(Math.round((answered / total) * 20)),
           reqFlag = q.required ? ' *(required)*' : '';
-        (lines.push(`**${q.title || '(Untitled)'}**${reqFlag}`),
-          lines.push(`  ${bar} ${answered}/${total} answered (${pct}%)`));
+        lines.push(`**${q.title || '(Untitled)'}**${reqFlag}`),
+          lines.push(`  ${bar} ${answered}/${total} answered (${pct}%)`);
       }
       return lines.join('\n');
     }

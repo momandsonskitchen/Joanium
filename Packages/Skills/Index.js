@@ -8,16 +8,18 @@ export async function createPackage({ rootDirectory }) {
     ipcHandlers: [
       {
         channel: 'skills:list-skills',
-        handler: async () => skillsStateManager.listSkills()
+        handler: async () => skillsStateManager.listSkills(),
       },
       {
         channel: 'skills:load-skill',
-        handler: async (_event, namespace, filename) => skillsStateManager.loadSkill(namespace, filename)
+        handler: async (_event, namespace, filename) =>
+          skillsStateManager.loadSkill(namespace, filename),
       },
       {
         channel: 'skills:delete-skill',
-        handler: async (_event, namespace, filename) => skillsStateManager.deleteSkill(namespace, filename)
-      }
-    ]
+        handler: async (_event, namespace, filename) =>
+          skillsStateManager.deleteSkill(namespace, filename),
+      },
+    ],
   };
 }

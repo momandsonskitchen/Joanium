@@ -25,7 +25,7 @@ import { createElement } from '../Utils/DomUtils.js';
  * @returns {{ el: HTMLElement, append: (item: HTMLElement) => void }}
  */
 export function createTwoColGrid() {
-  const el   = createElement('section', 'two-col-grid');
+  const el = createElement('section', 'two-col-grid');
   const colA = createElement('div', 'two-col-grid__col');
   const colB = createElement('div', 'two-col-grid__col');
   el.append(colA, colB);

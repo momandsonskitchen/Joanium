@@ -56,16 +56,18 @@ export async function collectSystemInfo(rootDirectory) {
     tmpDir: os.tmpdir(),
     totalMem: os.totalmem(),
     freeMem: os.freemem(),
-    cpuModel: String(firstCpu.model ?? 'Unknown CPU').replace(/\s+/g, ' ').trim(),
+    cpuModel: String(firstCpu.model ?? 'Unknown CPU')
+      .replace(/\s+/g, ' ')
+      .trim(),
     cpuCores: cpus.length,
     cpuSpeed: firstCpu.speed ? `${firstCpu.speed} MHz` : '',
-    shell: platform === 'win32' ? process.env.ComSpec ?? '' : process.env.SHELL ?? '',
+    shell: platform === 'win32' ? (process.env.ComSpec ?? '') : (process.env.SHELL ?? ''),
     locale: localeInfo.locale ?? '',
     timezone: localeInfo.timeZone ?? '',
     node: process.versions.node ?? '',
     electron: process.versions.electron ?? '',
     chrome: process.versions.chrome ?? '',
-    collectedAt: new Date().toISOString()
+    collectedAt: new Date().toISOString(),
   };
 
   await persistSystemInfo(rootDirectory, info).catch(() => {});

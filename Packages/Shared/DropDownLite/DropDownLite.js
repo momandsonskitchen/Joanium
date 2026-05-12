@@ -10,11 +10,11 @@ import { createElement } from '../Utils/DomUtils.js';
 // Returns: { element, getValue(), setValue(value), dispose() }
 
 export function createDropDownLite({
-  label       = '',
-  options     = [],
-  value       = '',
+  label = '',
+  options = [],
+  value = '',
   placeholder = 'Select',
-  onChange
+  onChange,
 } = {}) {
   let currentValue = value;
 
@@ -28,20 +28,20 @@ export function createDropDownLite({
 
   // ── Trigger ──────────────────────────────────────────────────────────────
 
-  const trigger     = createElement('button', 'joanium-ddm-lite__trigger');
-  trigger.type      = 'button';
+  const trigger = createElement('button', 'joanium-ddm-lite__trigger');
+  trigger.type = 'button';
   const triggerText = createElement('span', 'joanium-ddm-lite__trigger-text');
 
   const chevronSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  chevronSvg.setAttribute('class',        'joanium-ddm-lite__chevron');
-  chevronSvg.setAttribute('viewBox',      '0 0 16 16');
-  chevronSvg.setAttribute('fill',         'none');
-  chevronSvg.setAttribute('aria-hidden',  'true');
+  chevronSvg.setAttribute('class', 'joanium-ddm-lite__chevron');
+  chevronSvg.setAttribute('viewBox', '0 0 16 16');
+  chevronSvg.setAttribute('fill', 'none');
+  chevronSvg.setAttribute('aria-hidden', 'true');
   const chevronPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  chevronPath.setAttribute('d',               'M3 5.5L8 10.5L13 5.5');
-  chevronPath.setAttribute('stroke',          'currentColor');
-  chevronPath.setAttribute('stroke-width',    '1.75');
-  chevronPath.setAttribute('stroke-linecap',  'round');
+  chevronPath.setAttribute('d', 'M3 5.5L8 10.5L13 5.5');
+  chevronPath.setAttribute('stroke', 'currentColor');
+  chevronPath.setAttribute('stroke-width', '1.75');
+  chevronPath.setAttribute('stroke-linecap', 'round');
   chevronPath.setAttribute('stroke-linejoin', 'round');
   chevronSvg.append(chevronPath);
 
@@ -92,19 +92,20 @@ export function createDropDownLite({
   // ── Open / close ──────────────────────────────────────────────────────────
 
   function positionPanel() {
-    const rect     = trigger.getBoundingClientRect();
-    const panelH   = Math.min(options.length * 38 + 16, 240);
-    const goUp     = (window.innerHeight - rect.bottom) < panelH && rect.top > (window.innerHeight - rect.bottom);
+    const rect = trigger.getBoundingClientRect();
+    const panelH = Math.min(options.length * 38 + 16, 240);
+    const goUp =
+      window.innerHeight - rect.bottom < panelH && rect.top > window.innerHeight - rect.bottom;
 
-    panel.style.left  = `${rect.left}px`;
+    panel.style.left = `${rect.left}px`;
     panel.style.width = `${rect.width}px`;
 
     if (goUp) {
-      panel.style.top    = 'auto';
+      panel.style.top = 'auto';
       panel.style.bottom = `${window.innerHeight - rect.top + 6}px`;
     } else {
       panel.style.bottom = 'auto';
-      panel.style.top    = `${rect.bottom + 6}px`;
+      panel.style.top = `${rect.bottom + 6}px`;
     }
   }
 
@@ -135,7 +136,7 @@ export function createDropDownLite({
     if (wrapper.classList.contains('is-open')) positionPanel();
   }
 
-  document.addEventListener('click',   onDocClick);
+  document.addEventListener('click', onDocClick);
   document.addEventListener('keydown', onDocKeydown);
   window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
   window.addEventListener('resize', onScrollOrResize, { passive: true });
@@ -166,11 +167,11 @@ export function createDropDownLite({
     },
 
     dispose() {
-      document.removeEventListener('click',   onDocClick);
+      document.removeEventListener('click', onDocClick);
       document.removeEventListener('keydown', onDocKeydown);
       window.removeEventListener('scroll', onScrollOrResize, { capture: true });
       window.removeEventListener('resize', onScrollOrResize);
       panel.remove();
-    }
+    },
   };
 }

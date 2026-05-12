@@ -55,7 +55,7 @@ const TEXT_EXTENSIONS = new Set([
   'conf',
   'graphql',
   'gql',
-  'rtf'
+  'rtf',
 ]);
 
 const EXTRACTABLE_EXTENSIONS = new Set(['pdf', 'docx', 'xlsx', 'xlsm', 'pptx']);
@@ -63,14 +63,14 @@ const EXTRACTABLE_EXTENSIONS = new Set(['pdf', 'docx', 'xlsx', 'xlsm', 'pptx']);
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'bmp', 'tiff']);
 
 const IMAGE_MIME_TYPES = {
-  jpg:  'image/jpeg',
+  jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
-  png:  'image/png',
-  gif:  'image/gif',
+  png: 'image/png',
+  gif: 'image/gif',
   webp: 'image/webp',
   avif: 'image/avif',
-  bmp:  'image/bmp',
-  tiff: 'image/tiff'
+  bmp: 'image/bmp',
+  tiff: 'image/tiff',
 };
 
 const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
@@ -89,7 +89,9 @@ function countLines(text = '') {
 }
 
 function truncateText(text = '', maxChars = MAX_TEXT_CHARS) {
-  const normalized = String(text ?? '').replace(/\r\n/g, '\n').trim();
+  const normalized = String(text ?? '')
+    .replace(/\r\n/g, '\n')
+    .trim();
 
   if (normalized.length <= maxChars) {
     return { text: normalized, truncated: false };
@@ -97,7 +99,7 @@ function truncateText(text = '', maxChars = MAX_TEXT_CHARS) {
 
   return {
     text: `${normalized.slice(0, maxChars)}\n\n[Truncated for chat context]`,
-    truncated: true
+    truncated: true,
   };
 }
 
@@ -114,7 +116,7 @@ function buildResult({ kind, summary, text, warnings = [] }) {
     text: truncated.text,
     lines: countLines(truncated.text),
     truncated: truncated.truncated,
-    warnings
+    warnings,
   };
 }
 
@@ -171,7 +173,7 @@ function summarizeDelimitedText(rawText, delimiter = ',') {
     `[Table: ${rows.length} rows x ${headers.length} columns]`,
     `Columns: ${headers.join(', ')}`,
     '',
-    preview + hiddenRows
+    preview + hiddenRows,
   ].join('\n');
 }
 
@@ -237,7 +239,7 @@ function extractTextBuffer(fileName, buffer) {
   return buildResult({
     kind: getExtension(fileName) || 'text',
     summary: summarizeTextFile(fileName, decoded),
-    text: enriched
+    text: enriched,
   });
 }
 
@@ -253,7 +255,7 @@ async function extractPdf(buffer) {
       return buildResult({
         kind: 'pdf',
         summary: `${pageCount} pages`,
-        text: result.text || ''
+        text: result.text || '',
       });
     } finally {
       if (typeof parser.destroy === 'function') {
@@ -268,13 +270,13 @@ async function extractPdf(buffer) {
   return buildResult({
     kind: 'pdf',
     summary: `${result.numpages || '?'} pages`,
-    text: result.text || ''
+    text: result.text || '',
   });
 }
 
 async function extractDocx(buffer) {
-  const mammoth = (mammothModule ?? (mammothModule = await import('mammoth'))).default
-    ?? mammothModule;
+  const mammoth =
+    (mammothModule ?? (mammothModule = await import('mammoth'))).default ?? mammothModule;
   const result = await mammoth.extractRawText({ buffer });
   const paragraphCount = result.value
     .split(/\n{2,}/)
@@ -285,7 +287,7 @@ async function extractDocx(buffer) {
     kind: 'docx',
     summary: `${paragraphCount || countLines(result.value)} paragraphs`,
     text: result.value || '',
-    warnings: (result.messages ?? []).map((message) => message.message || String(message))
+    warnings: (result.messages ?? []).map((message) => message.message || String(message)),
   });
 }
 
@@ -304,8 +306,8 @@ function serializeWorksheetRow(row) {
 }
 
 async function extractSpreadsheet(buffer) {
-  const ExcelJS = (excelJsModule ?? (excelJsModule = await import('exceljs'))).default
-    ?? excelJsModule;
+  const ExcelJS =
+    (excelJsModule ?? (excelJsModule = await import('exceljs'))).default ?? excelJsModule;
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer);
 
@@ -340,7 +342,7 @@ async function extractSpreadsheet(buffer) {
   return buildResult({
     kind: 'spreadsheet',
     summary: `${workbook.worksheets.length} sheet${workbook.worksheets.length === 1 ? '' : 's'}`,
-    text: sections.join('\n\n')
+    text: sections.join('\n\n'),
   });
 }
 
@@ -379,7 +381,7 @@ async function extractPptx(buffer) {
   return buildResult({
     kind: 'pptx',
     summary: `${slideNames.length} slide${slideNames.length === 1 ? '' : 's'}`,
-    text: slides.join('\n\n')
+    text: slides.join('\n\n'),
   });
 }
 
@@ -402,7 +404,11 @@ function resolveLimit(fileName) {
 
 function isSupportedAttachment(fileName, allowImages = false) {
   const ext = getExtension(fileName);
-  return TEXT_EXTENSIONS.has(ext) || EXTRACTABLE_EXTENSIONS.has(ext) || (allowImages && IMAGE_EXTENSIONS.has(ext));
+  return (
+    TEXT_EXTENSIONS.has(ext) ||
+    EXTRACTABLE_EXTENSIONS.has(ext) ||
+    (allowImages && IMAGE_EXTENSIONS.has(ext))
+  );
 }
 
 export function getSupportedAttachmentExtensions() {
@@ -444,7 +450,12 @@ export async function readAttachmentFiles(filePaths = [], { allowImages = false 
     // ── Image files ────────────────────────────────────────────────────────
     if (allowImages && IMAGE_EXTENSIONS.has(ext)) {
       if (fileStats.size > IMAGE_MAX_BYTES) {
-        rejected.push({ fileName, reason: 'too-large', limitBytes: IMAGE_MAX_BYTES, sizeBytes: fileStats.size });
+        rejected.push({
+          fileName,
+          reason: 'too-large',
+          limitBytes: IMAGE_MAX_BYTES,
+          sizeBytes: fileStats.size,
+        });
         continue;
       }
 
@@ -464,10 +475,14 @@ export async function readAttachmentFiles(filePaths = [], { allowImages = false 
           text: null,
           lines: 0,
           truncated: false,
-          warnings: []
+          warnings: [],
         });
       } catch (error) {
-        rejected.push({ fileName, reason: 'extract-failed', message: error?.message ?? String(error) });
+        rejected.push({
+          fileName,
+          reason: 'extract-failed',
+          message: error?.message ?? String(error),
+        });
       }
 
       continue;
@@ -480,7 +495,7 @@ export async function readAttachmentFiles(filePaths = [], { allowImages = false 
         fileName,
         reason: 'too-large',
         limitBytes: limit,
-        sizeBytes: fileStats.size
+        sizeBytes: fileStats.size,
       });
       continue;
     }
@@ -500,13 +515,13 @@ export async function readAttachmentFiles(filePaths = [], { allowImages = false 
         lines: extracted.lines,
         kind: extracted.kind,
         truncated: extracted.truncated,
-        warnings: extracted.warnings
+        warnings: extracted.warnings,
       });
     } catch (error) {
       rejected.push({
         fileName,
         reason: 'extract-failed',
-        message: error?.message ?? String(error)
+        message: error?.message ?? String(error),
       });
     }
   }

@@ -2,12 +2,12 @@ import path from 'node:path';
 import { unlink } from 'node:fs/promises';
 import {
   listNamespacedMarkdown,
-  loadNamespacedMarkdown
+  loadNamespacedMarkdown,
 } from '../../Shared/Markdown/MarkdownLibrary.js';
 import { sanitizeMarkdownFilename, sanitizePathSegment } from '../../Shared/Storage/SafePath.js';
 import {
   getBundledResourceDirectory,
-  getWritableResourceDirectory
+  getWritableResourceDirectory,
 } from '../../Shared/Storage/ResourcePaths.js';
 import { readUserState, writeUserState, mergeUserStates } from '../../Shared/UserData/UserData.js';
 
@@ -17,27 +17,22 @@ const DEFAULT_ACTIVE_PERSONA = { namespace: 'Joanium', filename: 'Joana.md' };
 export function createPersonasStateManager({ rootDirectory }) {
   const bundledPersonasDir = getBundledResourceDirectory(rootDirectory, 'Personas');
   const writablePersonasDir = getWritableResourceDirectory(rootDirectory, 'Personas');
-  const personaDirs = [...new Set([
-    path.resolve(bundledPersonasDir),
-    path.resolve(writablePersonasDir)
-  ])];
+  const personaDirs = [
+    ...new Set([path.resolve(bundledPersonasDir), path.resolve(writablePersonasDir)]),
+  ];
 
   async function listPersonasFrom(personasDir) {
-    const bundledOnly = path.resolve(personasDir) === path.resolve(bundledPersonasDir)
-      && path.resolve(bundledPersonasDir) !== path.resolve(writablePersonasDir);
+    const bundledOnly =
+      path.resolve(personasDir) === path.resolve(bundledPersonasDir) &&
+      path.resolve(bundledPersonasDir) !== path.resolve(writablePersonasDir);
 
-    return listNamespacedMarkdown(personasDir, ({
-      id,
-      namespace,
-      filename,
-      frontmatter
-    }) => ({
+    return listNamespacedMarkdown(personasDir, ({ id, namespace, filename, frontmatter }) => ({
       id,
       namespace,
       filename,
       name: frontmatter.name || filename.replace(/\.md$/, ''),
       description: frontmatter.description || '',
-      protected: PROTECTED_PERSONAS.has(id) || bundledOnly
+      protected: PROTECTED_PERSONAS.has(id) || bundledOnly,
     }));
   }
 
@@ -60,23 +55,24 @@ export function createPersonasStateManager({ rootDirectory }) {
 
   async function loadPersona(namespace, filename) {
     let lastError;
-    for (const personasDir of [...new Set([path.resolve(writablePersonasDir), path.resolve(bundledPersonasDir)])]) {
+    for (const personasDir of [
+      ...new Set([path.resolve(writablePersonasDir), path.resolve(bundledPersonasDir)]),
+    ]) {
       try {
-        return await loadNamespacedMarkdown(personasDir, namespace, filename, ({
-          id,
-          namespace: safeNamespace,
-          filename: safeFilename,
-          frontmatter,
-          content
-        }) => ({
-          id,
-          namespace: safeNamespace,
-          filename: safeFilename,
-          name: frontmatter.name || safeFilename.replace(/\.md$/, ''),
-          description: frontmatter.description || '',
-          protected: PROTECTED_PERSONAS.has(id),
-          content
-        }));
+        return await loadNamespacedMarkdown(
+          personasDir,
+          namespace,
+          filename,
+          ({ id, namespace: safeNamespace, filename: safeFilename, frontmatter, content }) => ({
+            id,
+            namespace: safeNamespace,
+            filename: safeFilename,
+            name: frontmatter.name || safeFilename.replace(/\.md$/, ''),
+            description: frontmatter.description || '',
+            protected: PROTECTED_PERSONAS.has(id),
+            content,
+          }),
+        );
       } catch (error) {
         lastError = error;
       }
@@ -98,13 +94,13 @@ export function createPersonasStateManager({ rootDirectory }) {
 
   async function getActivePersona() {
     const state = await readUserState(rootDirectory);
-    const ref   = state.activePersona ?? DEFAULT_ACTIVE_PERSONA;
+    const ref = state.activePersona ?? DEFAULT_ACTIVE_PERSONA;
     return loadPersona(ref.namespace, ref.filename);
   }
 
   async function setActivePersonaRef(namespace, filename) {
     const current = await readUserState(rootDirectory);
-    const next    = mergeUserStates(current, { activePersona: { namespace, filename } });
+    const next = mergeUserStates(current, { activePersona: { namespace, filename } });
     await writeUserState(rootDirectory, next);
   }
 

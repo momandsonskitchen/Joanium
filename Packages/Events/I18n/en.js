@@ -5,25 +5,25 @@ const en = {
     total: 'Total',
     success: 'Success',
     errors: 'Errors',
-    sources: 'Sources'
+    sources: 'Sources',
   },
   filters: {
     all: 'All',
     channels: 'Channels',
     agents: 'Agents',
-    errors: 'Errors'
+    errors: 'Errors',
   },
   actions: {
     refresh: 'Refresh',
     clear: 'Clear',
-    clearAll: 'Clear event history'
+    clearAll: 'Clear event history',
   },
   states: {
     loading: 'Loading events...',
     empty: 'No events have been recorded yet.',
     noMatches: 'No events match this filter.',
     live: 'Live',
-    selectedEmpty: 'Select an event to inspect the details.'
+    selectedEmpty: 'Select an event to inspect the details.',
   },
   labels: {
     agent: 'Agent',
@@ -47,25 +47,25 @@ const en = {
     target: 'Target',
     externalId: 'Message ID',
     toolUsed: 'Tool used.',
-    parameters: 'Parameters'
+    parameters: 'Parameters',
   },
   status: {
     success: 'Success',
     error: 'Error',
     skipped: 'Skipped',
     running: 'Running',
-    queued: 'Queued'
+    queued: 'Queued',
   },
   types: {
     agent: 'Agent run',
-    channel: 'Channel reply'
+    channel: 'Channel reply',
   },
   channels: {
     telegram: 'Telegram',
     whatsapp: 'WhatsApp',
     discord: 'Discord',
-    slack: 'Slack'
-  }
+    slack: 'Slack',
+  },
 };
 
 export default en;

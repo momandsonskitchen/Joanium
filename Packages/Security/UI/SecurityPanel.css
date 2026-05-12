@@ -39,7 +39,7 @@
   overflow: hidden;
   background: rgba(255, 255, 255, 0.58);
   box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.10),
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
     0 10px 28px rgba(130, 95, 65, 0.07);
   backdrop-filter: blur(12px) saturate(1.4);
@@ -54,7 +54,7 @@
   background: rgba(250, 248, 255, 0.72);
   box-shadow:
     inset 0 0 0 1px rgba(160, 100, 210, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 10px 28px rgba(130, 80, 180, 0.07);
 }
 
@@ -72,8 +72,8 @@
 }
 
 .security-panel__status-badge--on {
-  background: rgba(34, 197, 94, 0.10);
-  border-color: rgba(34, 197, 94, 0.20);
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.2);
 }
 
 .security-panel__status-dot {
@@ -92,11 +92,11 @@
   font-size: 12.5px;
   font-weight: 620;
   letter-spacing: -0.01em;
-  color: rgba(150, 40, 40, 0.90);
+  color: rgba(150, 40, 40, 0.9);
 }
 
 .security-panel__status-badge--on .security-panel__status-text {
-  color: rgba(22, 120, 60, 0.90);
+  color: rgba(22, 120, 60, 0.9);
 }
 
 /* ── Desc ────────────────────────────────────────────────────────────────── */
@@ -153,7 +153,7 @@
 }
 
 .security-panel__feedback--ok {
-  color: rgba(22, 120, 60, 0.90);
+  color: rgba(22, 120, 60, 0.9);
 }
 
 .security-panel__feedback--error {
@@ -180,7 +180,10 @@
   font-size: 13.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  transition: background 130ms ease, opacity 130ms ease, transform 80ms ease;
+  transition:
+    background 130ms ease,
+    opacity 130ms ease,
+    transform 80ms ease;
   cursor: default;
 }
 
@@ -215,7 +218,7 @@
 }
 
 .security-panel__btn--danger {
-  background: rgba(220, 60, 60, 0.10);
+  background: rgba(220, 60, 60, 0.1);
   color: #a02020;
   box-shadow: inset 0 0 0 1px rgba(220, 60, 60, 0.18);
 }

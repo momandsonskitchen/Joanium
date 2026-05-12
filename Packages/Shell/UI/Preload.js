@@ -8,6 +8,6 @@ contextBridge.exposeInMainWorld('Joanium', {
       ipcRenderer.on(channel, listener);
       return () => ipcRenderer.removeListener(channel, listener);
     },
-    removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
-  }
+    removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
+  },
 });

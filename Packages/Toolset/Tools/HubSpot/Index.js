@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createHubSpotToolHandlers({ rootDirectory }),
-      ...createHubSpotConnectorToolHandlers({ rootDirectory })
+      ...createHubSpotConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildHubSpotPromptSection()]
+    promptSections: [buildHubSpotPromptSection()],
   };
 }
 

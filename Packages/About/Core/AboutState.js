@@ -9,7 +9,7 @@ export function createAboutStateManager({ rootDirectory }) {
 
       try {
         const packageJson = JSON.parse(
-          await readFile(path.join(rootDirectory, 'Package.json'), 'utf8')
+          await readFile(path.join(rootDirectory, 'Package.json'), 'utf8'),
         );
 
         return {
@@ -17,7 +17,7 @@ export function createAboutStateManager({ rootDirectory }) {
           version: packageJson.version ?? '',
           description: packageJson.description ?? '',
           author: packageJson.author ?? '',
-          system
+          system,
         };
       } catch {
         return {
@@ -25,9 +25,9 @@ export function createAboutStateManager({ rootDirectory }) {
           version: '',
           description: '',
           author: '',
-          system
+          system,
         };
       }
-    }
+    },
   };
 }

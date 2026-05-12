@@ -8,6 +8,6 @@ export function createVercelConnectorToolHandlers({ rootDirectory }) {
   return createConnectorToolHandlers({
     rootDirectory,
     toolDefinitions: TOOL_DEFINITIONS,
-    executeTool: executeVercelChatTool
+    executeTool: executeVercelChatTool,
   });
 }

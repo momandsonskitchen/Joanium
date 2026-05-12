@@ -19,7 +19,7 @@ const en = {
   lastProvider: 'This is your only connected provider. Add another before removing this one.',
   connected_feedback: 'Provider connected.',
   disconnected_feedback: 'Provider removed.',
-  models: (count) => `${count} model${count === 1 ? '' : 's'}`
+  models: (count) => `${count} model${count === 1 ? '' : 's'}`,
 };
 
 export default en;

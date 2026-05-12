@@ -8,7 +8,7 @@ const DEFAULT_CHANNELS = Object.freeze({
     botToken: '',
     systemPrompt: '',
     lastUpdateId: 0,
-    connectedAt: null
+    connectedAt: null,
   },
   whatsapp: {
     enabled: false,
@@ -16,7 +16,7 @@ const DEFAULT_CHANNELS = Object.freeze({
     authToken: '',
     fromNumber: '',
     systemPrompt: '',
-    connectedAt: null
+    connectedAt: null,
   },
   discord: {
     enabled: false,
@@ -24,7 +24,7 @@ const DEFAULT_CHANNELS = Object.freeze({
     channelId: '',
     systemPrompt: '',
     lastMessageId: null,
-    connectedAt: null
+    connectedAt: null,
   },
   slack: {
     enabled: false,
@@ -32,8 +32,8 @@ const DEFAULT_CHANNELS = Object.freeze({
     channelId: '',
     systemPrompt: '',
     lastMessageTs: null,
-    connectedAt: null
-  }
+    connectedAt: null,
+  },
 });
 
 const CHANNEL_NAMES = Object.keys(DEFAULT_CHANNELS);
@@ -57,9 +57,8 @@ function createMessageId() {
 }
 
 function normalizeChannels(candidate) {
-  const source = candidate?.channels && typeof candidate.channels === 'object'
-    ? candidate.channels
-    : {};
+  const source =
+    candidate?.channels && typeof candidate.channels === 'object' ? candidate.channels : {};
   const channels = {};
 
   for (const name of CHANNEL_NAMES) {
@@ -92,7 +91,7 @@ function sanitizeMessage(message = {}) {
     timestamp: repliedAt,
     externalId: message.externalId ? normalizeString(message.externalId) : null,
     targetId: message.targetId ? normalizeString(message.targetId) : null,
-    conversationId: message.conversationId ? normalizeString(message.conversationId) : null
+    conversationId: message.conversationId ? normalizeString(message.conversationId) : null,
   };
 }
 
@@ -101,7 +100,7 @@ function safeChannelConfig(name, config) {
     enabled: Boolean(config?.enabled),
     configured: isConfigured(name, config),
     connectedAt: config?.connectedAt ?? null,
-    systemPrompt: normalizeString(config?.systemPrompt)
+    systemPrompt: normalizeString(config?.systemPrompt),
   };
 
   if (name === 'telegram') {
@@ -154,7 +153,11 @@ export function createChannelStateManager({ rootDirectory }) {
 
   async function writeChannels(data) {
     await mkdir(path.dirname(channelsFilePath), { recursive: true });
-    await writeFile(channelsFilePath, `${JSON.stringify(normalizeChannels(data), null, 2)}\n`, 'utf8');
+    await writeFile(
+      channelsFilePath,
+      `${JSON.stringify(normalizeChannels(data), null, 2)}\n`,
+      'utf8',
+    );
   }
 
   async function readMessages() {
@@ -174,7 +177,7 @@ export function createChannelStateManager({ rootDirectory }) {
     await writeFile(
       messagesFilePath,
       `${JSON.stringify({ messages: messages.slice(0, MESSAGE_LIMIT) }, null, 2)}\n`,
-      'utf8'
+      'utf8',
     );
   }
 
@@ -194,7 +197,7 @@ export function createChannelStateManager({ rootDirectory }) {
     async getAllChannels() {
       const data = await readChannels();
       return Object.fromEntries(
-        CHANNEL_NAMES.map((name) => [name, safeChannelConfig(name, data.channels[name])])
+        CHANNEL_NAMES.map((name) => [name, safeChannelConfig(name, data.channels[name])]),
       );
     },
 
@@ -239,7 +242,7 @@ export function createChannelStateManager({ rootDirectory }) {
     async toggleChannel(name, enabled) {
       const updated = await updateChannel(name, (current) => ({
         ...current,
-        enabled: Boolean(enabled)
+        enabled: Boolean(enabled),
       }));
       return safeChannelConfig(name, updated);
     },
@@ -272,6 +275,6 @@ export function createChannelStateManager({ rootDirectory }) {
     async clearMessages() {
       await writeMessages({ messages: [] });
       return { ok: true };
-    }
+    },
   };
 }

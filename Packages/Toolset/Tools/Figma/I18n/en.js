@@ -6,7 +6,7 @@ const figmaStrings = {
     credentialLabel: 'Personal access token',
     credentialPlaceholder: 'Figma personal access token',
     credentialKey: 'token',
-    optional: false
+    optional: false,
   },
   tools: [
     {
@@ -14,8 +14,8 @@ const figmaStrings = {
       description: 'Get Figma file metadata and a document summary.',
       category: 'figma',
       parameters: {
-        file_key: { type: 'string', required: true, description: 'Figma file key.' }
-      }
+        file_key: { type: 'string', required: true, description: 'Figma file key.' },
+      },
     },
     {
       name: 'figma_get_file_nodes',
@@ -23,16 +23,16 @@ const figmaStrings = {
       category: 'figma',
       parameters: {
         file_key: { type: 'string', required: true, description: 'Figma file key.' },
-        node_ids: { type: 'string', required: true, description: 'Comma-separated node IDs.' }
-      }
+        node_ids: { type: 'string', required: true, description: 'Comma-separated node IDs.' },
+      },
     },
     {
       name: 'figma_list_comments',
       description: 'List comments in a Figma file.',
       category: 'figma',
       parameters: {
-        file_key: { type: 'string', required: true, description: 'Figma file key.' }
-      }
+        file_key: { type: 'string', required: true, description: 'Figma file key.' },
+      },
     },
     {
       name: 'figma_post_comment',
@@ -40,18 +40,18 @@ const figmaStrings = {
       category: 'figma',
       parameters: {
         file_key: { type: 'string', required: true, description: 'Figma file key.' },
-        message: { type: 'string', required: true, description: 'Comment message.' }
-      }
+        message: { type: 'string', required: true, description: 'Comment message.' },
+      },
     },
     {
       name: 'figma_get_versions',
       description: 'List versions for a Figma file.',
       category: 'figma',
       parameters: {
-        file_key: { type: 'string', required: true, description: 'Figma file key.' }
-      }
-    }
-  ]
+        file_key: { type: 'string', required: true, description: 'Figma file key.' },
+      },
+    },
+  ],
 };
 
 export default figmaStrings;

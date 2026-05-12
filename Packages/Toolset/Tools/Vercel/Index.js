@@ -12,9 +12,9 @@ export function createToolPackage({ rootDirectory }) {
     toolDefinitions: mergeToolDefinitions(TOOL_DEFINITIONS, strings.tools ?? []),
     toolHandlers: {
       ...createVercelToolHandlers({ rootDirectory }),
-      ...createVercelConnectorToolHandlers({ rootDirectory })
+      ...createVercelConnectorToolHandlers({ rootDirectory }),
     },
-    promptSections: [buildVercelPromptSection()]
+    promptSections: [buildVercelPromptSection()],
   };
 }
 

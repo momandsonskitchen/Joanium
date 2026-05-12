@@ -19,7 +19,7 @@ import {
   hydrateSetupState,
   serializeSetupState,
   setupStepIds,
-  validateStep
+  validateStep,
 } from './SetupStore.js';
 
 const dictionaries = { en };
@@ -39,7 +39,8 @@ function captureFocusState(container) {
     focusKey: activeElement.__focusKey,
     selectionStart:
       typeof activeElement.selectionStart === 'number' ? activeElement.selectionStart : null,
-    selectionEnd: typeof activeElement.selectionEnd === 'number' ? activeElement.selectionEnd : null
+    selectionEnd:
+      typeof activeElement.selectionEnd === 'number' ? activeElement.selectionEnd : null,
   };
 }
 
@@ -49,7 +50,7 @@ function restoreFocusState(container, focusState) {
   }
 
   const nextElement = Array.from(container.querySelectorAll('input, button')).find(
-    (element) => element.__focusKey === focusState.focusKey
+    (element) => element.__focusKey === focusState.focusKey,
   );
 
   if (!nextElement) {
@@ -83,8 +84,8 @@ function createProviderIdentity(provider, strings) {
     createElement(
       'span',
       'setup-provider-detail-card__badge',
-      provider.type === 'local' ? strings.common.localBadge : strings.common.cloudBadge
-    )
+      provider.type === 'local' ? strings.common.localBadge : strings.common.cloudBadge,
+    ),
   );
   textWrap.append(titleRow);
   identity.append(iconWrap, textWrap);
@@ -98,7 +99,7 @@ async function bootstrap() {
 
   let state = hydrateSetupState({
     persistedState: payload.state,
-    providers: payload.providers
+    providers: payload.providers,
   });
   let scene = findInitialScene(state, providersById);
   let showValidation = false;
@@ -195,7 +196,7 @@ async function bootstrap() {
     try {
       const completedState = {
         ...serializeSetupState(state, providersById),
-        onboardingCompleted: true
+        onboardingCompleted: true,
       };
       await window.JoaniumSetup.complete(completedState);
       await window.JoaniumSetup.openPackage('Shell');
@@ -222,7 +223,7 @@ async function bootstrap() {
     stage.append(
       createElement('span', 'setup-stage__eyebrow', strings.consent.eyebrow),
       createElement('h1', 'setup-stage__title', strings.consent.title),
-      createElement('p', 'setup-stage__description', strings.consent.description)
+      createElement('p', 'setup-stage__description', strings.consent.description),
     );
 
     const { element: checkboxEl } = createCheckbox({
@@ -230,48 +231,51 @@ async function bootstrap() {
       description: strings.consent.checkboxDescription,
       checked: state.consentAccepted,
       onChange: (nextChecked) => {
-        patchState((draft) => {
-          draft.consentAccepted = nextChecked;
-        }, { rerender: false });
+        patchState(
+          (draft) => {
+            draft.consentAccepted = nextChecked;
+          },
+          { rerender: false },
+        );
         const actionButton = root.querySelector('.setup-stage__actions .joanium-button');
         if (actionButton) actionButton.disabled = !nextChecked;
-      }
+      },
     });
 
     const links = createElement('div', 'setup-inline-links');
     const { element: termsBtn } = createButton({
-        label: strings.consent.termsLink,
-        variant: 'ghost',
-        size: 'compact',
-        onClick: () => {
-          const { element: loader } = createLogoLoader({ 
-            logoPath: payload.logoPath,
-            infinite: true,
-            inline: true
-          });
+      label: strings.consent.termsLink,
+      variant: 'ghost',
+      size: 'compact',
+      onClick: () => {
+        const { element: loader } = createLogoLoader({
+          logoPath: payload.logoPath,
+          infinite: true,
+          inline: true,
+        });
 
-          const iframe = document.createElement('iframe');
-          iframe.src = 'https://www.joanium.com/terms';
-          iframe.style.width = '100%';
-          iframe.style.height = '600px';
-          iframe.style.border = 'none';
-          iframe.style.opacity = '0';
-          iframe.style.transition = 'opacity 0.3s ease';
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://www.joanium.com/terms';
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = 'none';
+        iframe.style.opacity = '0';
+        iframe.style.transition = 'opacity 0.3s ease';
 
-          iframe.onload = () => {
-            loader.remove();
-            iframe.style.opacity = '1';
-          };
+        iframe.onload = () => {
+          loader.remove();
+          iframe.style.opacity = '1';
+        };
 
-          modal.open({
-            title: strings.documents.terms.title,
-            nodes: [loader, iframe]
-          });
-        }
-      });
+        modal.open({
+          title: strings.documents.terms.title,
+          nodes: [loader, iframe],
+        });
+      },
+    });
     links.append(
       createElement('span', 'setup-inline-links__prefix', strings.consent.reviewPrefix),
-      termsBtn
+      termsBtn,
     );
 
     stage.append(checkboxEl, links);
@@ -282,7 +286,7 @@ async function bootstrap() {
     const stage = createElement('section', 'setup-stage');
     stage.append(
       createElement('h1', 'setup-stage__title', strings.name.title),
-      createElement('p', 'setup-stage__description', strings.name.description)
+      createElement('p', 'setup-stage__description', strings.name.description),
     );
 
     const nameInput = createInputBox({
@@ -293,15 +297,18 @@ async function bootstrap() {
       focusKey: 'profile.name',
       autoFocus: true,
       onInput: (value) => {
-        patchState((draft) => {
-          draft.profile.name = value;
-        }, { rerender: false });
+        patchState(
+          (draft) => {
+            draft.profile.name = value;
+          },
+          { rerender: false },
+        );
       },
       onKeyDown: (event) => {
         if (event.key === 'Enter') {
           goNext();
         }
-      }
+      },
     });
 
     stage.append(nameInput.element);
@@ -312,7 +319,7 @@ async function bootstrap() {
     const stage = createElement('section', 'setup-stage');
     stage.append(
       createElement('h1', 'setup-stage__title', strings.dob.title),
-      createElement('p', 'setup-stage__description', strings.dob.description)
+      createElement('p', 'setup-stage__description', strings.dob.description),
     );
 
     const grid = createElement('div', 'setup-date-grid');
@@ -324,10 +331,13 @@ async function bootstrap() {
       inputMode: 'numeric',
       maxLength: 2,
       onInput: (value) => {
-        patchState((draft) => {
-          draft.profile.dateOfBirth.day = value.replace(/\D/g, '').slice(0, 2);
-        }, { rerender: false });
-      }
+        patchState(
+          (draft) => {
+            draft.profile.dateOfBirth.day = value.replace(/\D/g, '').slice(0, 2);
+          },
+          { rerender: false },
+        );
+      },
     });
     const yearInput = createInputBox({
       label: strings.dob.yearLabel,
@@ -338,10 +348,13 @@ async function bootstrap() {
       inputMode: 'numeric',
       maxLength: 4,
       onInput: (value) => {
-        patchState((draft) => {
-          draft.profile.dateOfBirth.year = value.replace(/\D/g, '').slice(0, 4);
-        }, { rerender: false });
-      }
+        patchState(
+          (draft) => {
+            draft.profile.dateOfBirth.year = value.replace(/\D/g, '').slice(0, 4);
+          },
+          { rerender: false },
+        );
+      },
     });
 
     currentDobDropDown = createDropDown({
@@ -351,10 +364,13 @@ async function bootstrap() {
       placeholder: strings.dob.months[0].label,
       focusKey: 'profile.dob.month',
       onChange: (value) => {
-        patchState((draft) => {
-          draft.profile.dateOfBirth.month = value;
-        }, { rerender: false });
-      }
+        patchState(
+          (draft) => {
+            draft.profile.dateOfBirth.month = value;
+          },
+          { rerender: false },
+        );
+      },
     });
 
     grid.append(dayInput.element, currentDobDropDown.element, yearInput.element);
@@ -369,7 +385,7 @@ async function bootstrap() {
 
     const setupSection = createElement('section', 'setup-provider-config__section');
     setupSection.append(
-      createElement('span', 'setup-provider-config__label', strings.providers.setupLabel)
+      createElement('span', 'setup-provider-config__label', strings.providers.setupLabel),
     );
 
     for (const requirement of provider.requirements) {
@@ -392,10 +408,13 @@ async function bootstrap() {
           revealLabel: strings.common.show,
           hideLabel: strings.common.hide,
           onInput: (value) => {
-            patchState((draft) => {
-              draft.providers.details[provider.id].apiKey = value;
-            }, { rerender: false });
-          }
+            patchState(
+              (draft) => {
+                draft.providers.details[provider.id].apiKey = value;
+              },
+              { rerender: false },
+            );
+          },
         });
         setupSection.append(secretInput.element);
       } else {
@@ -408,10 +427,13 @@ async function bootstrap() {
           type: 'url',
           inputMode: 'url',
           onInput: (value) => {
-            patchState((draft) => {
-              draft.providers.details[provider.id].endpoint = value;
-            }, { rerender: false });
-          }
+            patchState(
+              (draft) => {
+                draft.providers.details[provider.id].endpoint = value;
+              },
+              { rerender: false },
+            );
+          },
         });
         setupSection.append(endpointInput.element);
       }
@@ -439,8 +461,8 @@ async function bootstrap() {
       createElement(
         'span',
         'setup-provider-config__label setup-provider-config__label--selected',
-        strings.providers.selectedProvidersLabel
-      )
+        strings.providers.selectedProvidersLabel,
+      ),
     );
 
     const detailGrid = createElement('div', 'setup-provider-detail-grid');
@@ -464,7 +486,7 @@ async function bootstrap() {
     const stage = createElement('section', 'setup-stage setup-stage--providers');
     stage.append(
       createElement('h1', 'setup-stage__title', strings.providers.title),
-      createElement('p', 'setup-stage__description', strings.providers.description)
+      createElement('p', 'setup-stage__description', strings.providers.description),
     );
 
     providerScroller?.dispose?.();
@@ -472,18 +494,21 @@ async function bootstrap() {
       providers: payload.providers,
       selectedProviderIds: state.providers.selected,
       onToggle: (_providerId, selectedProviderIds) => {
-        patchState((draft) => {
-          draft.providers.selected = selectedProviderIds;
-        }, { rerender: false });
+        patchState(
+          (draft) => {
+            draft.providers.selected = selectedProviderIds;
+          },
+          { rerender: false },
+        );
         syncProviderDetailSection(stage);
-      }
+      },
     });
     stage.append(providerScroller.element);
 
     const securityCard = createElement('div', 'setup-security-card');
     securityCard.append(
       createElement('span', 'setup-security-card__title', strings.providers.securityTitle),
-      createElement('p', 'setup-security-card__body', strings.providers.securityBody)
+      createElement('p', 'setup-security-card__body', strings.providers.securityBody),
     );
     stage.append(securityCard);
 
@@ -496,21 +521,24 @@ async function bootstrap() {
     const stage = createElement('section', 'setup-stage');
     stage.append(
       createElement('h1', 'setup-stage__title', strings.usage.title),
-      createElement('p', 'setup-stage__description', strings.usage.description)
+      createElement('p', 'setup-stage__description', strings.usage.description),
     );
 
     const { element: selectorEl } = createTagSelector({
       options: strings.usage.options,
       selectedValues: state.usageModes,
       onToggle: (optionId, nextIsSelected) => {
-        patchState((draft) => {
-          if (nextIsSelected) {
-            draft.usageModes = [...new Set([...draft.usageModes, optionId])];
-          } else {
-            draft.usageModes = draft.usageModes.filter((item) => item !== optionId);
-          }
-        }, { rerender: false });
-      }
+        patchState(
+          (draft) => {
+            if (nextIsSelected) {
+              draft.usageModes = [...new Set([...draft.usageModes, optionId])];
+            } else {
+              draft.usageModes = draft.usageModes.filter((item) => item !== optionId);
+            }
+          },
+          { rerender: false },
+        );
+      },
     });
 
     stage.append(selectorEl);
@@ -525,16 +553,16 @@ async function bootstrap() {
         'setup-stage__title',
         formatText(strings.welcome.title, {
           name: state.profile.name || strings.appName,
-          appName: strings.appName
-        })
+          appName: strings.appName,
+        }),
       ),
       createElement(
         'p',
         'setup-stage__description',
         formatText(strings.welcome.description, {
-          appName: strings.appName
-        })
-      )
+          appName: strings.appName,
+        }),
+      ),
     );
 
     const featureGrid = createElement('div', 'setup-feature-grid');
@@ -543,7 +571,7 @@ async function bootstrap() {
       card.append(
         createElement('span', 'setup-feature-card__icon', feature.icon),
         createElement('strong', 'setup-feature-card__title', feature.title),
-        createElement('p', 'setup-feature-card__body', feature.body)
+        createElement('p', 'setup-feature-card__body', feature.body),
       );
       featureGrid.append(card);
     }
@@ -586,10 +614,15 @@ async function bootstrap() {
     const actions = createElement('div', 'setup-stage__actions');
     const isFinalStep = scene === 'welcome';
     const { element: actionBtn } = createButton({
-      label: scene === 'consent' ? strings.common.start : isFinalStep ? strings.common.letGo : strings.common.next,
+      label:
+        scene === 'consent'
+          ? strings.common.start
+          : isFinalStep
+            ? strings.common.letGo
+            : strings.common.next,
       variant: 'primary',
       disabled: scene === 'consent' ? !state.consentAccepted : false,
-      onClick: isFinalStep ? completeOnboarding : goNext
+      onClick: isFinalStep ? completeOnboarding : goNext,
     });
     actions.append(actionBtn);
     stage.append(actions);
@@ -621,7 +654,11 @@ async function bootstrap() {
     restoreFocusState(root, focusState);
 
     // Attach AFTER elements are in the DOM so the first measurement is accurate
-    currentScrollbar = attachCustomScrollbar(stageWrapper, stage, { top: 34, bottom: 34, right: 12 });
+    currentScrollbar = attachCustomScrollbar(stageWrapper, stage, {
+      top: 34,
+      bottom: 34,
+      right: 12,
+    });
   }
 
   await showSplash();

@@ -25,23 +25,23 @@ export async function createSlashCommandsPanel(strings) {
   }
 
   const groupDefs = [
-    { type: 'action',   label: strings.groups.actions },
-    { type: 'mode',     label: strings.groups.modes },
-    { type: 'navigate', label: strings.groups.navigation }
+    { type: 'action', label: strings.groups.actions },
+    { type: 'mode', label: strings.groups.modes },
+    { type: 'navigate', label: strings.groups.navigation },
   ];
 
   for (const { type, label } of groupDefs) {
     const items = commands.filter((c) => c.type === type);
     if (!items.length) continue;
 
-    const groupEl  = createElement('div', 'chat-shortcuts__group');
-    const heading  = createElement('p',   'chat-shortcuts__group-label', label);
-    const rows     = createElement('div', 'chat-shortcuts__rows');
+    const groupEl = createElement('div', 'chat-shortcuts__group');
+    const heading = createElement('p', 'chat-shortcuts__group-label', label);
+    const rows = createElement('div', 'chat-shortcuts__rows');
 
     for (const cmd of items) {
-      const row   = createElement('div',  'chat-shortcuts__row');
-      const name  = createElement('span', 'chat-shortcuts__row-label', `/${cmd.id}`);
-      const desc  = createElement('span', 'chat-shortcuts__row-desc',  cmd.description);
+      const row = createElement('div', 'chat-shortcuts__row');
+      const name = createElement('span', 'chat-shortcuts__row-label', `/${cmd.id}`);
+      const desc = createElement('span', 'chat-shortcuts__row-desc', cmd.description);
       row.append(name, desc);
       rows.append(row);
     }

@@ -76,7 +76,7 @@ export function createProviderScroller({ providers, selectedProviderIds, onToggl
     const card = createProviderTile({
       provider,
       selectedIds,
-      onToggle: onCardToggle
+      onToggle: onCardToggle,
     });
     renderedCards.push(card);
     track.append(card);

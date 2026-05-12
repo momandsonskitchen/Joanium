@@ -6,7 +6,7 @@ import { disableTray, enableTray, isTrayActive, rememberWindow } from './Core/Tr
 function applyLoginItemSetting(enabled) {
   app.setLoginItemSettings({
     openAtLogin: Boolean(enabled),
-    ...(process.platform === 'linux' ? {} : { openAsHidden: Boolean(enabled) })
+    ...(process.platform === 'linux' ? {} : { openAsHidden: Boolean(enabled) }),
   });
 }
 
@@ -14,7 +14,7 @@ function runtimeStatus(settings) {
   return {
     ...settings,
     keepAwakeActive: isKeepAwakeActive(),
-    trayActive: isTrayActive()
+    trayActive: isTrayActive(),
   };
 }
 
@@ -40,7 +40,7 @@ export async function createPackage({ rootDirectory }) {
 
   globalThis.JoaniumRuntime = {
     ...(globalThis.JoaniumRuntime ?? {}),
-    shouldStayResident: () => Boolean(cachedSettings.systemTray && isTrayActive())
+    shouldStayResident: () => Boolean(cachedSettings.systemTray && isTrayActive()),
   };
 
   app.on('browser-window-created', (_event, windowRef) => {
@@ -48,16 +48,19 @@ export async function createPackage({ rootDirectory }) {
     if (cachedSettings.systemTray) enableTray(rootDirectory, windowRef);
   });
 
-  app.whenReady().then(() => {
-    applySettings(cachedSettings, BrowserWindow.getAllWindows()[0] ?? null);
-  }).catch(() => {});
+  app
+    .whenReady()
+    .then(() => {
+      applySettings(cachedSettings, BrowserWindow.getAllWindows()[0] ?? null);
+    })
+    .catch(() => {});
 
   return {
     id: 'AppSettings',
     ipcHandlers: [
       {
         channel: 'app-settings:get',
-        handler: async () => runtimeStatus(await stateManager.readSettings())
+        handler: async () => runtimeStatus(await stateManager.readSettings()),
       },
       {
         channel: 'app-settings:save',
@@ -69,8 +72,8 @@ export async function createPackage({ rootDirectory }) {
           }
 
           return applySettings(saved, ownerWindow(event));
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 }
