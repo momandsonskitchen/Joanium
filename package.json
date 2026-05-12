@@ -16,13 +16,16 @@
   "devDependencies": {
     "electron": "42.0.1",
     "electron-builder": "^26.9.1",
-    "eslint": "10.3.0"
+    "eslint": "10.3.0",
+    "prettier": "3.5.3"
   },
   "main": "App.js",
   "scripts": {
     "start": "electron .",
     "build": "node Scripts/Build.mjs",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "joanium",
