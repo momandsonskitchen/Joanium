@@ -203,6 +203,15 @@ export async function createPackage({ rootDirectory }) {
           return readAttachmentFiles(result.filePaths, { allowImages });
         },
       },
+      {
+        channel: 'chat:process-dropped-files',
+        handler: async (_event, options = {}) => {
+          const filePaths = Array.isArray(options?.filePaths) ? options.filePaths : [];
+          const allowImages = Boolean(options?.allowImages);
+          if (filePaths.length === 0) return { attachments: [], rejected: [] };
+          return readAttachmentFiles(filePaths, { allowImages });
+        },
+      },
       // ── Model health ─────────────────────────────────────────────────────────
       {
         channel: 'chat:health-get',

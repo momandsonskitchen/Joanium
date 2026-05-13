@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 contextBridge.exposeInMainWorld('Joanium', {
   ipc: {
@@ -10,4 +10,5 @@ contextBridge.exposeInMainWorld('Joanium', {
     },
     removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
   },
+  getPathForFile: (file) => webUtils.getPathForFile(file),
 });

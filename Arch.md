@@ -1,17 +1,20 @@
 # About
+
 * Project: Joanium
 * Codename: Project Joana
 * Author: Joel Jolly
 * Tag: AI, Agent, Personal AI, Digital Companion, Personal Assistant, AI Companion, AI Assistant
 
-# Tech Stack
+## Tech Stack
+
 * Node.js
 * Electron.js
 * CSS
 * JavaScript
 * No react, no frameworks, no libraries other than the ones that are mentioned above. ( Vanilla JS )
 
-# System Files Structure:
+## System Files Structure
+
 * Assets: only for images, audios, videos only.
 * Docs: only for markdown documents only (about the system and it workings).
 * Data: only for user data and model data only.
@@ -25,32 +28,38 @@
 * Personas: markdown files that contains the personas of the AI agent (Joana is the default set persona).
 * Packages: that contains the features.
 
-# Flow
-## First time interaction:
+## Flow
+
+### First time interaction
+
 * Greet the user and ask the user to accept our terms and conditions and privacy policy.
 * Ask for the user's name.
 * Ask for the user's age.
 * take them to the AI model selection screen (where they can select the AI model they want to use API models, local models).
 * then in the next page  say "congrats you have setup your AI assistant" and then take them to the chat screen.
 
-## After setup and the next time the user opens the app, they should be taken directly to the chat screen.
+### After setup and the next time the user opens the app, they should be taken directly to the chat screen
 
-# Folder Structure:
+## Folder Structure
+
 * Core: Backend logic
 * UI: Frontend logic and view (includes css and js)
 * IPC: Inter-Process Communication
 * I18n: For language translations.
 
-# Expected working
-* In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
-    * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
+## Expected working
 
-# Read Only Files
+* In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
+  * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
+
+## Read Only Files
+
 * All files inside Assets, Config, Datasets are read only and needs to be inside the asar (for production).
 * All files inside Data are read and write only.
 
-# Ported Features From The Original App
-* Chat attachments and completion sound: `Packages/Chat` owns file picking, validation, extraction, composer chips, prompt context assembly, and the response completion chime. Attachments support text/code files plus PDF, DOCX, XLSX/XLSM, and PPTX extraction without importing from other packages.
+## Ported Features From The Original App
+
+* Chat attachments and completion sound: `Packages/Chat` owns file picking, validation, extraction, composer chips, prompt context assembly, and the response completion chime. Attachments support text/code files plus PDF, DOCX, XLSX/XLSM, and PPTX extraction without importing from other packages. Drag-and-drop onto the chat view is supported — the drop overlay is scoped exclusively to the chat view element and never appears on other Shell pages. The overlay label and accepted file types update dynamically based on whether the active model supports image inputs (`model.inputs.image`). Dropped file paths are processed via the `chat:process-dropped-files` IPC channel, which shares the same `readAttachmentFiles` backend as the dialog-based picker.
 * Chat slash commands: `Packages/Chat` owns the inline `/` command palette for chat actions, Shell navigation, prompt templates, and agent prompts. Connector slash scopes from the original app are intentionally not ported.
 * Channels: `Packages/Channels` owns channel state, runtime polling/replies, validation, reply history, and channel-specific system prompts for Telegram, WhatsApp, Discord, and Slack. The channel gateway uses the same bounded agentic tool loop as chat, so external channel replies can use terminal, live browser, connector, memory, and Toolset tools before sending the final message.
 * Browser Preview: `Packages/Toolset/LiveBrowser` owns the Electron browser view, browser-preview IPC, and live browser AI tools; `Packages/Chat` only provides the visible right-side host panel and bounds syncing.
@@ -69,99 +78,119 @@
 * Custom Instructions: `Packages/User` stores user-written behavior instructions in `Data/User.json`; `Packages/Chat` adds them to the model system context.
 * Birthday Card: `Packages/User/UI/BirthdayCard.js` mounts a full-viewport celebratory overlay with canvas confetti on the user's birthday (day + month match from `Data/User.json`). Shows the user's avatar photo when one is set; omits the image slot otherwise. Mounted by `Packages/Shell` after the initial route renders. All strings are owned by `Packages/User/I18n`.
 
-# Build System
+## Build System
 
-## Scripts
+### Scripts
+
 * `Scripts/Build.mjs` — production build entry point. Runs `SetVersionByDate.mjs` then `electron-builder`.
 * `Scripts/SetVersionByDate.mjs` — stamps `package.json` with a date-based version (`YYYY.MMDD.patch`). Writes the 2-part base version to stdout so CI can append its own counter.
 
-## Config
+### Config
+
 * `electron-builder.json` — electron-builder configuration (targets, icons, file inclusion, publish settings). Kept separate from `package.json` for clarity.
 
-## File Packaging Strategy
+### File Packaging Strategy
+
 * **Inside asar** (`files`): `App.js`, `Packages`, `Datasets`, `Prompts`. Code-only, read-only at runtime.
 * **Outside asar** (`extraResources`): `Assets`, `Data`, `Skills`, `Personas`. Placed at `process.resourcesPath` so they are accessible outside the asar sandbox.
 * `Data` ships only seed/static files. User-generated data (chats, memories, agents, channels, projects, security, avatar, usage) is excluded from the build via filters that mirror `.gitignore`.
 
-## Path Resolution (Packaged vs Dev)
+### Path Resolution (Packaged vs Dev)
+
 * `rootDirectory` always resolves to the asar root (or project root in dev) — used for `Assets`, `Packages`, etc.
 * Files in `extraResources` (e.g. `Data/Models`) must be resolved via `process.resourcesPath` when `app.isPackaged` is `true`. Use the pattern: `const dataRoot = app.isPackaged ? process.resourcesPath : rootDirectory;`
 
-## CI/CD
+### CI/CD
+
 * `.github/workflows/Release.yml` — manual trigger (`workflow_dispatch`) that versions, tags, creates a GitHub release, then fans out to three parallel jobs: Windows (NSIS installer), macOS (DMG), Linux (AppImage). Each job calls `electron-builder --publish always` with `GH_TOKEN`.
 
-# Design language
+## Design language
+
 * All buttons should have rounded corners (20px).
 * Should follow material 3 expressive design.
 * I need a clean and very premium looking UI.
 * Should match the current app design language.
 
-# Packages/AppSettings
+## Packages/AppSettings
+
 Owns persisted app behavior settings plus keep-awake and tray runtime side effects. Shell mounts its settings panel and routes each nav item to the correct sub-panel. The settings panel is a modal overlay with a left-side nav and a right-side content area.
 
-## Settings Panel Pages
+### Settings Panel Pages
 
-### User
+#### User
+
 * Owned by `Packages/User`.
 * Lets the user update their display name, date of birth, avatar photo, and custom instructions (tone / style / behavior hints passed to the AI).
 * Profile data is persisted in `Data/User.json`; the avatar image is stored in `Data/`.
 * Shell re-syncs the sidebar avatar whenever a profile save or avatar change fires.
 
-### App
+#### App
+
 * Owned by `Packages/AppSettings`.
 * Exposes boolean toggles for app-level behaviour: run on startup, system tray, keep-awake, and completion sound.
 * **App default view** — controls which view the app opens on after setup. Defaults to `chat`. The user can change it to any of the following: `chat`, `history`, `projects`, `agents`, `skills`, `personas`, `marketplace`, `events`, `usage`. The selected value is persisted in `Data/AppSettings.json` and read by Shell on boot to navigate to the correct view before anything is rendered.
 * Settings are persisted and broadcast via a `joanium:app-settings-changed` window event so other packages can react without polling.
 
-### Channels
+#### Channels
+
 * Owned by `Packages/Channels`.
 * Manages connected external messaging channels: Telegram, WhatsApp, Discord, and Slack.
 * Each channel entry stores its credentials, polling state, and an optional channel-specific system prompt.
 
-### Connectors
+#### Connectors
+
 * Owned by `Packages/Toolset/Connectors`.
 * Stores API-key-backed service credentials (e.g. GitHub, OpenWeather) used by Toolset chat tools.
 * Connector credentials are kept separate from channel config and are never exposed in the chat context directly.
 
-### Providers
+#### Providers
+
 * Owned by `Packages/Providers`.
 * Configures AI model providers — both API-based (OpenAI, Anthropic, etc.) and local (Ollama) models.
 * The active provider and model selection drive what the chat completion engine calls at runtime.
 
-### Appearance
+#### Appearance
+
 * Owned by `Packages/Themes`.
 * Controls the visual theme of the app (colour scheme, accent, light/dark mode).
 * Theme state is persisted and applied on boot via `ThemeController` before any UI is rendered.
 
-### MCP
+#### MCP
+
 * Owned by `Packages/MCP`.
 * Manages Model Context Protocol server connections that extend the AI's tool capabilities.
 * Each MCP entry stores the server URL, name, and connection state.
 
-### Shortcuts
+#### Shortcuts
+
 * Owned by `Packages/Shell` (`ShortcutsPanel.js`).
 * Displays all registered keyboard shortcuts in a read-only reference panel.
 * Shortcuts themselves are registered in `Shortcuts.js` and fire regardless of focus.
 
-### Security
+#### Security
+
 * Owned by `Packages/Security`.
 * Configures app-lock: enable/disable password protection, set the password, choose the auto-lock idle timeout, and define a secret recovery answer.
 * When enabled, a lock screen is mounted on boot and after the idle timer fires.
 
-### About
+#### About the App
+
 * Owned by `Packages/About`.
 * Shows app metadata (name, version, build) and a local system snapshot (OS, CPU, RAM, etc.) persisted to `Data/System.json`.
 
-# Data Storage
-* To store user data we use Data folder. 
+## Data Storage
+
+* To store user data we use Data folder.
 * Project workspace records are stored in `Data/Projects` and can include user-defined context and cover image paths.
 
-# Project Workspace
+## Project Workspace
+
 * The projects view should behave like a native workspace browser with searchable project cards, native image picking, and visually rich project previews.
 * Opening a project should make that workspace context visible to the user inside chat, not silently attach hidden state.
 * Project records preserve the selected workspace folder as `folderPath` / `rootPath`; Chat includes it in the system context and uses it as the default working directory for terminal, Git status, Git diff, and project checks.
 
-# Must Follow
+## Must Follow
+
 * Keep your code clean and organized.
 * Dont keep unused code.
 * Inside packages all are individual so no one package should import or use from another package. (if there is something that is common then keep it in Shared)

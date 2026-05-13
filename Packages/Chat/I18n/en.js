@@ -200,6 +200,12 @@ const en = {
       status: 'git status',
     },
   },
+  dropZone: {
+    label: 'Drop files here',
+    labelWithImages: 'Drop files or images here',
+    hint: 'Supported: documents, code, and text',
+    hintWithImages: 'Supported: documents, code, text, and images',
+  },
   slash: {
     label: 'Slash commands',
     empty: 'No matching commands',

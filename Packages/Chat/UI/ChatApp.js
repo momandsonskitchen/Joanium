@@ -1863,6 +1863,24 @@ function resolveProviderBaseUrl(provider, userProviderDetails) {
   }
 }
 
+function createDropZoneOverlay(strings) {
+  const overlay = createElement('div', 'chat-drop-overlay');
+
+  const body = createElement('div', 'chat-drop-overlay__body');
+  const ring = createElement('div', 'chat-drop-overlay__ring');
+  const iconEl = createElement('span', 'chat-drop-overlay__icon');
+  iconEl.append(createIcon('paperclip', 'chat-drop-overlay__icon-glyph'));
+  ring.append(iconEl);
+
+  const label = createElement('p', 'chat-drop-overlay__label', strings.dropZone.label);
+  const hint = createElement('p', 'chat-drop-overlay__hint', strings.dropZone.hint);
+
+  body.append(ring, label, hint);
+  overlay.append(body);
+
+  return overlay;
+}
+
 export async function createChatView(
   strings,
   {
@@ -1882,6 +1900,7 @@ export async function createChatView(
     invokeIpc('app-settings:get').catch(() => null),
   ]);
   const view = createElement('div', 'chat-view');
+  const dropOverlay = createDropZoneOverlay(strings);
   const profile = getProfile?.() ?? payload.user?.profile ?? {};
   const firstName = getFirstName(profile.name, strings.appName);
   const hour = new Date().getHours();
@@ -2107,29 +2126,33 @@ export async function createChatView(
     }
   }
 
+  function applyAttachmentResult(result) {
+    const incoming = Array.isArray(result?.attachments) ? result.attachments : [];
+    const rejected = Array.isArray(result?.rejected) ? result.rejected : [];
+
+    if (incoming.length > 0) {
+      pendingAttachments = [...pendingAttachments, ...incoming];
+      renderPendingAttachments();
+      syncComposer();
+    } else if (rejected.length === 0) {
+      attachmentNotice.hidden = true;
+    }
+
+    if (rejected.length > 0) {
+      showAttachmentNotice(
+        formatText(strings.composer.attachmentRejected, { count: String(rejected.length) }),
+        'warning',
+      );
+    }
+  }
+
   async function selectAttachments() {
     if (isSending) return;
     const allowImages = activeModel?.inputs?.image === true;
 
     try {
       const result = await invokeIpc('chat:select-attachments', { allowImages });
-      const incoming = Array.isArray(result?.attachments) ? result.attachments : [];
-      const rejected = Array.isArray(result?.rejected) ? result.rejected : [];
-
-      if (incoming.length > 0) {
-        pendingAttachments = [...pendingAttachments, ...incoming];
-        renderPendingAttachments();
-        syncComposer();
-      } else if (rejected.length === 0) {
-        attachmentNotice.hidden = true;
-      }
-
-      if (rejected.length > 0) {
-        showAttachmentNotice(
-          formatText(strings.composer.attachmentRejected, { count: String(rejected.length) }),
-          'warning',
-        );
-      }
+      applyAttachmentResult(result);
     } catch (error) {
       showAttachmentNotice(
         formatText(strings.composer.attachmentFailed, {
@@ -4544,7 +4567,7 @@ export async function createChatView(
   trackLabel = createElement('div', 'chat-thread-track__label');
   trackLabel.hidden = true;
   track.append(trackLabel);
-  view.append(track);
+  view.append(track, dropOverlay);
   scroll.addEventListener('scroll', () => updateTrackActive(), { passive: true });
   scroll.addEventListener(
     'scroll',
@@ -4556,6 +4579,81 @@ export async function createChatView(
   );
   browserPreview.start();
   wireTerminalProcessCards();
+
+  // ── File drag-and-drop (chat page only) ───────────────────────────────────
+  // Scoped entirely to the chat view element so drag events from other Shell
+  // pages never trigger this overlay. Uses a counter to handle the fact that
+  // dragenter/dragleave fire on every child element crossing.
+  let dropDragCounter = 0;
+
+  function isFileDrag(event) {
+    return Array.from(event.dataTransfer?.types ?? []).includes('Files');
+  }
+
+  function syncDropOverlayLabel() {
+    const allowImages = activeModel?.inputs?.image === true;
+    const labelEl = dropOverlay.querySelector('.chat-drop-overlay__label');
+    const hintEl = dropOverlay.querySelector('.chat-drop-overlay__hint');
+    if (labelEl) {
+      labelEl.textContent = allowImages ? strings.dropZone.labelWithImages : strings.dropZone.label;
+    }
+    if (hintEl) {
+      hintEl.textContent = allowImages ? strings.dropZone.hintWithImages : strings.dropZone.hint;
+    }
+  }
+
+  view.addEventListener('dragenter', (event) => {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    dropDragCounter += 1;
+    if (dropDragCounter === 1) {
+      syncDropOverlayLabel();
+      dropOverlay.classList.add('chat-drop-overlay--visible');
+    }
+  });
+
+  view.addEventListener('dragover', (event) => {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+  });
+
+  view.addEventListener('dragleave', (event) => {
+    if (!isFileDrag(event)) return;
+    dropDragCounter -= 1;
+    if (dropDragCounter <= 0) {
+      dropDragCounter = 0;
+      dropOverlay.classList.remove('chat-drop-overlay--visible');
+    }
+  });
+
+  view.addEventListener('drop', (event) => {
+    event.preventDefault();
+    dropDragCounter = 0;
+    dropOverlay.classList.remove('chat-drop-overlay--visible');
+    if (isSending) return;
+
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    const filePaths = files.map((file) => window.Joanium.getPathForFile(file)).filter(Boolean);
+    if (filePaths.length === 0) return;
+
+    const allowImages = activeModel?.inputs?.image === true;
+
+    invokeIpc('chat:process-dropped-files', { filePaths, allowImages })
+      .then((result) => {
+        applyAttachmentResult(result);
+        focusComposer();
+      })
+      .catch((error) => {
+        showAttachmentNotice(
+          formatText(strings.composer.attachmentFailed, {
+            message: error?.message ?? String(error),
+          }),
+          'warning',
+        );
+        focusComposer();
+      });
+  });
 
   applyActiveProject(activeProject);
   syncComposer();
