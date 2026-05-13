@@ -24,10 +24,6 @@ const en = {
       label: 'Auto memory updates',
       description: 'Let Joanium update personal memory from completed conversations while idle.',
     },
-    autoUpdate: {
-      label: 'App auto update',
-      description: 'Check for signed releases and download updates automatically when packaged.',
-    },
   },
   defaultView: {
     label: 'Default view',
@@ -47,21 +43,6 @@ const en = {
   defaultModel: {
     label: 'Default model',
     description: 'The AI model used by default when starting a new conversation.',
-  },
-  runtime: {
-    title: 'Runtime',
-    tray: 'Tray',
-    keepAwake: 'Keep awake',
-    autoUpdate: 'Auto update',
-    active: 'Active',
-    inactive: 'Inactive',
-    checking: 'Checking',
-    current: 'Current',
-    disabled: 'Disabled',
-    unavailable: 'Unavailable in development',
-    ready: 'Ready to install on quit',
-    downloading: 'Downloading {percent}%',
-    error: 'Needs attention',
   },
 };
 
