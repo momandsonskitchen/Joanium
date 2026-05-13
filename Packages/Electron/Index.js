@@ -18,7 +18,12 @@ app.commandLine.appendSwitch('force-color-profile', 'srgb');
 // Disable Windows' native window occlusion tracker. Chromium uses this OS
 // signal to throttle occluded windows through a separate code path that
 // disable-backgrounding-occluded-windows alone does not cover.
-app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+// OccludedWindowWebContentsExperiment is a second occlusion-based suspension
+// path in the WebContents layer — must be disabled separately.
+app.commandLine.appendSwitch(
+  'disable-features',
+  'CalculateNativeWinOcclusion,OccludedWindowWebContentsExperiment',
+);
 
 // Speed up GPU channel establishment so the first frame renders immediately
 // when the user switches back to the app after a long absence.
@@ -108,9 +113,6 @@ async function createMainWindow(entryPackage) {
   browserWindow.on('show', () => {
     writeBootLog('browserWindow:show');
   });
-  browserWindow.on('focus', () => {
-    writeBootLog('browserWindow:focus');
-  });
   browserWindow.webContents.on('did-start-loading', () => {
     writeBootLog('webContents:did-start-loading');
   });
@@ -140,6 +142,26 @@ async function createMainWindow(entryPackage) {
 
   await browserWindow.loadFile(entryPackage.rendererPath);
   writeBootLog('createMainWindow:loadFile-resolved');
+
+  // Belt-and-suspenders: set background throttling off directly on the
+  // WebContents instance. The webPreferences flag is sometimes overridden by
+  // Chromium's visibility state machinery after the first hide/show cycle.
+  browserWindow.webContents.setBackgroundThrottling(false);
+
+  // Kick the compositor back to life the instant the window regains focus.
+  // Without this Chromium can take 2-5 s to repaint after being occluded
+  // because it waits for the next scheduled vsync rather than painting now.
+  browserWindow.on('focus', () => {
+    writeBootLog('browserWindow:focus');
+    if (!browserWindow.isDestroyed()) {
+      browserWindow.webContents.invalidate();
+    }
+  });
+  browserWindow.on('show', () => {
+    if (!browserWindow.isDestroyed()) {
+      browserWindow.webContents.invalidate();
+    }
+  });
 
   // ── Production hardening ───────────────────────────────────────────────────
   // Only active in packaged builds. During development these stay open so you
