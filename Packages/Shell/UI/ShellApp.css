@@ -207,6 +207,19 @@ textarea {
   height: 100%;
 }
 
+/* Memory sync green dot — shown on the memory tab during background sync */
+.chat-sidebar__memory-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34c759;
+  box-shadow: 0 0 0 1.5px var(--color-chat-surface, #fff);
+  pointer-events: none;
+}
+
 .chat-sidebar__avatar-divider {
   width: calc(100% - 16px);
   height: 1px;

@@ -1960,7 +1960,6 @@ export async function createChatView(
   let toolsetPrompt = null;
   let memorySyncTimer = null;
   let memorySyncRunning = false;
-  let memorySyncIndicator = null;
   let slashCommandsLoaded = false;
   let track = null;
   let trackLabel = null;
@@ -2326,20 +2325,13 @@ export async function createChatView(
   }
 
   function showMemorySyncIndicator(label) {
-    if (!memorySyncIndicator) {
-      return;
-    }
-    memorySyncIndicator.hidden = false;
-    const labelEl = memorySyncIndicator.querySelector('.chat-memory-sync__label');
-    if (labelEl) {
-      labelEl.textContent = label;
-    }
+    window.dispatchEvent(
+      new CustomEvent('joanium:memory-sync', { detail: { active: true, message: label } }),
+    );
   }
 
   function hideMemorySyncIndicator() {
-    if (memorySyncIndicator) {
-      memorySyncIndicator.hidden = true;
-    }
+    window.dispatchEvent(new CustomEvent('joanium:memory-sync', { detail: { active: false } }));
   }
 
   function cancelScheduledMemorySync() {
@@ -4765,21 +4757,7 @@ export async function createChatView(
     }
   });
 
-  memorySyncIndicator = createElement('div', 'chat-memory-sync');
-  memorySyncIndicator.hidden = true;
-  memorySyncIndicator.append(
-    createIcon('thinking', 'chat-memory-sync__icon'),
-    createElement('span', 'chat-memory-sync__label', strings.memorySync.updating),
-  );
-
-  view.append(
-    scroll,
-    bottom,
-    browserPreview.element,
-    terminalPanel.build(),
-    privateBtn,
-    memorySyncIndicator,
-  );
+  view.append(scroll, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
   track = createElement('div', 'chat-thread-track');
   track.hidden = true;
   trackLabel = createElement('div', 'chat-thread-track__label');

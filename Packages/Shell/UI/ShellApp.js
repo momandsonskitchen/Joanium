@@ -689,6 +689,33 @@ async function bootstrap() {
   shell.append(sidebar, stage, dragRegion);
   root.replaceChildren(shell);
 
+  // ── Memory sync indicator ─────────────────────────────────────────────────
+  // Listens for joanium:memory-sync events dispatched by ChatApp. When active,
+  // adds a green dot to the memory tab and swaps its aria-label to the sync
+  // message so the existing CSS ::after tooltip shows the message on hover.
+  {
+    const memoryTab = tabElements.get('memory');
+    let memoryTabOriginalLabel = memoryTab?.getAttribute('aria-label') ?? '';
+    let memorySyncDot = null;
+
+    window.addEventListener('joanium:memory-sync', (event) => {
+      if (!memoryTab) return;
+      const { active, message } = event.detail ?? {};
+      if (active) {
+        memoryTabOriginalLabel = memoryTab.getAttribute('aria-label') ?? memoryTabOriginalLabel;
+        memoryTab.setAttribute('aria-label', message ?? memoryTabOriginalLabel);
+        if (!memorySyncDot) {
+          memorySyncDot = createElement('span', 'chat-sidebar__memory-dot');
+          memoryTab.append(memorySyncDot);
+        }
+      } else {
+        memoryTab.setAttribute('aria-label', memoryTabOriginalLabel);
+        memorySyncDot?.remove();
+        memorySyncDot = null;
+      }
+    });
+  }
+
   // Dismiss the boot loader now that the shell is in the DOM.
   // Fire-and-forget: fade out over 300ms then remove.
   const bootLoader = document.getElementById('boot-loader');
