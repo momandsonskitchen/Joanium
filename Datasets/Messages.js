@@ -174,6 +174,28 @@ export function getNewYearGreeting(name) {
   return greetings[Math.floor(Math.random() * greetings.length)];
 }
 
+// ── Private mode greetings ──────────────────────────────────────────────────
+
+/**
+ * Returns a random James Bond-style greeting used when private mode is active.
+ */
+export function getPrivateGreeting(name) {
+  const n = name || 'Agent';
+  const greetings = [
+    `The name's ${n}. And this conversation? It never happened.`,
+    `Good evening, ${n}. Your mission, should you choose to accept it…`,
+    `Welcome to the shadows, ${n}. No trace. No record. No regrets.`,
+    `${n}. Licensed to chat — and sworn to secrecy.`,
+    `Eyes only, ${n}. This channel is clean.`,
+    `${n}, you've just gone dark. Proceed with confidence.`,
+    `Encrypted. Untraceable. Just the way you like it, ${n}.`,
+    `Your cover is intact, ${n}. No one's watching.`,
+    `Private channel secured, ${n}. What's the mission?`,
+    `Welcome back to the cold, ${n}. Nothing leaves this room.`,
+  ];
+  return greetings[Math.floor(Math.random() * greetings.length)];
+}
+
 // ── Time-based greetings ──────────────────────────────────────────────────
 
 export const getTimeGreetings = (hour, name) =>

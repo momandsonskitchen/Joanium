@@ -6,6 +6,7 @@ import {
   getChristmasGreeting,
   isNewYearToday,
   getNewYearGreeting,
+  getPrivateGreeting,
 } from '../../../Datasets/Messages.js';
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
@@ -1921,7 +1922,6 @@ export async function createChatView(
   let isSending = false;
   let isEnhancing = false;
   let isPrivate = false;
-  let privateNoticeEl = null;
   let accText = '';
   let accThinking = '';
   let sessionId = null;
@@ -4484,18 +4484,11 @@ export async function createChatView(
   slashMenu.append(slashScroller);
   attachCustomScrollbar(slashMenu, slashScroller, { top: 6, bottom: 6, right: 4, minThumb: 24 });
   diagPanel = createDiagnosticPanel(strings);
-  privateNoticeEl = createElement('div', 'chat-composer__private-notice');
-  privateNoticeEl.hidden = true;
-  privateNoticeEl.append(
-    createIcon('lock', 'chat-composer__private-notice-icon'),
-    createElement('span', '', strings.composer.privateNotice),
-  );
   composer.append(
     projectPill,
     gitBarEl,
     attachmentsEl,
     attachmentNotice,
-    privateNoticeEl,
     composerField,
     composerFooter,
     slashMenu,
@@ -4529,10 +4522,17 @@ export async function createChatView(
     createIcon('lock', 'chat-private-btn__icon'),
     createElement('span', 'chat-private-btn__label', 'Private'),
   );
+  const originalGreeting = greeting;
   privateBtn.addEventListener('click', () => {
     isPrivate = !isPrivate;
     privateBtn.classList.toggle('chat-private-btn--active', isPrivate);
-    if (privateNoticeEl) privateNoticeEl.hidden = !isPrivate;
+    if (title && messages.length === 0) {
+      if (isPrivate) {
+        title.textContent = getPrivateGreeting(firstName).replace(/\s(\S+\s*)$/, '\u00A0$1');
+      } else {
+        title.textContent = originalGreeting;
+      }
+    }
   });
   view.append(scroll, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
   track = createElement('div', 'chat-thread-track');
