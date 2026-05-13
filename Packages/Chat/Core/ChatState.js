@@ -620,13 +620,13 @@ async function streamOpenAiCompatibleMessage({
       onChunk({ type: 'text', text: delta.content });
     }
 
-    // DeepSeek-R1 reasoning tokens and providers that follow the same pattern
+    // DeepSeek-R1 reasoning tokens and providers that follow the same pattern.
+    // Use else-if: some providers populate both fields on the same delta; treating
+    // them as mutually exclusive prevents the same thinking text being emitted twice.
     if (typeof delta.reasoning_content === 'string' && delta.reasoning_content) {
       onChunk({ type: 'thinking', text: delta.reasoning_content });
-    }
-
-    // Some providers (e.g. Qwen-QwQ via OpenRouter) use a different field name
-    if (typeof delta.reasoning === 'string' && delta.reasoning) {
+    } else if (typeof delta.reasoning === 'string' && delta.reasoning) {
+      // Some providers (e.g. Qwen-QwQ via OpenRouter) use a different field name
       onChunk({ type: 'thinking', text: delta.reasoning });
     }
   }
