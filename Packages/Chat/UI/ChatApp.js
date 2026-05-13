@@ -2789,6 +2789,10 @@ export async function createChatView(
           onOpenSettings?.();
           break;
 
+        case 'togglePrivate':
+          privateBtn.click();
+          break;
+
         case 'switchTheme': {
           const mode = command.payload?.mode;
           if (mode) {

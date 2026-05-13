@@ -34,6 +34,14 @@ const COMMANDS = [
   // These run a one-shot side effect and clear the slash token from the composer.
 
   {
+    id: 'private',
+    label: 'Private chat',
+    description: 'Toggle private mode — conversations are not saved.',
+    type: 'action',
+    icon: 'lock',
+    action: 'togglePrivate',
+  },
+  {
     id: 'new',
     label: 'New chat',
     description: 'Start a fresh conversation.',
