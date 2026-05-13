@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { app, BrowserWindow, ipcMain, powerSaveBlocker } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, powerSaveBlocker } from 'electron';
 import { createBootLogger } from '../Boot/Index.js';
 import {
   applyWindowState,
@@ -37,6 +37,50 @@ let currentPackage = null;
 let packageLoader = null;
 let registeredChannels = new Set();
 let navigationSequence = Promise.resolve();
+
+// ── Production hardening ───────────────────────────────────────────────────
+// Applied to every WebContents instance in packaged builds.
+// Covers reload, hard-reload, DevTools, view-source, and inspect shortcuts
+// across the main window and any secondary web contents that may be created.
+
+function applyProductionHardening(webContents) {
+  // Disable DevTools at the WebContents level — blocks Ctrl+Shift+I, F12,
+  // and the "Inspect Element" context-menu entry.
+  webContents.setDevToolsEnabled(false);
+
+  // Block all keyboard shortcuts that could reload, inspect, or expose
+  // internal content. Intercepted before Chromium acts on them.
+  webContents.on('before-input-event', (event, input) => {
+    const key = input.key.toLowerCase();
+    const ctrl = input.control || input.meta; // Ctrl on Windows/Linux, Cmd on macOS
+
+    // Reload
+    const reload = ctrl && !input.shift && !input.alt && key === 'r';
+    // Hard reload (Ctrl+Shift+R, Ctrl+F5, Shift+F5)
+    const hardReload =
+      (ctrl && input.shift && key === 'r') ||
+      (ctrl && key === 'f5') ||
+      (!ctrl && input.shift && key === 'f5');
+    // Any F5 variant
+    const f5 = key === 'f5';
+    // DevTools (Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, F12)
+    const devTools =
+      (ctrl && input.shift && (key === 'i' || key === 'j' || key === 'c')) || key === 'f12';
+    // View source (Ctrl+U)
+    const viewSource = ctrl && !input.shift && !input.alt && key === 'u';
+
+    if (reload || hardReload || f5 || devTools || viewSource) {
+      event.preventDefault();
+    }
+  });
+
+  // Suppress the default Chromium context menu — it contains "Inspect" and
+  // "View Page Source" entries. The renderer's own custom menus are unaffected
+  // since those are dispatched via IPC, not this event.
+  webContents.on('context-menu', (event) => {
+    event.preventDefault();
+  });
+}
 
 const writeBootLog = createBootLogger(
   path.join(process.cwd(), 'Build', 'Logs', 'electron-boot.log'),
@@ -167,25 +211,7 @@ async function createMainWindow(entryPackage) {
   // Only active in packaged builds. During development these stay open so you
   // can use DevTools and reload normally.
   if (app.isPackaged) {
-    // Disable DevTools entirely — prevents Ctrl+Shift+I / F12 from opening it.
-    // The keydown events still reach the renderer so app shortcuts still fire.
-    browserWindow.webContents.setDevToolsEnabled(false);
-
-    // Block reload shortcuts at the input level before Electron/Chromium acts
-    // on them. Ctrl+R, Ctrl+Shift+R and F5 would otherwise reload the page
-    // and wipe all in-memory state.
-    browserWindow.webContents.on('before-input-event', (event, input) => {
-      const key = input.key.toLowerCase();
-      const ctrl = input.control || input.meta;
-
-      const isReload = ctrl && !input.shift && key === 'r';
-      const isHardReload = ctrl && input.shift && key === 'r';
-      const isF5 = key === 'f5';
-
-      if (isReload || isHardReload || isF5) {
-        event.preventDefault();
-      }
-    });
+    applyProductionHardening(browserWindow.webContents);
   }
 
   ensureVisible();
@@ -280,8 +306,11 @@ export async function bootElectron({ entryPackage, loadPackage }) {
     }
   });
 
-  app.on('web-contents-created', () => {
+  app.on('web-contents-created', (_event, webContents) => {
     writeBootLog('app:web-contents-created');
+    if (app.isPackaged) {
+      applyProductionHardening(webContents);
+    }
   });
 
   app.on('browser-window-created', () => {
@@ -290,6 +319,19 @@ export async function bootElectron({ entryPackage, loadPackage }) {
 
   const launchMainWindow = async () => {
     writeBootLog('launchMainWindow:start');
+
+    // ── Strip the default application menu in production ───────────────────
+    // Electron ships with a built-in menu that includes accelerators for
+    // Reload (Ctrl+R / F5), Hard-Reload (Ctrl+Shift+R), DevTools (F12), and
+    // View Source (Ctrl+U). These accelerators are resolved at the native
+    // menu level — BEFORE before-input-event fires — so they completely
+    // bypass the WebContents keyboard handler. Setting the application menu
+    // to null removes every accelerator at once and is the only reliable way
+    // to block them in a packaged build.
+    if (app.isPackaged) {
+      Menu.setApplicationMenu(null);
+    }
+
     mainWindow = await createMainWindow(entryPackage);
     powerSaveBlocker.start('prevent-app-suspension');
     writeBootLog('launchMainWindow:complete');
