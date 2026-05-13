@@ -1933,6 +1933,7 @@ export async function createChatView(
   let modelPickerDispose = null;
   let modelPickerOpen = false;
   let terminalPanel = null;
+  let scrollToBottomBtn = null;
   let diagTimer = null;
   let diagPanel = null;
   let toolsetPrompt = null;
@@ -1963,6 +1964,11 @@ export async function createChatView(
       scrollToBottomFrame = null;
       if (!userScrolledUp && scroll) scroll.scrollTop = scroll.scrollHeight;
     });
+  }
+
+  function syncScrollToBottomBtn() {
+    if (!scrollToBottomBtn) return;
+    scrollToBottomBtn.classList.toggle('chat-scroll-to-bottom-btn--visible', userScrolledUp);
   }
 
   let composerField = null;
@@ -4396,7 +4402,16 @@ export async function createChatView(
     slashMenu,
   );
   scroll.append(title, bubblesEl, thread);
-  bottom.append(composer);
+  scrollToBottomBtn = createElement('button', 'chat-scroll-to-bottom-btn');
+  scrollToBottomBtn.type = 'button';
+  scrollToBottomBtn.setAttribute('aria-label', strings.composer.scrollToBottom);
+  scrollToBottomBtn.append(createIcon('chevronDown', 'chat-scroll-to-bottom-btn__icon'));
+  scrollToBottomBtn.addEventListener('click', () => {
+    userScrolledUp = false;
+    if (scroll) scroll.scrollTo({ top: scroll.scrollHeight, behavior: 'smooth' });
+    syncScrollToBottomBtn();
+  });
+  bottom.append(scrollToBottomBtn, composer);
   const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {
     onVisibilityChange: (visible) => {
       view.classList.toggle('chat-view--browser-preview', visible);
@@ -4431,6 +4446,7 @@ export async function createChatView(
     'scroll',
     () => {
       userScrolledUp = !isNearBottom();
+      syncScrollToBottomBtn();
     },
     { passive: true },
   );

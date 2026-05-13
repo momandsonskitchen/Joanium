@@ -29,6 +29,7 @@ const en = {
     healthGreen: 'Model is available',
     healthYellow: 'Checking availability...',
     healthRed: 'Model may be discontinued or unavailable',
+    scrollToBottom: 'Scroll to bottom',
   },
   diag: {
     statusLabel: 'Status',

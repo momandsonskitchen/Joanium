@@ -2395,3 +2395,57 @@
   line-height: 1.6;
   color: rgba(80, 40, 130, 0.65);
 }
+
+/* ── Scroll-to-bottom button ──────────────────────────────────────────────────
+   Floats above the composer. Hidden by default; appears when the user has
+   scrolled up and there is content below the viewport.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.chat-scroll-to-bottom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 10px;
+  background: rgba(var(--color-accent-rgb), 0.88);
+  box-shadow:
+    0 6px 18px rgba(var(--color-accent-rgb), 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.97);
+  -webkit-app-region: no-drag;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.chat-scroll-to-bottom-btn--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.chat-scroll-to-bottom-btn:hover {
+  background: rgba(var(--color-accent-rgb), 1);
+  box-shadow:
+    0 8px 22px rgba(var(--color-accent-rgb), 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.chat-scroll-to-bottom-btn__icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+.chat-scroll-to-bottom-btn__icon svg {
+  width: 100%;
+  height: 100%;
+}
