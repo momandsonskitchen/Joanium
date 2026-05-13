@@ -689,6 +689,15 @@ async function bootstrap() {
   shell.append(sidebar, stage);
   root.replaceChildren(shell);
 
+  // Dismiss the boot loader now that the shell is in the DOM.
+  // Fire-and-forget: fade out over 300ms then remove.
+  const bootLoader = document.getElementById('boot-loader');
+  if (bootLoader) {
+    bootLoader.style.transition = 'opacity 300ms ease';
+    bootLoader.style.opacity = '0';
+    setTimeout(() => bootLoader.remove(), 300);
+  }
+
   await showRoute(appSettings.defaultView ?? 'chat');
   requestAnimationFrame(() => moveIndicatorToTab(activeTabEl, false));
 

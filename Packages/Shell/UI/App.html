@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../../Shared/LogoLoader/LogoLoader.css" />
     <link rel="stylesheet" href="./ShellApp.css" />
     <link rel="stylesheet" href="../../Shared/Markdown/MarkdownRenderer.css" />
     <link rel="stylesheet" href="../../Chat/UI/ChatApp.css" />
@@ -32,6 +33,19 @@
     <link rel="stylesheet" href="../../Shared/DropDown/DropDown.css" />
   </head>
   <body>
+    <!-- Boot loader: spins from first paint (CSS is render-blocking), dismissed
+         by ShellApp.js once the shell is in the DOM and the route is ready. -->
+    <div id="boot-loader" class="logo-loader logo-loader--infinite">
+      <div class="logo-loader__glow"></div>
+      <div class="logo-loader__wrap">
+        <img
+          class="logo-loader__img"
+          src="../../../Assets/Logo/Logo.png"
+          alt=""
+          style="width: 104px; height: 104px"
+        />
+      </div>
+    </div>
     <div id="app"></div>
     <script type="module" src="./ShellApp.js"></script>
   </body>
