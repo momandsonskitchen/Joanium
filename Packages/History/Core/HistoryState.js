@@ -87,6 +87,21 @@ export function createHistoryStateManager({ rootDirectory }) {
     await unlink(filePath);
   }
 
+  async function deleteAllSessions(projectId) {
+    const targetDir = getChatsDirectory(projectId);
+    let files;
+    try {
+      files = await readdir(targetDir);
+    } catch {
+      return;
+    }
+    await Promise.all(
+      files
+        .filter((f) => f.endsWith('.json'))
+        .map((f) => unlink(path.join(targetDir, f)).catch(() => {})),
+    );
+  }
+
   async function renameSession(id, newTitle, projectId) {
     const safeId = sanitizeFileStem(id);
     if (!safeId) throw new Error('A valid session id is required.');
@@ -117,6 +132,7 @@ export function createHistoryStateManager({ rootDirectory }) {
     listSessions,
     loadSession,
     deleteSession,
+    deleteAllSessions,
     renameSession,
     pinSession,
   };

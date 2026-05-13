@@ -23,6 +23,10 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, id, projectId) => historyStateManager.deleteSession(id, projectId),
       },
       {
+        channel: 'history:delete-all-sessions',
+        handler: async (_event, projectId) => historyStateManager.deleteAllSessions(projectId),
+      },
+      {
         channel: 'history:rename-session',
         handler: async (_event, id, newTitle, projectId) =>
           historyStateManager.renameSession(id, newTitle, projectId),

@@ -17,6 +17,8 @@ const en = {
   unpin: 'Unpin',
   rename: 'Rename',
   deleteChat: 'Delete',
+  deleteAll: 'Delete All',
+  deleteAllConfirm: 'Confirm?',
 };
 
 export default en;

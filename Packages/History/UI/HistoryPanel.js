@@ -285,11 +285,46 @@ export function createHistoryPanel(
 
     const newBtn = createElement('button', 'chat-history__new-btn');
     newBtn.type = 'button';
-    newBtn.append(
-      createIcon('tabChat', 'chat-history__new-icon'),
-      createElement('span', 'chat-history__new-label', strings.newChat),
-    );
+    newBtn.setAttribute('aria-label', strings.newChat);
+    newBtn.append(createIcon('tabChat', 'chat-history__new-icon'));
     newBtn.addEventListener('click', () => onNewChat?.());
+
+    // Delete All button — two-step confirmation
+    const deleteAllBtn = createElement('button', 'chat-history__delete-all-btn');
+    deleteAllBtn.type = 'button';
+    deleteAllBtn.setAttribute('aria-label', strings.deleteAll);
+    deleteAllBtn.append(createIcon('trash', 'chat-history__delete-all-icon'));
+
+    let deleteAllConfirmTimeout = null;
+    let deleteAllPending = false;
+
+    const resetDeleteAllBtn = () => {
+      deleteAllPending = false;
+      clearTimeout(deleteAllConfirmTimeout);
+      deleteAllBtn.classList.remove('chat-history__delete-all-btn--confirm');
+      deleteAllBtn.setAttribute('aria-label', strings.deleteAll);
+    };
+
+    deleteAllBtn.addEventListener('click', async () => {
+      if (!deleteAllPending) {
+        // First click — enter confirm state
+        deleteAllPending = true;
+        deleteAllBtn.classList.add('chat-history__delete-all-btn--confirm');
+        deleteAllBtn.setAttribute('aria-label', strings.deleteAllConfirm);
+        deleteAllConfirmTimeout = setTimeout(resetDeleteAllBtn, 2500);
+        return;
+      }
+
+      // Second click — execute
+      resetDeleteAllBtn();
+      try {
+        await invokeIpc('history:delete-all-sessions', getActiveProject?.()?.id);
+        onNewChat?.();
+      } catch (err) {
+        console.error('[Joanium] Failed to delete all sessions:', err);
+      }
+      await populateList(contentEl);
+    });
 
     const search = createSearchBar({
       placeholder: strings.search,
@@ -298,7 +333,7 @@ export function createHistoryPanel(
 
     search.element.style.webkitAppRegion = 'no-drag';
 
-    searchInner.append(search.element, newBtn);
+    searchInner.append(search.element, newBtn, deleteAllBtn);
     searchWrap.append(searchInner);
 
     // Session list
