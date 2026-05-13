@@ -18,6 +18,7 @@ export function createMemoryPanel(strings) {
 
   async function populateList(query = '') {
     if (!listEl) return;
+    const savedScroll = listEl.scrollTop;
     listEl.replaceChildren();
 
     for (let i = 0; i < 4; i++) {
@@ -65,6 +66,7 @@ export function createMemoryPanel(strings) {
     for (const memory of filtered) {
       listEl.append(buildMemoryCard(memory));
     }
+    listEl.scrollTop = savedScroll;
   }
 
   function buildMemoryCard(memory) {
@@ -73,6 +75,7 @@ export function createMemoryPanel(strings) {
       `chat-memory__card${activeFilename === memory.filename ? ' chat-memory__card--active' : ''}`,
     );
     card.type = 'button';
+    card.dataset.filename = memory.filename;
     card.append(
       createElement('span', 'chat-memory__card-title', memory.title),
       createElement(
@@ -130,7 +133,9 @@ export function createMemoryPanel(strings) {
       setSaveButtonText(strings.save);
     }
 
-    await populateList(search?.getValue().trim() ?? '');
+    listEl?.querySelectorAll('.chat-memory__card').forEach((card) => {
+      card.classList.toggle('chat-memory__card--active', card.dataset.filename === activeFilename);
+    });
   }
 
   async function saveMemory() {
