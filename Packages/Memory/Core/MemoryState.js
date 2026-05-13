@@ -350,11 +350,44 @@ export function createMemoryStateManager({ rootDirectory }) {
     return context.length > maxChars ? context.slice(0, maxChars) : context;
   }
 
+  async function getMemoryCatalog() {
+    const memories = await Promise.all(
+      (await listMemories()).map((entry) => readMemoryFile(entry.filename)),
+    );
+    return memories.map((memory) => ({
+      filename: memory.filename,
+      title: memory.title,
+      description: memory.description,
+      content: memory.content,
+      empty: memory.empty,
+    }));
+  }
+
+  async function applyMemoryUpdates(payload = {}) {
+    const entries = [
+      ...(Array.isArray(payload.updates) ? payload.updates : []),
+      ...(Array.isArray(payload.newFiles) ? payload.newFiles : []),
+    ];
+    const saved = [];
+
+    for (const entry of entries) {
+      if (!entry || typeof entry !== 'object') continue;
+      const filename = normalizeFilename(entry.filename);
+      const content = String(entry.content ?? '').trim();
+      if (!content) continue;
+      saved.push(await saveMemory(filename, content));
+    }
+
+    return saved.map(({ content: _content, ...memory }) => memory);
+  }
+
   return {
     listMemories,
     readMemoryFile,
     saveMemory,
     searchMemories,
     getMemoryContext,
+    getMemoryCatalog,
+    applyMemoryUpdates,
   };
 }

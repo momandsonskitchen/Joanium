@@ -45,6 +45,10 @@ async function readSubAgentPromptFile(rootDirectory) {
   return (await readFile(path.join(rootDirectory, 'Prompts', 'SubAgent.md'), 'utf8')).trim();
 }
 
+async function readMemoryPromptFile(rootDirectory) {
+  return (await readFile(path.join(rootDirectory, 'Prompts', 'Memory.md'), 'utf8')).trim();
+}
+
 async function buildBaseSystemPrompt(rootDirectory, user) {
   const prompt = await readSystemPromptFile(rootDirectory);
   const now = new Date();
@@ -252,7 +256,7 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {
 
     try {
       parsed = new URL(urlString);
-    } catch (err) {
+    } catch {
       return reject(new Error(`Invalid URL: ${urlString}`));
     }
 
@@ -392,7 +396,6 @@ async function streamGoogleMessage({
   endpoint,
   provider,
   providerDetails,
-  model,
   messages,
   systemPrompt,
   onChunk,
@@ -857,14 +860,15 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
 export function createChatStateManager({ rootDirectory }) {
   return {
     async getBootstrapPayload() {
-      const [user, providers, terminalPrompt, subAgentPrompt] = await Promise.all([
+      const [user, providers, terminalPrompt, subAgentPrompt, memoryPrompt] = await Promise.all([
         readUserState(rootDirectory),
         readProviderCatalog(rootDirectory),
         readTerminalPromptFile(rootDirectory),
         readSubAgentPromptFile(rootDirectory),
+        readMemoryPromptFile(rootDirectory).catch(() => ''),
       ]);
 
-      return { user, providers, terminalPrompt, subAgentPrompt };
+      return { user, providers, terminalPrompt, subAgentPrompt, memoryPrompt };
     },
     // Streaming entry point — resolves once the stream ends (or rejects on error).
     // onChunk({ type: 'text'|'thinking', text }) is called for every token.

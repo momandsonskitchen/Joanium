@@ -27,6 +27,14 @@ export async function createPackage({ rootDirectory }) {
         channel: 'memory:get-context',
         handler: async (_event, maxChars) => memoryStateManager.getMemoryContext(maxChars),
       },
+      {
+        channel: 'memory:get-catalog',
+        handler: async () => memoryStateManager.getMemoryCatalog(),
+      },
+      {
+        channel: 'memory:apply-updates',
+        handler: async (_event, payload) => memoryStateManager.applyMemoryUpdates(payload),
+      },
     ],
   };
 }

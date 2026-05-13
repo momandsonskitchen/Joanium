@@ -36,6 +36,14 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, id, pinned, projectId) =>
           historyStateManager.pinSession(id, pinned, projectId),
       },
+      {
+        channel: 'history:list-memory-pending',
+        handler: async (_event, options) => historyStateManager.listPendingMemorySessions(options),
+      },
+      {
+        channel: 'history:mark-memory-synced',
+        handler: async (_event, id, options) => historyStateManager.markMemorySynced(id, options),
+      },
     ],
   };
 }

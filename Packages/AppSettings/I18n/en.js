@@ -20,6 +20,14 @@ const en = {
       label: 'Completion sound',
       description: 'Play a sound when a response finishes.',
     },
+    autoMemoryUpdates: {
+      label: 'Auto memory updates',
+      description: 'Let Joanium update personal memory from completed conversations while idle.',
+    },
+    autoUpdate: {
+      label: 'App auto update',
+      description: 'Check for signed releases and download updates automatically when packaged.',
+    },
   },
   defaultView: {
     label: 'Default view',
@@ -44,8 +52,16 @@ const en = {
     title: 'Runtime',
     tray: 'Tray',
     keepAwake: 'Keep awake',
+    autoUpdate: 'Auto update',
     active: 'Active',
     inactive: 'Inactive',
+    checking: 'Checking',
+    current: 'Current',
+    disabled: 'Disabled',
+    unavailable: 'Unavailable in development',
+    ready: 'Ready to install on quit',
+    downloading: 'Downloading {percent}%',
+    error: 'Needs attention',
   },
 };
 

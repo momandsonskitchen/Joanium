@@ -60,16 +60,32 @@ export function createAboutPanel(strings) {
     const socialBar = createElement('div', 'chat-profile__about-social');
 
     const socialLinks = [
-      { icon: 'globe', url: 'https://www.joanium.com', title: 'Website' },
-      { icon: 'github', url: 'https://github.com/joanium', title: 'GitHub' },
-      { icon: 'discord', url: 'https://discord.com/invite/5yHKxxx5fK', title: 'Discord' },
-      { icon: 'x', url: 'https://x.com/joanium', title: 'X' },
-      { icon: 'instagram', url: 'https://instagram.com/joaniumhere', title: 'Instagram' },
+      {
+        icon: 'globe',
+        url: 'https://www.joanium.com',
+        label: strings.social?.website ?? 'Website',
+      },
+      {
+        icon: 'github',
+        url: 'https://github.com/joanium',
+        label: strings.social?.github ?? 'GitHub',
+      },
+      {
+        icon: 'discord',
+        url: 'https://discord.com/invite/5yHKxxx5fK',
+        label: strings.social?.discord ?? 'Discord',
+      },
+      { icon: 'x', url: 'https://x.com/joanium', label: strings.social?.x ?? 'X' },
+      {
+        icon: 'instagram',
+        url: 'https://instagram.com/joaniumhere',
+        label: strings.social?.instagram ?? 'Instagram',
+      },
     ];
 
-    for (const { icon, url, title } of socialLinks) {
+    for (const { icon, url, label } of socialLinks) {
       const link = createElement('a', 'chat-profile__about-social-link');
-      link.title = title;
+      link.setAttribute('aria-label', label);
       link.href = '#';
       const iconEl = createElement('span', 'chat-profile__about-social-icon');
       iconEl.innerHTML = iconMarkup[icon] ?? '';
@@ -82,7 +98,7 @@ export function createAboutPanel(strings) {
     }
 
     const sponsorBtn = createElement('a', 'chat-profile__about-sponsor');
-    sponsorBtn.title = strings.sponsor;
+    sponsorBtn.setAttribute('aria-label', strings.sponsor);
     sponsorBtn.href = '#';
     const heartEl = createElement('span', 'chat-profile__about-social-icon');
     heartEl.innerHTML = iconMarkup.heart ?? '';

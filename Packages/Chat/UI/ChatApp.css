@@ -778,6 +778,171 @@
   transform: translateY(-1px);
 }
 
+.chat-gitbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -2px 0 12px;
+  padding: 10px 12px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(252, 248, 242, 0.68)),
+    rgba(var(--color-accent-rgb), 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
+    0 10px 22px rgba(130, 95, 65, 0.07);
+  -webkit-app-region: no-drag;
+}
+
+.chat-gitbar__identity,
+.chat-gitbar__actions {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.chat-gitbar__identity {
+  gap: 9px;
+  flex: 1;
+}
+
+.chat-gitbar__actions {
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.chat-gitbar__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex: 0 0 9px;
+  background: rgba(120, 120, 120, 0.7);
+  box-shadow: 0 0 0 4px rgba(120, 120, 120, 0.08);
+}
+
+.chat-gitbar__dot--clean {
+  background: #1f9d58;
+  box-shadow: 0 0 0 4px rgba(31, 157, 88, 0.11);
+}
+
+.chat-gitbar__dot--dirty {
+  background: #d97706;
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.12);
+}
+
+.chat-gitbar__icon,
+.chat-gitbar__button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.chat-gitbar__icon {
+  width: 17px;
+  height: 17px;
+  color: rgba(54, 38, 68, 0.72);
+  flex-shrink: 0;
+}
+
+.chat-gitbar__button-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.chat-gitbar__icon svg,
+.chat-gitbar__button-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-gitbar__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-gitbar__branch {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-chat-text-title);
+}
+
+.chat-gitbar__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+  font-weight: 560;
+  color: var(--color-chat-text-muted);
+}
+
+.chat-gitbar__icon-button,
+.chat-gitbar__secondary,
+.chat-gitbar__primary {
+  min-height: 34px;
+  border-radius: 20px;
+  color: var(--color-chat-text-secondary);
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease,
+    opacity 140ms ease;
+}
+
+.chat-gitbar__icon-button {
+  width: 34px;
+}
+
+.chat-gitbar__secondary,
+.chat-gitbar__primary {
+  padding: 0 13px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chat-gitbar__secondary {
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.12);
+}
+
+.chat-gitbar__primary {
+  color: rgba(255, 255, 255, 0.96);
+  background: rgba(var(--color-accent-rgb), 0.88);
+  box-shadow:
+    0 8px 18px rgba(var(--color-accent-rgb), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.chat-gitbar__icon-button:hover,
+.chat-gitbar__secondary:hover,
+.chat-gitbar__primary:hover {
+  transform: translateY(-1px);
+}
+
+.chat-gitbar__icon-button:hover,
+.chat-gitbar__secondary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-chat-text-title);
+}
+
+.chat-gitbar__primary:hover {
+  background: rgba(var(--color-accent-rgb), 1);
+}
+
+.chat-gitbar__icon-button:disabled,
+.chat-gitbar__secondary:disabled,
+.chat-gitbar__primary:disabled {
+  opacity: 0.58;
+  transform: none;
+}
+
 .chat-composer__attachments {
   display: flex;
   flex-wrap: wrap;
@@ -2154,6 +2319,42 @@
 
 .chat-private-btn--active .chat-private-btn__label {
   display: inline;
+}
+
+.chat-memory-sync {
+  position: absolute;
+  top: 22px;
+  right: 26px;
+  z-index: 18;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(18px) saturate(1.45);
+  -webkit-backdrop-filter: blur(18px) saturate(1.45);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
+    0 8px 22px rgba(130, 95, 65, 0.09);
+  color: var(--color-chat-text-secondary);
+  font-size: 12px;
+  font-weight: 680;
+  -webkit-app-region: no-drag;
+}
+
+.chat-memory-sync__icon {
+  display: inline-flex;
+  width: 15px;
+  height: 15px;
+  color: var(--color-accent);
+  animation: chat-spin 1.2s linear infinite;
+}
+
+.chat-memory-sync__icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* ── Conversation track ───────────────────────────────────────────────────── */

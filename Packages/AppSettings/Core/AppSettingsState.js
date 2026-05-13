@@ -5,6 +5,8 @@ const DEFAULT_SETTINGS = Object.freeze({
   systemTray: false,
   keepAwake: false,
   completionSound: true,
+  autoMemoryUpdates: true,
+  autoUpdate: true,
   defaultView: 'chat',
   defaultModel: null,
 });
@@ -29,6 +31,8 @@ function normalizeSettings(candidate = {}) {
     systemTray: Boolean(candidate.systemTray ?? DEFAULT_SETTINGS.systemTray),
     keepAwake: Boolean(candidate.keepAwake ?? DEFAULT_SETTINGS.keepAwake),
     completionSound: Boolean(candidate.completionSound ?? DEFAULT_SETTINGS.completionSound),
+    autoMemoryUpdates: Boolean(candidate.autoMemoryUpdates ?? DEFAULT_SETTINGS.autoMemoryUpdates),
+    autoUpdate: Boolean(candidate.autoUpdate ?? DEFAULT_SETTINGS.autoUpdate),
     defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView,
     defaultModel: normalizeDefaultModel(candidate.defaultModel),
   };

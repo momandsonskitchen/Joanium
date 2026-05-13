@@ -11,6 +11,13 @@ const en = {
   runtime: 'Runtime',
   sponsor: 'Sponsor',
   sponsorUrl: 'https://github.com/sponsors/withinjoel',
+  social: {
+    website: 'Website',
+    github: 'GitHub',
+    discord: 'Discord',
+    x: 'X',
+    instagram: 'Instagram',
+  },
 };
 
 export default en;

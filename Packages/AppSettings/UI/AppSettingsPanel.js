@@ -1,9 +1,16 @@
-import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
 import { createDropDown } from '../../Shared/DropDown/DropDown.js';
 
-const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound'];
+const OPTION_KEYS = [
+  'runOnStartup',
+  'systemTray',
+  'keepAwake',
+  'completionSound',
+  'autoMemoryUpdates',
+  'autoUpdate',
+];
 
 // Returns a flat list of { value, label } model options for all configured providers.
 // value is "providerId/modelId". The list never contains an empty-value sentinel —
@@ -44,6 +51,20 @@ function decodeModelValue(value) {
     providerId: value.slice(0, slashIndex),
     modelId: value.slice(slashIndex + 1),
   };
+}
+
+function formatAutoUpdateState(strings, updateState = {}) {
+  if (updateState.status === 'downloaded') return strings.runtime.ready;
+  if (updateState.status === 'downloading') {
+    const percent = Math.round(Number(updateState.progress?.percent) || 0);
+    return formatText(strings.runtime.downloading, { percent: String(percent) });
+  }
+  if (updateState.status === 'checking') return strings.runtime.checking;
+  if (updateState.status === 'current') return strings.runtime.current;
+  if (updateState.status === 'disabled') return strings.runtime.disabled;
+  if (updateState.status === 'unsupported') return strings.runtime.unavailable;
+  if (updateState.status === 'error') return strings.runtime.error;
+  return updateState.enabled ? strings.runtime.active : strings.runtime.inactive;
 }
 
 export function createAppSettingsPanel(strings) {
@@ -197,6 +218,30 @@ export function createAppSettingsPanel(strings) {
       });
       options.append(checkbox.element);
     }
+
+    const runtime = createElement('section', 'app-settings__runtime');
+    runtime.append(createElement('h3', 'app-settings__runtime-title', strings.runtime.title));
+
+    for (const row of [
+      {
+        label: strings.runtime.tray,
+        value: settings.trayActive ? strings.runtime.active : strings.runtime.inactive,
+      },
+      {
+        label: strings.runtime.keepAwake,
+        value: settings.keepAwakeActive ? strings.runtime.active : strings.runtime.inactive,
+      },
+      {
+        label: strings.runtime.autoUpdate,
+        value: formatAutoUpdateState(strings, settings.autoUpdateState),
+      },
+    ]) {
+      const rowEl = createElement('div', 'app-settings__runtime-row');
+      rowEl.append(createElement('span', '', row.label), createElement('strong', '', row.value));
+      runtime.append(rowEl);
+    }
+
+    options.append(runtime);
   }
 
   view.append(options, status);

@@ -1,7 +1,15 @@
 import { app, BrowserWindow } from 'electron';
+import process from 'node:process';
 import { createAppSettingsStateManager } from './Core/AppSettingsState.js';
 import { isKeepAwakeActive, startKeepAwake, stopKeepAwake } from './Core/PowerService.js';
 import { disableTray, enableTray, isTrayActive, rememberWindow } from './Core/TrayService.js';
+import {
+  checkForAppUpdates,
+  getAutoUpdateState,
+  installDownloadedUpdate,
+  setAutoUpdateEnabled,
+  setupAutoUpdates,
+} from './Core/AutoUpdateService.js';
 
 function applyLoginItemSetting(enabled) {
   app.setLoginItemSettings({
@@ -15,6 +23,7 @@ function runtimeStatus(settings) {
     ...settings,
     keepAwakeActive: isKeepAwakeActive(),
     trayActive: isTrayActive(),
+    autoUpdateState: getAutoUpdateState(),
   };
 }
 
@@ -35,6 +44,8 @@ export async function createPackage({ rootDirectory }) {
     if (settings.systemTray) enableTray(rootDirectory, windowRef);
     else disableTray();
 
+    setAutoUpdateEnabled(settings.autoUpdate);
+
     return runtimeStatus(settings);
   }
 
@@ -51,6 +62,7 @@ export async function createPackage({ rootDirectory }) {
   app
     .whenReady()
     .then(() => {
+      setupAutoUpdates({ rootDirectory, enabled: cachedSettings.autoUpdate });
       applySettings(cachedSettings, BrowserWindow.getAllWindows()[0] ?? null);
     })
     .catch(() => {});
@@ -73,6 +85,18 @@ export async function createPackage({ rootDirectory }) {
 
           return applySettings(saved, ownerWindow(event));
         },
+      },
+      {
+        channel: 'auto-update:get-state',
+        handler: async () => getAutoUpdateState(),
+      },
+      {
+        channel: 'auto-update:check',
+        handler: async () => checkForAppUpdates(),
+      },
+      {
+        channel: 'auto-update:install',
+        handler: async () => installDownloadedUpdate(),
       },
     ],
   };

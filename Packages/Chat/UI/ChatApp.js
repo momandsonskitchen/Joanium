@@ -1092,7 +1092,7 @@ function createSubAgentCallElement(terminal, strings) {
   if (subAgents.length > 0) {
     const agentsContainer = createElement('div', 'chat-subagent-call__agents');
 
-    for (const [index, agent] of subAgents.entries()) {
+    for (const agent of subAgents) {
       const agentStatus = agent.status ?? 'queued';
       const details = document.createElement('details');
       details.className = `chat-subagent-call__agent chat-subagent-call__agent--${agentStatus}`;
@@ -1900,6 +1900,7 @@ export async function createChatView(
     invokeIpc('app-settings:get').catch(() => null),
   ]);
   const view = createElement('div', 'chat-view');
+  let currentAppSettings = appSettings ?? {};
   const dropOverlay = createDropZoneOverlay(strings);
   const profile = getProfile?.() ?? payload.user?.profile ?? {};
   const firstName = getFirstName(profile.name, strings.appName);
@@ -1916,7 +1917,7 @@ export async function createChatView(
   let activeModel = null;
   let activeModelLabel = strings.composer.modelFallback;
 
-  const dm = appSettings?.defaultModel;
+  const dm = currentAppSettings?.defaultModel;
   if (dm?.providerId && dm?.modelId) {
     const dmProvider = payload.providers.find((p) => p.id === dm.providerId) ?? null;
     const dmModel = dmProvider?.models?.find((m) => m.id === dm.modelId) ?? null;
@@ -1957,6 +1958,9 @@ export async function createChatView(
   let diagTimer = null;
   let diagPanel = null;
   let toolsetPrompt = null;
+  let memorySyncTimer = null;
+  let memorySyncRunning = false;
+  let memorySyncIndicator = null;
   let slashCommandsLoaded = false;
   let track = null;
   let trackLabel = null;
@@ -1968,8 +1972,6 @@ export async function createChatView(
   let activeModeInstruction = null;
   let terminalProcessRenderFrame = null;
   let terminalProcessCardsWired = false;
-
-  let conversationEntering = false;
 
   let userScrolledUp = false;
   let scrollToBottomFrame = null;
@@ -2204,7 +2206,11 @@ export async function createChatView(
       sessionData.projectId = activeProject.id;
     }
 
-    await invokeIpc('history:save-session', sessionData);
+    const savedSession = await invokeIpc('history:save-session', sessionData);
+    if (savedSession?.personalMemoryPending) {
+      scheduleMemorySync(12000);
+    }
+    return savedSession;
   }
 
   function buildProjectContext(project) {
@@ -2231,6 +2237,197 @@ export async function createChatView(
       return await invokeIpc('memory:get-context', 24000);
     } catch {
       return '';
+    }
+  }
+
+  function extractJsonObject(text = '') {
+    const source = String(text ?? '').trim();
+    const start = source.indexOf('{');
+    const end = source.lastIndexOf('}');
+    if (start < 0 || end <= start) {
+      return null;
+    }
+    return source.slice(start, end + 1);
+  }
+
+  function normalizeMemoryEntry(entry) {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+    const filename = String(entry.filename ?? '').trim();
+    const content = String(entry.content ?? '').trim();
+    return filename && content ? { filename, content } : null;
+  }
+
+  function normalizeMemorySyncPayload(rawPayload = {}) {
+    return {
+      updates: (Array.isArray(rawPayload.updates) ? rawPayload.updates : [])
+        .map(normalizeMemoryEntry)
+        .filter(Boolean),
+      newFiles: (Array.isArray(rawPayload.newFiles) ? rawPayload.newFiles : [])
+        .map(normalizeMemoryEntry)
+        .filter(Boolean),
+    };
+  }
+
+  function buildMemoryCatalogBlock(catalog = []) {
+    if (!Array.isArray(catalog) || catalog.length === 0) {
+      return strings.memorySync.emptyContent;
+    }
+    const fileList = catalog
+      .map((entry) => entry.filename)
+      .filter(Boolean)
+      .join(', ');
+    const sections = [];
+
+    if (fileList) {
+      sections.push(formatText(strings.memorySync.availableFiles, { files: fileList }));
+    }
+
+    const fileSections = catalog
+      .map((entry) => {
+        const content = String(entry.content ?? '').trim() || strings.memorySync.emptyContent;
+        return [
+          formatText(strings.memorySync.fileHeader, { filename: entry.filename ?? '' }),
+          strings.memorySync.contentLabel,
+          content,
+        ].join('\n');
+      })
+      .join('\n\n---\n\n');
+
+    if (fileSections) {
+      sections.push(fileSections);
+    }
+
+    return sections.join('\n\n');
+  }
+
+  function buildMemoryTranscript(session) {
+    return (Array.isArray(session?.messages) ? session.messages : [])
+      .map((message) => {
+        const role =
+          message.role === 'assistant'
+            ? strings.memorySync.assistantLabel
+            : strings.memorySync.userLabel;
+        const content = String(message.content ?? message.modelContent ?? '').trim();
+        const attachments = Array.isArray(message.attachments)
+          ? message.attachments
+              .map((attachment) => attachment?.name ?? attachment?.filename ?? attachment?.kind)
+              .filter(Boolean)
+          : [];
+        const attachmentLine = attachments.length
+          ? `\n${formatText(strings.memorySync.attachmentsLabel, {
+              attachments: attachments.join(', '),
+            })}`
+          : '';
+        return `${role}: ${content || strings.memorySync.noText}${attachmentLine}`;
+      })
+      .join('\n\n');
+  }
+
+  function showMemorySyncIndicator(label) {
+    if (!memorySyncIndicator) {
+      return;
+    }
+    memorySyncIndicator.hidden = false;
+    const labelEl = memorySyncIndicator.querySelector('.chat-memory-sync__label');
+    if (labelEl) {
+      labelEl.textContent = label;
+    }
+  }
+
+  function hideMemorySyncIndicator() {
+    if (memorySyncIndicator) {
+      memorySyncIndicator.hidden = true;
+    }
+  }
+
+  function cancelScheduledMemorySync() {
+    if (memorySyncTimer) {
+      clearTimeout(memorySyncTimer);
+      memorySyncTimer = null;
+    }
+  }
+
+  function scheduleMemorySync(delayMs = 45000) {
+    cancelScheduledMemorySync();
+    if (currentAppSettings?.autoMemoryUpdates === false) {
+      return;
+    }
+    memorySyncTimer = setTimeout(() => {
+      memorySyncTimer = null;
+      void processPendingMemorySyncs();
+    }, delayMs);
+  }
+
+  async function runMemorySyncForSession(session) {
+    const catalog = await invokeIpc('memory:get-catalog');
+    const prompt = [
+      `${strings.memorySync.catalogLabel}:`,
+      buildMemoryCatalogBlock(catalog),
+      '',
+      `${strings.memorySync.transcriptLabel}:`,
+      buildMemoryTranscript(session),
+    ].join('\n');
+
+    const result = await invokeIpc('chat:complete-message', {
+      messages: [{ role: 'user', content: prompt }],
+      providerId: activeProvider?.id ?? null,
+      modelId: activeModel?.id ?? null,
+      modeInstruction: payload.memoryPrompt || null,
+      isNewSession: false,
+    });
+
+    const jsonText = extractJsonObject(result?.text);
+    if (!jsonText) {
+      throw new Error('Memory sync did not return JSON.');
+    }
+
+    const memoryPayload = normalizeMemorySyncPayload(JSON.parse(jsonText));
+    if (memoryPayload.updates.length || memoryPayload.newFiles.length) {
+      await invokeIpc('memory:apply-updates', memoryPayload);
+    }
+
+    await invokeIpc('history:mark-memory-synced', session.id, {
+      projectId: session.projectId ?? null,
+      fingerprint: session.personalMemoryFingerprint ?? null,
+    });
+  }
+
+  async function processPendingMemorySyncs() {
+    if (memorySyncRunning || isSending || isPrivate) {
+      return;
+    }
+
+    const latestSettings = await invokeIpc('app-settings:get').catch(() => currentAppSettings);
+    currentAppSettings = latestSettings ?? currentAppSettings;
+    if (currentAppSettings?.autoMemoryUpdates === false) {
+      return;
+    }
+
+    const pending = await invokeIpc('history:list-memory-pending', { limit: 3 }).catch(() => []);
+    if (!Array.isArray(pending) || pending.length === 0) {
+      return;
+    }
+
+    memorySyncRunning = true;
+    showMemorySyncIndicator(
+      pending.length > 1 ? strings.memorySync.catchingUp : strings.memorySync.updating,
+    );
+
+    try {
+      for (const session of pending) {
+        if (isSending) break;
+        await runMemorySyncForSession(session);
+      }
+    } catch {
+      // Background memory learning is best-effort; failed sessions remain pending.
+    } finally {
+      memorySyncRunning = false;
+      hideMemorySyncIndicator();
+      if (!isSending) {
+        scheduleMemorySync(90000);
+      }
     }
   }
 
@@ -2327,7 +2524,7 @@ export async function createChatView(
       meta.push(formatText(strings.git.ahead, { count: String(gitState.ahead) }));
     if (gitState.behind > 0)
       meta.push(formatText(strings.git.behind, { count: String(gitState.behind) }));
-    gitMetaEl.textContent = meta.join(' · ');
+    gitMetaEl.textContent = meta.join(' / ');
 
     const primaryAction = gitState.dirty ? 'diff' : gitState.ahead > 0 ? 'push' : 'pull';
     gitPrimaryBtn._gitAction = primaryAction;
@@ -2542,7 +2739,7 @@ export async function createChatView(
           activeProvider = provider;
           activeModel = model;
           activeModelLabel = model.name ?? model.id;
-          userOverrodeModel = true;
+          _userOverrodeModel = true;
           const labelEl = triggerButton.querySelector('.chat-composer__model-label');
           if (labelEl) labelEl.textContent = activeModelLabel;
           syncPickerActiveStates();
@@ -4292,6 +4489,7 @@ export async function createChatView(
       (allDisplayAttachments.length ? strings.composer.attachmentOnlyPrompt : '');
 
     if ((!prompt && allDisplayAttachments.length === 0) || isSending) return;
+    cancelScheduledMemorySync();
 
     const isNewSession = !sessionId;
     if (!sessionId) {
@@ -4544,10 +4742,10 @@ export async function createChatView(
   });
   const privateBtn = createElement('button', 'chat-private-btn');
   privateBtn.type = 'button';
-  privateBtn.setAttribute('aria-label', 'Toggle private chat');
+  privateBtn.setAttribute('aria-label', strings.composer.privateToggle);
   privateBtn.append(
     createIcon('lock', 'chat-private-btn__icon'),
-    createElement('span', 'chat-private-btn__label', 'Private'),
+    createElement('span', 'chat-private-btn__label', strings.composer.privateLabel),
   );
   const originalGreeting = greeting;
   privateBtn.addEventListener('click', () => {
@@ -4560,8 +4758,28 @@ export async function createChatView(
         title.textContent = originalGreeting;
       }
     }
+    if (isPrivate) {
+      cancelScheduledMemorySync();
+    } else {
+      scheduleMemorySync(12000);
+    }
   });
-  view.append(scroll, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
+
+  memorySyncIndicator = createElement('div', 'chat-memory-sync');
+  memorySyncIndicator.hidden = true;
+  memorySyncIndicator.append(
+    createIcon('thinking', 'chat-memory-sync__icon'),
+    createElement('span', 'chat-memory-sync__label', strings.memorySync.updating),
+  );
+
+  view.append(
+    scroll,
+    bottom,
+    browserPreview.element,
+    terminalPanel.build(),
+    privateBtn,
+    memorySyncIndicator,
+  );
   track = createElement('div', 'chat-thread-track');
   track.hidden = true;
   trackLabel = createElement('div', 'chat-thread-track__label');
@@ -4662,9 +4880,8 @@ export async function createChatView(
   // ── React to default-model changes made in App Settings ──────────────────
   // When the user saves a new default model, update the active provider/model
   // and the composer button label so the UI stays in sync without requiring a
-  // full reload. Only applies when the user has not manually picked a different
-  // model in the current session (tracked via the userOverrodeModel flag).
-  let userOverrodeModel = Boolean(appSettings?.defaultModel);
+  // full reload. The flag is kept for future policy decisions around in-chat picks.
+  let _userOverrodeModel = Boolean(appSettings?.defaultModel);
 
   function applyDefaultModelFromSettings(settings) {
     const dm = settings?.defaultModel;
@@ -4691,11 +4908,19 @@ export async function createChatView(
   }
 
   window.addEventListener('joanium:app-settings-changed', (event) => {
+    currentAppSettings = event.detail ?? currentAppSettings;
     // Always honour an explicit change from settings — it means the user
     // intentionally picked a model there, so override any in-chat selection.
-    userOverrodeModel = false;
+    _userOverrodeModel = false;
     applyDefaultModelFromSettings(event.detail);
+    if (currentAppSettings?.autoMemoryUpdates === false) {
+      cancelScheduledMemorySync();
+    } else {
+      scheduleMemorySync(12000);
+    }
   });
+
+  scheduleMemorySync(18000);
 
   return {
     element: view,
