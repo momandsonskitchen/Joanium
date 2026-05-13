@@ -8,6 +8,7 @@ const en = {
     generationStopped: 'Generation stopped.',
     attachFiles: 'Attach files',
     enhancePrompt: 'Enhance prompt',
+    openTerminal: 'Open terminal',
     enhancing: 'Enhancing...',
     enhanceFailed: 'Could not enhance prompt.',
     attachmentAdded: '{count} file(s) attached.',

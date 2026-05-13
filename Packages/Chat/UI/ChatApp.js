@@ -1979,6 +1979,7 @@ export async function createChatView(
   let sendButton = null;
   let enhanceBtn = null;
   let attachBtn = null;
+  let terminalBtn = null;
   let thread = null;
   let title = null;
   let bubblesEl = null;
@@ -2986,6 +2987,14 @@ export async function createChatView(
 
     if (attachBtn) {
       attachBtn.disabled = isEnhancing;
+    }
+
+    if (terminalBtn) {
+      terminalBtn.disabled = isEnhancing;
+      terminalBtn.classList.toggle(
+        'chat-composer__icon-button--active',
+        terminalPanel?.isOpen() ?? false,
+      );
     }
 
     if (composer) {
@@ -4344,7 +4353,15 @@ export async function createChatView(
     void enhancePrompt();
   });
 
-  composerActions.append(attachBtn, enhanceBtn);
+  terminalBtn = createElement('button', 'chat-composer__icon-button');
+  terminalBtn.type = 'button';
+  terminalBtn.setAttribute('aria-label', strings.composer.openTerminal);
+  terminalBtn.append(createIcon('terminal', 'chat-composer__icon'));
+  terminalBtn.addEventListener('click', () => {
+    terminalPanel?.toggle();
+  });
+
+  composerActions.append(attachBtn, enhanceBtn, terminalBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   modelButton = createElement('button', 'chat-composer__model');
@@ -4420,6 +4437,7 @@ export async function createChatView(
   terminalPanel = createChatTerminalPanel(strings, {
     onOpenChange: (open) => {
       view.classList.toggle('chat-view--terminal', open);
+      syncComposer();
     },
   });
   const privateBtn = createElement('button', 'chat-private-btn');
