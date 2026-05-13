@@ -2444,7 +2444,6 @@ export async function createChatView(
     projectPill.hidden = false;
     projectNameEl.textContent = activeProject.name;
     projectMetaEl.textContent =
-      collapseWhitespace(activeProject.info) ||
       collapseWhitespace(activeProject.folderPath ?? activeProject.rootPath) ||
       strings.projects.activeHint;
     void refreshProjectGitStatus({ silent: true });
