@@ -58,6 +58,31 @@ export function formatList(title, rows, empty = 'No results found.') {
   return rows.length ? [title, '', ...rows].join('\n') : [title, '', empty].join('\n');
 }
 
+// Builds a URL from a base + path and appends only non-empty search params.
+// Skips any entry whose value is undefined, null, or blank after trimming.
+export function buildUrl(base, path, searchParams = {}) {
+  const url = new URL(`${base}${path}`);
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (value !== undefined && value !== null && String(value).trim() !== '')
+      url.searchParams.set(key, String(value));
+  }
+  return url;
+}
+
+// Reads the response body as text and attempts a JSON parse.
+// Returns { data, text } so callers can use each independently for
+// custom error message extraction before throwing.
+export async function parseResponseJson(response) {
+  const text = await response.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
+  return { data, text };
+}
+
 export async function readConnectorDetails(rootDirectory, connectorId) {
   const state = await readUserState(rootDirectory);
   return state.connectors?.details?.[connectorId] ?? {};
@@ -76,13 +101,7 @@ export async function requireConnectorCredentials(
 }
 
 export async function readJsonResponse(response) {
-  const rawText = await response.text();
-  let data = null;
-  try {
-    data = rawText ? JSON.parse(rawText) : null;
-  } catch {
-    data = null;
-  }
+  const { data, text } = await parseResponseJson(response);
 
   if (!response.ok) {
     const message =
@@ -90,7 +109,7 @@ export async function readJsonResponse(response) {
       data?.error ||
       data?.error_description ||
       data?.errors?.[0]?.message ||
-      rawText ||
+      text ||
       response.statusText;
     throw new Error(`${response.status} ${response.statusText}: ${message}`);
   }

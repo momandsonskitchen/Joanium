@@ -3,6 +3,7 @@ import {
   formatDate,
   formatList,
   parseJsonObject,
+  parseResponseJson,
   requireConnectorCredentials,
   requireText,
   truncateText,
@@ -28,13 +29,7 @@ async function notionRequest(rootDirectory, path, { method = 'GET', body } = {})
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  const text = await response.text();
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = null;
-  }
+  const { data, text } = await parseResponseJson(response);
   if (!response.ok)
     throw new Error(`${response.status} ${response.statusText}: ${data?.message ?? text}`);
   return data;

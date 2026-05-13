@@ -1,8 +1,10 @@
 import {
+  buildUrl,
   clampInteger,
   formatDate,
   formatList,
   parseCommaList,
+  parseResponseJson,
   requireConnectorCredentials,
   requireText,
   truncateText,
@@ -34,13 +36,7 @@ async function gitLabRequest(
     String(credentials.baseUrl ?? 'https://gitlab.com')
       .trim()
       .replace(/\/+$/, '') || 'https://gitlab.com';
-  const url = new URL(`${baseUrl}/api/v4${path}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '') {
-      url.searchParams.set(key, String(value));
-    }
-  }
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(`${baseUrl}/api/v4`, path, searchParams), {
     method,
     headers: {
       accept: 'application/json',
@@ -49,18 +45,11 @@ async function gitLabRequest(
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  const text = await response.text();
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = null;
-  }
-  if (!response.ok) {
+  const { data, text } = await parseResponseJson(response);
+  if (!response.ok)
     throw new Error(
       `${response.status} ${response.statusText}: ${data?.message ?? text ?? 'GitLab request failed'}`,
     );
-  }
   return data;
 }
 

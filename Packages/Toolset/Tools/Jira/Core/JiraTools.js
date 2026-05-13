@@ -1,6 +1,8 @@
 import {
+  buildUrl,
   clampInteger,
   formatList,
+  parseResponseJson,
   requireConnectorCredentials,
   requireText,
   truncateText,
@@ -31,13 +33,7 @@ async function jiraRequest(rootDirectory, path, { method = 'GET', body, searchPa
     'Jira',
   );
   const baseUrl = String(credentials.siteUrl).trim().replace(/\/+$/, '');
-  const url = new URL(`${baseUrl}/rest/api/3${path}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '') {
-      url.searchParams.set(key, String(value));
-    }
-  }
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(`${baseUrl}/rest/api/3`, path, searchParams), {
     method,
     headers: {
       accept: 'application/json',
@@ -46,13 +42,7 @@ async function jiraRequest(rootDirectory, path, { method = 'GET', body, searchPa
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  const text = await response.text();
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = null;
-  }
+  const { data, text } = await parseResponseJson(response);
   if (!response.ok) {
     const message =
       data?.errorMessages?.join('; ') || Object.values(data?.errors ?? {}).join('; ') || text;

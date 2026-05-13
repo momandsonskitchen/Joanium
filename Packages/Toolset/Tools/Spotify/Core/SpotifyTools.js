@@ -1,4 +1,5 @@
 import {
+  buildUrl,
   clampInteger,
   formatList,
   requireConnectorCredentials,
@@ -14,12 +15,7 @@ async function spotifyRequest(rootDirectory, path, { searchParams = {} } = {}) {
     ['accessToken'],
     'Spotify',
   );
-  const url = new URL(`${SPOTIFY_API}${path}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '')
-      url.searchParams.set(key, String(value));
-  }
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(SPOTIFY_API, path, searchParams), {
     headers: {
       accept: 'application/json',
       authorization: `Bearer ${credentials.accessToken}`,

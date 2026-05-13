@@ -1,4 +1,5 @@
 import {
+  buildUrl,
   formatDate,
   formatList,
   parseCommaList,
@@ -11,12 +12,7 @@ const FIGMA_API = 'https://api.figma.com/v1';
 
 async function figmaRequest(rootDirectory, path, { method = 'GET', body, searchParams = {} } = {}) {
   const credentials = await requireConnectorCredentials(rootDirectory, 'figma', ['token'], 'Figma');
-  const url = new URL(`${FIGMA_API}${path}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '')
-      url.searchParams.set(key, String(value));
-  }
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(FIGMA_API, path, searchParams), {
     method,
     headers: {
       accept: 'application/json',

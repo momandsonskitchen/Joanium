@@ -1,4 +1,5 @@
 import {
+  buildUrl,
   clampInteger,
   formatDate,
   formatList,
@@ -15,12 +16,7 @@ async function vercelRequest(rootDirectory, path, { searchParams = {} } = {}) {
     ['token'],
     'Vercel',
   );
-  const url = new URL(`${VERCEL_API}${path}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '')
-      url.searchParams.set(key, String(value));
-  }
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(VERCEL_API, path, searchParams), {
     headers: {
       accept: 'application/json',
       authorization: `Bearer ${credentials.token}`,

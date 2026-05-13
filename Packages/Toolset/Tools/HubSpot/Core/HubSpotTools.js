@@ -1,4 +1,5 @@
 import {
+  buildUrl,
   clampInteger,
   formatDate,
   formatList,
@@ -19,12 +20,7 @@ async function hubSpotRequest(
     ['token'],
     'HubSpot',
   );
-  const url = new URL(`${HUBSPOT_API}${path}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '')
-      url.searchParams.set(key, String(value));
-  }
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(HUBSPOT_API, path, searchParams), {
     method,
     headers: {
       accept: 'application/json',

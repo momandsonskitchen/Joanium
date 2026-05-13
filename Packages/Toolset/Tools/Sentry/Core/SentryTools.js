@@ -1,7 +1,9 @@
 import {
+  buildUrl,
   clampInteger,
   formatDate,
   formatList,
+  parseResponseJson,
   requireConnectorCredentials,
   requireText,
 } from '../../../Core/ConnectorHttp.js';
@@ -19,12 +21,7 @@ async function sentryRequest(
     ['token'],
     'Sentry',
   );
-  const url = new URL(`${SENTRY_API}${path}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '')
-      url.searchParams.set(key, String(value));
-  }
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(SENTRY_API, path, searchParams), {
     method,
     headers: {
       accept: 'application/json',
@@ -33,13 +30,7 @@ async function sentryRequest(
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  const text = await response.text();
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = null;
-  }
+  const { data, text } = await parseResponseJson(response);
   if (!response.ok)
     throw new Error(
       `${response.status} ${response.statusText}: ${data?.detail ?? data?.message ?? text}`,
