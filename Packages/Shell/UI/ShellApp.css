@@ -272,21 +272,21 @@ textarea {
   overflow: hidden;
 }
 
-.chat-stage__drag-region {
-  position: absolute;
+.chat-shell__drag-region {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 48px;
   -webkit-app-region: drag;
-  z-index: 10;
-  pointer-events: none;
+  z-index: 1000;
 }
 
 .chat-view {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  z-index: 1;
 }
 
 .chat-settings {
@@ -303,7 +303,6 @@ textarea {
   align-items: center;
   padding: 60px 4px 20px;
   flex-shrink: 0;
-  -webkit-app-region: drag;
 }
 
 .chat-settings__title {
@@ -312,7 +311,6 @@ textarea {
   font-weight: 440;
   letter-spacing: -0.065em;
   color: var(--color-chat-text-title);
-  -webkit-app-region: no-drag;
   pointer-events: none;
 }
 
@@ -332,7 +330,6 @@ textarea {
   padding: 8px 0 40px;
   border-right: 1px solid rgba(170, 134, 104, 0.09);
   overflow-y: auto;
-  -webkit-app-region: drag;
 }
 
 .chat-settings__nav-items {
@@ -340,7 +337,6 @@ textarea {
   flex-direction: column;
   gap: 2px;
   padding: 0 8px;
-  -webkit-app-region: no-drag;
 }
 
 .chat-settings__nav-item {
@@ -359,7 +355,6 @@ textarea {
   transition:
     background-color 130ms ease,
     color 130ms ease;
-  -webkit-app-region: no-drag;
 }
 
 .chat-settings__nav-item:hover:not(.chat-settings__nav-item--active) {
@@ -401,7 +396,6 @@ textarea {
   min-width: 0;
   overflow-y: auto;
   padding: 24px 52px 40px;
-  -webkit-app-region: drag;
 }
 
 .chat-settings__main-heading {
@@ -411,7 +405,6 @@ textarea {
   letter-spacing: -0.065em;
   color: var(--color-chat-text-title);
   pointer-events: none;
-  -webkit-app-region: no-drag;
 }
 
 /* ── Shortcuts panel ──────────────────────────────────────────────────────── */
@@ -420,7 +413,6 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 32px;
-  -webkit-app-region: no-drag;
 }
 
 .chat-shortcuts__group {

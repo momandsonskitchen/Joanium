@@ -21,7 +21,6 @@
 .usage-view__header {
   flex-shrink: 0;
   padding: 0 40px 0 0;
-  -webkit-app-region: drag;
 }
 
 .usage-view__header-top {
@@ -29,7 +28,6 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
-  -webkit-app-region: no-drag;
   pointer-events: none;
 }
 

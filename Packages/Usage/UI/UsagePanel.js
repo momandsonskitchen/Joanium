@@ -659,10 +659,8 @@ export function createUsagePanel(strings) {
 
   // Header: title + subtitle (left) | year toggle (right)
   const header = createElement('div', 'usage-view__header');
-  header.style.webkitAppRegion = 'drag';
 
   const headerTop = createElement('div', 'usage-view__header-top');
-  headerTop.style.webkitAppRegion = 'no-drag';
 
   const headerText = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
 

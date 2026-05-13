@@ -67,8 +67,6 @@ export function createHistoryPanel(
     input.className = 'chat-history__card-title-input';
     input.type = 'text';
     input.value = session.title || '';
-    input.style.webkitAppRegion = 'no-drag';
-    input.style.webkitUserSelect = 'text';
     input.style.userSelect = 'text';
     input.style.cursor = 'text';
 
@@ -330,8 +328,6 @@ export function createHistoryPanel(
       placeholder: strings.search,
       onChange: (value) => void populateList(contentEl, value.trim()),
     });
-
-    search.element.style.webkitAppRegion = 'no-drag';
 
     searchInner.append(search.element, newBtn, deleteAllBtn);
     searchWrap.append(searchInner);

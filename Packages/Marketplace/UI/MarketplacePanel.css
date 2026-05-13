@@ -18,7 +18,6 @@
   flex-direction: column;
   padding: 0 10px 16px;
   flex-shrink: 0;
-  -webkit-app-region: drag;
 }
 
 .marketplace__header-top {
@@ -26,7 +25,6 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
-  -webkit-app-region: no-drag;
   pointer-events: none;
 }
 

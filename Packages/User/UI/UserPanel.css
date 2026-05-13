@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  -webkit-app-region: no-drag;
   animation: chat-fade-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -108,7 +107,6 @@
   transition:
     background 130ms ease,
     opacity 130ms ease;
-  -webkit-app-region: no-drag;
 }
 
 .chat-settings__avatar-upload-btn:hover:not(:disabled) {
@@ -133,7 +131,6 @@
   transition:
     background 130ms ease,
     color 130ms ease;
-  -webkit-app-region: no-drag;
 }
 
 .chat-settings__avatar-remove-btn:hover:not(:disabled) {

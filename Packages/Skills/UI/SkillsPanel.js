@@ -30,7 +30,6 @@ export function createSkillsPanel(strings) {
       placeholder: strings.searchPlaceholder,
       onChange: (value) => void populateList(_listEl, value.trim()),
     });
-    _search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(_search.element);
 
     _listEl = createElement('div', 'chat-skills__list-content');

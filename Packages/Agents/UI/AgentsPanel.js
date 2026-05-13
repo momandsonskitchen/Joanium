@@ -758,7 +758,6 @@ export function createAgentsPanel(strings) {
       placeholder: strings.searchPlaceholder,
       onChange: (value) => void populateList(listContent, value.trim()),
     });
-    search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(search.element);
 
     const listContent = createElement('div', 'agents-list__content');

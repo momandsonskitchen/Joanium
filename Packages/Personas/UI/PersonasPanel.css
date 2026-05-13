@@ -17,17 +17,16 @@
 
 .chat-personas__header {
   display: flex;
-  align-items: flex-start;
-  padding: 50px 10px 20px;
+  flex-direction: column;
+  padding: 50px 10px 16px;
   flex-shrink: 0;
-  -webkit-app-region: drag;
 }
 
-.chat-personas__header-text {
+.chat-personas__header-top {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  -webkit-app-region: no-drag;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
   pointer-events: none;
 }
 

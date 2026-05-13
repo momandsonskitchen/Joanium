@@ -37,7 +37,6 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
       placeholder: strings.searchPlaceholder,
       onChange: (value) => void populateList(_listEl, value.trim()),
     });
-    _search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(_search.element);
 
     _listEl = createElement('div', 'chat-personas__list-content');

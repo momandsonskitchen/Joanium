@@ -448,7 +448,6 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       placeholder: strings.searchPlaceholder,
       onChange: (value) => void populateList(listContent, value.trim()),
     });
-    search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(search.element);
 
     const listContent = createElement('div', 'chat-projects__list-content');

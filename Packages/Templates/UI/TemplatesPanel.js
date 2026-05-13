@@ -294,7 +294,6 @@ export function createTemplatesPanel(strings) {
       placeholder: strings.searchPlaceholder,
       onChange: (value) => void populateList(listContent, value.trim()),
     });
-    search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(search.element);
 
     const listContent = createElement('div', 'chat-templates__list-content');

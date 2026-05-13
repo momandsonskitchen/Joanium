@@ -128,7 +128,8 @@ async function bootstrap() {
   const tabIndicator = createElement('div', 'chat-sidebar__indicator');
   const stage = createElement('section', 'chat-stage');
   const canvas = createElement('div', 'chat-stage__canvas');
-  const dragRegion = createElement('div', 'chat-stage__drag-region');
+  const dragRegion = createElement('div', 'chat-shell__drag-region');
+  shell.append(dragRegion);
 
   function moveIndicatorToTab(tabEl, animate) {
     if (!tabEl) return;
@@ -684,9 +685,8 @@ async function bootstrap() {
 
   sidebarTabs.append(avatarDivider, sidebarAvatar);
   sidebar.append(sidebarTabs);
-  canvas.append(dragRegion);
   stage.append(canvas);
-  shell.append(sidebar, stage);
+  shell.append(sidebar, stage, dragRegion);
   root.replaceChildren(shell);
 
   // Dismiss the boot loader now that the shell is in the DOM.

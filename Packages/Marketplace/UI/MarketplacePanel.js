@@ -81,10 +81,8 @@ export function createMarketplacePanel(strings) {
 
     // ── Header ────────────────────────────────────────────────────────────
     const header = createElement('div', 'marketplace__header');
-    header.style.webkitAppRegion = 'drag';
 
     const headerTop = createElement('div', 'marketplace__header-top');
-    headerTop.style.webkitAppRegion = 'no-drag';
 
     const headerText = createPanelHeader({ title: strings.title, subtitle: strings.subtitle });
 
@@ -137,7 +135,6 @@ export function createMarketplacePanel(strings) {
       placeholder: strings.searchPlaceholder,
       onChange: (value) => void populateList(_listEl, value.trim()),
     });
-    _search.element.style.webkitAppRegion = 'no-drag';
     searchWrap.append(_search.element);
 
     _listEl = createElement('div', 'marketplace__list-content');
