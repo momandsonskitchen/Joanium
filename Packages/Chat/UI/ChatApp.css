@@ -2259,6 +2259,93 @@
   pointer-events: none;
 }
 
+/* ── Welcome → thread transition animations ──────────────────────────────── */
+
+@keyframes chat-welcome-exit {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.94);
+    filter: blur(5px);
+  }
+}
+
+@keyframes chat-thread-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chat-message-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chat-composer-settle {
+  from {
+    opacity: 0.7;
+    transform: translateY(10px) scale(0.994);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Title exits first — must complete before WELCOME_EXIT_MS (220ms) */
+.chat-stage__title--exiting {
+  animation: chat-welcome-exit 0.18s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+/* Bubbles exit right after — 40ms delay + 180ms = 220ms total */
+.chat-prompt-bubbles--exiting {
+  animation: chat-welcome-exit 0.18s cubic-bezier(0.4, 0, 1, 1) 0.04s forwards;
+  pointer-events: none;
+}
+
+/* Thread enters after exits have started */
+.chat-thread--entering {
+  animation: chat-thread-enter 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+/* Per-message stagger on first load */
+.chat-message--entering {
+  animation: chat-message-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--msg-enter-delay, 0ms);
+}
+
+/* Prevent the base chat-fade-in from re-firing once the conversation has started.
+   --entering overrides this while the settle animation plays (defined later in
+   source), then when --entering is removed this kicks in and keeps it silent. */
+.chat-composer--conversation {
+  animation: none;
+}
+
+/* Composer settles into place when conversation begins */
+.chat-composer--entering {
+  animation: chat-composer-settle 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+}
+
 /* ── Prompt bubbles ────────────────────────────────────────────────────── */
 
 .chat-prompt-bubbles {

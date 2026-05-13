@@ -1927,6 +1927,7 @@ export async function createChatView(
   let sessionId = null;
   let sessionCreatedAt = null;
   let messages = [];
+  let prevHasMessages = false;
   let streamDisposers = [];
   let generationToken = 0;
   let modelPickerPanel = null;
@@ -1948,6 +1949,8 @@ export async function createChatView(
   let activeModeInstruction = null;
   let terminalProcessRenderFrame = null;
   let terminalProcessCardsWired = false;
+
+  let conversationEntering = false;
 
   let userScrolledUp = false;
   let scrollToBottomFrame = null;
@@ -3118,12 +3121,85 @@ export async function createChatView(
     }
 
     const hasMessages = messages.length > 0;
-    title.hidden = hasMessages;
-    bubblesEl.hidden = hasMessages;
-    thread.hidden = !hasMessages;
-    composer.classList.toggle('chat-composer--conversation', hasMessages);
-    scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
-    bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
+    const isFirstMessage = hasMessages && !prevHasMessages;
+    prevHasMessages = hasMessages;
+
+    if (isFirstMessage) {
+      // ── Sequential FLIP transition ──────────────────────────────────────────
+      // Phase 1: pin welcome elements at their visual coords, swap the layout
+      // class (fixed elements are immune to the reflow), then animate them out.
+      // Phase 2: only after they’re fully gone, reveal and animate the thread in.
+      // No overlap — no z-index battles, no bleed-through.
+
+      const WELCOME_EXIT_MS = 220;
+      const THREAD_ENTER_MS = 400;
+
+      // 1. Capture visual positions before any change
+      const titleRect = title.getBoundingClientRect();
+      const bubblesRect = bubblesEl.getBoundingClientRect();
+
+      // 2. Pin elements at their exact screen positions
+      for (const [el, rect] of [
+        [title, titleRect],
+        [bubblesEl, bubblesRect],
+      ]) {
+        el.style.position = 'fixed';
+        el.style.top = `${rect.top}px`;
+        el.style.left = `${rect.left}px`;
+        el.style.width = `${rect.width}px`;
+        el.style.margin = '0';
+        el.style.zIndex = '100';
+      }
+
+      // 3. Swap layout and composer state — fixed elements are unaffected
+      scroll.classList.add('chat-stage__scroll--conversation');
+      bottom.classList.add('chat-stage__bottom--conversation');
+      composer.classList.add('chat-composer--conversation');
+      composer.classList.add('chat-composer--entering');
+
+      // 4. Start welcome exit on the next paint
+      requestAnimationFrame(() => {
+        title.classList.add('chat-stage__title--exiting');
+        bubblesEl.classList.add('chat-prompt-bubbles--exiting');
+      });
+
+      // 5. Phase 2 — after welcome is fully gone, reveal and animate thread
+      setTimeout(() => {
+        for (const el of [title, bubblesEl]) {
+          el.hidden = true;
+          for (const prop of ['position', 'top', 'left', 'width', 'margin', 'zIndex']) {
+            el.style[prop] = '';
+          }
+        }
+        title.classList.remove('chat-stage__title--exiting');
+        bubblesEl.classList.remove('chat-prompt-bubbles--exiting');
+
+        thread.hidden = false;
+        thread.classList.add('chat-thread--entering');
+
+        // Stagger messages in after thread is visible
+        requestAnimationFrame(() => {
+          const msgEls = thread.querySelectorAll('.chat-message');
+          msgEls.forEach((el, i) => {
+            el.classList.add('chat-message--entering');
+            el.style.setProperty('--msg-enter-delay', `${i * 55}ms`);
+          });
+        });
+      }, WELCOME_EXIT_MS);
+
+      // 6. Cleanup thread and composer animation classes
+      setTimeout(() => {
+        thread.classList.remove('chat-thread--entering');
+        composer.classList.remove('chat-composer--entering');
+      }, WELCOME_EXIT_MS + THREAD_ENTER_MS);
+    } else {
+      title.hidden = hasMessages;
+      bubblesEl.hidden = hasMessages;
+      thread.hidden = !hasMessages;
+      composer.classList.toggle('chat-composer--conversation', hasMessages);
+      scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
+      bottom.classList.toggle('chat-stage__bottom--conversation', hasMessages);
+    }
 
     if (!hasMessages) {
       thread.replaceChildren();
@@ -3217,6 +3293,13 @@ export async function createChatView(
     requestAnimationFrame(() => {
       if (!userScrolledUp) scroll.scrollTop = scroll.scrollHeight;
       renderTrack();
+      if (isFirstMessage) {
+        const msgEls = thread.querySelectorAll('.chat-message');
+        msgEls.forEach((el, i) => {
+          el.classList.add('chat-message--entering');
+          el.style.setProperty('--msg-enter-delay', `${90 + i * 55}ms`);
+        });
+      }
     });
   }
 
