@@ -32,14 +32,15 @@ export function createMemoryPanel(strings) {
     }
 
     const normalizedQuery = collapseWhitespace(query).toLowerCase();
+    const withData = memories.filter((memory) => (memory.lineCount ?? 0) > 0);
     const filtered = normalizedQuery
-      ? memories.filter((memory) => {
+      ? withData.filter((memory) => {
           const haystack = [memory.filename, memory.title, memory.description]
             .map((value) => collapseWhitespace(value).toLowerCase())
             .join('\n');
           return haystack.includes(normalizedQuery);
         })
-      : memories;
+      : withData;
 
     listEl.replaceChildren();
 
