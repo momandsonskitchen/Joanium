@@ -100,17 +100,28 @@ export async function requireConnectorCredentials(
   return details;
 }
 
+// Extracts the most meaningful error message from a parsed API error body.
+// Handles nested error objects (Vercel, Stripe), detail fields (Sentry),
+// plain string errors, and falls back to the raw response text or status text.
+function extractErrorMessage(data, text, statusText) {
+  const err = data?.error;
+  return (
+    (err && typeof err === 'object' ? err.message : null) ||
+    data?.detail ||
+    data?.message ||
+    (typeof err === 'string' ? err : null) ||
+    data?.error_description ||
+    data?.errors?.[0]?.message ||
+    text ||
+    statusText
+  );
+}
+
 export async function readJsonResponse(response) {
   const { data, text } = await parseResponseJson(response);
 
   if (!response.ok) {
-    const message =
-      data?.message ||
-      data?.error ||
-      data?.error_description ||
-      data?.errors?.[0]?.message ||
-      text ||
-      response.statusText;
+    const message = extractErrorMessage(data, text, response.statusText);
     throw new Error(`${response.status} ${response.statusText}: ${message}`);
   }
 
@@ -127,4 +138,69 @@ export async function fetchJson(url, { headers = {}, ...options } = {}) {
       },
     }),
   );
+}
+
+// ─── Low-level fetch helper for direct API client files ───────────────────────
+//
+// Used by API-layer modules (e.g. FigmaAPI, VercelAPI) that build their own
+// credential-backed header objects and call the service directly.
+// For connector tool files, prefer makeConnectorRequest instead.
+//
+// extractError(data, response) — optional; overrides default message extraction.
+// DELETE responses that return 200 become { ok: true }.
+// 204 responses become {}.
+export async function apiFetch(url, headers, options = {}, extractError = null) {
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const message = extractError
+      ? extractError(data, res)
+      : extractErrorMessage(data, '', res.statusText);
+    throw new Error(message);
+  }
+  if (res.status === 204) return {};
+  if (options.method === 'DELETE') return { ok: true };
+  return res.json();
+}
+
+// ─── Connector request factory ────────────────────────────────────────────────
+//
+// Returns an async request(path, options?) function pre-configured for a
+// specific connector. Credentials are fetched on every call so they stay fresh.
+//
+// Options:
+//   connectorId   — key used in Settings > Connectors (e.g. 'vercel')
+//   keys          — credential fields that must be present (default: ['token'])
+//   label         — human-readable service name shown in errors (e.g. 'Vercel')
+//   baseUrl       — static base URL (e.g. 'https://api.vercel.com')
+//   getBaseUrl    — (credentials) => string — dynamic base URL; takes priority over baseUrl
+//   getAuthHeaders — (credentials) => object — overrides default Bearer auth
+//   extraHeaders  — additional static headers merged into every request (e.g. API version)
+//
+// The returned function signature:
+//   request(path, { method?, body?, searchParams? }?)
+export function makeConnectorRequest(
+  rootDirectory,
+  {
+    connectorId,
+    keys = ['token'],
+    label,
+    baseUrl,
+    getBaseUrl = null,
+    getAuthHeaders = null,
+    extraHeaders = {},
+  },
+) {
+  return async function request(path, { method = 'GET', body, searchParams = {} } = {}) {
+    const credentials = await requireConnectorCredentials(rootDirectory, connectorId, keys, label);
+    const resolvedBase = getBaseUrl ? getBaseUrl(credentials) : baseUrl;
+    const authHeaders = getAuthHeaders
+      ? getAuthHeaders(credentials)
+      : { authorization: `Bearer ${credentials.token}` };
+    return fetchJson(buildUrl(resolvedBase, path, searchParams), {
+      method,
+      headers: { 'content-type': 'application/json', ...authHeaders, ...extraHeaders },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+  };
 }

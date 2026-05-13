@@ -1,31 +1,6 @@
-import {
-  requireConnectorCredentials,
-  requireText,
-  truncateText,
-} from '../../../Core/ConnectorHttp.js';
+import { makeConnectorRequest, requireText, truncateText } from '../../../Core/ConnectorHttp.js';
 
 const SUPABASE_API = 'https://api.supabase.com/v1';
-
-async function supabaseRequest(rootDirectory, path) {
-  const credentials = await requireConnectorCredentials(
-    rootDirectory,
-    'supabase',
-    ['token'],
-    'Supabase',
-  );
-  const response = await fetch(`${SUPABASE_API}${path}`, {
-    headers: {
-      accept: 'application/json',
-      authorization: `Bearer ${credentials.token}`,
-    },
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(
-      `${response.status} ${response.statusText}: ${data?.message ?? data?.error ?? 'Supabase request failed'}`,
-    );
-  return data;
-}
 
 function formatProject(project, index = null) {
   return [
@@ -38,9 +13,16 @@ function formatProject(project, index = null) {
 }
 
 export function createSupabaseToolHandlers({ rootDirectory }) {
+  const request = makeConnectorRequest(rootDirectory, {
+    connectorId: 'supabase',
+    keys: ['token'],
+    label: 'Supabase',
+    baseUrl: SUPABASE_API,
+  });
+
   return {
     async supabase_list_projects() {
-      const projects = await supabaseRequest(rootDirectory, '/projects');
+      const projects = await request('/projects');
       return projects.length
         ? ['Supabase projects', '', ...projects.map(formatProject)].join('\n')
         : 'No Supabase projects found.';
@@ -50,11 +32,11 @@ export function createSupabaseToolHandlers({ rootDirectory }) {
       const projectRef = encodeURIComponent(
         requireText(params.project_ref ?? params.projectRef, 'project_ref'),
       );
-      return formatProject(await supabaseRequest(rootDirectory, `/projects/${projectRef}`));
+      return formatProject(await request(`/projects/${projectRef}`));
     },
 
     async supabase_list_organizations() {
-      const organizations = await supabaseRequest(rootDirectory, '/organizations');
+      const organizations = await request('/organizations');
       return organizations.length
         ? [
             'Supabase organizations',
@@ -68,7 +50,7 @@ export function createSupabaseToolHandlers({ rootDirectory }) {
       const projectRef = encodeURIComponent(
         requireText(params.project_ref ?? params.projectRef, 'project_ref'),
       );
-      const config = await supabaseRequest(rootDirectory, `/projects/${projectRef}/config/auth`);
+      const config = await request(`/projects/${projectRef}/config/auth`);
       return ['Supabase auth config', '', truncateText(JSON.stringify(config, null, 2), 5000)].join(
         '\n',
       );
@@ -78,7 +60,7 @@ export function createSupabaseToolHandlers({ rootDirectory }) {
       const projectRef = encodeURIComponent(
         requireText(params.project_ref ?? params.projectRef, 'project_ref'),
       );
-      const settings = await supabaseRequest(rootDirectory, `/projects/${projectRef}/api-keys`);
+      const settings = await request(`/projects/${projectRef}/api-keys`);
       return [
         'Supabase API settings',
         '',

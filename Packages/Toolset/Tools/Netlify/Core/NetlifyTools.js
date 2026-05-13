@@ -1,34 +1,12 @@
 import {
-  buildUrl,
   clampInteger,
   formatDate,
   formatList,
-  requireConnectorCredentials,
+  makeConnectorRequest,
   requireText,
 } from '../../../Core/ConnectorHttp.js';
 
 const NETLIFY_API = 'https://api.netlify.com/api/v1';
-
-async function netlifyRequest(rootDirectory, path, { searchParams = {} } = {}) {
-  const credentials = await requireConnectorCredentials(
-    rootDirectory,
-    'netlify',
-    ['token'],
-    'Netlify',
-  );
-  const response = await fetch(buildUrl(NETLIFY_API, path, searchParams), {
-    headers: {
-      accept: 'application/json',
-      authorization: `Bearer ${credentials.token}`,
-    },
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(
-      `${response.status} ${response.statusText}: ${data?.message ?? 'Netlify request failed'}`,
-    );
-  return data;
-}
 
 function formatSite(site, index = null) {
   return [
@@ -41,9 +19,16 @@ function formatSite(site, index = null) {
 }
 
 export function createNetlifyToolHandlers({ rootDirectory }) {
+  const request = makeConnectorRequest(rootDirectory, {
+    connectorId: 'netlify',
+    keys: ['token'],
+    label: 'Netlify',
+    baseUrl: NETLIFY_API,
+  });
+
   return {
     async netlify_get_account() {
-      const user = await netlifyRequest(rootDirectory, '/user');
+      const user = await request('/user');
       return [
         `Netlify user: ${user.full_name || user.email}`,
         `Email: ${user.email}`,
@@ -53,21 +38,19 @@ export function createNetlifyToolHandlers({ rootDirectory }) {
 
     async netlify_list_sites(params = {}) {
       const limit = clampInteger(params.limit, 20, 1, 50);
-      const sites = await netlifyRequest(rootDirectory, '/sites', {
-        searchParams: { per_page: limit },
-      });
+      const sites = await request('/sites', { searchParams: { per_page: limit } });
       return formatList('Netlify sites', sites.map(formatSite));
     },
 
     async netlify_get_site(params = {}) {
       const siteId = encodeURIComponent(requireText(params.site_id ?? params.siteId, 'site_id'));
-      return formatSite(await netlifyRequest(rootDirectory, `/sites/${siteId}`));
+      return formatSite(await request(`/sites/${siteId}`));
     },
 
     async netlify_list_deploys(params = {}) {
       const siteId = encodeURIComponent(requireText(params.site_id ?? params.siteId, 'site_id'));
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const deploys = await netlifyRequest(rootDirectory, `/sites/${siteId}/deploys`, {
+      const deploys = await request(`/sites/${siteId}/deploys`, {
         searchParams: { per_page: limit },
       });
       return formatList(
@@ -83,7 +66,7 @@ export function createNetlifyToolHandlers({ rootDirectory }) {
       const deployId = encodeURIComponent(
         requireText(params.deploy_id ?? params.deployId, 'deploy_id'),
       );
-      const deploy = await netlifyRequest(rootDirectory, `/deploys/${deployId}`);
+      const deploy = await request(`/deploys/${deployId}`);
       return [
         `Netlify deploy: ${deploy.id}`,
         `Site: ${deploy.name ?? deploy.site_id}`,

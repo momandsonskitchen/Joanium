@@ -1,3 +1,5 @@
+import { apiFetch } from '../../../../Core/ConnectorHttp.js';
+
 const BASE = 'https://api.vercel.com';
 
 function headers(creds) {
@@ -14,16 +16,12 @@ function teamQueryAppend(creds, existing = '') {
 }
 
 async function vFetch(path, creds, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: headers(creds),
-    ...options,
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error?.message ?? `Vercel API error: ${res.status}`);
-  }
-  if (res.status === 204) return {};
-  return res.json();
+  return apiFetch(
+    `${BASE}${path}`,
+    headers(creds),
+    options,
+    (data, res) => data.error?.message ?? `Vercel API error: ${res.status}`,
+  );
 }
 
 // ─── User ────────────────────────────────────────────────────────────────────
@@ -218,6 +216,7 @@ export async function getDeploymentFiles(creds, deploymentId) {
 }
 
 export async function getDeploymentFileContent(creds, deploymentId, fileId) {
+  // Reads raw text rather than JSON — not routed through vFetch.
   const q = teamQuery(creds);
   const res = await fetch(
     `${BASE}/v7/deployments/${encodeURIComponent(deploymentId)}/files/${encodeURIComponent(fileId)}${q}`,
@@ -227,8 +226,7 @@ export async function getDeploymentFileContent(creds, deploymentId, fileId) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.error?.message ?? `Vercel API error: ${res.status}`);
   }
-  const text = await res.text();
-  return { content: text };
+  return { content: await res.text() };
 }
 
 // ─── Domains ──────────────────────────────────────────────────────────────────

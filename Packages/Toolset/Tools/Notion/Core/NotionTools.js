@@ -2,38 +2,14 @@ import {
   clampInteger,
   formatDate,
   formatList,
+  makeConnectorRequest,
   parseJsonObject,
-  parseResponseJson,
-  requireConnectorCredentials,
   requireText,
   truncateText,
 } from '../../../Core/ConnectorHttp.js';
 
 const NOTION_API = 'https://api.notion.com/v1';
 const NOTION_VERSION = '2022-06-28';
-
-async function notionRequest(rootDirectory, path, { method = 'GET', body } = {}) {
-  const credentials = await requireConnectorCredentials(
-    rootDirectory,
-    'notion',
-    ['token'],
-    'Notion',
-  );
-  const response = await fetch(`${NOTION_API}${path}`, {
-    method,
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      authorization: `Bearer ${credentials.token}`,
-      'notion-version': NOTION_VERSION,
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  const { data, text } = await parseResponseJson(response);
-  if (!response.ok)
-    throw new Error(`${response.status} ${response.statusText}: ${data?.message ?? text}`);
-  return data;
-}
 
 function richTextToPlain(items = []) {
   return items.map((item) => item.plain_text ?? item.text?.content ?? '').join('');
@@ -77,6 +53,14 @@ function paragraphBlock(text) {
 }
 
 export function createNotionToolHandlers({ rootDirectory }) {
+  const request = makeConnectorRequest(rootDirectory, {
+    connectorId: 'notion',
+    keys: ['token'],
+    label: 'Notion',
+    baseUrl: NOTION_API,
+    extraHeaders: { 'notion-version': NOTION_VERSION },
+  });
+
   return {
     async notion_search(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 25);
@@ -90,13 +74,12 @@ export function createNotionToolHandlers({ rootDirectory }) {
       if (filter === 'page' || filter === 'database') {
         body.filter = { value: filter, property: 'object' };
       }
-      const data = await notionRequest(rootDirectory, '/search', { method: 'POST', body });
+      const data = await request('/search', { method: 'POST', body });
       return formatList('Notion search results', (data.results ?? []).map(formatResult));
     },
 
     async notion_get_page(params = {}) {
-      const page = await notionRequest(
-        rootDirectory,
+      const page = await request(
         `/pages/${encodeURIComponent(requireText(params.page_id ?? params.pageId, 'page_id'))}`,
       );
       const properties = Object.entries(page.properties ?? {}).map(
@@ -106,8 +89,7 @@ export function createNotionToolHandlers({ rootDirectory }) {
     },
 
     async notion_get_database(params = {}) {
-      const database = await notionRequest(
-        rootDirectory,
+      const database = await request(
         `/databases/${encodeURIComponent(requireText(params.database_id ?? params.databaseId, 'database_id'))}`,
       );
       const properties = Object.entries(database.properties ?? {}).map(
@@ -128,10 +110,7 @@ export function createNotionToolHandlers({ rootDirectory }) {
         if (!Array.isArray(sorts)) throw new Error('sorts must be a JSON array.');
         body.sorts = sorts;
       }
-      const data = await notionRequest(rootDirectory, `/databases/${databaseId}/query`, {
-        method: 'POST',
-        body,
-      });
+      const data = await request(`/databases/${databaseId}/query`, { method: 'POST', body });
       return formatList('Notion database rows', (data.results ?? []).map(formatResult));
     },
 
@@ -150,7 +129,7 @@ export function createNotionToolHandlers({ rootDirectory }) {
             : { title: titleProperty(title) },
         children: params.content ? [paragraphBlock(truncateText(params.content, 1800))] : [],
       };
-      const page = await notionRequest(rootDirectory, '/pages', { method: 'POST', body });
+      const page = await request('/pages', { method: 'POST', body });
       return [
         `Notion page created`,
         `Title: ${getTitle(page)}`,
@@ -164,7 +143,7 @@ export function createNotionToolHandlers({ rootDirectory }) {
         requireText(params.block_id ?? params.blockId, 'block_id'),
       );
       const text = requireText(params.text, 'text');
-      await notionRequest(rootDirectory, `/blocks/${blockId}/children`, {
+      await request(`/blocks/${blockId}/children`, {
         method: 'PATCH',
         body: { children: [paragraphBlock(truncateText(text, 1800))] },
       });

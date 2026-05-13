@@ -1,40 +1,25 @@
 import {
-  buildUrl,
   clampInteger,
   formatDate,
   formatList,
-  requireConnectorCredentials,
+  makeConnectorRequest,
   requireText,
 } from '../../../Core/ConnectorHttp.js';
 
 const VERCEL_API = 'https://api.vercel.com';
 
-async function vercelRequest(rootDirectory, path, { searchParams = {} } = {}) {
-  const credentials = await requireConnectorCredentials(
-    rootDirectory,
-    'vercel',
-    ['token'],
-    'Vercel',
-  );
-  const response = await fetch(buildUrl(VERCEL_API, path, searchParams), {
-    headers: {
-      accept: 'application/json',
-      authorization: `Bearer ${credentials.token}`,
-    },
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(
-      `${response.status} ${response.statusText}: ${data?.error?.message ?? data?.message ?? 'Vercel request failed'}`,
-    );
-  return data;
-}
-
 export function createVercelToolHandlers({ rootDirectory }) {
+  const request = makeConnectorRequest(rootDirectory, {
+    connectorId: 'vercel',
+    keys: ['token'],
+    label: 'Vercel',
+    baseUrl: VERCEL_API,
+  });
+
   return {
     async vercel_list_projects(params = {}) {
       const limit = clampInteger(params.limit, 20, 1, 50);
-      const data = await vercelRequest(rootDirectory, '/v9/projects', {
+      const data = await request('/v9/projects', {
         searchParams: { teamId: params.team_id ?? params.teamId, limit },
       });
       return formatList(
@@ -50,7 +35,7 @@ export function createVercelToolHandlers({ rootDirectory }) {
       const projectId = encodeURIComponent(
         requireText(params.project_id ?? params.projectId, 'project_id'),
       );
-      const project = await vercelRequest(rootDirectory, `/v9/projects/${projectId}`, {
+      const project = await request(`/v9/projects/${projectId}`, {
         searchParams: { teamId: params.team_id ?? params.teamId },
       });
       return [
@@ -65,7 +50,7 @@ export function createVercelToolHandlers({ rootDirectory }) {
 
     async vercel_list_deployments(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await vercelRequest(rootDirectory, '/v6/deployments', {
+      const data = await request('/v6/deployments', {
         searchParams: {
           teamId: params.team_id ?? params.teamId,
           projectId: params.project_id ?? params.projectId,
@@ -85,7 +70,7 @@ export function createVercelToolHandlers({ rootDirectory }) {
       const deploymentId = encodeURIComponent(
         requireText(params.deployment_id ?? params.deploymentId, 'deployment_id'),
       );
-      const deployment = await vercelRequest(rootDirectory, `/v13/deployments/${deploymentId}`, {
+      const deployment = await request(`/v13/deployments/${deploymentId}`, {
         searchParams: { teamId: params.team_id ?? params.teamId },
       });
       return [
@@ -100,7 +85,7 @@ export function createVercelToolHandlers({ rootDirectory }) {
 
     async vercel_list_domains(params = {}) {
       const limit = clampInteger(params.limit, 20, 1, 50);
-      const data = await vercelRequest(rootDirectory, '/v5/domains', {
+      const data = await request('/v5/domains', {
         searchParams: { teamId: params.team_id ?? params.teamId, limit },
       });
       return formatList(

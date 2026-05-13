@@ -1,3 +1,5 @@
+import { apiFetch } from '../../../../Core/ConnectorHttp.js';
+
 const BASE = 'https://api.figma.com/v1';
 
 function headers(creds) {
@@ -5,17 +7,12 @@ function headers(creds) {
 }
 
 async function figFetch(path, creds, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: headers(creds),
-    ...options,
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.message ?? data.err ?? `Figma API error: ${res.status}`);
-  }
-  // DELETE returns 200 with no body or a status object
-  if (options.method === 'DELETE') return { ok: true };
-  return res.json();
+  return apiFetch(
+    `${BASE}${path}`,
+    headers(creds),
+    options,
+    (data, res) => data.message ?? data.err ?? `Figma API error: ${res.status}`,
+  );
 }
 
 // ─── User ────────────────────────────────────────────────────────────────────
@@ -279,40 +276,42 @@ export async function getStyle(creds, styleKey) {
 
 // ─── Variables ───────────────────────────────────────────────────────────────
 
-export async function getLocalVariables(creds, fileKey) {
-  const data = await figFetch(`/files/${fileKey}/variables/local`, creds);
-  const meta = data.meta ?? {};
-  const collections = Object.values(meta.variableCollections ?? {}).map((vc) => ({
+// Shared mappers for variable metadata — used by both getLocalVariables and getPublishedVariables.
+
+function mapVariableCollections(collections, includeVariableIds = false) {
+  return Object.values(collections ?? {}).map((vc) => ({
     id: vc.id,
     name: vc.name,
     modes: vc.modes ?? [],
-    variableIds: vc.variableIds ?? [],
+    ...(includeVariableIds ? { variableIds: vc.variableIds ?? [] } : {}),
   }));
-  const variables = Object.values(meta.variables ?? {}).map((v) => ({
+}
+
+function mapVariables(variables, includeHiddenFlag = false) {
+  return Object.values(variables ?? {}).map((v) => ({
     id: v.id,
     name: v.name,
     resolvedType: v.resolvedType,
     collectionId: v.variableCollectionId,
     description: v.description ?? null,
+    ...(includeHiddenFlag ? { hiddenFromPublishing: v.hiddenFromPublishing ?? false } : {}),
   }));
-  return { collections, variables };
+}
+
+export async function getLocalVariables(creds, fileKey) {
+  const data = await figFetch(`/files/${fileKey}/variables/local`, creds);
+  const meta = data.meta ?? {};
+  return {
+    collections: mapVariableCollections(meta.variableCollections, true),
+    variables: mapVariables(meta.variables),
+  };
 }
 
 export async function getPublishedVariables(creds, fileKey) {
   const data = await figFetch(`/files/${fileKey}/variables/published`, creds);
   const meta = data.meta ?? {};
-  const collections = Object.values(meta.variableCollections ?? {}).map((vc) => ({
-    id: vc.id,
-    name: vc.name,
-    modes: vc.modes ?? [],
-  }));
-  const variables = Object.values(meta.variables ?? {}).map((v) => ({
-    id: v.id,
-    name: v.name,
-    resolvedType: v.resolvedType,
-    collectionId: v.variableCollectionId,
-    description: v.description ?? null,
-    hiddenFromPublishing: v.hiddenFromPublishing ?? false,
-  }));
-  return { collections, variables };
+  return {
+    collections: mapVariableCollections(meta.variableCollections),
+    variables: mapVariables(meta.variables, true),
+  };
 }

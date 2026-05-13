@@ -1,43 +1,28 @@
 import {
-  buildUrl,
   clampInteger,
   formatDate,
   formatList,
-  requireConnectorCredentials,
+  makeConnectorRequest,
   requireText,
 } from '../../../Core/ConnectorHttp.js';
 
 const STRIPE_API = 'https://api.stripe.com/v1';
-
-async function stripeRequest(rootDirectory, path, { searchParams = {} } = {}) {
-  const credentials = await requireConnectorCredentials(
-    rootDirectory,
-    'stripe',
-    ['token'],
-    'Stripe',
-  );
-  const response = await fetch(buildUrl(STRIPE_API, path, searchParams), {
-    headers: {
-      accept: 'application/json',
-      authorization: `Bearer ${credentials.token}`,
-    },
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(
-      `${response.status} ${response.statusText}: ${data?.error?.message ?? 'Stripe request failed'}`,
-    );
-  return data;
-}
 
 function money(amount, currency) {
   return `${(Number(amount ?? 0) / 100).toFixed(2)} ${String(currency ?? '').toUpperCase()}`;
 }
 
 export function createStripeToolHandlers({ rootDirectory }) {
+  const request = makeConnectorRequest(rootDirectory, {
+    connectorId: 'stripe',
+    keys: ['token'],
+    label: 'Stripe',
+    baseUrl: STRIPE_API,
+  });
+
   return {
     async stripe_get_account() {
-      const account = await stripeRequest(rootDirectory, '/account');
+      const account = await request('/account');
       return [
         `Stripe account: ${account.id}`,
         `Business: ${account.business_profile?.name ?? account.settings?.dashboard?.display_name ?? '(none)'}`,
@@ -48,7 +33,7 @@ export function createStripeToolHandlers({ rootDirectory }) {
     },
 
     async stripe_get_balance() {
-      const balance = await stripeRequest(rootDirectory, '/balance');
+      const balance = await request('/balance');
       const rows = [
         ...(balance.available ?? []).map(
           (item) => `Available: ${money(item.amount, item.currency)}`,
@@ -60,7 +45,7 @@ export function createStripeToolHandlers({ rootDirectory }) {
 
     async stripe_list_customers(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await stripeRequest(rootDirectory, '/customers', { searchParams: { limit } });
+      const data = await request('/customers', { searchParams: { limit } });
       return formatList(
         'Stripe customers',
         (data.data ?? []).map(
@@ -72,7 +57,7 @@ export function createStripeToolHandlers({ rootDirectory }) {
 
     async stripe_list_charges(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await stripeRequest(rootDirectory, '/charges', { searchParams: { limit } });
+      const data = await request('/charges', { searchParams: { limit } });
       return formatList(
         'Stripe charges',
         (data.data ?? []).map(
@@ -83,8 +68,7 @@ export function createStripeToolHandlers({ rootDirectory }) {
     },
 
     async stripe_get_charge(params = {}) {
-      const charge = await stripeRequest(
-        rootDirectory,
+      const charge = await request(
         `/charges/${encodeURIComponent(requireText(params.charge_id ?? params.chargeId, 'charge_id'))}`,
       );
       return [
@@ -99,9 +83,7 @@ export function createStripeToolHandlers({ rootDirectory }) {
 
     async stripe_list_payment_intents(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await stripeRequest(rootDirectory, '/payment_intents', {
-        searchParams: { limit },
-      });
+      const data = await request('/payment_intents', { searchParams: { limit } });
       return formatList(
         'Stripe payment intents',
         (data.data ?? []).map(

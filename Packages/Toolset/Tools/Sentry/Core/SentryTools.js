@@ -1,42 +1,12 @@
 import {
-  buildUrl,
   clampInteger,
   formatDate,
   formatList,
-  parseResponseJson,
-  requireConnectorCredentials,
+  makeConnectorRequest,
   requireText,
 } from '../../../Core/ConnectorHttp.js';
 
 const SENTRY_API = 'https://sentry.io/api/0';
-
-async function sentryRequest(
-  rootDirectory,
-  path,
-  { method = 'GET', body, searchParams = {} } = {},
-) {
-  const credentials = await requireConnectorCredentials(
-    rootDirectory,
-    'sentry',
-    ['token'],
-    'Sentry',
-  );
-  const response = await fetch(buildUrl(SENTRY_API, path, searchParams), {
-    method,
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      authorization: `Bearer ${credentials.token}`,
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  const { data, text } = await parseResponseJson(response);
-  if (!response.ok)
-    throw new Error(
-      `${response.status} ${response.statusText}: ${data?.detail ?? data?.message ?? text}`,
-    );
-  return data;
-}
 
 function formatIssue(issue, index = null) {
   return [
@@ -49,9 +19,16 @@ function formatIssue(issue, index = null) {
 }
 
 export function createSentryToolHandlers({ rootDirectory }) {
+  const request = makeConnectorRequest(rootDirectory, {
+    connectorId: 'sentry',
+    keys: ['token'],
+    label: 'Sentry',
+    baseUrl: SENTRY_API,
+  });
+
   return {
     async sentry_get_user() {
-      const user = await sentryRequest(rootDirectory, '/users/me/');
+      const user = await request('/users/me/');
       return [
         `Sentry user: ${user.name || user.email}`,
         `Email: ${user.email}`,
@@ -60,7 +37,7 @@ export function createSentryToolHandlers({ rootDirectory }) {
     },
 
     async sentry_list_organizations() {
-      const orgs = await sentryRequest(rootDirectory, '/organizations/');
+      const orgs = await request('/organizations/');
       return formatList(
         'Sentry organizations',
         orgs.map((org, index) => `${index + 1}. ${org.name}\n   Slug: ${org.slug} | ID: ${org.id}`),
@@ -71,7 +48,7 @@ export function createSentryToolHandlers({ rootDirectory }) {
       const orgSlug = encodeURIComponent(
         requireText(params.org_slug ?? params.orgSlug, 'org_slug'),
       );
-      const projects = await sentryRequest(rootDirectory, `/organizations/${orgSlug}/projects/`);
+      const projects = await request(`/organizations/${orgSlug}/projects/`);
       return formatList(
         'Sentry projects',
         projects.map(
@@ -86,7 +63,7 @@ export function createSentryToolHandlers({ rootDirectory }) {
         requireText(params.org_slug ?? params.orgSlug, 'org_slug'),
       );
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const issues = await sentryRequest(rootDirectory, `/organizations/${orgSlug}/issues/`, {
+      const issues = await request(`/organizations/${orgSlug}/issues/`, {
         searchParams: { project: params.project, query: params.query, limit },
       });
       return formatList('Sentry issues', issues.map(formatIssue));
@@ -94,8 +71,7 @@ export function createSentryToolHandlers({ rootDirectory }) {
 
     async sentry_get_issue(params = {}) {
       return formatIssue(
-        await sentryRequest(
-          rootDirectory,
+        await request(
           `/issues/${encodeURIComponent(requireText(params.issue_id ?? params.issueId, 'issue_id'))}/`,
         ),
       );
@@ -105,7 +81,7 @@ export function createSentryToolHandlers({ rootDirectory }) {
       const issueId = encodeURIComponent(
         requireText(params.issue_id ?? params.issueId, 'issue_id'),
       );
-      const issue = await sentryRequest(rootDirectory, `/issues/${issueId}/`, {
+      const issue = await request(`/issues/${issueId}/`, {
         method: 'PUT',
         body: { status: 'resolved' },
       });
