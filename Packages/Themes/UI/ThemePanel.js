@@ -91,7 +91,7 @@ export function createThemePanel(strings) {
     });
   }
 
-  panel.append(modeGroup, motionGroup, fontGroup, feedback);
+  panel.append(fontGroup, modeGroup, motionGroup, feedback);
 
   void invokeIpc('themes:get')
     .then((loaded) => {
