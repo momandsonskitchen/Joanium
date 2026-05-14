@@ -150,11 +150,14 @@ export function mountLockScreen(strings, initialStatus) {
     // ── Secret-question section ───────────────────────────────────────────
     const answerSection = createElement('div', 'lock-screen__section');
 
+    const questionBlock = createElement('div', 'lock-screen__question-block');
+    const questionEyebrow = createElement('p', 'lock-screen__question-eyebrow', 'Secret question');
     const questionLabel = createElement(
       'p',
       'lock-screen__question-label',
       initialStatus.secretQuestion ?? '',
     );
+    questionBlock.append(questionEyebrow, questionLabel);
 
     const answerWrap = createElement('div', 'lock-screen__input-wrap');
     const answerInput = createElement('input', 'lock-screen__input');
@@ -179,7 +182,7 @@ export function mountLockScreen(strings, initialStatus) {
     );
     backBtn.type = 'button';
 
-    answerSection.append(questionLabel, answerWrap, answerError, answerBtn, backBtn);
+    answerSection.append(questionBlock, answerWrap, answerError, answerBtn, backBtn);
     answerSection.hidden = true;
 
     // ── Section transitions ───────────────────────────────────────────────
@@ -187,6 +190,7 @@ export function mountLockScreen(strings, initialStatus) {
     forgotBtn.addEventListener('click', () => {
       passwordSection.hidden = true;
       answerSection.hidden = false;
+      subtitleEl.hidden = true;
       passwordError.hidden = true;
       answerInput.value = '';
       answerError.hidden = true;
@@ -196,6 +200,7 @@ export function mountLockScreen(strings, initialStatus) {
     backBtn.addEventListener('click', () => {
       answerSection.hidden = true;
       passwordSection.hidden = false;
+      subtitleEl.hidden = false;
       answerError.hidden = true;
       passwordInput.value = '';
       passwordError.hidden = true;
