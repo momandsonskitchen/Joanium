@@ -13,7 +13,11 @@ function formatCountdown(ms) {
   return `${s}s`;
 }
 
-function makeSvg(innerHTML) {
+function toFileUrl(filePath) {
+  return 'file:///' + filePath.replace(/\\/g, '/');
+}
+
+function makeLockSvg() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('fill', 'none');
@@ -21,12 +25,21 @@ function makeSvg(innerHTML) {
   svg.setAttribute('stroke-width', '1.7');
   svg.setAttribute('stroke-linecap', 'round');
   svg.setAttribute('stroke-linejoin', 'round');
-  svg.innerHTML = innerHTML;
+  svg.innerHTML = `
+    <rect x="3" y="11" width="18" height="11" rx="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  `;
   return svg;
 }
 
-function toFileUrl(filePath) {
-  return 'file:///' + filePath.replace(/\\/g, '/');
+/** Shakes an input to signal a wrong attempt — restarts cleanly if re-triggered. */
+function shake(el) {
+  el.classList.remove('lock-screen__input--shake');
+  void el.offsetWidth; // force reflow so animation restarts
+  el.classList.add('lock-screen__input--shake');
+  el.addEventListener('animationend', () => el.classList.remove('lock-screen__input--shake'), {
+    once: true,
+  });
 }
 
 // ── Lock screen ───────────────────────────────────────────────────────────────
@@ -45,7 +58,6 @@ export function mountLockScreen(strings, initialStatus) {
     // ── Avatar ────────────────────────────────────────────────────────────
     const avatar = createElement('div', 'lock-screen__avatar');
 
-    // Start with lock icon, swap to profile image if available
     function renderAvatar(avatarPath) {
       avatar.replaceChildren();
       if (avatarPath) {
@@ -56,24 +68,26 @@ export function mountLockScreen(strings, initialStatus) {
         avatar.append(img);
       } else {
         avatar.classList.remove('lock-screen__avatar--photo');
-        avatar.append(
-          makeSvg(`
-            <rect x="3" y="11" width="18" height="11" rx="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          `),
-        );
+        avatar.append(makeLockSvg());
       }
     }
 
     renderAvatar(null);
 
-    invokeIpc('user:get-profile')
-      .then((profile) => renderAvatar(profile?.avatarPath ?? null))
-      .catch(() => {});
-
-    // ── Text ──────────────────────────────────────────────────────────────
-    const titleEl = createElement('h1', 'lock-screen__title', strings.lockTitle);
+    // ── Name + subtitle ───────────────────────────────────────────────────
+    // nameEl shows the user's real name once the profile loads.
+    // Falls back to the app name so the card is never empty.
+    const nameEl = createElement('h1', 'lock-screen__name', 'Joanium');
     const subtitleEl = createElement('p', 'lock-screen__subtitle', strings.lockSubtitle);
+
+    invokeIpc('user:get-profile')
+      .then((profile) => {
+        renderAvatar(profile?.avatarPath ?? null);
+        if (profile?.name?.trim()) {
+          nameEl.textContent = profile.name.trim();
+        }
+      })
+      .catch(() => {});
 
     // ── Rate-limit banner ─────────────────────────────────────────────────
     const rateLimitBanner = createElement('div', 'lock-screen__rate-limit');
@@ -192,7 +206,10 @@ export function mountLockScreen(strings, initialStatus) {
 
     async function attemptPassword() {
       const pw = passwordInput.value;
-      if (!pw) return;
+      if (!pw) {
+        shake(passwordInput);
+        return;
+      }
 
       unlockBtn.disabled = true;
       passwordError.hidden = true;
@@ -212,11 +229,13 @@ export function mountLockScreen(strings, initialStatus) {
           passwordError.textContent = strings.lockWrongPassword;
           passwordError.hidden = false;
           passwordInput.value = '';
+          shake(passwordInput);
           passwordInput.focus();
         }
       } catch {
         passwordError.textContent = strings.lockWrongPassword;
         passwordError.hidden = false;
+        shake(passwordInput);
       } finally {
         if (rateLimitBanner.hidden) {
           unlockBtn.disabled = false;
@@ -233,7 +252,10 @@ export function mountLockScreen(strings, initialStatus) {
 
     async function attemptAnswer() {
       const ans = answerInput.value.trim();
-      if (!ans) return;
+      if (!ans) {
+        shake(answerInput);
+        return;
+      }
 
       answerBtn.disabled = true;
       answerError.hidden = true;
@@ -250,10 +272,12 @@ export function mountLockScreen(strings, initialStatus) {
         answerError.textContent = strings.lockWrongAnswer;
         answerError.hidden = false;
         answerInput.value = '';
+        shake(answerInput);
         answerInput.focus();
       } catch {
         answerError.textContent = strings.lockWrongAnswer;
         answerError.hidden = false;
+        shake(answerInput);
       } finally {
         answerBtn.disabled = false;
       }
@@ -266,7 +290,7 @@ export function mountLockScreen(strings, initialStatus) {
 
     // ── Assemble ──────────────────────────────────────────────────────────
 
-    card.append(avatar, titleEl, subtitleEl, rateLimitBanner, passwordSection, answerSection);
+    card.append(avatar, nameEl, subtitleEl, rateLimitBanner, passwordSection, answerSection);
     overlay.append(card);
     document.body.append(overlay);
 
