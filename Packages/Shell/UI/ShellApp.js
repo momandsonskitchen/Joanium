@@ -74,18 +74,22 @@ async function bootstrap() {
   // ── Auto-lock timer ────────────────────────────────────────────────────
   // Created here so it is in scope for buildSettingsPanel below.
   // The timer listens to window activity events and fires onLock when idle.
+  // ── Lock helper ───────────────────────────────────────────────────────────
+  // Shared by the auto-lock timer, the /lock slash command, and the shortcut.
+  async function lockNow() {
+    try {
+      const status = await invokeIpc('security:get-status');
+      if (!status.enabled) return;
+      autoLockTimer.pause();
+      await mountLockScreen(strings.security, status);
+      await autoLockTimer.refresh();
+    } catch {
+      // Non-fatal.
+    }
+  }
+
   const autoLockTimer = createAutoLockTimer({
-    onLock: async () => {
-      try {
-        autoLockTimer.pause();
-        const status = await invokeIpc('security:get-status');
-        if (!status.enabled) return;
-        await mountLockScreen(strings.security, status);
-        await autoLockTimer.refresh();
-      } catch {
-        // Non-fatal.
-      }
-    },
+    onLock: () => lockNow(),
   });
   autoLockTimer.start();
 
@@ -186,6 +190,7 @@ async function bootstrap() {
         getProfile: () => profile,
         onNavigate: showRoute,
         onOpenSettings: showSettingsPanel,
+        onLockApp: lockNow,
       });
       canvas.append(chatView.element);
       routeViews.set('chat', {
@@ -828,6 +833,13 @@ async function bootstrap() {
       combo: { ctrl: true, key: 'u' },
       handler: () => {
         void showRoute('usage');
+      },
+    },
+    {
+      id: 'lock',
+      combo: { ctrl: true, key: 'l' },
+      handler: () => {
+        void lockNow();
       },
     },
     {

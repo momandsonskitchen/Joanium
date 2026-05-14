@@ -34,6 +34,14 @@ const COMMANDS = [
   // These run a one-shot side effect and clear the slash token from the composer.
 
   {
+    id: 'lock',
+    label: 'Lock',
+    description: 'Lock the app immediately.',
+    type: 'action',
+    icon: 'lock',
+    action: 'lockApp',
+  },
+  {
     id: 'private',
     label: 'Private chat',
     description: 'Toggle private mode — conversations are not saved.',

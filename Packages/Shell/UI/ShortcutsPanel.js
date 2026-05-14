@@ -29,6 +29,10 @@ export function createShortcutsPanel(strings) {
         { label: strings.items.settings, combo: ['Ctrl', ','] },
       ],
     },
+    {
+      label: strings.groups.security,
+      items: [{ label: strings.items.lock, combo: ['Ctrl', 'L'] }],
+    },
   ];
 
   for (const group of groups) {

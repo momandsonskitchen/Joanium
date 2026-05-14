@@ -1891,6 +1891,7 @@ export async function createChatView(
     getProfile,
     onNavigate,
     onOpenSettings,
+    onLockApp,
   } = {},
 ) {
   initCompletionSound();
@@ -3279,6 +3280,10 @@ export async function createChatView(
 
         case 'openSettings':
           onOpenSettings?.();
+          break;
+
+        case 'lockApp':
+          onLockApp?.();
           break;
 
         case 'togglePrivate':

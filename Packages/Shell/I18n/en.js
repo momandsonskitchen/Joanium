@@ -56,6 +56,7 @@ const en = {
   shortcuts: {
     groups: {
       navigation: 'Navigation',
+      security: 'Security',
     },
     items: {
       newChat: 'New Chat',
@@ -71,6 +72,7 @@ const en = {
       marketplace: 'Marketplace',
       usage: 'Usage',
       settings: 'Settings',
+      lock: 'Lock app',
     },
   },
   chat,
