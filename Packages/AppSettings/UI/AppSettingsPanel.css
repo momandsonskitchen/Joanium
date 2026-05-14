@@ -136,3 +136,40 @@
     inset 0 0 0 1px var(--dropdown-color-border),
     0 2px 8px var(--dropdown-color-shadow);
 }
+
+/* ── Manual memory update card ──────────────────────────────────────────── */
+
+.app-settings__memory-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-surface);
+  padding: 18px 20px;
+  border: 1.5px solid color-mix(in srgb, var(--color-accent, #b07d4a) 18%, transparent);
+}
+
+.app-settings__memory-btn {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent, #b07d4a);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 660;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.app-settings__memory-btn:hover {
+  opacity: 0.85;
+}
+
+.app-settings__memory-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

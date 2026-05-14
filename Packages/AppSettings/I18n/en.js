@@ -44,6 +44,12 @@ const en = {
     label: 'Default model',
     description: 'The AI model used by default when starting a new conversation.',
   },
+  updateMemory: {
+    label: 'Update memory now',
+    description: 'Manually run memory learning on recent conversations.',
+    button: 'Update Memory',
+    updating: 'Updating…',
+  },
 };
 
 export default en;

@@ -2386,14 +2386,14 @@ export async function createChatView(
     });
   }
 
-  async function processPendingMemorySyncs() {
+  async function processPendingMemorySyncs({ force = false } = {}) {
     if (memorySyncRunning || isSending || isPrivate) {
       return;
     }
 
     const latestSettings = await invokeIpc('app-settings:get').catch(() => currentAppSettings);
     currentAppSettings = latestSettings ?? currentAppSettings;
-    if (currentAppSettings?.autoMemoryUpdates === false) {
+    if (!force && currentAppSettings?.autoMemoryUpdates === false) {
       return;
     }
 
@@ -4896,6 +4896,11 @@ export async function createChatView(
     } else {
       scheduleMemorySync(12000);
     }
+  });
+
+  // Manual memory sync trigger fired from AppSettingsPanel when auto-update is off.
+  window.addEventListener('joanium:trigger-memory-sync', () => {
+    void processPendingMemorySyncs({ force: true });
   });
 
   scheduleMemorySync(18000);

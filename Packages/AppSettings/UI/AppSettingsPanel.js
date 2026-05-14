@@ -203,6 +203,64 @@ export function createAppSettingsPanel(strings) {
       });
       options.append(checkbox.element);
     }
+
+    // ── Manual memory update card (only shown when autoMemoryUpdates is off) ──
+    const memoryCard = createElement('div', 'app-settings__memory-card');
+    memoryCard.hidden = Boolean(settings.autoMemoryUpdates);
+
+    const memoryMeta = createElement('div', 'app-settings__dropdown-meta');
+    const memoryLabel = createElement(
+      'span',
+      'app-settings__dropdown-label',
+      strings.updateMemory.label,
+    );
+    const memoryDesc = createElement(
+      'span',
+      'app-settings__dropdown-desc',
+      strings.updateMemory.description,
+    );
+    memoryMeta.append(memoryLabel, memoryDesc);
+
+    const memoryBtn = createElement(
+      'button',
+      'app-settings__memory-btn',
+      strings.updateMemory.button,
+    );
+    memoryBtn.type = 'button';
+    memoryBtn.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('joanium:trigger-memory-sync'));
+      memoryBtn.disabled = true;
+      memoryBtn.textContent = strings.updateMemory.updating;
+
+      // Reset the button once the sync finishes (indicator fires active: false).
+      let fallbackTimer = null;
+      const onSyncEnd = (event) => {
+        if (event.detail?.active) return;
+        window.removeEventListener('joanium:memory-sync', onSyncEnd);
+        clearTimeout(fallbackTimer);
+        memoryBtn.disabled = false;
+        memoryBtn.textContent = strings.updateMemory.button;
+      };
+      window.addEventListener('joanium:memory-sync', onSyncEnd);
+      // Fallback in case there are no pending sessions (sync completes silently).
+      fallbackTimer = setTimeout(() => {
+        window.removeEventListener('joanium:memory-sync', onSyncEnd);
+        memoryBtn.disabled = false;
+        memoryBtn.textContent = strings.updateMemory.button;
+      }, 30000);
+    });
+
+    memoryCard.append(memoryMeta, memoryBtn);
+    options.append(memoryCard);
+
+    // Keep the card in sync when autoMemoryUpdates is toggled this session.
+    function syncMemoryCard() {
+      memoryCard.hidden = Boolean(settings?.autoMemoryUpdates);
+    }
+    window.addEventListener('joanium:app-settings-changed', (event) => {
+      settings = event.detail ?? settings;
+      syncMemoryCard();
+    });
   }
 
   view.append(options, status);
