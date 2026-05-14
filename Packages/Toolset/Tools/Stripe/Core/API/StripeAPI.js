@@ -7,6 +7,12 @@ import {
   mapRefund,
   mapPayout,
   mapCoupon,
+  mapSubscriptionItem,
+  mapInvoiceItem,
+  mapShippingRate,
+  mapTopup,
+  mapReview,
+  mapPlan,
 } from './Utils.js';
 
 const BASE = 'https://api.stripe.com/v1';
@@ -239,81 +245,27 @@ export async function getCustomer(creds, id) {
 }
 
 export async function getCharge(creds, id) {
-  const c = await stripeFetch(`/charges/${id}`, creds);
-  return {
-    id: c.id,
-    amount: c.amount / 100,
-    currency: c.currency?.toUpperCase() ?? '',
-    status: c.status,
-    description: c.description ?? null,
-    receiptEmail: c.receipt_email ?? null,
-    customerId: c.customer ?? null,
-    created: c.created,
-  };
+  return mapCharge(await stripeFetch(`/charges/${id}`, creds));
 }
 
 export async function getSubscription(creds, id) {
-  const s = await stripeFetch(`/subscriptions/${id}`, creds);
-  return {
-    id: s.id,
-    status: s.status,
-    customerId: s.customer,
-    currentPeriodEnd: s.current_period_end,
-    cancelAtPeriodEnd: s.cancel_at_period_end,
-    created: s.created,
-  };
+  return mapSubscription(await stripeFetch(`/subscriptions/${id}`, creds));
 }
 
 export async function getInvoice(creds, id) {
-  const i = await stripeFetch(`/invoices/${id}`, creds);
-  return {
-    id: i.id,
-    customerId: i.customer,
-    customerEmail: i.customer_email ?? null,
-    amountDue: i.amount_due / 100,
-    amountPaid: i.amount_paid / 100,
-    currency: i.currency?.toUpperCase() ?? '',
-    status: i.status,
-    dueDate: i.due_date ?? null,
-    created: i.created,
-  };
+  return mapInvoice(await stripeFetch(`/invoices/${id}`, creds));
 }
 
 export async function getPaymentIntent(creds, id) {
-  const p = await stripeFetch(`/payment_intents/${id}`, creds);
-  return {
-    id: p.id,
-    amount: p.amount / 100,
-    currency: p.currency?.toUpperCase() ?? '',
-    status: p.status,
-    customerId: p.customer ?? null,
-    description: p.description ?? null,
-    created: p.created,
-  };
+  return mapPaymentIntent(await stripeFetch(`/payment_intents/${id}`, creds));
 }
 
 export async function getProduct(creds, id) {
-  const p = await stripeFetch(`/products/${id}`, creds);
-  return {
-    id: p.id,
-    name: p.name,
-    description: p.description ?? null,
-    active: p.active,
-    created: p.created,
-  };
+  return mapProduct(await stripeFetch(`/products/${id}`, creds));
 }
 
 export async function getRefund(creds, id) {
-  const r = await stripeFetch(`/refunds/${id}`, creds);
-  return {
-    id: r.id,
-    amount: r.amount / 100,
-    currency: r.currency?.toUpperCase() ?? '',
-    chargeId: r.charge,
-    status: r.status,
-    reason: r.reason ?? null,
-    created: r.created,
-  };
+  return mapRefund(await stripeFetch(`/refunds/${id}`, creds));
 }
 
 export async function getDispute(creds, id) {
@@ -331,31 +283,11 @@ export async function getDispute(creds, id) {
 }
 
 export async function getPayout(creds, id) {
-  const p = await stripeFetch(`/payouts/${id}`, creds);
-  return {
-    id: p.id,
-    amount: p.amount / 100,
-    currency: p.currency?.toUpperCase() ?? '',
-    status: p.status,
-    arrivalDate: p.arrival_date,
-    description: p.description ?? null,
-    created: p.created,
-  };
+  return mapPayout(await stripeFetch(`/payouts/${id}`, creds));
 }
 
 export async function getCoupon(creds, id) {
-  const c = await stripeFetch(`/coupons/${id}`, creds);
-  return {
-    id: c.id,
-    name: c.name ?? null,
-    percentOff: c.percent_off ?? null,
-    amountOff: c.amount_off != null ? c.amount_off / 100 : null,
-    currency: c.currency?.toUpperCase() ?? null,
-    duration: c.duration,
-    timesRedeemed: c.times_redeemed,
-    valid: c.valid,
-    created: c.created,
-  };
+  return mapCoupon(await stripeFetch(`/coupons/${id}`, creds));
 }
 
 // ── New: 30 additional tools ───────────────────────────────────────────────
@@ -382,59 +314,23 @@ export async function listSubscriptionItems(creds, subscriptionId, limit = 10) {
     ? `/subscription_items?subscription=${subscriptionId}&limit=${limit}`
     : `/subscription_items?limit=${limit}`;
   const data = await stripeFetch(qs, creds);
-  return (data.data ?? []).map((si) => ({
-    id: si.id,
-    subscriptionId: si.subscription,
-    priceId: si.price?.id ?? null,
-    productId: si.price?.product ?? null,
-    quantity: si.quantity ?? null,
-    created: si.created,
-  }));
+  return (data.data ?? []).map(mapSubscriptionItem);
 }
 
 // 3. Get a single subscription item by ID
 export async function getSubscriptionItem(creds, id) {
-  const si = await stripeFetch(`/subscription_items/${id}`, creds);
-  return {
-    id: si.id,
-    subscriptionId: si.subscription,
-    priceId: si.price?.id ?? null,
-    productId: si.price?.product ?? null,
-    quantity: si.quantity ?? null,
-    created: si.created,
-  };
+  return mapSubscriptionItem(await stripeFetch(`/subscription_items/${id}`, creds));
 }
 
 // 4. List invoice items (line items added to upcoming invoices)
 export async function listInvoiceItems(creds, limit = 10) {
   const data = await stripeFetch(`/invoiceitems?limit=${limit}`, creds);
-  return (data.data ?? []).map((ii) => ({
-    id: ii.id,
-    customerId: ii.customer,
-    invoiceId: ii.invoice ?? null,
-    amount: ii.amount / 100,
-    currency: ii.currency?.toUpperCase() ?? '',
-    description: ii.description ?? null,
-    proration: ii.proration,
-    quantity: ii.quantity,
-    created: ii.date,
-  }));
+  return (data.data ?? []).map(mapInvoiceItem);
 }
 
 // 5. Get a single invoice item by ID
 export async function getInvoiceItem(creds, id) {
-  const ii = await stripeFetch(`/invoiceitems/${id}`, creds);
-  return {
-    id: ii.id,
-    customerId: ii.customer,
-    invoiceId: ii.invoice ?? null,
-    amount: ii.amount / 100,
-    currency: ii.currency?.toUpperCase() ?? '',
-    description: ii.description ?? null,
-    proration: ii.proration,
-    quantity: ii.quantity,
-    created: ii.date,
-  };
+  return mapInvoiceItem(await stripeFetch(`/invoiceitems/${id}`, creds));
 }
 
 // 6. List credit notes
@@ -471,97 +367,34 @@ export async function getCreditNote(creds, id) {
 // 8. List shipping rates
 export async function listShippingRates(creds, limit = 10) {
   const data = await stripeFetch(`/shipping_rates?limit=${limit}`, creds);
-  return (data.data ?? []).map((sr) => ({
-    id: sr.id,
-    displayName: sr.display_name,
-    type: sr.type,
-    fixedAmount: sr.fixed_amount
-      ? {
-          amount: sr.fixed_amount.amount / 100,
-          currency: sr.fixed_amount.currency?.toUpperCase() ?? '',
-        }
-      : null,
-    active: sr.active,
-    created: sr.created,
-  }));
+  return (data.data ?? []).map(mapShippingRate);
 }
 
 // 9. Get a single shipping rate by ID
 export async function getShippingRate(creds, id) {
-  const sr = await stripeFetch(`/shipping_rates/${id}`, creds);
-  return {
-    id: sr.id,
-    displayName: sr.display_name,
-    type: sr.type,
-    fixedAmount: sr.fixed_amount
-      ? {
-          amount: sr.fixed_amount.amount / 100,
-          currency: sr.fixed_amount.currency?.toUpperCase() ?? '',
-        }
-      : null,
-    active: sr.active,
-    deliveryEstimate: sr.delivery_estimate ?? null,
-    created: sr.created,
-  };
+  return mapShippingRate(await stripeFetch(`/shipping_rates/${id}`, creds));
 }
 
 // 10. List top-ups (adding funds to Stripe balance)
 export async function listTopups(creds, limit = 10) {
   const data = await stripeFetch(`/topups?limit=${limit}`, creds);
-  return (data.data ?? []).map((t) => ({
-    id: t.id,
-    amount: t.amount / 100,
-    currency: t.currency?.toUpperCase() ?? '',
-    status: t.status,
-    description: t.description ?? null,
-    expectedAvailabilityDate: t.expected_availability_date ?? null,
-    created: t.created,
-  }));
+  return (data.data ?? []).map(mapTopup);
 }
 
 // 11. Get a single top-up by ID
 export async function getTopup(creds, id) {
-  const t = await stripeFetch(`/topups/${id}`, creds);
-  return {
-    id: t.id,
-    amount: t.amount / 100,
-    currency: t.currency?.toUpperCase() ?? '',
-    status: t.status,
-    description: t.description ?? null,
-    expectedAvailabilityDate: t.expected_availability_date ?? null,
-    created: t.created,
-  };
+  return mapTopup(await stripeFetch(`/topups/${id}`, creds));
 }
 
 // 12. List Radar reviews (manual review queue)
 export async function listReviews(creds, limit = 10) {
   const data = await stripeFetch(`/reviews?limit=${limit}`, creds);
-  return (data.data ?? []).map((r) => ({
-    id: r.id,
-    chargeId: r.charge ?? null,
-    paymentIntentId: r.payment_intent ?? null,
-    reason: r.reason,
-    open: r.open,
-    openedReason: r.opened_reason,
-    closedReason: r.closed_reason ?? null,
-    created: r.created,
-  }));
+  return (data.data ?? []).map(mapReview);
 }
 
 // 13. Get a single Radar review by ID
 export async function getReview(creds, id) {
-  const r = await stripeFetch(`/reviews/${id}`, creds);
-  return {
-    id: r.id,
-    chargeId: r.charge ?? null,
-    paymentIntentId: r.payment_intent ?? null,
-    reason: r.reason,
-    open: r.open,
-    openedReason: r.opened_reason,
-    closedReason: r.closed_reason ?? null,
-    billingZip: r.billing_zip ?? null,
-    created: r.created,
-  };
+  return mapReview(await stripeFetch(`/reviews/${id}`, creds));
 }
 
 // 14. List Radar early fraud warnings
@@ -593,34 +426,12 @@ export async function listRadarValueLists(creds, limit = 10) {
 // 16. List plans (classic pricing model, still fully supported)
 export async function listPlans(creds, limit = 10) {
   const data = await stripeFetch(`/plans?limit=${limit}`, creds);
-  return (data.data ?? []).map((p) => ({
-    id: p.id,
-    nickname: p.nickname ?? null,
-    amount: p.amount != null ? p.amount / 100 : null,
-    currency: p.currency?.toUpperCase() ?? '',
-    interval: p.interval,
-    intervalCount: p.interval_count,
-    productId: p.product,
-    active: p.active,
-    created: p.created,
-  }));
+  return (data.data ?? []).map(mapPlan);
 }
 
 // 17. Get a single plan by ID
 export async function getPlan(creds, id) {
-  const p = await stripeFetch(`/plans/${id}`, creds);
-  return {
-    id: p.id,
-    nickname: p.nickname ?? null,
-    amount: p.amount != null ? p.amount / 100 : null,
-    currency: p.currency?.toUpperCase() ?? '',
-    interval: p.interval,
-    intervalCount: p.interval_count,
-    productId: p.product,
-    active: p.active,
-    trialPeriodDays: p.trial_period_days ?? null,
-    created: p.created,
-  };
+  return mapPlan(await stripeFetch(`/plans/${id}`, creds));
 }
 
 // 18. Get a single payment method by ID
@@ -686,15 +497,7 @@ export async function searchCharges(creds, query, limit = 10) {
     `/charges/search?query=${encodeURIComponent(query)}&limit=${limit}`,
     creds,
   );
-  return (data.data ?? []).map((c) => ({
-    id: c.id,
-    amount: c.amount / 100,
-    currency: c.currency?.toUpperCase() ?? '',
-    status: c.status,
-    description: c.description ?? null,
-    receiptEmail: c.receipt_email ?? null,
-    created: c.created,
-  }));
+  return (data.data ?? []).map(mapCharge);
 }
 
 // 22. Search invoices using Stripe's Search API
@@ -703,16 +506,7 @@ export async function searchInvoices(creds, query, limit = 10) {
     `/invoices/search?query=${encodeURIComponent(query)}&limit=${limit}`,
     creds,
   );
-  return (data.data ?? []).map((i) => ({
-    id: i.id,
-    customerId: i.customer,
-    customerEmail: i.customer_email ?? null,
-    amountDue: i.amount_due / 100,
-    amountPaid: i.amount_paid / 100,
-    currency: i.currency?.toUpperCase() ?? '',
-    status: i.status,
-    created: i.created,
-  }));
+  return (data.data ?? []).map(mapInvoice);
 }
 
 // 23. Search payment intents using Stripe's Search API
@@ -721,15 +515,7 @@ export async function searchPaymentIntents(creds, query, limit = 10) {
     `/payment_intents/search?query=${encodeURIComponent(query)}&limit=${limit}`,
     creds,
   );
-  return (data.data ?? []).map((p) => ({
-    id: p.id,
-    amount: p.amount / 100,
-    currency: p.currency?.toUpperCase() ?? '',
-    status: p.status,
-    customerId: p.customer ?? null,
-    description: p.description ?? null,
-    created: p.created,
-  }));
+  return (data.data ?? []).map(mapPaymentIntent);
 }
 
 // 24. Search subscriptions using Stripe's Search API
@@ -738,14 +524,7 @@ export async function searchSubscriptions(creds, query, limit = 10) {
     `/subscriptions/search?query=${encodeURIComponent(query)}&limit=${limit}`,
     creds,
   );
-  return (data.data ?? []).map((s) => ({
-    id: s.id,
-    status: s.status,
-    customerId: s.customer,
-    currentPeriodEnd: s.current_period_end,
-    cancelAtPeriodEnd: s.cancel_at_period_end,
-    created: s.created,
-  }));
+  return (data.data ?? []).map(mapSubscription);
 }
 
 // 25. Search products using Stripe's Search API
@@ -754,13 +533,7 @@ export async function searchProducts(creds, query, limit = 10) {
     `/products/search?query=${encodeURIComponent(query)}&limit=${limit}`,
     creds,
   );
-  return (data.data ?? []).map((p) => ({
-    id: p.id,
-    name: p.name,
-    description: p.description ?? null,
-    active: p.active,
-    created: p.created,
-  }));
+  return (data.data ?? []).map(mapProduct);
 }
 
 // 26. List uploaded files (documents, dispute evidence, etc.)
