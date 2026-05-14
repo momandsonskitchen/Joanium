@@ -1,4 +1,5 @@
 import { netlifyRequest } from './Request.js';
+import { mapDeploy } from './Utils.js';
 
 function nFetch(path, creds, options = {}) {
   return netlifyRequest(path, creds, options);
@@ -81,15 +82,7 @@ export async function listServiceInstances(creds, siteId) {
 
 export async function listDeploys(creds, siteId, limit = 10) {
   const deploys = await nFetch(`/sites/${siteId}/deploys?per_page=${limit}`, creds);
-  return (deploys ?? []).map((d) => ({
-    id: d.id,
-    state: d.state,
-    branch: d.branch,
-    commitRef: d.commit_ref ?? null,
-    commitUrl: d.commit_url ?? null,
-    createdAt: d.created_at,
-    errorMessage: d.error_message ?? null,
-  }));
+  return (deploys ?? []).map(mapDeploy);
 }
 
 export async function listAllDeploys(creds, limit = 20) {
@@ -111,14 +104,7 @@ export async function getDeploy(creds, deployId) {
 
 export async function listSiteDeploys(creds, siteId, limit = 10) {
   const deploys = await nFetch(`/sites/${siteId}/deploys?per_page=${limit}`, creds);
-  return (deploys ?? []).map((d) => ({
-    id: d.id,
-    state: d.state,
-    branch: d.branch,
-    commitRef: d.commit_ref ?? null,
-    createdAt: d.created_at,
-    errorMessage: d.error_message ?? null,
-  }));
+  return (deploys ?? []).map(mapDeploy);
 }
 
 export async function cancelDeploy(creds, deployId) {

@@ -1,4 +1,5 @@
 import { apiFetch } from '../../../../Core/ConnectorHttp.js';
+import { mapDeployment } from './Utils.js';
 
 const BASE = 'https://api.vercel.com';
 
@@ -113,27 +114,13 @@ export async function unpauseProject(creds, idOrName) {
 export async function listDeployments(creds, limit = 20) {
   const q = teamQueryAppend(creds, `?limit=${limit}`);
   const data = await vFetch(`/v6/deployments${q}`, creds);
-  return (data.deployments ?? []).map((d) => ({
-    id: d.uid,
-    name: d.name,
-    url: d.url,
-    state: d.state,
-    createdAt: d.createdAt,
-    target: d.target ?? 'preview',
-  }));
+  return (data.deployments ?? []).map(mapDeployment);
 }
 
 export async function listDeploymentsByProject(creds, projectId, limit = 20) {
   const q = teamQueryAppend(creds, `?projectId=${encodeURIComponent(projectId)}&limit=${limit}`);
   const data = await vFetch(`/v6/deployments${q}`, creds);
-  return (data.deployments ?? []).map((d) => ({
-    id: d.uid,
-    name: d.name,
-    url: d.url,
-    state: d.state,
-    createdAt: d.createdAt,
-    target: d.target ?? 'preview',
-  }));
+  return (data.deployments ?? []).map(mapDeployment);
 }
 
 export async function getDeployment(creds, deploymentId) {

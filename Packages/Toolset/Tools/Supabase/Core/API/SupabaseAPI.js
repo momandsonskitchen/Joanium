@@ -1,3 +1,5 @@
+import { mapBucket } from './Utils.js';
+
 const BASE = 'https://api.supabase.com/v1';
 
 function headers(creds) {
@@ -273,28 +275,12 @@ export async function getFunction(creds, projectRef, functionSlug) {
 
 export async function listBuckets(creds, projectRef) {
   const buckets = await sbFetch(`/projects/${projectRef}/storage/buckets`, creds);
-  return (buckets ?? []).map((b) => ({
-    id: b.id,
-    name: b.name,
-    public: b.public,
-    fileSizeLimit: b.file_size_limit ?? null,
-    allowedMimeTypes: b.allowed_mime_types ?? null,
-    createdAt: b.created_at,
-    updatedAt: b.updated_at,
-  }));
+  return (buckets ?? []).map(mapBucket);
 }
 
 export async function getBucket(creds, projectRef, bucketId) {
   const b = await sbFetch(`/projects/${projectRef}/storage/buckets/${bucketId}`, creds);
-  return {
-    id: b.id,
-    name: b.name,
-    public: b.public,
-    fileSizeLimit: b.file_size_limit ?? null,
-    allowedMimeTypes: b.allowed_mime_types ?? null,
-    createdAt: b.created_at,
-    updatedAt: b.updated_at,
-  };
+  return mapBucket(b);
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────

@@ -1,3 +1,5 @@
+import { mapArtist, mapPlaylist } from './Utils.js';
+
 const BASE = 'https://api.spotify.com/v1';
 
 function headers(creds) {
@@ -72,15 +74,7 @@ export async function getTopArtists(creds, limit = 10) {
 
 export async function getTopArtistsFull(creds, limit = 10, timeRange = 'short_term') {
   const data = await spFetch(`/me/top/artists?limit=${limit}&time_range=${timeRange}`, creds);
-  return (data.items ?? []).map((a, i) => ({
-    rank: i + 1,
-    name: a.name,
-    genres: a.genres ?? [],
-    popularity: a.popularity,
-    followers: a.followers?.total ?? 0,
-    imageUrl: a.images?.[0]?.url ?? null,
-    id: a.id,
-  }));
+  return (data.items ?? []).map((a, i) => ({ rank: i + 1, ...mapArtist(a), id: a.id }));
 }
 
 // ─── Tool 2: Recently Played ─────────────────────────────────────────────────
@@ -135,14 +129,7 @@ export async function getSavedAlbums(creds, limit = 20, offset = 0) {
 
 export async function getFollowedArtists(creds, limit = 20) {
   const data = await spFetch(`/me/following?type=artist&limit=${limit}`, creds);
-  return (data.artists?.items ?? []).map((a) => ({
-    name: a.name,
-    genres: a.genres ?? [],
-    popularity: a.popularity,
-    followers: a.followers?.total ?? 0,
-    artistId: a.id,
-    imageUrl: a.images?.[0]?.url ?? null,
-  }));
+  return (data.artists?.items ?? []).map(mapArtist);
 }
 
 // ─── Tool 6: Playlist Tracks ─────────────────────────────────────────────────
@@ -216,14 +203,7 @@ export async function search(creds, query, types = ['track', 'artist', 'album'],
 
 export async function getArtist(creds, artistId) {
   const a = await spFetch(`/artists/${artistId}`, creds);
-  return {
-    name: a.name,
-    genres: a.genres ?? [],
-    popularity: a.popularity,
-    followers: a.followers?.total ?? 0,
-    imageUrl: a.images?.[0]?.url ?? null,
-    artistId: a.id,
-  };
+  return mapArtist(a);
 }
 
 // ─── Tool 9: Get Album ────────────────────────────────────────────────────────
@@ -307,14 +287,7 @@ export async function getFeaturedPlaylists(creds, limit = 10) {
   const data = await spFetch(`/browse/featured-playlists?limit=${limit}`, creds);
   return {
     message: data.message ?? null,
-    playlists: (data.playlists?.items ?? []).map((p) => ({
-      name: p.name,
-      description: p.description ?? '',
-      owner: p.owner?.display_name ?? '',
-      totalTracks: p.tracks?.total ?? 0,
-      playlistId: p.id,
-      imageUrl: p.images?.[0]?.url ?? null,
-    })),
+    playlists: (data.playlists?.items ?? []).map(mapPlaylist),
   };
 }
 
@@ -365,14 +338,7 @@ export async function getArtistAlbums(creds, artistId, limit = 10) {
 
 export async function getRelatedArtists(creds, artistId) {
   const data = await spFetch(`/artists/${artistId}/related-artists`, creds);
-  return (data.artists ?? []).slice(0, 10).map((a) => ({
-    name: a.name,
-    genres: a.genres?.slice(0, 3) ?? [],
-    popularity: a.popularity,
-    followers: a.followers?.total ?? 0,
-    artistId: a.id,
-    imageUrl: a.images?.[0]?.url ?? null,
-  }));
+  return (data.artists ?? []).slice(0, 10).map(mapArtist);
 }
 
 // ─── Tool 18: Audio Features ──────────────────────────────────────────────────
@@ -586,12 +552,5 @@ export async function getAudioAnalysis(creds, trackId) {
 
 export async function getCategoryPlaylists(creds, categoryId, limit = 10) {
   const data = await spFetch(`/browse/categories/${categoryId}/playlists?limit=${limit}`, creds);
-  return (data.playlists?.items ?? []).map((p) => ({
-    name: p.name,
-    description: p.description ?? '',
-    owner: p.owner?.display_name ?? '',
-    totalTracks: p.tracks?.total ?? 0,
-    playlistId: p.id,
-    imageUrl: p.images?.[0]?.url ?? null,
-  }));
+  return (data.playlists?.items ?? []).map(mapPlaylist);
 }

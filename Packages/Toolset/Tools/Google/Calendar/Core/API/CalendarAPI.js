@@ -1,4 +1,5 @@
 import { createGoogleJsonFetch } from '../../../Core/API/GoogleApiFetch.js';
+import { getWeekRange } from './Utils.js';
 
 const CALENDAR_BASE = 'https://www.googleapis.com/calendar/v3';
 const calFetch = createGoogleJsonFetch('Calendar');
@@ -142,40 +143,26 @@ export async function searchEvents(creds, query, maxResults = 20) {
   });
 }
 export async function getThisWeekEvents(creds) {
-  const now = new Date(),
-    day = now.getDay(),
-    diffToMon = 0 === day ? -6 : 1 - day,
-    monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon),
-    sunday = new Date(monday);
-  return (
-    sunday.setDate(monday.getDate() + 6),
-    sunday.setHours(23, 59, 59),
-    listEvents(creds, 'primary', {
-      timeMin: monday.toISOString(),
-      timeMax: sunday.toISOString(),
-      maxResults: 100,
-      singleEvents: !0,
-      orderBy: 'startTime',
-    })
-  );
+  const day = new Date().getDay();
+  const { timeMin, timeMax } = getWeekRange(day === 0 ? -6 : 1 - day);
+  return listEvents(creds, 'primary', {
+    timeMin,
+    timeMax,
+    maxResults: 100,
+    singleEvents: true,
+    orderBy: 'startTime',
+  });
 }
 export async function getNextWeekEvents(creds) {
-  const now = new Date(),
-    day = now.getDay(),
-    diffToMon = 0 === day ? 1 : 8 - day,
-    monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon),
-    sunday = new Date(monday);
-  return (
-    sunday.setDate(monday.getDate() + 6),
-    sunday.setHours(23, 59, 59),
-    listEvents(creds, 'primary', {
-      timeMin: monday.toISOString(),
-      timeMax: sunday.toISOString(),
-      maxResults: 100,
-      singleEvents: !0,
-      orderBy: 'startTime',
-    })
-  );
+  const day = new Date().getDay();
+  const { timeMin, timeMax } = getWeekRange(day === 0 ? 1 : 8 - day);
+  return listEvents(creds, 'primary', {
+    timeMin,
+    timeMax,
+    maxResults: 100,
+    singleEvents: true,
+    orderBy: 'startTime',
+  });
 }
 export async function getThisMonthEvents(creds) {
   const now = new Date();

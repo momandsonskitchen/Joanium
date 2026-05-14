@@ -1,3 +1,5 @@
+import { sDelete, mapProject, mapIssue, mapEvent } from './Utils.js';
+
 const BASE = 'https://sentry.io/api/0';
 
 function headers(creds) {
@@ -100,14 +102,7 @@ export async function getOrgStats(creds, orgSlug) {
 
 export async function listProjects(creds, orgSlug) {
   const projects = await sFetch(`/organizations/${orgSlug}/projects/`, creds);
-  return (projects ?? []).map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    platform: p.platform ?? 'unknown',
-    status: p.status,
-    dateCreated: p.dateCreated,
-  }));
+  return (projects ?? []).map(mapProject);
 }
 
 /** GET /projects/{org_slug}/{project_slug}/ */
@@ -133,29 +128,13 @@ export async function listProjectIssues(creds, orgSlug, projectSlug, limit = 25)
     `/projects/${orgSlug}/${projectSlug}/issues/?query=is:unresolved&limit=${limit}&sort=date`,
     creds,
   );
-  return (issues ?? []).map((i) => ({
-    id: i.id,
-    title: i.title,
-    level: i.level,
-    count: i.count,
-    userCount: i.userCount,
-    firstSeen: i.firstSeen,
-    lastSeen: i.lastSeen,
-    permalink: i.permalink,
-  }));
+  return (issues ?? []).map((i) => mapIssue(i, false));
 }
 
 /** GET /projects/{org_slug}/{project_slug}/events/ */
 export async function listProjectEvents(creds, orgSlug, projectSlug, limit = 25) {
   const events = await sFetch(`/projects/${orgSlug}/${projectSlug}/events/?limit=${limit}`, creds);
-  return (events ?? []).map((e) => ({
-    id: e.id,
-    eventID: e.eventID,
-    title: e.title,
-    platform: e.platform,
-    dateCreated: e.dateCreated,
-    groupID: e.groupID,
-  }));
+  return (events ?? []).map(mapEvent);
 }
 
 /** GET /projects/{org_slug}/{project_slug}/releases/ */
@@ -224,17 +203,7 @@ export async function listIssues(creds, orgSlug, limit = 25) {
     `/organizations/${orgSlug}/issues/?query=is:unresolved&limit=${limit}&sort=date`,
     creds,
   );
-  return (issues ?? []).map((i) => ({
-    id: i.id,
-    title: i.title,
-    level: i.level,
-    count: i.count,
-    userCount: i.userCount,
-    project: i.project?.slug ?? 'unknown',
-    firstSeen: i.firstSeen,
-    lastSeen: i.lastSeen,
-    permalink: i.permalink,
-  }));
+  return (issues ?? []).map((i) => mapIssue(i, true));
 }
 
 /** GET /organizations/{org_slug}/issues/{issue_id}/ */
@@ -289,11 +258,7 @@ export async function bulkUpdateIssues(creds, orgSlug, issueIds, update) {
 export async function listIssueEvents(creds, issueId, limit = 10) {
   const events = await sFetch(`/issues/${issueId}/events/?limit=${limit}`, creds);
   return (events ?? []).map((e) => ({
-    id: e.id,
-    eventID: e.eventID,
-    title: e.title,
-    platform: e.platform,
-    dateCreated: e.dateCreated,
+    ...mapEvent(e),
     user: e.user ? { id: e.user.id, email: e.user.email } : null,
   }));
 }
@@ -400,13 +365,7 @@ export async function listDeploys(creds, orgSlug, version) {
 /** GET /teams/{org_slug}/{team_slug}/projects/ */
 export async function listTeamProjects(creds, orgSlug, teamSlug) {
   const projects = await sFetch(`/teams/${orgSlug}/${teamSlug}/projects/`, creds);
-  return (projects ?? []).map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    platform: p.platform ?? 'unknown',
-    dateCreated: p.dateCreated,
-  }));
+  return (projects ?? []).map(mapProject);
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -415,17 +374,7 @@ export async function listTeamProjects(creds, orgSlug, teamSlug) {
 export async function searchIssues(creds, orgSlug, query, limit = 25) {
   const params = new URLSearchParams({ query, limit, sort: 'date' });
   const issues = await sFetch(`/organizations/${orgSlug}/issues/?${params}`, creds);
-  return (issues ?? []).map((i) => ({
-    id: i.id,
-    title: i.title,
-    level: i.level,
-    count: i.count,
-    userCount: i.userCount,
-    project: i.project?.slug ?? 'unknown',
-    firstSeen: i.firstSeen,
-    lastSeen: i.lastSeen,
-    permalink: i.permalink,
-  }));
+  return (issues ?? []).map((i) => mapIssue(i, true));
 }
 
 /** GET /organizations/{org_slug}/issues/?query=is:unresolved level:fatal */
@@ -453,15 +402,7 @@ export async function createIssueComment(creds, issueId, text) {
 
 /** DELETE /issues/{issue_id}/comments/{comment_id}/ */
 export async function deleteIssueComment(creds, issueId, commentId) {
-  const res = await fetch(`${BASE}/issues/${issueId}/comments/${commentId}/`, {
-    method: 'DELETE',
-    headers: headers(creds),
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail ?? `Sentry API error: ${res.status}`);
-  }
-  return { deleted: true };
+  return sDelete(BASE, `/issues/${issueId}/comments/${commentId}/`, creds, headers);
 }
 
 // ─── Similar Issues ───────────────────────────────────────────────────────────
@@ -533,15 +474,7 @@ export async function bookmarkIssue(creds, orgSlug, issueId, bookmark = true) {
 
 /** DELETE /organizations/{org_slug}/issues/{issue_id}/ */
 export async function deleteIssue(creds, orgSlug, issueId) {
-  const res = await fetch(`${BASE}/organizations/${orgSlug}/issues/${issueId}/`, {
-    method: 'DELETE',
-    headers: headers(creds),
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail ?? `Sentry API error: ${res.status}`);
-  }
-  return { deleted: true };
+  return sDelete(BASE, `/organizations/${orgSlug}/issues/${issueId}/`, creds, headers);
 }
 
 // ─── Project Tags, Keys & Ownership ──────────────────────────────────────────

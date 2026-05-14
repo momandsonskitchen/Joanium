@@ -1,4 +1,5 @@
 import { jiraAuthHeader } from '../Shared/Common.js';
+import { mapBoardIssue, throwJiraError } from './Utils.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -26,10 +27,7 @@ async function jFetch(path, creds, options = {}) {
     ...options,
     headers: { ...headers(creds), ...(options.headers ?? {}) },
   });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.errorMessages?.[0] ?? data.message ?? `Jira API error: ${res.status}`);
-  }
+  if (!res.ok) await throwJiraError(res, 'Jira API');
   if (res.status === 204) return { ok: true };
   return res.json();
 }
@@ -40,12 +38,7 @@ async function agileFetch(path, creds, options = {}) {
     ...options,
     headers: { ...headers(creds), ...(options.headers ?? {}) },
   });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(
-      data.errorMessages?.[0] ?? data.message ?? `Jira Agile API error: ${res.status}`,
-    );
-  }
+  if (!res.ok) await throwJiraError(res, 'Jira Agile API');
   if (res.status === 204) return { ok: true };
   return res.json();
 }
@@ -320,14 +313,7 @@ export async function getSprintIssues(creds, sprintId, maxResults = 50) {
     `/sprint/${sprintId}/issue?maxResults=${maxResults}&fields=summary,status,assignee,priority,issuetype,storyPoints`,
     creds,
   );
-  return (data.issues ?? []).map((i) => ({
-    key: i.key,
-    summary: i.fields?.summary ?? '',
-    status: i.fields?.status?.name ?? '',
-    assignee: i.fields?.assignee?.displayName ?? 'Unassigned',
-    priority: i.fields?.priority?.name ?? 'None',
-    issueType: i.fields?.issuetype?.name ?? '',
-  }));
+  return (data.issues ?? []).map(mapBoardIssue);
 }
 
 // ─── 15. Get Backlog ──────────────────────────────────────────────────────────
@@ -337,14 +323,7 @@ export async function getBacklog(creds, boardId, maxResults = 50) {
     `/board/${boardId}/backlog?maxResults=${maxResults}&fields=summary,status,assignee,priority,issuetype`,
     creds,
   );
-  return (data.issues ?? []).map((i) => ({
-    key: i.key,
-    summary: i.fields?.summary ?? '',
-    status: i.fields?.status?.name ?? '',
-    assignee: i.fields?.assignee?.displayName ?? 'Unassigned',
-    priority: i.fields?.priority?.name ?? 'None',
-    issueType: i.fields?.issuetype?.name ?? '',
-  }));
+  return (data.issues ?? []).map(mapBoardIssue);
 }
 
 // ─── 16. Get Issue Types ──────────────────────────────────────────────────────

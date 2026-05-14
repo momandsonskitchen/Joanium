@@ -1,3 +1,14 @@
+import {
+  mapCharge,
+  mapSubscription,
+  mapInvoice,
+  mapPaymentIntent,
+  mapProduct,
+  mapRefund,
+  mapPayout,
+  mapCoupon,
+} from './Utils.js';
+
 const BASE = 'https://api.stripe.com/v1';
 
 function headers(creds) {
@@ -45,68 +56,29 @@ export async function listCustomers(creds, limit = 10) {
 
 export async function listCharges(creds, limit = 10) {
   const data = await stripeFetch(`/charges?limit=${limit}`, creds);
-  return (data.data ?? []).map((c) => ({
-    id: c.id,
-    amount: c.amount / 100,
-    currency: c.currency?.toUpperCase() ?? '',
-    status: c.status,
-    description: c.description ?? null,
-    receiptEmail: c.receipt_email ?? null,
-    created: c.created,
-  }));
+  return (data.data ?? []).map(mapCharge);
 }
 
 export async function listSubscriptions(creds, limit = 10) {
   const data = await stripeFetch(`/subscriptions?limit=${limit}&status=all`, creds);
-  return (data.data ?? []).map((s) => ({
-    id: s.id,
-    status: s.status,
-    customerId: s.customer,
-    currentPeriodEnd: s.current_period_end,
-    cancelAtPeriodEnd: s.cancel_at_period_end,
-    created: s.created,
-  }));
+  return (data.data ?? []).map(mapSubscription);
 }
 
 // ── Existing: List endpoints ───────────────────────────────────────────────
 
 export async function listInvoices(creds, limit = 10) {
   const data = await stripeFetch(`/invoices?limit=${limit}`, creds);
-  return (data.data ?? []).map((i) => ({
-    id: i.id,
-    customerId: i.customer,
-    customerEmail: i.customer_email ?? null,
-    amountDue: i.amount_due / 100,
-    amountPaid: i.amount_paid / 100,
-    currency: i.currency?.toUpperCase() ?? '',
-    status: i.status,
-    dueDate: i.due_date ?? null,
-    created: i.created,
-  }));
+  return (data.data ?? []).map(mapInvoice);
 }
 
 export async function listPaymentIntents(creds, limit = 10) {
   const data = await stripeFetch(`/payment_intents?limit=${limit}`, creds);
-  return (data.data ?? []).map((p) => ({
-    id: p.id,
-    amount: p.amount / 100,
-    currency: p.currency?.toUpperCase() ?? '',
-    status: p.status,
-    customerId: p.customer ?? null,
-    description: p.description ?? null,
-    created: p.created,
-  }));
+  return (data.data ?? []).map(mapPaymentIntent);
 }
 
 export async function listProducts(creds, limit = 10) {
   const data = await stripeFetch(`/products?limit=${limit}`, creds);
-  return (data.data ?? []).map((p) => ({
-    id: p.id,
-    name: p.name,
-    description: p.description ?? null,
-    active: p.active,
-    created: p.created,
-  }));
+  return (data.data ?? []).map(mapProduct);
 }
 
 export async function listPrices(creds, limit = 10) {
@@ -127,15 +99,7 @@ export async function listPrices(creds, limit = 10) {
 
 export async function listRefunds(creds, limit = 10) {
   const data = await stripeFetch(`/refunds?limit=${limit}`, creds);
-  return (data.data ?? []).map((r) => ({
-    id: r.id,
-    amount: r.amount / 100,
-    currency: r.currency?.toUpperCase() ?? '',
-    chargeId: r.charge,
-    status: r.status,
-    reason: r.reason ?? null,
-    created: r.created,
-  }));
+  return (data.data ?? []).map(mapRefund);
 }
 
 export async function listDisputes(creds, limit = 10) {
@@ -153,15 +117,7 @@ export async function listDisputes(creds, limit = 10) {
 
 export async function listPayouts(creds, limit = 10) {
   const data = await stripeFetch(`/payouts?limit=${limit}`, creds);
-  return (data.data ?? []).map((p) => ({
-    id: p.id,
-    amount: p.amount / 100,
-    currency: p.currency?.toUpperCase() ?? '',
-    status: p.status,
-    arrivalDate: p.arrival_date,
-    description: p.description ?? null,
-    created: p.created,
-  }));
+  return (data.data ?? []).map(mapPayout);
 }
 
 export async function listEvents(creds, limit = 10) {
@@ -176,17 +132,7 @@ export async function listEvents(creds, limit = 10) {
 
 export async function listCoupons(creds, limit = 10) {
   const data = await stripeFetch(`/coupons?limit=${limit}`, creds);
-  return (data.data ?? []).map((c) => ({
-    id: c.id,
-    name: c.name ?? null,
-    percentOff: c.percent_off ?? null,
-    amountOff: c.amount_off != null ? c.amount_off / 100 : null,
-    currency: c.currency?.toUpperCase() ?? null,
-    duration: c.duration,
-    timesRedeemed: c.times_redeemed,
-    valid: c.valid,
-    created: c.created,
-  }));
+  return (data.data ?? []).map(mapCoupon);
 }
 
 export async function listPromotionCodes(creds, limit = 10) {
