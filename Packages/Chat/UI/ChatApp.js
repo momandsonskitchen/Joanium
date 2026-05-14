@@ -2965,6 +2965,8 @@ export async function createChatView(
 
       sessionId = session.id;
       sessionCreatedAt = session.createdAt ?? new Date().toISOString();
+      userScrolledUp = false;
+      syncScrollToBottomBtn();
       renderThread();
       focusComposer();
     } catch (error) {
@@ -3523,6 +3525,8 @@ export async function createChatView(
     isSending = false;
     sessionId = null;
     sessionCreatedAt = null;
+    userScrolledUp = false;
+    syncScrollToBottomBtn();
     removeStreamListeners();
     closeSlashMenu();
     if (window.speechSynthesis) {
