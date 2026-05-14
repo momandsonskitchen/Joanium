@@ -1,6 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createDropDown } from '../../Shared/DropDown/DropDown.js';
 import { applyThemeState } from './ThemeController.js';
 
 function createSegmentedOption(label, value, groupName) {
@@ -34,33 +33,17 @@ export function createThemePanel(strings) {
   motionControls.append(...motionButtons);
   motionGroup.append(motionControls, createElement('p', 'theme-card__hint', strings.helper.motion));
 
-  const fontGroup = createElement('section', 'theme-card theme-card--font');
-  fontGroup.append(createElement('div', 'theme-card__label', strings.font.label));
-  const fontDropdown = createDropDown({
-    label: '',
-    options: strings.font.options,
-    selectedValue: 'system',
-    onChange: (value) => {
-      void save({ ...state, font: value });
-    },
-  });
-  fontGroup.append(
-    fontDropdown.element,
-    createElement('p', 'theme-card__hint', strings.helper.font),
-  );
-
   const feedback = createElement('div', 'theme-panel__feedback');
   feedback.hidden = true;
   feedback.setAttribute('aria-live', 'polite');
 
-  let state = { mode: 'system', motion: 'full', font: 'system' };
+  let state = { mode: 'system', motion: 'full' };
 
   function syncButtons() {
     for (const button of [...modeButtons, ...motionButtons]) {
       const active = state[button._groupName] === button._value;
       button.classList.toggle('theme-segmented__button--active', active);
     }
-    fontDropdown.setValue(state.font ?? 'system');
   }
 
   async function save(nextState) {
@@ -91,7 +74,7 @@ export function createThemePanel(strings) {
     });
   }
 
-  panel.append(fontGroup, modeGroup, motionGroup, feedback);
+  panel.append(modeGroup, motionGroup, feedback);
 
   void invokeIpc('themes:get')
     .then((loaded) => {
