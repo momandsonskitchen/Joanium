@@ -81,6 +81,11 @@ export function createAboutPanel(strings) {
         url: 'https://instagram.com/joaniumhere',
         label: strings.social?.instagram ?? 'Instagram',
       },
+      {
+        icon: 'youtube',
+        url: 'https://www.youtube.com/@Joaniumhere',
+        label: strings.social?.youtube ?? 'YouTube',
+      },
     ];
 
     for (const { icon, url, label } of socialLinks) {
