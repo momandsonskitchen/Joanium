@@ -81,7 +81,6 @@ html.joanium-motion-reduced *::after {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  max-width: 760px;
   -webkit-app-region: no-drag;
 }
 
