@@ -3,7 +3,6 @@
 .security-panel {
   display: flex;
   flex-direction: column;
-  max-width: 560px;
   -webkit-app-region: no-drag;
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
