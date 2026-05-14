@@ -65,17 +65,19 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
   function renderDisabled() {
     body.replaceChildren();
 
-    // Top card — status + description + enable button
-    const topCard = createElement('div', 'security-panel__card');
+    // Top card — row layout: meta (badge + desc) left, enable button right
+    const topCard = createElement('div', 'security-panel__card security-panel__card--row');
+    const topMeta = createElement('div', 'security-panel__card-meta');
     const badge = buildStatusBadge(false, strings);
     const desc = createElement('p', 'security-panel__desc', strings.statusDisabledDesc);
+    topMeta.append(badge, desc);
     const enableBtn = createElement(
       'button',
       'security-panel__btn security-panel__btn--primary',
       strings.enableBtn,
     );
     enableBtn.type = 'button';
-    topCard.append(badge, desc, enableBtn);
+    topCard.append(topMeta, enableBtn);
     body.append(topCard);
 
     // Inline enable form (shown in a separate card below)
@@ -136,14 +138,14 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
     // Show form
     enableBtn.addEventListener('click', () => {
       formCard.hidden = false;
-      enableBtn.hidden = true;
+      topCard.hidden = true;
       requestAnimationFrame(() => passwordBox.input.focus());
     });
 
     // Hide form
     cancelBtn.addEventListener('click', () => {
       formCard.hidden = true;
-      enableBtn.hidden = false;
+      topCard.hidden = false;
       passwordBox.input.value = '';
       confirmBox.input.value = '';
       questionBox.input.value = '';
@@ -199,17 +201,22 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
   }
 
   // ── Enabled state ─────────────────────────────────────────────────────────
-  // Single card containing: status badge, description, two-button row.
-  // Clicking a button hides the button row and expands an inline form
-  // inside the same card. Cancel collapses back to the button row.
+  // Card header: meta (badge + desc) left, btn-row right — all vertically centred.
+  // Clicking a button hides the btn-row and expands an inline form below the
+  // header inside the same card. Cancel collapses back to the btn-row.
 
   function renderEnabled() {
     body.replaceChildren();
 
     const card = createElement('div', 'security-panel__card');
 
+    // ── Card header row ───────────────────────────────────────────────────
+    const cardHeader = createElement('div', 'security-panel__card-header');
+
+    const cardMeta = createElement('div', 'security-panel__card-meta');
     const badge = buildStatusBadge(true, strings);
     const desc = createElement('p', 'security-panel__desc', strings.statusEnabledDesc);
+    cardMeta.append(badge, desc);
 
     // ── Button row ────────────────────────────────────────────────────────
     const btnRow = createElement('div', 'security-panel__btn-row');
@@ -226,6 +233,8 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
     );
     disableBtn.type = 'button';
     btnRow.append(changeBtn, disableBtn);
+
+    cardHeader.append(cardMeta, btnRow);
 
     // ── Change-password inline form ───────────────────────────────────────
     const changeForm = createElement('div', 'security-panel__inline-form');
@@ -401,7 +410,7 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
       }
     });
 
-    card.append(badge, desc, btnRow, changeForm, disableForm);
+    card.append(cardHeader, changeForm, disableForm);
     body.append(card);
 
     // ── Auto-lock timeout card ─────────────────────────────────────────────

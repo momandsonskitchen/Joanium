@@ -49,6 +49,31 @@
   gap: 14px;
 }
 
+/* Row variant — meta on left, action button on right, vertically centered */
+.security-panel__card--row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Card header — same row layout used inside the enabled-state card */
+.security-panel__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Meta block — badge + desc stacked on the left */
+.security-panel__card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
 .security-panel__card--form {
   background: rgba(250, 248, 255, 0.72);
   box-shadow:
@@ -137,6 +162,7 @@
 .security-panel__form-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
   padding-top: 2px;
@@ -164,26 +190,32 @@
 .security-panel__btn-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.security-panel__btn-row .security-panel__btn {
-  flex: 1;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 
 .security-panel__btn {
-  padding: 9px 20px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0 16px;
   border-radius: 20px;
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 650;
   letter-spacing: -0.01em;
   transition:
-    background 130ms ease,
-    opacity 130ms ease,
-    transform 80ms ease;
+    transform 120ms ease,
+    opacity 140ms ease,
+    background-color 140ms ease;
   cursor: default;
+}
+
+.security-panel__btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .security-panel__btn:active:not(:disabled) {
@@ -191,41 +223,34 @@
 }
 
 .security-panel__btn:disabled {
-  opacity: 0.45;
+  opacity: 0.6;
 }
 
+/* Primary — accent fill with white text */
 .security-panel__btn--primary {
-  background: rgba(155, 90, 200, 0.15);
-  color: #3a1060;
-  box-shadow:
-    inset 0 0 0 1px rgba(155, 90, 200, 0.22),
-    0 4px 12px rgba(140, 70, 190, 0.08);
+  background: var(--color-accent);
+  color: #fff;
 }
 
-.security-panel__btn--primary:hover:not(:disabled) {
-  background: rgba(155, 90, 200, 0.24);
-}
-
+/* Secondary — translucent white with a soft border */
 .security-panel__btn--secondary {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.58);
   color: var(--color-chat-text-secondary);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(175, 139, 104, 0.12);
 }
 
-.security-panel__btn--secondary:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.07);
-}
-
+/* Danger — matches the reset/danger row style in AppSettings */
 .security-panel__btn--danger {
-  background: rgba(220, 60, 60, 0.1);
-  color: #a02020;
-  box-shadow: inset 0 0 0 1px rgba(220, 60, 60, 0.18);
+  color: #a03420;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(160, 52, 32, 0.16);
 }
 
 .security-panel__btn--danger:hover:not(:disabled) {
-  background: rgba(220, 60, 60, 0.18);
+  background: rgba(255, 255, 255, 0.94);
 }
 
+/* Ghost — muted cancel/back action */
 .security-panel__btn--ghost {
   background: transparent;
   color: var(--color-chat-text-muted);
@@ -233,7 +258,7 @@
   font-weight: 500;
 }
 
-.security-panel__btn--ghost:hover {
+.security-panel__btn--ghost:hover:not(:disabled) {
   color: var(--color-chat-text-secondary);
 }
 
