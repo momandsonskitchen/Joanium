@@ -293,3 +293,8 @@
   letter-spacing: -0.01em;
   color: var(--color-chat-text-muted);
 }
+
+/* Widen the auto-lock timeout dropdown so options like "15 minutes" fit */
+.security-panel__setting-row .joanium-ddm-lite__trigger {
+  min-width: 140px;
+}
