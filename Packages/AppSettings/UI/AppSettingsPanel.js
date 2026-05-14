@@ -9,7 +9,6 @@ const OPTION_KEYS = [
   'keepAwake',
   'completionSound',
   'autoMemoryUpdates',
-  'autoUpdate',
 ];
 
 // Returns a flat list of { value, label } model options for all configured providers.
