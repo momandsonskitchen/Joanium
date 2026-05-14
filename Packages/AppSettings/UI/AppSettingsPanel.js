@@ -1,5 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
-import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
 import { createDropDown } from '../../Shared/DropDown/DropDown.js';
 
@@ -62,53 +62,8 @@ export function createAppSettingsPanel(strings) {
   let languageDropdown = null;
   let defaultViewDropdown = null;
   let defaultModelDropdown = null;
-  let autoUpdateState = null;
-  let autoUpdateStatusEl = null;
-  let autoUpdateDetailEl = null;
-  let autoUpdateCheckBtn = null;
-  let autoUpdateInstallBtn = null;
   let resetConfirmTimer = null;
   let resetConfirming = false;
-
-  function autoUpdateStatusLabel(state) {
-    const key = state?.enabled === false ? 'disabled' : (state?.status ?? 'idle');
-    return strings.autoUpdate.statuses[key] ?? strings.autoUpdate.statuses.idle;
-  }
-
-  function autoUpdateDetail(state) {
-    if (!state) return strings.autoUpdate.details.idle;
-    if (state.error) return state.error;
-    if (state.status === 'unsupported') return strings.autoUpdate.details.unsupported;
-    if (state.status === 'disabled') return strings.autoUpdate.details.disabled;
-    if (state.status === 'current') return strings.autoUpdate.details.current;
-    if (state.status === 'downloaded') return strings.autoUpdate.details.downloaded;
-    if (state.status === 'downloading') {
-      const percent = Math.round(Number(state.progress?.percent) || 0);
-      return strings.autoUpdate.details.downloading.replace('{percent}', String(percent));
-    }
-    return strings.autoUpdate.details.idle;
-  }
-
-  function syncAutoUpdateRuntime(nextState = autoUpdateState) {
-    autoUpdateState = nextState;
-    if (!autoUpdateStatusEl || !autoUpdateDetailEl) return;
-
-    autoUpdateStatusEl.textContent = autoUpdateStatusLabel(autoUpdateState);
-    autoUpdateDetailEl.textContent = autoUpdateDetail(autoUpdateState);
-
-    const canCheck = Boolean(autoUpdateState?.enabled && autoUpdateState?.supported);
-    const isChecking = autoUpdateState?.status === 'checking';
-    if (autoUpdateCheckBtn) {
-      autoUpdateCheckBtn.disabled = !canCheck || isChecking;
-      autoUpdateCheckBtn.textContent = isChecking
-        ? strings.autoUpdate.checking
-        : strings.autoUpdate.check;
-    }
-    if (autoUpdateInstallBtn) {
-      autoUpdateInstallBtn.hidden = !autoUpdateState?.downloaded;
-      autoUpdateInstallBtn.disabled = !autoUpdateState?.downloaded;
-    }
-  }
 
   function setStatus(message, tone = 'ok') {
     status.textContent = message;
@@ -176,10 +131,8 @@ export function createAppSettingsPanel(strings) {
     ]);
 
     settings = nextSettings;
-    autoUpdateState = settings.autoUpdateState ?? null;
     resetConfirming = false;
     options.replaceChildren();
-    runtime.replaceChildren();
     danger.replaceChildren();
     languageDropdown?.dispose();
     languageDropdown = null;
@@ -337,70 +290,6 @@ export function createAppSettingsPanel(strings) {
     memoryCard.append(memoryMeta, memoryBtn);
     options.append(memoryCard);
 
-    runtime.append(createElement('h3', 'app-settings__runtime-title', strings.runtime.title));
-
-    const keepAwakeRow = createElement('div', 'app-settings__runtime-row');
-    keepAwakeRow.append(
-      createElement('span', '', strings.runtime.keepAwake),
-      createElement(
-        'strong',
-        '',
-        settings.keepAwakeActive ? strings.runtime.active : strings.runtime.inactive,
-      ),
-    );
-
-    const trayRow = createElement('div', 'app-settings__runtime-row');
-    trayRow.append(
-      createElement('span', '', strings.runtime.tray),
-      createElement(
-        'strong',
-        '',
-        settings.trayActive ? strings.runtime.active : strings.runtime.inactive,
-      ),
-    );
-
-    const updateRow = createElement(
-      'div',
-      'app-settings__runtime-row app-settings__runtime-row--update',
-    );
-    const updateCopy = createElement('div', 'app-settings__runtime-copy');
-    autoUpdateStatusEl = createElement('strong', 'app-settings__runtime-update-status');
-    autoUpdateDetailEl = createElement('span', 'app-settings__runtime-update-detail');
-    updateCopy.append(
-      createElement('span', 'app-settings__runtime-update-label', strings.autoUpdate.label),
-      autoUpdateStatusEl,
-      autoUpdateDetailEl,
-    );
-    const updateActions = createElement('div', 'app-settings__runtime-actions');
-    autoUpdateCheckBtn = createElement(
-      'button',
-      'app-settings__runtime-btn',
-      strings.autoUpdate.check,
-    );
-    autoUpdateCheckBtn.type = 'button';
-    autoUpdateCheckBtn.addEventListener('click', async () => {
-      autoUpdateCheckBtn.disabled = true;
-      autoUpdateCheckBtn.textContent = strings.autoUpdate.checking;
-      const state = await invokeIpc('auto-update:check').catch(() => null);
-      if (state) syncAutoUpdateRuntime(state);
-      else setStatus(strings.autoUpdate.checkFailed, 'error');
-    });
-    autoUpdateInstallBtn = createElement(
-      'button',
-      'app-settings__runtime-btn app-settings__runtime-btn--primary',
-      strings.autoUpdate.install,
-    );
-    autoUpdateInstallBtn.type = 'button';
-    autoUpdateInstallBtn.hidden = true;
-    autoUpdateInstallBtn.addEventListener('click', () => {
-      void invokeIpc('auto-update:install');
-    });
-    updateActions.append(autoUpdateCheckBtn, autoUpdateInstallBtn);
-    updateRow.append(updateCopy, updateActions);
-
-    runtime.append(keepAwakeRow, trayRow, updateRow);
-    syncAutoUpdateRuntime(autoUpdateState);
-
     danger.append(createElement('h3', 'app-settings__danger-title', strings.reset.title));
     const resetRow = createElement('div', 'app-settings__danger-row');
     const resetMeta = createElement('div', 'app-settings__dropdown-meta');
@@ -449,30 +338,17 @@ export function createAppSettingsPanel(strings) {
     window.addEventListener('joanium:app-settings-changed', (event) => {
       settings = event.detail ?? settings;
       syncMemoryCard();
-      syncAutoUpdateRuntime(settings?.autoUpdateState ?? autoUpdateState);
     });
   }
 
-  const disposeAutoUpdateState = onIpc('auto-update:state', (state) => {
-    syncAutoUpdateRuntime(state);
-  });
-  const disposeAutoUpdateProgress = onIpc('auto-update:download-progress', (progress) => {
-    syncAutoUpdateRuntime({
-      ...(autoUpdateState ?? {}),
-      status: 'downloading',
-      progress,
-    });
-  });
   view._dispose = () => {
     clearTimeout(resetConfirmTimer);
     languageDropdown?.dispose();
     defaultViewDropdown?.dispose();
     defaultModelDropdown?.dispose();
-    disposeAutoUpdateState?.();
-    disposeAutoUpdateProgress?.();
   };
 
-  view.append(options, runtime, danger, status);
+  view.append(options, danger, status);
   void populate().catch(() => setStatus(strings.saveFailed, 'error'));
   return view;
 }
