@@ -118,6 +118,14 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
 
   return {
     element: wrapper,
+    getValue() {
+      return currentValue;
+    },
+    setValue(value) {
+      currentValue = value ?? '';
+      updateTriggerText();
+      buildOptions();
+    },
     dispose() {
       document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onDocumentKeydown);

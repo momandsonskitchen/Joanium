@@ -465,7 +465,7 @@ async function bootstrap() {
     }
   }
 
-  async function showSettingsPanel() {
+  async function showSettingsPanel(initialSubMenu = 'user') {
     if (activeRouteId === 'chat') {
       chatView?.pauseBrowserPreview();
     }
@@ -479,6 +479,7 @@ async function bootstrap() {
 
     settingsPanel.hidden = false;
     sidebarAvatar.classList.add('chat-sidebar__avatar--active');
+    await settingsPanel._activateSubMenu?.(initialSubMenu);
   }
 
   function buildSettingsPanel() {
@@ -617,7 +618,7 @@ async function bootstrap() {
     nav.append(navItems);
     body.append(nav, main);
     panel.append(header, body);
-    void activateSubMenu('user');
+    panel._activateSubMenu = activateSubMenu;
     return panel;
   }
 
@@ -833,7 +834,7 @@ async function bootstrap() {
       id: 'channels',
       combo: { ctrl: true, shift: true, key: 'l' },
       handler: () => {
-        void showSettingsPanel();
+        void showSettingsPanel('channels');
       },
     },
   ]);

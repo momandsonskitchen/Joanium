@@ -690,8 +690,11 @@
 }
 
 .chat-composer__project {
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 12px;
   padding: 10px 12px;
@@ -701,6 +704,14 @@
     inset 0 0 0 1px rgba(170, 134, 104, 0.1),
     0 8px 18px rgba(130, 95, 65, 0.06);
   -webkit-app-region: no-drag;
+}
+
+.chat-composer__project-main {
+  min-width: min(280px, 100%);
+  flex: 1 1 280px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .chat-composer__project-icon,
@@ -744,7 +755,7 @@
 .chat-composer__project-name {
   font-size: 13px;
   font-weight: 680;
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
   color: var(--color-chat-text-title);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -754,7 +765,7 @@
 .chat-composer__project-meta {
   font-size: 12px;
   color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -782,16 +793,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin: -2px 0 12px;
-  padding: 10px 12px;
-  border-radius: 20px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(252, 248, 242, 0.68)),
-    rgba(var(--color-accent-rgb), 0.06);
-  box-shadow:
-    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
-    0 10px 22px rgba(130, 95, 65, 0.07);
+  gap: 10px;
+  min-width: 0;
+  flex: 0 1 auto;
   -webkit-app-region: no-drag;
 }
 
@@ -804,12 +808,18 @@
 
 .chat-gitbar__identity {
   gap: 9px;
-  flex: 1;
+  flex: 0 1 210px;
 }
 
 .chat-gitbar__actions {
   gap: 8px;
   flex-shrink: 0;
+}
+
+.chat-gitbar__action-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
 }
 
 .chat-gitbar__dot {
@@ -883,6 +893,7 @@
 }
 
 .chat-gitbar__icon-button,
+.chat-gitbar__menu-button,
 .chat-gitbar__secondary,
 .chat-gitbar__primary {
   min-height: 34px;
@@ -900,6 +911,32 @@
   width: 34px;
 }
 
+.chat-gitbar__menu-button {
+  width: 30px;
+  border-radius: 0 20px 20px 0;
+  color: rgba(255, 255, 255, 0.94);
+  background: rgba(var(--color-accent-rgb), 0.88);
+  box-shadow:
+    0 8px 18px rgba(var(--color-accent-rgb), 0.18),
+    inset 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.chat-gitbar__menu-button-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  transition: transform 140ms ease;
+}
+
+.chat-gitbar__menu-button-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-gitbar__menu-button--open .chat-gitbar__menu-button-icon {
+  transform: rotate(180deg);
+}
+
 .chat-gitbar__secondary,
 .chat-gitbar__primary {
   padding: 0 13px;
@@ -915,12 +952,18 @@
 .chat-gitbar__primary {
   color: rgba(255, 255, 255, 0.96);
   background: rgba(var(--color-accent-rgb), 0.88);
+  border-radius: 20px 0 0 20px;
   box-shadow:
     0 8px 18px rgba(var(--color-accent-rgb), 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
+.chat-gitbar__primary--solo {
+  border-radius: 20px;
+}
+
 .chat-gitbar__icon-button:hover,
+.chat-gitbar__menu-button:hover,
 .chat-gitbar__secondary:hover,
 .chat-gitbar__primary:hover {
   transform: translateY(-1px);
@@ -936,10 +979,254 @@
   background: rgba(var(--color-accent-rgb), 1);
 }
 
+.chat-gitbar__menu-button:hover {
+  background: rgba(var(--color-accent-rgb), 1);
+}
+
 .chat-gitbar__icon-button:disabled,
+.chat-gitbar__menu-button:disabled,
 .chat-gitbar__secondary:disabled,
 .chat-gitbar__primary:disabled {
   opacity: 0.58;
+  transform: none;
+}
+
+.chat-gitbar__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 45;
+  min-width: 190px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.13),
+    0 18px 46px rgba(72, 48, 30, 0.18);
+}
+
+.chat-gitbar__menu[hidden] {
+  display: none;
+}
+
+.chat-gitbar__menu-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 9px 10px;
+  border-radius: 11px;
+  color: var(--color-chat-text-secondary);
+  transition:
+    background-color 140ms ease,
+    transform 140ms ease,
+    color 140ms ease;
+}
+
+.chat-gitbar__menu-item:hover {
+  color: var(--color-chat-text-title);
+  background: var(--color-chat-hover-surface);
+  transform: translateX(1px);
+}
+
+.chat-gitbar__menu-label {
+  font-size: 12.5px;
+  font-weight: 720;
+}
+
+.chat-gitbar__menu-meta {
+  font-size: 11.5px;
+  color: var(--color-chat-text-muted);
+}
+
+.chat-gitbar__commit-panel {
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(170, 134, 104, 0.12);
+}
+
+.chat-gitbar__commit-panel[hidden] {
+  display: none;
+}
+
+.chat-gitbar__commit-field-wrap {
+  position: relative;
+  border-radius: 14px;
+}
+
+.chat-gitbar__commit-field-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    transparent 12%,
+    rgba(155, 115, 255, 0.16) 45%,
+    rgba(180, 140, 255, 0.2) 50%,
+    rgba(155, 115, 255, 0.16) 55%,
+    transparent 88%
+  );
+  background-size: 300% 100%;
+  transition: opacity 160ms ease;
+}
+
+.chat-gitbar__commit-field-wrap--generating::before {
+  opacity: 1;
+  animation: composer-field-shimmer 1.6s linear infinite;
+}
+
+.chat-gitbar__commit-message {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  padding: 10px 42px 10px 12px;
+  border: 0;
+  outline: 0;
+  border-radius: 14px;
+  color: var(--color-chat-text-title);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.13),
+    0 8px 18px rgba(130, 95, 65, 0.05);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-app-region: no-drag;
+}
+
+.chat-gitbar__commit-message:focus {
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.28),
+    0 0 0 3px rgba(var(--color-accent-rgb), 0.08);
+}
+
+.chat-gitbar__commit-message::placeholder {
+  color: var(--color-chat-text-placeholder);
+}
+
+.chat-gitbar__commit-ai {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--color-chat-icon);
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+.chat-gitbar__commit-ai:hover:not(:disabled) {
+  color: var(--color-accent);
+  background: rgba(var(--color-accent-rgb), 0.12);
+  transform: scale(1.08) rotate(10deg);
+}
+
+.chat-gitbar__commit-ai:disabled {
+  opacity: 0.55;
+}
+
+.chat-gitbar__commit-ai--loading {
+  color: var(--color-accent);
+  animation: chat-git-ai-pulse 1.1s ease-in-out infinite;
+}
+
+.chat-gitbar__commit-ai-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+
+.chat-gitbar__commit-ai-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes chat-git-ai-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18) rotate(14deg);
+    opacity: 0.76;
+  }
+}
+
+.chat-gitbar__commit-status {
+  min-height: 16px;
+  margin: 0;
+  color: var(--color-chat-text-muted);
+  font-size: 11.5px;
+  font-weight: 620;
+}
+
+.chat-gitbar__commit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.chat-gitbar__commit-cancel,
+.chat-gitbar__commit-confirm {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+.chat-gitbar__commit-cancel {
+  color: var(--color-chat-text-secondary);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.12);
+}
+
+.chat-gitbar__commit-confirm {
+  color: rgba(255, 255, 255, 0.96);
+  background: rgba(var(--color-accent-rgb), 0.88);
+  box-shadow:
+    0 8px 18px rgba(var(--color-accent-rgb), 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.chat-gitbar__commit-cancel:hover:not(:disabled),
+.chat-gitbar__commit-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.chat-gitbar__commit-cancel:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.chat-gitbar__commit-confirm:hover:not(:disabled) {
+  background: rgba(var(--color-accent-rgb), 1);
+}
+
+.chat-gitbar__commit-cancel:disabled,
+.chat-gitbar__commit-confirm:disabled {
+  opacity: 0.56;
   transform: none;
 }
 

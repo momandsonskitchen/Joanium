@@ -53,6 +53,7 @@ export function createDefaultUserState() {
     theme: {
       mode: 'system',
       motion: 'full',
+      font: 'system',
     },
   };
 }
@@ -215,6 +216,8 @@ const VALID_DEFAULT_VIEWS = new Set([
   'chat',
   'history',
   'projects',
+  'memory',
+  'templates',
   'agents',
   'skills',
   'personas',
@@ -263,6 +266,16 @@ function sanitizeAppSettings(candidate) {
 
 const THEME_MODES = new Set(['system', 'light', 'dark']);
 const MOTION_MODES = new Set(['full', 'reduced']);
+const FONT_MODES = new Set([
+  'system',
+  'sora',
+  'dm-sans',
+  'nunito',
+  'plus-jakarta',
+  'outfit',
+  'manrope',
+  'poppins',
+]);
 
 function sanitizeTheme(candidate) {
   const defaults = createDefaultUserState().theme;
@@ -272,6 +285,7 @@ function sanitizeTheme(candidate) {
   return {
     mode: THEME_MODES.has(candidate.mode) ? candidate.mode : defaults.mode,
     motion: MOTION_MODES.has(candidate.motion) ? candidate.motion : defaults.motion,
+    font: FONT_MODES.has(candidate.font) ? candidate.font : defaults.font,
   };
 }
 
@@ -279,7 +293,12 @@ export function sanitizeIncomingUserState(candidateState) {
   const baseState = createDefaultUserState();
 
   return mergeUserStates(baseState, {
-    locale: sanitizeString(candidateState?.locale) || baseState.locale,
+    locale:
+      sanitizeString(
+        candidateState?.locale ??
+          candidateState?.appSettings?.locale ??
+          candidateState?.appSettings?.app_language,
+      ) || baseState.locale,
     onboardingCompleted: Boolean(candidateState?.onboardingCompleted),
     consentAccepted: Boolean(candidateState?.consentAccepted),
     completedAt: candidateState?.completedAt ?? null,

@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { screen } from 'electron';
 import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 

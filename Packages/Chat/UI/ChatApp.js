@@ -2019,10 +2019,21 @@ export async function createChatView(
   let gitStatusDotEl = null;
   let gitPrimaryBtn = null;
   let gitSecondaryBtn = null;
+  let gitMenuBtn = null;
   let gitRefreshBtn = null;
+  let gitActionMenuEl = null;
+  let gitCommitPanelEl = null;
+  let gitCommitFieldWrapEl = null;
+  let gitCommitMessageEl = null;
+  let gitCommitConfirmBtn = null;
+  let gitCommitCancelBtn = null;
+  let gitCommitAiBtn = null;
+  let gitCommitStatusEl = null;
+  let gitPendingAction = null;
   let gitRefreshTimer = null;
   let gitState = null;
   let gitBusy = false;
+  let gitAiBusy = false;
   let modelButton = null;
 
   function scheduleTerminalProcessRender() {
@@ -2482,9 +2493,87 @@ export async function createChatView(
 
   function setGitBarBusy(busy) {
     gitBusy = busy;
-    for (const button of [gitPrimaryBtn, gitSecondaryBtn, gitRefreshBtn]) {
+    for (const button of [
+      gitPrimaryBtn,
+      gitSecondaryBtn,
+      gitMenuBtn,
+      gitRefreshBtn,
+      gitCommitConfirmBtn,
+      gitCommitCancelBtn,
+    ]) {
       if (button) button.disabled = busy;
     }
+    if (gitCommitMessageEl) gitCommitMessageEl.disabled = busy || gitAiBusy;
+    if (gitCommitAiBtn) gitCommitAiBtn.disabled = busy || gitAiBusy;
+  }
+
+  function setGitCommitStatus(text = '') {
+    if (!gitCommitStatusEl) return;
+    gitCommitStatusEl.textContent = text;
+    gitCommitStatusEl.hidden = !text;
+  }
+
+  function setGitAiBusy(busy) {
+    gitAiBusy = busy;
+    gitCommitFieldWrapEl?.classList.toggle('chat-gitbar__commit-field-wrap--generating', busy);
+    if (gitCommitAiBtn) {
+      gitCommitAiBtn.disabled = busy || gitBusy;
+      gitCommitAiBtn.classList.toggle('chat-gitbar__commit-ai--loading', busy);
+    }
+    if (gitCommitConfirmBtn) gitCommitConfirmBtn.disabled = busy || gitBusy;
+    if (gitCommitCancelBtn) gitCommitCancelBtn.disabled = busy || gitBusy;
+    if (gitCommitMessageEl) gitCommitMessageEl.disabled = busy || gitBusy;
+  }
+
+  function closeGitActionMenu() {
+    if (gitActionMenuEl) gitActionMenuEl.hidden = true;
+    gitMenuBtn?.classList.remove('chat-gitbar__menu-button--open');
+  }
+
+  function closeGitCommitPanel({ clear = true } = {}) {
+    if (gitCommitPanelEl) gitCommitPanelEl.hidden = true;
+    if (clear && gitCommitMessageEl) gitCommitMessageEl.value = '';
+    gitPendingAction = null;
+    setGitCommitStatus('');
+    setGitAiBusy(false);
+  }
+
+  function buildGitActionMenuItems() {
+    if (!gitState) return [];
+    if (gitState.dirty) {
+      return ['commit', 'commitPush', 'commitSync'];
+    }
+    if (gitState.ahead > 0) {
+      return ['push', 'sync'];
+    }
+    return [];
+  }
+
+  function renderGitActionMenu() {
+    if (!gitActionMenuEl || !gitMenuBtn) return;
+    const actions = buildGitActionMenuItems();
+    gitActionMenuEl.replaceChildren();
+
+    for (const action of actions) {
+      const item = createElement('button', 'chat-gitbar__menu-item');
+      item.type = 'button';
+      item._gitAction = action;
+      item.append(
+        createElement('span', 'chat-gitbar__menu-label', strings.git.actions[action]),
+        createElement('span', 'chat-gitbar__menu-meta', strings.git.actionMeta[action]),
+      );
+      item.addEventListener('click', (event) => {
+        event.stopPropagation();
+        closeGitActionMenu();
+        void runGitBarAction(action);
+      });
+      gitActionMenuEl.append(item);
+    }
+
+    const hasMenu = actions.length > 0;
+    gitMenuBtn.hidden = !hasMenu;
+    gitMenuBtn.disabled = !hasMenu || gitBusy;
+    gitPrimaryBtn?.classList.toggle('chat-gitbar__primary--solo', !hasMenu);
   }
 
   function syncGitBarView() {
@@ -2502,6 +2591,8 @@ export async function createChatView(
       gitBarEl.hidden = true;
       gitBranchEl.textContent = '';
       gitMetaEl.textContent = '';
+      closeGitActionMenu();
+      closeGitCommitPanel();
       return;
     }
 
@@ -2518,13 +2609,13 @@ export async function createChatView(
       meta.push(formatText(strings.git.behind, { count: String(gitState.behind) }));
     gitMetaEl.textContent = meta.join(' / ');
 
-    const primaryAction = gitState.dirty ? 'diff' : gitState.ahead > 0 ? 'push' : 'pull';
+    const primaryAction = gitState.dirty ? 'commit' : gitState.ahead > 0 ? 'push' : 'pull';
     gitPrimaryBtn._gitAction = primaryAction;
     gitPrimaryBtn.textContent = strings.git.actions[primaryAction];
 
-    const secondaryAction = gitState.dirty && gitState.ahead > 0 ? 'push' : 'status';
-    gitSecondaryBtn._gitAction = secondaryAction;
-    gitSecondaryBtn.textContent = strings.git.actions[secondaryAction];
+    gitSecondaryBtn._gitAction = 'status';
+    gitSecondaryBtn.textContent = strings.git.actions.status;
+    renderGitActionMenu();
   }
 
   async function refreshProjectGitStatus({ silent = false } = {}) {
@@ -2597,6 +2688,189 @@ export async function createChatView(
     void saveCurrentSession();
   }
 
+  function normalizeGeneratedCommitMessage(text = '') {
+    const parsed = parseThinkingFromText(String(text ?? ''));
+    const visible = stripNativeToolCalls(stripToolCallBlocks(parsed.content || text));
+    return visible
+      .replace(/^```(?:text|gitcommit|commit)?\s*/i, '')
+      .replace(/```$/i, '')
+      .replace(/^commit message:\s*/i, '')
+      .replace(/^["']|["']$/g, '')
+      .split(/\r?\n/)
+      .map((line) => line.trimEnd())
+      .join('\n')
+      .trim();
+  }
+
+  async function typeIntoGitCommitMessage(text) {
+    if (!gitCommitMessageEl) return;
+    gitCommitMessageEl.value = '';
+    for (let index = 0; index < text.length; index += 1) {
+      if (!gitCommitMessageEl || gitCommitPanelEl?.hidden) return;
+      gitCommitMessageEl.value = text.slice(0, index + 1);
+      await new Promise((resolve) => setTimeout(resolve, 8));
+    }
+  }
+
+  async function generateGitCommitMessage() {
+    if (gitBusy || gitAiBusy) return;
+    const workingDir = getActiveProjectFolder();
+    if (!workingDir) {
+      showAttachmentNotice(strings.git.noProjectFolder, 'warning');
+      return;
+    }
+
+    setGitAiBusy(true);
+    setGitCommitStatus(strings.git.commitStatus.generating);
+
+    try {
+      const [unstagedResult, stagedResult] = await Promise.all([
+        invokeIpc('terminal:git-diff', { workingDir, staged: false }),
+        invokeIpc('terminal:git-diff', { workingDir, staged: true }),
+      ]);
+
+      const diff = [stagedResult?.stdout, unstagedResult?.stdout]
+        .map((value) => String(value ?? '').trim())
+        .filter(Boolean)
+        .join('\n\n');
+
+      if (!diff) {
+        showAttachmentNotice(strings.git.noDiffForCommitMessage, 'warning');
+        return;
+      }
+
+      const cappedDiff =
+        diff.length > 12000 ? `${diff.slice(0, 12000)}\n\n${strings.git.diffTruncated}` : diff;
+
+      const result = await invokeIpc('chat:complete-message', {
+        messages: [
+          {
+            role: 'user',
+            content: formatText(strings.git.aiCommitUserPrompt, { diff: cappedDiff }),
+          },
+        ],
+        providerId: activeProvider?.id ?? null,
+        modelId: activeModel?.id ?? null,
+        modeInstruction: strings.git.aiCommitInstruction,
+        isNewSession: false,
+      });
+
+      const message = normalizeGeneratedCommitMessage(result?.text);
+      if (!message) {
+        showAttachmentNotice(strings.git.aiCommitEmpty, 'warning');
+        return;
+      }
+
+      await typeIntoGitCommitMessage(message);
+    } catch {
+      showAttachmentNotice(strings.git.aiCommitFailed, 'warning');
+    } finally {
+      setGitCommitStatus('');
+      setGitAiBusy(false);
+      gitCommitMessageEl?.focus();
+    }
+  }
+
+  function openGitCommitPanel(action) {
+    if (!gitCommitPanelEl || !gitCommitConfirmBtn) return;
+    gitPendingAction = action;
+    gitCommitConfirmBtn.textContent = strings.git.actions[action] ?? strings.git.actions.commit;
+    gitCommitPanelEl.hidden = false;
+    closeGitActionMenu();
+    gitCommitMessageEl?.focus();
+  }
+
+  async function performGitCommitAction() {
+    if (gitBusy) return;
+    const workingDir = getActiveProjectFolder();
+    if (!workingDir) {
+      showAttachmentNotice(strings.git.noProjectFolder, 'warning');
+      return;
+    }
+
+    const message = String(gitCommitMessageEl?.value ?? '').trim();
+    if (!message) {
+      gitCommitMessageEl?.focus();
+      showAttachmentNotice(strings.git.commitMessageRequired, 'warning');
+      return;
+    }
+
+    const action = gitPendingAction ?? 'commit';
+    const shouldPush = action === 'commitPush';
+    const shouldSync = action === 'commitSync';
+
+    setGitBarBusy(true);
+    setGitCommitStatus(strings.git.commitStatus.staging);
+    const hooksTimer = setTimeout(() => {
+      setGitCommitStatus(strings.git.commitStatus.hooks);
+    }, 2500);
+
+    try {
+      const commitResult = await invokeIpc('terminal:git-commit', {
+        workingDir,
+        message,
+        allowRisky: true,
+      });
+      clearTimeout(hooksTimer);
+      appendGitResultMessage(
+        strings.git.resultLabels.commit,
+        strings.git.commands.commit,
+        commitResult,
+      );
+
+      if (!commitResult?.ok) {
+        showAttachmentNotice(
+          commitResult?.hint || commitResult?.error || strings.git.actionFailed,
+          'warning',
+        );
+        return;
+      }
+
+      let followUpResult = null;
+      if (shouldPush) {
+        setGitCommitStatus(strings.git.commitStatus.pushing);
+        followUpResult = await invokeIpc('terminal:git-push', {
+          workingDir,
+          allowRisky: true,
+        });
+        appendGitResultMessage(
+          strings.git.resultLabels.push,
+          strings.git.commands.push,
+          followUpResult,
+        );
+      }
+      if (shouldSync) {
+        setGitCommitStatus(strings.git.commitStatus.syncing);
+        followUpResult = await invokeIpc('terminal:git-push-sync', {
+          workingDir,
+          allowRisky: true,
+        });
+        appendGitResultMessage(
+          strings.git.resultLabels.sync,
+          strings.git.commands.sync,
+          followUpResult,
+        );
+      }
+
+      const ok = followUpResult ? followUpResult.ok : commitResult.ok;
+      showAttachmentNotice(
+        ok
+          ? strings.git.actionComplete
+          : followUpResult?.hint || followUpResult?.error || strings.git.actionFailed,
+        ok ? 'info' : 'warning',
+      );
+      closeGitCommitPanel();
+      await refreshProjectGitStatus({ silent: true });
+    } catch (error) {
+      showAttachmentNotice(error?.message ?? strings.git.actionFailed, 'warning');
+    } finally {
+      clearTimeout(hooksTimer);
+      setGitCommitStatus('');
+      setGitBarBusy(false);
+      await refreshProjectGitStatus({ silent: true });
+    }
+  }
+
   async function runGitBarAction(action) {
     if (gitBusy) return;
     const workingDir = getActiveProjectFolder();
@@ -2605,11 +2879,17 @@ export async function createChatView(
       return;
     }
 
+    if (['commit', 'commitPush', 'commitSync'].includes(action)) {
+      openGitCommitPanel(action);
+      return;
+    }
+
     const channel = {
       status: 'terminal:git-status',
       diff: 'terminal:git-diff',
       pull: 'terminal:git-pull',
       push: 'terminal:git-push',
+      sync: 'terminal:git-push-sync',
     }[action];
 
     if (!channel) return;
@@ -2618,7 +2898,7 @@ export async function createChatView(
     try {
       const result = await invokeIpc(channel, {
         workingDir,
-        allowRisky: action === 'pull' || action === 'push',
+        allowRisky: action === 'pull' || action === 'push' || action === 'sync',
       });
       appendGitResultMessage(
         strings.git.resultLabels[action],
@@ -2626,7 +2906,7 @@ export async function createChatView(
         result,
       );
 
-      if (action === 'pull' || action === 'push') {
+      if (action === 'pull' || action === 'push' || action === 'sync') {
         showAttachmentNotice(
           result?.ok
             ? strings.git.actionComplete
@@ -4566,6 +4846,7 @@ export async function createChatView(
   composer = createElement('section', 'chat-composer');
   projectPill = createElement('div', 'chat-composer__project');
   projectPill.hidden = true;
+  const projectMainEl = createElement('div', 'chat-composer__project-main');
   const projectIconEl = createElement('span', 'chat-composer__project-icon');
   projectIconEl.append(createIcon('tabProjects', 'chat-composer__project-icon-glyph'));
   const projectBodyEl = createElement('div', 'chat-composer__project-body');
@@ -4580,7 +4861,7 @@ export async function createChatView(
     clearActiveProject();
     focusComposer();
   });
-  projectPill.append(projectIconEl, projectBodyEl, projectClearBtn);
+  projectMainEl.append(projectIconEl, projectBodyEl, projectClearBtn);
 
   gitBarEl = createElement('div', 'chat-gitbar');
   gitBarEl.hidden = true;
@@ -4607,14 +4888,74 @@ export async function createChatView(
     void runGitBarAction(gitSecondaryBtn._gitAction);
   });
 
+  const gitActionWrap = createElement('div', 'chat-gitbar__action-wrap');
   gitPrimaryBtn = createElement('button', 'chat-gitbar__primary');
   gitPrimaryBtn.type = 'button';
   gitPrimaryBtn.addEventListener('click', () => {
     void runGitBarAction(gitPrimaryBtn._gitAction);
   });
 
-  gitActions.append(gitRefreshBtn, gitSecondaryBtn, gitPrimaryBtn);
+  gitMenuBtn = createElement('button', 'chat-gitbar__menu-button');
+  gitMenuBtn.type = 'button';
+  gitMenuBtn.hidden = true;
+  gitMenuBtn.setAttribute('aria-label', strings.git.moreActions);
+  gitMenuBtn.append(createIcon('chevronDown', 'chat-gitbar__menu-button-icon'));
+  gitMenuBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (gitBusy || !gitActionMenuEl) return;
+    const willOpen = gitActionMenuEl.hidden;
+    gitActionMenuEl.hidden = !willOpen;
+    gitMenuBtn.classList.toggle('chat-gitbar__menu-button--open', willOpen);
+  });
+
+  gitActionMenuEl = createElement('div', 'chat-gitbar__menu');
+  gitActionMenuEl.hidden = true;
+
+  gitActionWrap.append(gitPrimaryBtn, gitMenuBtn, gitActionMenuEl);
+  gitActions.append(gitRefreshBtn, gitSecondaryBtn, gitActionWrap);
   gitBarEl.append(gitIdentity, gitActions);
+
+  gitCommitPanelEl = createElement('div', 'chat-gitbar__commit-panel');
+  gitCommitPanelEl.hidden = true;
+  gitCommitFieldWrapEl = createElement('div', 'chat-gitbar__commit-field-wrap');
+  gitCommitMessageEl = document.createElement('textarea');
+  gitCommitMessageEl.className = 'chat-gitbar__commit-message';
+  gitCommitMessageEl.placeholder = strings.git.commitMessagePlaceholder;
+  gitCommitMessageEl.rows = 3;
+  gitCommitMessageEl.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      void performGitCommitAction();
+    }
+  });
+  gitCommitAiBtn = createElement('button', 'chat-gitbar__commit-ai');
+  gitCommitAiBtn.type = 'button';
+  gitCommitAiBtn.setAttribute('aria-label', strings.git.generateCommitMessage);
+  gitCommitAiBtn.append(createIcon('aiSparkle', 'chat-gitbar__commit-ai-icon'));
+  gitCommitAiBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    void generateGitCommitMessage();
+  });
+  gitCommitFieldWrapEl.append(gitCommitMessageEl, gitCommitAiBtn);
+
+  gitCommitStatusEl = createElement('p', 'chat-gitbar__commit-status');
+  gitCommitStatusEl.hidden = true;
+  const gitCommitActions = createElement('div', 'chat-gitbar__commit-actions');
+  gitCommitCancelBtn = createElement('button', 'chat-gitbar__commit-cancel', strings.git.cancel);
+  gitCommitCancelBtn.type = 'button';
+  gitCommitCancelBtn.addEventListener('click', () => {
+    if (!gitBusy) closeGitCommitPanel();
+    focusComposer();
+  });
+  gitCommitConfirmBtn = createElement('button', 'chat-gitbar__commit-confirm');
+  gitCommitConfirmBtn.type = 'button';
+  gitCommitConfirmBtn.addEventListener('click', () => {
+    void performGitCommitAction();
+  });
+  gitCommitActions.append(gitCommitCancelBtn, gitCommitConfirmBtn);
+  gitCommitPanelEl.append(gitCommitFieldWrapEl, gitCommitStatusEl, gitCommitActions);
+
+  projectPill.append(projectMainEl, gitBarEl, gitCommitPanelEl);
 
   composerField = document.createElement('textarea');
   composerField.className = 'chat-composer__field';
@@ -4703,7 +5044,6 @@ export async function createChatView(
   diagPanel = createDiagnosticPanel(strings);
   composer.append(
     projectPill,
-    gitBarEl,
     attachmentsEl,
     attachmentNotice,
     composerField,
@@ -4849,6 +5189,12 @@ export async function createChatView(
         );
         focusComposer();
       });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!projectPill?.contains(event.target)) {
+      closeGitActionMenu();
+    }
   });
 
   applyActiveProject(activeProject);

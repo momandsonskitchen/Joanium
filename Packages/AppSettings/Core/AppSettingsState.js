@@ -11,6 +11,48 @@ const DEFAULT_SETTINGS = Object.freeze({
   defaultModel: null,
 });
 
+const SUPPORTED_LOCALES = new Set([
+  'en',
+  'de',
+  'ja',
+  'ml',
+  'sv',
+  'ru',
+  'ta',
+  'fr',
+  'hi',
+  'nl',
+  'es',
+  'th',
+  'ar',
+  'pt',
+  'it',
+  'mr',
+  'ko',
+  'zh',
+  'fi',
+  'da',
+  'cs',
+  'kn',
+  'te',
+  'uk',
+  'pl',
+  'ro',
+  'hu',
+  'el',
+  'he',
+  'bg',
+  'is',
+  'cy',
+  'ga',
+  'tr',
+]);
+
+function normalizeLocale(candidate) {
+  const locale = String(candidate ?? '').trim();
+  return SUPPORTED_LOCALES.has(locale) ? locale : 'en';
+}
+
 function normalizeDefaultModel(candidate) {
   if (
     candidate &&
@@ -41,14 +83,18 @@ function normalizeSettings(candidate = {}) {
 export function createAppSettingsStateManager({ rootDirectory }) {
   async function readSettings() {
     const userState = await readUserState(rootDirectory);
-    return normalizeSettings(userState.appSettings);
+    return {
+      ...normalizeSettings(userState.appSettings),
+      locale: normalizeLocale(userState.locale),
+    };
   }
 
   async function writeSettings(settings) {
     const normalized = normalizeSettings(settings);
     const userState = await readUserState(rootDirectory);
-    await writeUserState(rootDirectory, { ...userState, appSettings: normalized });
-    return normalized;
+    const locale = normalizeLocale(settings.locale ?? userState.locale);
+    await writeUserState(rootDirectory, { ...userState, locale, appSettings: normalized });
+    return { ...normalized, locale };
   }
 
   return {

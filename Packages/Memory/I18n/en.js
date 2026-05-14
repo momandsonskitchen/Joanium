@@ -16,6 +16,37 @@ const en = {
   saveFailed: 'Save failed',
   editorLabel: 'Memory Content',
   emptyEditor: 'Choose a memory file from the list.',
+  importMemory: {
+    action: 'Import',
+    title: 'Import memory',
+    subtitle: 'Paste a profile summary from another AI assistant and merge it into memory.',
+    close: 'Close import memory',
+    cancel: 'Cancel',
+    save: 'Save to memory',
+    textareaLabel: 'Imported profile summary',
+    placeholder: 'Paste the full profile summary here...',
+    emptyInput: 'Paste a profile summary first.',
+    emptyCatalog: '(empty)',
+    analysing: 'Analysing imported profile...',
+    done: 'Memory updated.',
+    failed: 'Could not import memory.',
+    parseFailed: 'The model did not return valid memory updates.',
+    noUpdates: 'No memory updates were found in the imported text.',
+    systemInstruction:
+      'You update structured personal memory files. Return only valid JSON and never include markdown fences.',
+    userPrompt: [
+      'Extract durable personal facts from the imported profile and merge them with the existing memory catalog.',
+      'Return a JSON object with this exact shape: {"updates":[{"filename":"User.md","content":"# User Profile\\n- ..."}],"newFiles":[]}.',
+      'For every updated file, return the full final Markdown content for that file, including its heading.',
+      'Preserve existing facts unless the imported profile clearly refines or corrects them. Do not invent facts.',
+      '',
+      'CURRENT MEMORY CATALOG:',
+      '{catalog}',
+      '',
+      'IMPORTED PROFILE:',
+      '{importedText}',
+    ].join('\n'),
+  },
 };
 
 export default en;

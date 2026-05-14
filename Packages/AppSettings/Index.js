@@ -1,5 +1,8 @@
 import { app, BrowserWindow } from 'electron';
+import { rm } from 'node:fs/promises';
+import path from 'node:path';
 import process from 'node:process';
+import { getWritableDataDirectory } from '../Shared/Storage/ResourcePaths.js';
 import { createAppSettingsStateManager } from './Core/AppSettingsState.js';
 import { isKeepAwakeActive, startKeepAwake, stopKeepAwake } from './Core/PowerService.js';
 import { disableTray, enableTray, isTrayActive, rememberWindow } from './Core/TrayService.js';
@@ -29,6 +32,47 @@ function runtimeStatus(settings) {
 
 function ownerWindow(event) {
   return event?.sender?.getOwnerBrowserWindow?.() ?? BrowserWindow.getAllWindows()[0] ?? null;
+}
+
+const RESET_DATA_ENTRIES = [
+  'Agents',
+  'Avatar.avif',
+  'Avatar.bmp',
+  'Avatar.gif',
+  'Avatar.jpeg',
+  'Avatar.jpg',
+  'Avatar.png',
+  'Avatar.webp',
+  'ChannelMessages.json',
+  'Channels.json',
+  'Chats',
+  'Logs',
+  'MCPServers.json',
+  'Memories',
+  'Models',
+  'Projects',
+  'Security.json',
+  'System.json',
+  'Templates',
+  'Usage.json',
+  'User.json',
+];
+
+async function resetAppData(rootDirectory) {
+  const dataDirectory = getWritableDataDirectory(rootDirectory);
+
+  await Promise.all(
+    RESET_DATA_ENTRIES.map((entry) =>
+      rm(path.join(dataDirectory, entry), { recursive: true, force: true }),
+    ),
+  );
+
+  setTimeout(() => {
+    app.relaunch();
+    app.exit(0);
+  }, 120);
+
+  return { ok: true, relaunching: true };
 }
 
 export async function createPackage({ rootDirectory }) {
@@ -97,6 +141,10 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'auto-update:install',
         handler: async () => installDownloadedUpdate(),
+      },
+      {
+        channel: 'app-settings:reset-app',
+        handler: async () => resetAppData(rootDirectory),
       },
     ],
   };
