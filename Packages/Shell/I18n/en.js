@@ -41,6 +41,7 @@ const en = {
     nav: {
       user: 'User',
       app: 'App',
+      memory: 'Memory',
       channels: 'Channels',
       connectors: 'Connectors',
       providers: 'AI Providers',

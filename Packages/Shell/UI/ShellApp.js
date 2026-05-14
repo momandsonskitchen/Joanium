@@ -20,6 +20,7 @@ import { createUsagePanel } from '../../Usage/UI/UsagePanel.js';
 import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
 import { createAppSettingsPanel } from '../../AppSettings/UI/AppSettingsPanel.js';
+import { createMemorySettingsPanel } from '../../AppSettings/UI/MemorySettingsPanel.js';
 import { mountLockScreen } from '../../Security/UI/LockScreen.js';
 import { createSecurityPanel } from '../../Security/UI/SecurityPanel.js';
 import { createAutoLockTimer } from '../../Security/UI/AutoLockTimer.js';
@@ -494,6 +495,7 @@ async function bootstrap() {
     const pageLabels = {
       user: strings.settings.nav.user,
       app: strings.settings.nav.app,
+      memory: strings.settings.nav.memory,
       channels: strings.settings.nav.channels,
       connectors: strings.settings.nav.connectors,
       providers: strings.settings.nav.providers,
@@ -537,6 +539,10 @@ async function bootstrap() {
 
       if (id === 'app') {
         main.append(createAppSettingsPanel(strings.appSettings));
+      }
+
+      if (id === 'memory') {
+        main.append(createMemorySettingsPanel(strings.appSettings));
       }
 
       if (id === 'channels') {
@@ -593,6 +599,7 @@ async function bootstrap() {
     for (const menu of [
       { id: 'user', label: strings.settings.nav.user, icon: iconMarkup.tabPersonas },
       { id: 'app', label: strings.settings.nav.app, icon: iconMarkup.power },
+      { id: 'memory', label: strings.settings.nav.memory, icon: iconMarkup.tabMemory },
       { id: 'channels', label: strings.settings.nav.channels, icon: iconMarkup.tabChannels },
       { id: 'connectors', label: strings.settings.nav.connectors, icon: iconMarkup.network },
       { id: 'providers', label: strings.settings.nav.providers, icon: iconMarkup.verified },
