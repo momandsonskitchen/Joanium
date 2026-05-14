@@ -25,6 +25,10 @@ function makeSvg(innerHTML) {
   return svg;
 }
 
+function toFileUrl(filePath) {
+  return 'file:///' + filePath.replace(/\\/g, '/');
+}
+
 // ── Lock screen ───────────────────────────────────────────────────────────────
 // Returns a Promise that resolves once the correct password (or secret answer)
 // has been verified by the main process. The overlay removes itself from the
@@ -40,12 +44,32 @@ export function mountLockScreen(strings, initialStatus) {
 
     // ── Avatar ────────────────────────────────────────────────────────────
     const avatar = createElement('div', 'lock-screen__avatar');
-    avatar.append(
-      makeSvg(`
-      <rect x="3" y="11" width="18" height="11" rx="2"/>
-      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-    `),
-    );
+
+    // Start with lock icon, swap to profile image if available
+    function renderAvatar(avatarPath) {
+      avatar.replaceChildren();
+      if (avatarPath) {
+        const img = createElement('img', 'lock-screen__avatar-img');
+        img.src = toFileUrl(avatarPath) + '?t=' + Date.now();
+        img.alt = '';
+        avatar.classList.add('lock-screen__avatar--photo');
+        avatar.append(img);
+      } else {
+        avatar.classList.remove('lock-screen__avatar--photo');
+        avatar.append(
+          makeSvg(`
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          `),
+        );
+      }
+    }
+
+    renderAvatar(null);
+
+    invokeIpc('user:get-profile')
+      .then((profile) => renderAvatar(profile?.avatarPath ?? null))
+      .catch(() => {});
 
     // ── Text ──────────────────────────────────────────────────────────────
     const titleEl = createElement('h1', 'lock-screen__title', strings.lockTitle);
