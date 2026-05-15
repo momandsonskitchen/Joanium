@@ -53,3 +53,12 @@ export function createGoogleJsonFetch(serviceName, options = {}) {
     ...options,
   });
 }
+
+export function createReplaceAllTextRequest(searchText, replacement) {
+  return {
+    replaceAllText: {
+      containsText: { text: searchText, matchCase: !0 },
+      replaceText: replacement,
+    },
+  };
+}

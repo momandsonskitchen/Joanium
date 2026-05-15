@@ -1,41 +1,16 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
+import { createSettingsPanelState } from './Utils.js';
 
 export function createMemorySettingsPanel(strings) {
   const view = createElement('div', 'app-settings');
   const options = createElement('div', 'app-settings__options');
   const status = createElement('p', 'app-settings__status');
-  let settings = null;
-
-  function setStatus(message, tone = 'ok') {
-    status.textContent = message;
-    status.className = `app-settings__status app-settings__status--${tone}`;
-    if (message) {
-      setTimeout(() => {
-        status.textContent = '';
-        status.className = 'app-settings__status';
-      }, 2600);
-    }
-  }
-
-  async function updateSetting(key, value, checkboxElement) {
-    checkboxElement.disabled = true;
-    try {
-      settings = await invokeIpc('app-settings:save', { [key]: value });
-      window.dispatchEvent(new CustomEvent('joanium:app-settings-changed', { detail: settings }));
-      setStatus(strings.saved);
-    } catch {
-      checkboxElement.classList.toggle('is-checked', !value);
-      checkboxElement.setAttribute('aria-pressed', !value ? 'true' : 'false');
-      setStatus(strings.saveFailed, 'error');
-    } finally {
-      checkboxElement.disabled = false;
-    }
-  }
+  const state = createSettingsPanelState({ status, strings });
 
   async function populate() {
-    settings = await invokeIpc('app-settings:get');
+    state.setSettings(await invokeIpc('app-settings:get'));
     options.replaceChildren();
 
     // ── Auto memory updates toggle ─────────────────────────────────────────
@@ -43,9 +18,9 @@ export function createMemorySettingsPanel(strings) {
     const checkbox = createCheckbox({
       label: option.label,
       description: option.description,
-      checked: Boolean(settings.autoMemoryUpdates),
+      checked: Boolean(state.settings.autoMemoryUpdates),
       onChange: (checked) => {
-        void updateSetting('autoMemoryUpdates', checked, checkbox.element);
+        void state.updateSetting('autoMemoryUpdates', checked, checkbox.element);
         memoryCard.hidden = checked;
       },
     });
@@ -53,7 +28,7 @@ export function createMemorySettingsPanel(strings) {
 
     // ── Update memory now card ─────────────────────────────────────────────
     const memoryCard = createElement('div', 'app-settings__memory-card');
-    memoryCard.hidden = Boolean(settings.autoMemoryUpdates);
+    memoryCard.hidden = Boolean(state.settings.autoMemoryUpdates);
 
     const memoryMeta = createElement('div', 'app-settings__dropdown-meta');
     memoryMeta.append(
@@ -93,12 +68,12 @@ export function createMemorySettingsPanel(strings) {
 
     // Keep card in sync when the toggle is changed elsewhere in the same session.
     window.addEventListener('joanium:app-settings-changed', (event) => {
-      settings = event.detail ?? settings;
-      memoryCard.hidden = Boolean(settings?.autoMemoryUpdates);
+      state.setSettings(event.detail ?? state.settings);
+      memoryCard.hidden = Boolean(state.settings?.autoMemoryUpdates);
     });
   }
 
   view.append(options, status);
-  void populate().catch(() => setStatus(strings.saveFailed, 'error'));
+  void populate().catch(() => state.setStatus(strings.saveFailed, 'error'));
   return view;
 }

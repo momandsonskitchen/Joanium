@@ -341,6 +341,27 @@ function formatProviderError(response, data, rawText) {
   return `${response.status} ${response.statusText}`;
 }
 
+async function assertProviderResponse(response) {
+  if (!response.ok) {
+    const { data, rawText } = await parseResponse(response);
+    throw new Error(formatProviderError(response, data, rawText));
+  }
+}
+
+async function postJsonStream(endpoint, bodyString, headers) {
+  const response = await nodeRequest(endpoint, {
+    method: 'POST',
+    headers: {
+      ...headers,
+      'content-length': Buffer.byteLength(bodyString),
+    },
+    body: bodyString,
+  });
+
+  await assertProviderResponse(response);
+  return response;
+}
+
 // ---------------------------------------------------------------------------
 // SSE streaming parser — reads directly from a Node.js IncomingMessage.
 // Yields { event, data } for every complete SSE event.
@@ -434,20 +455,10 @@ async function streamGoogleMessage({
 
   const streamBodyStr = JSON.stringify(googleBody);
 
-  const response = await nodeRequest(streamUrl, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'content-length': Buffer.byteLength(streamBodyStr),
-      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
-    },
-    body: streamBodyStr,
+  const response = await postJsonStream(streamUrl, streamBodyStr, {
+    'content-type': 'application/json',
+    [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
   });
-
-  if (!response.ok) {
-    const { data, rawText } = await parseResponse(response);
-    throw new Error(formatProviderError(response, data, rawText));
-  }
 
   for await (const { data } of parseSSE(response.body)) {
     if (!data || typeof data !== 'object') continue;
@@ -515,21 +526,11 @@ async function streamAnthropicMessage({
 
   const streamReqBodyStr = JSON.stringify(requestBody);
 
-  const response = await nodeRequest(endpoint, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'content-length': Buffer.byteLength(streamReqBodyStr),
-      'anthropic-version': '2023-06-01',
-      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
-    },
-    body: streamReqBodyStr,
+  const response = await postJsonStream(endpoint, streamReqBodyStr, {
+    'content-type': 'application/json',
+    'anthropic-version': '2023-06-01',
+    [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
   });
-
-  if (!response.ok) {
-    const { data, rawText } = await parseResponse(response);
-    throw new Error(formatProviderError(response, data, rawText));
-  }
 
   for await (const { data } of parseSSE(response.body)) {
     if (!data || typeof data !== 'object') continue;
@@ -598,19 +599,7 @@ async function streamOpenAiCompatibleMessage({
     stream: true,
   });
 
-  const response = await nodeRequest(endpoint, {
-    method: 'POST',
-    headers: {
-      ...headers,
-      'content-length': Buffer.byteLength(streamOaiBodyStr),
-    },
-    body: streamOaiBodyStr,
-  });
-
-  if (!response.ok) {
-    const { data, rawText } = await parseResponse(response);
-    throw new Error(formatProviderError(response, data, rawText));
-  }
+  const response = await postJsonStream(endpoint, streamOaiBodyStr, headers);
 
   for await (const { data } of parseSSE(response.body)) {
     if (!data || typeof data !== 'object') continue;

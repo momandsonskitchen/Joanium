@@ -1,3 +1,5 @@
+import * as ContactsAPI from '../API/ContactsAPI.js';
+
 export function formatPerson(person, index) {
   const name = ContactsAPI.getDisplayName(person),
     emails = (person.emailAddresses ?? []).map((e) => `${e.value}${e.type ? ` (${e.type})` : ''}`),
@@ -48,4 +50,15 @@ export function buildContactPayload({
       (payload.organizations = [{ name: company ?? '', title: job_title ?? '' }]),
     payload
   );
+}
+
+export function formatContactMutation(contact, action) {
+  return [
+    `Contact ${action}: **${ContactsAPI.getDisplayName(contact)}**`,
+    `Resource: \`${contact.resourceName}\``,
+    ContactsAPI.getPrimaryEmail(contact) ? `Email: ${ContactsAPI.getPrimaryEmail(contact)}` : '',
+    ContactsAPI.getPrimaryPhone(contact) ? `Phone: ${ContactsAPI.getPrimaryPhone(contact)}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 }

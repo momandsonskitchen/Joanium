@@ -226,7 +226,7 @@ const VALID_DEFAULT_VIEWS = new Set([
   'usage',
 ]);
 
-function sanitizeDefaultModel(candidate) {
+export function sanitizeDefaultModel(candidate) {
   if (
     candidate &&
     typeof candidate === 'object' &&

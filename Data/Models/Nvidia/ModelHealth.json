@@ -17,7 +17,7 @@
   },
   "moonshotai/kimi-k2-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-15T07:44:29.745Z"
+    "checkedAt": "2026-05-15T13:01:45.954Z"
   },
   "nvidia/nemotron-3-super-120b-a12b": {
     "status": "green",
@@ -40,11 +40,11 @@
     "checkedAt": "2026-05-12T06:25:45.699Z"
   },
   "qwen/qwen3-coder-480b-a35b-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-14T06:14:42.066Z"
+    "status": "yellow",
+    "checkedAt": "2026-05-15T13:02:00.896Z"
   },
   "moonshotai/kimi-k2.6": {
-    "status": "yellow",
-    "checkedAt": "2026-05-15T07:40:33.039Z"
+    "status": "green",
+    "checkedAt": "2026-05-15T13:01:50.644Z"
   }
 }

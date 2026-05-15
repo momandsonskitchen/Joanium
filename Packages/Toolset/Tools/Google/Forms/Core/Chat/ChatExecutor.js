@@ -1,17 +1,91 @@
 import * as FormsAPI from '../API/FormsAPI.js';
 import { requireGoogleCredentials } from '../../../Common.js';
 import { formatDate, typeLabel, csvEscape, median } from './Utils.js';
+
+const NON_ANSWER_QUESTION_TYPES = ['PAGE_BREAK', 'SECTION_TEXT', 'IMAGE', 'VIDEO'];
+
+function requireFormId(params) {
+  const formId = params.form_id;
+  if (!formId?.trim()) throw new Error('Missing required param: form_id');
+  return formId.trim();
+}
+
+function isAnswerQuestion(question) {
+  return !NON_ANSWER_QUESTION_TYPES.includes(question.type);
+}
+
+function answerQuestions(form) {
+  return FormsAPI.extractQuestions(form).filter((question) => isAnswerQuestion(question));
+}
+
+function answerQuestionsWithIds(form) {
+  return answerQuestions(form).filter((question) => question.questionId);
+}
+
+async function loadFormAndResponses(credentials, formId, maxResults) {
+  const [form, responseData] = await Promise.all([
+    FormsAPI.getForm(credentials, formId),
+    FormsAPI.listResponses(credentials, formId, { maxResults: maxResults }),
+  ]);
+  return { form: form, ...responseData };
+}
+
+async function loadFormAndResponseCount(credentials, formId) {
+  return loadFormAndResponses(credentials, formId, 1);
+}
+
+async function loadQuestionResponses(credentials, params, defaultMaxResults) {
+  const { question_id: questionId, max_results: maxResults = defaultMaxResults } = params,
+    formId = requireFormId(params);
+  if (!questionId?.trim()) throw new Error('Missing required param: question_id');
+  const { form, responses } = await loadFormAndResponses(credentials, formId, maxResults),
+    question = answerQuestions(form).find((q) => q.questionId === questionId.trim());
+  return { form: form, responses: responses, question: question, questionId: questionId.trim() };
+}
+
+function buildQuestionTitleMap(form) {
+  return Object.fromEntries(
+    FormsAPI.extractQuestions(form)
+      .filter((q) => q.questionId)
+      .map((q) => [q.questionId, q.title || '(Untitled)']),
+  );
+}
+
+function formatResponseAnswerLines(response, questionMap) {
+  return Object.entries(response.answers ?? {}).map(
+    ([qId, answer]) =>
+      `  Q: ${questionMap[qId] ?? qId}\n  A: ${FormsAPI.extractAnswerValue(answer)}`,
+  );
+}
+
+function appendResponseAnswers(lines, response, questionMap) {
+  for (const [qId, answer] of Object.entries(response.answers ?? {})) {
+    lines.push(`\nQ: ${questionMap[qId] ?? qId}`);
+    lines.push(`A: ${FormsAPI.extractAnswerValue(answer)}`);
+  }
+}
+
+function formatResponseSection(response, label, questionMap, { includeEmail = true } = {}) {
+  return [
+    [
+      label,
+      response.createTime ? `  Submitted: ${formatDate(response.createTime)}` : '',
+      includeEmail && response.respondentEmail ? `  Respondent: ${response.respondentEmail}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    ...formatResponseAnswerLines(response, questionMap),
+  ].join('\n');
+}
+
 export async function executeFormsChatTool(ctx, toolName, params = {}) {
   const credentials = requireGoogleCredentials(ctx);
   switch (toolName) {
     case 'forms_get_form': {
-      const { form_id: form_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const form = await FormsAPI.getForm(credentials, form_id.trim()),
+      const formId = requireFormId(params);
+      const form = await FormsAPI.getForm(credentials, formId),
         questions = FormsAPI.extractQuestions(form),
-        questionItems = questions.filter(
-          (q) => !['PAGE_BREAK', 'SECTION_TEXT', 'IMAGE', 'VIDEO'].includes(q.type),
-        ),
+        questionItems = questions.filter((q) => isAnswerQuestion(q)),
         lines = [
           `**${form.info?.title ?? 'Untitled Form'}**`,
           form.info?.description ? `Description: ${form.info.description}` : '',
@@ -38,15 +112,9 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'forms_get_summary': {
-      const { form_id: form_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { totalResponses: totalResponses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: 1 }),
-        ]),
-        answerableCount = FormsAPI.extractQuestions(form).filter(
-          (q) => !['PAGE_BREAK', 'SECTION_TEXT', 'IMAGE', 'VIDEO'].includes(q.type),
-        ).length;
+      const formId = requireFormId(params);
+      const { form, totalResponses } = await loadFormAndResponseCount(credentials, formId),
+        answerableCount = answerQuestions(form).length;
       return [
         `**${form.info?.title ?? 'Untitled Form'}**`,
         form.info?.description ? `Description: ${form.info.description}` : '',
@@ -65,33 +133,20 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_list_responses': {
       const { form_id: form_id, max_results: max_results = 50 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const form = await FormsAPI.getForm(credentials, form_id.trim()),
-        { responses: responses, totalResponses: totalResponses } = await FormsAPI.listResponses(
-          credentials,
-          form_id.trim(),
-          { maxResults: max_results },
-        );
+      const formId = requireFormId(params);
+      const { form, responses, totalResponses } = await loadFormAndResponses(
+        credentials,
+        formId,
+        max_results,
+      );
       if (!responses.length) return `No responses found for form "${form.info?.title ?? form_id}".`;
-      const questions = FormsAPI.extractQuestions(form),
-        qMap = Object.fromEntries(
-          questions.filter((q) => q.questionId).map((q) => [q.questionId, q.title || '(Untitled)']),
-        ),
+      const qMap = buildQuestionTitleMap(form),
         sections = responses.map((resp, i) =>
-          [
-            [
-              `Response ${i + 1}`,
-              `  Response ID: \`${resp.responseId}\``,
-              resp.createTime ? `  Submitted: ${formatDate(resp.createTime)}` : '',
-              resp.respondentEmail ? `  Respondent: ${resp.respondentEmail}` : '',
-            ]
-              .filter(Boolean)
-              .join('\n'),
-            ...Object.entries(resp.answers ?? {}).map(
-              ([qId, answer]) =>
-                `  Q: ${qMap[qId] ?? qId}\n  A: ${FormsAPI.extractAnswerValue(answer)}`,
-            ),
-          ].join('\n'),
+          formatResponseSection(
+            resp,
+            `Response ${i + 1}\n  Response ID: \`${resp.responseId}\``,
+            qMap,
+          ),
         );
       return [
         `**${form.info?.title ?? 'Form'}** — ${responses.length} of ${totalResponses} response(s)`,
@@ -100,17 +155,14 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       ].join('\n');
     }
     case 'forms_get_response': {
-      const { form_id: form_id, response_id: response_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
+      const { response_id: response_id } = params;
+      const formId = requireFormId(params);
       if (!response_id?.trim()) throw new Error('Missing required param: response_id');
       const [form, resp] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.getResponse(credentials, form_id.trim(), response_id.trim()),
+          FormsAPI.getForm(credentials, formId),
+          FormsAPI.getResponse(credentials, formId, response_id.trim()),
         ]),
-        questions = FormsAPI.extractQuestions(form),
-        qMap = Object.fromEntries(
-          questions.filter((q) => q.questionId).map((q) => [q.questionId, q.title || '(Untitled)']),
-        ),
+        qMap = buildQuestionTitleMap(form),
         lines = [
           `Response \`${resp.responseId}\``,
           resp.createTime ? `Submitted: ${formatDate(resp.createTime)}` : '',
@@ -134,87 +186,61 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       return lines.filter(Boolean).join('\n');
     }
     case 'forms_get_response_count': {
-      const { form_id: form_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { totalResponses: totalResponses }] = await Promise.all([
-        FormsAPI.getForm(credentials, form_id.trim()),
-        FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: 1 }),
-      ]);
+      const formId = requireFormId(params);
+      const { form, totalResponses } = await loadFormAndResponseCount(credentials, formId);
       return `**${form.info?.title ?? 'Untitled Form'}** has **${totalResponses}** response(s).`;
     }
     case 'forms_get_latest_response': {
-      const { form_id: form_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses }] = await Promise.all([
-        FormsAPI.getForm(credentials, form_id.trim()),
-        FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: 5e3 }),
-      ]);
-      if (!responses.length) return `No responses found for form "${form.info?.title ?? form_id}".`;
+      const formId = requireFormId(params);
+      const { form, responses } = await loadFormAndResponses(credentials, formId, 5e3);
+      if (!responses.length) return `No responses found for form "${form.info?.title ?? formId}".`;
       const latest = [...responses].sort(
           (a, b) => new Date(b.createTime) - new Date(a.createTime),
         )[0],
-        questions = FormsAPI.extractQuestions(form),
-        qMap = Object.fromEntries(
-          questions.filter((q) => q.questionId).map((q) => [q.questionId, q.title || '(Untitled)']),
-        ),
+        qMap = buildQuestionTitleMap(form),
         lines = [
-          `**Most recent response** for "${form.info?.title ?? form_id}"`,
+          `**Most recent response** for "${form.info?.title ?? formId}"`,
           `Response ID: \`${latest.responseId}\``,
           latest.createTime ? `Submitted: ${formatDate(latest.createTime)}` : '',
           latest.respondentEmail ? `Respondent: ${latest.respondentEmail}` : '',
           '',
           '── Answers ──',
         ];
-      for (const [qId, answer] of Object.entries(latest.answers ?? {}))
-        lines.push(`\nQ: ${qMap[qId] ?? qId}`),
-          lines.push(`A: ${FormsAPI.extractAnswerValue(answer)}`);
+      appendResponseAnswers(lines, latest, qMap);
       return lines.filter(Boolean).join('\n');
     }
     case 'forms_get_first_response': {
-      const { form_id: form_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses }] = await Promise.all([
-        FormsAPI.getForm(credentials, form_id.trim()),
-        FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: 5e3 }),
-      ]);
-      if (!responses.length) return `No responses found for form "${form.info?.title ?? form_id}".`;
+      const formId = requireFormId(params);
+      const { form, responses } = await loadFormAndResponses(credentials, formId, 5e3);
+      if (!responses.length) return `No responses found for form "${form.info?.title ?? formId}".`;
       const first = [...responses].sort(
           (a, b) => new Date(a.createTime) - new Date(b.createTime),
         )[0],
-        questions = FormsAPI.extractQuestions(form),
-        qMap = Object.fromEntries(
-          questions.filter((q) => q.questionId).map((q) => [q.questionId, q.title || '(Untitled)']),
-        ),
+        qMap = buildQuestionTitleMap(form),
         lines = [
-          `**First response** for "${form.info?.title ?? form_id}"`,
+          `**First response** for "${form.info?.title ?? formId}"`,
           `Response ID: \`${first.responseId}\``,
           first.createTime ? `Submitted: ${formatDate(first.createTime)}` : '',
           first.respondentEmail ? `Respondent: ${first.respondentEmail}` : '',
           '',
           '── Answers ──',
         ];
-      for (const [qId, answer] of Object.entries(first.answers ?? {}))
-        lines.push(`\nQ: ${qMap[qId] ?? qId}`),
-          lines.push(`A: ${FormsAPI.extractAnswerValue(answer)}`);
+      appendResponseAnswers(lines, first, qMap);
       return lines.filter(Boolean).join('\n');
     }
     case 'forms_get_responses_in_range': {
-      const {
-        form_id: form_id,
-        start_date: start_date,
-        end_date: end_date,
-        max_results: max_results = 50,
-      } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
+      const { start_date: start_date, end_date: end_date, max_results: max_results = 50 } = params;
+      const formId = requireFormId(params);
       if (!start_date?.trim()) throw new Error('Missing required param: start_date');
       if (!end_date?.trim()) throw new Error('Missing required param: end_date');
       const start = new Date(start_date),
         end = new Date(end_date);
       if (isNaN(start) || isNaN(end)) throw new Error('Invalid date format. Use ISO 8601.');
-      const [form, { responses: responses, totalResponses: totalResponses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: 5e3 }),
-        ]),
+      const { form, responses, totalResponses } = await loadFormAndResponses(
+          credentials,
+          formId,
+          5e3,
+        ),
         filtered = responses
           .filter((r) => {
             const t = new Date(r.createTime);
@@ -223,24 +249,9 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
           .slice(0, max_results);
       if (!filtered.length)
         return `No responses found between ${formatDate(start_date)} and ${formatDate(end_date)}.`;
-      const questions = FormsAPI.extractQuestions(form),
-        qMap = Object.fromEntries(
-          questions.filter((q) => q.questionId).map((q) => [q.questionId, q.title || '(Untitled)']),
-        ),
+      const qMap = buildQuestionTitleMap(form),
         sections = filtered.map((resp, i) =>
-          [
-            [
-              `Response ${i + 1} — \`${resp.responseId}\``,
-              resp.createTime ? `  Submitted: ${formatDate(resp.createTime)}` : '',
-              resp.respondentEmail ? `  Respondent: ${resp.respondentEmail}` : '',
-            ]
-              .filter(Boolean)
-              .join('\n'),
-            ...Object.entries(resp.answers ?? {}).map(
-              ([qId, answer]) =>
-                `  Q: ${qMap[qId] ?? qId}\n  A: ${FormsAPI.extractAnswerValue(answer)}`,
-            ),
-          ].join('\n'),
+          formatResponseSection(resp, `Response ${i + 1} - \`${resp.responseId}\``, qMap),
         );
       return [
         `**${form.info?.title ?? 'Form'}** — ${filtered.length} response(s) between ${formatDate(start_date)} and ${formatDate(end_date)} (out of ${totalResponses} total)`,
@@ -250,33 +261,18 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_find_responses_by_email': {
       const { form_id: form_id, email: email } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
+      const formId = requireFormId(params);
       if (!email?.trim()) throw new Error('Missing required param: email');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: 5e3 }),
-        ]),
+      const { form, responses } = await loadFormAndResponses(credentials, formId, 5e3),
         needle = email.trim().toLowerCase(),
         matched = responses.filter((r) => r.respondentEmail?.toLowerCase() === needle);
       if (!matched.length)
         return `No responses found from "${email}" in form "${form.info?.title ?? form_id}".`;
-      const questions = FormsAPI.extractQuestions(form),
-        qMap = Object.fromEntries(
-          questions.filter((q) => q.questionId).map((q) => [q.questionId, q.title || '(Untitled)']),
-        ),
+      const qMap = buildQuestionTitleMap(form),
         sections = matched.map((resp, i) =>
-          [
-            [
-              `Response ${i + 1} — \`${resp.responseId}\``,
-              resp.createTime ? `  Submitted: ${formatDate(resp.createTime)}` : '',
-            ]
-              .filter(Boolean)
-              .join('\n'),
-            ...Object.entries(resp.answers ?? {}).map(
-              ([qId, answer]) =>
-                `  Q: ${qMap[qId] ?? qId}\n  A: ${FormsAPI.extractAnswerValue(answer)}`,
-            ),
-          ].join('\n'),
+          formatResponseSection(resp, `Response ${i + 1} - \`${resp.responseId}\``, qMap, {
+            includeEmail: false,
+          }),
         );
       return [
         `**${matched.length} response(s)** from ${email} in "${form.info?.title ?? form_id}"`,
@@ -286,17 +282,11 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_search_responses': {
       const { form_id: form_id, keyword: keyword, max_results: max_results = 200 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
+      const formId = requireFormId(params);
       if (!keyword?.trim()) throw new Error('Missing required param: keyword');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
+      const { form, responses } = await loadFormAndResponses(credentials, formId, max_results),
         needle = keyword.trim().toLowerCase(),
-        questions = FormsAPI.extractQuestions(form),
-        qMap = Object.fromEntries(
-          questions.filter((q) => q.questionId).map((q) => [q.questionId, q.title || '(Untitled)']),
-        ),
+        qMap = buildQuestionTitleMap(form),
         matched = responses.filter((resp) =>
           Object.values(resp.answers ?? {}).some((answer) =>
             FormsAPI.extractAnswerValue(answer).toLowerCase().includes(needle),
@@ -327,9 +317,8 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       ].join('\n');
     }
     case 'forms_list_questions': {
-      const { form_id: form_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const form = await FormsAPI.getForm(credentials, form_id.trim()),
+      const formId = requireFormId(params);
+      const form = await FormsAPI.getForm(credentials, formId),
         questions = FormsAPI.extractQuestions(form),
         lines = [`**${form.info?.title ?? 'Untitled Form'}** — Questions`, ''];
       let qNum = 0;
@@ -349,17 +338,17 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       return lines.join('\n');
     }
     case 'forms_get_question_by_title': {
-      const { form_id: form_id, title_query: title_query } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
+      const { title_query: title_query } = params;
+      const formId = requireFormId(params);
       if (!title_query?.trim()) throw new Error('Missing required param: title_query');
-      const form = await FormsAPI.getForm(credentials, form_id.trim()),
+      const form = await FormsAPI.getForm(credentials, formId),
         questions = FormsAPI.extractQuestions(form),
         needle = title_query.trim().toLowerCase(),
         matches = questions.filter((q) => q.title?.toLowerCase().includes(needle));
       if (!matches.length)
-        return `No questions matching "${title_query}" found in form "${form.info?.title ?? form_id}".`;
+        return `No questions matching "${title_query}" found in form "${form.info?.title ?? formId}".`;
       const lines = [
-        `**${matches.length} question(s)** matching "${title_query}" in "${form.info?.title ?? form_id}"`,
+        `**${matches.length} question(s)** matching "${title_query}" in "${form.info?.title ?? formId}"`,
         '',
       ];
       return (
@@ -377,19 +366,16 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'forms_count_answers_for_question': {
-      const { form_id: form_id, question_id: question_id, max_results: max_results = 500 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      if (!question_id?.trim()) throw new Error('Missing required param: question_id');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
-        question = FormsAPI.extractQuestions(form).find((q) => q.questionId === question_id.trim());
-      if (!question) throw new Error(`Question ID "${question_id}" not found in this form.`);
+      const { responses, question, questionId } = await loadQuestionResponses(
+        credentials,
+        params,
+        500,
+      );
+      if (!question) throw new Error(`Question ID "${questionId}" not found in this form.`);
       const counts = {};
       let answered = 0;
       for (const resp of responses) {
-        const answer = resp.answers?.[question_id.trim()];
+        const answer = resp.answers?.[questionId];
         if (!answer) continue;
         const value = FormsAPI.extractAnswerValue(answer);
         if ('(no answer)' !== value) {
@@ -412,18 +398,15 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       return lines.join('\n');
     }
     case 'forms_analyze_scale_question': {
-      const { form_id: form_id, question_id: question_id, max_results: max_results = 500 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      if (!question_id?.trim()) throw new Error('Missing required param: question_id');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
-        question = FormsAPI.extractQuestions(form).find((q) => q.questionId === question_id.trim());
-      if (!question) throw new Error(`Question ID "${question_id}" not found in this form.`);
+      const { responses, question, questionId } = await loadQuestionResponses(
+        credentials,
+        params,
+        500,
+      );
+      if (!question) throw new Error(`Question ID "${questionId}" not found in this form.`);
       const values = [];
       for (const resp of responses) {
-        const answer = resp.answers?.[question_id.trim()];
+        const answer = resp.answers?.[questionId];
         if (!answer) continue;
         const raw = FormsAPI.extractAnswerValue(answer),
           num = parseFloat(raw);
@@ -457,18 +440,15 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       return lines.join('\n');
     }
     case 'forms_collect_text_answers': {
-      const { form_id: form_id, question_id: question_id, max_results: max_results = 100 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      if (!question_id?.trim()) throw new Error('Missing required param: question_id');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
-        question = FormsAPI.extractQuestions(form).find((q) => q.questionId === question_id.trim());
-      if (!question) throw new Error(`Question ID "${question_id}" not found.`);
+      const { responses, question, questionId } = await loadQuestionResponses(
+        credentials,
+        params,
+        100,
+      );
+      if (!question) throw new Error(`Question ID "${questionId}" not found.`);
       const answers = [];
       for (const resp of responses) {
-        const answer = resp.answers?.[question_id.trim()],
+        const answer = resp.answers?.[questionId],
           value = FormsAPI.extractAnswerValue(answer);
         value &&
           '(no answer)' !== value &&
@@ -487,24 +467,13 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'forms_get_top_answers': {
-      const {
-        form_id: form_id,
-        question_id: question_id,
-        top_n: top_n = 5,
-        max_results: max_results = 500,
-      } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      if (!question_id?.trim()) throw new Error('Missing required param: question_id');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
-        question = FormsAPI.extractQuestions(form).find((q) => q.questionId === question_id.trim());
-      if (!question) throw new Error(`Question ID "${question_id}" not found.`);
+      const { top_n: top_n = 5 } = params,
+        { responses, question, questionId } = await loadQuestionResponses(credentials, params, 500);
+      if (!question) throw new Error(`Question ID "${questionId}" not found.`);
       const counts = {};
       let total = 0;
       for (const resp of responses) {
-        const answer = resp.answers?.[question_id.trim()],
+        const answer = resp.answers?.[questionId],
           value = FormsAPI.extractAnswerValue(answer);
         if (value && '(no answer)' !== value) {
           total++;
@@ -529,14 +498,9 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_get_unanswered_count': {
       const { form_id: form_id, max_results: max_results = 200 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
-        questions = FormsAPI.extractQuestions(form).filter(
-          (q) => !['PAGE_BREAK', 'SECTION_TEXT', 'IMAGE', 'VIDEO'].includes(q.type) && q.questionId,
-        ),
+      const formId = requireFormId(params);
+      const { form, responses } = await loadFormAndResponses(credentials, formId, max_results),
+        questions = answerQuestionsWithIds(form),
         total = responses.length;
       if (!total) return `No responses found for form "${form.info?.title ?? form_id}".`;
       const lines = [
@@ -557,11 +521,8 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_get_score_summary': {
       const { form_id: form_id, max_results: max_results = 200 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
+      const formId = requireFormId(params);
+      const { form, responses } = await loadFormAndResponses(credentials, formId, max_results),
         scoredResponses = responses.filter((r) => null != r.totalScore);
       if (!scoredResponses.length)
         return `No quiz scores found. Make sure "${form.info?.title ?? form_id}" is a quiz with graded responses.`;
@@ -590,11 +551,8 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_get_quiz_leaderboard': {
       const { form_id: form_id, top_n: top_n = 10, max_results: max_results = 200 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
+      const formId = requireFormId(params);
+      const { form, responses } = await loadFormAndResponses(credentials, formId, max_results),
         scoredResponses = responses
           .filter((r) => null != r.totalScore)
           .sort((a, b) => b.totalScore - a.totalScore)
@@ -616,11 +574,12 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_get_respondent_list': {
       const { form_id: form_id, max_results: max_results = 200 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses, totalResponses: totalResponses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
+      const formId = requireFormId(params);
+      const { form, responses, totalResponses } = await loadFormAndResponses(
+          credentials,
+          formId,
+          max_results,
+        ),
         withEmail = responses.filter((r) => r.respondentEmail);
       if (!withEmail.length)
         return 'No respondent emails found. The form may not be collecting email addresses, or no responses have been submitted yet.';
@@ -642,17 +601,15 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
         response_id_a: response_id_a,
         response_id_b: response_id_b,
       } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
+      const formId = requireFormId(params);
       if (!response_id_a?.trim()) throw new Error('Missing required param: response_id_a');
       if (!response_id_b?.trim()) throw new Error('Missing required param: response_id_b');
       const [form, respA, respB] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.getResponse(credentials, form_id.trim(), response_id_a.trim()),
-          FormsAPI.getResponse(credentials, form_id.trim(), response_id_b.trim()),
+          FormsAPI.getForm(credentials, formId),
+          FormsAPI.getResponse(credentials, formId, response_id_a.trim()),
+          FormsAPI.getResponse(credentials, formId, response_id_b.trim()),
         ]),
-        questions = FormsAPI.extractQuestions(form).filter(
-          (q) => !['PAGE_BREAK', 'SECTION_TEXT', 'IMAGE', 'VIDEO'].includes(q.type) && q.questionId,
-        ),
+        questions = answerQuestionsWithIds(form),
         labelA = respA.respondentEmail ?? `Response A (${respA.responseId.slice(0, 8)})`,
         labelB = respB.respondentEmail ?? `Response B (${respB.responseId.slice(0, 8)})`,
         lines = [
@@ -674,15 +631,14 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_export_csv': {
       const { form_id: form_id, max_results: max_results = 200 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses, totalResponses: totalResponses }] = await Promise.all([
-        FormsAPI.getForm(credentials, form_id.trim()),
-        FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-      ]);
+      const formId = requireFormId(params);
+      const { form, responses, totalResponses } = await loadFormAndResponses(
+        credentials,
+        formId,
+        max_results,
+      );
       if (!responses.length) return `No responses found for form "${form.info?.title ?? form_id}".`;
-      const questions = FormsAPI.extractQuestions(form).filter(
-          (q) => !['PAGE_BREAK', 'SECTION_TEXT', 'IMAGE', 'VIDEO'].includes(q.type) && q.questionId,
-        ),
+      const questions = answerQuestionsWithIds(form),
         rows = [
           [
             'Response ID',
@@ -712,13 +668,12 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
       ].join('\n');
     }
     case 'forms_get_form_settings': {
-      const { form_id: form_id } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const form = await FormsAPI.getForm(credentials, form_id.trim()),
+      const formId = requireFormId(params);
+      const form = await FormsAPI.getForm(credentials, formId),
         s = form.settings ?? {},
         quiz = s.quizSettings,
         lines = [
-          `**Settings** for "${form.info?.title ?? form_id}"`,
+          `**Settings** for "${form.info?.title ?? formId}"`,
           '',
           `Form ID: \`${form.formId}\``,
           `Responder link: ${form.responderUri ?? `https://docs.google.com/forms/d/${form.formId}/viewform`}`,
@@ -755,14 +710,13 @@ export async function executeFormsChatTool(ctx, toolName, params = {}) {
     }
     case 'forms_get_completion_rate': {
       const { form_id: form_id, max_results: max_results = 200 } = params;
-      if (!form_id?.trim()) throw new Error('Missing required param: form_id');
-      const [form, { responses: responses, totalResponses: totalResponses }] = await Promise.all([
-          FormsAPI.getForm(credentials, form_id.trim()),
-          FormsAPI.listResponses(credentials, form_id.trim(), { maxResults: max_results }),
-        ]),
-        questions = FormsAPI.extractQuestions(form).filter(
-          (q) => !['PAGE_BREAK', 'SECTION_TEXT', 'IMAGE', 'VIDEO'].includes(q.type) && q.questionId,
+      const formId = requireFormId(params);
+      const { form, responses, totalResponses } = await loadFormAndResponses(
+          credentials,
+          formId,
+          max_results,
         ),
+        questions = answerQuestionsWithIds(form),
         total = responses.length;
       if (!total) return `No responses found for form "${form.info?.title ?? form_id}".`;
       const lines = [

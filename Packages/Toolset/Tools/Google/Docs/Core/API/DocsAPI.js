@@ -1,4 +1,7 @@
-import { createGoogleJsonFetch } from '../../../Core/API/GoogleApiFetch.js';
+import {
+  createGoogleJsonFetch,
+  createReplaceAllTextRequest,
+} from '../../../Core/API/GoogleApiFetch.js';
 
 const DOCS_BASE = 'https://docs.googleapis.com/v1/documents';
 const docsFetch = createGoogleJsonFetch('Docs');
@@ -81,14 +84,7 @@ export async function replaceAllText(creds, documentId, searchText, replacement)
   return docsFetch(creds, `${DOCS_BASE}/${documentId}:batchUpdate`, {
     method: 'POST',
     body: JSON.stringify({
-      requests: [
-        {
-          replaceAllText: {
-            containsText: { text: searchText, matchCase: !0 },
-            replaceText: replacement,
-          },
-        },
-      ],
+      requests: [createReplaceAllTextRequest(searchText, replacement)],
     }),
   });
 }

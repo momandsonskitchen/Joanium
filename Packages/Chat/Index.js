@@ -13,6 +13,53 @@ export async function createPackage({ rootDirectory }) {
   const healthChecker = createModelHealthChecker({ rootDirectory });
   const usageTracker = createUsageTracker({ rootDirectory });
 
+  function sendIfAlive(event, channel, payload) {
+    if (!event.sender.isDestroyed()) {
+      event.sender.send(channel, payload);
+    }
+  }
+
+  function createUsageExchange(meta, isNewSession) {
+    const tokensIn = estimateTokens(meta?.charCountIn ?? 0);
+    const tokensOut = estimateTokens(meta?.charCountOut ?? 0);
+    if (tokensIn + tokensOut <= 0) return null;
+
+    return {
+      tokensIn,
+      tokensOut,
+      modelId: meta?.modelId ?? null,
+      modelLabel: meta?.modelLabel ?? null,
+      providerLabel: meta?.providerLabel ?? null,
+      isNewSession,
+    };
+  }
+
+  async function recordUsage(meta, isNewSession) {
+    const exchange = createUsageExchange(meta, isNewSession);
+    if (exchange) {
+      await usageTracker.recordExchange(exchange);
+    }
+  }
+
+  function streamMessage(event, request, channels, decorate = (payload) => payload) {
+    const sendError = (error) => {
+      sendIfAlive(event, channels.error, decorate({ message: error?.message ?? String(error) }));
+    };
+
+    chatStateManager
+      .streamMessage(request, {
+        onChunk: (chunk) => {
+          sendIfAlive(event, channels.chunk, decorate(chunk));
+        },
+        onDone: (meta) => {
+          sendIfAlive(event, channels.done, decorate(meta));
+          recordUsage(meta, Boolean(request?.isNewSession)).catch(() => {});
+        },
+        onError: sendError,
+      })
+      .catch(sendError);
+  }
+
   return {
     id: 'Chat',
     ipcHandlers: [
@@ -23,50 +70,11 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:stream-message',
         handler: (event, request) => {
-          chatStateManager
-            .streamMessage(request, {
-              onChunk: (chunk) => {
-                if (!event.sender.isDestroyed()) {
-                  event.sender.send('chat:stream-chunk', chunk);
-                }
-              },
-              onDone: (meta) => {
-                if (!event.sender.isDestroyed()) {
-                  event.sender.send('chat:stream-done', meta);
-                }
-
-                // Record usage — fire-and-forget, non-blocking.
-                const tokensIn = estimateTokens(meta?.charCountIn ?? 0);
-                const tokensOut = estimateTokens(meta?.charCountOut ?? 0);
-                if (tokensIn + tokensOut > 0) {
-                  usageTracker
-                    .recordExchange({
-                      tokensIn,
-                      tokensOut,
-                      modelId: meta?.modelId ?? null,
-                      modelLabel: meta?.modelLabel ?? null,
-                      providerLabel: meta?.providerLabel ?? null,
-                      isNewSession: Boolean(request?.isNewSession),
-                    })
-                    .catch(() => {});
-                }
-              },
-              onError: (error) => {
-                if (!event.sender.isDestroyed()) {
-                  event.sender.send('chat:stream-error', {
-                    message: error?.message ?? String(error),
-                  });
-                }
-              },
-            })
-            .catch((error) => {
-              if (!event.sender.isDestroyed()) {
-                event.sender.send('chat:stream-error', {
-                  message: error?.message ?? String(error),
-                });
-              }
-            });
-
+          streamMessage(event, request, {
+            chunk: 'chat:stream-chunk',
+            done: 'chat:stream-done',
+            error: 'chat:stream-error',
+          });
           return null;
         },
       },
@@ -80,52 +88,16 @@ export async function createPackage({ rootDirectory }) {
         channel: 'chat:stream-message-agent',
         handler: (event, request) => {
           const { streamId } = request;
-
-          chatStateManager
-            .streamMessage(request, {
-              onChunk: (chunk) => {
-                if (!event.sender.isDestroyed()) {
-                  event.sender.send('agents:stream-chunk', { streamId, ...chunk });
-                }
-              },
-              onDone: (meta) => {
-                if (!event.sender.isDestroyed()) {
-                  event.sender.send('agents:stream-done', { streamId, ...meta });
-                }
-
-                const tokensIn = estimateTokens(meta?.charCountIn ?? 0);
-                const tokensOut = estimateTokens(meta?.charCountOut ?? 0);
-                if (tokensIn + tokensOut > 0) {
-                  usageTracker
-                    .recordExchange({
-                      tokensIn,
-                      tokensOut,
-                      modelId: meta?.modelId ?? null,
-                      modelLabel: meta?.modelLabel ?? null,
-                      providerLabel: meta?.providerLabel ?? null,
-                      isNewSession: Boolean(request?.isNewSession),
-                    })
-                    .catch(() => {});
-                }
-              },
-              onError: (error) => {
-                if (!event.sender.isDestroyed()) {
-                  event.sender.send('agents:stream-error', {
-                    streamId,
-                    message: error?.message ?? String(error),
-                  });
-                }
-              },
-            })
-            .catch((error) => {
-              if (!event.sender.isDestroyed()) {
-                event.sender.send('agents:stream-error', {
-                  streamId,
-                  message: error?.message ?? String(error),
-                });
-              }
-            });
-
+          streamMessage(
+            event,
+            request,
+            {
+              chunk: 'agents:stream-chunk',
+              done: 'agents:stream-done',
+              error: 'agents:stream-error',
+            },
+            (payload) => ({ streamId, ...payload }),
+          );
           return null;
         },
       },
@@ -133,20 +105,7 @@ export async function createPackage({ rootDirectory }) {
         channel: 'chat:complete-message',
         handler: async (_event, request) => {
           const result = await chatStateManager.completeMessage(request);
-          const tokensIn = estimateTokens(result?.charCountIn ?? 0);
-          const tokensOut = estimateTokens(result?.charCountOut ?? 0);
-
-          if (tokensIn + tokensOut > 0) {
-            await usageTracker.recordExchange({
-              tokensIn,
-              tokensOut,
-              modelId: result?.modelId ?? null,
-              modelLabel: result?.modelLabel ?? null,
-              providerLabel: result?.providerLabel ?? null,
-              isNewSession: Boolean(request?.isNewSession),
-            });
-          }
-
+          await recordUsage(result, Boolean(request?.isNewSession));
           return result;
         },
       },
@@ -154,20 +113,7 @@ export async function createPackage({ rootDirectory }) {
         channel: 'chat:enhance-prompt',
         handler: async (_event, { raw, providerId, modelId }) => {
           const result = await chatStateManager.enhancePrompt({ raw, providerId, modelId });
-          const tokensIn = estimateTokens(result?.charCountIn ?? 0);
-          const tokensOut = estimateTokens(result?.charCountOut ?? 0);
-
-          if (tokensIn + tokensOut > 0) {
-            await usageTracker.recordExchange({
-              tokensIn,
-              tokensOut,
-              modelId: result?.modelId ?? null,
-              modelLabel: result?.modelLabel ?? null,
-              providerLabel: result?.providerLabel ?? null,
-              isNewSession: false,
-            });
-          }
-
+          await recordUsage(result, false);
           return result;
         },
       },

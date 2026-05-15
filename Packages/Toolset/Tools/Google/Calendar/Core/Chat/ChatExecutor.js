@@ -1,6 +1,12 @@
 import * as CalendarAPI from '../API/CalendarAPI.js';
 import { requireGoogleCredentials } from '../../../Common.js';
-import { formatEventTime, formatEvent, formatSlot } from './Utils.js';
+import {
+  buildCalendarEventPayload,
+  buildDefaultEndDateTime,
+  formatEventTime,
+  formatEvent,
+  formatSlot,
+} from './Utils.js';
 export async function executeCalendarChatTool(ctx, toolName, params = {}) {
   const credentials = requireGoogleCredentials(ctx);
   switch (toolName) {
@@ -62,28 +68,25 @@ export async function executeCalendarChatTool(ctx, toolName, params = {}) {
       if (!summary?.trim()) throw new Error('Missing required param: summary (event title)');
       if (!start_datetime?.trim()) throw new Error('Missing required param: start_datetime');
       let endDateTime = end_datetime;
-      if (!endDateTime && !all_day)
-        try {
-          const startDate = new Date(start_datetime);
-          startDate.setHours(startDate.getHours() + 1), (endDateTime = startDate.toISOString());
-        } catch {
-          endDateTime = start_datetime;
-        }
-      const attendeeList = attendees
-          ? String(attendees)
-              .split(',')
-              .map((e) => e.trim())
-              .filter(Boolean)
-          : [],
-        event = await CalendarAPI.createEvent(credentials, calendar_id?.trim() || 'primary', {
-          summary: summary.trim(),
-          startDateTime: start_datetime.trim(),
-          endDateTime: endDateTime,
-          description: description?.trim() || '',
-          location: location?.trim() || '',
-          attendees: attendeeList,
-          allDay: Boolean(all_day),
+      if (!endDateTime) {
+        endDateTime = buildDefaultEndDateTime(start_datetime, {
+          allDay: all_day,
+          tolerateInvalid: true,
         });
+      }
+      const event = await CalendarAPI.createEvent(
+        credentials,
+        calendar_id?.trim() || 'primary',
+        buildCalendarEventPayload({
+          summary,
+          startDateTime: start_datetime,
+          endDateTime,
+          description,
+          location,
+          attendees,
+          allDay: all_day,
+        }),
+      );
       return [
         'Event created in Google Calendar',
         `Title: ${event.summary ?? summary}`,
@@ -253,24 +256,21 @@ export async function executeCalendarChatTool(ctx, toolName, params = {}) {
         throw new Error('Missing required param: rrule (e.g. RRULE:FREQ=WEEKLY;BYDAY=MO)');
       let endDateTime = end_datetime;
       if (!endDateTime) {
-        const s = new Date(start_datetime);
-        s.setHours(s.getHours() + 1), (endDateTime = s.toISOString());
+        endDateTime = buildDefaultEndDateTime(start_datetime);
       }
-      const attendeeList = attendees
-          ? String(attendees)
-              .split(',')
-              .map((e) => e.trim())
-              .filter(Boolean)
-          : [],
-        event = await CalendarAPI.createEvent(credentials, calendar_id?.trim() || 'primary', {
-          summary: summary.trim(),
-          startDateTime: start_datetime.trim(),
-          endDateTime: endDateTime,
-          description: description?.trim() || '',
-          location: location?.trim() || '',
-          attendees: attendeeList,
+      const event = await CalendarAPI.createEvent(
+        credentials,
+        calendar_id?.trim() || 'primary',
+        buildCalendarEventPayload({
+          summary,
+          startDateTime: start_datetime,
+          endDateTime,
+          description,
+          location,
+          attendees,
           recurrence: [rrule.startsWith('RRULE:') ? rrule : `RRULE:${rrule}`],
-        });
+        }),
+      );
       return [
         'Recurring event created.',
         `Title: ${event.summary}`,

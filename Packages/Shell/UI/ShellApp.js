@@ -202,6 +202,15 @@ async function bootstrap() {
     return chatView;
   }
 
+  function mountSearchListPanel(panel) {
+    const element = panel.build();
+    canvas.append(element);
+    return {
+      element,
+      onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
+    };
+  }
+
   const routeDefinitions = [
     {
       id: 'chat',
@@ -256,12 +265,7 @@ async function bootstrap() {
           },
           getActiveProject: () => activeProject,
         });
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
-        };
+        return mountSearchListPanel(panel);
       },
     },
     {
@@ -281,39 +285,21 @@ async function bootstrap() {
       id: 'templates',
       icon: 'tabTemplates',
       create: async () => {
-        const panel = createTemplatesPanel(strings.templates);
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
-        };
+        return mountSearchListPanel(createTemplatesPanel(strings.templates));
       },
     },
     {
       id: 'agents',
       icon: 'tabAgents',
       create: async () => {
-        const panel = createAgentsPanel(strings.agents);
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
-        };
+        return mountSearchListPanel(createAgentsPanel(strings.agents));
       },
     },
     {
       id: 'skills',
       icon: 'tabSkills',
       create: async () => {
-        const panel = createSkillsPanel(strings.skills);
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
-        };
+        return mountSearchListPanel(createSkillsPanel(strings.skills));
       },
     },
     {
@@ -324,25 +310,14 @@ async function bootstrap() {
           getActivePersona: () => activePersona,
           onActivatePersona: setActivePersona,
         });
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
-        };
+        return mountSearchListPanel(panel);
       },
     },
     {
       id: 'marketplace',
       icon: 'tabMarketplace',
       create: async () => {
-        const panel = createMarketplacePanel(strings.marketplace);
-        const element = panel.build();
-        canvas.append(element);
-        return {
-          element,
-          onShow: () => panel.populateList(element._listEl, element._search.getValue().trim()),
-        };
+        return mountSearchListPanel(createMarketplacePanel(strings.marketplace));
       },
     },
     {

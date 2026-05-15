@@ -1,67 +1,25 @@
-import { readUserState } from '../../../../Shared/UserData/UserData.js';
+import {
+  buildUrl,
+  clampInteger,
+  formatDate,
+  formatList,
+  parseCommaList,
+  readConnectorDetails,
+  readJsonResponse,
+  requireText,
+  truncateText as truncateConnectorText,
+} from '../../../Core/ConnectorHttp.js';
 
 const GITHUB_API = 'https://api.github.com';
 const MAX_TEXT_PREVIEW = 6000;
 
-function requireText(value, label) {
-  const text = String(value ?? '').trim();
-  if (!text) throw new Error(`Missing required parameter: ${label}.`);
-  return text;
-}
-
-function clampInteger(value, fallback, min, max) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.round(parsed))) : fallback;
-}
-
-function parseCommaList(value = '') {
-  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
-  return String(value)
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function formatDate(value) {
-  if (!value) return '';
-  try {
-    return new Date(value).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return String(value);
-  }
-}
-
 function truncateText(value = '', limit = MAX_TEXT_PREVIEW) {
-  const text = String(value);
-  return text.length > limit ? `${text.slice(0, limit)}\n...(truncated)` : text;
+  return truncateConnectorText(value, limit);
 }
 
 async function readGitHubToken(rootDirectory) {
-  const state = await readUserState(rootDirectory);
-  return String(state.connectors?.details?.github?.token ?? '').trim();
-}
-
-async function readJsonResponse(response) {
-  const rawText = await response.text();
-  let data = null;
-  try {
-    data = rawText ? JSON.parse(rawText) : null;
-  } catch {
-    data = null;
-  }
-
-  if (!response.ok) {
-    const message = data?.message || data?.error?.message || rawText || response.statusText;
-    throw new Error(`${response.status} ${response.statusText}: ${message}`);
-  }
-
-  return data;
+  const details = await readConnectorDetails(rootDirectory, 'github');
+  return String(details.token ?? '').trim();
 }
 
 async function githubRequest(
@@ -81,12 +39,7 @@ async function githubRequest(
     throw new Error('GitHub token is not configured in Settings > Connectors.');
   }
 
-  const url = new URL(`${GITHUB_API}${pathname}`);
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (value !== undefined && value !== null && String(value).trim() !== '') {
-      url.searchParams.set(key, String(value));
-    }
-  }
+  const url = buildUrl(GITHUB_API, pathname, searchParams);
 
   const response = await fetch(url, {
     method,
@@ -189,10 +142,6 @@ function formatRelease(release, index) {
     .join('\n');
 }
 
-function formatList(title, rows) {
-  return rows.length ? [title, '', ...rows].join('\n') : `${title}\n\nNo results found.`;
-}
-
 async function getFileContent(rootDirectory, params) {
   const owner = requireText(params.owner, 'owner');
   const repo = requireText(params.repo, 'repo');
@@ -278,6 +227,36 @@ function getSafeState(value) {
   return ['open', 'closed', 'all'].includes(state) ? state : 'open';
 }
 
+function readRepositoryParams(params) {
+  return {
+    owner: requireText(params.owner, 'owner'),
+    repo: requireText(params.repo, 'repo'),
+  };
+}
+
+function readPullRequestParams(params) {
+  return {
+    ...readRepositoryParams(params),
+    prNumber: requireText(params.pr_number ?? params.prNumber, 'pr_number'),
+  };
+}
+
+function readIssueParams(params) {
+  return {
+    ...readRepositoryParams(params),
+    issueNumber: requireText(params.issue_number ?? params.issueNumber, 'issue_number'),
+  };
+}
+
+async function listRepositoryIssues(rootDirectory, params) {
+  const { owner, repo } = readRepositoryParams(params);
+  const limit = clampInteger(params.limit ?? params.per_page, 10, 1, 30);
+  const issues = await githubRequest(rootDirectory, `/repos/${owner}/${repo}/issues`, {
+    searchParams: { state: getSafeState(params.state), per_page: limit },
+  });
+  return { owner: owner, repo: repo, issues: issues };
+}
+
 export function createGitHubToolHandlers({ rootDirectory }) {
   return {
     async github_get_repository(params = {}) {
@@ -311,22 +290,12 @@ export function createGitHubToolHandlers({ rootDirectory }) {
     },
 
     async github_list_issues(params = {}) {
-      const owner = requireText(params.owner, 'owner');
-      const repo = requireText(params.repo, 'repo');
-      const limit = clampInteger(params.limit ?? params.per_page, 10, 1, 30);
-      const issues = await githubRequest(rootDirectory, `/repos/${owner}/${repo}/issues`, {
-        searchParams: { state: getSafeState(params.state), per_page: limit },
-      });
+      const { owner, repo, issues } = await listRepositoryIssues(rootDirectory, params);
       return formatList(`Issues and pull requests for ${owner}/${repo}`, issues.map(formatIssue));
     },
 
     async github_get_issues(params = {}) {
-      const owner = requireText(params.owner, 'owner');
-      const repo = requireText(params.repo, 'repo');
-      const limit = clampInteger(params.limit ?? params.per_page, 10, 1, 30);
-      const issues = await githubRequest(rootDirectory, `/repos/${owner}/${repo}/issues`, {
-        searchParams: { state: getSafeState(params.state), per_page: limit },
-      });
+      const { owner, repo, issues } = await listRepositoryIssues(rootDirectory, params);
       return formatList(
         `Issues for ${owner}/${repo}`,
         issues.filter((issue) => !issue.pull_request).map(formatIssue),
@@ -480,9 +449,7 @@ export function createGitHubToolHandlers({ rootDirectory }) {
     },
 
     async github_get_pr_details(params = {}) {
-      const owner = requireText(params.owner, 'owner');
-      const repo = requireText(params.repo, 'repo');
-      const prNumber = requireText(params.pr_number ?? params.prNumber, 'pr_number');
+      const { owner, repo, prNumber } = readPullRequestParams(params);
       const pr = await githubRequest(rootDirectory, `/repos/${owner}/${repo}/pulls/${prNumber}`);
       return [
         `Pull request #${pr.number}: ${pr.title}`,
@@ -501,9 +468,7 @@ export function createGitHubToolHandlers({ rootDirectory }) {
     },
 
     async github_get_pr_diff(params = {}) {
-      const owner = requireText(params.owner, 'owner');
-      const repo = requireText(params.repo, 'repo');
-      const prNumber = requireText(params.pr_number ?? params.prNumber, 'pr_number');
+      const { owner, repo, prNumber } = readPullRequestParams(params);
       const diff = await githubRequest(rootDirectory, `/repos/${owner}/${repo}/pulls/${prNumber}`, {
         accept: 'application/vnd.github.v3.diff',
         raw: true,
@@ -593,9 +558,7 @@ export function createGitHubToolHandlers({ rootDirectory }) {
     },
 
     async github_close_issue(params = {}) {
-      const owner = requireText(params.owner, 'owner');
-      const repo = requireText(params.repo, 'repo');
-      const issueNumber = requireText(params.issue_number ?? params.issueNumber, 'issue_number');
+      const { owner, repo, issueNumber } = readIssueParams(params);
       const issue = await githubRequest(
         rootDirectory,
         `/repos/${owner}/${repo}/issues/${issueNumber}`,
@@ -613,9 +576,7 @@ export function createGitHubToolHandlers({ rootDirectory }) {
     },
 
     async github_reopen_issue(params = {}) {
-      const owner = requireText(params.owner, 'owner');
-      const repo = requireText(params.repo, 'repo');
-      const issueNumber = requireText(params.issue_number ?? params.issueNumber, 'issue_number');
+      const { owner, repo, issueNumber } = readIssueParams(params);
       const issue = await githubRequest(
         rootDirectory,
         `/repos/${owner}/${repo}/issues/${issueNumber}`,

@@ -1,3 +1,5 @@
+export { parseCommaList } from '../../Core/ConnectorHttp.js';
+
 function getErrorMessage(error, fallback = 'Unknown error') {
   if (error instanceof Error && error.message) return error.message;
   return typeof error === 'string' && error ? error : fallback;
@@ -69,14 +71,6 @@ export async function runCredentialedChatTool(ctx, getCredentials, notConnected,
   } catch (error) {
     return { ok: false, error: getErrorMessage(error) };
   }
-}
-
-export function parseCommaList(value = '') {
-  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
-  return String(value)
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
 }
 
 export function formatDate(value, fallback = 'unknown date') {

@@ -1,3 +1,41 @@
+const PRESENTATION_ID_PARAMETER = {
+  type: 'string',
+  required: !0,
+  description: 'Google Slides presentation ID.',
+};
+
+const TABLE_OBJECT_ID_PARAMETER = {
+  type: 'string',
+  required: !0,
+  description: 'Object ID of the table.',
+};
+
+const ROW_INDEX_PARAMETER = {
+  type: 'number',
+  required: !0,
+  description: 'Zero-based index of the row.',
+};
+
+function optionalNumberParameter(description) {
+  return { type: 'number', required: !1, description: description };
+}
+
+function createPlacementParameters({
+  x,
+  y,
+  width,
+  height,
+  widthLabel = 'Width',
+  heightLabel = 'Height',
+}) {
+  return {
+    x: optionalNumberParameter(`Horizontal position in points (default ${x}).`),
+    y: optionalNumberParameter(`Vertical position in points (default ${y}).`),
+    width: optionalNumberParameter(`${widthLabel} in points (default ${width}).`),
+    height: optionalNumberParameter(`${heightLabel} in points (default ${height}).`),
+  };
+}
+
 export const SLIDES_TOOLS = [
   {
     name: 'slides_get_info',
@@ -179,18 +217,7 @@ export const SLIDES_TOOLS = [
         required: !1,
         description: 'Text content to place inside the text box.',
       },
-      x: {
-        type: 'number',
-        required: !1,
-        description: 'Horizontal position in points (default 100).',
-      },
-      y: {
-        type: 'number',
-        required: !1,
-        description: 'Vertical position in points (default 100).',
-      },
-      width: { type: 'number', required: !1, description: 'Width in points (default 300).' },
-      height: { type: 'number', required: !1, description: 'Height in points (default 60).' },
+      ...createPlacementParameters({ x: 100, y: 100, width: 300, height: 60 }),
     },
   },
   {
@@ -286,18 +313,7 @@ export const SLIDES_TOOLS = [
         required: !1,
         description: 'Shape type constant (e.g. RECTANGLE, ELLIPSE, TRIANGLE). Default RECTANGLE.',
       },
-      x: {
-        type: 'number',
-        required: !1,
-        description: 'Horizontal position in points (default 100).',
-      },
-      y: {
-        type: 'number',
-        required: !1,
-        description: 'Vertical position in points (default 100).',
-      },
-      width: { type: 'number', required: !1, description: 'Width in points (default 200).' },
-      height: { type: 'number', required: !1, description: 'Height in points (default 150).' },
+      ...createPlacementParameters({ x: 100, y: 100, width: 200, height: 150 }),
     },
   },
   {
@@ -367,22 +383,14 @@ export const SLIDES_TOOLS = [
       },
       rows: { type: 'number', required: !1, description: 'Number of rows (default 3).' },
       columns: { type: 'number', required: !1, description: 'Number of columns (default 3).' },
-      x: {
-        type: 'number',
-        required: !1,
-        description: 'Horizontal position in points (default 50).',
-      },
-      y: {
-        type: 'number',
-        required: !1,
-        description: 'Vertical position in points (default 100).',
-      },
-      width: { type: 'number', required: !1, description: 'Table width in points (default 450).' },
-      height: {
-        type: 'number',
-        required: !1,
-        description: 'Table height in points (default 200).',
-      },
+      ...createPlacementParameters({
+        x: 50,
+        y: 100,
+        width: 450,
+        height: 200,
+        widthLabel: 'Table width',
+        heightLabel: 'Table height',
+      }),
     },
   },
   {
@@ -474,17 +482,9 @@ export const SLIDES_TOOLS = [
       'Insert one or more rows into an existing table, either above or below a specified row index.',
     category: 'slides',
     parameters: {
-      presentation_id: {
-        type: 'string',
-        required: !0,
-        description: 'Google Slides presentation ID.',
-      },
-      table_object_id: { type: 'string', required: !0, description: 'Object ID of the table.' },
-      row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based index of the reference row.',
-      },
+      presentation_id: PRESENTATION_ID_PARAMETER,
+      table_object_id: TABLE_OBJECT_ID_PARAMETER,
+      row_index: { ...ROW_INDEX_PARAMETER, description: 'Zero-based index of the reference row.' },
       insert_below: {
         type: 'boolean',
         required: !1,
@@ -499,17 +499,9 @@ export const SLIDES_TOOLS = [
     description: 'Delete a row from a table by its zero-based row index.',
     category: 'slides',
     parameters: {
-      presentation_id: {
-        type: 'string',
-        required: !0,
-        description: 'Google Slides presentation ID.',
-      },
-      table_object_id: { type: 'string', required: !0, description: 'Object ID of the table.' },
-      row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based index of the row to delete.',
-      },
+      presentation_id: PRESENTATION_ID_PARAMETER,
+      table_object_id: TABLE_OBJECT_ID_PARAMETER,
+      row_index: { ...ROW_INDEX_PARAMETER, description: 'Zero-based index of the row to delete.' },
     },
   },
   {
@@ -593,18 +585,7 @@ export const SLIDES_TOOLS = [
         required: !0,
         description: 'YouTube video ID (e.g. "dQw4w9WgXcQ" from youtube.com/watch?v=dQw4w9WgXcQ).',
       },
-      x: {
-        type: 'number',
-        required: !1,
-        description: 'Horizontal position in points (default 100).',
-      },
-      y: {
-        type: 'number',
-        required: !1,
-        description: 'Vertical position in points (default 100).',
-      },
-      width: { type: 'number', required: !1, description: 'Width in points (default 320).' },
-      height: { type: 'number', required: !1, description: 'Height in points (default 180).' },
+      ...createPlacementParameters({ x: 100, y: 100, width: 320, height: 180 }),
     },
   },
 ];

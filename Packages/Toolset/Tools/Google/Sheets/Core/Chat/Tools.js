@@ -1,3 +1,34 @@
+const SPREADSHEET_ID_PARAMETER = Object.freeze({
+  spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+});
+
+const SHEET_ID_PARAMETER = Object.freeze({
+  sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+});
+
+const GRID_RANGE_PARAMETERS = Object.freeze({
+  start_row_index: {
+    type: 'number',
+    required: !0,
+    description: 'Zero-based start row (inclusive).',
+  },
+  end_row_index: {
+    type: 'number',
+    required: !0,
+    description: 'Zero-based end row (exclusive).',
+  },
+  start_column_index: {
+    type: 'number',
+    required: !0,
+    description: 'Zero-based start column (inclusive).',
+  },
+  end_column_index: {
+    type: 'number',
+    required: !0,
+    description: 'Zero-based end column (exclusive).',
+  },
+});
+
 export const SHEETS_TOOLS = [
   {
     name: 'sheets_get_info',
@@ -16,7 +47,7 @@ export const SHEETS_TOOLS = [
     description: 'List all individual sheets (tabs) inside a Google Spreadsheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
     },
   },
   {
@@ -25,7 +56,7 @@ export const SHEETS_TOOLS = [
       "Read cell values from a range in a Google Spreadsheet. Use A1 notation like 'Sheet1!A1:D10' or just 'A1:D10' for the first sheet.",
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       range: {
         type: 'string',
         required: !0,
@@ -39,7 +70,7 @@ export const SHEETS_TOOLS = [
       'Write values to a range in a Google Spreadsheet, replacing existing data. Values is a 2D array (rows × columns).',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       range: {
         type: 'string',
         required: !0,
@@ -57,7 +88,7 @@ export const SHEETS_TOOLS = [
     description: 'Append new rows to the end of existing data in a sheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       range: {
         type: 'string',
         required: !0,
@@ -76,7 +107,7 @@ export const SHEETS_TOOLS = [
       'Clear all values from a range in a Google Spreadsheet (leaves formatting intact).',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       range: {
         type: 'string',
         required: !0,
@@ -103,7 +134,7 @@ export const SHEETS_TOOLS = [
     description: 'Add a new sheet (tab) to an existing Google Spreadsheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       title: { type: 'string', required: !0, description: 'Name for the new sheet.' },
     },
   },
@@ -112,7 +143,7 @@ export const SHEETS_TOOLS = [
     description: 'Delete a sheet (tab) from a Google Spreadsheet by its sheet ID.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       sheet_id: {
         type: 'number',
         required: !0,
@@ -125,7 +156,7 @@ export const SHEETS_TOOLS = [
     description: 'Rename a sheet (tab) inside a Google Spreadsheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       sheet_id: {
         type: 'number',
         required: !0,
@@ -140,7 +171,7 @@ export const SHEETS_TOOLS = [
       'Write values to multiple ranges at once in a single API call. More efficient than calling sheets_write_range repeatedly.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       updates: {
         type: 'string',
         required: !0,
@@ -154,7 +185,7 @@ export const SHEETS_TOOLS = [
     description: 'Clear values from multiple ranges at once in a single API call.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       ranges: {
         type: 'string',
         required: !0,
@@ -168,7 +199,7 @@ export const SHEETS_TOOLS = [
       'Read the raw formulas (not computed values) from a range. Returns =SUM(A1:A10) style strings where formulas exist.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       range: {
         type: 'string',
         required: !0,
@@ -201,7 +232,7 @@ export const SHEETS_TOOLS = [
     description: 'Duplicate a sheet within the same spreadsheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       sheet_id: {
         type: 'number',
         required: !0,
@@ -224,7 +255,7 @@ export const SHEETS_TOOLS = [
     description: 'Reorder a sheet by moving it to a different position (index) in the spreadsheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       sheet_id: { type: 'number', required: !0, description: 'Numeric ID of the sheet to move.' },
       new_index: {
         type: 'number',
@@ -238,8 +269,8 @@ export const SHEETS_TOOLS = [
     description: 'Insert blank rows into a sheet at a specified position.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
       start_index: {
         type: 'number',
         required: !0,
@@ -258,8 +289,8 @@ export const SHEETS_TOOLS = [
     description: 'Delete a range of rows from a sheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
       start_index: {
         type: 'number',
         required: !0,
@@ -278,8 +309,8 @@ export const SHEETS_TOOLS = [
     description: 'Insert blank columns into a sheet at a specified position.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
       start_index: {
         type: 'number',
         required: !0,
@@ -298,8 +329,8 @@ export const SHEETS_TOOLS = [
     description: 'Delete a range of columns from a sheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
       start_index: {
         type: 'number',
         required: !0,
@@ -317,8 +348,8 @@ export const SHEETS_TOOLS = [
     description: 'Auto-resize column widths to fit their content.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
       start_index: {
         type: 'number',
         required: !0,
@@ -336,28 +367,9 @@ export const SHEETS_TOOLS = [
     description: 'Merge a rectangular range of cells into one.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
-      start_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start row (inclusive).',
-      },
-      end_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end row (exclusive).',
-      },
-      start_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start column (inclusive).',
-      },
-      end_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end column (exclusive).',
-      },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
+      ...GRID_RANGE_PARAMETERS,
       merge_type: {
         type: 'string',
         required: !1,
@@ -370,28 +382,9 @@ export const SHEETS_TOOLS = [
     description: 'Unmerge previously merged cells in a range.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
-      start_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start row (inclusive).',
-      },
-      end_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end row (exclusive).',
-      },
-      start_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start column (inclusive).',
-      },
-      end_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end column (exclusive).',
-      },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
+      ...GRID_RANGE_PARAMETERS,
     },
   },
   {
@@ -400,8 +393,8 @@ export const SHEETS_TOOLS = [
       'Freeze rows and/or columns so they stay visible when scrolling. Set counts to 0 to unfreeze.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
       frozen_row_count: {
         type: 'number',
         required: !1,
@@ -420,28 +413,9 @@ export const SHEETS_TOOLS = [
       'Apply text formatting and/or background colour to a range of cells. All format fields are optional — only supplied ones are changed.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
-      start_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start row (inclusive).',
-      },
-      end_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end row (exclusive).',
-      },
-      start_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start column (inclusive).',
-      },
-      end_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end column (exclusive).',
-      },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
+      ...GRID_RANGE_PARAMETERS,
       bold: { type: 'boolean', required: !1, description: 'Make text bold.' },
       italic: { type: 'boolean', required: !1, description: 'Make text italic.' },
       font_size: { type: 'number', required: !1, description: 'Font size in points.' },
@@ -468,28 +442,15 @@ export const SHEETS_TOOLS = [
     description: 'Sort a range of cells by one or more columns.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
+      ...SHEET_ID_PARAMETER,
       start_row_index: {
-        type: 'number',
-        required: !0,
+        ...GRID_RANGE_PARAMETERS.start_row_index,
         description: 'Zero-based start row (inclusive). Usually 1 to skip a header row.',
       },
-      end_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end row (exclusive).',
-      },
-      start_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start column (inclusive).',
-      },
-      end_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end column (exclusive).',
-      },
+      end_row_index: GRID_RANGE_PARAMETERS.end_row_index,
+      start_column_index: GRID_RANGE_PARAMETERS.start_column_index,
+      end_column_index: GRID_RANGE_PARAMETERS.end_column_index,
       sort_specs: {
         type: 'string',
         required: !0,
@@ -503,7 +464,7 @@ export const SHEETS_TOOLS = [
     description: 'List all named ranges defined in a Google Spreadsheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
     },
   },
   {
@@ -511,34 +472,15 @@ export const SHEETS_TOOLS = [
     description: 'Create a named range (e.g. "SalesData") pointing to a specific cell range.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       name: {
         type: 'string',
         required: !0,
         description:
           'Name for the range (letters, numbers, underscores; must start with a letter).',
       },
-      sheet_id: { type: 'number', required: !0, description: 'Numeric sheet ID.' },
-      start_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start row (inclusive).',
-      },
-      end_row_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end row (exclusive).',
-      },
-      start_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based start column (inclusive).',
-      },
-      end_column_index: {
-        type: 'number',
-        required: !0,
-        description: 'Zero-based end column (exclusive).',
-      },
+      ...SHEET_ID_PARAMETER,
+      ...GRID_RANGE_PARAMETERS,
     },
   },
   {
@@ -547,7 +489,7 @@ export const SHEETS_TOOLS = [
       'Delete a named range by its ID. Use sheets_list_named_ranges to find the namedRangeId.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       named_range_id: {
         type: 'string',
         required: !0,
@@ -560,7 +502,7 @@ export const SHEETS_TOOLS = [
     description: 'Find and replace text values across a sheet or the entire spreadsheet.',
     category: 'sheets',
     parameters: {
-      spreadsheet_id: { type: 'string', required: !0, description: 'Google Spreadsheet ID.' },
+      ...SPREADSHEET_ID_PARAMETER,
       find: { type: 'string', required: !0, description: 'Text (or regex) to search for.' },
       replacement: { type: 'string', required: !0, description: 'Text to replace matches with.' },
       sheet_id: {

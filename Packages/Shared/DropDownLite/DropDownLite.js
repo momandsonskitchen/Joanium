@@ -1,4 +1,5 @@
 import { createElement } from '../Utils/DomUtils.js';
+import { createPortalDropdownController } from '../DropDown/PortalDropdown.js';
 
 // ── createDropDownLite ─────────────────────────────────────────────────────
 // A compact, inline-friendly dropdown built for settings panels and tight
@@ -17,6 +18,7 @@ export function createDropDownLite({
   onChange,
 } = {}) {
   let currentValue = value;
+  let dropdownController = null;
 
   // ── Wrapper ──────────────────────────────────────────────────────────────
 
@@ -81,7 +83,7 @@ export function createDropDownLite({
         currentValue = opt.value;
         syncTriggerText();
         buildPanel();
-        close();
+        dropdownController?.close();
         onChange?.(opt.value);
       });
 
@@ -109,41 +111,13 @@ export function createDropDownLite({
     }
   }
 
-  function open() {
-    positionPanel();
-    wrapper.classList.add('is-open');
-    panel.classList.add('is-open');
-    trigger.setAttribute('aria-expanded', 'true');
-  }
-
-  function close() {
-    wrapper.classList.remove('is-open');
-    panel.classList.remove('is-open');
-    trigger.setAttribute('aria-expanded', 'false');
-  }
-
   // ── Document-level listeners ──────────────────────────────────────────────
 
-  function onDocClick(e) {
-    if (!wrapper.contains(e.target) && !panel.contains(e.target)) close();
-  }
-
-  function onDocKeydown(e) {
-    if (e.key === 'Escape') close();
-  }
-
-  function onScrollOrResize() {
-    if (wrapper.classList.contains('is-open')) positionPanel();
-  }
-
-  document.addEventListener('click', onDocClick);
-  document.addEventListener('keydown', onDocKeydown);
-  window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
-  window.addEventListener('resize', onScrollOrResize, { passive: true });
-
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    wrapper.classList.contains('is-open') ? close() : open();
+  dropdownController = createPortalDropdownController({
+    wrapper,
+    panel,
+    trigger,
+    positionPanel,
   });
 
   // ── Init ──────────────────────────────────────────────────────────────────
@@ -167,11 +141,7 @@ export function createDropDownLite({
     },
 
     dispose() {
-      document.removeEventListener('click', onDocClick);
-      document.removeEventListener('keydown', onDocKeydown);
-      window.removeEventListener('scroll', onScrollOrResize, { capture: true });
-      window.removeEventListener('resize', onScrollOrResize);
-      panel.remove();
+      dropdownController.dispose();
     },
   };
 }

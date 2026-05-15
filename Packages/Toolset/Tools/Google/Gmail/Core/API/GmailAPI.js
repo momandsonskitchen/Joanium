@@ -28,17 +28,67 @@ function parseHeaders(headers = []) {
     messageId: get('Message-ID'),
   };
 }
-export async function getUnreadEmails(creds, maxResults = 10) {
-  const messages =
-      (await gmailFetch(creds, `${GMAIL_BASE}/messages?q=is:unread&maxResults=${maxResults}`))
-        .messages || [],
-    emails = [];
+
+function encodeRawMessage(message) {
+  return Buffer.from(message)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+async function postGmailJson(creds, path, body, errorPrefix) {
+  const fresh = await getFreshGoogleCreds(creds),
+    res = await fetch(`${GMAIL_BASE}${path}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${fresh.accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`${errorPrefix}: ${err.error?.message ?? res.status}`);
+  }
+  return 204 === res.status ? null : res.json();
+}
+
+async function listMessageRefs(creds, query, maxResults) {
+  return (
+    (
+      await gmailFetch(
+        creds,
+        `${GMAIL_BASE}/messages?q=${encodeURIComponent(query)}&maxResults=${maxResults}`,
+      )
+    ).messages ?? []
+  );
+}
+
+async function hydrateMessageRefs(creds, messages) {
+  const emails = [];
   for (const msg of messages) {
     const detail = await gmailFetch(creds, `${GMAIL_BASE}/messages/${msg.id}`),
       headers = parseHeaders(detail.payload.headers);
     emails.push({ id: msg.id, threadId: detail.threadId, ...headers, snippet: detail.snippet });
   }
   return emails;
+}
+
+async function batchModifyByQuery(creds, query, maxResults, payload) {
+  const messages = await listMessageRefs(creds, query, maxResults);
+  if (!messages.length) return 0;
+
+  await gmailFetch(creds, `${GMAIL_BASE}/messages/batchModify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ids: messages.map((message) => message.id),
+      ...payload,
+    }),
+  });
+  return messages.length;
+}
+
+export async function getUnreadEmails(creds, maxResults = 10) {
+  return hydrateMessageRefs(creds, await listMessageRefs(creds, 'is:unread', maxResults));
 }
 export async function getEmailBrief(creds, maxResults = 10) {
   const emails = await getUnreadEmails(creds, maxResults);
@@ -52,52 +102,29 @@ export async function getEmailBrief(creds, maxResults = 10) {
     : { count: 0, text: '' };
 }
 export async function searchEmails(creds, query, maxResults = 10) {
-  const messages =
-      (
-        await gmailFetch(
-          creds,
-          `${GMAIL_BASE}/messages?q=${encodeURIComponent(query)}&maxResults=${maxResults}`,
-        )
-      ).messages || [],
-    emails = [];
-  for (const msg of messages) {
-    const detail = await gmailFetch(creds, `${GMAIL_BASE}/messages/${msg.id}`),
-      headers = parseHeaders(detail.payload.headers);
-    emails.push({ id: msg.id, threadId: detail.threadId, ...headers, snippet: detail.snippet });
-  }
-  return emails;
+  return hydrateMessageRefs(creds, await listMessageRefs(creds, query, maxResults));
 }
 export async function sendEmail(creds, to, subject, body, cc = '', bcc = '') {
-  const fresh = await getFreshGoogleCreds(creds),
-    message = [
-      `To: ${to}`,
-      ...(cc ? [`Cc: ${cc}`] : []),
-      ...(bcc ? [`Bcc: ${bcc}`] : []),
-      `Subject: ${subject}`,
-      'Content-Type: text/plain; charset=UTF-8',
-      'MIME-Version: 1.0',
-      '',
-      body,
-    ].join('\r\n'),
-    raw = Buffer.from(message)
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, ''),
-    res = await fetch(`${GMAIL_BASE}/messages/send`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${fresh.accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raw: raw }),
-    });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`Failed to send email: ${err.error?.message ?? res.status}`);
-  }
+  const message = [
+    `To: ${to}`,
+    ...(cc ? [`Cc: ${cc}`] : []),
+    ...(bcc ? [`Bcc: ${bcc}`] : []),
+    `Subject: ${subject}`,
+    'Content-Type: text/plain; charset=UTF-8',
+    'MIME-Version: 1.0',
+    '',
+    body,
+  ].join('\r\n');
+  await postGmailJson(
+    creds,
+    '/messages/send',
+    { raw: encodeRawMessage(message) },
+    'Failed to send email',
+  );
   return !0;
 }
 export async function replyToEmail(creds, messageId, replyBody) {
-  const fresh = await getFreshGoogleCreds(creds),
-    detail = await gmailFetch(creds, `${GMAIL_BASE}/messages/${messageId}?format=full`),
+  const detail = await gmailFetch(creds, `${GMAIL_BASE}/messages/${messageId}?format=full`),
     headers = parseHeaders(detail.payload.headers),
     replyTo = headers.from || '',
     subject = headers.subject.startsWith('Re:') ? headers.subject : `Re: ${headers.subject}`,
@@ -111,26 +138,17 @@ export async function replyToEmail(creds, messageId, replyBody) {
       'MIME-Version: 1.0',
       '',
       replyBody,
-    ].join('\r\n'),
-    raw = Buffer.from(message)
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, ''),
-    res = await fetch(`${GMAIL_BASE}/messages/send`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${fresh.accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raw: raw, threadId: detail.threadId }),
-    });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`Failed to send reply: ${err.error?.message ?? res.status}`);
-  }
+    ].join('\r\n');
+  await postGmailJson(
+    creds,
+    '/messages/send',
+    { raw: encodeRawMessage(message), threadId: detail.threadId },
+    'Failed to send reply',
+  );
   return !0;
 }
 export async function forwardEmail(creds, messageId, forwardTo, extraNote = '') {
-  const fresh = await getFreshGoogleCreds(creds),
-    detail = await gmailFetch(creds, `${GMAIL_BASE}/messages/${messageId}?format=full`),
+  const detail = await gmailFetch(creds, `${GMAIL_BASE}/messages/${messageId}?format=full`),
     headers = parseHeaders(detail.payload.headers);
   let originalBody = '';
   const walk = (parts = []) => {
@@ -144,36 +162,28 @@ export async function forwardEmail(creds, messageId, forwardTo, extraNote = '') 
     ? (originalBody = Buffer.from(detail.payload.body.data, 'base64').toString('utf-8'))
     : walk(detail.payload.parts ?? []);
   const message = [
-      `To: ${forwardTo}`,
-      `Subject: ${headers.subject.startsWith('Fwd:') ? headers.subject : `Fwd: ${headers.subject}`}`,
-      'Content-Type: text/plain; charset=UTF-8',
-      'MIME-Version: 1.0',
+    `To: ${forwardTo}`,
+    `Subject: ${headers.subject.startsWith('Fwd:') ? headers.subject : `Fwd: ${headers.subject}`}`,
+    'Content-Type: text/plain; charset=UTF-8',
+    'MIME-Version: 1.0',
+    '',
+    [
+      ...(extraNote ? [extraNote, ''] : []),
+      '---------- Forwarded message ----------',
+      `From: ${headers.from}`,
+      `Date: ${headers.date}`,
+      `Subject: ${headers.subject}`,
+      `To: ${headers.to}`,
       '',
-      [
-        ...(extraNote ? [extraNote, ''] : []),
-        '---------- Forwarded message ----------',
-        `From: ${headers.from}`,
-        `Date: ${headers.date}`,
-        `Subject: ${headers.subject}`,
-        `To: ${headers.to}`,
-        '',
-        originalBody,
-      ].join('\n'),
-    ].join('\r\n'),
-    raw = Buffer.from(message)
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, ''),
-    res = await fetch(`${GMAIL_BASE}/messages/send`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${fresh.accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raw: raw }),
-    });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`Failed to forward email: ${err.error?.message ?? res.status}`);
-  }
+      originalBody,
+    ].join('\n'),
+  ].join('\r\n');
+  await postGmailJson(
+    creds,
+    '/messages/send',
+    { raw: encodeRawMessage(message) },
+    'Failed to forward email',
+  );
   return !0;
 }
 export async function modifyMessage(
@@ -203,59 +213,15 @@ export async function untrashMessage(creds, messageId) {
   return gmailFetch(creds, `${GMAIL_BASE}/messages/${messageId}/untrash`, { method: 'POST' });
 }
 export async function markAllRead(creds) {
-  const messages =
-    (await gmailFetch(creds, `${GMAIL_BASE}/messages?q=is:unread&maxResults=500`)).messages ?? [];
-  return messages.length
-    ? (await gmailFetch(creds, `${GMAIL_BASE}/messages/batchModify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ids: messages.map((message) => message.id),
-          removeLabelIds: ['UNREAD'],
-        }),
-      }),
-      messages.length)
-    : 0;
+  return batchModifyByQuery(creds, 'is:unread', 500, { removeLabelIds: ['UNREAD'] });
 }
 export async function archiveReadEmails(creds, maxResults = 100) {
-  const messages =
-    (
-      await gmailFetch(
-        creds,
-        `${GMAIL_BASE}/messages?q=in:inbox -is:unread&maxResults=${maxResults}`,
-      )
-    ).messages ?? [];
-  return messages.length
-    ? (await gmailFetch(creds, `${GMAIL_BASE}/messages/batchModify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ids: messages.map((message) => message.id),
-          removeLabelIds: ['INBOX'],
-        }),
-      }),
-      messages.length)
-    : 0;
+  return batchModifyByQuery(creds, 'in:inbox -is:unread', maxResults, {
+    removeLabelIds: ['INBOX'],
+  });
 }
 export async function trashEmailsByQuery(creds, query, maxResults = 50) {
-  const messages =
-    (
-      await gmailFetch(
-        creds,
-        `${GMAIL_BASE}/messages?q=${encodeURIComponent(query)}&maxResults=${maxResults}`,
-      )
-    ).messages ?? [];
-  return messages.length
-    ? (await gmailFetch(creds, `${GMAIL_BASE}/messages/batchModify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ids: messages.map((message) => message.id),
-          addLabelIds: ['TRASH'],
-        }),
-      }),
-      messages.length)
-    : 0;
+  return batchModifyByQuery(creds, query, maxResults, { addLabelIds: ['TRASH'] });
 }
 export async function listLabels(creds) {
   return (await gmailFetch(creds, `${GMAIL_BASE}/labels`)).labels ?? [];
@@ -281,31 +247,21 @@ export async function getLabelId(creds, labelName) {
   return labels.find((label) => label.name.toLowerCase() === labelName.toLowerCase())?.id ?? null;
 }
 export async function createDraft(creds, to, subject, body, cc = '') {
-  const fresh = await getFreshGoogleCreds(creds),
-    message = [
-      `To: ${to}`,
-      ...(cc ? [`Cc: ${cc}`] : []),
-      `Subject: ${subject}`,
-      'Content-Type: text/plain; charset=UTF-8',
-      'MIME-Version: 1.0',
-      '',
-      body,
-    ].join('\r\n'),
-    raw = Buffer.from(message)
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, ''),
-    res = await fetch(`${GMAIL_BASE}/drafts`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${fresh.accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: { raw: raw } }),
-    });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`Failed to create draft: ${err.error?.message ?? res.status}`);
-  }
-  return res.json();
+  const message = [
+    `To: ${to}`,
+    ...(cc ? [`Cc: ${cc}`] : []),
+    `Subject: ${subject}`,
+    'Content-Type: text/plain; charset=UTF-8',
+    'MIME-Version: 1.0',
+    '',
+    body,
+  ].join('\r\n');
+  return postGmailJson(
+    creds,
+    '/drafts',
+    { message: { raw: encodeRawMessage(message) } },
+    'Failed to create draft',
+  );
 }
 export async function getInboxStats(creds) {
   const [profile, unreadList, inboxList] = await Promise.all([

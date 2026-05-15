@@ -2,6 +2,7 @@ import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { readJsonDirectory } from '../Utils.js';
 
 // ---------------------------------------------------------------------------
 // AgentState — CRUD for user-defined scheduled agents.
@@ -60,36 +61,18 @@ export function createAgentStateManager({ rootDirectory }) {
     },
 
     async listAgents() {
-      let files;
-      try {
-        files = await readdir(agentsDirectory);
-      } catch {
-        return [];
-      }
-
-      const agents = [];
-
-      for (const file of files) {
-        if (!file.endsWith('.json')) continue;
-        try {
-          const raw = await readFile(path.join(agentsDirectory, file), 'utf8');
-          const data = JSON.parse(raw);
-          agents.push({
-            id: data.id,
-            name: data.name,
-            avatar: data.avatar ?? null,
-            schedule: data.schedule ?? { type: 'startup' },
-            model: data.model ?? null,
-            prompt: data.prompt,
-            enabled: data.enabled ?? true,
-            createdAt: data.createdAt,
-            updatedAt: data.updatedAt,
-            lastRunAt: data.lastRunAt ?? null,
-          });
-        } catch {
-          // Skip corrupt or unreadable files silently.
-        }
-      }
+      const agents = await readJsonDirectory(agentsDirectory, (data) => ({
+        id: data.id,
+        name: data.name,
+        avatar: data.avatar ?? null,
+        schedule: data.schedule ?? { type: 'startup' },
+        model: data.model ?? null,
+        prompt: data.prompt,
+        enabled: data.enabled ?? true,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        lastRunAt: data.lastRunAt ?? null,
+      }));
 
       return agents.sort(
         (a, b) =>

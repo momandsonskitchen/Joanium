@@ -6,9 +6,7 @@ import {
   requireText,
   truncateText,
 } from '../../../Core/ConnectorHttp.js';
-
-// ── In-memory token cache (per process lifetime) ─────────────────────────────
-const tokenCache = new Map(); // connectorId → { accessToken, expiresAt }
+import { getFreshCreds } from '../../GoogleWorkspace.js';
 
 async function getAccessToken(rootDirectory) {
   const credentials = await requireConnectorCredentials(
@@ -17,37 +15,7 @@ async function getAccessToken(rootDirectory) {
     ['clientId', 'clientSecret', 'refreshToken'],
     'Google Workspace',
   );
-
-  const cacheKey = credentials.clientId;
-  const cached = tokenCache.get(cacheKey);
-  if (cached && Date.now() < cached.expiresAt) return cached.accessToken;
-
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: credentials.clientId,
-      client_secret: credentials.clientSecret,
-      refresh_token: credentials.refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  });
-
-  const data = await response.json().catch(() => null);
-  if (!response.ok || !data?.access_token) {
-    throw new Error(
-      `Google token refresh failed: ${data?.error_description ?? data?.error ?? response.statusText}`,
-    );
-  }
-
-  const expiresIn = (data.expires_in ?? 3600) * 1000;
-  tokenCache.set(cacheKey, {
-    accessToken: data.access_token,
-    // Subtract 60 s as a safety buffer
-    expiresAt: Date.now() + expiresIn - 60_000,
-  });
-
-  return data.access_token;
+  return (await getFreshCreds(credentials)).accessToken;
 }
 
 async function googleRequest(rootDirectory, url, { searchParams = {} } = {}) {

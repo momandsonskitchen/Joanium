@@ -1,3 +1,20 @@
+const DOCUMENT_ID_PARAMETER = Object.freeze({
+  document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+});
+
+const CHARACTER_RANGE_PARAMETERS = Object.freeze({
+  start_index: {
+    type: 'number',
+    required: !0,
+    description: 'Inclusive start of the character range.',
+  },
+  end_index: {
+    type: 'number',
+    required: !0,
+    description: 'Exclusive end of the character range.',
+  },
+});
+
 export const DOCS_TOOLS = [
   {
     name: 'docs_get_info',
@@ -18,7 +35,7 @@ export const DOCS_TOOLS = [
       'Read the full text content of a Google Doc, including table text. Returns up to 30,000 characters.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
     },
   },
   {
@@ -26,7 +43,7 @@ export const DOCS_TOOLS = [
     description: 'Return word count, character count, and paragraph count for a Google Doc.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
     },
   },
   {
@@ -35,7 +52,7 @@ export const DOCS_TOOLS = [
       'Extract all headings from a Google Doc and return them as a structured outline with heading level and character indices.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
     },
   },
   {
@@ -44,7 +61,7 @@ export const DOCS_TOOLS = [
       'Find all occurrences of a search string in a Google Doc and return each match with its start and end character index. Useful before calling docs_delete_range or docs_apply_text_style.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       query: {
         type: 'string',
         required: !0,
@@ -58,7 +75,7 @@ export const DOCS_TOOLS = [
       'List all named ranges defined in a Google Doc, including their character indices.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
     },
   },
   {
@@ -74,7 +91,7 @@ export const DOCS_TOOLS = [
     description: 'Append text to the end of an existing Google Doc.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       text: { type: 'string', required: !0, description: 'Text content to append.' },
     },
   },
@@ -83,7 +100,7 @@ export const DOCS_TOOLS = [
     description: 'Insert text at the very beginning of an existing Google Doc.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       text: { type: 'string', required: !0, description: 'Text content to prepend.' },
     },
   },
@@ -93,7 +110,7 @@ export const DOCS_TOOLS = [
       'Insert text at a specific character index in a Google Doc. Use docs_read or docs_search_text first to identify the correct index. Index 1 is the very start of the document body.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       text: { type: 'string', required: !0, description: 'Text content to insert.' },
       index: {
         type: 'number',
@@ -108,7 +125,7 @@ export const DOCS_TOOLS = [
       'Insert multiple text snippets into a Google Doc in a single API call. More efficient than calling docs_insert_text repeatedly. Indices are automatically sorted descending to avoid offset shifting.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       insertions: {
         type: 'array',
         required: !0,
@@ -122,7 +139,7 @@ export const DOCS_TOOLS = [
     description: 'Find and replace all occurrences of a string in a Google Doc.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       search_text: {
         type: 'string',
         required: !0,
@@ -137,7 +154,7 @@ export const DOCS_TOOLS = [
       'Delete a range of characters from a Google Doc by start and end index. Use docs_search_text first to identify the correct indices.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       start_index: {
         type: 'number',
         required: !0,
@@ -156,7 +173,7 @@ export const DOCS_TOOLS = [
       'Delete all body text from a Google Doc, leaving it blank. This is irreversible — confirm with the user before calling.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
     },
   },
   {
@@ -165,17 +182,8 @@ export const DOCS_TOOLS = [
       'Apply inline text formatting to a character range in a Google Doc. Supports bold, italic, underline, strikethrough, font size (PT), font family, and foreground color (hex). Use docs_search_text first to find the right indices.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
-      start_index: {
-        type: 'number',
-        required: !0,
-        description: 'Inclusive start of the character range.',
-      },
-      end_index: {
-        type: 'number',
-        required: !0,
-        description: 'Exclusive end of the character range.',
-      },
+      ...DOCUMENT_ID_PARAMETER,
+      ...CHARACTER_RANGE_PARAMETERS,
       bold: { type: 'boolean', required: !1, description: 'Set text bold.' },
       italic: { type: 'boolean', required: !1, description: 'Set text italic.' },
       underline: { type: 'boolean', required: !1, description: 'Set text underline.' },
@@ -203,17 +211,8 @@ export const DOCS_TOOLS = [
       'Apply paragraph-level styling to all paragraphs overlapping a character range. Supports heading level, alignment, and line spacing.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
-      start_index: {
-        type: 'number',
-        required: !0,
-        description: 'Inclusive start of the character range.',
-      },
-      end_index: {
-        type: 'number',
-        required: !0,
-        description: 'Exclusive end of the character range.',
-      },
+      ...DOCUMENT_ID_PARAMETER,
+      ...CHARACTER_RANGE_PARAMETERS,
       named_style_type: {
         type: 'string',
         required: !1,
@@ -238,7 +237,7 @@ export const DOCS_TOOLS = [
       'Apply a bullet or numbered list style to all paragraphs overlapping a character range.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       start_index: {
         type: 'number',
         required: !0,
@@ -262,7 +261,7 @@ export const DOCS_TOOLS = [
     description: 'Remove bullet or list formatting from all paragraphs in a character range.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       start_index: { type: 'number', required: !0, description: 'Inclusive start of the range.' },
       end_index: { type: 'number', required: !0, description: 'Exclusive end of the range.' },
     },
@@ -273,7 +272,7 @@ export const DOCS_TOOLS = [
       'Insert an empty N×M table at a specific character index in a Google Doc. Cell content can be added afterwards with docs_insert_text.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       rows: { type: 'number', required: !0, description: 'Number of rows (minimum 1).' },
       columns: { type: 'number', required: !0, description: 'Number of columns (minimum 1).' },
       index: {
@@ -288,7 +287,7 @@ export const DOCS_TOOLS = [
     description: 'Insert a page break at a specific character index in a Google Doc.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       index: {
         type: 'number',
         required: !1,
@@ -302,7 +301,7 @@ export const DOCS_TOOLS = [
       'Insert an image from a publicly accessible URL into a Google Doc at a specific character index.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       image_url: {
         type: 'string',
         required: !0,
@@ -331,7 +330,7 @@ export const DOCS_TOOLS = [
       'Create a named range (bookmark) over a character range in a Google Doc. Useful for marking sections to update later by name.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       name: { type: 'string', required: !0, description: 'Name for the range.' },
       start_index: {
         type: 'number',
@@ -346,7 +345,7 @@ export const DOCS_TOOLS = [
     description: 'Delete a named range from a Google Doc by name.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       name: { type: 'string', required: !0, description: 'Name of the range to delete.' },
     },
   },
@@ -356,7 +355,7 @@ export const DOCS_TOOLS = [
       'Change the page dimensions of a Google Doc. Common sizes in points — A4: 595×842, Letter: 612×792, Legal: 612×1008. Swap width/height for landscape orientation.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       width_pt: { type: 'number', required: !0, description: 'Page width in points.' },
       height_pt: { type: 'number', required: !0, description: 'Page height in points.' },
     },
@@ -367,7 +366,7 @@ export const DOCS_TOOLS = [
       'Change the page margins of a Google Doc. All values are in points (72 pt = 1 inch). Default Google Docs margins are 72 pt on all sides.',
     category: 'docs',
     parameters: {
-      document_id: { type: 'string', required: !0, description: 'Google Doc document ID.' },
+      ...DOCUMENT_ID_PARAMETER,
       top_pt: { type: 'number', required: !1, description: 'Top margin in points.' },
       bottom_pt: { type: 'number', required: !1, description: 'Bottom margin in points.' },
       left_pt: { type: 'number', required: !1, description: 'Left (start) margin in points.' },

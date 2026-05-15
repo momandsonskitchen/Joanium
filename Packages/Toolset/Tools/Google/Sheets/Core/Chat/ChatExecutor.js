@@ -1,6 +1,49 @@
 import * as SheetsAPI from '../API/SheetsAPI.js';
 import { requireGoogleCredentials } from '../../../Common.js';
 import { parseValues, parseJSON, renderTable, requireParam, requireNumeric } from './Utils.js';
+
+function renderRangeValues(result, label) {
+  const rowCount = result.values.length,
+    colCount = Math.max(...result.values.map((r) => r.length));
+  return [
+    `${label} \`${result.range}\` — ${rowCount} row${1 !== rowCount ? 's' : ''} × ${colCount} col${1 !== colCount ? 's' : ''}`,
+    '',
+    '```',
+    renderTable(result.values),
+    '```',
+  ].join('\n');
+}
+
+function readDimensionParams(params) {
+  return {
+    sid: requireParam(params, 'spreadsheet_id').trim(),
+    sheetId: requireNumeric(params, 'sheet_id'),
+    startIndex: requireNumeric(params, 'start_index'),
+    endIndex: requireNumeric(params, 'end_index'),
+  };
+}
+
+function readInsertDimensionParams(params) {
+  return {
+    sid: requireParam(params, 'spreadsheet_id').trim(),
+    sheetId: requireNumeric(params, 'sheet_id'),
+    startIndex: requireNumeric(params, 'start_index'),
+    count: requireNumeric(params, 'count'),
+    inherit: !0 === params.inherit_from_before || 'true' === params.inherit_from_before,
+  };
+}
+
+function readGridRangeParams(params) {
+  return {
+    sid: requireParam(params, 'spreadsheet_id').trim(),
+    sheetId: requireNumeric(params, 'sheet_id'),
+    r0: requireNumeric(params, 'start_row_index'),
+    r1: requireNumeric(params, 'end_row_index'),
+    c0: requireNumeric(params, 'start_column_index'),
+    c1: requireNumeric(params, 'end_column_index'),
+  };
+}
+
 export async function executeSheetsChatTool(ctx, toolName, params = {}) {
   const credentials = requireGoogleCredentials(ctx);
   switch (toolName) {
@@ -40,15 +83,7 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       if (!range?.trim()) throw new Error('Missing required param: range');
       const result = await SheetsAPI.readRange(credentials, spreadsheet_id.trim(), range.trim());
       if (!result.values.length) return `Range \`${range}\` is empty.`;
-      const rowCount = result.values.length,
-        colCount = Math.max(...result.values.map((r) => r.length));
-      return [
-        `Range: \`${result.range}\` — ${rowCount} row${1 !== rowCount ? 's' : ''} × ${colCount} col${1 !== colCount ? 's' : ''}`,
-        '',
-        '```',
-        renderTable(result.values),
-        '```',
-      ].join('\n');
+      return renderRangeValues(result, 'Range:');
     }
     case 'sheets_write_range': {
       const { spreadsheet_id: spreadsheet_id, range: range, values: rawValues } = params;
@@ -178,15 +213,7 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
         range = requireParam(params, 'range').trim(),
         result = await SheetsAPI.getFormulas(credentials, sid, range);
       if (!result.values.length) return `Range \`${range}\` contains no formulas.`;
-      const rowCount = result.values.length,
-        colCount = Math.max(...result.values.map((r) => r.length));
-      return [
-        `Formulas in \`${result.range}\` — ${rowCount} row${1 !== rowCount ? 's' : ''} × ${colCount} col${1 !== colCount ? 's' : ''}`,
-        '',
-        '```',
-        renderTable(result.values),
-        '```',
-      ].join('\n');
+      return renderRangeValues(result, 'Formulas in');
     }
     case 'sheets_copy_sheet': {
       const sid = requireParam(params, 'spreadsheet_id').trim(),
@@ -228,11 +255,7 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'sheets_insert_rows': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        startIndex = requireNumeric(params, 'start_index'),
-        count = requireNumeric(params, 'count'),
-        inherit = !0 === params.inherit_from_before || 'true' === params.inherit_from_before;
+      const { sid, sheetId, startIndex, count, inherit } = readInsertDimensionParams(params);
       return (
         await SheetsAPI.insertDimension(
           credentials,
@@ -247,21 +270,14 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'sheets_delete_rows': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        startIndex = requireNumeric(params, 'start_index'),
-        endIndex = requireNumeric(params, 'end_index');
+      const { sid, sheetId, startIndex, endIndex } = readDimensionParams(params);
       return (
         await SheetsAPI.deleteDimension(credentials, sid, sheetId, 'ROWS', startIndex, endIndex),
         `Rows ${startIndex}–${endIndex - 1} deleted (${endIndex - startIndex} row${endIndex - startIndex !== 1 ? 's' : ''}).`
       );
     }
     case 'sheets_insert_columns': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        startIndex = requireNumeric(params, 'start_index'),
-        count = requireNumeric(params, 'count'),
-        inherit = !0 === params.inherit_from_before || 'true' === params.inherit_from_before;
+      const { sid, sheetId, startIndex, count, inherit } = readInsertDimensionParams(params);
       return (
         await SheetsAPI.insertDimension(
           credentials,
@@ -276,20 +292,14 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'sheets_delete_columns': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        startIndex = requireNumeric(params, 'start_index'),
-        endIndex = requireNumeric(params, 'end_index');
+      const { sid, sheetId, startIndex, endIndex } = readDimensionParams(params);
       return (
         await SheetsAPI.deleteDimension(credentials, sid, sheetId, 'COLUMNS', startIndex, endIndex),
         `Columns ${startIndex}–${endIndex - 1} deleted (${endIndex - startIndex} column${endIndex - startIndex !== 1 ? 's' : ''}).`
       );
     }
     case 'sheets_auto_resize_columns': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        startIndex = requireNumeric(params, 'start_index'),
-        endIndex = requireNumeric(params, 'end_index');
+      const { sid, sheetId, startIndex, endIndex } = readDimensionParams(params);
       return (
         await SheetsAPI.autoResizeDimensions(
           credentials,
@@ -303,12 +313,7 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'sheets_merge_cells': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        r0 = requireNumeric(params, 'start_row_index'),
-        r1 = requireNumeric(params, 'end_row_index'),
-        c0 = requireNumeric(params, 'start_column_index'),
-        c1 = requireNumeric(params, 'end_column_index'),
+      const { sid, sheetId, r0, r1, c0, c1 } = readGridRangeParams(params),
         mergeType = params.merge_type?.trim() || 'MERGE_ALL';
       return (
         await SheetsAPI.mergeCells(credentials, sid, sheetId, r0, r1, c0, c1, mergeType),
@@ -316,12 +321,7 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'sheets_unmerge_cells': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        r0 = requireNumeric(params, 'start_row_index'),
-        r1 = requireNumeric(params, 'end_row_index'),
-        c0 = requireNumeric(params, 'start_column_index'),
-        c1 = requireNumeric(params, 'end_column_index');
+      const { sid, sheetId, r0, r1, c0, c1 } = readGridRangeParams(params);
       return (
         await SheetsAPI.unmergeCells(credentials, sid, sheetId, r0, r1, c0, c1),
         `Cells unmerged in range (rows ${r0}–${r1 - 1}, cols ${c0}–${c1 - 1}).`
@@ -341,12 +341,7 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'sheets_format_range': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        r0 = requireNumeric(params, 'start_row_index'),
-        r1 = requireNumeric(params, 'end_row_index'),
-        c0 = requireNumeric(params, 'start_column_index'),
-        c1 = requireNumeric(params, 'end_column_index'),
+      const { sid, sheetId, r0, r1, c0, c1 } = readGridRangeParams(params),
         format = {};
       if (
         (null != params.bold && (format.bold = !0 === params.bold || 'true' === params.bold),
@@ -369,12 +364,7 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'sheets_sort_range': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        r0 = requireNumeric(params, 'start_row_index'),
-        r1 = requireNumeric(params, 'end_row_index'),
-        c0 = requireNumeric(params, 'start_column_index'),
-        c1 = requireNumeric(params, 'end_column_index'),
+      const { sid, sheetId, r0, r1, c0, c1 } = readGridRangeParams(params),
         sortSpecs = parseJSON(requireParam(params, 'sort_specs'), 'sort_specs');
       if (!Array.isArray(sortSpecs)) throw new Error('sort_specs must be a JSON array');
       return (
@@ -393,13 +383,8 @@ export async function executeSheetsChatTool(ctx, toolName, params = {}) {
       return `Named ranges (${ranges.length}):\n\n${lines.join('\n')}`;
     }
     case 'sheets_add_named_range': {
-      const sid = requireParam(params, 'spreadsheet_id').trim(),
+      const { sid, sheetId, r0, r1, c0, c1 } = readGridRangeParams(params),
         name = requireParam(params, 'name').trim(),
-        sheetId = requireNumeric(params, 'sheet_id'),
-        r0 = requireNumeric(params, 'start_row_index'),
-        r1 = requireNumeric(params, 'end_row_index'),
-        c0 = requireNumeric(params, 'start_column_index'),
-        c1 = requireNumeric(params, 'end_column_index'),
         nr = await SheetsAPI.addNamedRange(credentials, sid, name, sheetId, r0, r1, c0, c1);
       return [
         'Named range created',

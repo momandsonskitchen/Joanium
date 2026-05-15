@@ -49,3 +49,52 @@ export function formatSlot(slot, index) {
     mins = Math.round((slot.end - slot.start) / 6e4);
   return `${index}. ${fmt(slot.start)} – ${fmt(slot.end)} (${mins} min)`;
 }
+
+export function parseAttendees(value) {
+  return value
+    ? String(value)
+        .split(',')
+        .map((email) => email.trim())
+        .filter(Boolean)
+    : [];
+}
+
+export function buildDefaultEndDateTime(
+  startDateTime,
+  { allDay = false, tolerateInvalid = false } = {},
+) {
+  if (allDay) return undefined;
+
+  try {
+    const startDate = new Date(startDateTime);
+    startDate.setHours(startDate.getHours() + 1);
+    return startDate.toISOString();
+  } catch (error) {
+    if (tolerateInvalid) return startDateTime;
+    throw error;
+  }
+}
+
+export function buildCalendarEventPayload({
+  summary,
+  startDateTime,
+  endDateTime,
+  description,
+  location,
+  attendees,
+  allDay = null,
+  recurrence = null,
+}) {
+  const payload = {
+    summary: summary.trim(),
+    startDateTime: startDateTime.trim(),
+    endDateTime,
+    description: description?.trim() || '',
+    location: location?.trim() || '',
+    attendees: parseAttendees(attendees),
+  };
+
+  if (allDay !== null) payload.allDay = Boolean(allDay);
+  if (recurrence) payload.recurrence = recurrence;
+  return payload;
+}

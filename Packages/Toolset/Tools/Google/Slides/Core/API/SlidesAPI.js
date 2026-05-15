@@ -1,4 +1,7 @@
-import { createGoogleJsonFetch } from '../../../Core/API/GoogleApiFetch.js';
+import {
+  createGoogleJsonFetch,
+  createReplaceAllTextRequest,
+} from '../../../Core/API/GoogleApiFetch.js';
 
 const SLIDES_BASE = 'https://slides.googleapis.com/v1/presentations';
 const slidesFetch = createGoogleJsonFetch('Slides');
@@ -73,14 +76,7 @@ export async function replaceAllText(creds, presentationId, searchText, replacem
   const result = await slidesFetch(creds, `${SLIDES_BASE}/${presentationId}:batchUpdate`, {
     method: 'POST',
     body: JSON.stringify({
-      requests: [
-        {
-          replaceAllText: {
-            containsText: { text: searchText, matchCase: !0 },
-            replaceText: replacement,
-          },
-        },
-      ],
+      requests: [createReplaceAllTextRequest(searchText, replacement)],
     }),
   });
   return result.replies?.[0]?.replaceAllText ?? null;

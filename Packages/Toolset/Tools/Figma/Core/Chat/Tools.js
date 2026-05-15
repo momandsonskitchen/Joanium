@@ -1,3 +1,11 @@
+const FILE_KEY_PARAMETER = Object.freeze({
+  file_key: {
+    type: 'string',
+    required: true,
+    description: 'Figma file key.',
+  },
+});
+
 export const FIGMA_TOOLS = [
   // ─── Files ─────────────────────────────────────────────────────────────────
   {
@@ -21,11 +29,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       node_ids: {
         type: 'array',
         items: { type: 'string' },
@@ -41,11 +45,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       page_id: {
         type: 'string',
         required: true,
@@ -60,11 +60,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -74,11 +70,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -88,11 +80,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -102,11 +90,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -116,11 +100,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
 
@@ -132,11 +112,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       node_ids: {
         type: 'array',
         items: { type: 'string' },
@@ -157,11 +133,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       node_ids: {
         type: 'array',
         items: { type: 'string' },
@@ -177,11 +149,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       node_ids: {
         type: 'array',
         items: { type: 'string' },
@@ -196,11 +164,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       node_ids: {
         type: 'array',
         items: { type: 'string' },
@@ -223,11 +187,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -236,11 +196,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       message: {
         type: 'string',
         required: true,
@@ -260,11 +216,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       comment_id: {
         type: 'string',
         required: true,
@@ -278,11 +230,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       comment_id: {
         type: 'string',
         required: true,
@@ -416,11 +364,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -430,11 +374,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
 
@@ -446,11 +386,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -460,11 +396,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -493,11 +425,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       version_a: {
         type: 'string',
         required: true,
@@ -517,11 +445,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
     },
   },
   {
@@ -531,11 +455,7 @@ export const FIGMA_TOOLS = [
     category: 'figma',
     connectorId: 'figma',
     parameters: {
-      file_key: {
-        type: 'string',
-        required: true,
-        description: 'Figma file key.',
-      },
+      ...FILE_KEY_PARAMETER,
       page_id: {
         type: 'string',
         required: true,

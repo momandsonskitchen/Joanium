@@ -98,6 +98,32 @@ function isPublicConnector(connector) {
   );
 }
 
+function createConnectorBadge(connector) {
+  const badge = createElement('div', 'connectors-card__badge');
+  const iconPath = getConnectorIconPath(connector.id);
+
+  if (iconPath) {
+    const img = document.createElement('img');
+    img.src = iconPath;
+    img.alt = '';
+    img.className = 'connectors-card__badge-img';
+    badge.append(img);
+  } else {
+    badge.append(createIcon('globe', 'connectors-card__badge-icon'));
+  }
+
+  return badge;
+}
+
+function createConnectorCopy(connector) {
+  const copy = createElement('div', 'connectors-card__copy');
+  copy.append(
+    createElement('h3', 'connectors-card__title', connector.label),
+    createElement('p', 'connectors-card__description', connector.description),
+  );
+  return copy;
+}
+
 export function createConnectorsPanel(strings = defaultStrings) {
   const refs = new Map();
   let servicesMount = null;
@@ -133,25 +159,27 @@ export function createConnectorsPanel(strings = defaultStrings) {
     }
   }
 
-  async function saveConnector(connector) {
-    const ref = refs.get(connector.id);
+  function collectCredentials(connector, inputs, { allowOptionalBlank = false } = {}) {
     const credentials = {};
     let firstMissingInput = null;
     let firstShortInput = null;
 
     for (const field of getVisibleFields(connector)) {
-      const input = ref.inputs.get(field.key);
-      credentials[field.key] = input.value.trim();
-      const fieldHasSavedCredential = input.placeholder === strings.savedSecret;
+      const input = inputs.get(field.key);
+      credentials[field.key] = input?.value.trim() ?? '';
+      const fieldHasSavedCredential = input?.placeholder === strings.savedSecret;
+      const canSkipBlank = allowOptionalBlank && connector.optional;
+
       if (
         field.required !== false &&
         !credentials[field.key] &&
-        !connector.optional &&
         !fieldHasSavedCredential &&
+        !canSkipBlank &&
         !firstMissingInput
       ) {
         firstMissingInput = input;
       }
+
       if (
         !firstShortInput &&
         field.type !== 'text' &&
@@ -162,24 +190,38 @@ export function createConnectorsPanel(strings = defaultStrings) {
       }
     }
 
+    return { credentials, firstMissingInput, firstShortInput };
+  }
+
+  function showCredentialError(connectorId, { firstMissingInput, firstShortInput }) {
     if (firstMissingInput) {
       firstMissingInput.focus();
-      setFeedback(connector.id, strings.credentialRequired, 'error');
-      return;
+      setFeedback(connectorId, strings.credentialRequired, 'error');
+      return true;
     }
 
     if (firstShortInput) {
       firstShortInput.focus();
-      setFeedback(connector.id, strings.credentialTooShort, 'error');
-      return;
+      setFeedback(connectorId, strings.credentialTooShort, 'error');
+      return true;
     }
+
+    return false;
+  }
+
+  async function saveConnector(connector) {
+    const ref = refs.get(connector.id);
+    const validation = collectCredentials(connector, ref.inputs, { allowOptionalBlank: true });
+    if (showCredentialError(connector.id, validation)) return;
 
     ref.save.disabled = true;
     ref.saveLabel.textContent = strings.saving;
     setFeedback(connector.id, '', 'info');
 
     try {
-      const updated = await invokeIpc('connectors:save', connector.id, { credentials });
+      const updated = await invokeIpc('connectors:save', connector.id, {
+        credentials: validation.credentials,
+      });
       setCardState(updated);
       setFeedback(connector.id, strings.connectedFeedback, 'success');
     } catch (error) {
@@ -213,25 +255,6 @@ export function createConnectorsPanel(strings = defaultStrings) {
     // ── Header (always visible) ──────────────────────────────────────────────
     const header = createElement('div', 'connectors-card__header');
 
-    // Real icon image or SVG fallback
-    const badge = createElement('div', 'connectors-card__badge');
-    const iconPath = getConnectorIconPath(connector.id);
-    if (iconPath) {
-      const img = document.createElement('img');
-      img.src = iconPath;
-      img.alt = '';
-      img.className = 'connectors-card__badge-img';
-      badge.append(img);
-    } else {
-      badge.append(createIcon('globe', 'connectors-card__badge-icon'));
-    }
-
-    const copy = createElement('div', 'connectors-card__copy');
-    copy.append(
-      createElement('h3', 'connectors-card__title', connector.label),
-      createElement('p', 'connectors-card__description', connector.description),
-    );
-
     const status = createElement('span', 'connectors-card__status', strings.notConnected);
 
     const expandBtn = createElement('button', 'connectors-card__expand');
@@ -239,7 +262,12 @@ export function createConnectorsPanel(strings = defaultStrings) {
     expandBtn.setAttribute('aria-label', strings.expand);
     expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
 
-    header.append(badge, copy, status, expandBtn);
+    header.append(
+      createConnectorBadge(connector),
+      createConnectorCopy(connector),
+      status,
+      expandBtn,
+    );
 
     // ── Collapsible body ─────────────────────────────────────────────────────
     const body = createElement('div', 'connectors-card__body');
@@ -269,40 +297,14 @@ export function createConnectorsPanel(strings = defaultStrings) {
       save.type = 'button';
       save.append(saveLabel);
       save.addEventListener('click', async () => {
-        const credentials = {};
-        let firstMissing = null;
-        let firstShort = null;
-        for (const field of getVisibleFields(connector)) {
-          const input = inputs.get(field.key);
-          credentials[field.key] = input?.value.trim() ?? '';
-          const hasSaved = input?.placeholder === strings.savedSecret;
-          if (field.required !== false && !credentials[field.key] && !hasSaved && !firstMissing) {
-            firstMissing = input;
-          }
-          if (
-            !firstShort &&
-            field.type !== 'text' &&
-            credentials[field.key] &&
-            credentials[field.key].length < 10
-          ) {
-            firstShort = input;
-          }
-        }
-        if (firstMissing) {
-          firstMissing.focus();
-          setFeedback(connector.id, strings.credentialRequired, 'error');
-          return;
-        }
-        if (firstShort) {
-          firstShort.focus();
-          setFeedback(connector.id, strings.credentialTooShort, 'error');
-          return;
-        }
+        const validation = collectCredentials(connector, inputs);
+        if (showCredentialError(connector.id, validation)) return;
+
         save.disabled = true;
         saveLabel.textContent = strings.connecting;
         setFeedback(connector.id, '', 'info');
         try {
-          const updated = await invokeIpc(connector.oauthChannel, credentials);
+          const updated = await invokeIpc(connector.oauthChannel, validation.credentials);
           setCardState(updated);
           setFeedback(connector.id, strings.connectedFeedback, 'success');
         } catch (error) {
@@ -360,31 +362,12 @@ export function createConnectorsPanel(strings = defaultStrings) {
       'connectors-card connectors-card--connected connectors-card--public',
     );
     const header = createElement('div', 'connectors-card__header');
-    const badge = createElement('div', 'connectors-card__badge');
-    const iconPath = getConnectorIconPath(connector.id);
-
-    if (iconPath) {
-      const img = document.createElement('img');
-      img.src = iconPath;
-      img.alt = '';
-      img.className = 'connectors-card__badge-img';
-      badge.append(img);
-    } else {
-      badge.append(createIcon('globe', 'connectors-card__badge-icon'));
-    }
-
-    const copy = createElement('div', 'connectors-card__copy');
-    copy.append(
-      createElement('h3', 'connectors-card__title', connector.label),
-      createElement('p', 'connectors-card__description', connector.description),
-    );
-
     const status = createElement(
       'span',
       'connectors-card__status connectors-card__status--active',
       strings.available,
     );
-    header.append(badge, copy, status);
+    header.append(createConnectorBadge(connector), createConnectorCopy(connector), status);
     card.append(header);
 
     if (connector.toolHint) {

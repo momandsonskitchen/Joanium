@@ -1,6 +1,11 @@
 import * as ContactsAPI from '../API/ContactsAPI.js';
 import { requireGoogleCredentials } from '../../../Common.js';
-import { formatPerson, formatBirthday, buildContactPayload } from './Utils.js';
+import {
+  formatPerson,
+  formatBirthday,
+  buildContactPayload,
+  formatContactMutation,
+} from './Utils.js';
 export async function executeContactsChatTool(ctx, toolName, params = {}) {
   const credentials = requireGoogleCredentials(ctx);
   switch (toolName) {
@@ -51,18 +56,7 @@ export async function executeContactsChatTool(ctx, toolName, params = {}) {
       if (!Object.keys(payload).length)
         throw new Error('At least one field (given_name, email, phone, etc.) is required.');
       const contact = await ContactsAPI.createContact(credentials, payload);
-      return [
-        `Contact created: **${ContactsAPI.getDisplayName(contact)}**`,
-        `Resource: \`${contact.resourceName}\``,
-        ContactsAPI.getPrimaryEmail(contact)
-          ? `Email: ${ContactsAPI.getPrimaryEmail(contact)}`
-          : '',
-        ContactsAPI.getPrimaryPhone(contact)
-          ? `Phone: ${ContactsAPI.getPrimaryPhone(contact)}`
-          : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
+      return formatContactMutation(contact, 'created');
     }
     case 'contacts_update': {
       const { resource_name: resource_name, ...fields } = params;
@@ -77,18 +71,7 @@ export async function executeContactsChatTool(ctx, toolName, params = {}) {
           updateData,
           updatePersonFields,
         );
-      return [
-        `Contact updated: **${ContactsAPI.getDisplayName(contact)}**`,
-        `Resource: \`${contact.resourceName}\``,
-        ContactsAPI.getPrimaryEmail(contact)
-          ? `Email: ${ContactsAPI.getPrimaryEmail(contact)}`
-          : '',
-        ContactsAPI.getPrimaryPhone(contact)
-          ? `Phone: ${ContactsAPI.getPrimaryPhone(contact)}`
-          : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
+      return formatContactMutation(contact, 'updated');
     }
     case 'contacts_delete': {
       const { resource_name: resource_name } = params;

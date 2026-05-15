@@ -1,4 +1,8 @@
-import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
+import {
+  readUserState,
+  sanitizeDefaultModel,
+  writeUserState,
+} from '../../Shared/UserData/UserData.js';
 
 const DEFAULT_SETTINGS = Object.freeze({
   runOnStartup: false,
@@ -53,20 +57,6 @@ function normalizeLocale(candidate) {
   return SUPPORTED_LOCALES.has(locale) ? locale : 'en';
 }
 
-function normalizeDefaultModel(candidate) {
-  if (
-    candidate &&
-    typeof candidate === 'object' &&
-    typeof candidate.providerId === 'string' &&
-    candidate.providerId.trim() &&
-    typeof candidate.modelId === 'string' &&
-    candidate.modelId.trim()
-  ) {
-    return { providerId: candidate.providerId.trim(), modelId: candidate.modelId.trim() };
-  }
-  return null;
-}
-
 function normalizeSettings(candidate = {}) {
   return {
     runOnStartup: Boolean(candidate.runOnStartup ?? DEFAULT_SETTINGS.runOnStartup),
@@ -76,7 +66,7 @@ function normalizeSettings(candidate = {}) {
     autoMemoryUpdates: Boolean(candidate.autoMemoryUpdates ?? DEFAULT_SETTINGS.autoMemoryUpdates),
     autoUpdate: Boolean(candidate.autoUpdate ?? DEFAULT_SETTINGS.autoUpdate),
     defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView,
-    defaultModel: normalizeDefaultModel(candidate.defaultModel),
+    defaultModel: sanitizeDefaultModel(candidate.defaultModel),
   };
 }
 

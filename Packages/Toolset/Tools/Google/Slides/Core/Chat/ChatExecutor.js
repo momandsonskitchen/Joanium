@@ -1,5 +1,47 @@
 import * as SlidesAPI from '../API/SlidesAPI.js';
 import { requireGoogleCredentials } from '../../../Common.js';
+
+function requirePresentationId(params) {
+  const presentationId = params.presentation_id;
+  if (!presentationId?.trim()) throw new Error('Missing required param: presentation_id');
+  return presentationId.trim();
+}
+
+function requireSlideObjectId(params) {
+  const slideObjectId = params.slide_object_id;
+  if (!slideObjectId?.trim()) throw new Error('Missing required param: slide_object_id');
+  return slideObjectId.trim();
+}
+
+function optionalNumber(value, fallback) {
+  return null != value ? Number(value) : fallback;
+}
+
+function readSlidePlacement(params, defaults) {
+  return {
+    presentationId: requirePresentationId(params),
+    slideObjectId: requireSlideObjectId(params),
+    placement: {
+      x: optionalNumber(params.x, defaults.x),
+      y: optionalNumber(params.y, defaults.y),
+      width: optionalNumber(params.width, defaults.width),
+      height: optionalNumber(params.height, defaults.height),
+    },
+  };
+}
+
+function requireTableRowParams(params) {
+  const presentationId = requirePresentationId(params),
+    tableObjectId = params.table_object_id;
+  if (!tableObjectId?.trim()) throw new Error('Missing required param: table_object_id');
+  if (null == params.row_index) throw new Error('Missing required param: row_index');
+  return {
+    presentationId: presentationId,
+    tableObjectId: tableObjectId.trim(),
+    rowIndex: Number(params.row_index),
+  };
+}
+
 export async function executeSlidesChatTool(ctx, toolName, params = {}) {
   const credentials = requireGoogleCredentials(ctx);
   switch (toolName) {
@@ -172,20 +214,16 @@ export async function executeSlidesChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'slides_add_text_box': {
-      const {
-        presentation_id: presentation_id,
-        slide_object_id: slide_object_id,
-        text: text,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!slide_object_id?.trim()) throw new Error('Missing required param: slide_object_id');
+      const { text: text } = params,
+        { presentationId, slideObjectId, placement } = readSlidePlacement(params, {
+          x: 100,
+          y: 100,
+          width: 300,
+          height: 60,
+        });
       return [
         'Text box added',
-        `Element ID: \`${(await SlidesAPI.addTextBox(credentials, presentation_id.trim(), slide_object_id.trim(), { text: text ?? '', x: null != x ? Number(x) : 100, y: null != y ? Number(y) : 100, width: null != width ? Number(width) : 300, height: null != height ? Number(height) : 60 })).objectId}\``,
+        `Element ID: \`${(await SlidesAPI.addTextBox(credentials, presentationId, slideObjectId, { text: text ?? '', ...placement })).objectId}\``,
         text ? `Content: "${text}"` : '',
       ]
         .filter(Boolean)
@@ -207,21 +245,17 @@ export async function executeSlidesChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'slides_add_image': {
-      const {
-        presentation_id: presentation_id,
-        slide_object_id: slide_object_id,
-        image_url: image_url,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!slide_object_id?.trim()) throw new Error('Missing required param: slide_object_id');
+      const { image_url: image_url } = params,
+        { presentationId, slideObjectId, placement } = readSlidePlacement(params, {
+          x: 50,
+          y: 50,
+          width: 300,
+          height: 200,
+        });
       if (!image_url?.trim()) throw new Error('Missing required param: image_url');
       return [
         'Image added',
-        `Element ID: \`${(await SlidesAPI.addImage(credentials, presentation_id.trim(), slide_object_id.trim(), { imageUrl: image_url.trim(), x: null != x ? Number(x) : 50, y: null != y ? Number(y) : 50, width: null != width ? Number(width) : 300, height: null != height ? Number(height) : 200 })).objectId}\``,
+        `Element ID: \`${(await SlidesAPI.addImage(credentials, presentationId, slideObjectId, { imageUrl: image_url.trim(), ...placement })).objectId}\``,
       ].join('\n');
     }
     case 'slides_delete_element': {
@@ -234,29 +268,17 @@ export async function executeSlidesChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'slides_add_shape': {
-      const {
-        presentation_id: presentation_id,
-        slide_object_id: slide_object_id,
-        shape_type: shape_type,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!slide_object_id?.trim()) throw new Error('Missing required param: slide_object_id');
-      const result = await SlidesAPI.addShape(
-        credentials,
-        presentation_id.trim(),
-        slide_object_id.trim(),
-        {
-          shapeType: shape_type?.trim() ?? 'RECTANGLE',
-          x: null != x ? Number(x) : 100,
-          y: null != y ? Number(y) : 100,
-          width: null != width ? Number(width) : 200,
-          height: null != height ? Number(height) : 150,
-        },
-      );
+      const { shape_type: shape_type } = params,
+        { presentationId, slideObjectId, placement } = readSlidePlacement(params, {
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 150,
+        });
+      const result = await SlidesAPI.addShape(credentials, presentationId, slideObjectId, {
+        shapeType: shape_type?.trim() ?? 'RECTANGLE',
+        ...placement,
+      });
       return [
         `${shape_type ?? 'RECTANGLE'} shape added`,
         `Element ID: \`${result.objectId}\``,
@@ -313,21 +335,16 @@ export async function executeSlidesChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'slides_add_table': {
-      const {
-        presentation_id: presentation_id,
-        slide_object_id: slide_object_id,
-        rows: rows,
-        columns: columns,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!slide_object_id?.trim()) throw new Error('Missing required param: slide_object_id');
+      const { rows: rows, columns: columns } = params,
+        { presentationId, slideObjectId, placement } = readSlidePlacement(params, {
+          x: 50,
+          y: 100,
+          width: 450,
+          height: 200,
+        });
       return [
         `Table (${rows ?? 3}×${columns ?? 3}) added`,
-        `Element ID: \`${(await SlidesAPI.addTable(credentials, presentation_id.trim(), slide_object_id.trim(), { rows: null != rows ? Number(rows) : 3, columns: null != columns ? Number(columns) : 3, x: null != x ? Number(x) : 50, y: null != y ? Number(y) : 100, width: null != width ? Number(width) : 450, height: null != height ? Number(height) : 200 })).objectId}\``,
+        `Element ID: \`${(await SlidesAPI.addTable(credentials, presentationId, slideObjectId, { rows: optionalNumber(rows, 3), columns: optionalNumber(columns, 3), ...placement })).objectId}\``,
       ].join('\n');
     }
     case 'slides_move_element': {
@@ -408,41 +425,21 @@ export async function executeSlidesChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'slides_insert_table_rows': {
-      const {
-        presentation_id: presentation_id,
-        table_object_id: table_object_id,
-        row_index: row_index,
-        insert_below: insert_below,
-        count: count,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!table_object_id?.trim()) throw new Error('Missing required param: table_object_id');
-      if (null == row_index) throw new Error('Missing required param: row_index');
-      await SlidesAPI.insertTableRows(credentials, presentation_id.trim(), table_object_id.trim(), {
-        rowIndex: Number(row_index),
+      const { insert_below: insert_below, count: count } = params,
+        { presentationId, tableObjectId, rowIndex } = requireTableRowParams(params);
+      await SlidesAPI.insertTableRows(credentials, presentationId, tableObjectId, {
+        rowIndex: rowIndex,
         insertBelow: null == insert_below || Boolean(insert_below),
         count: null != count ? Number(count) : 1,
       });
       const n = count ?? 1;
-      return `${n} row${1 !== n ? 's' : ''} inserted ${!1 === insert_below ? 'above' : 'below'} row ${row_index} in table \`${table_object_id}\`.`;
+      return `${n} row${1 !== n ? 's' : ''} inserted ${!1 === insert_below ? 'above' : 'below'} row ${rowIndex} in table \`${tableObjectId}\`.`;
     }
     case 'slides_delete_table_row': {
-      const {
-        presentation_id: presentation_id,
-        table_object_id: table_object_id,
-        row_index: row_index,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!table_object_id?.trim()) throw new Error('Missing required param: table_object_id');
-      if (null == row_index) throw new Error('Missing required param: row_index');
+      const { presentationId, tableObjectId, rowIndex } = requireTableRowParams(params);
       return (
-        await SlidesAPI.deleteTableRow(
-          credentials,
-          presentation_id.trim(),
-          table_object_id.trim(),
-          Number(row_index),
-        ),
-        `Row ${row_index} deleted from table \`${table_object_id}\`.`
+        await SlidesAPI.deleteTableRow(credentials, presentationId, tableObjectId, rowIndex),
+        `Row ${rowIndex} deleted from table \`${tableObjectId}\`.`
       );
     }
     case 'slides_update_table_cell': {
@@ -471,47 +468,31 @@ export async function executeSlidesChatTool(ctx, toolName, params = {}) {
       );
     }
     case 'slides_add_line': {
-      const {
-        presentation_id: presentation_id,
-        slide_object_id: slide_object_id,
-        line_category: line_category,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!slide_object_id?.trim()) throw new Error('Missing required param: slide_object_id');
+      const { line_category: line_category } = params,
+        { presentationId, slideObjectId, placement } = readSlidePlacement(params, {
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 0,
+        });
       return [
         'Line added',
-        `Element ID: \`${(await SlidesAPI.addLine(credentials, presentation_id.trim(), slide_object_id.trim(), { lineCategory: line_category?.trim().toUpperCase() ?? 'STRAIGHT', x: null != x ? Number(x) : 50, y: null != y ? Number(y) : 50, width: null != width ? Number(width) : 200, height: null != height ? Number(height) : 0 })).objectId}\``,
+        `Element ID: \`${(await SlidesAPI.addLine(credentials, presentationId, slideObjectId, { lineCategory: line_category?.trim().toUpperCase() ?? 'STRAIGHT', ...placement })).objectId}\``,
       ].join('\n');
     }
     case 'slides_add_video': {
-      const {
-        presentation_id: presentation_id,
-        slide_object_id: slide_object_id,
-        video_id: video_id,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-      } = params;
-      if (!presentation_id?.trim()) throw new Error('Missing required param: presentation_id');
-      if (!slide_object_id?.trim()) throw new Error('Missing required param: slide_object_id');
+      const { video_id: video_id } = params,
+        { presentationId, slideObjectId, placement } = readSlidePlacement(params, {
+          x: 100,
+          y: 100,
+          width: 320,
+          height: 180,
+        });
       if (!video_id?.trim()) throw new Error('Missing required param: video_id');
-      const result = await SlidesAPI.addVideo(
-        credentials,
-        presentation_id.trim(),
-        slide_object_id.trim(),
-        {
-          videoId: video_id.trim(),
-          x: null != x ? Number(x) : 100,
-          y: null != y ? Number(y) : 100,
-          width: null != width ? Number(width) : 320,
-          height: null != height ? Number(height) : 180,
-        },
-      );
+      const result = await SlidesAPI.addVideo(credentials, presentationId, slideObjectId, {
+        videoId: video_id.trim(),
+        ...placement,
+      });
       return [`YouTube video \`${video_id}\` embedded`, `Element ID: \`${result.objectId}\``].join(
         '\n',
       );

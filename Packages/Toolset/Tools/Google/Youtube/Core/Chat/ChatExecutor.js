@@ -24,31 +24,75 @@ function formatVideo(item, index) {
     lines.filter(Boolean).join('\n')
   );
 }
+
+function formatChannelDetails(channel, titleFallback, { includeCreated = false } = {}) {
+  const sn = channel.snippet ?? {},
+    stats = channel.statistics ?? {},
+    lines = [
+      `**${sn.title ?? titleFallback}**`,
+      sn.description
+        ? `${sn.description.slice(0, 200)}${sn.description.length > 200 ? '...' : ''}`
+        : '',
+      '',
+      `Channel ID: \`${channel.id}\``,
+      `Subscribers: ${stats.hiddenSubscriberCount ? 'Hidden' : YouTubeAPI.formatCount(stats.subscriberCount)}`,
+      `Total Views: ${YouTubeAPI.formatCount(stats.viewCount)}`,
+      `Videos: ${YouTubeAPI.formatCount(stats.videoCount)}`,
+      sn.country ? `Country: ${sn.country}` : '',
+      includeCreated && sn.publishedAt
+        ? `Created: ${new Date(sn.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}`
+        : '',
+    ];
+  return lines.filter(Boolean).join('\n');
+}
+
+function formatSimpleVideoItem(item, index) {
+  const sn = item.snippet ?? {},
+    videoId = item.id?.videoId ?? '';
+  return `${index}. **${sn.title ?? '(No title)'}**${videoId ? `\n   ID: \`${videoId}\`` : ''}\n   Published: ${sn.publishedAt ? new Date(sn.publishedAt).toLocaleDateString() : 'unknown'}`;
+}
+
+function formatPlaylistItem(playlist, index) {
+  const sn = playlist.snippet ?? {},
+    count = playlist.contentDetails?.itemCount ?? 0;
+  return `${index}. **${sn.title ?? '(Untitled)'}** — ${count} video${1 !== count ? 's' : ''}\n   ID: \`${playlist.id}\`${sn.description ? `\n   ${sn.description.slice(0, 80)}` : ''}`;
+}
+
+function formatActivityItem(item, index, { includeChannel = true } = {}) {
+  const sn = item.snippet ?? {},
+    contentDetails = item.contentDetails ?? {},
+    typeKey = Object.keys(contentDetails)[0] ?? 'unknown',
+    resource = contentDetails[typeKey] ?? {},
+    resourceId =
+      resource.videoId ?? resource.playlistId ?? (includeChannel ? resource.channelId : '') ?? '';
+  return [
+    `${index}. **${sn.title ?? typeKey}** (${sn.type ?? typeKey})`,
+    resourceId ? `   Resource ID: \`${resourceId}\`` : '',
+    sn.publishedAt
+      ? `   ${new Date(sn.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+async function formatDetailedSearchVideos(credentials, items, loadVideos) {
+  const videoIds = items.map((item) => item.id?.videoId).filter(Boolean),
+    detailed = videoIds.length ? await loadVideos(credentials, videoIds) : items,
+    map = Object.fromEntries(detailed.map((v) => [v.id, v]));
+  return items.map((item, i) => {
+    const full = map[item.id?.videoId] ?? item;
+    return formatVideo(full.id ? full : { ...full, id: { videoId: item.id?.videoId } }, i + 1);
+  });
+}
+
 export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
   const credentials = requireGoogleCredentials(ctx);
   switch (toolName) {
     case 'youtube_get_my_channel': {
       const channel = await YouTubeAPI.getMyChannel(credentials);
       if (!channel) return 'No YouTube channel found for this account.';
-      const sn = channel.snippet ?? {},
-        stats = channel.statistics ?? {};
-      return [
-        `**${sn.title ?? 'Your Channel'}**`,
-        sn.description
-          ? `${sn.description.slice(0, 200)}${sn.description.length > 200 ? '...' : ''}`
-          : '',
-        '',
-        `Channel ID: \`${channel.id}\``,
-        `Subscribers: ${stats.hiddenSubscriberCount ? 'Hidden' : YouTubeAPI.formatCount(stats.subscriberCount)}`,
-        `Total Views: ${YouTubeAPI.formatCount(stats.viewCount)}`,
-        `Videos: ${YouTubeAPI.formatCount(stats.videoCount)}`,
-        sn.country ? `Country: ${sn.country}` : '',
-        sn.publishedAt
-          ? `Created: ${new Date(sn.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}`
-          : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
+      return formatChannelDetails(channel, 'Your Channel', { includeCreated: true });
     }
     case 'youtube_search_videos': {
       const { query: query, max_results: max_results = 10, order: order = 'relevance' } = params;
@@ -58,18 +102,11 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
         order: order,
       });
       if (!items.length) return `No videos found for "${query}".`;
-      const videoIds = items.map((item) => item.id?.videoId).filter(Boolean),
-        detailed = videoIds.length
-          ? await YouTubeAPI.getMultipleVideos(credentials, videoIds)
-          : items,
-        map = Object.fromEntries(detailed.map((v) => [v.id, v])),
-        lines = items.map((item, i) => {
-          const full = map[item.id?.videoId] ?? item;
-          return formatVideo(
-            full.id ? full : { ...full, id: { videoId: item.id?.videoId } },
-            i + 1,
-          );
-        });
+      const lines = await formatDetailedSearchVideos(
+        credentials,
+        items,
+        YouTubeAPI.getMultipleVideos,
+      );
       return `YouTube search "${query}" — ${items.length} result${1 !== items.length ? 's' : ''}:\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_get_video': {
@@ -102,11 +139,7 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
       const { max_results: max_results = 20 } = params,
         playlists = await YouTubeAPI.listMyPlaylists(credentials, max_results);
       if (!playlists.length) return 'No playlists found on your channel.';
-      const lines = playlists.map((pl, i) => {
-        const sn = pl.snippet ?? {},
-          count = pl.contentDetails?.itemCount ?? 0;
-        return `${i + 1}. **${sn.title ?? '(Untitled)'}** — ${count} video${1 !== count ? 's' : ''}\n   ID: \`${pl.id}\`${sn.description ? `\n   ${sn.description.slice(0, 80)}` : ''}`;
-      });
+      const lines = playlists.map((playlist, i) => formatPlaylistItem(playlist, i + 1));
       return `Your playlists (${playlists.length}):\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_get_playlist_items': {
@@ -169,11 +202,7 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
       const { max_results: max_results = 20 } = params,
         items = await YouTubeAPI.listMyVideos(credentials, max_results);
       if (!items.length) return 'No videos found on your channel.';
-      const lines = items.map((item, i) => {
-        const sn = item.snippet ?? {},
-          videoId = item.id?.videoId ?? '';
-        return `${i + 1}. **${sn.title ?? '(No title)'}**${videoId ? `\n   ID: \`${videoId}\`` : ''}\n   Published: ${sn.publishedAt ? new Date(sn.publishedAt).toLocaleDateString() : 'unknown'}`;
-      });
+      const lines = items.map((item, i) => formatSimpleVideoItem(item, i + 1));
       return `Your videos (${items.length}):\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_get_channel_by_id': {
@@ -181,31 +210,14 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
       if (!channel_id?.trim()) throw new Error('Missing required param: channel_id');
       const channel = await YouTubeAPI.getChannelById(credentials, channel_id.trim());
       if (!channel) return `No channel found with ID "${channel_id}".`;
-      const sn = channel.snippet ?? {},
-        stats = channel.statistics ?? {};
-      return [
-        `**${sn.title ?? 'Unknown Channel'}**`,
-        sn.description ? sn.description.slice(0, 200) : '',
-        '',
-        `Channel ID: \`${channel.id}\``,
-        `Subscribers: ${stats.hiddenSubscriberCount ? 'Hidden' : YouTubeAPI.formatCount(stats.subscriberCount)}`,
-        `Total Views: ${YouTubeAPI.formatCount(stats.viewCount)}`,
-        `Videos: ${YouTubeAPI.formatCount(stats.videoCount)}`,
-        sn.country ? `Country: ${sn.country}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
+      return formatChannelDetails(channel, 'Unknown Channel');
     }
     case 'youtube_get_channel_videos': {
       const { channel_id: channel_id, max_results: max_results = 20 } = params;
       if (!channel_id?.trim()) throw new Error('Missing required param: channel_id');
       const items = await YouTubeAPI.getChannelVideos(credentials, channel_id.trim(), max_results);
       if (!items.length) return `No videos found for channel \`${channel_id}\`.`;
-      const lines = items.map((item, i) => {
-        const sn = item.snippet ?? {},
-          videoId = item.id?.videoId ?? '';
-        return `${i + 1}. **${sn.title ?? '(No title)'}**${videoId ? `\n   ID: \`${videoId}\`` : ''}\n   Published: ${sn.publishedAt ? new Date(sn.publishedAt).toLocaleDateString() : 'unknown'}`;
-      });
+      const lines = items.map((item, i) => formatSimpleVideoItem(item, i + 1));
       return `Channel videos (${items.length}):\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_create_playlist': {
@@ -419,22 +431,7 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
       const { max_results: max_results = 20 } = params,
         items = await YouTubeAPI.getMyActivities(credentials, max_results);
       if (!items.length) return 'No activity found on your account.';
-      const lines = items.map((item, i) => {
-        const sn = item.snippet ?? {},
-          cd = item.contentDetails ?? {},
-          typeKey = Object.keys(cd)[0] ?? 'unknown',
-          resourceId =
-            cd[typeKey]?.videoId ?? cd[typeKey]?.playlistId ?? cd[typeKey]?.channelId ?? '';
-        return [
-          `${i + 1}. **${sn.title ?? typeKey}** (${sn.type ?? typeKey})`,
-          resourceId ? `   Resource ID: \`${resourceId}\`` : '',
-          sn.publishedAt
-            ? `   ${new Date(sn.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`
-            : '',
-        ]
-          .filter(Boolean)
-          .join('\n');
-      });
+      const lines = items.map((item, i) => formatActivityItem(item, i + 1));
       return `Your recent activities (${items.length}):\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_get_channel_activities': {
@@ -446,21 +443,9 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
         max_results,
       );
       if (!items.length) return `No public activity found for channel \`${channel_id}\`.`;
-      const lines = items.map((item, i) => {
-        const sn = item.snippet ?? {},
-          cd = item.contentDetails ?? {},
-          typeKey = Object.keys(cd)[0] ?? 'unknown',
-          resourceId = cd[typeKey]?.videoId ?? cd[typeKey]?.playlistId ?? '';
-        return [
-          `${i + 1}. **${sn.title ?? typeKey}** (${sn.type ?? typeKey})`,
-          resourceId ? `   Resource ID: \`${resourceId}\`` : '',
-          sn.publishedAt
-            ? `   ${new Date(sn.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`
-            : '',
-        ]
-          .filter(Boolean)
-          .join('\n');
-      });
+      const lines = items.map((item, i) =>
+        formatActivityItem(item, i + 1, { includeChannel: false }),
+      );
       return `Channel \`${channel_id}\` activities (${items.length}):\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_get_channel_playlists': {
@@ -472,11 +457,7 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
         max_results,
       );
       if (!playlists.length) return `No public playlists found for channel \`${channel_id}\`.`;
-      const lines = playlists.map((pl, i) => {
-        const sn = pl.snippet ?? {},
-          count = pl.contentDetails?.itemCount ?? 0;
-        return `${i + 1}. **${sn.title ?? '(Untitled)'}** — ${count} video${1 !== count ? 's' : ''}\n   ID: \`${pl.id}\`${sn.description ? `\n   ${sn.description.slice(0, 80)}` : ''}`;
-      });
+      const lines = playlists.map((playlist, i) => formatPlaylistItem(playlist, i + 1));
       return `Playlists for \`${channel_id}\` (${playlists.length}):\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_get_video_captions': {
@@ -707,16 +688,7 @@ export async function executeYouTubeChatTool(ctx, toolName, params = {}) {
           relevance_language ? `language: ${relevance_language}` : null,
         ].filter(Boolean),
         filterNote = activeFilters.length ? ` [${activeFilters.join(' · ')}]` : '',
-        videoIds = items.map((item) => item.id?.videoId).filter(Boolean),
-        detailed = videoIds.length ? await YouTubeAPI.getVideosBatch(credentials, videoIds) : items,
-        map = Object.fromEntries(detailed.map((v) => [v.id, v])),
-        lines = items.map((item, i) => {
-          const full = map[item.id?.videoId] ?? item;
-          return formatVideo(
-            full.id ? full : { ...full, id: { videoId: item.id?.videoId } },
-            i + 1,
-          );
-        });
+        lines = await formatDetailedSearchVideos(credentials, items, YouTubeAPI.getVideosBatch);
       return `Advanced search "${query}"${filterNote} — ${items.length} result${1 !== items.length ? 's' : ''}:\n\n${lines.join('\n\n')}`;
     }
     case 'youtube_get_video_statistics': {

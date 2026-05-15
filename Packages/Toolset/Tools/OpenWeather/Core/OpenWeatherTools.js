@@ -1,33 +1,14 @@
-import { readUserState } from '../../../../Shared/UserData/UserData.js';
+import {
+  readConnectorDetails,
+  readJsonResponse,
+  requireText,
+} from '../../../Core/ConnectorHttp.js';
 
 const OPENWEATHER_API = 'https://api.openweathermap.org/data/2.5/weather';
 
-function requireText(value, label) {
-  const text = String(value ?? '').trim();
-  if (!text) throw new Error(`Missing required parameter: ${label}.`);
-  return text;
-}
-
 async function readOpenWeatherApiKey(rootDirectory) {
-  const state = await readUserState(rootDirectory);
-  return String(state.connectors?.details?.openweather?.apiKey ?? '').trim();
-}
-
-async function readJsonResponse(response) {
-  const rawText = await response.text();
-  let data = null;
-  try {
-    data = rawText ? JSON.parse(rawText) : null;
-  } catch {
-    data = null;
-  }
-
-  if (!response.ok) {
-    const message = data?.message || data?.error?.message || rawText || response.statusText;
-    throw new Error(`${response.status} ${response.statusText}: ${message}`);
-  }
-
-  return data;
+  const details = await readConnectorDetails(rootDirectory, 'openweather');
+  return String(details.apiKey ?? '').trim();
 }
 
 async function openWeatherCurrent(rootDirectory, params = {}) {

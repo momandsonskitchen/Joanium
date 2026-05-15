@@ -1,3 +1,33 @@
+const CALENDAR_ID_PARAMETER = Object.freeze({
+  calendar_id: { type: 'string', required: !1, description: 'Calendar ID (default: primary).' },
+});
+
+const OPTIONAL_TIME_RANGE_PARAMETERS = Object.freeze({
+  time_min: {
+    type: 'string',
+    required: !1,
+    description: 'Start of the range in ISO 8601 or YYYY-MM-DD format.',
+  },
+  time_max: {
+    type: 'string',
+    required: !1,
+    description: 'End of the range in ISO 8601 or YYYY-MM-DD format.',
+  },
+});
+
+const REQUIRED_TIME_RANGE_PARAMETERS = Object.freeze({
+  time_min: {
+    type: 'string',
+    required: !0,
+    description: 'Start of the range in ISO 8601 or YYYY-MM-DD format.',
+  },
+  time_max: {
+    type: 'string',
+    required: !0,
+    description: 'End of the range in ISO 8601 or YYYY-MM-DD format.',
+  },
+});
+
 export const CALENDAR_TOOLS = [
   {
     name: 'calendar_get_today',
@@ -50,21 +80,8 @@ export const CALENDAR_TOOLS = [
     description: 'List Google Calendar events within a specific date range.',
     category: 'calendar',
     parameters: {
-      time_min: {
-        type: 'string',
-        required: !1,
-        description: 'Start of the range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      time_max: {
-        type: 'string',
-        required: !1,
-        description: 'End of the range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      calendar_id: {
-        type: 'string',
-        required: !1,
-        description: 'Calendar ID to list from (default: primary).',
-      },
+      ...OPTIONAL_TIME_RANGE_PARAMETERS,
+      ...CALENDAR_ID_PARAMETER,
       max_results: {
         type: 'number',
         required: !1,
@@ -317,17 +334,8 @@ export const CALENDAR_TOOLS = [
     description: 'Count the number of events in a given time range on a calendar.',
     category: 'calendar',
     parameters: {
-      time_min: {
-        type: 'string',
-        required: !0,
-        description: 'Start of the range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      time_max: {
-        type: 'string',
-        required: !0,
-        description: 'End of the range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      calendar_id: { type: 'string', required: !1, description: 'Calendar ID (default: primary).' },
+      ...REQUIRED_TIME_RANGE_PARAMETERS,
+      ...CALENDAR_ID_PARAMETER,
     },
   },
   {
@@ -596,17 +604,8 @@ export const CALENDAR_TOOLS = [
       'Calculate the total number of hours and count of timed meetings scheduled within a given date range.',
     category: 'calendar',
     parameters: {
-      time_min: {
-        type: 'string',
-        required: !0,
-        description: 'Start of the range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      time_max: {
-        type: 'string',
-        required: !0,
-        description: 'End of the range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      calendar_id: { type: 'string', required: !1, description: 'Calendar ID (default: primary).' },
+      ...REQUIRED_TIME_RANGE_PARAMETERS,
+      ...CALENDAR_ID_PARAMETER,
     },
   },
   {
@@ -642,17 +641,8 @@ export const CALENDAR_TOOLS = [
     description: 'Get only all-day events (no timed events) within a date range.',
     category: 'calendar',
     parameters: {
-      time_min: {
-        type: 'string',
-        required: !0,
-        description: 'Start of range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      time_max: {
-        type: 'string',
-        required: !0,
-        description: 'End of range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      calendar_id: { type: 'string', required: !1, description: 'Calendar ID (default: primary).' },
+      ...REQUIRED_TIME_RANGE_PARAMETERS,
+      ...CALENDAR_ID_PARAMETER,
       max_results: { type: 'number', required: !1, description: 'Max results (default: 50).' },
     },
   },
@@ -771,17 +761,8 @@ export const CALENDAR_TOOLS = [
       'Get a day-by-day summary of event counts and total meeting time within a date range.',
     category: 'calendar',
     parameters: {
-      time_min: {
-        type: 'string',
-        required: !0,
-        description: 'Start of range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      time_max: {
-        type: 'string',
-        required: !0,
-        description: 'End of range in ISO 8601 or YYYY-MM-DD format.',
-      },
-      calendar_id: { type: 'string', required: !1, description: 'Calendar ID (default: primary).' },
+      ...REQUIRED_TIME_RANGE_PARAMETERS,
+      ...CALENDAR_ID_PARAMETER,
     },
   },
   {

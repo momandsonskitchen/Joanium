@@ -1,5 +1,4 @@
-import { readdir, readFile } from 'node:fs/promises';
-import path from 'node:path';
+import { readJsonDirectory } from '../Utils.js';
 
 // ---------------------------------------------------------------------------
 // AgentScheduler — fires agents at the right moment.
@@ -33,24 +32,7 @@ export function createAgentScheduler({ agentsDirectory, runAgent, queueAgent }) 
   // ── Internal helpers ──────────────────────────────────────────────────────
 
   async function loadAllAgents() {
-    let files;
-    try {
-      files = await readdir(agentsDirectory);
-    } catch {
-      return [];
-    }
-
-    const agents = [];
-    for (const file of files) {
-      if (!file.endsWith('.json')) continue;
-      try {
-        const raw = await readFile(path.join(agentsDirectory, file), 'utf8');
-        agents.push(JSON.parse(raw));
-      } catch {
-        // Skip corrupt files.
-      }
-    }
-    return agents;
+    return readJsonDirectory(agentsDirectory);
   }
 
   function shouldRunNow(schedule, now) {

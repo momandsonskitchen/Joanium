@@ -6,6 +6,11 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
+import {
+  buildAvailableModelOptions,
+  decodeModelValue,
+  encodeModelValue,
+} from '../../Shared/ProviderCatalog/ModelOptions.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -46,24 +51,6 @@ function buildScheduleDescription(schedule, strings) {
     default:
       return strings.scheduleTypes.startup;
   }
-}
-
-// Encode { providerId, modelId } → "providerId/modelId" (or 'default' for null).
-// Uses 'default' (not '') because DropDown skips options with empty values.
-function encodeModelValue(model) {
-  if (!model?.providerId || !model?.modelId) return 'default';
-  return `${model.providerId}/${model.modelId}`;
-}
-
-// Decode "providerId/modelId" → { providerId, modelId } (or null for 'default').
-function decodeModelValue(value) {
-  if (!value || value === 'default') return null;
-  const slashIndex = value.indexOf('/');
-  if (slashIndex < 0) return null;
-  return {
-    providerId: value.slice(0, slashIndex),
-    modelId: value.slice(slashIndex + 1),
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -114,21 +101,9 @@ export function createAgentsPanel(strings) {
   }
 
   function buildModelOptions() {
-    const options = [{ value: 'default', label: strings.modelDefault }];
-    for (const provider of cachedProviders) {
-      if (!provider.models?.length) continue;
-      const details = cachedUserProviderDetails?.[provider.id] ?? {};
-      const endpoint = (details.endpoint ?? '').trim() || (provider.endpoint ?? '').trim();
-      if (!endpoint) continue;
-      if (provider.requiresApiKey && !(details.apiKey ?? '').trim()) continue;
-      for (const model of provider.models) {
-        options.push({
-          value: `${provider.id}/${model.id}`,
-          label: `${provider.label} — ${model.name ?? model.id}`,
-        });
-      }
-    }
-    return options;
+    return buildAvailableModelOptions(cachedProviders, cachedUserProviderDetails, {
+      defaultOption: { value: 'default', label: strings.modelDefault },
+    });
   }
 
   // Rebuild (or first-build) the model dropdown inside its container.
@@ -144,13 +119,13 @@ export function createAgentsPanel(strings) {
     }
 
     const options = buildModelOptions();
-    const selectedValue = encodeModelValue(draftModel);
+    const selectedValue = encodeModelValue(draftModel, 'default');
 
     modelDropdown = createDropDownLite({
       options,
       value: selectedValue,
       onChange: (value) => {
-        draftModel = decodeModelValue(value);
+        draftModel = decodeModelValue(value, 'default');
       },
     });
 
