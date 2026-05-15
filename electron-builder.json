@@ -2,6 +2,8 @@
   "appId": "com.joanium.app",
   "productName": "Joanium",
   "copyright": "Copyright © 2026 Joel Jolly",
+  "asar": true,
+  "afterSign": "Scripts/Fuses.cjs",
   "files": [
     "App.js",
     "Assets/**/*",

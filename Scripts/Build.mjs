@@ -4,9 +4,18 @@
  * Steps:
  *   1. Set version from date  (silent — captured for header display)
  *   2. Package with electron-builder
+ *        ↳ packs source into app.asar
+ *        ↳ runs Scripts/Fuses.cjs as afterSign hook
+ *             → flips Electron V1 fuses in the binary:
+ *               RunAsNode OFF · EnableCookieEncryption ON
+ *               NodeOptions OFF · NodeCliInspect OFF
+ *               AsarIntegrity ON · OnlyLoadAppFromAsar ON
  *
  * Usage:
  *   node Scripts/Build.mjs
+ *
+ * Requirement (first time):
+ *   npm install --save-dev @electron/fuses
  */
 
 import { execSync } from 'child_process';
@@ -73,6 +82,30 @@ function stepDone(label) {
   );
 }
 
+function printProtectionSummary() {
+  const rows = [
+    ['ASAR packing', 'source tree archived into app.asar'],
+    ['RunAsNode', 'OFF — binary cannot run as a bare Node process'],
+    ['CookieEncryption', 'ON  — cookies encrypted via OS keychain / DPAPI'],
+    ['NODE_OPTIONS', 'OFF — --require / --loader injection blocked'],
+    ['--inspect flags', 'OFF — V8 debugger attach blocked'],
+    ['ASAR integrity', 'ON  — hash verified at startup (macOS + notarization)'],
+    ['OnlyLoadFromAsar', 'ON  — code outside ASAR refused at load time'],
+  ];
+
+  const divider = `${C.lavDeep}${'─'.repeat(60)}${C.reset}`;
+  process.stdout.write(`  ${divider}\n\n`);
+  process.stdout.write(`  ${C.lavDeep}◈  Protection applied${C.reset}\n\n`);
+
+  for (const [key, value] of rows) {
+    const k = `${C.lav}${key.padEnd(20)}${C.reset}`;
+    const v = `${C.gray}${value}${C.reset}`;
+    process.stdout.write(`     ${k}  ${v}\n`);
+  }
+
+  process.stdout.write('\n');
+}
+
 function run(label, cmd, detail = '') {
   stepStart(label, detail);
   execSync(cmd, { cwd: ROOT, stdio: 'inherit' });
@@ -90,9 +123,13 @@ const version = execSync('node ./Scripts/SetVersionByDate.mjs', {
 printLogo();
 printMeta(version);
 
-run('Package app', 'npx electron-builder', 'electron-builder');
+// electron-builder handles both ASAR packing and the afterSign fuse hook
+// (Scripts/Fuses.cjs) automatically. No separate steps needed.
+run('Package app', 'npx electron-builder', 'electron-builder → asar pack → fuses');
 
 // ── Done ──────────────────────────────────────────────────────────────────────
+
+printProtectionSummary();
 
 const divider = `${C.lavDeep}${'─'.repeat(60)}${C.reset}`;
 process.stdout.write(`  ${divider}\n\n`);
