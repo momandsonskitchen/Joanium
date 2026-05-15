@@ -692,6 +692,7 @@
 .chat-composer__project {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -783,7 +784,7 @@
 .chat-composer__project-clear {
   width: 30px;
   height: 30px;
-  margin-left: auto;
+  flex-shrink: 0;
   border-radius: 10px;
   color: var(--color-chat-text-muted);
   transition:
@@ -797,6 +798,22 @@
   background: var(--color-chat-hover-surface);
   color: var(--color-chat-text-title);
   transform: translateY(-1px);
+}
+
+.chat-composer__project--commit-mode {
+  align-items: stretch;
+}
+
+.chat-composer__project--commit-mode .chat-composer__project-main,
+.chat-composer__project--commit-mode .chat-composer__project-clear,
+.chat-composer__project--commit-mode .chat-gitbar {
+  display: none;
+}
+
+.chat-composer__project--commit-mode .chat-gitbar__commit-panel {
+  flex-basis: 100%;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .chat-gitbar {
@@ -856,12 +873,37 @@
 }
 
 .chat-gitbar__dot {
+  position: relative;
   width: 9px;
   height: 9px;
   border-radius: 999px;
   flex: 0 0 9px;
   background: rgba(120, 120, 120, 0.7);
   box-shadow: 0 0 0 4px rgba(120, 120, 120, 0.08);
+}
+
+.chat-gitbar__dot::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: var(--color-chat-text-title);
+  color: var(--color-bg-base, #fff);
+  font-size: 11.5px;
+  font-weight: 580;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease;
+  z-index: 100;
+}
+
+.chat-gitbar__dot:hover::after {
+  opacity: 1;
 }
 
 .chat-gitbar__dot--clean {
@@ -902,7 +944,7 @@
 
 .chat-gitbar__copy {
   min-width: 0;
-  max-width: 150px;
+  max-width: 220px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1083,12 +1125,38 @@
   font-weight: 700;
 }
 
+.chat-branch-picker__create-button:disabled {
+  opacity: 0.58;
+}
+
+.chat-branch-picker__status {
+  margin: 0 2px 8px;
+  color: var(--color-chat-text-muted);
+  font-size: 11.5px;
+  font-weight: 560;
+}
+
+.chat-branch-picker__status--warning {
+  color: #a84b2a;
+}
+
+.chat-branch-picker__status--success {
+  color: #1f9d58;
+}
+
 .chat-branch-picker__list {
   display: flex;
   flex-direction: column;
   gap: 4px;
   max-height: 210px;
   overflow: auto;
+}
+
+.chat-branch-picker__empty {
+  padding: 8px 10px;
+  color: var(--color-chat-text-muted);
+  font-size: 13px;
+  font-weight: 560;
 }
 
 .chat-branch-picker__option {
@@ -1105,10 +1173,21 @@
   text-align: left;
 }
 
+.chat-branch-picker__option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .chat-branch-picker__option:hover,
 .chat-branch-picker__option--active {
   background: var(--color-chat-hover-surface);
   color: var(--color-chat-text-title);
+}
+
+.chat-branch-picker__option:disabled {
+  opacity: 0.6;
 }
 
 .chat-branch-picker__check {
@@ -1120,10 +1199,13 @@
 
 .chat-gitbar__menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 4px);
   right: 0;
   z-index: 45;
-  min-width: 190px;
+  min-width: 228px;
+  max-width: min(280px, calc(100vw - 32px));
+  max-height: min(260px, calc(100vh - 140px));
+  overflow-y: auto;
   padding: 6px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.94);
@@ -1140,11 +1222,12 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 2px;
   padding: 9px 10px;
   border-radius: 11px;
   color: var(--color-chat-text-secondary);
+  text-align: left;
   transition:
     background-color 140ms ease,
     transform 140ms ease,
@@ -1158,13 +1241,19 @@
 }
 
 .chat-gitbar__menu-label {
+  display: block;
+  width: 100%;
   font-size: 12.5px;
   font-weight: 720;
+  text-align: left;
 }
 
 .chat-gitbar__menu-meta {
+  display: block;
+  width: 100%;
   font-size: 11.5px;
   color: var(--color-chat-text-muted);
+  text-align: left;
 }
 
 .chat-gitbar__commit-panel {
@@ -1561,6 +1650,7 @@
 }
 
 .chat-composer__icon-button,
+.chat-composer__branch,
 .chat-composer__model,
 .chat-composer__send {
   display: inline-flex;
@@ -1578,6 +1668,7 @@
 }
 
 .chat-composer__icon-button:hover,
+.chat-composer__branch:hover,
 .chat-composer__model:hover,
 .chat-composer__send:hover {
   transform: translateY(-1px);
@@ -1591,6 +1682,7 @@
 }
 
 .chat-composer__icon-button:hover,
+.chat-composer__branch:hover,
 .chat-composer__model:hover {
   background: var(--color-chat-hover-surface);
 }
@@ -1601,6 +1693,12 @@
 }
 
 /* ── Enhance-prompt glow state ──────────────────────────────────────────── */
+
+.chat-composer__branch:disabled,
+.chat-composer__model:disabled {
+  opacity: 0.62;
+  transform: none;
+}
 
 .chat-composer--enhancing {
   background-image: linear-gradient(
@@ -1655,23 +1753,52 @@
   color: var(--color-chat-text-secondary);
 }
 
+.chat-composer__branch {
+  gap: 10px;
+  min-height: 42px;
+  min-width: 0;
+  max-width: min(200px, 28vw);
+  padding: 0 12px 0 14px;
+  border-radius: var(--radius-pill);
+  color: var(--color-chat-text-secondary);
+}
+
+.chat-composer__branch-status {
+  display: block;
+  flex-shrink: 0;
+  align-self: center;
+  transform: translateY(1px);
+}
+
+.chat-composer__branch-chevron,
 .chat-composer__model-icon {
   transition: transform var(--transition-base);
 }
 
+.chat-composer__branch--open .chat-composer__branch-chevron,
 .chat-composer__model--open .chat-composer__model-icon {
   transform: rotate(180deg);
 }
 
+.chat-composer__branch-label,
 .chat-composer__model-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.chat-composer__branch-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chat-composer__model-label {
   font-size: 15px;
   font-weight: 600;
 }
 
 .chat-composer__icon,
+.chat-composer__branch-chevron,
 .chat-composer__model-icon,
 .chat-composer__send-icon {
   display: inline-flex;
@@ -1681,6 +1808,7 @@
 }
 
 .chat-composer__icon svg,
+.chat-composer__branch-chevron svg,
 .chat-composer__model-icon svg,
 .chat-composer__send-icon svg {
   width: 100%;
@@ -2652,6 +2780,25 @@
 
   .chat-composer {
     width: 100%;
+  }
+
+  .chat-composer__footer,
+  .chat-composer__submit {
+    flex-wrap: wrap;
+  }
+
+  .chat-composer__footer {
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .chat-composer__submit {
+    justify-content: flex-end;
+  }
+
+  .chat-composer__branch,
+  .chat-composer__model {
+    max-width: min(100%, 240px);
   }
 
   .chat-terminal-drawer,

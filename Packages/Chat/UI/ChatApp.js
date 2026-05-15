@@ -648,6 +648,130 @@ function createModelPickerPanel({ providers, userProviderDetails, strings, onSel
   };
 }
 
+function orderGitBranches(branches = [], current = '') {
+  return [...new Set(branches.map((branch) => String(branch ?? '').trim()).filter(Boolean))].sort(
+    (left, right) => {
+      if (left === current) return -1;
+      if (right === current) return 1;
+      return left.localeCompare(right);
+    },
+  );
+}
+
+function createGitBranchPickerPanel({ strings, onCreateBranch, onCheckoutBranch }) {
+  const panel = createElement('div', 'chat-branch-picker');
+  document.body.append(panel);
+
+  const createRow = createElement('div', 'chat-branch-picker__create');
+  const input = document.createElement('input');
+  input.className = 'chat-branch-picker__input';
+  input.type = 'text';
+  input.placeholder = strings.git.createBranchPlaceholder;
+  input.setAttribute('aria-label', strings.git.createBranch);
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+
+  const createButton = createElement(
+    'button',
+    'chat-branch-picker__create-button',
+    strings.git.createBranch,
+  );
+  createButton.type = 'button';
+  createRow.append(input, createButton);
+
+  const status = createElement('p', 'chat-branch-picker__status');
+  status.hidden = true;
+
+  const list = createElement('div', 'chat-branch-picker__list');
+  panel.append(createRow, status, list);
+
+  let busy = false;
+
+  function syncCreateButton() {
+    createButton.disabled = busy || !String(input.value ?? '').trim();
+  }
+
+  function setBusy(nextBusy) {
+    busy = nextBusy;
+    input.disabled = busy;
+    syncCreateButton();
+
+    for (const option of list.querySelectorAll('.chat-branch-picker__option')) {
+      option.disabled = busy;
+    }
+  }
+
+  function setStatus(text = '', tone = '') {
+    status.textContent = text;
+    status.hidden = !text;
+    status.className = tone
+      ? `chat-branch-picker__status chat-branch-picker__status--${tone}`
+      : 'chat-branch-picker__status';
+  }
+
+  function renderBranches({ current = '', branches = [] } = {}) {
+    list.replaceChildren();
+
+    if (!branches.length) {
+      list.append(createElement('div', 'chat-branch-picker__empty', strings.git.noBranches));
+      return;
+    }
+
+    for (const branch of branches) {
+      const option = createElement('button', 'chat-branch-picker__option');
+      option.type = 'button';
+      option._branchName = branch;
+      const active = branch === current;
+      option.classList.toggle('chat-branch-picker__option--active', active);
+      option.append(createElement('span', 'chat-branch-picker__option-label', branch));
+      if (active) option.append(createIcon('check', 'chat-branch-picker__check'));
+      option.addEventListener('click', (event) => {
+        event.stopPropagation();
+        void onCheckoutBranch(branch);
+      });
+      list.append(option);
+    }
+
+    setBusy(busy);
+  }
+
+  input.addEventListener('input', () => {
+    syncCreateButton();
+  });
+  input.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || createButton.disabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    void onCreateBranch(input.value);
+  });
+  createButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (createButton.disabled) return;
+    void onCreateBranch(input.value);
+  });
+
+  const scrollbar = attachCustomScrollbar(panel, list, {
+    top: 6,
+    bottom: 6,
+    right: 4,
+    minThumb: 24,
+  });
+  syncCreateButton();
+
+  return {
+    element: panel,
+    input,
+    list,
+    setBusy,
+    setStatus,
+    renderBranches,
+    dispose() {
+      scrollbar.dispose();
+      panel.remove();
+    },
+  };
+}
+
 function generateSessionId() {
   const date = new Date();
   const pad = (value, length = 2) => String(value).padStart(length, '0');
@@ -2016,9 +2140,18 @@ export async function createChatView(
   let projectMetaEl = null;
   let projectIconEl = null;
   let gitBarEl = null;
+  let gitIdentityEl = null;
   let gitBranchEl = null;
   let gitMetaEl = null;
   let gitStatusDotEl = null;
+  let gitBranchButton = null;
+  let gitBranchButtonLabelEl = null;
+  let gitBranchButtonDotEl = null;
+  let gitBranchPicker = null;
+  let gitBranchPickerOpen = false;
+  let gitBranchPickerBusy = false;
+  let gitBranchPickerCleanup = null;
+  let gitBranchPickerListenerTimer = null;
   let gitPrimaryBtn = null;
   let gitSecondaryBtn = null;
   let gitMenuBtn = null;
@@ -2493,9 +2626,257 @@ export async function createChatView(
     };
   }
 
+  function positionFloatingPanel(panel, triggerButton, preferredWidth = 320) {
+    if (!panel || !triggerButton) return;
+    const rect = triggerButton.getBoundingClientRect();
+    const panelWidth = Math.min(preferredWidth, window.innerWidth - 32);
+    const maxLeft = Math.max(16, window.innerWidth - panelWidth - 16);
+    const left = Math.min(Math.max(rect.left, 16), maxLeft);
+    panel.style.left = `${left}px`;
+    panel.style.bottom = `${window.innerHeight - rect.top + 8}px`;
+  }
+
+  function clearGitBranchPickerListeners() {
+    if (gitBranchPickerListenerTimer) {
+      clearTimeout(gitBranchPickerListenerTimer);
+      gitBranchPickerListenerTimer = null;
+    }
+    gitBranchPickerCleanup?.();
+    gitBranchPickerCleanup = null;
+  }
+
+  function setGitBranchPickerBusy(busy) {
+    gitBranchPickerBusy = busy;
+    gitBranchPicker?.setBusy(gitBusy || busy);
+    syncGitBranchButton();
+  }
+
+  function closeGitBranchPicker({ reset = false } = {}) {
+    if (!gitBranchPicker) return;
+    gitBranchPicker.element.classList.remove('chat-branch-picker--open');
+    gitBranchButton?.classList.remove('chat-composer__branch--open');
+    clearGitBranchPickerListeners();
+    gitBranchPickerOpen = false;
+    setGitBranchPickerBusy(false);
+
+    if (reset) {
+      gitBranchPicker.input.value = '';
+      gitBranchPicker.setStatus('');
+      gitBranchPicker.renderBranches({ current: '', branches: [] });
+    }
+  }
+
+  function syncGitBranchButton() {
+    if (!gitBranchButton || !gitBranchButtonLabelEl || !gitBranchButtonDotEl) return;
+
+    const visible = Boolean(activeProject && gitState);
+    gitBranchButton.hidden = !visible;
+
+    if (!visible) {
+      gitBranchButtonLabelEl.textContent = '';
+      gitBranchButton.classList.remove('chat-composer__branch--open');
+      gitBranchButton.disabled = true;
+      return;
+    }
+
+    gitBranchButtonLabelEl.textContent = gitState.branch;
+    gitBranchButton.setAttribute(
+      'aria-label',
+      formatText(strings.git.switchBranch, { branch: gitState.branch }),
+    );
+    gitBranchButtonDotEl.classList.toggle('chat-gitbar__dot--dirty', gitState.dirty);
+    gitBranchButtonDotEl.classList.toggle('chat-gitbar__dot--clean', !gitState.dirty);
+    gitBranchButtonDotEl.setAttribute(
+      'aria-label',
+      gitState.dirty ? strings.git.dirty : strings.git.clean,
+    );
+    gitBranchButton.disabled = isEnhancing || gitBusy || gitBranchPickerBusy;
+  }
+
+  function ensureGitBranchPicker() {
+    if (gitBranchPicker) return gitBranchPicker;
+
+    gitBranchPicker = createGitBranchPickerPanel({
+      strings,
+      onCreateBranch: async (branchName) => {
+        await runGitBranchMutation({
+          branch: branchName,
+          channel: 'terminal:git-create-branch',
+          resultLabel: strings.git.resultLabels.createBranch,
+          commandLabel: strings.git.commands.createBranch,
+          progressText: (nextBranch) =>
+            formatText(strings.git.creatingBranch, { branch: nextBranch }),
+          successText: (nextBranch) =>
+            formatText(strings.git.branchCreated, { branch: nextBranch }),
+        });
+      },
+      onCheckoutBranch: async (branchName) => {
+        if (branchName === gitState?.branch) {
+          closeGitBranchPicker();
+          return;
+        }
+
+        await runGitBranchMutation({
+          branch: branchName,
+          channel: 'terminal:git-checkout-branch',
+          resultLabel: strings.git.resultLabels.checkout,
+          commandLabel: strings.git.commands.checkout,
+          progressText: (nextBranch) =>
+            formatText(strings.git.switchingBranch, { branch: nextBranch }),
+          successText: (nextBranch) =>
+            formatText(strings.git.branchSwitched, { branch: nextBranch }),
+        });
+      },
+    });
+
+    return gitBranchPicker;
+  }
+
+  async function loadGitBranchesIntoPicker() {
+    const workingDir = getActiveProjectFolder();
+    const picker = ensureGitBranchPicker();
+    if (!workingDir) {
+      picker.setStatus(strings.git.noProjectFolder, 'warning');
+      picker.renderBranches({ current: '', branches: [] });
+      return;
+    }
+
+    setGitBranchPickerBusy(true);
+    picker.setStatus(strings.git.loadingBranches, 'muted');
+    picker.renderBranches({ current: '', branches: [] });
+
+    try {
+      const result = await invokeIpc('terminal:git-branches', { workingDir });
+      if (!result?.ok) {
+        picker.setStatus(
+          result?.hint || result?.error || strings.git.branchesLoadFailed,
+          'warning',
+        );
+        picker.renderBranches({ current: '', branches: [] });
+        return;
+      }
+
+      const current = String(result.current ?? gitState?.branch ?? '').trim();
+      picker.renderBranches({
+        current,
+        branches: orderGitBranches(result.branches ?? [], current),
+      });
+      picker.setStatus('');
+    } catch (error) {
+      picker.setStatus(error?.message ?? strings.git.branchesLoadFailed, 'warning');
+      picker.renderBranches({ current: '', branches: [] });
+    } finally {
+      setGitBranchPickerBusy(false);
+    }
+  }
+
+  async function runGitBranchMutation({
+    branch,
+    channel,
+    resultLabel,
+    commandLabel,
+    progressText,
+    successText,
+  }) {
+    const workingDir = getActiveProjectFolder();
+    if (!workingDir) {
+      showAttachmentNotice(strings.git.noProjectFolder, 'warning');
+      return false;
+    }
+
+    const nextBranch = String(branch ?? '').trim();
+    if (!nextBranch) {
+      gitBranchPicker?.input.focus();
+      return false;
+    }
+
+    setGitBarBusy(true);
+    setGitBranchPickerBusy(true);
+    gitBranchPicker?.setStatus(progressText(nextBranch), 'muted');
+
+    try {
+      const result = await invokeIpc(channel, {
+        workingDir,
+        branch: nextBranch,
+        allowRisky: true,
+      });
+      appendGitResultMessage(resultLabel, commandLabel, result);
+
+      if (!result?.ok || result.exitCode !== 0) {
+        const failureText = result?.hint || result?.error || strings.git.actionFailed;
+        gitBranchPicker?.setStatus(failureText, 'warning');
+        showAttachmentNotice(failureText, 'warning');
+        return false;
+      }
+
+      gitBranchPicker?.setStatus(successText(nextBranch), 'success');
+      showAttachmentNotice(successText(nextBranch), 'info');
+      closeGitBranchPicker({ reset: true });
+      focusComposer();
+      return true;
+    } catch (error) {
+      const failureText = error?.message ?? strings.git.actionFailed;
+      gitBranchPicker?.setStatus(failureText, 'warning');
+      showAttachmentNotice(failureText, 'warning');
+      return false;
+    } finally {
+      setGitBarBusy(false);
+      setGitBranchPickerBusy(false);
+      await refreshProjectGitStatus({ silent: true });
+    }
+  }
+
+  async function openGitBranchPicker(triggerButton) {
+    if (gitBranchPickerOpen) {
+      closeGitBranchPicker();
+      return;
+    }
+
+    if (!activeProject || !gitState) return;
+
+    closeModelPicker();
+    const picker = ensureGitBranchPicker();
+    gitBranchPickerOpen = true;
+    gitBranchButton?.classList.add('chat-composer__branch--open');
+    positionFloatingPanel(picker.element, triggerButton);
+    requestAnimationFrame(() => picker.element.classList.add('chat-branch-picker--open'));
+    picker.input.focus();
+
+    const reposition = () => {
+      positionFloatingPanel(picker.element, triggerButton);
+    };
+    const onDocClick = (event) => {
+      if (!picker.element.contains(event.target) && !triggerButton.contains(event.target)) {
+        closeGitBranchPicker();
+      }
+    };
+    const onDocKey = (event) => {
+      if (event.key === 'Escape') {
+        closeGitBranchPicker();
+        triggerButton.focus();
+      }
+    };
+
+    clearGitBranchPickerListeners();
+    gitBranchPickerListenerTimer = setTimeout(() => {
+      document.addEventListener('click', onDocClick, { capture: true });
+      document.addEventListener('keydown', onDocKey);
+      window.addEventListener('resize', reposition);
+      gitBranchPickerListenerTimer = null;
+    }, 0);
+    gitBranchPickerCleanup = () => {
+      document.removeEventListener('click', onDocClick, { capture: true });
+      document.removeEventListener('keydown', onDocKey);
+      window.removeEventListener('resize', reposition);
+    };
+
+    await loadGitBranchesIntoPicker();
+  }
+
   function setGitBarBusy(busy) {
     gitBusy = busy;
     for (const button of [
+      gitBranchButton,
       gitPrimaryBtn,
       gitSecondaryBtn,
       gitMenuBtn,
@@ -2507,6 +2888,7 @@ export async function createChatView(
     }
     if (gitCommitMessageEl) gitCommitMessageEl.disabled = busy || gitAiBusy;
     if (gitCommitAiBtn) gitCommitAiBtn.disabled = busy || gitAiBusy;
+    gitBranchPicker?.setBusy(busy || gitBranchPickerBusy);
   }
 
   function setGitCommitStatus(text = '') {
@@ -2534,6 +2916,7 @@ export async function createChatView(
 
   function closeGitCommitPanel({ clear = true } = {}) {
     if (gitCommitPanelEl) gitCommitPanelEl.hidden = true;
+    projectPill?.classList.remove('chat-composer__project--commit-mode');
     if (clear && gitCommitMessageEl) gitCommitMessageEl.value = '';
     gitPendingAction = null;
     setGitCommitStatus('');
@@ -2591,25 +2974,29 @@ export async function createChatView(
 
     if (!activeProject || !gitState) {
       gitBarEl.hidden = true;
+      if (gitIdentityEl) gitIdentityEl.hidden = true;
       gitBranchEl.textContent = '';
+      gitBranchEl.hidden = true;
       gitMetaEl.textContent = '';
       closeGitActionMenu();
       closeGitCommitPanel();
+      closeGitBranchPicker({ reset: true });
+      syncGitBranchButton();
       return;
     }
 
     gitBarEl.hidden = false;
-    gitBranchEl.textContent = gitState.branch;
-    gitStatusDotEl.classList.toggle('chat-gitbar__dot--dirty', gitState.dirty);
-    gitStatusDotEl.classList.toggle('chat-gitbar__dot--clean', !gitState.dirty);
+    if (gitStatusDotEl) gitStatusDotEl.hidden = true;
+    gitBranchEl.textContent = '';
+    gitBranchEl.hidden = true;
 
     const meta = [];
-    meta.push(gitState.dirty ? strings.git.dirty : strings.git.clean);
     if (gitState.ahead > 0)
       meta.push(formatText(strings.git.ahead, { count: String(gitState.ahead) }));
     if (gitState.behind > 0)
       meta.push(formatText(strings.git.behind, { count: String(gitState.behind) }));
     gitMetaEl.textContent = meta.join(' / ');
+    if (gitIdentityEl) gitIdentityEl.hidden = meta.length === 0;
 
     const primaryAction = gitState.dirty ? 'commit' : gitState.ahead > 0 ? 'push' : 'pull';
     gitPrimaryBtn._gitAction = primaryAction;
@@ -2617,6 +3004,7 @@ export async function createChatView(
 
     gitSecondaryBtn._gitAction = 'status';
     gitSecondaryBtn.textContent = strings.git.actions.status;
+    syncGitBranchButton();
     renderGitActionMenu();
   }
 
@@ -2777,6 +3165,7 @@ export async function createChatView(
     if (!gitCommitPanelEl || !gitCommitConfirmBtn) return;
     gitPendingAction = action;
     gitCommitConfirmBtn.textContent = strings.git.actions[action] ?? strings.git.actions.commit;
+    projectPill?.classList.add('chat-composer__project--commit-mode');
     gitCommitPanelEl.hidden = false;
     closeGitActionMenu();
     gitCommitMessageEl?.focus();
@@ -2882,6 +3271,7 @@ export async function createChatView(
     }
 
     if (['commit', 'commitPush', 'commitSync'].includes(action)) {
+      closeGitBranchPicker();
       openGitCommitPanel(action);
       return;
     }
@@ -2895,6 +3285,7 @@ export async function createChatView(
     }[action];
 
     if (!channel) return;
+    closeGitBranchPicker();
     setGitBarBusy(true);
 
     try {
@@ -2933,11 +3324,13 @@ export async function createChatView(
       projectNameEl.textContent = '';
       projectMetaEl.textContent = '';
       gitState = null;
+      closeGitBranchPicker({ reset: true });
       syncGitBarView();
       restartGitStatusTimer();
       return;
     }
 
+    closeGitBranchPicker({ reset: true });
     projectPill.hidden = false;
     projectNameEl.textContent = activeProject.name;
     projectMetaEl.textContent =
@@ -3032,6 +3425,7 @@ export async function createChatView(
       return;
     }
 
+    closeGitBranchPicker();
     if (!modelPickerPanel) {
       const picker = createModelPickerPanel({
         providers: payload.providers,
@@ -3528,6 +3922,11 @@ export async function createChatView(
 
     if (modelButton) {
       modelButton.disabled = isEnhancing;
+    }
+
+    if (gitBranchButton) {
+      gitBranchButton.disabled =
+        !activeProject || !gitState || isEnhancing || gitBusy || gitBranchPickerBusy;
     }
 
     if (attachBtn) {
@@ -4910,17 +5309,19 @@ export async function createChatView(
     clearActiveProject();
     focusComposer();
   });
-  projectMainEl.append(projectIconEl, projectBodyEl, projectClearBtn);
+  projectMainEl.append(projectIconEl, projectBodyEl);
 
   gitBarEl = createElement('div', 'chat-gitbar');
   gitBarEl.hidden = true;
-  const gitIdentity = createElement('div', 'chat-gitbar__identity');
+  gitIdentityEl = createElement('div', 'chat-gitbar__identity');
   gitStatusDotEl = createElement('span', 'chat-gitbar__dot');
+  gitStatusDotEl.hidden = true;
   const gitCopy = createElement('div', 'chat-gitbar__copy');
   gitBranchEl = createElement('div', 'chat-gitbar__branch');
+  gitBranchEl.hidden = true;
   gitMetaEl = createElement('div', 'chat-gitbar__meta');
   gitCopy.append(gitBranchEl, gitMetaEl);
-  gitIdentity.append(gitStatusDotEl, createIcon('github', 'chat-gitbar__icon'), gitCopy);
+  gitIdentityEl.append(gitStatusDotEl, gitCopy);
 
   const gitActions = createElement('div', 'chat-gitbar__actions');
   gitRefreshBtn = createElement('button', 'chat-gitbar__icon-button');
@@ -4962,7 +5363,7 @@ export async function createChatView(
 
   gitActionWrap.append(gitPrimaryBtn, gitMenuBtn, gitActionMenuEl);
   gitActions.append(gitRefreshBtn, gitSecondaryBtn, gitActionWrap);
-  gitBarEl.append(gitIdentity, gitActions);
+  gitBarEl.append(gitIdentityEl, gitActions);
 
   gitCommitPanelEl = createElement('div', 'chat-gitbar__commit-panel');
   gitCommitPanelEl.hidden = true;
@@ -5004,7 +5405,7 @@ export async function createChatView(
   gitCommitActions.append(gitCommitCancelBtn, gitCommitConfirmBtn);
   gitCommitPanelEl.append(gitCommitFieldWrapEl, gitCommitStatusEl, gitCommitActions);
 
-  projectPill.append(projectMainEl, gitBarEl, gitCommitPanelEl);
+  projectPill.append(projectMainEl, gitBarEl, projectClearBtn, gitCommitPanelEl);
 
   composerField = document.createElement('textarea');
   composerField.className = 'chat-composer__field';
@@ -5053,6 +5454,21 @@ export async function createChatView(
   composerActions.append(attachBtn, enhanceBtn, terminalBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
+  gitBranchButton = createElement('button', 'chat-composer__branch');
+  gitBranchButton.type = 'button';
+  gitBranchButton.hidden = true;
+  gitBranchButtonDotEl = createElement('span', 'chat-gitbar__dot chat-composer__branch-status');
+  gitBranchButtonLabelEl = createElement('span', 'chat-composer__branch-label');
+  gitBranchButton.append(
+    gitBranchButtonDotEl,
+    gitBranchButtonLabelEl,
+    createIcon('chevronDown', 'chat-composer__branch-chevron'),
+  );
+  gitBranchButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    void openGitBranchPicker(gitBranchButton);
+  });
+
   modelButton = createElement('button', 'chat-composer__model');
   modelButton.type = 'button';
   modelButton.append(
@@ -5077,7 +5493,7 @@ export async function createChatView(
     }
   });
 
-  composerSubmit.append(modelButton, sendButton);
+  composerSubmit.append(gitBranchButton, modelButton, sendButton);
   composerFooter.append(composerActions, composerSubmit);
   attachmentsEl = createElement('div', 'chat-composer__attachments');
   attachmentsEl.hidden = true;

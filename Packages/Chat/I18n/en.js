@@ -185,6 +185,13 @@ const en = {
     switchBranch: 'Switch branch from {branch}',
     createBranch: 'Create branch',
     createBranchPlaceholder: 'New branch name',
+    loadingBranches: 'Loading branches...',
+    branchesLoadFailed: 'Could not load branches.',
+    noBranches: 'No branches found.',
+    creatingBranch: 'Creating branch {branch}...',
+    switchingBranch: 'Switching to {branch}...',
+    branchCreated: 'Created and switched to {branch}.',
+    branchSwitched: 'Switched to {branch}.',
     emptyOutput: 'No output.',
     actions: {
       diff: 'View diff',
