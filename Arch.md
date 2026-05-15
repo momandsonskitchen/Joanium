@@ -42,6 +42,7 @@
 
 ## Folder Structure
 
+* We follow and should use only feature-based architecture or vertical slice architecture.
 * Core: Backend logic
 * UI: Frontend logic and view (includes css and js)
 * IPC: Inter-Process Communication
