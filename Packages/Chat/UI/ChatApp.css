@@ -744,6 +744,16 @@
   height: 100%;
 }
 
+/* Project cover image — replaces the folder glyph when a project has an image */
+.chat-composer__project-cover {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
 .chat-composer__project-body {
   min-width: 0;
   flex: 1;

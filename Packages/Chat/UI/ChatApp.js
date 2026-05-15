@@ -2014,6 +2014,7 @@ export async function createChatView(
   let projectPill = null;
   let projectNameEl = null;
   let projectMetaEl = null;
+  let projectIconEl = null;
   let gitBarEl = null;
   let gitBranchEl = null;
   let gitMetaEl = null;
@@ -2942,6 +2943,32 @@ export async function createChatView(
     projectMetaEl.textContent =
       collapseWhitespace(activeProject.folderPath ?? activeProject.rootPath) ||
       strings.projects.activeHint;
+
+    // Show cover image if the project has one, otherwise fall back to the folder icon.
+    if (projectIconEl) {
+      const coverPath = collapseWhitespace(activeProject.coverImagePath);
+      if (coverPath) {
+        const fileUrl = `file:///${coverPath.replace(/\\/g, '/')}`;
+        let imgEl = projectIconEl.querySelector('.chat-composer__project-cover');
+        if (!imgEl) {
+          imgEl = document.createElement('img');
+          imgEl.className = 'chat-composer__project-cover';
+          imgEl.alt = '';
+          imgEl.draggable = false;
+        }
+        imgEl.src = fileUrl;
+        projectIconEl.replaceChildren(imgEl);
+      } else {
+        // Restore the default folder glyph if there is no cover image.
+        const existingImg = projectIconEl.querySelector('.chat-composer__project-cover');
+        if (existingImg) {
+          projectIconEl.replaceChildren(
+            createIcon('tabProjects', 'chat-composer__project-icon-glyph'),
+          );
+        }
+      }
+    }
+
     void refreshProjectGitStatus({ silent: true });
     restartGitStatusTimer();
   }
@@ -4856,7 +4883,7 @@ export async function createChatView(
   projectPill = createElement('div', 'chat-composer__project');
   projectPill.hidden = true;
   const projectMainEl = createElement('div', 'chat-composer__project-main');
-  const projectIconEl = createElement('span', 'chat-composer__project-icon');
+  projectIconEl = createElement('span', 'chat-composer__project-icon');
   projectIconEl.append(createIcon('tabProjects', 'chat-composer__project-icon-glyph'));
   const projectBodyEl = createElement('div', 'chat-composer__project-body');
   projectNameEl = createElement('div', 'chat-composer__project-name');
