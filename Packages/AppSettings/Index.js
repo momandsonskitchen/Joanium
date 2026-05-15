@@ -58,6 +58,23 @@ const RESET_DATA_ENTRIES = [
   'User.json',
 ];
 
+function restartApp(delayMs = 120) {
+  setTimeout(() => {
+    app.relaunch();
+    app.exit(0);
+  }, delayMs);
+
+  return { ok: true, relaunching: true };
+}
+
+function quitApp(delayMs = 120) {
+  setTimeout(() => {
+    app.quit();
+  }, delayMs);
+
+  return { ok: true, quitting: true };
+}
+
 async function resetAppData(rootDirectory) {
   const dataDirectory = getWritableDataDirectory(rootDirectory);
 
@@ -67,12 +84,7 @@ async function resetAppData(rootDirectory) {
     ),
   );
 
-  setTimeout(() => {
-    app.relaunch();
-    app.exit(0);
-  }, 120);
-
-  return { ok: true, relaunching: true };
+  return restartApp();
 }
 
 export async function createPackage({ rootDirectory }) {
@@ -145,6 +157,14 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'app-settings:reset-app',
         handler: async () => resetAppData(rootDirectory),
+      },
+      {
+        channel: 'app-settings:restart-app',
+        handler: async () => restartApp(),
+      },
+      {
+        channel: 'app-settings:quit-app',
+        handler: async () => quitApp(),
       },
     ],
   };

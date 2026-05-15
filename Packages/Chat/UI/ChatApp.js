@@ -3315,6 +3315,19 @@ export async function createChatView(
           onLockApp?.();
           break;
 
+        case 'closeApp':
+          void invokeIpc('app-settings:quit-app').catch(() => {});
+          break;
+
+        case 'restartApp':
+          void invokeIpc('app-settings:restart-app').catch(() => {});
+          break;
+
+        case 'syncMemory':
+          void processPendingMemorySyncs({ force: true });
+          focusComposer();
+          break;
+
         case 'togglePrivate':
           privateBtn.click();
           break;
