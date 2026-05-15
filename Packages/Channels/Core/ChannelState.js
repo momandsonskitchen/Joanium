@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 const DEFAULT_CHANNELS = Object.freeze({
@@ -140,7 +140,7 @@ export function isConfigured(name, config) {
 export function createChannelStateManager({ rootDirectory }) {
   const dataDirectory = getWritableDataDirectory(rootDirectory);
   const channelsFilePath = path.join(dataDirectory, 'Channels.json');
-  const messagesFilePath = path.join(dataDirectory, 'ChannelMessages.json');
+  const messagesRootDir = path.join(dataDirectory, 'ChannelMessages');
 
   async function readChannels() {
     try {
@@ -160,25 +160,39 @@ export function createChannelStateManager({ rootDirectory }) {
     );
   }
 
-  async function readMessages() {
+  async function readChannelMessages(channelName) {
+    const dir = path.join(messagesRootDir, channelName);
     try {
-      const raw = await readFile(messagesFilePath, 'utf8');
-      const parsed = JSON.parse(raw);
-      const messages = Array.isArray(parsed?.messages) ? parsed.messages : [];
-      return { messages: messages.map(sanitizeMessage).slice(0, MESSAGE_LIMIT) };
+      const files = await readdir(dir);
+      const jsonFiles = files
+        .filter((f) => f.endsWith('.json'))
+        .sort()
+        .reverse();
+      const messages = [];
+
+      for (const file of jsonFiles.slice(0, MESSAGE_LIMIT)) {
+        try {
+          const raw = await readFile(path.join(dir, file), 'utf8');
+          const parsed = JSON.parse(raw);
+          messages.push(sanitizeMessage(parsed));
+        } catch {
+          // Skip unreadable files
+        }
+      }
+
+      return messages;
     } catch {
-      return { messages: [] };
+      return [];
     }
   }
 
-  async function writeMessages(data) {
-    const messages = Array.isArray(data?.messages) ? data.messages.map(sanitizeMessage) : [];
-    await mkdir(path.dirname(messagesFilePath), { recursive: true });
-    await writeFile(
-      messagesFilePath,
-      `${JSON.stringify({ messages: messages.slice(0, MESSAGE_LIMIT) }, null, 2)}\n`,
-      'utf8',
-    );
+  async function readAllMessages() {
+    const allMessages = [];
+    for (const name of CHANNEL_NAMES) {
+      const messages = await readChannelMessages(name);
+      allMessages.push(...messages);
+    }
+    return allMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   }
 
   async function updateChannel(name, updater) {
@@ -252,28 +266,58 @@ export function createChannelStateManager({ rootDirectory }) {
     },
 
     async listMessages() {
-      const data = await readMessages();
-      return data.messages;
+      return readAllMessages();
     },
 
     async saveMessage(message) {
-      const data = await readMessages();
       const normalized = sanitizeMessage(message);
-      data.messages.unshift(normalized);
-      await writeMessages(data);
+      const channelName = normalized.channel;
+      if (!channelName || !CHANNEL_NAMES.includes(channelName)) {
+        throw new Error('Invalid channel name.');
+      }
+
+      const dir = path.join(messagesRootDir, channelName);
+      await mkdir(dir, { recursive: true });
+
+      const dateStr = new Date(normalized.timestamp).toISOString().replace(/[:.]/g, '-');
+      const filePath = path.join(dir, `${dateStr}.json`);
+      await writeFile(filePath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
+
       return normalized;
     },
 
     async deleteMessage(id) {
       const safeId = normalizeString(id);
-      const data = await readMessages();
-      data.messages = data.messages.filter((message) => message.id !== safeId);
-      await writeMessages(data);
+      for (const name of CHANNEL_NAMES) {
+        const dir = path.join(messagesRootDir, name);
+        try {
+          const files = await readdir(dir);
+          for (const file of files) {
+            if (!file.endsWith('.json')) continue;
+            try {
+              const raw = await readFile(path.join(dir, file), 'utf8');
+              const parsed = JSON.parse(raw);
+              if (parsed.id === safeId) {
+                await unlink(path.join(dir, file));
+                return { ok: true };
+              }
+            } catch {
+              // Skip unreadable files
+            }
+          }
+        } catch {
+          // Directory doesn't exist, continue
+        }
+      }
       return { ok: true };
     },
 
     async clearMessages() {
-      await writeMessages({ messages: [] });
+      try {
+        await rm(messagesRootDir, { recursive: true, force: true });
+      } catch {
+        // Directory doesn't exist
+      }
       return { ok: true };
     },
   };

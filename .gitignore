@@ -7,6 +7,7 @@ Data/Channels/
 Data/Projects/
 Data/Templates/
 Data/Chats/
+Data/ChannelMessages/
 Data/Memories/
 Data/Avatar.*
 Data/User.json

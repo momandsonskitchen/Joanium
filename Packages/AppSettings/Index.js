@@ -43,7 +43,7 @@ const RESET_DATA_ENTRIES = [
   'Avatar.jpg',
   'Avatar.png',
   'Avatar.webp',
-  'ChannelMessages.json',
+  'ChannelMessages',
   'Channels.json',
   'Chats',
   'Logs',
