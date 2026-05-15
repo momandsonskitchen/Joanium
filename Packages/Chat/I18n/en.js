@@ -182,6 +182,9 @@ const en = {
     refreshFailed: 'Could not refresh git status.',
     actionComplete: 'Git action completed.',
     actionFailed: 'Git action failed.',
+    switchBranch: 'Switch branch from {branch}',
+    createBranch: 'Create branch',
+    createBranchPlaceholder: 'New branch name',
     emptyOutput: 'No output.',
     actions: {
       diff: 'View diff',
@@ -207,6 +210,8 @@ const en = {
       status: 'Git status',
       sync: 'Git sync',
       commit: 'Git commit',
+      checkout: 'Git checkout',
+      createBranch: 'Git branch',
     },
     commands: {
       diff: 'git diff',
@@ -215,6 +220,8 @@ const en = {
       status: 'git status',
       sync: 'git pull && git push',
       commit: 'git commit',
+      checkout: 'git checkout',
+      createBranch: 'git checkout -b',
     },
     moreActions: 'More git actions',
     cancel: 'Cancel',
