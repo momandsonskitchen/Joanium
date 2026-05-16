@@ -4,7 +4,7 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { formatTerminalResultForModel as formatRendererTerminalResultForModel } from '../../Shared/ToolLoop/RendererToolLoop.js';
 import { createSubAgentOutputSection, createSubAgentPromptSection } from './SubAgentSections.js';
 
-function getTerminalToolLabel(strings, tool) {
+export function getTerminalToolLabel(strings, tool) {
   return strings.terminal?.toolLabels?.[tool] ?? tool;
 }
 

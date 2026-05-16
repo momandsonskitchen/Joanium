@@ -39,6 +39,7 @@ import {
   createChatTerminalPanel,
   formatTerminalResultForModel,
   getTerminalActionSummary,
+  getTerminalToolLabel,
 } from './TerminalPanel.js';
 import {
   buildModelContent,
