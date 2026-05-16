@@ -3,7 +3,7 @@ import { createHubSpotToolHandlers } from './Core/HubSpotTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createHubSpotConnectorToolHandlers } from './Executors.js';
 import { buildHubSpotPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

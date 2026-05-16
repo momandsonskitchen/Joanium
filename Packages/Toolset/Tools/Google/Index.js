@@ -3,7 +3,7 @@ import { createGoogleToolHandlers } from './Core/GoogleTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createGoogleConnectorToolHandlers } from './Executors.js';
 import { buildGooglePromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

@@ -3,7 +3,7 @@ import { createSentryToolHandlers } from './Core/SentryTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createSentryConnectorToolHandlers } from './Executors.js';
 import { buildSentryPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

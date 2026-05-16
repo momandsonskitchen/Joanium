@@ -3,7 +3,7 @@ import { createGitLabToolHandlers } from './Core/GitLabTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createGitLabConnectorToolHandlers } from './Executors.js';
 import { buildGitLabPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

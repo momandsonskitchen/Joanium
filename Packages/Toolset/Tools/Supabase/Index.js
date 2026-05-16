@@ -3,7 +3,7 @@ import { createSupabaseToolHandlers } from './Core/SupabaseTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createSupabaseConnectorToolHandlers } from './Executors.js';
 import { buildSupabasePromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

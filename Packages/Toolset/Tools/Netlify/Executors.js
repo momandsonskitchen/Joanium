@@ -1,5 +1,5 @@
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createConnectorToolHandlers } from '../Core/ConnectorToolAdapter.js';
+import { createConnectorToolHandlers } from '../../Core/ConnectorToolAdapter.js';
 import { executeNetlifyChatTool } from './Core/Chat/ChatExecutor.js';
 
 export { executeNetlifyChatTool };

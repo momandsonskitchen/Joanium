@@ -1,4 +1,4 @@
-import { createConnectorToolHandlers } from '../Core/ConnectorToolAdapter.js';
+import { createConnectorToolHandlers } from '../../Core/ConnectorToolAdapter.js';
 import { CALENDAR_TOOLS } from './Calendar/Core/Chat/Tools.js';
 import { CONTACTS_TOOLS } from './Contacts/Core/Chat/Tools.js';
 import { DOCS_TOOLS } from './Docs/Core/Chat/Tools.js';

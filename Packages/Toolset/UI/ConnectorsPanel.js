@@ -1,8 +1,8 @@
-import { createElement } from '../../../Shared/Utils/DomUtils.js';
-import { invokeIpc } from '../../../Shared/Ipc/RendererIpc.js';
-import { createIcon } from '../../../Shared/Icons/Icons.js';
-import { createTwoColGrid } from '../../../Shared/TwoColGrid/TwoColGrid.js';
-import defaultStrings from '../I18n/en.js';
+import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
+import defaultStrings from '../I18n/Connectors.en.js';
 
 // ── Icon map: connector id → filename in Assets/Icons/ ──────────────────────
 const ICON_MAP = {

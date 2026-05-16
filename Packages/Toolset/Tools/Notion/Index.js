@@ -3,7 +3,7 @@ import { createNotionToolHandlers } from './Core/NotionTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createNotionConnectorToolHandlers } from './Executors.js';
 import { buildNotionPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

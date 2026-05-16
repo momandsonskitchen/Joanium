@@ -3,7 +3,7 @@ import { createNetlifyToolHandlers } from './Core/NetlifyTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createNetlifyConnectorToolHandlers } from './Executors.js';
 import { buildNetlifyPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

@@ -1,4 +1,4 @@
-import { readUserState, writeUserState } from '../../../Shared/UserData/UserData.js';
+import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 import {
   CONNECTOR_CATALOG,
   createConnectorCatalog,

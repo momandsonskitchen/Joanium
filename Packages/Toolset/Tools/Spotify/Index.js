@@ -3,7 +3,7 @@ import { createSpotifyToolHandlers } from './Core/SpotifyTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createSpotifyConnectorToolHandlers } from './Executors.js';
 import { buildSpotifyPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

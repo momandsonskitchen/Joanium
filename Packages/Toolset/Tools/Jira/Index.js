@@ -3,7 +3,7 @@ import { createJiraToolHandlers } from './Core/JiraTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createJiraConnectorToolHandlers } from './Executors.js';
 import { buildJiraPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

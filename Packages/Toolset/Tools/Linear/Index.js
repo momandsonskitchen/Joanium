@@ -3,7 +3,7 @@ import { createLinearToolHandlers } from './Core/LinearTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createLinearConnectorToolHandlers } from './Executors.js';
 import { buildLinearPromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

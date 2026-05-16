@@ -1,5 +1,5 @@
 import { TOOL_DEFINITIONS } from './Tools.js';
-import { createConnectorToolHandlers } from '../Core/ConnectorToolAdapter.js';
+import { createConnectorToolHandlers } from '../../Core/ConnectorToolAdapter.js';
 import { executeSupabaseChatTool } from './Core/Chat/ChatExecutor.js';
 
 export { executeSupabaseChatTool };

@@ -28,7 +28,7 @@ import { createThemePanel } from '../../Themes/UI/ThemePanel.js';
 import { loadAndApplyThemeState, stripNativeTooltips } from '../../Themes/UI/ThemeController.js';
 import { createMCPPanel } from '../../MCP/UI/MCPPanel.js';
 import { createProvidersPanel } from '../../Providers/UI/ProvidersPanel.js';
-import { createConnectorsPanel } from '../../Toolset/Connectors/UI/ConnectorsPanel.js';
+import { createConnectorsPanel } from '../../Toolset/UI/ConnectorsPanel.js';
 import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 import { createSlashCommandsPanel } from '../../SlashCommands/UI/SlashCommandsPanel.js';

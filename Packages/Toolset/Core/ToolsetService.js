@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import strings from '../I18n/en.js';
-import { generatePasswordValue } from '../Security/PasswordTools.js';
+import { generatePasswordValue } from '../Tools/Security/Core/PasswordTools.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
 const DAYS = Object.freeze([

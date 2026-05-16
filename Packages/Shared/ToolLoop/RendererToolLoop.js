@@ -9,6 +9,9 @@ export const TERMINAL_TOOL_NAMES = Object.freeze([
   'inspect_workspace',
   'search_workspace',
   'read_local_file',
+  'write_local_file',
+  'apply_file_patch',
+  'delete_local_item',
   'list_directory',
   'git_status',
   'git_diff',
@@ -52,6 +55,28 @@ function parseJsonToolBlock(text, blockRegex) {
   } catch {
     return null;
   }
+}
+
+function emitFileChangedEvent(result = {}) {
+  if (
+    typeof window === 'undefined' ||
+    typeof CustomEvent === 'undefined' ||
+    !result?.ok ||
+    !result?.path ||
+    result?.kind === 'directory'
+  ) {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent('jo:file-changed', {
+      detail: {
+        filePath: result.path,
+        before: result.beforeContent ?? '',
+        after: result.afterContent ?? '',
+      },
+    }),
+  );
 }
 
 export function parseTerminalToolRequest(text, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
@@ -139,13 +164,47 @@ export async function executeTerminalTool(
   if (action.tool === 'read_local_file') {
     return invokeIpc('terminal:read-file', {
       filePath: payload.path,
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
       maxLines: payload.max_lines,
     });
+  }
+
+  if (action.tool === 'write_local_file') {
+    const result = await invokeIpc('terminal:write-file', {
+      filePath: payload.path,
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+      content: payload.content,
+      append: payload.append === true,
+    });
+    emitFileChangedEvent(result);
+    return result;
+  }
+
+  if (action.tool === 'apply_file_patch') {
+    const result = await invokeIpc('terminal:apply-file-patch', {
+      filePath: payload.path,
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+      search: payload.search,
+      replace: payload.replace,
+      replaceAll: payload.replace_all === true,
+    });
+    emitFileChangedEvent(result);
+    return result;
+  }
+
+  if (action.tool === 'delete_local_item') {
+    const result = await invokeIpc('terminal:delete-item', {
+      itemPath: payload.path,
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+    });
+    emitFileChangedEvent(result);
+    return result;
   }
 
   if (action.tool === 'list_directory') {
     return invokeIpc('terminal:list-directory', {
       dirPath: payload.path || (await resolveCwd(payload.working_directory)),
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
     });
   }
 

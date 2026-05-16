@@ -3,7 +3,7 @@ import { createStripeToolHandlers } from './Core/StripeTools.js';
 import { TOOL_DEFINITIONS } from './Tools.js';
 import { createStripeConnectorToolHandlers } from './Executors.js';
 import { buildStripePromptSection } from './Prompt.js';
-import { mergeToolDefinitions } from '../Core/ConnectorToolAdapter.js';
+import { mergeToolDefinitions } from '../../Core/ConnectorToolAdapter.js';
 
 export function createToolPackage({ rootDirectory }) {
   return {

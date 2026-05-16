@@ -17,7 +17,7 @@ import memory from '../../Memory/I18n/en.js';
 import themes from '../../Themes/I18n/en.js';
 import mcp from '../../MCP/I18n/en.js';
 import providers from '../../Providers/I18n/en.js';
-import connectors from '../../Toolset/Connectors/I18n/en.js';
+import connectors from '../../Toolset/I18n/Connectors.en.js';
 import slashCommands from '../../SlashCommands/I18n/en.js';
 
 const en = {

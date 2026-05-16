@@ -25,6 +25,7 @@ import { createAttachmentPill } from './AttachmentPill.js';
 import { createBrowserPreviewPanel } from './BrowserPreviewPanel.js';
 import { createDiagnosticPanel, measureFetch, resolveProviderBaseUrl } from './DiagnosticPanel.js';
 import { createDropZoneOverlay } from './DropZoneOverlay.js';
+import { createFileDiffTracker } from './FileDiffTracker.js';
 import { createGitBranchPickerPanel, orderGitBranches } from './GitBranchPickerPanel.js';
 import {
   createAssistantGroupElement,
@@ -187,6 +188,8 @@ export async function createChatView(
   let composer = null;
   let scroll = null;
   let bottom = null;
+  let fileDiffPanel = null;
+  let fileDiffTracker = null;
 
   let projectPill = null;
   let projectNameEl = null;
@@ -638,6 +641,7 @@ export async function createChatView(
   }
 
   function applyActiveProject(project) {
+    const previousRoot = collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
     activeProject = project
       ? {
           id: project.id,
@@ -650,6 +654,12 @@ export async function createChatView(
         }
       : null;
     syncActiveProjectPill();
+    const nextRoot = collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
+    if (previousRoot !== nextRoot) {
+      fileDiffTracker?.reset();
+    } else {
+      fileDiffTracker?.render();
+    }
   }
 
   function clearActiveProject() {
@@ -1439,6 +1449,7 @@ export async function createChatView(
       sessionId = session.id;
       sessionCreatedAt = session.createdAt ?? new Date().toISOString();
       userScrolledUp = false;
+      fileDiffTracker?.reset();
       syncScrollToBottomBtn();
       renderThread();
       focusComposer();
@@ -2026,6 +2037,7 @@ export async function createChatView(
       resetSpeakButton(activeSpeakBtn);
       activeSpeakBtn = null;
     }
+    fileDiffTracker?.reset();
     renderPendingAttachments();
     if (attachmentNotice) {
       attachmentNotice.hidden = true;
@@ -3068,7 +3080,7 @@ export async function createChatView(
       projectInfo: buildProjectContext(activeProject) || null,
       persona: (getActivePersona?.() ?? activePersona)?.content || null,
       modeInstruction: getModeInstruction(),
-      terminalTools: strings.terminal.systemPrompt,
+      terminalTools: payload.terminalPrompt,
       toolsetTools: toolsetTools || null,
       isNewSession,
     });
@@ -3190,6 +3202,8 @@ export async function createChatView(
   composer = createElement('section', 'chat-composer');
   projectPill = createElement('div', 'chat-composer__project');
   projectPill.hidden = true;
+  fileDiffPanel = createElement('section', 'chat-file-diff');
+  fileDiffPanel.hidden = true;
   const projectMainEl = createElement('div', 'chat-composer__project-main');
   projectIconEl = createElement('span', 'chat-composer__project-icon');
   projectIconEl.append(createIcon('tabProjects', 'chat-composer__project-icon-glyph'));
@@ -3405,6 +3419,7 @@ export async function createChatView(
   diagPanel = createDiagnosticPanel(strings);
   composer.append(
     projectPill,
+    fileDiffPanel,
     attachmentsEl,
     attachmentNotice,
     composerField,
@@ -3476,6 +3491,12 @@ export async function createChatView(
   );
   browserPreview.start();
   wireTerminalProcessCards();
+  fileDiffTracker = createFileDiffTracker({
+    panel: fileDiffPanel,
+    getWorkspaceRoot: () =>
+      collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath),
+  });
+  fileDiffTracker.init();
 
   // ── File drag-and-drop (chat page only) ───────────────────────────────────
   // Scoped entirely to the chat view element so drag events from other Shell
