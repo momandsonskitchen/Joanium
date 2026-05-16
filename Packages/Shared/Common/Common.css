@@ -99,28 +99,27 @@
   --transition-slow: 220ms ease;
   --transition-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* ══ Warm Dropdown Palette ════════════════════════════════════════════
-     The standalone DropDown component uses a warm brown/orange palette
-     intentionally distinct from the purple app theme.
+  /* ══ Dropdown Palette ═══════════════════════════════════════════════════
+     Matches the app's primary lavender / purple theme.
      ═════════════════════════════════════════════════════════════════════ */
 
-  --dropdown-color-text: #24150d;
-  --dropdown-color-text-label: rgba(44, 27, 17, 0.82);
-  --dropdown-color-text-placeholder: rgba(104, 81, 68, 0.45);
-  --dropdown-color-text-selected: #3d2215;
-  --dropdown-color-chevron: rgba(104, 81, 68, 0.55);
-  --dropdown-color-border: rgba(112, 84, 66, 0.08);
-  --dropdown-color-border-hover: rgba(112, 84, 66, 0.12);
-  --dropdown-color-border-focus: rgba(240, 168, 128, 0.34);
-  --dropdown-color-shadow: rgba(96, 67, 47, 0.08);
-  --dropdown-color-shadow-focus: rgba(238, 168, 127, 0.14);
-  --dropdown-color-surface: rgba(255, 250, 247, 0.82);
-  --dropdown-color-surface-panel: rgba(255, 250, 247, 0.96);
-  --dropdown-color-option-hover: rgba(255, 241, 232, 0.72);
+  --dropdown-color-text: #1e0d28;
+  --dropdown-color-text-label: rgba(40, 15, 55, 0.82);
+  --dropdown-color-text-placeholder: rgba(100, 55, 120, 0.45);
+  --dropdown-color-text-selected: #2a1040;
+  --dropdown-color-chevron: rgba(60, 20, 80, 0.62);
+  --dropdown-color-border: rgba(100, 55, 120, 0.08);
+  --dropdown-color-border-hover: rgba(105, 55, 125, 0.12);
+  --dropdown-color-border-focus: rgba(200, 116, 217, 0.34);
+  --dropdown-color-shadow: rgba(80, 35, 105, 0.08);
+  --dropdown-color-shadow-focus: rgba(200, 116, 217, 0.14);
+  --dropdown-color-surface: rgba(249, 244, 254, 0.82);
+  --dropdown-color-surface-panel: rgba(247, 240, 254, 0.96);
+  --dropdown-color-option-hover: rgba(200, 116, 217, 0.06);
   --dropdown-color-option-selected: linear-gradient(
     135deg,
-    rgba(255, 237, 226, 0.9),
-    rgba(255, 246, 240, 0.85)
+    rgba(242, 224, 252, 0.9),
+    rgba(247, 238, 254, 0.85)
   );
 
   /* ══ Scrollbar ════════════════════════════════════════════════════════ */

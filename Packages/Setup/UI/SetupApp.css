@@ -323,6 +323,26 @@ body::after {
   justify-content: center;
 }
 
+/* ─── Dropdown scrollbar (lavender to match Setup theme) ────────────────── */
+
+.joanium-dropdown__panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.joanium-dropdown__panel::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.joanium-dropdown__panel::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-accent-rgb), 0.22);
+  border-radius: var(--radius-pill);
+}
+
+.joanium-dropdown__panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--color-accent-rgb), 0.42);
+}
+
 /* ─── Stage enter / leave animations ────────────────────────────────────── */
 
 @keyframes setup-stage-enter {

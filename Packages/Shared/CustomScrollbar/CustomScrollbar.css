@@ -198,9 +198,7 @@
 .chat-templates__form-col,
 .usage-content__scroller,
 .chat-settings__nav,
-.joanium-ddm-lite__panel,
-.joanium-provider-picker__viewport,
-.joanium-dropdown__panel {
+.joanium-provider-picker__viewport {
   scrollbar-width: none;
 }
 
@@ -213,8 +211,6 @@
 .chat-templates__form-col::-webkit-scrollbar,
 .usage-content__scroller::-webkit-scrollbar,
 .chat-settings__nav::-webkit-scrollbar,
-.joanium-ddm-lite__panel::-webkit-scrollbar,
-.joanium-provider-picker__viewport::-webkit-scrollbar,
-.joanium-dropdown__panel::-webkit-scrollbar {
+.joanium-provider-picker__viewport::-webkit-scrollbar {
   display: none;
 }
