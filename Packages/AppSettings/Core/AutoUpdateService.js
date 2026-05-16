@@ -114,8 +114,15 @@ function scheduleCheck() {
 
 function bindUpdaterEvents() {
   autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.channel = 'latest';
+
+  app.on('before-quit', () => {
+    if (state.downloaded && autoUpdater) {
+      writeLog('before-quit:installing-update');
+      autoUpdater.quitAndInstall(true, false);
+    }
+  });
 
   autoUpdater.on('checking-for-update', () => {
     writeLog('checking-for-update');
