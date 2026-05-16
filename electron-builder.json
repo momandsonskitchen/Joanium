@@ -48,6 +48,8 @@
   },
   "publish": {
     "provider": "github",
+    "owner": "Joanium",
+    "repo": "Joanium",
     "releaseType": "release"
   },
   "win": {

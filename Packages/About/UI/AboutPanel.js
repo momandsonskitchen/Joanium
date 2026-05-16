@@ -1,43 +1,197 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
+import { formatBytes, getUpdatePresentation, parseBuildDate } from './Utils.js';
 
-function formatBytes(bytes) {
-  const value = Number(bytes) || 0;
-  if (value <= 0) {
-    return '';
-  }
-  const gb = value / 1024 / 1024 / 1024;
-  return `${gb.toFixed(gb >= 10 ? 0 : 1)} GB`;
+function createSocialLink({ icon, url, label }) {
+  const link = createElement('a', 'chat-profile__about-social-link');
+  link.setAttribute('aria-label', label);
+  link.href = '#';
+
+  const iconEl = createElement('span', 'chat-profile__about-social-icon');
+  iconEl.innerHTML = iconMarkup[icon] ?? '';
+  link.append(iconEl);
+
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    void invokeIpc('about:open-external', url);
+  });
+
+  return link;
 }
 
-function parseBuildDate(version) {
-  if (!version) {
-    return '';
+function createMetaCard(rows) {
+  const card = createElement('div', 'chat-profile__about-meta');
+
+  for (const { label, value } of rows) {
+    const row = createElement('div', 'chat-profile__about-meta-row');
+    row.append(
+      createElement('span', 'chat-profile__about-meta-label', label),
+      createElement('span', 'chat-profile__about-meta-value', value),
+    );
+    card.append(row);
   }
-  // Format: YYYY.MMDD.build — e.g. "2026.430.1" → year=2026, month=4, day=30
-  const match = /^(\d{4})\.(\d{1,4})\./.exec(version);
-  if (match) {
-    const year = Number(match[1]);
-    const mmdd = match[2].padStart(4, '0');
-    const month = Number(mmdd.slice(0, -2));
-    const day = Number(mmdd.slice(-2));
-    const date = new Date(year, month - 1, day);
-    if (!isNaN(date) && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  return card;
+}
+
+function createUpdateCard(strings) {
+  const card = createElement('section', 'chat-profile__about-update');
+  const top = createElement('div', 'chat-profile__about-update-top');
+  const heading = createElement('div', 'chat-profile__about-update-heading');
+  const icon = createElement('span', 'chat-profile__about-update-icon');
+  icon.innerHTML = iconMarkup.download ?? '';
+
+  const titleWrap = createElement('div', 'chat-profile__about-update-title-wrap');
+  const title = createElement('h2', 'chat-profile__about-update-title', strings.title);
+  const subtitle = createElement('p', 'chat-profile__about-update-subtitle', strings.subtitle);
+  titleWrap.append(title, subtitle);
+  heading.append(icon, titleWrap);
+
+  const statusPill = createElement('span', 'chat-profile__about-update-pill');
+  top.append(heading, statusPill);
+
+  const body = createElement('div', 'chat-profile__about-update-body');
+  const summary = createElement('div', 'chat-profile__about-update-summary');
+  const detail = createElement('p', 'chat-profile__about-update-detail');
+  const release = createElement('p', 'chat-profile__about-update-release');
+  summary.append(detail, release);
+
+  const actions = createElement('div', 'chat-profile__about-update-actions');
+  const checkButton = createElement('button', 'chat-profile__about-update-btn');
+  checkButton.type = 'button';
+  const checkIcon = createElement('span', 'chat-profile__about-update-btn-icon');
+  checkIcon.innerHTML = iconMarkup.retry ?? '';
+  const checkLabel = createElement('span', 'chat-profile__about-update-btn-label', strings.check);
+  checkButton.append(checkIcon, checkLabel);
+
+  const installButton = createElement(
+    'button',
+    'chat-profile__about-update-btn chat-profile__about-update-btn--primary',
+  );
+  installButton.type = 'button';
+  const installIcon = createElement('span', 'chat-profile__about-update-btn-icon');
+  installIcon.innerHTML = iconMarkup.download ?? '';
+  const installLabel = createElement(
+    'span',
+    'chat-profile__about-update-btn-label',
+    strings.install,
+  );
+  installButton.append(installIcon, installLabel);
+  actions.append(checkButton, installButton);
+
+  body.append(summary, actions);
+
+  const progress = createElement('div', 'chat-profile__about-update-progress');
+  const progressHeader = createElement('div', 'chat-profile__about-update-progress-header');
+  const progressPercent = createElement('strong', 'chat-profile__about-update-progress-percent');
+  const progressCaption = createElement('span', 'chat-profile__about-update-progress-caption');
+  progressHeader.append(progressPercent, progressCaption);
+
+  const progressTrack = createElement('div', 'chat-profile__about-update-progress-track');
+  const progressBar = createElement('div', 'chat-profile__about-update-progress-bar');
+  progressTrack.append(progressBar);
+  progress.append(progressHeader, progressTrack);
+
+  let installing = false;
+  let currentState = null;
+
+  async function handleCheck() {
+    checkButton.disabled = true;
+    checkLabel.textContent = strings.checking;
+    try {
+      currentState = await invokeIpc('auto-update:check');
+      render(currentState);
+    } catch {
+      render({
+        ...(currentState ?? {}),
+        status: 'error',
+        error: strings.details.error,
+      });
     }
   }
-  return '';
+
+  async function handleInstall() {
+    installing = true;
+    render(currentState);
+
+    try {
+      const installed = await invokeIpc('auto-update:install');
+      if (!installed) {
+        installing = false;
+        render(currentState);
+      }
+    } catch {
+      installing = false;
+      render({
+        ...(currentState ?? {}),
+        status: 'error',
+        error: strings.details.error,
+      });
+    }
+  }
+
+  checkButton.addEventListener('click', () => {
+    void handleCheck();
+  });
+  installButton.addEventListener('click', () => {
+    void handleInstall();
+  });
+
+  function render(updateState) {
+    currentState = updateState ?? {};
+    const presentation = getUpdatePresentation(currentState, strings);
+
+    card.className = `chat-profile__about-update chat-profile__about-update--${presentation.status}`;
+    statusPill.textContent = presentation.statusLabel;
+    detail.textContent = presentation.detail;
+    release.textContent = presentation.release;
+    release.hidden = !presentation.release;
+
+    progress.hidden = !presentation.showProgress;
+    if (presentation.showProgress) {
+      progressPercent.textContent = `${presentation.percent}%`;
+      progressCaption.textContent = presentation.progressDetail;
+      progressBar.style.width = `${presentation.percent}%`;
+    } else {
+      progressBar.style.width = '0%';
+      progressPercent.textContent = '0%';
+      progressCaption.textContent = strings.idleDetail;
+    }
+
+    checkButton.hidden = !presentation.canCheck;
+    checkButton.disabled = !presentation.canCheck || installing;
+    checkLabel.textContent = presentation.status === 'checking' ? strings.checking : strings.check;
+
+    installButton.hidden = !presentation.canInstall;
+    installButton.disabled = !presentation.canInstall || installing;
+    installLabel.textContent = installing ? strings.installing : strings.install;
+  }
+
+  card.append(top, body, progress);
+  return { element: card, render };
 }
 
 export function createAboutPanel(strings) {
   const view = createElement('div', 'chat-profile__about');
+  let removeUpdateListener = null;
 
   async function populate() {
-    const info = await invokeIpc('about:get-info');
-    const system = info.system ?? {};
+    removeUpdateListener?.();
 
-    const nameEl = createElement('h1', 'chat-profile__about-name', info.name || 'Joanium');
+    const [info, updateState] = await Promise.all([
+      invokeIpc('about:get-info'),
+      invokeIpc('auto-update:get-state').catch(() => ({
+        enabled: false,
+        supported: false,
+        status: 'unsupported',
+      })),
+    ]);
+
+    const system = info.system ?? {};
+    const unknownValue = strings.unknownValue;
+
+    const nameEl = createElement('h1', 'chat-profile__about-name', info.name || '');
     const versionEl = createElement(
       'p',
       'chat-profile__about-version',
@@ -45,61 +199,49 @@ export function createAboutPanel(strings) {
     );
     const descEl = createElement('p', 'chat-profile__about-desc', info.description || '');
 
-    // ── macOS-style app icon ───────────────────────────────────────────────
     const iconWrap = createElement('div', 'chat-profile__about-icon-wrap');
     const iconImg = document.createElement('img');
     iconImg.className = 'chat-profile__about-icon';
     iconImg.src = info.logoPath ?? '';
-    iconImg.alt = info.name || 'Joanium';
+    iconImg.alt = info.name || '';
     iconImg.draggable = false;
     iconWrap.append(iconImg);
-    const iconReflect = createElement('div', 'chat-profile__about-icon-reflect');
-    iconWrap.append(iconReflect);
+    iconWrap.append(createElement('div', 'chat-profile__about-icon-reflect'));
 
-    // ── Social bar ─────────────────────────────────────────────────────────
     const socialBar = createElement('div', 'chat-profile__about-social');
-
-    const socialLinks = [
+    for (const socialLink of [
       {
         icon: 'globe',
         url: 'https://www.joanium.com',
-        label: strings.social?.website ?? 'Website',
+        label: strings.social.website,
       },
       {
         icon: 'github',
         url: 'https://github.com/joanium',
-        label: strings.social?.github ?? 'GitHub',
+        label: strings.social.github,
       },
       {
         icon: 'discord',
         url: 'https://discord.com/invite/5yHKxxx5fK',
-        label: strings.social?.discord ?? 'Discord',
+        label: strings.social.discord,
       },
-      { icon: 'x', url: 'https://x.com/joanium', label: strings.social?.x ?? 'X' },
+      {
+        icon: 'x',
+        url: 'https://x.com/joanium',
+        label: strings.social.x,
+      },
       {
         icon: 'instagram',
         url: 'https://instagram.com/joaniumhere',
-        label: strings.social?.instagram ?? 'Instagram',
+        label: strings.social.instagram,
       },
       {
         icon: 'youtube',
         url: 'https://www.youtube.com/@Joaniumhere',
-        label: strings.social?.youtube ?? 'YouTube',
+        label: strings.social.youtube,
       },
-    ];
-
-    for (const { icon, url, label } of socialLinks) {
-      const link = createElement('a', 'chat-profile__about-social-link');
-      link.setAttribute('aria-label', label);
-      link.href = '#';
-      const iconEl = createElement('span', 'chat-profile__about-social-icon');
-      iconEl.innerHTML = iconMarkup[icon] ?? '';
-      link.append(iconEl);
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        void invokeIpc('about:open-external', url);
-      });
-      socialBar.append(link);
+    ]) {
+      socialBar.append(createSocialLink(socialLink));
     }
 
     const sponsorBtn = createElement('a', 'chat-profile__about-sponsor');
@@ -108,90 +250,83 @@ export function createAboutPanel(strings) {
     const heartEl = createElement('span', 'chat-profile__about-social-icon');
     heartEl.innerHTML = iconMarkup.heart ?? '';
     sponsorBtn.append(heartEl);
-    sponsorBtn.addEventListener('click', (e) => {
-      e.preventDefault();
+    sponsorBtn.addEventListener('click', (event) => {
+      event.preventDefault();
       void invokeIpc('about:open-external', strings.sponsorUrl);
     });
     socialBar.append(sponsorBtn);
 
-    // ── Left column — app meta ─────────────────────────────────────────────
-    const metaCard = createElement('div', 'chat-profile__about-meta');
-    for (const { label, value } of [
-      { label: strings.author, value: info.author || '' },
-      { label: strings.lastUpdated, value: parseBuildDate(info.version) || '—' },
-    ]) {
-      const row = createElement('div', 'chat-profile__about-meta-row');
-      row.append(
-        createElement('span', 'chat-profile__about-meta-label', label),
-        createElement('span', 'chat-profile__about-meta-value', value),
-      );
-      metaCard.append(row);
-    }
+    const updateCard = createUpdateCard(strings.updates);
+    updateCard.render(updateState);
+    removeUpdateListener = onIpc('auto-update:state', (nextState) => {
+      updateCard.render(nextState);
+    });
 
-    const leftCol = createElement('div', 'chat-profile__about-col chat-profile__about-col--left');
-    leftCol.append(metaCard);
+    const metaCard = createMetaCard([
+      { label: strings.author, value: info.author || unknownValue },
+      { label: strings.lastUpdated, value: parseBuildDate(info.version) || unknownValue },
+    ]);
 
-    // ── Right column — system info ─────────────────────────────────────────
-    const systemCard = createElement('div', 'chat-profile__about-meta');
     const osVersion = system.osVersion || '';
     const osName = system.osName || '';
     const osDisplay = osVersion.startsWith(osName)
       ? osVersion
       : [osName, osVersion].filter(Boolean).join(' ');
 
-    const systemRows = [
+    const systemCard = createMetaCard([
       {
         label: strings.os,
-        value: [osDisplay, system.arch].filter(Boolean).join(' '),
+        value: [osDisplay, system.arch].filter(Boolean).join(' ') || unknownValue,
       },
       {
         label: strings.cpu,
-        value: [system.cpuModel, system.cpuCores ? `${system.cpuCores} cores` : '']
-          .filter(Boolean)
-          .join(' '),
+        value:
+          [system.cpuModel, system.cpuCores ? `${system.cpuCores} cores` : '']
+            .filter(Boolean)
+            .join(' ') || unknownValue,
       },
       {
         label: strings.memory,
-        value: formatBytes(system.totalMem),
+        value: formatBytes(system.totalMem) || unknownValue,
       },
       {
         label: strings.locale,
-        value: system.locale || '',
+        value: system.locale || unknownValue,
       },
       {
         label: strings.timezone,
-        value: system.timezone || '',
+        value: system.timezone || unknownValue,
       },
-    ];
+    ]);
 
-    for (const { label, value } of systemRows) {
-      const row = createElement('div', 'chat-profile__about-meta-row');
-      row.append(
-        createElement('span', 'chat-profile__about-meta-label', label),
-        createElement('span', 'chat-profile__about-meta-value', value),
-      );
-      systemCard.append(row);
-    }
+    const leftCol = createElement('div', 'chat-profile__about-col chat-profile__about-col--left');
+    leftCol.append(metaCard);
 
     const rightCol = createElement('div', 'chat-profile__about-col chat-profile__about-col--right');
     rightCol.append(systemCard);
 
-    // ── Two-column row ────────────────────────────────────────────────────────
     const columnsRow = createElement('div', 'chat-profile__about-columns');
     columnsRow.append(leftCol, rightCol);
 
-    // ── Hero: icon left, text right ───────────────────────────────────────
     const heroText = createElement('div', 'chat-profile__about-hero-text');
     heroText.append(nameEl, versionEl, descEl);
 
     const heroRow = createElement('div', 'chat-profile__about-hero');
     heroRow.append(iconWrap, heroText);
 
-    view.replaceChildren(heroRow, socialBar, columnsRow);
+    view.replaceChildren(heroRow, socialBar, updateCard.element, columnsRow);
   }
+
+  function dispose() {
+    removeUpdateListener?.();
+    removeUpdateListener = null;
+  }
+
+  view._dispose = dispose;
 
   return {
     element: view,
     populate,
+    dispose,
   };
 }

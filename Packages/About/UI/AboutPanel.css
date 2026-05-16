@@ -3,11 +3,10 @@
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
+  gap: 0;
   -webkit-app-region: no-drag;
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
-/* ── macOS-style app icon ──────────────────────────────────────────────── */
 
 .chat-profile__about-icon-wrap {
   position: relative;
@@ -23,6 +22,7 @@
     opacity: 0;
     transform: scale(0.78) translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -50,7 +50,6 @@
   transform: translateY(-2px) scale(1.03);
 }
 
-/* Subtle reflection strip below icon (like macOS Dock) */
 .chat-profile__about-icon-reflect {
   width: 60px;
   height: 6px;
@@ -95,8 +94,6 @@
   color: var(--color-chat-text-secondary);
 }
 
-/* ── Hero: icon + text side by side ───────────────────────────────────── */
-
 .chat-profile__about-hero {
   display: flex;
   flex-direction: row;
@@ -113,15 +110,13 @@
   justify-content: center;
   flex: 1;
   min-width: 0;
-  /* Push text down so it lines up with the icon's visual centre */
   padding-top: 8px;
 }
-
-/* ── Social bar ────────────────────────────────────────────────────────── */
 
 .chat-profile__about-social {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 28px;
 }
@@ -165,8 +160,6 @@
   height: 16px;
 }
 
-/* ── Sponsor (icon-only, pink tint) ────────────────────────────────────── */
-
 .chat-profile__about-sponsor {
   display: inline-flex;
   align-items: center;
@@ -193,7 +186,297 @@
   transform: translateY(-1px);
 }
 
-/* ── Two-column layout ─────────────────────────────────────────────────── */
+.chat-profile__about-update,
+.chat-profile__about-meta {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 10px 28px rgba(130, 95, 65, 0.07);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+.chat-profile__about-update {
+  position: relative;
+  margin-bottom: 24px;
+  padding: 20px 22px;
+}
+
+.chat-profile__about-update::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(var(--color-accent-rgb), 0.16), transparent 36%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.chat-profile__about-update-top,
+.chat-profile__about-update-body,
+.chat-profile__about-update-progress {
+  position: relative;
+  z-index: 1;
+}
+
+.chat-profile__about-update-top,
+.chat-profile__about-update-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.chat-profile__about-update-top {
+  margin-bottom: 18px;
+}
+
+.chat-profile__about-update-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.chat-profile__about-update-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  color: rgba(var(--color-accent-rgb), 0.92);
+  background: rgba(var(--color-accent-rgb), 0.12);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.12),
+    0 10px 20px rgba(var(--color-accent-rgb), 0.08);
+}
+
+.chat-profile__about-update-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.chat-profile__about-update-title-wrap {
+  min-width: 0;
+}
+
+.chat-profile__about-update-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 680;
+  letter-spacing: -0.03em;
+  color: var(--color-chat-text-title);
+}
+
+.chat-profile__about-update-subtitle {
+  margin: 0;
+  max-width: 520px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-chat-text-muted);
+}
+
+.chat-profile__about-update-pill {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.12);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: 0.01em;
+  color: var(--color-chat-text-title);
+}
+
+.chat-profile__about-update-summary {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.chat-profile__about-update-detail,
+.chat-profile__about-update-release {
+  margin: 0;
+}
+
+.chat-profile__about-update-detail {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-chat-text-secondary);
+}
+
+.chat-profile__about-update-release {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: rgba(var(--color-accent-rgb), 0.9);
+}
+
+.chat-profile__about-update-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.chat-profile__about-update-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
+    0 6px 14px rgba(113, 86, 60, 0.06);
+  color: var(--color-chat-text-title);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease,
+    opacity 140ms ease;
+}
+
+.chat-profile__about-update-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.chat-profile__about-update-btn:disabled {
+  cursor: default;
+  opacity: 0.56;
+  transform: none;
+}
+
+.chat-profile__about-update-btn--primary {
+  color: rgba(255, 255, 255, 0.97);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-accent-rgb), 0.82),
+    rgba(var(--color-accent-rgb), 0.98)
+  );
+  box-shadow:
+    0 12px 24px rgba(var(--color-accent-rgb), 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.chat-profile__about-update-btn--primary:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-accent-rgb), 0.92),
+    rgba(var(--color-accent-rgb), 1)
+  );
+}
+
+.chat-profile__about-update-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+
+.chat-profile__about-update-btn-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.chat-profile__about-update-progress {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.chat-profile__about-update-progress-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.chat-profile__about-update-progress-percent {
+  font-size: 24px;
+  font-weight: 730;
+  letter-spacing: -0.04em;
+  color: var(--color-chat-text-title);
+}
+
+.chat-profile__about-update-progress-caption {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-chat-text-muted);
+}
+
+.chat-profile__about-update-progress-track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.12);
+}
+
+.chat-profile__about-update-progress-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--color-accent-rgb), 0.62),
+    rgba(var(--color-accent-rgb), 0.96)
+  );
+  box-shadow:
+    0 0 22px rgba(var(--color-accent-rgb), 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: width 180ms ease;
+}
+
+.chat-profile__about-update--downloaded .chat-profile__about-update-pill,
+.chat-profile__about-update--current .chat-profile__about-update-pill {
+  color: #1d6c47;
+  background: rgba(36, 167, 114, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(36, 167, 114, 0.16);
+}
+
+.chat-profile__about-update--error .chat-profile__about-update-pill {
+  color: #a03420;
+  background: rgba(160, 52, 32, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(160, 52, 32, 0.16);
+}
+
+.chat-profile__about-update--downloading .chat-profile__about-update-icon,
+.chat-profile__about-update--checking .chat-profile__about-update-icon {
+  animation: about-update-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes about-update-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.12),
+      0 10px 20px rgba(var(--color-accent-rgb), 0.08);
+  }
+
+  50% {
+    transform: scale(1.04);
+    box-shadow:
+      inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.18),
+      0 12px 26px rgba(var(--color-accent-rgb), 0.14);
+  }
+}
 
 .chat-profile__about-columns {
   display: grid;
@@ -209,21 +492,6 @@
   min-width: 0;
 }
 
-/* ── Shared card style ─────────────────────────────────────────────────── */
-
-.chat-profile__about-meta {
-  width: 100%;
-  border-radius: 20px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.58);
-  box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.86),
-    0 10px 28px rgba(130, 95, 65, 0.07);
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-}
-
 .chat-profile__about-section-title {
   margin: 0 0 10px;
   font-size: 13px;
@@ -237,6 +505,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
   padding: 14px 20px;
   border-bottom: 1px solid rgba(170, 134, 104, 0.07);
 }
@@ -262,4 +531,56 @@
   font-weight: 600;
   color: var(--color-chat-text-title);
   letter-spacing: -0.015em;
+}
+
+@media (max-width: 920px) {
+  .chat-profile__about-hero,
+  .chat-profile__about-update-body,
+  .chat-profile__about-update-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chat-profile__about-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-profile__about-update-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-profile__about-name {
+    font-size: 36px;
+  }
+
+  .chat-profile__about-icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  .chat-profile__about-update {
+    padding: 18px;
+  }
+
+  .chat-profile__about-update-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chat-profile__about-update-btn {
+    width: 100%;
+  }
+
+  .chat-profile__about-update-progress-header,
+  .chat-profile__about-meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chat-profile__about-meta-value {
+    max-width: 100%;
+    white-space: normal;
+  }
 }

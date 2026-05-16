@@ -56,6 +56,18 @@ function toFileUrl(filePath) {
   return 'file:///' + filePath.replace(/\\/g, '/');
 }
 
+function disposeElementTree(root) {
+  if (!root) {
+    return;
+  }
+
+  for (const child of root.children) {
+    disposeElementTree(child);
+  }
+
+  root._dispose?.();
+}
+
 async function bootstrap() {
   stripNativeTooltips();
   await loadAndApplyThemeState();
@@ -493,6 +505,10 @@ async function bootstrap() {
       navItems.querySelectorAll('.chat-settings__nav-item').forEach((item) => {
         item.classList.toggle('chat-settings__nav-item--active', item._settingsSubId === id);
       });
+
+      for (const child of Array.from(main.children)) {
+        disposeElementTree(child);
+      }
 
       mainHeading.textContent = pageLabels[id] ?? '';
       if (id === 'about') {
