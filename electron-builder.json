@@ -54,17 +54,20 @@
   },
   "win": {
     "target": "nsis",
-    "icon": "Assets/Logo/Logo.ico"
+    "icon": "Assets/Logo/Logo.ico",
+    "artifactName": "Joanium.exe"
   },
   "mac": {
     "target": "dmg",
     "icon": "Assets/Logo/Logo.icns",
-    "category": "public.app-category.productivity"
+    "category": "public.app-category.productivity",
+    "artifactName": "Joanium.dmg"
   },
   "linux": {
     "target": "AppImage",
     "icon": "Assets/Logo/Logo.png",
-    "category": "Utility"
+    "category": "Utility",
+    "artifactName": "Joanium.AppImage"
   },
   "nsis": {
     "oneClick": false,
