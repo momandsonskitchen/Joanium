@@ -30,9 +30,18 @@ function normalizeImportPayload(payload = {}) {
   };
 }
 
-function buildImportCatalogBlock(catalog = [], emptyLabel) {
+// All files listed with just filename + description so the AI knows every available bucket.
+function buildFileRegistry(catalog = []) {
+  if (!Array.isArray(catalog) || catalog.length === 0) return '(none)';
+  return catalog.map((entry) => `- ${entry.filename}: ${entry.description}`).join('\n');
+}
+
+// Only non-empty files with their full content so the AI can merge and deduplicate.
+function buildExistingContentBlock(catalog = [], emptyLabel) {
   if (!Array.isArray(catalog) || catalog.length === 0) return emptyLabel;
-  return catalog
+  const populated = catalog.filter((entry) => !entry.empty);
+  if (populated.length === 0) return emptyLabel;
+  return populated
     .map((entry) => {
       const content = String(entry.content ?? '').trim() || emptyLabel;
       return [`--- ${entry.filename} ---`, content].join('\n');
@@ -307,16 +316,21 @@ export function createMemoryPanel(strings) {
     importStatusEl.className = 'chat-memory__import-status';
 
     try {
-      const [catalog, bootstrap, appSettings] = await Promise.all([
+      const [catalog, bootstrap, appSettings, importPromptTemplate] = await Promise.all([
         invokeIpc('memory:get-catalog'),
         invokeIpc('chat:bootstrap'),
         invokeIpc('app-settings:get').catch(() => ({})),
+        invokeIpc('memory:get-import-prompt'),
       ]);
-      const catalogBlock = buildImportCatalogBlock(catalog, strings.importMemory.emptyCatalog);
+
+      const fileRegistry = buildFileRegistry(catalog);
+      const existingContent = buildExistingContentBlock(catalog, strings.importMemory.emptyCatalog);
       const selectedModel = resolveImportModel(bootstrap, appSettings);
-      const prompt = strings.importMemory.userPrompt
-        .replace('{catalog}', () => catalogBlock)
+      const prompt = importPromptTemplate
+        .replace('{fileRegistry}', () => fileRegistry)
+        .replace('{existingContent}', () => existingContent)
         .replace('{importedText}', () => importedText);
+
       const result = await invokeIpc('chat:complete-message', {
         messages: [{ role: 'user', content: prompt }],
         providerId: selectedModel?.providerId ?? null,
@@ -324,6 +338,7 @@ export function createMemoryPanel(strings) {
         modeInstruction: strings.importMemory.systemInstruction,
         isNewSession: false,
       });
+
       const jsonText = extractJsonObject(result?.text);
       if (!jsonText) throw new Error(strings.importMemory.parseFailed);
 
@@ -433,10 +448,7 @@ export function createMemoryPanel(strings) {
 
     importCancelBtn = createElement('button', 'chat-memory__import-back');
     importCancelBtn.type = 'button';
-    importCancelBtn.append(
-      createIcon('arrow-left', 'chat-memory__import-back-icon'),
-      createElement('span', '', strings.importMemory.cancel),
-    );
+    importCancelBtn.textContent = strings.importMemory.cancel;
     importCancelBtn.addEventListener('click', showEditorView);
 
     const importHeaderActions = createElement('div', 'chat-memory__import-header-actions');
