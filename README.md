@@ -33,7 +33,6 @@
 
 ---
 
-
 > Local-first AI desktop assistant with multi-model chat, agents, automations, MCP, and real integrations.
 
 Joanium is a privacy-first, offline-capable desktop app built with Electron and vanilla JavaScript. It runs on your machine, connects to the AI providers you choose, and keeps your data yours.
@@ -97,7 +96,7 @@ npm start
 
 ## Project Structure
 
-```
+```md
 v2/
 ├── App.js               # Electron entry point
 ├── Packages/            # Feature packages (microservice architecture)
@@ -126,7 +125,7 @@ See [Arch.md](Arch.md) for full architecture documentation.
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.  
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
 Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
@@ -139,4 +138,4 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-Proprietary — © 2026 Joel Jolly. All rights reserved. See [LICENSE.md](LICENSE.md) for full terms.
+Apache-2.0 license
