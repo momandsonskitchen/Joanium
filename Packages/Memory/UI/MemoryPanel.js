@@ -36,14 +36,19 @@ function buildFileRegistry(catalog = []) {
   return catalog.map((entry) => `- ${entry.filename}: ${entry.description}`).join('\n');
 }
 
-// Only non-empty files with their full content so the AI can merge and deduplicate.
+// Only non-empty files, capped per file so the prompt stays fast.
+const EXISTING_CONTENT_PER_FILE_LIMIT = 600;
+
 function buildExistingContentBlock(catalog = [], emptyLabel) {
   if (!Array.isArray(catalog) || catalog.length === 0) return emptyLabel;
   const populated = catalog.filter((entry) => !entry.empty);
   if (populated.length === 0) return emptyLabel;
   return populated
     .map((entry) => {
-      const content = String(entry.content ?? '').trim() || emptyLabel;
+      let content = String(entry.content ?? '').trim() || emptyLabel;
+      if (content.length > EXISTING_CONTENT_PER_FILE_LIMIT) {
+        content = content.slice(0, EXISTING_CONTENT_PER_FILE_LIMIT) + '\n[…truncated]';
+      }
       return [`--- ${entry.filename} ---`, content].join('\n');
     })
     .join('\n\n');
@@ -102,6 +107,7 @@ export function createMemoryPanel(strings) {
   let copyPromptBtn = null;
   let copyPromptLabelEl = null;
   let copyPromptResetTimer = null;
+  let importLoader = null;
 
   async function populateList(query = '') {
     if (!listEl) return;
@@ -252,7 +258,7 @@ export function createMemoryPanel(strings) {
     }
   }
 
-  function showEditorView() {
+  function showImportView() {
     if (importView) importView.hidden = true;
     if (editorView) editorView.hidden = false;
   }
@@ -312,8 +318,9 @@ export function createMemoryPanel(strings) {
     importTextarea.disabled = true;
     importSaveBtn.disabled = true;
     importCancelBtn.disabled = true;
-    importStatusEl.textContent = strings.importMemory.analysing;
+    importStatusEl.textContent = '';
     importStatusEl.className = 'chat-memory__import-status';
+    showImportLoader();
 
     try {
       const [catalog, bootstrap, appSettings, importPromptTemplate] = await Promise.all([
@@ -348,16 +355,21 @@ export function createMemoryPanel(strings) {
       }
 
       await invokeIpc('memory:apply-updates', payload);
-      importStatusEl.textContent = strings.importMemory.done;
-      importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--success';
       await populateList(search?.getValue().trim() ?? '');
-      setTimeout(showEditorView, 900);
+
+      hideImportLoader(() => {
+        importStatusEl.textContent = strings.importMemory.done;
+        importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--success';
+        setTimeout(showEditorView, 900);
+      });
     } catch (error) {
-      importStatusEl.textContent = error?.message || strings.importMemory.failed;
-      importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--error';
-      importTextarea.disabled = false;
-      importSaveBtn.disabled = false;
-      importCancelBtn.disabled = false;
+      hideImportLoader(() => {
+        importStatusEl.textContent = error?.message || strings.importMemory.failed;
+        importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--error';
+        importTextarea.disabled = false;
+        importSaveBtn.disabled = false;
+        importCancelBtn.disabled = false;
+      });
     }
   }
 
@@ -480,7 +492,33 @@ export function createMemoryPanel(strings) {
     });
     importActions.append(importSaveBtn);
 
-    importView.append(importHeader, pasteLabel, importTextarea, importStatusEl, importActions);
+    // ── Import loader overlay ────────────────────────────────────────────────
+    importLoader = createElement('div', 'chat-memory__import-loader');
+    importLoader.hidden = true;
+    const loaderInner = createElement(
+      'div',
+      'logo-loader logo-loader--infinite logo-loader--inline',
+    );
+    const loaderGlow = createElement('div', 'logo-loader__glow');
+    const loaderWrap = createElement('div', 'logo-loader__wrap');
+    const loaderImg = document.createElement('img');
+    loaderImg.className = 'logo-loader__img';
+    loaderImg.src = '../../../Assets/Logo/Logo.png';
+    loaderImg.alt = '';
+    loaderImg.style.width = '80px';
+    loaderImg.style.height = '80px';
+    loaderWrap.append(loaderImg);
+    loaderInner.append(loaderGlow, loaderWrap);
+    importLoader.append(loaderInner);
+
+    importView.append(
+      importHeader,
+      pasteLabel,
+      importTextarea,
+      importStatusEl,
+      importActions,
+      importLoader,
+    );
 
     editorColumn.append(editorView, importView);
     body.append(listColumn, editorColumn);

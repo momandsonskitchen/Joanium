@@ -386,6 +386,11 @@ export function createMemoryStateManager({ rootDirectory }) {
     return readFile(promptPath, 'utf8');
   }
 
+  async function getImportPrompt() {
+    const promptPath = path.join(rootDirectory, 'Prompts', 'ImportMemory.md');
+    return readFile(promptPath, 'utf8');
+  }
+
   return {
     listMemories,
     readMemoryFile,
@@ -395,5 +400,6 @@ export function createMemoryStateManager({ rootDirectory }) {
     getMemoryCatalog,
     applyMemoryUpdates,
     getExportPrompt,
+    getImportPrompt,
   };
 }
