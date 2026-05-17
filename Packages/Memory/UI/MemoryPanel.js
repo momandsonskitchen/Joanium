@@ -84,7 +84,12 @@ export function createMemoryPanel(strings) {
   let saveButton = null;
   let activeFilename = null;
   let activeMemory = null;
-  let importOverlay = null;
+  let editorView = null;
+  let importView = null;
+  let importTextarea = null;
+  let importStatusEl = null;
+  let importSaveBtn = null;
+  let importCancelBtn = null;
 
   async function populateList(query = '') {
     if (!listEl) return;
@@ -235,24 +240,41 @@ export function createMemoryPanel(strings) {
     }
   }
 
-  function closeImportDialog() {
-    importOverlay?.remove();
-    importOverlay = null;
+  function showEditorView() {
+    if (importView) importView.hidden = true;
+    if (editorView) editorView.hidden = false;
   }
 
-  async function runMemoryImport(textarea, statusEl, saveBtn, cancelBtn) {
-    const importedText = String(textarea.value ?? '').trim();
+  function showImportView() {
+    if (!editorView || !importView) return;
+    editorView.hidden = true;
+    importView.hidden = false;
+    if (importTextarea) {
+      importTextarea.value = '';
+      importTextarea.disabled = false;
+      importTextarea.focus();
+    }
+    if (importStatusEl) {
+      importStatusEl.textContent = '';
+      importStatusEl.className = 'chat-memory__import-status';
+    }
+    if (importSaveBtn) importSaveBtn.disabled = false;
+    if (importCancelBtn) importCancelBtn.disabled = false;
+  }
+
+  async function runMemoryImport() {
+    const importedText = String(importTextarea.value ?? '').trim();
     if (!importedText) {
-      statusEl.textContent = strings.importMemory.emptyInput;
-      statusEl.className = 'chat-memory-import__status chat-memory-import__status--error';
+      importStatusEl.textContent = strings.importMemory.emptyInput;
+      importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--error';
       return;
     }
 
-    textarea.disabled = true;
-    saveBtn.disabled = true;
-    cancelBtn.disabled = true;
-    statusEl.textContent = strings.importMemory.analysing;
-    statusEl.className = 'chat-memory-import__status';
+    importTextarea.disabled = true;
+    importSaveBtn.disabled = true;
+    importCancelBtn.disabled = true;
+    importStatusEl.textContent = strings.importMemory.analysing;
+    importStatusEl.className = 'chat-memory__import-status';
 
     try {
       const [catalog, bootstrap, appSettings] = await Promise.all([
@@ -281,68 +303,17 @@ export function createMemoryPanel(strings) {
       }
 
       await invokeIpc('memory:apply-updates', payload);
-      statusEl.textContent = strings.importMemory.done;
-      statusEl.className = 'chat-memory-import__status chat-memory-import__status--success';
+      importStatusEl.textContent = strings.importMemory.done;
+      importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--success';
       await populateList(search?.getValue().trim() ?? '');
-      setTimeout(closeImportDialog, 900);
+      setTimeout(showEditorView, 900);
     } catch (error) {
-      statusEl.textContent = error?.message || strings.importMemory.failed;
-      statusEl.className = 'chat-memory-import__status chat-memory-import__status--error';
-      textarea.disabled = false;
-      saveBtn.disabled = false;
-      cancelBtn.disabled = false;
+      importStatusEl.textContent = error?.message || strings.importMemory.failed;
+      importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--error';
+      importTextarea.disabled = false;
+      importSaveBtn.disabled = false;
+      importCancelBtn.disabled = false;
     }
-  }
-
-  function openImportDialog() {
-    if (!panel || importOverlay) return;
-
-    importOverlay = createElement('div', 'chat-memory-import');
-    const dialog = createElement('section', 'chat-memory-import__dialog');
-    const header = createElement('div', 'chat-memory-import__header');
-    const copy = createElement('div', 'chat-memory-import__copy');
-    copy.append(
-      createElement('h3', 'chat-memory-import__title', strings.importMemory.title),
-      createElement('p', 'chat-memory-import__subtitle', strings.importMemory.subtitle),
-    );
-    const closeBtn = createElement('button', 'chat-memory-import__close');
-    closeBtn.type = 'button';
-    closeBtn.setAttribute('aria-label', strings.importMemory.close);
-    closeBtn.append(createIcon('close', 'chat-memory-import__close-icon'));
-    closeBtn.addEventListener('click', closeImportDialog);
-    header.append(copy, closeBtn);
-
-    const textarea = createElement('textarea', 'chat-memory-import__textarea');
-    textarea.placeholder = strings.importMemory.placeholder;
-    textarea.setAttribute('aria-label', strings.importMemory.textareaLabel);
-
-    const statusEl = createElement('p', 'chat-memory-import__status');
-    const actions = createElement('div', 'chat-memory-import__actions');
-    const cancelBtn = createElement(
-      'button',
-      'chat-memory-import__button',
-      strings.importMemory.cancel,
-    );
-    cancelBtn.type = 'button';
-    cancelBtn.addEventListener('click', closeImportDialog);
-    const saveBtn = createElement(
-      'button',
-      'chat-memory-import__button chat-memory-import__button--primary',
-      strings.importMemory.save,
-    );
-    saveBtn.type = 'button';
-    saveBtn.addEventListener('click', () => {
-      void runMemoryImport(textarea, statusEl, saveBtn, cancelBtn);
-    });
-    actions.append(cancelBtn, saveBtn);
-
-    dialog.append(header, textarea, statusEl, actions);
-    importOverlay.append(dialog);
-    importOverlay.addEventListener('click', (event) => {
-      if (event.target === importOverlay) closeImportDialog();
-    });
-    panel.append(importOverlay);
-    textarea.focus();
   }
 
   function build() {
@@ -373,11 +344,14 @@ export function createMemoryPanel(strings) {
     const importButton = createElement('button', 'chat-memory__import');
     importButton.type = 'button';
     importButton.append(createIcon('download', 'chat-memory__import-icon'));
-    importButton.addEventListener('click', openImportDialog);
+    importButton.addEventListener('click', showImportView);
 
     searchWrap.append(search.element, importButton);
     listEl = createElement('div', 'chat-memory__list');
     listColumn.append(searchWrap, listEl);
+
+    // ── Editor view ──────────────────────────────────────────────────────
+    editorView = createElement('div', 'chat-memory__editor-view');
 
     const editorHeader = createElement('div', 'chat-memory__editor-header');
     const editorMeta = createElement('div', 'chat-memory__editor-meta');
@@ -401,7 +375,48 @@ export function createMemoryPanel(strings) {
     editor.setAttribute('aria-label', strings.editorLabel);
     editor.disabled = true;
 
-    editorColumn.append(editorHeader, editor);
+    editorView.append(editorHeader, editor);
+
+    // ── Import view ──────────────────────────────────────────────────────
+    importView = createElement('div', 'chat-memory__import-view');
+    importView.hidden = true;
+
+    const importHeader = createElement('div', 'chat-memory__import-header');
+    const importCopy = createElement('div', 'chat-memory__import-copy');
+    importCopy.append(
+      createElement('h3', 'chat-memory__import-title', strings.importMemory.title),
+      createElement('p', 'chat-memory__import-subtitle', strings.importMemory.subtitle),
+    );
+    importCancelBtn = createElement('button', 'chat-memory__import-back');
+    importCancelBtn.type = 'button';
+    importCancelBtn.append(
+      createIcon('arrow-left', 'chat-memory__import-back-icon'),
+      createElement('span', '', strings.importMemory.cancel),
+    );
+    importCancelBtn.addEventListener('click', showEditorView);
+    importHeader.append(importCopy, importCancelBtn);
+
+    importTextarea = createElement('textarea', 'chat-memory__import-textarea');
+    importTextarea.placeholder = strings.importMemory.placeholder;
+    importTextarea.setAttribute('aria-label', strings.importMemory.textareaLabel);
+
+    importStatusEl = createElement('p', 'chat-memory__import-status');
+
+    const importActions = createElement('div', 'chat-memory__import-actions');
+    importSaveBtn = createElement(
+      'button',
+      'chat-memory__import-btn chat-memory__import-btn--primary',
+      strings.importMemory.save,
+    );
+    importSaveBtn.type = 'button';
+    importSaveBtn.addEventListener('click', () => {
+      void runMemoryImport();
+    });
+    importActions.append(importSaveBtn);
+
+    importView.append(importHeader, importTextarea, importStatusEl, importActions);
+
+    editorColumn.append(editorView, importView);
     body.append(listColumn, editorColumn);
     panel.append(body);
     renderEmptyEditor();
