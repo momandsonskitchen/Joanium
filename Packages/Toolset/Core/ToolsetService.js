@@ -1973,9 +1973,12 @@ function getMapUrl(params) {
 function buildToolsPrompt(tools, promptSections = []) {
   return [
     'Built-in tools are available when the user asks for calculations, conversions, local date/time utilities, URL helpers, geospatial math, text utilities, JSON formatting, hashing, UUIDs, timezone lookup, password generation, connector lookups, public web/reference data, package registries, weather, crypto/finance data, Stack Overflow, Wikipedia, or live browser work.',
-    'When one of these tools is needed, respond with exactly one fenced block and no final answer yet:',
+    'When tools are needed, respond with one or more fenced blocks — one per call — before any final answer. Tools that do not depend on each other must be batched in the same response:',
     '```joanium-tool',
     '{"tool":"calculate_expression","parameters":{"expression":"sqrt(144) + pi","precision":4}}',
+    '```',
+    '```joanium-tool',
+    '{"tool":"generate_uuid","parameters":{"count":2}}',
     '```',
     'Supported tools:',
     ...tools.map((tool) => {

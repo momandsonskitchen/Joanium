@@ -21,22 +21,22 @@
   },
   "z-ai/glm4.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-17T11:59:21.905Z"
+    "checkedAt": "2026-05-17T14:18:15.753Z"
   },
   "qwen/qwen3.5-397b-a17b": {
-    "status": "yellow",
-    "checkedAt": "2026-05-17T12:11:19.433Z"
+    "status": "green",
+    "checkedAt": "2026-05-17T13:12:36.902Z"
   },
   "minimaxai/minimax-m2.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-17T11:39:44.336Z"
+    "checkedAt": "2026-05-17T14:18:30.669Z"
   },
   "moonshotai/kimi-k2-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-17T12:11:04.581Z"
+    "checkedAt": "2026-05-17T14:48:28.700Z"
   },
   "google/gemma-4-31b-it": {
     "status": "yellow",
-    "checkedAt": "2026-05-17T12:11:19.817Z"
+    "checkedAt": "2026-05-17T14:48:43.627Z"
   }
 }

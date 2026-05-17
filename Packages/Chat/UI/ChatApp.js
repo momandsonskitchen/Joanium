@@ -19,6 +19,8 @@ import {
   executeTerminalTool as executeRendererTerminalTool,
   formatToolsetResultForModel,
   parseToolRequests,
+  parseAllTerminalToolRequests,
+  parseAllToolRequests,
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
 import { createAttachmentPill } from './AttachmentPill.js';
 import { createBrowserPreviewPanel } from './BrowserPreviewPanel.js';
@@ -155,6 +157,7 @@ export async function createChatView(
   let activeModeInstruction = null;
   let terminalProcessRenderFrame = null;
   let terminalProcessCardsWired = false;
+  let completedWrites = new Set(); // dedup guard for write_local_file
 
   let userScrolledUp = false;
   let scrollToBottomFrame = null;
@@ -2043,6 +2046,7 @@ export async function createChatView(
       activeSpeakBtn = null;
     }
     fileDiffTracker?.reset();
+    completedWrites = new Set();
     renderPendingAttachments();
     if (attachmentNotice) {
       attachmentNotice.hidden = true;
@@ -2333,6 +2337,14 @@ export async function createChatView(
   }
 
   async function executeTerminalTool(action) {
+    // ── Dedup guard: skip exact repeated write_local_file calls within a session ──
+    if (action?.tool === 'write_local_file') {
+      const dedupKey = `${action.payload?.filePath ?? ''}::${action.payload?.content ?? ''}`;
+      if (completedWrites.has(dedupKey)) {
+        return { ok: true, path: action.payload?.filePath, bytes: 0, _skippedDuplicate: true };
+      }
+    }
+
     let nextAction = action;
 
     if (PROJECT_SCOPED_MUTATION_TOOLS.has(action?.tool)) {
@@ -2352,10 +2364,18 @@ export async function createChatView(
       };
     }
 
-    return executeRendererTerminalTool(nextAction, {
+    const result = await executeRendererTerminalTool(nextAction, {
       resolveCwd: resolveTerminalCwd,
       unsupportedError: strings.terminal.unsupportedTool,
     });
+
+    // Track successful writes for dedup
+    if (action?.tool === 'write_local_file' && result?.ok) {
+      const dedupKey = `${action.payload?.filePath ?? ''}::${action.payload?.content ?? ''}`;
+      completedWrites.add(dedupKey);
+    }
+
+    return result;
   }
 
   function buildSubAgentTaskPrompt(task, coordinationGoal, index, total) {
@@ -2636,54 +2656,113 @@ export async function createChatView(
     return parts.join('\n\n').trim();
   }
 
-  async function continueAfterTerminalTool(action, terminalDepth, runToken, generationStartTime) {
-    let result;
+  async function continueAfterTerminalTool(
+    actionOrActions,
+    terminalDepth,
+    runToken,
+    generationStartTime,
+  ) {
+    const actions = Array.isArray(actionOrActions) ? actionOrActions : [actionOrActions];
 
-    try {
-      result = await executeTerminalTool(action);
-    } catch (error) {
-      result = { ok: false, error: error?.message ?? String(error) };
+    const executionResults = [];
+
+    for (let i = 0; i < actions.length; i++) {
+      const action = actions[i];
+      if (runToken !== generationToken) return;
+
+      // For actions beyond the first, add a dedicated terminal card.
+      // The first action's card was already set up by the stream-done handler.
+      if (i > 0) {
+        const label = getTerminalToolLabel(strings, action.tool);
+        const command = getTerminalActionSummary(action, strings);
+        messages = [
+          ...messages,
+          {
+            role: 'assistant',
+            content: stripNativeToolCalls(action.visibleContent) || strings.terminal.runningTool,
+            thinking: '',
+            streaming: false,
+            providerLabel: activeProvider?.label ?? 'AI',
+            modelLabel: activeModelLabel,
+            terminal: {
+              label,
+              command,
+              status: action.unsupported ? 'failed' : 'running',
+              statusLabel: action.unsupported
+                ? strings.terminal.unsupportedTool
+                : strings.terminal.running,
+            },
+          },
+        ];
+        syncComposer();
+        renderThread();
+        scheduleScrollToBottom();
+
+        if (action.unsupported) {
+          executionResults.push({
+            action,
+            result: { ok: false, error: strings.terminal.unsupportedTool },
+          });
+          continue;
+        }
+      }
+
+      if (runToken !== generationToken) return;
+
+      let result;
+      try {
+        result = await executeTerminalTool(action);
+      } catch (error) {
+        result = { ok: false, error: error?.message ?? String(error) };
+      }
+      executionResults.push({ action, result });
+
+      if (runToken !== generationToken) return;
+
+      const isBlocked = Boolean(result?.risk?.blocked);
+      const isRunningProcess = result?.ok && result?.running === true && result?.processId;
+      const status = isBlocked
+        ? 'blocked'
+        : isRunningProcess
+          ? 'running'
+          : result?.ok
+            ? 'completed'
+            : 'failed';
+      const statusLabel = isBlocked
+        ? strings.terminal.blockedTool
+        : isRunningProcess
+          ? strings.terminal.running
+          : result?.ok
+            ? strings.terminal.completedTool
+            : strings.terminal.failedTool;
+
+      updateLastAssistantMessage((message) => ({
+        ...message,
+        terminal: {
+          ...(message.terminal ?? {}),
+          status,
+          statusLabel,
+          processId: result?.processId ?? message.terminal?.processId ?? null,
+          output: buildTerminalDisplayOutput(result),
+          exitCode: result?.exitCode,
+        },
+      }));
+      renderThread();
+      scheduleScrollToBottom();
     }
 
     if (runToken !== generationToken) return;
 
-    const isBlocked = Boolean(result?.risk?.blocked);
-    const ok = result?.ok !== false && !result?.error;
-    const isRunningProcess = ok && result?.running === true && result?.processId;
-    const status = isBlocked
-      ? 'blocked'
-      : isRunningProcess
-        ? 'running'
-        : ok
-          ? 'completed'
-          : 'failed';
-    const statusLabel = isBlocked
-      ? strings.terminal.blockedTool
-      : isRunningProcess
-        ? strings.terminal.running
-        : ok
-          ? strings.terminal.completedTool
-          : strings.terminal.failedTool;
-    const baseModelResult = formatTerminalResultForModel(strings, action, result);
-    const modelResult = isBlocked
-      ? baseModelResult + '\n\nThe action was blocked by a security policy. Do not retry it.'
-      : ok
-        ? baseModelResult +
-          "\n\nThe tool completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tool again with the same arguments."
-        : baseModelResult +
-          '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal. Do not repeat the exact same failing call.';
-
-    updateLastAssistantMessage((message) => ({
-      ...message,
-      terminal: {
-        ...(message.terminal ?? {}),
-        status,
-        statusLabel,
-        processId: result?.processId ?? message.terminal?.processId ?? null,
-        output: buildTerminalDisplayOutput(result),
-        exitCode: result?.exitCode,
-      },
-    }));
+    const allOk = executionResults.every(({ result }) => result?.ok !== false && !result?.error);
+    const combinedParts = executionResults.map(({ action, result }) =>
+      formatTerminalResultForModel(strings, action, result),
+    );
+    const baseModelResult = combinedParts.join('\n\n---\n\n');
+    const modelResult = allOk
+      ? baseModelResult +
+        "\n\nAll tool calls completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tools again."
+      : baseModelResult +
+        '\n\nOne or more tool calls failed. Diagnose the errors, then retry with corrected approaches. Do not repeat exact same failing calls.';
 
     messages = [
       ...messages,
@@ -2716,11 +2795,19 @@ export async function createChatView(
     });
   }
 
-  async function continueAfterToolsetTool(action, terminalDepth, runToken, generationStartTime) {
+  async function continueAfterToolsetTool(
+    actionOrActions,
+    terminalDepth,
+    runToken,
+    generationStartTime,
+  ) {
+    const actions = Array.isArray(actionOrActions) ? actionOrActions : [actionOrActions];
+    const primaryAction = actions[0];
+
     // ── Sub-agents: special-cased for live per-task progress ─────────────────
-    if (action.tool === 'spawn_sub_agents') {
+    if (primaryAction.tool === 'spawn_sub_agents') {
       const initTasks = normalizeSubAgentTasks(
-        action.payload?.parameters?.tasks ?? action.payload?.tasks,
+        primaryAction.payload?.parameters?.tasks ?? primaryAction.payload?.tasks,
       );
       let currentSubAgents = initTasks.map((task) => ({
         title: task.title,
@@ -2753,9 +2840,13 @@ export async function createChatView(
 
       let subAgentResult;
       try {
-        subAgentResult = await executeSubAgentTool(action, onProgress);
+        subAgentResult = await executeSubAgentTool(primaryAction, onProgress);
       } catch (error) {
-        subAgentResult = { ok: false, error: error?.message ?? String(error), tool: action.tool };
+        subAgentResult = {
+          ok: false,
+          error: error?.message ?? String(error),
+          tool: primaryAction.tool,
+        };
       }
 
       if (runToken !== generationToken) return;
@@ -2772,7 +2863,7 @@ export async function createChatView(
       }
 
       const subAgentOk = subAgentResult?.ok !== false && !subAgentResult?.error;
-      const subAgentModelResult = formatToolsetResultForModel(action, subAgentResult);
+      const subAgentModelResult = formatToolsetResultForModel(primaryAction, subAgentResult);
 
       updateLastAssistantMessage((message) => ({
         ...message,
@@ -2821,15 +2912,15 @@ export async function createChatView(
     let result;
 
     try {
-      result = await executeToolsetTool(action);
+      result = await executeToolsetTool(primaryAction);
     } catch (error) {
-      result = { ok: false, error: error?.message ?? String(error), tool: action.tool };
+      result = { ok: false, error: error?.message ?? String(error), tool: primaryAction.tool };
     }
 
     if (runToken !== generationToken) return;
 
     const ok = result?.ok !== false && !result?.error;
-    const baseModelResult = formatToolsetResultForModel(action, result);
+    const baseModelResult = formatToolsetResultForModel(primaryAction, result);
     const modelResult = ok
       ? baseModelResult +
         "\n\nThe tool completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tool again with the same arguments."
@@ -2969,7 +3060,32 @@ export async function createChatView(
         diagPanel?.hide();
         removeStreamListeners();
         const { content: parsedContent, thinking: inlineThinking } = parseThinkingFromText(accText);
-        const { terminalAction, toolsetAction } = parseToolRequests(parsedContent);
+        // Some models (e.g. Nemotron) embed tool calls inside their reasoning/thinking blocks.
+        // Search content first, then fall back to thinking text so we never miss a tool call.
+        const thinkingText = accThinking || inlineThinking || '';
+        let terminalActions =
+          parseAllTerminalToolRequests(parsedContent)?.terminalActions ??
+          parseAllTerminalToolRequests(thinkingText)?.terminalActions ??
+          null;
+        terminalActions = terminalActions?.length ? terminalActions : null;
+        let terminalAction = terminalActions?.[0] ?? null;
+        let toolsetAction = null;
+        let toolsetActions = null;
+        if (!terminalAction) {
+          const primaryFallback = parseAllToolRequests(parsedContent);
+          const fallback = primaryFallback.hasTools
+            ? primaryFallback
+            : thinkingText
+              ? parseAllToolRequests(thinkingText)
+              : null;
+          if (fallback?.hasTools) {
+            terminalActions = fallback.terminalActions.length ? fallback.terminalActions : null;
+            terminalAction = terminalActions?.[0] ?? null;
+            toolsetActions = fallback.toolsetActions.length ? fallback.toolsetActions : null;
+            toolsetAction = toolsetActions?.[0] ?? null;
+          }
+          if (terminalAction && !terminalActions) terminalActions = [terminalAction];
+        }
 
         if ((terminalAction || toolsetAction) && terminalDepth >= MAX_TERMINAL_TOOL_CALLS) {
           const action = terminalAction || toolsetAction;
@@ -2993,6 +3109,7 @@ export async function createChatView(
 
         if (terminalAction) {
           const label = getTerminalToolLabel(strings, terminalAction.tool);
+          const command = getTerminalActionSummary(terminalAction, strings);
           updateLastAssistantMessage((message) => ({
             ...message,
             role: 'assistant',
@@ -3004,7 +3121,7 @@ export async function createChatView(
             modelLabel: meta?.modelLabel ?? activeModelLabel,
             terminal: {
               label,
-              command: getTerminalActionSummary(terminalAction, strings),
+              command,
               status: terminalAction.unsupported ? 'failed' : 'running',
               statusLabel: terminalAction.unsupported
                 ? strings.terminal.unsupportedTool
@@ -3023,7 +3140,7 @@ export async function createChatView(
           }
 
           void continueAfterTerminalTool(
-            terminalAction,
+            terminalActions,
             terminalDepth,
             runToken,
             generationStartTime,

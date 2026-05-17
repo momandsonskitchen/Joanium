@@ -43,28 +43,22 @@ async function loadToolPackage(packageIndex, { rootDirectory } = {}) {
 
 async function discoverLocalToolPackages({ rootDirectory } = {}) {
   const entries = await readdir(toolsDirectory, { withFileTypes: true }).catch(() => []);
-  const packages = [];
+  const sorted = entries
+    .filter((entry) => entry.isDirectory() && !NON_PACKAGE_DIRECTORIES.has(entry.name))
+    .sort((left, right) => left.name.localeCompare(right.name));
 
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
-    if (!entry.isDirectory() || NON_PACKAGE_DIRECTORIES.has(entry.name)) {
-      continue;
-    }
+  const results = await Promise.all(
+    sorted.map(async (entry) => {
+      const packageIndex = path.join(toolsDirectory, entry.name, 'Index.js');
+      const hasIndex = await access(packageIndex)
+        .then(() => true)
+        .catch(() => false);
+      if (!hasIndex) return null;
+      return loadToolPackage(packageIndex, { rootDirectory });
+    }),
+  );
 
-    const packageIndex = path.join(toolsDirectory, entry.name, 'Index.js');
-    const hasIndex = await access(packageIndex)
-      .then(() => true)
-      .catch(() => false);
-    if (!hasIndex) {
-      continue;
-    }
-
-    const toolPackage = await loadToolPackage(packageIndex, { rootDirectory });
-    if (toolPackage) {
-      packages.push(toolPackage);
-    }
-  }
-
-  return packages;
+  return results.filter(Boolean);
 }
 
 async function discoverExternalToolPackages({
@@ -79,21 +73,16 @@ async function discoverExternalToolPackages({
   const packageIds = [...new Set(externalPackageIds)].sort((left, right) =>
     left.localeCompare(right),
   );
-  const packages = [];
 
-  for (const packageId of packageIds) {
-    const packageRecord = registry.get(packageId);
-    if (!packageRecord?.entryPath) {
-      continue;
-    }
+  const results = await Promise.all(
+    packageIds.map(async (packageId) => {
+      const packageRecord = registry.get(packageId);
+      if (!packageRecord?.entryPath) return null;
+      return loadToolPackage(packageRecord.entryPath, { rootDirectory });
+    }),
+  );
 
-    const toolPackage = await loadToolPackage(packageRecord.entryPath, { rootDirectory });
-    if (toolPackage) {
-      packages.push(toolPackage);
-    }
-  }
-
-  return packages;
+  return results.filter(Boolean);
 }
 
 export async function discoverToolPackages({
@@ -101,10 +90,12 @@ export async function discoverToolPackages({
   registry,
   externalPackageIds = [],
 } = {}) {
-  const packages = [
-    ...(await discoverLocalToolPackages({ rootDirectory })),
-    ...(await discoverExternalToolPackages({ rootDirectory, registry, externalPackageIds })),
-  ];
+  const [local, external] = await Promise.all([
+    discoverLocalToolPackages({ rootDirectory }),
+    discoverExternalToolPackages({ rootDirectory, registry, externalPackageIds }),
+  ]);
+
+  const packages = [...local, ...external];
 
   return {
     packages,

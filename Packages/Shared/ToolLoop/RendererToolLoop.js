@@ -147,6 +147,102 @@ export function parseToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOOL_S
     : { terminalAction: null, toolsetAction };
 }
 
+function matchAllBlocks(text, pattern) {
+  const re = new RegExp(pattern, 'gi');
+  const results = [];
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    try {
+      results.push({ payload: JSON.parse(match[1].trim()), fullMatch: match[0] });
+    } catch {
+      /* skip malformed JSON */
+    }
+  }
+  return results;
+}
+
+export function parseAllTerminalToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
+  const rawText = String(text ?? '');
+  const blocks = matchAllBlocks(rawText, '```joanium-terminal\\s*([\\s\\S]*?)```');
+  if (blocks.length === 0) return null;
+
+  const normalized = normalizeSupportedTools(supportedTools);
+  let visibleContent = rawText;
+  for (const { fullMatch } of blocks) {
+    visibleContent = visibleContent.replace(fullMatch, '');
+  }
+  visibleContent = visibleContent.trim();
+
+  const terminalActions = blocks.map(({ payload }) => {
+    const tool = String(payload?.tool ?? '').trim();
+    return { tool, payload, unsupported: !normalized.has(tool), visibleContent };
+  });
+
+  return { terminalActions, visibleContent };
+}
+
+export function parseAllToolsetToolRequests(text) {
+  const rawText = String(text ?? '');
+  const blocks = matchAllBlocks(rawText, '```joanium-tool\\s*([\\s\\S]*?)```');
+  if (blocks.length === 0) return null;
+
+  let visibleContent = rawText;
+  for (const { fullMatch } of blocks) {
+    visibleContent = visibleContent.replace(fullMatch, '');
+  }
+  visibleContent = visibleContent.trim();
+
+  const toolsetActions = blocks.map(({ payload }) => ({
+    tool: String(payload?.tool ?? '').trim(),
+    payload,
+    visibleContent,
+  }));
+
+  return { toolsetActions, visibleContent };
+}
+
+export function parseAllToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
+  const rawText = String(text ?? '');
+  const normalized = normalizeSupportedTools(supportedTools);
+
+  const terminalBlocks = matchAllBlocks(rawText, '```joanium-terminal\\s*([\\s\\S]*?)```');
+  const toolsetBlocks = matchAllBlocks(rawText, '```joanium-tool\\s*([\\s\\S]*?)```');
+
+  if (terminalBlocks.length === 0 && toolsetBlocks.length === 0) {
+    return { terminalActions: [], toolsetActions: [], hasTools: false, visibleContent: rawText };
+  }
+
+  let visibleContent = rawText;
+  for (const { fullMatch } of [...terminalBlocks, ...toolsetBlocks]) {
+    visibleContent = visibleContent.replace(fullMatch, '');
+  }
+  visibleContent = visibleContent.trim();
+
+  const terminalActions = terminalBlocks.map(({ payload }) => {
+    const tool = String(payload?.tool ?? '').trim();
+    return { tool, payload, unsupported: !normalized.has(tool), visibleContent };
+  });
+
+  const toolsetActions = [];
+  for (const { payload } of toolsetBlocks) {
+    const tool = String(payload?.tool ?? '').trim();
+    const action = { tool, payload, visibleContent };
+    const coerced = coerceToolsetTerminalRequest(action, supportedTools);
+    if (coerced) {
+      terminalActions.push({ ...coerced, visibleContent });
+    } else {
+      toolsetActions.push(action);
+    }
+  }
+
+  return {
+    terminalActions,
+    toolsetActions,
+    hasTools: terminalActions.length > 0 || toolsetActions.length > 0,
+    visibleContent,
+  };
+}
+
 export async function resolveDefaultTerminalCwd(requestedPath = '') {
   const explicitPath = String(requestedPath ?? '').trim();
   if (explicitPath) return explicitPath;
@@ -500,14 +596,19 @@ export async function runRendererToolLoop({
     finalText = stripThinking(result?.text ?? '');
     finalThinking = result?.thinking ?? finalThinking;
 
-    const { terminalAction, toolsetAction } = parseToolRequests(finalText, supportedTerminalTools);
+    const {
+      terminalActions,
+      toolsetActions,
+      hasTools,
+      visibleContent: toolVisibleContent,
+    } = parseAllToolRequests(finalText, supportedTerminalTools);
 
     if (typeof onProgress === 'function') {
-      const currentTool = (terminalAction || toolsetAction)?.tool ?? null;
-      onProgress({ text: finalText, toolName: currentTool, depth }).catch?.(() => {});
+      const firstTool = (terminalActions[0] ?? toolsetActions[0])?.tool ?? null;
+      onProgress({ text: finalText, toolName: firstTool, depth }).catch?.(() => {});
     }
 
-    if (!terminalAction && !toolsetAction) {
+    if (!hasTools) {
       return {
         text: finalText,
         thinking: finalThinking,
@@ -518,10 +619,9 @@ export async function runRendererToolLoop({
       };
     }
 
-    const action = terminalAction || toolsetAction;
     if (depth >= maxToolCalls) {
       return {
-        text: action.visibleContent || finalText || toolLimitMessage,
+        text: toolVisibleContent || finalText || toolLimitMessage,
         thinking: finalThinking,
         providerLabel,
         modelLabel,
@@ -530,20 +630,40 @@ export async function runRendererToolLoop({
       };
     }
 
-    let toolResult;
-    try {
-      toolResult = terminalAction ? await executeTerminal(action) : await executeToolset(action);
-    } catch (error) {
-      toolResult = { ok: false, error: error?.message ?? String(error), tool: action.tool };
-    }
+    // Execute all tool calls from this turn in parallel
+    const allActions = [
+      ...terminalActions.map((a) => ({ ...a, _kind: 'terminal' })),
+      ...toolsetActions.map((a) => ({ ...a, _kind: 'toolset' })),
+    ];
 
-    const modelResult = terminalAction
-      ? formatTerminalResult(action, toolResult)
-      : formatToolsetResult(action, toolResult);
+    const allResults = await Promise.all(
+      allActions.map(async (action) => {
+        try {
+          const result =
+            action._kind === 'terminal'
+              ? await executeTerminal(action)
+              : await executeToolset(action);
+          return { action, result };
+        } catch (error) {
+          return {
+            action,
+            result: { ok: false, error: error?.message ?? String(error), tool: action.tool },
+          };
+        }
+      }),
+    );
+
+    const modelResult = allResults
+      .map(({ action, result }) =>
+        action._kind === 'terminal'
+          ? formatTerminalResult(action, result)
+          : formatToolsetResult(action, result),
+      )
+      .join('\n\n---\n\n');
 
     workingMessages = [
       ...workingMessages,
-      { role: 'assistant', content: action.visibleContent || toolStepMessage },
+      { role: 'assistant', content: toolVisibleContent || toolStepMessage },
       { role: 'user', content: modelResult },
     ];
   }
