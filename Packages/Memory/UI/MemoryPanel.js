@@ -417,23 +417,8 @@ export function createMemoryPanel(strings) {
       createElement('h3', 'chat-memory__import-title', strings.importMemory.title),
       createElement('p', 'chat-memory__import-subtitle', strings.importMemory.subtitle),
     );
-    importCancelBtn = createElement('button', 'chat-memory__import-back');
-    importCancelBtn.type = 'button';
-    importCancelBtn.append(
-      createIcon('arrow-left', 'chat-memory__import-back-icon'),
-      createElement('span', '', strings.importMemory.cancel),
-    );
-    importCancelBtn.addEventListener('click', showEditorView);
-    importHeader.append(importCopy, importCancelBtn);
 
-    // ── Step 1 — Copy prompt ─────────────────────────────────────────────
-    const stepOneBlock = createElement('div', 'chat-memory__step-block');
-
-    const stepOneTop = createElement('div', 'chat-memory__step-top');
-    stepOneTop.append(
-      createElement('span', 'chat-memory__step-label', strings.importMemory.getPrompt.stepOneLabel),
-    );
-
+    // ── Copy prompt button + Cancel grouped together in the header ────────
     copyPromptBtn = createElement('button', 'chat-memory__copy-prompt');
     copyPromptBtn.type = 'button';
     copyPromptLabelEl = createElement(
@@ -446,17 +431,23 @@ export function createMemoryPanel(strings) {
       void handleCopyPrompt();
     });
 
-    stepOneTop.append(copyPromptBtn);
-    stepOneBlock.append(
-      stepOneTop,
-      createElement('p', 'chat-memory__step-hint', strings.importMemory.getPrompt.stepOneHint),
+    importCancelBtn = createElement('button', 'chat-memory__import-back');
+    importCancelBtn.type = 'button';
+    importCancelBtn.append(
+      createIcon('arrow-left', 'chat-memory__import-back-icon'),
+      createElement('span', '', strings.importMemory.cancel),
     );
+    importCancelBtn.addEventListener('click', showEditorView);
 
-    // ── Step 2 — Paste output ────────────────────────────────────────────
-    const stepTwoLabel = createElement(
+    const importHeaderActions = createElement('div', 'chat-memory__import-header-actions');
+    importHeaderActions.append(copyPromptBtn, importCancelBtn);
+    importHeader.append(importCopy, importHeaderActions);
+
+    // ── Paste label ──────────────────────────────────────────────────────
+    const pasteLabel = createElement(
       'span',
       'chat-memory__step-label',
-      strings.importMemory.getPrompt.stepTwoLabel,
+      strings.importMemory.getPrompt.pasteLabel,
     );
 
     importTextarea = createElement('textarea', 'chat-memory__import-textarea');
@@ -477,14 +468,7 @@ export function createMemoryPanel(strings) {
     });
     importActions.append(importSaveBtn);
 
-    importView.append(
-      importHeader,
-      stepOneBlock,
-      stepTwoLabel,
-      importTextarea,
-      importStatusEl,
-      importActions,
-    );
+    importView.append(importHeader, pasteLabel, importTextarea, importStatusEl, importActions);
 
     editorColumn.append(editorView, importView);
     body.append(listColumn, editorColumn);

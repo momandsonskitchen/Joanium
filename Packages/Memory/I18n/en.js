@@ -55,6 +55,7 @@ const en = {
       copied: 'Copied!',
       copyFailed: 'Could not copy',
       stepTwoLabel: 'Step 2 — Paste the output below',
+      pasteLabel: 'Paste your response',
     },
   },
 };

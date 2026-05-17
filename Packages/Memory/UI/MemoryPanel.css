@@ -342,6 +342,13 @@
   padding-bottom: 16px;
 }
 
+.chat-memory__import-header-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .chat-memory__import-copy {
   min-width: 0;
 }
