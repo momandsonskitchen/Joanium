@@ -69,29 +69,34 @@
 
 .joanium-provider-tile__tick {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 26px;
-  height: 26px;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-pill);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-text);
+  background: var(--color-accent);
+  box-shadow:
+    0 4px 14px rgba(var(--color-accent-rgb), 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
   opacity: 0;
-  transform: scale(0.7);
+  transform: scale(0.5);
   transition:
-    opacity var(--transition-fast),
-    transform var(--transition-fast);
+    opacity 160ms ease,
+    transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .joanium-provider-tile__tick::before {
   content: '';
-  width: 8px;
-  height: 14px;
-  border-right: 2px solid rgba(250, 242, 255, 1);
-  border-bottom: 2px solid rgba(250, 242, 255, 1);
+  width: 5px;
+  height: 9px;
+  border-right: 2.5px solid #fff;
+  border-bottom: 2.5px solid #fff;
+  border-radius: 1px;
   transform: rotate(45deg) translate(-1px, -1px);
+  margin-top: -2px;
 }
 
 .joanium-provider-tile.is-selected .joanium-provider-tile__tick {
