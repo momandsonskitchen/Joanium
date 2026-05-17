@@ -38,20 +38,18 @@
 }
 
 .chat-memory__import {
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: 18px;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   color: var(--color-chat-text-title);
   background: rgba(255, 255, 255, 0.62);
   box-shadow:
     inset 0 0 0 1px rgba(170, 134, 104, 0.12),
     0 8px 20px rgba(130, 95, 65, 0.06);
-  font-size: 13px;
-  font-weight: 720;
   transition:
     transform 140ms ease,
     background-color 140ms ease,
@@ -68,8 +66,8 @@
 }
 
 .chat-memory__import-icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   display: inline-flex;
 }
 
@@ -111,6 +109,14 @@
 .chat-memory__search {
   flex-shrink: 0;
   padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-memory__search .joanium-search-bar {
+  flex: 1;
+  min-width: 0;
 }
 
 .chat-memory__list {

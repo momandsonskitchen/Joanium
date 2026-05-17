@@ -351,19 +351,10 @@ export function createMemoryPanel(strings) {
     panel = createElement('div', 'chat-memory');
     panel.hidden = true;
 
-    const importButton = createElement('button', 'chat-memory__import');
-    importButton.type = 'button';
-    importButton.append(
-      createIcon('download', 'chat-memory__import-icon'),
-      createElement('span', 'chat-memory__import-label', strings.importMemory.action),
-    );
-    importButton.addEventListener('click', openImportDialog);
-
     panel.append(
       createPanelHeader({
         title: strings.title,
         subtitle: strings.subtitle,
-        actions: [importButton],
       }),
     );
 
@@ -378,7 +369,13 @@ export function createMemoryPanel(strings) {
         void populateList(value.trim());
       },
     });
-    searchWrap.append(search.element);
+
+    const importButton = createElement('button', 'chat-memory__import');
+    importButton.type = 'button';
+    importButton.append(createIcon('download', 'chat-memory__import-icon'));
+    importButton.addEventListener('click', openImportDialog);
+
+    searchWrap.append(search.element, importButton);
     listEl = createElement('div', 'chat-memory__list');
     listColumn.append(searchWrap, listEl);
 
