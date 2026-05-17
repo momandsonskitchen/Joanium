@@ -9,6 +9,15 @@ import {
 } from '../../Shared/UserData/UserData.js';
 
 export function createSetupStateManager({ rootDirectory }) {
+  // Serialise all writes through a promise chain so concurrent draft saves
+  // and the final complete() call never race on the same .tmp file.
+  let writeQueue = Promise.resolve();
+
+  function enqueue(fn) {
+    writeQueue = writeQueue.then(fn, fn);
+    return writeQueue;
+  }
+
   return {
     async getBootstrapPayload() {
       const [state, providers] = await Promise.all([
@@ -27,18 +36,25 @@ export function createSetupStateManager({ rootDirectory }) {
       return state.onboardingCompleted ? 'Shell' : 'Setup';
     },
     async saveDraft(draftState) {
-      const currentState = await readUserState(rootDirectory);
-      const mergedState = mergeUserStates(currentState, sanitizeIncomingUserState(draftState));
-      mergedState.onboardingCompleted = false;
-      mergedState.completedAt = null;
-      return writeUserState(rootDirectory, mergedState);
+      return enqueue(async () => {
+        const currentState = await readUserState(rootDirectory);
+        const mergedState = mergeUserStates(currentState, sanitizeIncomingUserState(draftState));
+        mergedState.onboardingCompleted = false;
+        mergedState.completedAt = null;
+        return writeUserState(rootDirectory, mergedState);
+      });
     },
     async completeOnboarding(completedState) {
-      const currentState = await readUserState(rootDirectory);
-      const mergedState = mergeUserStates(currentState, sanitizeIncomingUserState(completedState));
-      mergedState.onboardingCompleted = true;
-      mergedState.completedAt = new Date().toISOString();
-      return writeUserState(rootDirectory, mergedState);
+      return enqueue(async () => {
+        const currentState = await readUserState(rootDirectory);
+        const mergedState = mergeUserStates(
+          currentState,
+          sanitizeIncomingUserState(completedState),
+        );
+        mergedState.onboardingCompleted = true;
+        mergedState.completedAt = new Date().toISOString();
+        return writeUserState(rootDirectory, mergedState);
+      });
     },
   };
 }
