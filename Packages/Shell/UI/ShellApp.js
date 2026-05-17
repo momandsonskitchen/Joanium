@@ -91,7 +91,11 @@ async function bootstrap() {
   async function lockNow() {
     try {
       const status = await invokeIpc('security:get-status');
-      if (!status.enabled) return;
+      if (!status.enabled) {
+        // Security not configured — show a guest lock screen that unlocks on any keystroke.
+        await mountLockScreen(strings.security, { ...status, guestMode: true });
+        return;
+      }
       autoLockTimer.pause();
       await mountLockScreen(strings.security, status);
       await autoLockTimer.refresh();

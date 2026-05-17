@@ -75,8 +75,6 @@ export function mountLockScreen(strings, initialStatus) {
     renderAvatar(null);
 
     // ── Name + subtitle ───────────────────────────────────────────────────
-    // nameEl shows the user's real name once the profile loads.
-    // Falls back to the app name so the card is never empty.
     const nameEl = createElement('h1', 'lock-screen__name', 'Joanium');
     const subtitleEl = createElement('p', 'lock-screen__subtitle', strings.lockSubtitle);
 
@@ -88,6 +86,43 @@ export function mountLockScreen(strings, initialStatus) {
         }
       })
       .catch(() => {});
+
+    // ── Guest mode ────────────────────────────────────────────────────────
+    // When security is not configured, show a lightweight lock that unlocks
+    // on any keypress — no password needed.
+    if (initialStatus.guestMode) {
+      subtitleEl.textContent = strings.lockGuestSubtitle ?? 'App is locked';
+
+      const hintEl = createElement(
+        'p',
+        'lock-screen__subtitle',
+        strings.lockGuestHint ?? 'Press any key to unlock',
+      );
+      hintEl.style.opacity = '0.5';
+
+      card.append(avatar, nameEl, subtitleEl, hintEl);
+      overlay.append(card);
+      document.body.append(overlay);
+
+      function dismiss() {
+        document.removeEventListener('keydown', onKey, { capture: true });
+        overlay.classList.add('lock-screen--leaving');
+        overlay.addEventListener('animationend', () => overlay.remove(), { once: true });
+      }
+
+      function onKey() {
+        dismiss();
+        resolve();
+      }
+
+      // Small delay so the keydown that triggered /lock doesn't immediately
+      // dismiss the screen.
+      setTimeout(() => {
+        document.addEventListener('keydown', onKey, { capture: true, once: true });
+      }, 300);
+
+      return;
+    }
 
     // ── Rate-limit banner ─────────────────────────────────────────────────
     const rateLimitBanner = createElement('div', 'lock-screen__rate-limit');

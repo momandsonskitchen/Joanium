@@ -62,6 +62,10 @@ const en = {
   lockWrongAnswer: 'Incorrect answer.',
   lockAttemptsLeft: '{n} attempt{s} remaining before lockout.',
 
+  // Guest lock screen (security not configured)
+  lockGuestSubtitle: 'App is locked',
+  lockGuestHint: 'Press any key to unlock',
+
   // Auto-lock
   autoLockLabel: 'Auto-lock',
   autoLockDesc: 'Lock automatically after a period of inactivity.',
