@@ -2905,17 +2905,30 @@ export async function createChatView(
 
         if (runToken !== generationToken) return;
 
+        const internetDown = !netResult.ok;
+
         if (netResult.ok) {
-          netRef.update(`${strings.diag.internetStable} (${netResult.ms}ms)`);
+          if (netResult.ms > 1500) {
+            netRef.update(`${strings.diag.internetSlow} (${netResult.ms}ms)`, 'warn');
+          } else {
+            netRef.update(`${strings.diag.internetStable} (${netResult.ms}ms)`);
+          }
         } else {
           netRef.update(strings.diag.internetUnreachable, 'error');
         }
 
-        if (provResult === null) {
+        if (internetDown) {
+          // Internet is down — provider check is meaningless; don't mislead the user.
+          provRef.update(strings.diag.providerSkipped, 'warn');
+        } else if (provResult === null) {
           provRef.update(strings.diag.providerNoEndpoint, 'warn');
         } else if (provResult.ok) {
-          provRef.update(`${provLabel}: Reachable (${provResult.ms}ms)`);
-          diagPanel.addItem(strings.diag.providerSlow);
+          if (provResult.ms > 3000) {
+            provRef.update(`${provLabel}: Reachable (${provResult.ms}ms)`, 'warn');
+            diagPanel.addItem(strings.diag.providerSlow);
+          } else {
+            provRef.update(`${provLabel}: Reachable (${provResult.ms}ms)`);
+          }
         } else {
           provRef.update(`${provLabel}: Unreachable`, 'error');
           diagPanel.addItem(strings.diag.checkSettings, 'warn');
