@@ -18,8 +18,7 @@ import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js'
 import {
   executeTerminalTool as executeRendererTerminalTool,
   formatToolsetResultForModel,
-  parseTerminalToolRequest,
-  parseToolsetToolRequest,
+  parseToolRequests,
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
 import { createAttachmentPill } from './AttachmentPill.js';
 import { createBrowserPreviewPanel } from './BrowserPreviewPanel.js';
@@ -58,6 +57,11 @@ import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScroll
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
 
 const MAX_TERMINAL_TOOL_CALLS = 3;
+const PROJECT_SCOPED_MUTATION_TOOLS = new Set([
+  'write_local_file',
+  'apply_file_patch',
+  'delete_local_item',
+]);
 
 export async function createChatView(
   strings,
@@ -2329,7 +2333,26 @@ export async function createChatView(
   }
 
   async function executeTerminalTool(action) {
-    return executeRendererTerminalTool(action, {
+    let nextAction = action;
+
+    if (PROJECT_SCOPED_MUTATION_TOOLS.has(action?.tool)) {
+      const projectRoot = getActiveProjectFolder();
+
+      if (!projectRoot) {
+        return { ok: false, error: strings.terminal.projectRequired };
+      }
+
+      nextAction = {
+        ...action,
+        payload: {
+          ...(action.payload ?? {}),
+          enforceProjectRoot: true,
+          projectRoot,
+        },
+      };
+    }
+
+    return executeRendererTerminalTool(nextAction, {
       resolveCwd: resolveTerminalCwd,
       unsupportedError: strings.terminal.unsupportedTool,
     });
@@ -2433,8 +2456,7 @@ export async function createChatView(
       lastMeta = result ?? {};
 
       const { content: parsedContent } = parseThinkingFromText(String(result?.text ?? ''));
-      const terminalAction = parseTerminalToolRequest(parsedContent);
-      const toolsetAction = terminalAction ? null : parseToolsetToolRequest(parsedContent);
+      const { terminalAction, toolsetAction } = parseToolRequests(parsedContent);
 
       if (!terminalAction && !toolsetAction) {
         return {
@@ -2922,8 +2944,7 @@ export async function createChatView(
         diagPanel?.hide();
         removeStreamListeners();
         const { content: parsedContent, thinking: inlineThinking } = parseThinkingFromText(accText);
-        const terminalAction = parseTerminalToolRequest(parsedContent);
-        const toolsetAction = terminalAction ? null : parseToolsetToolRequest(parsedContent);
+        const { terminalAction, toolsetAction } = parseToolRequests(parsedContent);
 
         if ((terminalAction || toolsetAction) && terminalDepth >= MAX_TERMINAL_TOOL_CALLS) {
           const action = terminalAction || toolsetAction;

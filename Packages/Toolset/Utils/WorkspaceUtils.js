@@ -81,7 +81,23 @@ export function truncateText(text, maxLength = OUTPUT_LIMIT) {
 
 export function resolveDirectory(inputPath, fallbackDirectory) {
   const candidate = String(inputPath ?? '').trim();
-  return path.resolve(candidate || fallbackDirectory || os.homedir());
+  const fallback = fallbackDirectory || os.homedir();
+
+  if (!candidate) {
+    return path.resolve(fallback);
+  }
+
+  return path.isAbsolute(candidate) ? path.resolve(candidate) : path.resolve(fallback, candidate);
+}
+
+export function isPathInsideDirectory(childPath, parentDirectory) {
+  const resolvedChild = path.resolve(childPath);
+  const resolvedParent = path.resolve(parentDirectory);
+  const child = process.platform === 'win32' ? resolvedChild.toLowerCase() : resolvedChild;
+  const parent = process.platform === 'win32' ? resolvedParent.toLowerCase() : resolvedParent;
+  const relativePath = path.relative(parent, child);
+
+  return relativePath === '' || (!relativePath.startsWith('..') && !path.isAbsolute(relativePath));
 }
 
 export function requireString(value, message) {

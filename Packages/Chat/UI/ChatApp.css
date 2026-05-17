@@ -437,11 +437,11 @@
 
 .chat-message__action-button--copied,
 .chat-message__action-button--speaking {
-  color: #7c3aed;
+  color: var(--color-accent);
 }
 
 .chat-message__action-button--speaking {
-  background: rgba(124, 58, 237, 0.08);
+  background: rgba(var(--color-accent-rgb), 0.08);
 }
 
 .chat-message__action-button--speaking .chat-message__action-icon {
@@ -2181,14 +2181,14 @@
 }
 
 .chat-terminal-call--completed .chat-terminal-call__status {
-  color: #287b49;
-  background: rgba(40, 123, 73, 0.1);
+  color: rgb(var(--color-accent-rgb));
+  background: rgba(var(--color-accent-rgb), 0.1);
 }
 
 .chat-terminal-call--failed .chat-terminal-call__status,
 .chat-terminal-call--blocked .chat-terminal-call__status {
-  color: #a23036;
-  background: rgba(162, 48, 54, 0.1);
+  color: var(--color-chat-text-secondary);
+  background: rgba(var(--color-accent-rgb), 0.14);
 }
 
 .chat-terminal-call__details {
@@ -2299,11 +2299,11 @@
 }
 
 .chat-subagent-call__agent-status--completed {
-  background: #22c55e;
+  background: rgba(var(--color-accent-rgb), 0.9);
 }
 
 .chat-subagent-call__agent-status--failed {
-  background: #ef4444;
+  background: rgba(var(--color-accent-rgb), 0.45);
 }
 
 @keyframes chat-subagent-pulse {
@@ -2360,13 +2360,13 @@
 }
 
 .chat-subagent-call__agent--completed .chat-subagent-call__agent-badge {
-  color: #287b49;
-  background: rgba(40, 123, 73, 0.1);
+  color: rgb(var(--color-accent-rgb));
+  background: rgba(var(--color-accent-rgb), 0.1);
 }
 
 .chat-subagent-call__agent--failed .chat-subagent-call__agent-badge {
-  color: #a23036;
-  background: rgba(162, 48, 54, 0.1);
+  color: var(--color-chat-text-secondary);
+  background: rgba(var(--color-accent-rgb), 0.14);
 }
 
 .chat-subagent-call__agent-chevron {

@@ -64,7 +64,6 @@ export function createProvidersPanel(strings) {
       const isConnected = refs.card.classList.contains('providers-card--connected');
       const isLast = isConnected && configuredCount === 1;
       refs.disconnect.disabled = isLast;
-      refs.disconnect.title = '';
     }
   }
 

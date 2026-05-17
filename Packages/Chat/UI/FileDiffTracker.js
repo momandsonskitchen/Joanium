@@ -168,12 +168,11 @@ export function createFileDiffTracker({ panel, getWorkspaceRoot = () => '' } = {
     }
 
     const workspaceRoot = getWorkspacePath();
-    const cards = Array.from(changes.entries()).map(([filePath, change], index) => {
+    const cards = Array.from(changes.entries()).map(([filePath, change]) => {
       const relativePath = buildRelativePath(filePath, workspaceRoot);
       const segments = normalizePath(relativePath).split('/');
       const fileName = segments.pop() || relativePath;
       const directory = segments.length ? `${segments.join('/')}/` : '';
-      const targetId = `chat-file-diff-${index + 1}`;
       const diffHtml = change.diff.ops
         ? buildDiffHtml(change.diff.ops) ||
           '<div class="chat-file-diff__summary-note">No line changes detected.</div>'
@@ -186,9 +185,7 @@ export function createFileDiffTracker({ panel, getWorkspaceRoot = () => '' } = {
           <button
             type="button"
             class="chat-file-diff__card-button"
-            data-diff-target="${targetId}"
             aria-expanded="false"
-            title="${escapeHtml(filePath)}"
           >
             <span class="chat-file-diff__card-main">
               <span class="chat-file-diff__file-name">${escapeHtml(fileName)}</span>
@@ -201,7 +198,7 @@ export function createFileDiffTracker({ panel, getWorkspaceRoot = () => '' } = {
             </span>
             <span class="chat-file-diff__chevron" aria-hidden="true">▾</span>
           </button>
-          <div class="chat-file-diff__diff" id="${targetId}" hidden>
+          <div class="chat-file-diff__diff" hidden>
             ${diffHtml}
           </div>
         </article>
@@ -225,7 +222,9 @@ export function createFileDiffTracker({ panel, getWorkspaceRoot = () => '' } = {
     panel.querySelector('.chat-file-diff__dismiss')?.addEventListener('click', () => reset());
     panel.querySelectorAll('.chat-file-diff__card-button').forEach((button) => {
       button.addEventListener('click', () => {
-        const diff = panel.querySelector(`#${button.dataset.diffTarget}`);
+        const diff = button
+          .closest('.chat-file-diff__card')
+          ?.querySelector('.chat-file-diff__diff');
         if (!diff) {
           return;
         }

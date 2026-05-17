@@ -3,16 +3,18 @@ import en from '../I18n/en.js';
 
 // Shared Components
 import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
-import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
-import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
-import { createButton } from '../../Shared/Button/Button.js';
-import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
-import { createInputBox } from '../../Shared/InputBox/InputBox.js';
-import { createApiKeyInput } from '../../Shared/ApiKeyInput/ApiKeyInput.js';
-import { createProviderScroller } from '../../Shared/ProviderScroller/ProviderScroller.js';
-import { createTagSelector } from '../../Shared/TagSelector/TagSelector.js';
-import { createDropDown } from '../../Shared/DropDown/DropDown.js';
-import { createModal } from '../../Shared/Modal/Modal.js';
+import {
+  attachCustomScrollbar,
+  createApiKeyInput,
+  createButton,
+  createCheckbox,
+  createDropDown,
+  createInputBox,
+  createLogoLoader,
+  createModal,
+  createProviderScroller,
+  createTagSelector,
+} from '../../Shared/Bubbly/Index.js';
 import {
   calculateLastCompletedStep,
   findInitialScene,

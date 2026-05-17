@@ -30,6 +30,10 @@ export const TERMINAL_TOOL_NAMES = Object.freeze([
 
 const DEFAULT_TERMINAL_TOOL_SET = new Set(TERMINAL_TOOL_NAMES);
 
+export function isTerminalToolName(toolName) {
+  return DEFAULT_TERMINAL_TOOL_SET.has(String(toolName ?? '').trim());
+}
+
 export function stripThinking(text) {
   return String(text ?? '')
     .replace(/<(think|thinking|reasoning|reflection)>[\s\S]*?<\/\1>/gi, '')
@@ -101,6 +105,46 @@ export function parseToolsetToolRequest(text) {
     payload: parsed.payload,
     visibleContent: parsed.visibleContent,
   };
+}
+
+function normalizeTerminalPayload(payload = {}) {
+  const parameters =
+    payload?.parameters &&
+    typeof payload.parameters === 'object' &&
+    !Array.isArray(payload.parameters)
+      ? payload.parameters
+      : {};
+  const args =
+    payload?.arguments && typeof payload.arguments === 'object' && !Array.isArray(payload.arguments)
+      ? payload.arguments
+      : {};
+  const normalized = { ...parameters, ...args, ...payload };
+  delete normalized.parameters;
+  delete normalized.arguments;
+  return normalized;
+}
+
+export function coerceToolsetTerminalRequest(action, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
+  if (!action || !isTerminalToolName(action.tool)) return null;
+
+  return {
+    tool: action.tool,
+    payload: normalizeTerminalPayload(action.payload),
+    unsupported: !normalizeSupportedTools(supportedTools).has(action.tool),
+    visibleContent: action.visibleContent,
+  };
+}
+
+export function parseToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
+  const terminalAction = parseTerminalToolRequest(text, supportedTools);
+  if (terminalAction) return { terminalAction, toolsetAction: null };
+
+  const toolsetAction = parseToolsetToolRequest(text);
+  const coercedTerminalAction = coerceToolsetTerminalRequest(toolsetAction, supportedTools);
+
+  return coercedTerminalAction
+    ? { terminalAction: coercedTerminalAction, toolsetAction: null }
+    : { terminalAction: null, toolsetAction };
 }
 
 export async function resolveDefaultTerminalCwd(requestedPath = '') {
@@ -175,6 +219,8 @@ export async function executeTerminalTool(
       cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
       content: payload.content,
       append: payload.append === true,
+      enforceProjectRoot: payload.enforceProjectRoot === true,
+      projectRoot: payload.projectRoot,
     });
     emitFileChangedEvent(result);
     return result;
@@ -187,6 +233,8 @@ export async function executeTerminalTool(
       search: payload.search,
       replace: payload.replace,
       replaceAll: payload.replace_all === true,
+      enforceProjectRoot: payload.enforceProjectRoot === true,
+      projectRoot: payload.projectRoot,
     });
     emitFileChangedEvent(result);
     return result;
@@ -196,6 +244,8 @@ export async function executeTerminalTool(
     const result = await invokeIpc('terminal:delete-item', {
       itemPath: payload.path,
       cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+      enforceProjectRoot: payload.enforceProjectRoot === true,
+      projectRoot: payload.projectRoot,
     });
     emitFileChangedEvent(result);
     return result;
@@ -450,8 +500,7 @@ export async function runRendererToolLoop({
     finalText = stripThinking(result?.text ?? '');
     finalThinking = result?.thinking ?? finalThinking;
 
-    const terminalAction = parseTerminalToolRequest(finalText, supportedTerminalTools);
-    const toolsetAction = terminalAction ? null : parseToolsetToolRequest(finalText);
+    const { terminalAction, toolsetAction } = parseToolRequests(finalText, supportedTerminalTools);
 
     if (typeof onProgress === 'function') {
       const currentTool = (terminalAction || toolsetAction)?.tool ?? null;

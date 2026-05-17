@@ -114,6 +114,7 @@ const en = {
     failedTool: 'Terminal tool failed.',
     blockedTool: 'Terminal tool blocked.',
     unsupportedTool: 'Unsupported terminal tool request.',
+    projectRequired: 'Open a project before modifying local files.',
     hiddenResultLabel: 'Terminal result',
     resultHeader: 'Terminal tool result',
     outputLabel: 'Output',

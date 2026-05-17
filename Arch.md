@@ -50,6 +50,7 @@
 
 ## Expected working
 
+* Should work in all 3 OS (Windows, Linux, Mac)
 * In every package i have kept index.js file that should be the main entry point of that package. (as we are treating all the packages as microservices, they should be independently runnable)
   * example: if the ai needs to use telegram, then the ai should call the telegram package's index.js file alone and should not call any of its inner files directly. (inner files mean Core/, UI/, IPC/, ..)
 
@@ -113,6 +114,10 @@
 * Should follow material 3 expressive design.
 * I need a clean and very premium looking UI.
 * Should match the current app design language.
+* Setup/onboarding controls use the shared Bubbly UI entry point:
+  `Packages/Shared/Bubbly/Index.js` and `Packages/Shared/Bubbly/Bubbly.css`. Add or
+  re-export setup-facing shared controls there instead of creating one-off inputs,
+  dropdowns, buttons, selectors, or loaders inside `Packages/Setup`.
 
 ## Packages/AppSettings
 

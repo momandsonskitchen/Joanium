@@ -64,7 +64,8 @@ export function createDialogBox({ confirmLabel, cancelLabel = '', onConfirm, onC
     open({ title, message, variant = 'default' }) {
       titleNode.textContent = title;
       messageNode.textContent = message;
-      panel.dataset.variant = variant;
+      const safeVariant = String(variant).replace(/[^a-z0-9_-]/gi, '') || 'default';
+      panel.className = `joanium-dialog-box__panel joanium-dialog-box__panel--${safeVariant}`;
       overlay.classList.add('is-open');
       confirmButton.focus();
     },

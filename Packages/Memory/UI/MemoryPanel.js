@@ -153,7 +153,7 @@ export function createMemoryPanel(strings) {
       `chat-memory__card${activeFilename === memory.filename ? ' chat-memory__card--active' : ''}`,
     );
     card.type = 'button';
-    card.dataset.filename = memory.filename;
+    card.__memoryFilename = memory.filename;
     card.append(
       createElement('span', 'chat-memory__card-title', memory.title),
       createElement(
@@ -212,7 +212,7 @@ export function createMemoryPanel(strings) {
     }
 
     listEl?.querySelectorAll('.chat-memory__card').forEach((card) => {
-      card.classList.toggle('chat-memory__card--active', card.dataset.filename === activeFilename);
+      card.classList.toggle('chat-memory__card--active', card.__memoryFilename === activeFilename);
     });
   }
 

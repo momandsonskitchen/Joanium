@@ -3,6 +3,7 @@ import path from 'node:path';
 import {
   MAX_FILE_SIZE,
   inspectWorkspaceSummary,
+  isPathInsideDirectory,
   isProbablyTextFile,
   normalizeBool,
   protectedDeleteReason,
@@ -10,9 +11,26 @@ import {
   resolveDirectory,
   walkWorkspaceFiles,
 } from '../../../Utils/WorkspaceUtils.js';
+import strings from '../I18n/en.js';
 
 export function createDirectoryService({ rootDirectory }) {
   const fallbackDirectory = rootDirectory || process.cwd();
+
+  function requireProjectScopedPath(resolvedPath, payload = {}) {
+    if (!normalizeBool(payload.enforceProjectRoot)) return null;
+
+    const projectRoot = String(payload.projectRoot ?? '').trim();
+    if (!projectRoot) {
+      return { ok: false, error: strings.errors.projectRequired };
+    }
+
+    const resolvedProjectRoot = resolveDirectory(projectRoot, fallbackDirectory);
+    if (!isPathInsideDirectory(resolvedPath, resolvedProjectRoot)) {
+      return { ok: false, error: strings.errors.outsideProject };
+    }
+
+    return null;
+  }
 
   function readTextFile(payload = {}) {
     const fileError = requireString(payload.filePath, 'No file path provided.');
@@ -132,6 +150,9 @@ export function createDirectoryService({ rootDirectory }) {
     const fileError = requireString(payload.filePath, 'No file path provided.');
     if (fileError) return fileError;
     const resolvedPath = resolveDirectory(payload.filePath, payload.cwd ?? fallbackDirectory);
+    const projectError = requireProjectScopedPath(resolvedPath, payload);
+    if (projectError) return projectError;
+
     const append = normalizeBool(payload.append);
     const existed = fs.existsSync(resolvedPath);
     const beforeContent =
@@ -166,6 +187,9 @@ export function createDirectoryService({ rootDirectory }) {
     }
 
     const resolvedPath = resolveDirectory(payload.filePath, payload.cwd ?? fallbackDirectory);
+    const projectError = requireProjectScopedPath(resolvedPath, payload);
+    if (projectError) return projectError;
+
     if (!fs.existsSync(resolvedPath) || !fs.statSync(resolvedPath).isFile()) {
       return { ok: false, error: `"${resolvedPath}" is not a file.` };
     }
@@ -198,6 +222,9 @@ export function createDirectoryService({ rootDirectory }) {
     const itemError = requireString(payload.itemPath, 'No path provided to delete.');
     if (itemError) return itemError;
     const resolvedPath = resolveDirectory(payload.itemPath, payload.cwd ?? fallbackDirectory);
+    const projectError = requireProjectScopedPath(resolvedPath, payload);
+    if (projectError) return projectError;
+
     const protectedReason = protectedDeleteReason(resolvedPath);
     if (protectedReason) return { ok: false, error: protectedReason };
     if (!fs.existsSync(resolvedPath)) return { ok: false, error: 'Path does not exist.' };

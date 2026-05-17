@@ -166,14 +166,13 @@ export function updateLastStreamingMessage(threadEl, { content, thinking }) {
     const allThinkingWraps = lastEl.querySelectorAll('.chat-message__thinking');
     const thinkingWrap = allThinkingWraps[allThinkingWraps.length - 1];
     if (thinkingWrap) {
-      if (thinkingWrap.dataset.statusMode) {
+      if (thinkingWrap.__statusMode) {
         // Real thinking has arrived — exit status mode and switch to normal thinking display.
-        // The label was saved in data-original-text when status mode was entered.
-        delete thinkingWrap.dataset.statusMode;
+        delete thinkingWrap.__statusMode;
         const label = thinkingWrap.querySelector('.chat-message__thinking-label');
-        if (label?.dataset.originalText) {
-          label.textContent = label.dataset.originalText;
-          delete label.dataset.originalText;
+        if (label?.__originalText) {
+          label.textContent = label.__originalText;
+          delete label.__originalText;
         }
         const body = thinkingWrap.querySelector('.chat-message__thinking-body');
         if (body) body.replaceChildren(createElement('p', 'chat-message__thinking-text', thinking));

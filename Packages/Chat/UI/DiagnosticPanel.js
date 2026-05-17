@@ -61,12 +61,12 @@ export function createDiagnosticPanel(strings) {
 
     // Save the original label text so we can restore it if real thinking arrives.
     if (label) {
-      label.dataset.originalText = label.textContent;
+      label.__originalText = label.textContent;
       label.textContent = strings.diag.statusLabel;
     }
 
     // Mark status mode so updateLastStreamingMessage knows to exit gracefully.
-    wrap.dataset.statusMode = 'true';
+    wrap.__statusMode = true;
     wrap.hidden = false;
     wrap.open = true;
 
@@ -89,13 +89,13 @@ export function createDiagnosticPanel(strings) {
     const body = activeWrap.querySelector('.chat-message__thinking-body');
 
     // Restore original label.
-    if (label?.dataset.originalText) {
-      label.textContent = label.dataset.originalText;
-      delete label.dataset.originalText;
+    if (label?.__originalText) {
+      label.textContent = label.__originalText;
+      delete label.__originalText;
     }
 
     // Exit status mode and collapse the block.
-    delete activeWrap.dataset.statusMode;
+    delete activeWrap.__statusMode;
     activeWrap.open = false;
     activeWrap.hidden = true;
     if (body) body.replaceChildren(createElement('p', 'chat-message__thinking-text', ''));
