@@ -108,7 +108,7 @@
 
 /* Command input — monospace to reinforce slash-command feel */
 .chat-templates__command-input {
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+  font-family: var(--font-family);
   font-size: 13.5px;
   font-weight: 560;
   letter-spacing: 0;
@@ -246,7 +246,7 @@
   border-radius: var(--radius-pill);
   background: rgba(var(--color-accent-rgb), 0.09);
   color: var(--color-accent);
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+  font-family: var(--font-family);
   font-size: 12px;
   font-weight: 640;
   letter-spacing: 0;

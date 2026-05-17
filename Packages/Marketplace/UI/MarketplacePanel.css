@@ -616,7 +616,7 @@
 .marketplace__viewer-tag-value {
   font-weight: 500;
   color: var(--color-accent);
-  font-family: var(--font-mono);
+  font-family: var(--font-family);
 }
 
 /* ── Description ─────────────────────────────────────────────────────────── */

@@ -760,7 +760,7 @@
 }
 
 .events-tool-call__sub {
-  font-family: var(--font-mono, ui-monospace, 'Cascadia Code', monospace);
+  font-family: var(--font-family);
   font-size: 11px;
   color: var(--color-chat-text-muted);
   overflow: hidden;
@@ -827,7 +827,7 @@ details.events-tool-call__details[open] .events-tool-call__chevron {
 .events-tool-call__params {
   margin: 0;
   padding: 10px 14px 14px;
-  font-family: var(--font-mono, ui-monospace, 'Cascadia Code', monospace);
+  font-family: var(--font-family);
   font-size: 11.5px;
   line-height: 1.65;
   letter-spacing: 0;

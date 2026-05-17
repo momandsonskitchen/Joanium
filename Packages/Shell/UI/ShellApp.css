@@ -493,7 +493,7 @@ textarea {
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  font-family: inherit;
+  font-family: var(--font-family);
   color: var(--color-chat-text-title);
   background: rgba(255, 255, 255, 0.8);
   box-shadow:

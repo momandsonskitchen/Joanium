@@ -50,12 +50,12 @@ function waitForCode(server) {
       // Respond with a close-tab page before resolving/rejecting
       const html = code
         ? `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Connected</title>
-           <style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f6f8fa}
+           <style>body{font-family:'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f6f8fa}
            .box{text-align:center;padding:2rem;border-radius:12px;background:#fff;box-shadow:0 2px 16px #0001}
            h2{margin:0 0 .5rem;color:#1a1a1a}p{color:#555;margin:0}</style></head>
            <body><div class="box"><h2>✓ Google connected</h2><p>You can close this tab and return to Joanium.</p></div></body></html>`
         : `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Error</title>
-           <style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f6f8fa}
+           <style>body{font-family:'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f6f8fa}
            .box{text-align:center;padding:2rem;border-radius:12px;background:#fff;box-shadow:0 2px 16px #0001}
            h2{margin:0 0 .5rem;color:#c00}p{color:#555;margin:0}</style></head>
            <body><div class="box"><h2>Sign-in failed</h2><p>${error ?? 'Unknown error'}. You can close this tab.</p></div></body></html>`;
