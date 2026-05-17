@@ -56,7 +56,7 @@ import {
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
 
-const MAX_TERMINAL_TOOL_CALLS = 3;
+const MAX_TERMINAL_TOOL_CALLS = 100;
 const PROJECT_SCOPED_MUTATION_TOOLS = new Set([
   'write_local_file',
   'apply_file_patch',
@@ -2664,7 +2664,14 @@ export async function createChatView(
         : ok
           ? strings.terminal.completedTool
           : strings.terminal.failedTool;
-    const modelResult = formatTerminalResultForModel(strings, action, result);
+    const baseModelResult = formatTerminalResultForModel(strings, action, result);
+    const modelResult = isBlocked
+      ? baseModelResult + '\n\nThe action was blocked by a security policy. Do not retry it.'
+      : ok
+        ? baseModelResult +
+          "\n\nThe tool completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tool again with the same arguments."
+        : baseModelResult +
+          '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal. Do not repeat the exact same failing call.';
 
     updateLastAssistantMessage((message) => ({
       ...message,
@@ -2822,7 +2829,12 @@ export async function createChatView(
     if (runToken !== generationToken) return;
 
     const ok = result?.ok !== false && !result?.error;
-    const modelResult = formatToolsetResultForModel(action, result);
+    const baseModelResult = formatToolsetResultForModel(action, result);
+    const modelResult = ok
+      ? baseModelResult +
+        "\n\nThe tool completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tool again with the same arguments."
+      : baseModelResult +
+        '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal. Do not repeat the exact same failing call.';
 
     updateLastAssistantMessage((message) => ({
       ...message,
