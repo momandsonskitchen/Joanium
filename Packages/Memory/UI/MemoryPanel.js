@@ -258,7 +258,7 @@ export function createMemoryPanel(strings) {
     }
   }
 
-  function showImportView() {
+  function showEditorView() {
     if (importView) importView.hidden = true;
     if (editorView) editorView.hidden = false;
   }
