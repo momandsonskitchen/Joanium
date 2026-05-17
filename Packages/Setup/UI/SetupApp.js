@@ -384,9 +384,6 @@ async function bootstrap() {
     card.append(createProviderIdentity(provider, strings));
 
     const setupSection = createElement('section', 'setup-provider-config__section');
-    setupSection.append(
-      createElement('span', 'setup-provider-config__label', strings.providers.setupLabel),
-    );
 
     for (const requirement of provider.requirements) {
       const labelTemplate =

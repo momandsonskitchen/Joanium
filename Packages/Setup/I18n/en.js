@@ -80,7 +80,6 @@ const en = {
     localEndpointPlaceholder: 'Enter the local server URL',
     localEndpointHelper:
       'Use the default local address unless you changed it in your local model app.',
-    setupLabel: 'Connection',
   },
   usage: {
     title: 'What will you use Joanium for?',
