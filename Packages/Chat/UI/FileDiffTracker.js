@@ -196,7 +196,7 @@ export function createFileDiffTracker({ panel, getWorkspaceRoot = () => '' } = {
               ${change.diff.added > 0 ? `<span class="chat-file-diff__count chat-file-diff__count--add">+${change.diff.added}</span>` : ''}
               ${change.diff.removed > 0 ? `<span class="chat-file-diff__count chat-file-diff__count--remove">-${change.diff.removed}</span>` : ''}
             </span>
-            <span class="chat-file-diff__chevron" aria-hidden="true">▾</span>
+            <span class="chat-file-diff__chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </button>
           <div class="chat-file-diff__diff" hidden>
             ${diffHtml}
@@ -207,19 +207,11 @@ export function createFileDiffTracker({ panel, getWorkspaceRoot = () => '' } = {
 
     panel.hidden = false;
     panel.innerHTML = `
-      <div class="chat-file-diff__header">
-        <div class="chat-file-diff__title">
-          <span class="chat-file-diff__eyebrow">Session Changes</span>
-          <span class="chat-file-diff__summary">${changes.size} file${changes.size === 1 ? '' : 's'} updated by AI</span>
-        </div>
-        <button type="button" class="chat-file-diff__dismiss" aria-label="Dismiss file changes">Clear</button>
-      </div>
       <div class="chat-file-diff__scroll">
         ${cards.join('')}
       </div>
     `;
 
-    panel.querySelector('.chat-file-diff__dismiss')?.addEventListener('click', () => reset());
     panel.querySelectorAll('.chat-file-diff__card-button').forEach((button) => {
       button.addEventListener('click', () => {
         const diff = button
