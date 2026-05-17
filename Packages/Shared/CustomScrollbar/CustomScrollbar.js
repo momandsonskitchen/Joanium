@@ -72,8 +72,14 @@ export function attachCustomScrollbar(
   }
 
   /* Forward wheel events so the scroller still responds to the mouse wheel
-     even when its overflow is set to hidden (no native scrollbar). */
+     even when its overflow is set to hidden (no native scrollbar).
+     Horizontal wheel events (trackpad side-swipe) are intentionally skipped so
+     that any child element with its own horizontal scroll axis — e.g. the
+     provider-picker carousel — can handle them natively without interference. */
   const onWheel = (e) => {
+    // If the gesture is primarily horizontal, let native horizontal scroll work.
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
     const scrollable = scroller.scrollHeight - scroller.clientHeight;
     if (scrollable <= 4) return;
     e.preventDefault();
