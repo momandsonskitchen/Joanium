@@ -186,6 +186,10 @@
   transform: translateY(-1px);
 }
 
+/* ─────────────────────────────────────────────
+   Shared glass-card base (update + meta)
+───────────────────────────────────────────── */
+
 .chat-profile__about-update,
 .chat-profile__about-meta {
   width: 100%;
@@ -200,19 +204,24 @@
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
 }
 
+/* ─────────────────────────────────────────────
+   Update card
+───────────────────────────────────────────── */
+
 .chat-profile__about-update {
+  /* custom property drives the bleed trick on the separator */
+  --_upd-pad-x: 20px;
   position: relative;
   margin-bottom: 24px;
-  padding: 20px 22px;
+  padding: 17px var(--_upd-pad-x) 16px;
 }
 
+/* Very subtle top-left sheen instead of a bold radial blob */
 .chat-profile__about-update::before {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at top right, rgba(var(--color-accent-rgb), 0.16), transparent 36%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.12) 0%, transparent 48%);
   pointer-events: none;
 }
 
@@ -223,42 +232,45 @@
   z-index: 1;
 }
 
-.chat-profile__about-update-top,
-.chat-profile__about-update-body {
+/* Header row — bleeds edge-to-edge for a full-width separator */
+.chat-profile__about-update-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  gap: 12px;
+  /* bleed past card padding */
+  margin-left: calc(-1 * var(--_upd-pad-x));
+  margin-right: calc(-1 * var(--_upd-pad-x));
+  padding: 0 var(--_upd-pad-x) 14px;
+  border-bottom: 1px solid rgba(170, 134, 104, 0.1);
+  margin-bottom: 14px;
 }
 
-.chat-profile__about-update-top {
-  margin-bottom: 18px;
-}
-
+/* Heading: icon + text stack */
 .chat-profile__about-update-heading {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 11px;
   min-width: 0;
 }
 
+/* Icon — compact, lightly tinted, no heavy shadow */
 .chat-profile__about-update-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
-  color: rgba(var(--color-accent-rgb), 0.92);
-  background: rgba(var(--color-accent-rgb), 0.12);
-  box-shadow:
-    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.12),
-    0 10px 20px rgba(var(--color-accent-rgb), 0.08);
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  color: rgba(var(--color-accent-rgb), 0.72);
+  background: rgba(var(--color-accent-rgb), 0.09);
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.1);
 }
 
 .chat-profile__about-update-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
 }
 
 .chat-profile__about-update-title-wrap {
@@ -266,36 +278,64 @@
 }
 
 .chat-profile__about-update-title {
-  margin: 0 0 4px;
-  font-size: 18px;
-  font-weight: 680;
-  letter-spacing: -0.03em;
+  margin: 0 0 2px;
+  font-size: 13.5px;
+  font-weight: 660;
+  letter-spacing: -0.02em;
   color: var(--color-chat-text-title);
 }
 
 .chat-profile__about-update-subtitle {
   margin: 0;
-  max-width: 520px;
-  font-size: 13px;
+  font-size: 11.5px;
   line-height: 1.45;
   color: var(--color-chat-text-muted);
+  max-width: 460px;
 }
 
+/* Status indicator — dot + label, no pill background */
 .chat-profile__about-update-pill {
   flex-shrink: 0;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.12);
-  font-size: 12px;
-  font-weight: 760;
-  letter-spacing: 0.01em;
-  color: var(--color-chat-text-title);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 11.5px;
+  font-weight: 620;
+  letter-spacing: 0;
+  color: var(--color-chat-text-muted);
+  transition: color 200ms ease;
+}
+
+/* The status dot via ::before */
+.chat-profile__about-update-pill::before {
+  content: '';
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.45;
+  transition:
+    background 200ms ease,
+    box-shadow 200ms ease,
+    opacity 200ms ease;
+}
+
+/* Body — detail text + action buttons */
+.chat-profile__about-update-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .chat-profile__about-update-summary {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -305,22 +345,23 @@
 }
 
 .chat-profile__about-update-detail {
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.55;
   color: var(--color-chat-text-secondary);
 }
 
 .chat-profile__about-update-release {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 650;
-  letter-spacing: 0.01em;
-  color: rgba(var(--color-accent-rgb), 0.9);
+  letter-spacing: 0;
+  color: rgba(var(--color-accent-rgb), 0.88);
 }
 
+/* Action buttons */
 .chat-profile__about-update-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -328,19 +369,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-height: 42px;
-  padding: 0 16px;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
   border: none;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.72);
   box-shadow:
     inset 0 0 0 1px rgba(170, 134, 104, 0.12),
-    0 6px 14px rgba(113, 86, 60, 0.06);
+    0 4px 10px rgba(113, 86, 60, 0.05);
   color: var(--color-chat-text-title);
   font: inherit;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 660;
   cursor: pointer;
   transition:
     transform 140ms ease,
@@ -352,11 +393,14 @@
 .chat-profile__about-update-btn:hover:not(:disabled) {
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.16),
+    0 6px 14px rgba(113, 86, 60, 0.08);
 }
 
 .chat-profile__about-update-btn:disabled {
   cursor: default;
-  opacity: 0.56;
+  opacity: 0.5;
   transform: none;
 }
 
@@ -368,64 +412,68 @@
     rgba(var(--color-accent-rgb), 0.98)
   );
   box-shadow:
-    0 12px 24px rgba(var(--color-accent-rgb), 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    0 8px 20px rgba(var(--color-accent-rgb), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .chat-profile__about-update-btn--primary:hover:not(:disabled) {
   background: linear-gradient(
     135deg,
-    rgba(var(--color-accent-rgb), 0.92),
+    rgba(var(--color-accent-rgb), 0.9),
     rgba(var(--color-accent-rgb), 1)
   );
+  box-shadow:
+    0 10px 24px rgba(var(--color-accent-rgb), 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .chat-profile__about-update-btn-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .chat-profile__about-update-btn-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
+/* Progress */
 .chat-profile__about-update-progress {
-  margin-top: 16px;
+  margin-top: 14px;
   display: grid;
-  gap: 10px;
+  gap: 9px;
 }
 
 .chat-profile__about-update-progress-header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
 }
 
 .chat-profile__about-update-progress-percent {
-  font-size: 24px;
-  font-weight: 730;
+  font-size: 22px;
+  font-weight: 720;
   letter-spacing: -0.04em;
   color: var(--color-chat-text-title);
 }
 
 .chat-profile__about-update-progress-caption {
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.45;
   color: var(--color-chat-text-muted);
 }
 
 .chat-profile__about-update-progress-track {
   position: relative;
-  height: 10px;
+  height: 6px;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.12);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.1);
 }
 
 .chat-profile__about-update-progress-bar {
@@ -438,45 +486,91 @@
     rgba(var(--color-accent-rgb), 0.96)
   );
   box-shadow:
-    0 0 22px rgba(var(--color-accent-rgb), 0.22),
+    0 0 16px rgba(var(--color-accent-rgb), 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
-  transition: width 180ms ease;
+  transition: width 200ms ease;
 }
 
-.chat-profile__about-update--downloaded .chat-profile__about-update-pill,
-.chat-profile__about-update--current .chat-profile__about-update-pill {
+/* ─────────────────────────────────────────────
+   Update card state modifiers
+───────────────────────────────────────────── */
+
+/* Hide pill when there is no meaningful status to show */
+.chat-profile__about-update--unsupported .chat-profile__about-update-pill,
+.chat-profile__about-update--idle .chat-profile__about-update-pill {
+  display: none;
+}
+
+/* Up to date / downloaded → green */
+.chat-profile__about-update--current .chat-profile__about-update-pill,
+.chat-profile__about-update--downloaded .chat-profile__about-update-pill {
   color: #1d6c47;
-  background: rgba(36, 167, 114, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(36, 167, 114, 0.16);
 }
 
+.chat-profile__about-update--current .chat-profile__about-update-pill::before,
+.chat-profile__about-update--downloaded .chat-profile__about-update-pill::before {
+  background: #3ab47a;
+  opacity: 1;
+  box-shadow: 0 0 0 2.5px rgba(58, 180, 122, 0.22);
+}
+
+/* Error → red */
 .chat-profile__about-update--error .chat-profile__about-update-pill {
   color: #a03420;
-  background: rgba(160, 52, 32, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(160, 52, 32, 0.16);
 }
 
-.chat-profile__about-update--downloading .chat-profile__about-update-icon,
-.chat-profile__about-update--checking .chat-profile__about-update-icon {
-  animation: about-update-pulse 1.8s ease-in-out infinite;
+.chat-profile__about-update--error .chat-profile__about-update-pill::before {
+  background: #c04040;
+  opacity: 1;
+  box-shadow: 0 0 0 2.5px rgba(192, 64, 64, 0.2);
 }
 
-@keyframes about-update-pulse {
+/* Checking / downloading → accent, pulsing dot */
+.chat-profile__about-update--checking .chat-profile__about-update-pill,
+.chat-profile__about-update--downloading .chat-profile__about-update-pill {
+  color: rgba(var(--color-accent-rgb), 0.88);
+}
+
+.chat-profile__about-update--checking .chat-profile__about-update-pill::before,
+.chat-profile__about-update--downloading .chat-profile__about-update-pill::before {
+  background: rgba(var(--color-accent-rgb), 1);
+  opacity: 1;
+  animation: about-status-dot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes about-status-dot-pulse {
   0%,
   100% {
+    opacity: 1;
     transform: scale(1);
-    box-shadow:
-      inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.12),
-      0 10px 20px rgba(var(--color-accent-rgb), 0.08);
   }
 
   50% {
-    transform: scale(1.04);
-    box-shadow:
-      inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.18),
-      0 12px 26px rgba(var(--color-accent-rgb), 0.14);
+    opacity: 0.35;
+    transform: scale(0.75);
   }
 }
+
+/* Icon pulse for active states — simple opacity, no scale since icon is smaller now */
+.chat-profile__about-update--downloading .chat-profile__about-update-icon,
+.chat-profile__about-update--checking .chat-profile__about-update-icon {
+  animation: about-update-icon-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes about-update-icon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Meta / system info cards
+───────────────────────────────────────────── */
 
 .chat-profile__about-columns {
   display: grid;
@@ -533,6 +627,10 @@
   letter-spacing: -0.015em;
 }
 
+/* ─────────────────────────────────────────────
+   Responsive
+───────────────────────────────────────────── */
+
 @media (max-width: 920px) {
   .chat-profile__about-hero,
   .chat-profile__about-update-body,
@@ -561,7 +659,8 @@
   }
 
   .chat-profile__about-update {
-    padding: 18px;
+    --_upd-pad-x: 16px;
+    padding: 15px var(--_upd-pad-x) 14px;
   }
 
   .chat-profile__about-update-actions {
