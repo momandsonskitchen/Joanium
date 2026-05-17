@@ -19,12 +19,13 @@ const en = {
   importMemory: {
     action: 'Import',
     title: 'Import memory',
-    subtitle: 'Paste a profile summary from another AI assistant and merge it into memory.',
+    subtitle:
+      'Bring your profile from ChatGPT, Gemini, or any other AI — Joana will merge it into memory.',
     close: 'Close import memory',
     cancel: 'Cancel',
     save: 'Save to memory',
     textareaLabel: 'Imported profile summary',
-    placeholder: 'Paste the full profile summary here...',
+    placeholder: 'Paste the profile summary here...',
     emptyInput: 'Paste a profile summary first.',
     emptyCatalog: '(empty)',
     analysing: 'Analysing imported profile...',
@@ -46,6 +47,15 @@ const en = {
       'IMPORTED PROFILE:',
       '{importedText}',
     ].join('\n'),
+    getPrompt: {
+      stepOneLabel: 'Step 1 — Get your data from another AI',
+      stepOneHint:
+        'Copy the prompt below and paste it into ChatGPT, Gemini, or any AI you use. It will generate a profile summary you can import here.',
+      copyPrompt: 'Copy prompt',
+      copied: 'Copied!',
+      copyFailed: 'Could not copy',
+      stepTwoLabel: 'Step 2 — Paste the output below',
+    },
   },
 };
 

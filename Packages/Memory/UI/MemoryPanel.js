@@ -90,6 +90,9 @@ export function createMemoryPanel(strings) {
   let importStatusEl = null;
   let importSaveBtn = null;
   let importCancelBtn = null;
+  let copyPromptBtn = null;
+  let copyPromptLabelEl = null;
+  let copyPromptResetTimer = null;
 
   async function populateList(query = '') {
     if (!listEl) return;
@@ -245,6 +248,15 @@ export function createMemoryPanel(strings) {
     if (editorView) editorView.hidden = false;
   }
 
+  function resetCopyPromptButton() {
+    if (copyPromptLabelEl)
+      copyPromptLabelEl.textContent = strings.importMemory.getPrompt.copyPrompt;
+    if (copyPromptBtn) {
+      copyPromptBtn.disabled = false;
+      copyPromptBtn.classList.remove('chat-memory__copy-prompt--copied');
+    }
+  }
+
   function showImportView() {
     if (!editorView || !importView) return;
     editorView.hidden = true;
@@ -260,6 +272,24 @@ export function createMemoryPanel(strings) {
     }
     if (importSaveBtn) importSaveBtn.disabled = false;
     if (importCancelBtn) importCancelBtn.disabled = false;
+    clearTimeout(copyPromptResetTimer);
+    resetCopyPromptButton();
+  }
+
+  async function handleCopyPrompt() {
+    if (!copyPromptBtn || !copyPromptLabelEl) return;
+    copyPromptBtn.disabled = true;
+
+    try {
+      const promptText = await invokeIpc('memory:get-export-prompt');
+      await navigator.clipboard.writeText(promptText);
+      copyPromptLabelEl.textContent = strings.importMemory.getPrompt.copied;
+      copyPromptBtn.classList.add('chat-memory__copy-prompt--copied');
+      copyPromptResetTimer = setTimeout(resetCopyPromptButton, 2000);
+    } catch {
+      copyPromptLabelEl.textContent = strings.importMemory.getPrompt.copyFailed;
+      copyPromptResetTimer = setTimeout(resetCopyPromptButton, 1800);
+    }
   }
 
   async function runMemoryImport() {
@@ -396,6 +426,39 @@ export function createMemoryPanel(strings) {
     importCancelBtn.addEventListener('click', showEditorView);
     importHeader.append(importCopy, importCancelBtn);
 
+    // ── Step 1 — Copy prompt ─────────────────────────────────────────────
+    const stepOneBlock = createElement('div', 'chat-memory__step-block');
+
+    const stepOneTop = createElement('div', 'chat-memory__step-top');
+    stepOneTop.append(
+      createElement('span', 'chat-memory__step-label', strings.importMemory.getPrompt.stepOneLabel),
+    );
+
+    copyPromptBtn = createElement('button', 'chat-memory__copy-prompt');
+    copyPromptBtn.type = 'button';
+    copyPromptLabelEl = createElement(
+      'span',
+      'chat-memory__copy-prompt-label',
+      strings.importMemory.getPrompt.copyPrompt,
+    );
+    copyPromptBtn.append(createIcon('copy', 'chat-memory__copy-prompt-icon'), copyPromptLabelEl);
+    copyPromptBtn.addEventListener('click', () => {
+      void handleCopyPrompt();
+    });
+
+    stepOneTop.append(copyPromptBtn);
+    stepOneBlock.append(
+      stepOneTop,
+      createElement('p', 'chat-memory__step-hint', strings.importMemory.getPrompt.stepOneHint),
+    );
+
+    // ── Step 2 — Paste output ────────────────────────────────────────────
+    const stepTwoLabel = createElement(
+      'span',
+      'chat-memory__step-label',
+      strings.importMemory.getPrompt.stepTwoLabel,
+    );
+
     importTextarea = createElement('textarea', 'chat-memory__import-textarea');
     importTextarea.placeholder = strings.importMemory.placeholder;
     importTextarea.setAttribute('aria-label', strings.importMemory.textareaLabel);
@@ -414,7 +477,14 @@ export function createMemoryPanel(strings) {
     });
     importActions.append(importSaveBtn);
 
-    importView.append(importHeader, importTextarea, importStatusEl, importActions);
+    importView.append(
+      importHeader,
+      stepOneBlock,
+      stepTwoLabel,
+      importTextarea,
+      importStatusEl,
+      importActions,
+    );
 
     editorColumn.append(editorView, importView);
     body.append(listColumn, editorColumn);

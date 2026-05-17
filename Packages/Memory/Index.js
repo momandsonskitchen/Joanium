@@ -32,6 +32,10 @@ export async function createPackage({ rootDirectory }) {
         handler: async () => memoryStateManager.getMemoryCatalog(),
       },
       {
+        channel: 'memory:get-export-prompt',
+        handler: async () => memoryStateManager.getExportPrompt(),
+      },
+      {
         channel: 'memory:apply-updates',
         handler: async (_event, payload) => memoryStateManager.applyMemoryUpdates(payload),
       },

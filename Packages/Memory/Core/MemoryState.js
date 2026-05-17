@@ -381,6 +381,11 @@ export function createMemoryStateManager({ rootDirectory }) {
     return saved.map(({ content: _content, ...memory }) => memory);
   }
 
+  async function getExportPrompt() {
+    const promptPath = path.join(rootDirectory, 'Prompts', 'ExportProfile.md');
+    return readFile(promptPath, 'utf8');
+  }
+
   return {
     listMemories,
     readMemoryFile,
@@ -389,5 +394,6 @@ export function createMemoryStateManager({ rootDirectory }) {
     getMemoryContext,
     getMemoryCatalog,
     applyMemoryUpdates,
+    getExportPrompt,
   };
 }
