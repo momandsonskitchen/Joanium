@@ -96,7 +96,7 @@ npm start
 
 ## Project Structure
 
-```md
+```markdown
 v2/
 ├── App.js               # Electron entry point
 ├── Packages/            # Feature packages (microservice architecture)
