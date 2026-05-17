@@ -20,7 +20,6 @@ const en = {
     install: 'Install Update',
     installing: 'Preparing...',
     idleDetail: 'Waiting for the next background update check.',
-    releaseVersion: 'Release {version}',
     transferDetail: '{transferred} of {total} • {speed}/s',
     statuses: {
       idle: 'Standby',
@@ -38,7 +37,7 @@ const en = {
       unsupported: 'Updates are available only in packaged release builds.',
       checking: 'Checking GitHub Releases for a newer build.',
       current: 'This installation already has the latest published release.',
-      downloading: 'Downloading the new release: {percent}%',
+      downloading: '',
       downloaded: 'The update package has finished downloading and is ready to install.',
       error: 'Joanium could not complete the update flow.',
     },

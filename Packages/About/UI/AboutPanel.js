@@ -54,8 +54,7 @@ function createUpdateCard(strings) {
   const body = createElement('div', 'chat-profile__about-update-body');
   const summary = createElement('div', 'chat-profile__about-update-summary');
   const detail = createElement('p', 'chat-profile__about-update-detail');
-  const release = createElement('p', 'chat-profile__about-update-release');
-  summary.append(detail, release);
+  summary.append(detail);
 
   const actions = createElement('div', 'chat-profile__about-update-actions');
   const checkButton = createElement('button', 'chat-profile__about-update-btn');
@@ -145,8 +144,7 @@ function createUpdateCard(strings) {
     card.className = `chat-profile__about-update chat-profile__about-update--${presentation.status}`;
     statusPill.textContent = presentation.statusLabel;
     detail.textContent = presentation.detail;
-    release.textContent = presentation.release;
-    release.hidden = !presentation.release;
+    detail.hidden = !presentation.detail;
 
     progress.hidden = !presentation.showProgress;
     if (presentation.showProgress) {

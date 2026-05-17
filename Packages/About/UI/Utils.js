@@ -85,12 +85,6 @@ export function getUpdatePresentation(updateState, strings) {
   const statusLabel = strings.statuses?.[status] ?? strings.statuses.idle;
   let detail = strings.details?.[status] ?? strings.idleDetail;
 
-  if (status === 'downloading') {
-    detail = formatText(strings.details.downloading, {
-      percent: formatPercent(state.progress?.percent ?? 0),
-    });
-  }
-
   if (status === 'error' && state.error) {
     detail = state.error;
   }
@@ -101,7 +95,6 @@ export function getUpdatePresentation(updateState, strings) {
     detail,
     progressDetail: formatTransferProgress(state.progress, strings),
     percent: formatPercent(state.progress?.percent ?? 0),
-    release: state.version ? formatText(strings.releaseVersion, { version: state.version }) : '',
     canCheck: Boolean(state.supported) && status !== 'checking' && status !== 'downloading',
     canInstall: Boolean(state.downloaded),
     showProgress: status === 'downloading' || status === 'downloaded',
