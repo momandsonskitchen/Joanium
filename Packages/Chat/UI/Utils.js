@@ -36,6 +36,8 @@ export function stripMarkdown(text) {
  */
 export function stripNativeToolCalls(text) {
   if (!text) return text;
+  // Fast path: no angle brackets means no XML tool-call tags to strip.
+  if (!text.includes('<')) return text.trim();
   return (
     text
       // Namespaced XML tags: <vendor:anything>...</vendor:anything>
@@ -59,6 +61,8 @@ export function stripNativeToolCalls(text) {
  */
 export function stripToolCallBlocks(text) {
   if (!text) return text;
+  // Fast path: no fenced joanium blocks to strip.
+  if (!text.includes('joanium-')) return text;
   return text.replace(/```joanium-(?:tool|terminal)[\s\S]*?(?:```|$)/gi, '').trim();
 }
 

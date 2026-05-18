@@ -21,7 +21,7 @@
   },
   "z-ai/glm4.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T10:29:40.416Z"
+    "checkedAt": "2026-05-18T12:11:03.995Z"
   },
   "qwen/qwen3.5-397b-a17b": {
     "status": "green",
@@ -29,14 +29,14 @@
   },
   "minimaxai/minimax-m2.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T10:57:09.519Z"
+    "checkedAt": "2026-05-18T12:11:18.951Z"
   },
   "moonshotai/kimi-k2-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T10:56:54.665Z"
+    "checkedAt": "2026-05-18T11:39:07.336Z"
   },
   "google/gemma-4-31b-it": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T10:57:09.578Z"
+    "checkedAt": "2026-05-18T12:11:19.007Z"
   }
 }

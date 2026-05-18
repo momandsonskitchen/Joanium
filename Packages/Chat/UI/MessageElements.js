@@ -1,6 +1,6 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
-import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
+import { renderMarkdown, renderInline } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createAttachmentPill } from './AttachmentPill.js';
 import { createTerminalCallElement } from './TerminalPanel.js';
 import { createSubAgentPromptSection, upsertSubAgentOutputSection } from './SubAgentSections.js';
@@ -166,21 +166,28 @@ export function updateLastStreamingMessage(threadEl, { content, thinking }) {
     const allThinkingWraps = lastEl.querySelectorAll('.chat-message__thinking');
     const thinkingWrap = allThinkingWraps[allThinkingWraps.length - 1];
     if (thinkingWrap) {
-      if (thinkingWrap.__statusMode) {
-        // Real thinking has arrived — exit status mode and switch to normal thinking display.
-        delete thinkingWrap.__statusMode;
-        const label = thinkingWrap.querySelector('.chat-message__thinking-label');
-        if (label?.__originalText) {
-          label.textContent = label.__originalText;
-          delete label.__originalText;
-        }
-        const body = thinkingWrap.querySelector('.chat-message__thinking-body');
-        if (body) body.replaceChildren(createElement('p', 'chat-message__thinking-text', thinking));
+      // Skip update if thinking text hasn't changed since last render.
+      if (thinkingWrap.__lastThinking === thinking) {
+        // no-op — content unchanged
       } else {
-        const thinkingText = thinkingWrap.querySelector('.chat-message__thinking-text');
-        if (thinkingText) thinkingText.textContent = thinking;
+        thinkingWrap.__lastThinking = thinking;
+        if (thinkingWrap.__statusMode) {
+          // Real thinking has arrived — exit status mode and switch to normal thinking display.
+          delete thinkingWrap.__statusMode;
+          const label = thinkingWrap.querySelector('.chat-message__thinking-label');
+          if (label?.__originalText) {
+            label.textContent = label.__originalText;
+            delete label.__originalText;
+          }
+          const body = thinkingWrap.querySelector('.chat-message__thinking-body');
+          if (body)
+            body.replaceChildren(createElement('p', 'chat-message__thinking-text', thinking));
+        } else {
+          const thinkingText = thinkingWrap.querySelector('.chat-message__thinking-text');
+          if (thinkingText) thinkingText.textContent = thinking;
+        }
+        thinkingWrap.hidden = false;
       }
-      thinkingWrap.hidden = false;
     }
   }
 
@@ -188,18 +195,82 @@ export function updateLastStreamingMessage(threadEl, { content, thinking }) {
     const allBubbles = lastEl.querySelectorAll('.chat-message__bubble');
     const bubble = allBubbles[allBubbles.length - 1];
     if (bubble) {
+      if (bubble.__lastContent === content) return;
+      bubble.__lastContent = content;
+
+      // Remove loading dots on first content.
       bubble.querySelector('.chat-message__dots')?.remove();
-      bubble.querySelector('.chat-message__stream-dot')?.remove();
-      const fresh = renderMarkdown(content.trimStart(), 'chat-message__md');
-      const existing = bubble.querySelector('.chat-message__md, .chat-message__text');
-      if (existing) {
-        bubble.replaceChild(fresh, existing);
-      } else {
-        bubble.append(fresh);
+
+      const trimmed = content.trimStart();
+
+      // ── Settled / Tail split ────────────────────────────────────────────
+      // Split at the last safe paragraph boundary (double newline that is
+      // NOT inside an unclosed code fence).  Everything before the boundary
+      // is "settled" — rendered as full markdown and cached.  Everything
+      // after is the "active tail" — the paragraph currently being typed,
+      // updated word-by-word via cheap inline formatting (renderInline).
+      // This mirrors how Claude.ai streams: text appears smoothly and
+      // formatting "clicks into place" as blocks complete.
+      const boundary = findSettledBoundary(trimmed);
+      const settled = boundary > 0 ? trimmed.slice(0, boundary) : '';
+      const tail = boundary > 0 ? trimmed.slice(boundary + 2) : trimmed;
+
+      // Re-render settled markdown only when it actually changes.
+      if (settled !== (bubble.__settledContent || '')) {
+        bubble.__settledContent = settled;
+        const freshMd = settled ? renderMarkdown(settled, 'chat-message__md') : null;
+        const existingMd = bubble.querySelector('.chat-message__md');
+        if (freshMd && existingMd) {
+          bubble.replaceChild(freshMd, existingMd);
+        } else if (freshMd) {
+          // Insert before the tail element (if present) or at the start.
+          const tailEl = bubble.querySelector('.chat-message__stream-tail');
+          if (tailEl) bubble.insertBefore(freshMd, tailEl);
+          else bubble.prepend(freshMd);
+        } else if (existingMd) {
+          existingMd.remove();
+        }
       }
-      bubble.append(createElement('span', 'chat-message__stream-dot'));
+
+      // Update the active tail — just inline formatting on a short string,
+      // nearly free compared to a full markdown parse + DOM rebuild.
+      let tailEl = bubble.querySelector('.chat-message__stream-tail');
+      if (tail) {
+        if (!tailEl) {
+          tailEl = document.createElement('p');
+          tailEl.className = 'md-p chat-message__stream-tail';
+          const dot = bubble.querySelector('.chat-message__stream-dot');
+          if (dot) bubble.insertBefore(tailEl, dot);
+          else bubble.append(tailEl);
+        }
+        tailEl.innerHTML = renderInline(tail);
+      } else if (tailEl) {
+        tailEl.remove();
+      }
+
+      // Ensure stream dot is at the end.
+      if (!bubble.querySelector('.chat-message__stream-dot')) {
+        bubble.append(createElement('span', 'chat-message__stream-dot'));
+      }
     }
   }
+}
+
+/**
+ * Finds the position of the last safe paragraph boundary (double newline)
+ * that is NOT inside an unclosed code fence.  Returns -1 if no safe
+ * boundary exists.
+ */
+function findSettledBoundary(text) {
+  // Count code fences — if odd, the last fence is unclosed.
+  const fences = text.match(/```/g);
+  if (fences && fences.length % 2 !== 0) {
+    // Find the opening of the unclosed fence and look for a boundary before it.
+    const lastFence = text.lastIndexOf('```');
+    const before = text.lastIndexOf('\n\n', lastFence);
+    return before > 0 ? before : -1;
+  }
+  return text.lastIndexOf('\n\n');
 }
 
 /**

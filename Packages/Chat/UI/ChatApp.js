@@ -158,6 +158,7 @@ export async function createChatView(
   let terminalProcessRenderFrame = null;
   let terminalProcessCardsWired = false;
   let completedWrites = new Set(); // dedup guard for write_local_file
+  let streamUpdateFrame = null;
 
   let userScrolledUp = false;
   let scrollToBottomFrame = null;
@@ -377,6 +378,10 @@ export async function createChatView(
   }
 
   function removeStreamListeners() {
+    if (streamUpdateFrame) {
+      cancelAnimationFrame(streamUpdateFrame);
+      streamUpdateFrame = null;
+    }
     for (const dispose of streamDisposers) {
       dispose();
     }
@@ -3229,20 +3234,34 @@ export async function createChatView(
         if (!isCurrentStreamEvent(chunk)) return;
         if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
         if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
-        const { content: displayContent, thinking: inlineThinking } =
-          parseThinkingFromText(accText);
-        const displayThinking = accThinking || inlineThinking;
-        updateLastStreamingMessage(thread, {
-          content: sanitizeAssistantVisibleContent(displayContent),
-          thinking: sanitizeAssistantVisibleContent(displayThinking),
-        });
-        scheduleScrollToBottom();
+        // Batch UI updates to once per animation frame instead of every token.
+        // Text accumulation above is still instant so tool detection in
+        // stream-done always sees the complete text.
+        if (!streamUpdateFrame) {
+          streamUpdateFrame = requestAnimationFrame(() => {
+            streamUpdateFrame = null;
+            const { content: displayContent, thinking: inlineThinking } =
+              parseThinkingFromText(accText);
+            const displayThinking = accThinking || inlineThinking;
+            updateLastStreamingMessage(thread, {
+              content: sanitizeAssistantVisibleContent(displayContent),
+              thinking: sanitizeAssistantVisibleContent(displayThinking),
+            });
+            scheduleScrollToBottom();
+          });
+        }
       }),
     );
 
     streamDisposers.push(
       onIpc('chat:stream-done', (meta) => {
         if (!isCurrentStreamEvent(meta)) return;
+        // Cancel any pending rAF — we are about to do a final authoritative
+        // render that supersedes any in-flight streaming frame.
+        if (streamUpdateFrame) {
+          cancelAnimationFrame(streamUpdateFrame);
+          streamUpdateFrame = null;
+        }
         clearActiveStreamId(streamId);
         clearTimeout(diagTimer);
         diagTimer = null;
@@ -3382,6 +3401,10 @@ export async function createChatView(
     streamDisposers.push(
       onIpc('chat:stream-error', (error) => {
         if (!isCurrentStreamEvent(error)) return;
+        if (streamUpdateFrame) {
+          cancelAnimationFrame(streamUpdateFrame);
+          streamUpdateFrame = null;
+        }
         clearActiveStreamId(streamId);
         clearTimeout(diagTimer);
         diagTimer = null;

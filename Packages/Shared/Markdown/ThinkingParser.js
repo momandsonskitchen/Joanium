@@ -38,6 +38,10 @@ const THINKING_TAG_PAIRS = [
 export function parseThinkingFromText(text) {
   if (!text) return { content: '', thinking: '' };
 
+  // Fast path: if there are no angle brackets at all, there cannot be any
+  // thinking tags.  Skip all eight tag-pair scans.
+  if (!text.includes('<')) return { content: text.trimStart(), thinking: '' };
+
   let thinking = '';
   let content = text;
 

@@ -25,7 +25,7 @@
  * @param {string} text
  * @returns {string} HTML string (safe for innerHTML assignment)
  */
-function renderInline(text) {
+export function renderInline(text) {
   // 1. Escape HTML special chars
   let out = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
