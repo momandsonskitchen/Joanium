@@ -1,7 +1,7 @@
 {
   "deepseek-ai/deepseek-v3.2": {
     "status": "red",
-    "checkedAt": "2026-05-18T04:40:55.101Z"
+    "checkedAt": "2026-05-18T10:56:54.566Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -29,14 +29,14 @@
   },
   "minimaxai/minimax-m2.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T10:04:57.457Z"
+    "checkedAt": "2026-05-18T10:57:09.519Z"
   },
   "moonshotai/kimi-k2-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T06:27:03.667Z"
+    "checkedAt": "2026-05-18T10:56:54.665Z"
   },
   "google/gemma-4-31b-it": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T10:29:55.506Z"
+    "checkedAt": "2026-05-18T10:57:09.578Z"
   }
 }

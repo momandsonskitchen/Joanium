@@ -289,22 +289,25 @@ export function createAssistantGroupElement(items, strings, { onCopy, onRetry } 
     // 1. Thinking block — always first so it appears before the text it precedes
     article.append(createThinkingBlock(strings, message.thinking ?? ''));
 
-    // 2. Text bubble — skipped for intermediate turns that have no visible content
-    const bubble = createElement('div', 'chat-message__bubble');
+    // 2. Text bubble — skipped for intermediate turns that have no visible content,
+    //    and skipped entirely for tool messages (terminal card renders below instead).
+    if (!message.terminal) {
+      const bubble = createElement('div', 'chat-message__bubble');
 
-    if (message.pending || (message.streaming && !message.content)) {
-      const dots = createElement('span', 'chat-message__dots');
-      dots.innerHTML = '<span></span><span></span><span></span>';
-      bubble.append(dots);
-    } else if (message.streaming) {
-      bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
-      bubble.append(createElement('span', 'chat-message__stream-dot'));
-    } else if (message.content) {
-      bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
-    }
+      if (message.pending || (message.streaming && !message.content)) {
+        const dots = createElement('span', 'chat-message__dots');
+        dots.innerHTML = '<span></span><span></span><span></span>';
+        bubble.append(dots);
+      } else if (message.streaming) {
+        bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
+        bubble.append(createElement('span', 'chat-message__stream-dot'));
+      } else if (message.content) {
+        bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
+      }
 
-    if (bubble.childElementCount > 0) {
-      article.append(bubble);
+      if (bubble.childElementCount > 0) {
+        article.append(bubble);
+      }
     }
 
     // 3. Tool card — appears after the text that triggered it
