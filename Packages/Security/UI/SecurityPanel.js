@@ -2,6 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
+import { saveBackup, clearBackup } from './SecurityGuard.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -183,6 +184,14 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
       try {
         const result = await invokeIpc('security:enable', password, question, answer);
         if (result.success) {
+          // Persist backup so tamper detection can restore Security.json if
+          // the file is cleared externally between sessions.
+          try {
+            const backup = await invokeIpc('security:get-backup-state');
+            if (backup) saveBackup(backup);
+          } catch {
+            // Non-fatal — backup is best-effort.
+          }
           renderEnabled();
           onSecurityChanged?.();
         } else {
@@ -367,6 +376,13 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
       try {
         const result = await invokeIpc('security:change-password', current, newPw);
         if (result.success) {
+          // New credentials — refresh the backup so it stays in sync.
+          try {
+            const backup = await invokeIpc('security:get-backup-state');
+            if (backup) saveBackup(backup);
+          } catch {
+            // Non-fatal.
+          }
           showFeedback(changeFeedback, strings.successPasswordChanged, false);
           setTimeout(() => renderEnabled(), 1200);
         } else {
@@ -394,6 +410,9 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
       try {
         const result = await invokeIpc('security:disable', current);
         if (result.success) {
+          // User intentionally disabled — remove the backup from both storages
+          // so the boot guard does not attempt to restore the old credentials.
+          clearBackup();
           renderDisabled();
           onSecurityChanged?.();
         } else {
@@ -433,6 +452,14 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
         try {
           await invokeIpc('security:set-auto-lock-timeout', val);
           onSecurityChanged?.();
+          // Keep the backup in sync so a restored Security.json also gets
+          // the updated timeout value and doesn't revert to the old one.
+          try {
+            const backup = await invokeIpc('security:get-backup-state');
+            if (backup) saveBackup(backup);
+          } catch {
+            // Non-fatal — backup refresh is best-effort.
+          }
         } catch {
           // Non-fatal.
         }

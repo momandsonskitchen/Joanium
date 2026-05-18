@@ -24,6 +24,7 @@ import { createMemorySettingsPanel } from '../../AppSettings/UI/MemorySettingsPa
 import { mountLockScreen } from '../../Security/UI/LockScreen.js';
 import { createSecurityPanel } from '../../Security/UI/SecurityPanel.js';
 import { createAutoLockTimer } from '../../Security/UI/AutoLockTimer.js';
+import { resolveSecurityStatus } from '../../Security/UI/SecurityGuard.js';
 import { createThemePanel } from '../../Themes/UI/ThemePanel.js';
 import { loadAndApplyThemeState, stripNativeTooltips } from '../../Themes/UI/ThemeController.js';
 import { createMCPPanel } from '../../MCP/UI/MCPPanel.js';
@@ -72,10 +73,12 @@ async function bootstrap() {
   stripNativeTooltips();
   await loadAndApplyThemeState();
   // ── Security lock gate ─────────────────────────────────────────────────────
-  // Must resolve before ANY UI is built. If the app is locked, the lock screen
-  // covers the entire viewport and awaits a correct password / secret answer.
+  // Must resolve before ANY UI is built. resolveSecurityStatus() performs
+  // tamper detection: if Security.json was cleared externally and a valid
+  // backup exists in sessionStorage / localStorage, it restores the file
+  // before deciding whether to show the lock screen.
   try {
-    const secStatus = await invokeIpc('security:get-status');
+    const secStatus = await resolveSecurityStatus();
     if (secStatus.enabled) {
       await mountLockScreen(strings.security, secStatus);
     }
@@ -90,7 +93,11 @@ async function bootstrap() {
   // Shared by the auto-lock timer, the /lock slash command, and the shortcut.
   async function lockNow() {
     try {
-      const status = await invokeIpc('security:get-status');
+      // resolveSecurityStatus() performs tamper detection at runtime: if
+      // Security.json was cleared or emptied since boot, the sessionStorage
+      // backup is used to restore it before deciding whether to lock.  This
+      // guards against mid-session file tampering, not just boot-time tampering.
+      const status = await resolveSecurityStatus();
       if (!status.enabled) {
         // Security not configured — show a guest lock screen that unlocks on any keystroke.
         await mountLockScreen(strings.security, { ...status, guestMode: true });

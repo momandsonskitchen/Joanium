@@ -40,6 +40,17 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, currentPassword, newPassword) =>
           security.changePassword(currentPassword, newPassword),
       },
+      // ── Tamper-detection backup ─────────────────────────────────────────
+      // The renderer stores a copy of the hashed credentials in sessionStorage
+      // and localStorage so it can detect and repair a cleared Security.json.
+      {
+        channel: 'security:get-backup-state',
+        handler: async () => security.getBackupState(),
+      },
+      {
+        channel: 'security:restore-from-backup',
+        handler: async (_event, backup) => security.restoreFromBackup(backup),
+      },
     ],
   };
 }

@@ -136,6 +136,9 @@ export function createSecurityStateManager({ rootDirectory }) {
         secretAnswerSalt,
         failedPasswordAttempts: 0,
         lockedUntil: null,
+        // Clear any previous explicit-disable marker so tamper detection works
+        // correctly if the user re-enables after a deliberate disable.
+        _explicitlyDisabled: false,
       });
 
       return { success: true };
@@ -149,7 +152,10 @@ export function createSecurityStateManager({ rootDirectory }) {
         return { success: false, error: 'wrongPassword' };
       }
 
-      await writeSecurity(createDefaultSecurity());
+      // Write an explicit disable marker so the tamper-detection guard in the
+      // renderer can tell the difference between a deliberate disable and a
+      // deleted / cleared Security.json file.
+      await writeSecurity({ ...createDefaultSecurity(), _explicitlyDisabled: true });
       return { success: true };
     },
 
@@ -225,6 +231,60 @@ export function createSecurityStateManager({ rootDirectory }) {
       }
       const state = await readSecurity();
       await writeSecurity({ ...state, autoLockTimeout: timeout });
+      return { success: true };
+    },
+
+    // Returns a sanitised snapshot of the current security config for the
+    // renderer to keep in localStorage / sessionStorage as a tamper-detection
+    // backup.  Hashes and salts are included so the backup can be restored to
+    // Security.json if the file is cleared or deleted.
+    // Returns null when security is not currently enabled.
+    async getBackupState() {
+      const state = await readSecurity();
+      if (!state.enabled) return null;
+      return {
+        enabled: true,
+        passwordHash: state.passwordHash,
+        passwordSalt: state.passwordSalt,
+        secretQuestion: state.secretQuestion,
+        secretAnswerHash: state.secretAnswerHash,
+        secretAnswerSalt: state.secretAnswerSalt,
+        autoLockTimeout: state.autoLockTimeout ?? 'never',
+      };
+    },
+
+    // Writes backup credentials back to Security.json when tamper is detected.
+    // Refuses to overwrite a file that was explicitly disabled by the user
+    // (guarded by the _explicitlyDisabled marker written in disable()).
+    async restoreFromBackup(backup) {
+      if (!backup?.enabled || !backup.passwordHash || !backup.passwordSalt) {
+        return { success: false, error: 'invalidBackup' };
+      }
+
+      const current = await readSecurity();
+
+      if (current.enabled) {
+        return { success: false, error: 'alreadyEnabled' };
+      }
+
+      if (current._explicitlyDisabled) {
+        // The user intentionally removed the lock — do not restore.
+        return { success: false, error: 'explicitlyDisabled' };
+      }
+
+      await writeSecurity({
+        enabled: true,
+        passwordHash: backup.passwordHash,
+        passwordSalt: backup.passwordSalt,
+        secretQuestion: backup.secretQuestion ?? null,
+        secretAnswerHash: backup.secretAnswerHash ?? null,
+        secretAnswerSalt: backup.secretAnswerSalt ?? null,
+        autoLockTimeout: backup.autoLockTimeout ?? 'never',
+        failedPasswordAttempts: 0,
+        lockedUntil: null,
+        _explicitlyDisabled: false,
+      });
+
       return { success: true };
     },
 
