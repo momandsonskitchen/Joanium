@@ -50,7 +50,7 @@ jobs:
             for (const c of contributors) {
               if (c.login === 'invalid-email-address') continue;
               lines.push(
-                `| <img src="${c.avatar_url}&s=32" width="32" height="32" style="border-radius:50%"/> | [@${c.login}](${c.html_url}) | ${c.contributions} |`
+                `| <img src="${c.avatar_url}&s=32" width="32" height="32" alt="${c.login} avatar" style="border-radius:50%"/> | [@${c.login}](${c.html_url}) | ${c.contributions} |`
               );
             }
 

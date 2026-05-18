@@ -63,7 +63,7 @@ Explain the problem it solves, not just what you want.
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 feat: add Gemini provider support
 fix: resolve crash on empty chat history
 chore: bump electron to 42.0.1

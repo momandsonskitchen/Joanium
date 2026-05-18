@@ -3,8 +3,26 @@ import { fileURLToPath } from 'node:url';
 import { readUserState } from '../Shared/UserData/UserData.js';
 
 const shellDirectory = path.dirname(fileURLToPath(import.meta.url));
+const NON_SHELL_COMPANION_IDS = new Set([
+  'Boot',
+  'Electron',
+  'LiveBrowser',
+  'Setup',
+  'Shared',
+  'Shell',
+]);
 
-export async function createPackage({ rootDirectory }) {
+function resolveShellCompanions(registry) {
+  if (!registry || !(registry instanceof Map)) {
+    return [];
+  }
+
+  return [...registry.keys()]
+    .filter((packageId) => !NON_SHELL_COMPANION_IDS.has(packageId))
+    .sort((left, right) => left.localeCompare(right));
+}
+
+export async function createPackage({ rootDirectory, registry }) {
   const usesOverlayControls = process.platform !== 'darwin';
   const overlayOptions = {
     height: 48,
@@ -17,29 +35,7 @@ export async function createPackage({ rootDirectory }) {
 
   return {
     id: 'Shell',
-    ipcCompanions: [
-      'Chat',
-      'SlashCommands',
-      'History',
-      'Channels',
-      'Events',
-      'Projects',
-      'Toolset',
-      'Memory',
-      'Templates',
-      'Agents',
-      'Skills',
-      'Personas',
-      'Marketplace',
-      'Usage',
-      'User',
-      'AppSettings',
-      'About',
-      'Security',
-      'Themes',
-      'MCP',
-      'Providers',
-    ],
+    ipcCompanions: resolveShellCompanions(registry),
     rendererPath: path.join(shellDirectory, 'UI', 'App.html'),
     preloadPath: path.join(shellDirectory, 'UI', 'Preload.js'),
     window: {

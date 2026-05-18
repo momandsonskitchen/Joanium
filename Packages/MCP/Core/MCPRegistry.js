@@ -36,12 +36,24 @@ class MCPSession extends EventEmitter {
     }
   }
 
+  failPending(error) {
+    for (const pending of this.pending.values()) {
+      pending.reject(error);
+    }
+    this.pending.clear();
+  }
+
   request(method, params = {}) {
     const id = this.nextRequestId();
 
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
-      this.send({ jsonrpc: '2.0', id, method, params });
+      try {
+        this.send({ jsonrpc: '2.0', id, method, params });
+      } catch (error) {
+        this.pending.delete(id);
+        reject(error);
+      }
     });
   }
 
@@ -83,7 +95,8 @@ class StdioMCPSession extends MCPSession {
       windowsHide: true,
     });
 
-    createInterface({ input: this.process.stdout }).on('line', (line) => {
+    this.outputReader = createInterface({ input: this.process.stdout });
+    this.outputReader.on('line', (line) => {
       if (!line.trim()) return;
       try {
         this.dispatch(JSON.parse(line));
@@ -96,25 +109,37 @@ class StdioMCPSession extends MCPSession {
       this.emit('stderr', chunk.toString());
     });
 
+    this.process.once('error', (error) => {
+      this.closed = true;
+      this.failPending(error);
+      this.resolveClosed?.(null);
+      this.emit('close', null);
+    });
+
     this.process.on('exit', (code) => {
       this.closed = true;
+      this.failPending(new Error(`MCP server exited with code ${code ?? 'unknown'}.`));
       this.resolveClosed?.(code);
       this.emit('close', code);
     });
   }
 
   send(message) {
+    if (this.closed || this.process.stdin?.destroyed) {
+      throw new Error('MCP server is not running.');
+    }
     this.process.stdin?.write(`${JSON.stringify(message)}\n`);
   }
 
   async close() {
     if (!this.closed && this.process.exitCode === null) {
       this.process.stdin?.end();
-      setTimeout(() => {
+      const killTimer = setTimeout(() => {
         if (!this.closed && this.process.exitCode === null) {
           this.process.kill();
         }
       }, 1000);
+      killTimer.unref?.();
     }
     return this.closedPromise;
   }

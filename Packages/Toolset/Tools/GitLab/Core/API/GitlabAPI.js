@@ -356,7 +356,7 @@ export async function createPRReview(
   owner,
   repo,
   prNumber,
-  { body: body, event: event = 'COMMENT', comments: comments = [] },
+  { body: body, event: event = 'COMMENT', comments: _comments = [] },
 ) {
   'APPROVE' === event &&
     (await gitlabFetch(
@@ -527,7 +527,7 @@ export async function closePR(credentials, owner, repo, prNumber) {
     ),
   );
 }
-export async function closeIssue(credentials, owner, repo, issueNumber, reason = 'completed') {
+export async function closeIssue(credentials, owner, repo, issueNumber, _reason = 'completed') {
   return normalizeIssue(
     await gitlabFetch(`/projects/${pid(owner, repo)}/issues/${issueNumber}`, credentials.token, {
       method: 'PUT',
@@ -804,7 +804,7 @@ export async function getGists(credentials, perPage = 20) {
     }),
   );
 }
-export async function getTrafficViews(credentials, owner, repo) {
+export async function getTrafficViews(_credentials, _owner, _repo) {
   return { count: 0, uniques: 0, views: [] };
 }
 export async function requestReviewers(
@@ -813,7 +813,7 @@ export async function requestReviewers(
   repo,
   prNumber,
   reviewers = [],
-  teamReviewers = [],
+  _teamReviewers = [],
 ) {
   const userIds = (
     await Promise.all(
@@ -930,8 +930,8 @@ export async function createRelease(
     tagName: tagName,
     name: name = '',
     body: body = '',
-    draft: draft = !1,
-    prerelease: prerelease = !1,
+    draft: _draft = !1,
+    prerelease: _prerelease = !1,
     targetCommitish: targetCommitish = '',
   },
 ) {
@@ -1030,7 +1030,7 @@ export async function getFileCommits(credentials, owner, repo, filePath, perPage
     )) ?? []
   ).map(normalizeCommit);
 }
-export async function lockIssue(credentials, owner, repo, issueNumber, lockReason = '') {
+export async function lockIssue(credentials, owner, repo, issueNumber, _lockReason = '') {
   return gitlabFetch(`/projects/${pid(owner, repo)}/issues/${issueNumber}`, credentials.token, {
     method: 'PUT',
     body: JSON.stringify({ discussion_locked: !0 }),
@@ -1140,7 +1140,7 @@ export async function listActionsSecrets(credentials, owner, repo) {
     ).map((v) => ({ name: v.key, updated_at: null })),
   };
 }
-export async function getDependabotAlerts(credentials, owner, repo, state = 'open', perPage = 20) {
+export async function getDependabotAlerts(credentials, owner, repo, _state = 'open', perPage = 20) {
   return (
     (await gitlabFetch(
       `/projects/${pid(owner, repo)}/vulnerability_findings?per_page=${perPage}&scanner_ids[]=dependency_scanning`,
@@ -1175,7 +1175,7 @@ export async function getUserOrgs(credentials, username) {
     )) ?? []
   ).map((g) => ({ login: g.path, description: g.description ?? '', html_url: g.web_url }));
 }
-export async function getTrafficClones(credentials, owner, repo) {
+export async function getTrafficClones(_credentials, _owner, _repo) {
   return { count: 0, uniques: 0, clones: [] };
 }
 export async function getCommunityProfile(credentials, owner, repo) {
@@ -1270,7 +1270,7 @@ export async function getRepoLicense(credentials, owner, repo) {
     content: null,
   };
 }
-export async function getCodeFrequency(credentials, owner, repo) {
+export async function getCodeFrequency(_credentials, _owner, _repo) {
   return [];
 }
 export async function getContributorStats(credentials, owner, repo) {
@@ -1280,13 +1280,13 @@ export async function getContributorStats(credentials, owner, repo) {
     weeks: [],
   }));
 }
-export async function getCommitActivity(credentials, owner, repo) {
+export async function getCommitActivity(_credentials, _owner, _repo) {
   return [];
 }
-export async function getPunchCard(credentials, owner, repo) {
+export async function getPunchCard(_credentials, _owner, _repo) {
   return [];
 }
-export async function getRepoSubscription(credentials, owner, repo) {
+export async function getRepoSubscription(_credentials, _owner, _repo) {
   return { subscribed: null, ignored: !1, reason: null };
 }
 export async function getUserFollowers(credentials, username, perPage = 30) {
@@ -1399,7 +1399,7 @@ export async function searchCommits(credentials, query, perPage = 20) {
   }));
   return { items: items, total_count: items.length };
 }
-export async function getDeploymentStatuses(credentials, owner, repo, deploymentId, perPage = 10) {
+export async function getDeploymentStatuses(credentials, owner, repo, deploymentId, _perPage = 10) {
   const d = await gitlabFetch(
     `/projects/${pid(owner, repo)}/deployments/${deploymentId}`,
     credentials.token,
@@ -1420,7 +1420,7 @@ export async function getRepoInvitations(credentials, owner, repo) {
     credentials.token,
   ).catch(() => []);
 }
-export async function getRateLimit(credentials) {
+export async function getRateLimit(_credentials) {
   return {
     resources: {
       core: { limit: 2e3, remaining: null, reset: null },
@@ -1488,7 +1488,7 @@ export async function getActionsVariables(credentials, owner, repo, perPage = 30
     ).map((v) => ({ name: v.key, value: v.masked ? '***' : v.value, updated_at: null })),
   };
 }
-export async function getActionsCache(credentials, owner, repo, perPage = 30) {
+export async function getActionsCache(_credentials, _owner, _repo, _perPage = 30) {
   return { actions_caches: [] };
 }
 export async function getTeamRepos(credentials, org, teamSlug, perPage = 30) {
@@ -1576,7 +1576,7 @@ export async function getOrgVariables(credentials, org, perPage = 30) {
     })),
   };
 }
-export async function getRepoAutolinks(credentials, owner, repo) {
+export async function getRepoAutolinks(_credentials, _owner, _repo) {
   return [];
 }
 export async function getCheckRunDetails(credentials, owner, repo, checkRunId) {
@@ -1687,7 +1687,7 @@ export async function deleteFile(
   owner,
   repo,
   filePath,
-  { message: message, sha: sha, branch: branch = '' },
+  { message: message, sha: _sha, branch: branch = '' },
 ) {
   const encodedPath = filePath.split('/').map(encodeURIComponent).join('%2F'),
     payload = { commit_message: message };
@@ -1753,7 +1753,7 @@ export async function rerunWorkflowRun(credentials, owner, repo, runId) {
     body: JSON.stringify({}),
   });
 }
-export async function listWorkflowRunArtifacts(credentials, owner, repo, runId, perPage = 20) {
+export async function listWorkflowRunArtifacts(credentials, owner, repo, runId, _perPage = 20) {
   return {
     artifacts: (
       (await gitlabFetch(
@@ -1820,7 +1820,7 @@ export async function updateGist(
 export async function deleteGist(credentials, gistId) {
   return gitlabFetch(`/snippets/${gistId}`, credentials.token, { method: 'DELETE' });
 }
-export async function transferIssue(credentials, owner, repo, issueNumber, newOwner) {
+export async function transferIssue(_credentials, _owner, _repo, _issueNumber, _newOwner) {
   throw new Error(
     'transferIssue requires the target project numeric ID in GitLab. Use the GitLab web UI or API directly with the project ID.',
   );
@@ -1896,7 +1896,7 @@ export async function getCodeScanningAlerts(
   credentials,
   owner,
   repo,
-  state = 'open',
+  _state = 'open',
   perPage = 20,
 ) {
   return gitlabFetch(
@@ -1908,7 +1908,7 @@ export async function getSecretScanningAlerts(
   credentials,
   owner,
   repo,
-  state = 'open',
+  _state = 'open',
   perPage = 20,
 ) {
   return gitlabFetch(
@@ -1926,7 +1926,7 @@ export async function getWorkflowRunJobs(
   owner,
   repo,
   runId,
-  filter = 'latest',
+  _filter = 'latest',
   perPage = 30,
 ) {
   return {
@@ -2031,9 +2031,9 @@ export async function starGist(credentials, gistId) {
     body: JSON.stringify({ name: 'star2' }),
   }).catch(() => null);
 }
-export async function unstarGist(credentials, gistId) {
+export async function unstarGist(_credentials, _gistId) {
   return null;
 }
-export async function checkGistStarred(credentials, gistId) {
+export async function checkGistStarred(_credentials, _gistId) {
   return !1;
 }

@@ -291,6 +291,28 @@ export function createMemoryPanel(strings) {
     resetCopyPromptButton();
   }
 
+  function showImportLoader() {
+    if (!importLoader) return;
+    importLoader.hidden = false;
+    importLoader.classList.remove('chat-memory__import-loader--leaving');
+  }
+
+  function hideImportLoader(afterHide) {
+    if (!importLoader || importLoader.hidden) {
+      afterHide?.();
+      return;
+    }
+
+    importLoader.classList.add('chat-memory__import-loader--leaving');
+    setTimeout(() => {
+      if (importLoader) {
+        importLoader.hidden = true;
+        importLoader.classList.remove('chat-memory__import-loader--leaving');
+      }
+      afterHide?.();
+    }, 180);
+  }
+
   async function handleCopyPrompt() {
     if (!copyPromptBtn || !copyPromptLabelEl) return;
     copyPromptBtn.disabled = true;

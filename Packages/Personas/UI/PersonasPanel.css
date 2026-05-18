@@ -15,38 +15,6 @@
    Drag region spanning the full width. Text group stacks vertically.
    ────────────────────────────────────────────────────────────────────── */
 
-.chat-personas__header {
-  display: flex;
-  flex-direction: column;
-  padding: 50px 10px 16px;
-  flex-shrink: 0;
-}
-
-.chat-personas__header-top {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  pointer-events: none;
-}
-
-.chat-personas__title {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1.1;
-  color: var(--color-chat-text-title);
-}
-
-.chat-personas__subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
-  line-height: 1.4;
-}
-
 /* ── Two-column body ──────────────────────────────────────────────────────
    Body fills all remaining height below the header.
    ────────────────────────────────────────────────────────────────────── */

@@ -15,39 +15,6 @@
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 
-.agents-panel__header {
-  display: flex;
-  align-items: center;
-  padding: 50px 10px 20px;
-  flex-shrink: 0;
-  -webkit-app-region: drag;
-}
-
-.agents-panel__header-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.agents-panel__title {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  color: var(--color-chat-text-title);
-  -webkit-app-region: no-drag;
-  pointer-events: none;
-}
-
-.agents-panel__subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
-  -webkit-app-region: no-drag;
-  pointer-events: none;
-}
-
 /* ── Two-column body ─────────────────────────────────────────────────────── */
 
 .agents-panel__body {

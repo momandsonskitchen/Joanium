@@ -21,7 +21,15 @@ export function createAppSettingsPanel(strings) {
   let defaultModelDropdown = null;
   let resetConfirmTimer = null;
   let resetConfirming = false;
+  let disposed = false;
+  let removeSettingsChangeListener = null;
   const state = createSettingsPanelState({ status, strings });
+
+  function handleSettingsChanged(event) {
+    if (!disposed) {
+      state.setSettings(event.detail ?? state.settings);
+    }
+  }
 
   async function updateDefaultView(value) {
     try {
@@ -54,6 +62,10 @@ export function createAppSettingsPanel(strings) {
       invokeIpc('app-settings:get'),
       invokeIpc('chat:bootstrap').catch(() => ({ providers: [], user: {} })),
     ]);
+
+    if (disposed) {
+      return;
+    }
 
     state.setSettings(nextSettings);
     resetConfirming = false;
@@ -207,13 +219,19 @@ export function createAppSettingsPanel(strings) {
     resetRow.append(resetMeta, resetButton);
     danger.append(resetRow);
 
-    window.addEventListener('joanium:app-settings-changed', (event) => {
-      state.setSettings(event.detail ?? state.settings);
-    });
+    if (!removeSettingsChangeListener) {
+      window.addEventListener('joanium:app-settings-changed', handleSettingsChanged);
+      removeSettingsChangeListener = () => {
+        window.removeEventListener('joanium:app-settings-changed', handleSettingsChanged);
+      };
+    }
   }
 
   view._dispose = () => {
+    disposed = true;
     clearTimeout(resetConfirmTimer);
+    removeSettingsChangeListener?.();
+    removeSettingsChangeListener = null;
     languageDropdown?.dispose();
     defaultViewDropdown?.dispose();
     defaultModelDropdown?.dispose();

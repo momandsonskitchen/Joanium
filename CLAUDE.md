@@ -37,7 +37,7 @@ Read `Arch.md` for full architecture. Read `AGENTS.md` for coding rules.
 
 ## File Structure Cheatsheet
 
-```
+```text
 Packages/<Name>/
 ├── Index.js        ← only file other code may import
 ├── Core/           ← backend logic
@@ -69,6 +69,7 @@ const dataRoot = app.isPackaged ? process.resourcesPath : rootDirectory;
 ## Common Patterns
 
 ### IPC handler (main process)
+
 ```js
 ipcMain.handle('package:action', async (_event, payload) => {
   // logic
@@ -77,11 +78,13 @@ ipcMain.handle('package:action', async (_event, payload) => {
 ```
 
 ### IPC call (renderer process)
+
 ```js
 const result = await window.electron.invoke('package:action', payload);
 ```
 
 ### I18n usage
+
 ```js
 import { t } from '../I18n/Index.js';
 element.textContent = t('key');

@@ -43,7 +43,7 @@ Joanium is a local-first AI desktop assistant built with Electron and vanilla Ja
 
 Every package follows this layout:
 
-```
+```text
 Packages/<Name>/
 ├── Index.js       # Only public entry point
 ├── Core/          # Backend logic
@@ -77,7 +77,7 @@ const dataRoot = app.isPackaged ? process.resourcesPath : rootDirectory;
 
 ## Commit Convention
 
-```
+```text
 feat: add Gemini provider
 fix: crash on empty chat history
 chore: bump electron to 42.0.1

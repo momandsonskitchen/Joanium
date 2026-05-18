@@ -139,7 +139,9 @@ async function bootstrap() {
   });
 
   const routeViews = new Map();
+  const routeViewPromises = new Map();
   const tabElements = new Map();
+  let navigationToken = 0;
   channelGateway.start();
   agentGateway.start();
 
@@ -364,10 +366,17 @@ async function bootstrap() {
   ];
 
   const routeById = new Map(routeDefinitions.map((route) => [route.id, route]));
+  if (!routeById.has(activeRouteId)) {
+    activeRouteId = 'chat';
+  }
 
   async function ensureRouteView(routeId) {
     if (routeViews.has(routeId)) {
       return routeViews.get(routeId);
+    }
+
+    if (routeViewPromises.has(routeId)) {
+      return routeViewPromises.get(routeId);
     }
 
     const route = routeById.get(routeId);
@@ -375,10 +384,19 @@ async function bootstrap() {
       throw new Error(`Unknown route "${routeId}".`);
     }
 
-    const view = await route.create();
-    view.element.hidden = true;
-    routeViews.set(routeId, view);
-    return view;
+    const viewPromise = route
+      .create()
+      .then((view) => {
+        view.element.hidden = true;
+        routeViews.set(routeId, view);
+        return view;
+      })
+      .finally(() => {
+        routeViewPromises.delete(routeId);
+      });
+
+    routeViewPromises.set(routeId, viewPromise);
+    return viewPromise;
   }
 
   function hideAllViews() {
@@ -396,25 +414,31 @@ async function bootstrap() {
   }
 
   async function showRoute(routeId) {
-    const view = await ensureRouteView(routeId);
+    const nextRouteId = routeById.has(routeId) ? routeId : 'chat';
+    const token = ++navigationToken;
+    const view = await ensureRouteView(nextRouteId);
+
+    if (token !== navigationToken) {
+      return;
+    }
 
     // Detach the native BrowserView before hiding the chat panel so it stops
     // painting over whatever panel the user is switching to.
-    if (activeRouteId === 'chat' && routeId !== 'chat') {
+    if (activeRouteId === 'chat' && nextRouteId !== 'chat') {
       chatView?.pauseBrowserPreview();
     }
 
     hideAllViews();
     view.element.hidden = false;
-    activeRouteId = routeId;
+    activeRouteId = nextRouteId;
     sidebarAvatar.classList.remove('chat-sidebar__avatar--active');
 
     // Re-attach and re-sync the native BrowserView now that chat is visible.
-    if (routeId === 'chat') {
+    if (nextRouteId === 'chat') {
       chatView?.resumeBrowserPreview();
     }
 
-    const tab = tabElements.get(routeId);
+    const tab = tabElements.get(nextRouteId);
     if (tab && tab !== activeTabEl) {
       activeTabEl?.classList.remove('chat-sidebar__tab--active');
       tab.classList.add('chat-sidebar__tab--active');
@@ -463,6 +487,8 @@ async function bootstrap() {
   }
 
   async function showSettingsPanel(initialSubMenu = 'user') {
+    const token = ++navigationToken;
+
     if (activeRouteId === 'chat') {
       chatView?.pauseBrowserPreview();
     }
@@ -472,6 +498,10 @@ async function bootstrap() {
     if (!settingsPanel) {
       settingsPanel = buildSettingsPanel();
       canvas.append(settingsPanel);
+    }
+
+    if (token !== navigationToken) {
+      return;
     }
 
     settingsPanel.hidden = false;

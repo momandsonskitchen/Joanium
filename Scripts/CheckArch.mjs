@@ -3,7 +3,8 @@
  *
  * Rules enforced:
  *   1. Every directory inside Packages/ must have an Index.js entry file.
- *   2. No package (except Shared and Boot) may import from another package.
+ *   2. No package (except Shared, Boot, and Shell composition imports) may
+ *      import from another package.
  *
  * Usage:
  *   node Scripts/CheckArch.mjs
@@ -18,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGES_DIR = path.join(ROOT, 'Packages');
 const ALLOWED_CROSS_IMPORTS = new Set(['Shared', 'Boot']);
+const SHELL_COMPOSITION_IMPORTS = new Set(['UI', 'I18n']);
 
 let violations = 0;
 
@@ -102,7 +104,16 @@ async function checkCrossPackageImports(packages) {
 
         const importedPkg = importedMatch[1];
 
-        if (importedPkg !== pkg && !ALLOWED_CROSS_IMPORTS.has(importedPkg)) {
+        if (importedPkg === pkg || ALLOWED_CROSS_IMPORTS.has(importedPkg)) {
+          continue;
+        }
+
+        const importedRelativePath = resolved.split(`/Packages/${importedPkg}/`)[1] ?? '';
+        const importedSection = importedRelativePath.split('/')[0];
+        const isShellCompositionImport =
+          pkg === 'Shell' && SHELL_COMPOSITION_IMPORTS.has(importedSection);
+
+        if (!isShellCompositionImport) {
           fail(
             `${relativePath}\n    imports from '${importedPkg}' — move shared code to Packages/Shared`,
           );

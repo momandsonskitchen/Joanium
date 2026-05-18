@@ -19,6 +19,7 @@
 
 import path from 'node:path';
 import { readdir, readFile } from 'node:fs/promises';
+import { builtinModules } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -27,6 +28,10 @@ const SCRIPTS_DIR = path.join(ROOT, 'Scripts');
 const MANIFEST_PATH = path.join(ROOT, 'package.json');
 
 // Node built-ins and Electron — never in package.json
+const NODE_BUILTIN_IMPORTS = new Set(
+  builtinModules.flatMap((moduleName) => [moduleName, `node:${moduleName}`]),
+);
+
 const IGNORED_IMPORTS = new Set([
   'electron',
   'node:path',
@@ -128,7 +133,7 @@ async function checkRuntimeDepsAreDeclared(manifest) {
   }
 
   for (const pkg of allRuntimeImports) {
-    if (IGNORED_IMPORTS.has(pkg)) {
+    if (IGNORED_IMPORTS.has(pkg) || NODE_BUILTIN_IMPORTS.has(pkg)) {
       continue;
     }
 
@@ -170,7 +175,7 @@ async function checkDevOnlyDepsNotInDependencies(manifest) {
   }
 
   for (const dep of runtimeDeps) {
-    if (IGNORED_IMPORTS.has(dep)) {
+    if (IGNORED_IMPORTS.has(dep) || NODE_BUILTIN_IMPORTS.has(dep)) {
       continue;
     }
 

@@ -2,9 +2,11 @@ import electron from 'electron';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import strings from '../I18n/en.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
 const { BrowserWindow, WebContentsView } = electron;
+const browserStrings = strings.browserPreview;
 
 export const BUILTIN_BROWSER_USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36';
@@ -142,9 +144,13 @@ function setElementValue(element, value) {
 
 function normalizeUrl(input) {
   const raw = String(input ?? '').trim();
-  if (!raw) throw new Error('A URL is required.');
+  if (!raw) throw new Error(browserStrings.errors.urlRequired);
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) || raw.startsWith('file://')) return raw;
   return `https://${raw}`;
+}
+
+function formatText(template, replacements = {}) {
+  return String(template).replace(/\{([^}]+)\}/g, (_, key) => replacements[key] ?? '');
 }
 
 function getRegistrableDomain(hostname = '') {
@@ -255,11 +261,15 @@ function canGoForward(webContents) {
 
 function formatBrowserState(state) {
   return [
-    `Title: ${state.title || 'Browser Preview'}`,
-    `URL: ${state.url || '(no page loaded)'}`,
-    `Visible: ${state.visible ? 'yes' : 'no'}`,
-    `Loading: ${state.loading ? 'yes' : 'no'}`,
-    `Status: ${state.status || 'Ready'}`,
+    `${browserStrings.stateLabels.title}: ${state.title || browserStrings.fallbackTitle}`,
+    `${browserStrings.stateLabels.url}: ${state.url || browserStrings.noPageLoaded}`,
+    `${browserStrings.stateLabels.visible}: ${
+      state.visible ? browserStrings.yes : browserStrings.no
+    }`,
+    `${browserStrings.stateLabels.loading}: ${
+      state.loading ? browserStrings.yes : browserStrings.no
+    }`,
+    `${browserStrings.stateLabels.status}: ${state.status || browserStrings.status.ready}`,
   ].join('\n');
 }
 
@@ -278,9 +288,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   let visible = false;
   let hostBounds = null;
   let paused = false;
-  let title = 'Browser Preview';
+  let title = browserStrings.fallbackTitle;
   let url = '';
-  let status = 'Ready';
+  let status = browserStrings.status.ready;
   let loading = false;
   let resizeHandler = null;
   let sessionConfigured = false;
@@ -377,13 +387,13 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
 
     webContents.on('page-title-updated', (event, nextTitle) => {
       event.preventDefault();
-      title = nextTitle || 'Browser Preview';
+      title = nextTitle || browserStrings.fallbackTitle;
       emitState();
     });
 
     webContents.on('did-start-loading', () => {
       loading = true;
-      status = 'Loading page...';
+      status = browserStrings.status.loading;
       emitState();
     });
 
@@ -391,7 +401,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       loading = false;
       title = webContents.getTitle() || title;
       url = webContents.getURL() || url;
-      status = 'Ready';
+      status = browserStrings.status.ready;
       emitState();
     });
 
@@ -411,14 +421,17 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         if (!isMainFrame) return;
         loading = false;
         url = validatedUrl || url;
-        status = `Load failed (${errorCode}): ${errorDescription}`;
+        status = formatText(browserStrings.status.loadFailed, {
+          code: errorCode,
+          description: errorDescription,
+        });
         emitState();
       },
     );
 
     webContents.on('render-process-gone', () => {
       loading = false;
-      status = 'Browser process ended unexpectedly.';
+      status = browserStrings.status.processEnded;
       emitState();
     });
 
@@ -426,7 +439,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       view = null;
       viewAttached = false;
       loading = false;
-      status = 'Ready';
+      status = browserStrings.status.ready;
       emitState();
     });
   }
@@ -455,7 +468,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     view.setVisible(false);
 
     const webContents = getViewWebContents(view);
-    if (!webContents) throw new Error('Could not create the browser preview.');
+    if (!webContents) throw new Error(browserStrings.errors.createPreviewFailed);
     configureSession(webContents.session);
     webContents.setUserAgent(BUILTIN_BROWSER_USER_AGENT);
     wireViewEvents(webContents);
@@ -467,7 +480,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     const webContents = await ensureView();
     url = nextUrl;
     visible = true;
-    status = `Opening ${nextUrl}`;
+    status = formatText(browserStrings.status.opening, { url: nextUrl });
     attach();
     emitState();
     await webContents.loadURL(nextUrl, {
@@ -481,11 +494,11 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   async function getPageWebContents(ownerWindow = null) {
     if (ownerWindow) attachToWindow(ownerWindow);
     if (!view || !url) {
-      throw new Error('No browser page is loaded. Use browser_navigate first.');
+      throw new Error(browserStrings.errors.pageRequired);
     }
     const webContents = getViewWebContents(view);
     if (!webContents || webContents.isDestroyed()) {
-      throw new Error('Browser page is not available.');
+      throw new Error(browserStrings.errors.pageUnavailable);
     }
     return webContents;
   }
@@ -534,24 +547,31 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     );
 
     const lines = [
-      `Page: ${result.title || '(untitled)'}`,
-      `URL: ${result.url || url}`,
+      formatText(browserStrings.messages.page, { title: result.title || browserStrings.untitled }),
+      `${browserStrings.stateLabels.url}: ${result.url || url}`,
       '',
-      'Visible interactive elements:',
+      browserStrings.messages.visibleElements,
     ];
 
     if (result.elements?.length) {
       for (const element of result.elements) {
         const label = element.label || element.href || element.tag;
-        const state = element.disabled ? ' disabled' : '';
-        lines.push(`- ${element.id} [${element.role}] ${label}${state}`);
+        const state = element.disabled ? browserStrings.messages.disabledState : '';
+        lines.push(
+          formatText(browserStrings.messages.elementLine, {
+            id: element.id,
+            role: element.role,
+            label,
+            state,
+          }),
+        );
       }
     } else {
-      lines.push('- none visible');
+      lines.push(browserStrings.noneVisible);
     }
 
     if (result.text) {
-      lines.push('', 'Page text excerpt:', result.text);
+      lines.push('', browserStrings.messages.pageTextExcerpt, result.text);
     }
 
     return lines.join('\n');
@@ -565,25 +585,29 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         ${PAGE_HELPERS}
         const target = ${JSON.stringify(target)};
         const element = target ? resolveTarget(target) : document.body;
-        if (!element) return { ok: false, error: 'Element not found.' };
+        if (!element) return { ok: false, error: ${JSON.stringify(
+          browserStrings.errors.elementNotFound,
+        )} };
         return { ok: true, text: cleanText(element.innerText || element.textContent || element.value || '') };
       })()
     `,
       ownerWindow,
     );
-    if (!result?.ok) throw new Error(result?.error ?? 'Could not read browser text.');
-    return result.text || '(no visible text)';
+    if (!result?.ok) throw new Error(result?.error ?? browserStrings.errors.readTextFailed);
+    return result.text || browserStrings.noVisibleText;
   }
 
   async function browserClick(params = {}, ownerWindow = null) {
     const target = String(params.target ?? '').trim();
-    if (!target) throw new Error('Missing required parameter: target.');
+    if (!target) throw new Error(browserStrings.errors.targetRequired);
     const result = await executeOnPage(
       `
       (() => {
         ${PAGE_HELPERS}
         const element = resolveTarget(${JSON.stringify(target)});
-        if (!element) return { ok: false, error: 'Element not found.' };
+        if (!element) return { ok: false, error: ${JSON.stringify(
+          browserStrings.errors.elementNotFound,
+        )} };
         element.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
         element.focus?.();
         element.click();
@@ -592,24 +616,31 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     `,
       ownerWindow,
     );
-    if (!result?.ok) throw new Error(result?.error ?? 'Click failed.');
-    return `Clicked ${result.role || 'element'}: ${result.label || target}`;
+    if (!result?.ok) throw new Error(result?.error ?? browserStrings.errors.clickFailed);
+    return formatText(browserStrings.messages.clicked, {
+      role: result.role || browserStrings.elementFallback,
+      label: result.label || target,
+    });
   }
 
   async function browserType(params = {}, ownerWindow = null) {
     const target = String(params.target ?? '').trim();
     const text = String(params.text ?? '');
-    if (!target) throw new Error('Missing required parameter: target.');
+    if (!target) throw new Error(browserStrings.errors.targetRequired);
     const result = await executeOnPage(
       `
       (() => {
         ${PAGE_HELPERS}
         const element = resolveTarget(${JSON.stringify(target)}, { preferTextField: true });
-        if (!element) return { ok: false, error: 'Text field not found.' };
+        if (!element) return { ok: false, error: ${JSON.stringify(
+          browserStrings.errors.textFieldNotFound,
+        )} };
         const clearFirst = ${params.clear_first === false || params.clearFirst === false ? 'false' : 'true'};
         const nextText = ${JSON.stringify(text)};
         const current = clearFirst ? '' : String(element.value || element.textContent || '');
-        if (!setElementValue(element, current + nextText)) return { ok: false, error: 'Element cannot receive text.' };
+        if (!setElementValue(element, current + nextText)) return { ok: false, error: ${JSON.stringify(
+          browserStrings.errors.elementCannotReceiveText,
+        )} };
         if (${params.press_enter === true || params.pressEnter === true ? 'true' : 'false'}) {
           element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
           element.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
@@ -620,13 +651,13 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     `,
       ownerWindow,
     );
-    if (!result?.ok) throw new Error(result?.error ?? 'Typing failed.');
-    return `Typed into ${result.label || target}.`;
+    if (!result?.ok) throw new Error(result?.error ?? browserStrings.errors.typingFailed);
+    return formatText(browserStrings.messages.typed, { label: result.label || target });
   }
 
   async function browserPressKey(params = {}, ownerWindow = null) {
     const key = String(params.key ?? '').trim();
-    if (!key) throw new Error('Missing required parameter: key.');
+    if (!key) throw new Error(browserStrings.errors.keyRequired);
 
     if (params.target) {
       await executeOnPage(
@@ -644,7 +675,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     const webContents = await getPageWebContents(ownerWindow);
     webContents.sendInputEvent({ type: 'keyDown', keyCode: key });
     webContents.sendInputEvent({ type: 'keyUp', keyCode: key });
-    return `Pressed key: ${key}`;
+    return formatText(browserStrings.messages.pressedKey, { key });
   }
 
   async function browserScroll(params = {}, ownerWindow = null) {
@@ -662,7 +693,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         const amount = ${JSON.stringify(amount)};
         const element = target ? resolveTarget(target) : null;
         const scroller = element || document.scrollingElement || document.documentElement;
-        if (!scroller) return { ok: false, error: 'No scroll target found.' };
+        if (!scroller) return { ok: false, error: ${JSON.stringify(
+          browserStrings.errors.noScrollTarget,
+        )} };
         if (direction === 'top') scroller.scrollTo?.({ top: 0, behavior: 'instant' });
         else if (direction === 'bottom') scroller.scrollTo?.({ top: scroller.scrollHeight, behavior: 'instant' });
         else scroller.scrollBy?.({
@@ -675,8 +708,11 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     `,
       ownerWindow,
     );
-    if (!result?.ok) throw new Error(result?.error ?? 'Scroll failed.');
-    return `Scrolled ${direction}${['top', 'bottom'].includes(direction) ? '' : ` by ${amount}px`}.`;
+    if (!result?.ok) throw new Error(result?.error ?? browserStrings.errors.scrollFailed);
+    const amountText = ['top', 'bottom'].includes(direction)
+      ? ''
+      : formatText(browserStrings.messages.scrollAmount, { amount });
+    return formatText(browserStrings.messages.scrolled, { direction, amount: amountText });
   }
 
   async function browserScreenshot(params = {}, ownerWindow = null) {
@@ -689,7 +725,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     await mkdir(directory, { recursive: true });
     const filePath = path.join(directory, safeScreenshotName(params.file_name ?? params.fileName));
     await writeFile(filePath, image.toPNG());
-    return `Screenshot saved: ${filePath}`;
+    return formatText(browserStrings.messages.screenshotSaved, { path: filePath });
   }
 
   async function goBack() {
@@ -731,7 +767,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     switch (tool) {
       case 'browser_navigate': {
         const state = await loadUrl(params.url, { referrer: url });
-        return `Opened ${state.url}`;
+        return formatText(browserStrings.messages.opened, { url: state.url });
       }
       case 'browser_get_state':
         return formatBrowserState(getState());
@@ -759,7 +795,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       case 'browser_screenshot':
         return browserScreenshot(params, ownerWindow);
       default:
-        throw new Error('Unsupported browser tool.');
+        throw new Error(browserStrings.errors.unsupportedTool);
     }
   }
 
@@ -833,9 +869,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
         webContents.close();
       }
       view = null;
-      title = 'Browser Preview';
+      title = browserStrings.fallbackTitle;
       url = '';
-      status = 'Ready';
+      status = browserStrings.status.ready;
       loading = false;
       sessionConfigured = false;
       emitState();

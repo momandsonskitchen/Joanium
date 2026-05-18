@@ -3,6 +3,7 @@ const en = {
   subtitle: 'Give each workspace a visual identity and reusable context.',
   newProjectHeading: 'New Project',
   editProjectHeading: 'Edit Project',
+  nameLabel: 'Project name',
   namePlaceholder: 'Project name',
   folderLabel: 'Project folder',
   folderPlaceholder: 'No folder selected',

@@ -5,6 +5,7 @@ Task goal: {goal}
 {context}
 {deliverable}
 Return a compact handoff for the coordinator with:
+
 1. Key findings
 2. Actions taken
 3. Evidence, assumptions, or relevant references

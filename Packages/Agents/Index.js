@@ -1,6 +1,5 @@
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
 import { readdir, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { BrowserWindow } from 'electron';
 import { createAgentStateManager } from './Core/AgentState.js';
@@ -8,8 +7,6 @@ import { createAgentScheduler } from './Core/AgentScheduler.js';
 import { sanitizeFileStem } from '../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../Shared/Storage/ResourcePaths.js';
 import { estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
-
-const agentsPackageDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------
 // createPackage — standard package contract.

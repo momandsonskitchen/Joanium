@@ -8,9 +8,21 @@ export function createMemorySettingsPanel(strings) {
   const options = createElement('div', 'app-settings__options');
   const status = createElement('p', 'app-settings__status');
   const state = createSettingsPanelState({ status, strings });
+  let disposed = false;
+  let memorySyncCleanup = null;
+  let removeSettingsChangeListener = null;
+
+  function clearMemorySyncWait() {
+    memorySyncCleanup?.();
+    memorySyncCleanup = null;
+  }
 
   async function populate() {
     state.setSettings(await invokeIpc('app-settings:get'));
+    if (disposed) {
+      return;
+    }
+
     options.replaceChildren();
 
     // ── Auto memory updates toggle ─────────────────────────────────────────
@@ -19,9 +31,9 @@ export function createMemorySettingsPanel(strings) {
       label: option.label,
       description: option.description,
       checked: Boolean(state.settings.autoMemoryUpdates),
-      onChange: (checked) => {
-        void state.updateSetting('autoMemoryUpdates', checked, checkbox.element);
-        memoryCard.hidden = checked;
+      onChange: async (checked) => {
+        await state.updateSetting('autoMemoryUpdates', checked, checkbox.element);
+        memoryCard.hidden = Boolean(state.settings?.autoMemoryUpdates);
       },
     });
     options.append(checkbox.element);
@@ -43,23 +55,30 @@ export function createMemorySettingsPanel(strings) {
     );
     memoryBtn.type = 'button';
     memoryBtn.addEventListener('click', () => {
+      clearMemorySyncWait();
       window.dispatchEvent(new CustomEvent('joanium:trigger-memory-sync'));
       memoryBtn.disabled = true;
       memoryBtn.textContent = strings.updateMemory.updating;
 
       let fallbackTimer = null;
-      const onSyncEnd = (event) => {
-        if (event.detail?.active) return;
-        window.removeEventListener('joanium:memory-sync', onSyncEnd);
-        clearTimeout(fallbackTimer);
+      const resetMemoryButton = () => {
+        if (disposed) return;
         memoryBtn.disabled = false;
         memoryBtn.textContent = strings.updateMemory.button;
       };
+      const onSyncEnd = (event) => {
+        if (event.detail?.active) return;
+        clearMemorySyncWait();
+        resetMemoryButton();
+      };
       window.addEventListener('joanium:memory-sync', onSyncEnd);
-      fallbackTimer = setTimeout(() => {
+      memorySyncCleanup = () => {
         window.removeEventListener('joanium:memory-sync', onSyncEnd);
-        memoryBtn.disabled = false;
-        memoryBtn.textContent = strings.updateMemory.button;
+        clearTimeout(fallbackTimer);
+      };
+      fallbackTimer = setTimeout(() => {
+        clearMemorySyncWait();
+        resetMemoryButton();
       }, 30000);
     });
 
@@ -67,11 +86,23 @@ export function createMemorySettingsPanel(strings) {
     options.append(memoryCard);
 
     // Keep card in sync when the toggle is changed elsewhere in the same session.
-    window.addEventListener('joanium:app-settings-changed', (event) => {
+    const onSettingsChanged = (event) => {
+      if (disposed) return;
       state.setSettings(event.detail ?? state.settings);
       memoryCard.hidden = Boolean(state.settings?.autoMemoryUpdates);
-    });
+    };
+    window.addEventListener('joanium:app-settings-changed', onSettingsChanged);
+    removeSettingsChangeListener = () => {
+      window.removeEventListener('joanium:app-settings-changed', onSettingsChanged);
+    };
   }
+
+  view._dispose = () => {
+    disposed = true;
+    clearMemorySyncWait();
+    removeSettingsChangeListener?.();
+    removeSettingsChangeListener = null;
+  };
 
   view.append(options, status);
   void populate().catch(() => state.setStatus(strings.saveFailed, 'error'));

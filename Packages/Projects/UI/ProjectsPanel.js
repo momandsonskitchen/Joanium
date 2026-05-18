@@ -248,7 +248,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
     // Name input
     const nameBox = createInputBoxLite({
-      label: strings.nameLabel ?? 'PROJECT NAME',
+      label: strings.nameLabel,
       labelClassName: 'chat-projects__info-label',
       className: 'chat-projects__name-input',
       placeholder: strings.namePlaceholder,

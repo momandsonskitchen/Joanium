@@ -14,6 +14,24 @@
  *   container.append(el);
  */
 
+import strings from '../I18n/en.js';
+
+const codeBlockStrings = strings.markdown.codeBlock;
+
+function escapeHtml(value) {
+  return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escapeAttributeFromEscapedText(value) {
+  return String(value).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function sanitizeEscapedMarkdownUrl(url) {
+  const candidate = String(url ?? '').trim();
+  if (!/^(https?:|mailto:)/i.test(candidate)) return '#';
+  return escapeAttributeFromEscapedText(candidate);
+}
+
 // ---------------------------------------------------------------------------
 // Inline renderer
 // ---------------------------------------------------------------------------
@@ -26,11 +44,17 @@
  * @returns {string} HTML string (safe for innerHTML assignment)
  */
 export function renderInline(text) {
+  const inlineCodeTokens = [];
+
   // 1. Escape HTML special chars
-  let out = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let out = escapeHtml(text);
 
   // 2. Inline code  `code`  — must run before bold/italic so backticks win
-  out = out.replace(/`([^`]+)`/g, '<code class="md-code-inline">$1</code>');
+  out = out.replace(/`([^`]+)`/g, (_, code) => {
+    const token = `@@JOANIUMINLINECODE${inlineCodeTokens.length}@@`;
+    inlineCodeTokens.push(`<code class="md-code-inline">${code}</code>`);
+    return token;
+  });
 
   // 3. Bold  **text** or __text__
   out = out.replace(/\*\*(.+?)\*\*|__(.+?)__/g, (_, a, b) => `<strong>${a ?? b}</strong>`);
@@ -40,9 +64,13 @@ export function renderInline(text) {
 
   // 5. Links  [label](url)
   out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
-    const safe = /^(https?:|mailto:)/.test(url) ? url : '#';
+    const safe = sanitizeEscapedMarkdownUrl(url);
     return `<a class="md-link" href="${safe}" target="_blank" rel="noopener noreferrer">${label}</a>`;
   });
+
+  out = inlineCodeTokens.reduce((next, html, index) => {
+    return next.replace(`@@JOANIUMINLINECODE${index}@@`, html);
+  }, out);
 
   return out;
 }
@@ -255,15 +283,17 @@ function buildDom(blocks) {
         const copyBtn = document.createElement('button');
         copyBtn.className = 'md-codeblock__btn';
         copyBtn.type = 'button';
-        copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span>`;
+        copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span></span>`;
+        const copyLabel = copyBtn.querySelector('span');
+        copyLabel.textContent = codeBlockStrings.copy;
         copyBtn.addEventListener('click', () => {
           navigator.clipboard
             .writeText(block.code)
             .then(() => {
-              copyBtn.querySelector('span').textContent = 'Copied!';
+              copyLabel.textContent = codeBlockStrings.copied;
               copyBtn.classList.add('md-codeblock__btn--success');
               setTimeout(() => {
-                copyBtn.querySelector('span').textContent = 'Copy';
+                copyLabel.textContent = codeBlockStrings.copy;
                 copyBtn.classList.remove('md-codeblock__btn--success');
               }, 1800);
             })
@@ -299,7 +329,8 @@ function buildDom(blocks) {
           xml: 'xml',
         };
         const ext = extMap[block.lang?.toLowerCase()] ?? 'txt';
-        dlBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Download</span>`;
+        dlBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span></span>`;
+        dlBtn.querySelector('span').textContent = codeBlockStrings.download;
         dlBtn.addEventListener('click', () => {
           const blob = new Blob([block.code], { type: 'text/plain' });
           const url = URL.createObjectURL(blob);

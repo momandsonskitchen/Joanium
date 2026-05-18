@@ -7,36 +7,6 @@
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.chat-templates__header {
-  display: flex;
-  align-items: center;
-  padding: 50px 10px 20px;
-  flex-shrink: 0;
-}
-
-.chat-templates__header-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.chat-templates__title {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  color: var(--color-chat-text-title);
-  pointer-events: none;
-}
-
-.chat-templates__subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
-  pointer-events: none;
-}
-
 /* Two-column body */
 
 .chat-templates__body {

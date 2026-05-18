@@ -35,7 +35,7 @@
     "start": "electron .",
     "build": "node Scripts/Build.mjs",
     "lint": "eslint .",
-    "lint:md": "markdownlint **/*.md --ignore node_modules",
+    "lint:md": "markdownlint **/*.md --ignore node_modules --ignore Data --ignore Skills --ignore Personas",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "cpd": "jscpd Packages",

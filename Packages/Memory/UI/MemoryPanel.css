@@ -7,36 +7,6 @@
   animation: chat-fade-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.chat-memory__header {
-  display: flex;
-  align-items: center;
-  padding: 50px 10px 20px;
-  flex-shrink: 0;
-}
-
-.chat-memory__header-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.chat-memory__title {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  color: var(--color-chat-text-title);
-  pointer-events: none;
-}
-
-.chat-memory__subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--color-chat-text-muted);
-  letter-spacing: -0.01em;
-  pointer-events: none;
-}
-
 .chat-memory__import {
   flex-shrink: 0;
   width: 38px;
@@ -112,11 +82,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.chat-memory__search .joanium-search-bar {
-  flex: 1;
-  min-width: 0;
 }
 
 .chat-memory__list {
@@ -235,9 +200,7 @@
   color: var(--color-chat-text-title);
 }
 
-.chat-memory__editor-description,
-.chat-memory__editor-stats,
-.chat-memory__context-note {
+.chat-memory__editor-description {
   margin: 6px 0 0;
   font-size: 13px;
   line-height: 1.45;
@@ -275,12 +238,6 @@
 .chat-memory__save-icon svg {
   width: 100%;
   height: 100%;
-}
-
-.chat-memory__context-note {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0 18px 12px;
 }
 
 .chat-memory__editor {
@@ -323,6 +280,7 @@
 /* ── Import view ───────────────────────────────────────────────────────────── */
 
 .chat-memory__import-view {
+  position: relative;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -390,17 +348,6 @@
   transform: translateX(-1px);
 }
 
-.chat-memory__import-back-icon {
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-}
-
-.chat-memory__import-back-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
 .chat-memory__import-textarea {
   flex: 1;
   min-height: 0;
@@ -454,28 +401,6 @@
   justify-content: flex-end;
 }
 
-/* ── Step blocks ───────────────────────────────────────────────────────────── */
-
-.chat-memory__step-block {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.54);
-  box-shadow:
-    inset 0 0 0 1px rgba(170, 134, 104, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82);
-}
-
-.chat-memory__step-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
 .chat-memory__step-label {
   display: block;
   font-size: 12px;
@@ -484,13 +409,6 @@
   color: var(--color-chat-text-muted);
   text-transform: uppercase;
   margin-bottom: 2px;
-}
-
-.chat-memory__step-hint {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--color-chat-text-muted);
 }
 
 /* ── Copy prompt button ────────────────────────────────────────────────────── */
@@ -571,6 +489,24 @@
 
 .chat-memory__import-btn--primary:disabled {
   opacity: 0.58;
+}
+
+.chat-memory__import-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px) saturate(1.3);
+  -webkit-backdrop-filter: blur(10px) saturate(1.3);
+  animation: chat-fade-in 0.18s ease both;
+}
+
+.chat-memory__import-loader--leaving {
+  opacity: 0;
+  transition: opacity 180ms ease;
 }
 
 @media (max-width: 1020px) {
