@@ -96,7 +96,9 @@ function buildDiffHtml(ops) {
     }
 
     if (lastShownIndex !== -2 && index > lastShownIndex + 1) {
-      html += '<div class="chat-file-diff__hunk-gap">...</div>';
+      const hiddenCount = index - lastShownIndex - 1;
+      const label = hiddenCount === 1 ? '1 unchanged line' : `${hiddenCount} unchanged lines`;
+      html += `<div class="chat-file-diff__hunk-gap">↕ ${label}</div>`;
     }
 
     const entry = ops[index];
