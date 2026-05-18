@@ -66,6 +66,17 @@ const en = {
   lockGuestSubtitle: 'App is locked',
   lockGuestHint: 'Press any key to unlock',
 
+  // Password strength roasts
+  roastTooShort: "That's not a password, that's a PIN having an identity crisis.",
+  roastCommon: "Come on. That password is literally on every hacker's top-10 list.",
+  roastKeyboardWalk:
+    "A keyboard smash is not a password strategy. You're basically handing someone a key.",
+  roastSequential:
+    'Did you just hold down a key and call it a day? Even a toddler could crack that.',
+  roastRepeated: "One character repeated over and over isn't a password. It's a cry for help.",
+  roastName: 'Using your own name? Even your dog could guess that.',
+  roastDob: "Your birthday as a password? Bold of you to assume hackers don't have Google.",
+
   // Auto-lock
   autoLockLabel: 'Auto-lock',
   autoLockDesc: 'Lock automatically after a period of inactivity.',

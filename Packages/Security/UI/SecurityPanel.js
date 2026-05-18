@@ -3,6 +3,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
 import { saveBackup, clearBackup } from './SecurityGuard.js';
+import { checkPasswordStrength } from './PasswordStrength.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -60,6 +61,14 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
 
   const body = createElement('div', 'security-panel__body');
   view.append(body);
+
+  // ── User profile (for password roasting) ─────────────────────────────────
+  let userProfile = {};
+  invokeIpc('user:get-profile')
+    .then((p) => {
+      if (p) userProfile = p;
+    })
+    .catch(() => {});
 
   // ── Disabled state ────────────────────────────────────────────────────────
 
@@ -163,6 +172,12 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
 
       if (password.length < 6) {
         showFeedback(feedback, strings.errorPasswordTooShort, true);
+        return;
+      }
+      const strengthCheck = checkPasswordStrength(password, userProfile);
+      if (strengthCheck.weak) {
+        const roastKey = `roast${strengthCheck.category.charAt(0).toUpperCase()}${strengthCheck.category.slice(1)}`;
+        showFeedback(feedback, strings[roastKey] ?? strengthCheck.roast, true);
         return;
       }
       if (password !== confirm) {
@@ -363,6 +378,12 @@ export function createSecurityPanel(strings, { onSecurityChanged } = {}) {
 
       if (newPw.length < 6) {
         showFeedback(changeFeedback, strings.errorPasswordTooShort, true);
+        return;
+      }
+      const strengthCheck = checkPasswordStrength(newPw, userProfile);
+      if (strengthCheck.weak) {
+        const roastKey = `roast${strengthCheck.category.charAt(0).toUpperCase()}${strengthCheck.category.slice(1)}`;
+        showFeedback(changeFeedback, strings[roastKey] ?? strengthCheck.roast, true);
         return;
       }
       if (newPw !== confirm) {
