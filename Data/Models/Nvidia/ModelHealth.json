@@ -21,7 +21,7 @@
   },
   "z-ai/glm4.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T10:04:42.472Z"
+    "checkedAt": "2026-05-18T10:21:59.552Z"
   },
   "qwen/qwen3.5-397b-a17b": {
     "status": "green",
@@ -37,6 +37,6 @@
   },
   "google/gemma-4-31b-it": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T06:27:18.516Z"
+    "checkedAt": "2026-05-18T10:22:14.542Z"
   }
 }
