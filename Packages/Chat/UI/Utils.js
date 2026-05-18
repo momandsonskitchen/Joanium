@@ -59,9 +59,12 @@ export function stripNativeToolCalls(text) {
  */
 export function stripToolCallBlocks(text) {
   if (!text) return text;
-  return text
-    .replace(/```joanium-tool[\s\S]*?```/gi, '')
-    .replace(/```joanium-terminal[\s\S]*?```/gi, '')
+  return text.replace(/```joanium-(?:tool|terminal)[\s\S]*?(?:```|$)/gi, '').trim();
+}
+
+export function sanitizeAssistantVisibleContent(text) {
+  return stripNativeToolCalls(stripToolCallBlocks(text))
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 

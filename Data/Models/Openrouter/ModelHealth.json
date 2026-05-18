@@ -1,0 +1,54 @@
+{
+  "mistralai/mistral-small-4": {
+    "status": "red",
+    "checkedAt": "2026-05-18T04:40:55.229Z"
+  },
+  "qwen/qwen3.6-plus-preview:free": {
+    "status": "red",
+    "checkedAt": "2026-05-18T04:40:55.316Z"
+  },
+  "meta-llama/llama-4-scout": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:55.637Z"
+  },
+  "meta-llama/llama-4-maverick": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:55.732Z"
+  },
+  "mistralai/mistral-large": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:55.849Z"
+  },
+  "google/gemma-4-31b-it": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:55.955Z"
+  },
+  "minimax/minimax-m2.5:free": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:56.194Z"
+  },
+  "meta-llama/llama-3.3-70b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:56.277Z"
+  },
+  "qwen/qwen3-235b-a22b": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:56.988Z"
+  },
+  "openai/gpt-5.4": {
+    "status": "yellow",
+    "checkedAt": "2026-05-18T10:04:44.117Z"
+  },
+  "google/gemini-3.1-pro-preview": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:40:57.564Z"
+  },
+  "anthropic/claude-opus-4-7": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:41:02.195Z"
+  },
+  "deepseek/deepseek-r1": {
+    "status": "green",
+    "checkedAt": "2026-05-18T04:41:04.849Z"
+  }
+}

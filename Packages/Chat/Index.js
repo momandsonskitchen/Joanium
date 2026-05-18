@@ -12,6 +12,7 @@ export async function createPackage({ rootDirectory }) {
   const chatStateManager = createChatStateManager({ rootDirectory });
   const healthChecker = createModelHealthChecker({ rootDirectory });
   const usageTracker = createUsageTracker({ rootDirectory });
+  const activeStreams = new Map();
 
   function sendIfAlive(event, channel, payload) {
     if (!event.sender.isDestroyed()) {
@@ -41,23 +42,41 @@ export async function createPackage({ rootDirectory }) {
     }
   }
 
-  function streamMessage(event, request, channels, decorate = (payload) => payload) {
+  function streamMessage(
+    event,
+    request,
+    channels,
+    decorate = (payload) => payload,
+    streamController = null,
+  ) {
+    const streamId = streamController?.streamId ?? null;
+    const controller = streamController?.controller ?? null;
+    const isCanceled = () => controller?.signal?.aborted === true;
+    const cleanup = () => {
+      if (streamId && activeStreams.get(streamId) === controller) {
+        activeStreams.delete(streamId);
+      }
+    };
     const sendError = (error) => {
+      if (isCanceled()) return;
       sendIfAlive(event, channels.error, decorate({ message: error?.message ?? String(error) }));
     };
 
     chatStateManager
       .streamMessage(request, {
         onChunk: (chunk) => {
+          if (isCanceled()) return;
           sendIfAlive(event, channels.chunk, decorate(chunk));
         },
         onDone: (meta) => {
+          if (isCanceled()) return;
           sendIfAlive(event, channels.done, decorate(meta));
           recordUsage(meta, Boolean(request?.isNewSession)).catch(() => {});
         },
         onError: sendError,
       })
-      .catch(sendError);
+      .catch(sendError)
+      .finally(cleanup);
   }
 
   return {
@@ -70,12 +89,47 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'chat:stream-message',
         handler: (event, request) => {
-          streamMessage(event, request, {
-            chunk: 'chat:stream-chunk',
-            done: 'chat:stream-done',
-            error: 'chat:stream-error',
-          });
+          const streamId =
+            String(request?.streamId ?? '').trim() || `chat-${Date.now()}-${Math.random()}`;
+          const controller = new AbortController();
+          activeStreams.set(streamId, controller);
+          streamMessage(
+            event,
+            { ...request, streamId, signal: controller.signal },
+            {
+              chunk: 'chat:stream-chunk',
+              done: 'chat:stream-done',
+              error: 'chat:stream-error',
+            },
+            (payload) => ({ streamId, ...payload }),
+            { streamId, controller },
+          );
           return null;
+        },
+      },
+      {
+        channel: 'chat:cancel-stream',
+        handler: async (_event, request = {}) => {
+          const streamId = String(request?.streamId ?? '').trim();
+          const controller = activeStreams.get(streamId);
+          if (!controller) {
+            return { ok: true, canceled: false };
+          }
+
+          controller.abort();
+          activeStreams.delete(streamId);
+          return { ok: true, canceled: true };
+        },
+      },
+      {
+        channel: 'chat:cancel-all-streams',
+        handler: async () => {
+          const controllers = [...activeStreams.values()];
+          activeStreams.clear();
+          for (const controller of controllers) {
+            controller.abort();
+          }
+          return { ok: true, canceled: controllers.length };
         },
       },
 
@@ -90,7 +144,7 @@ export async function createPackage({ rootDirectory }) {
           const { streamId } = request;
           streamMessage(
             event,
-            request,
+            { ...request, signal: null },
             {
               chunk: 'agents:stream-chunk',
               done: 'agents:stream-done',

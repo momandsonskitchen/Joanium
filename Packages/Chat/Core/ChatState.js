@@ -25,6 +25,22 @@ const openAiCompatibleProviders = new Set([
   'xai',
 ]);
 
+function createAbortError() {
+  const error = new Error('Request aborted.');
+  error.name = 'AbortError';
+  return error;
+}
+
+function isAbortError(error) {
+  return error?.name === 'AbortError' || error?.code === 'ABORT_ERR';
+}
+
+function throwIfAborted(signal) {
+  if (signal?.aborted) {
+    throw createAbortError();
+  }
+}
+
 async function readSystemPromptFile(rootDirectory) {
   try {
     return (await readFile(path.join(rootDirectory, 'Prompts', 'System.md'), 'utf8')).trim();
@@ -250,8 +266,13 @@ function extractText(value) {
 // body is the raw Node.js IncomingMessage (async-iterable, chunk by chunk).
 // ---------------------------------------------------------------------------
 
-function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {}) {
+function nodeRequest(urlString, { method = 'POST', headers = {}, body = '', signal = null } = {}) {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(createAbortError());
+      return;
+    }
+
     let parsed;
 
     try {
@@ -263,7 +284,24 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {
     const client = parsed.protocol === 'https:' ? https : http;
     const defaultPort = parsed.protocol === 'https:' ? 443 : 80;
 
-    const req = client.request(
+    let responseMessage = null;
+    let settled = false;
+    let req = null;
+
+    const settle = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      callback(value);
+    };
+
+    const abortRequest = () => {
+      const error = createAbortError();
+      responseMessage?.destroy(error);
+      req?.destroy(error);
+      settle(reject, error);
+    };
+
+    req = client.request(
       {
         hostname: parsed.hostname,
         port: parsed.port ? Number(parsed.port) : defaultPort,
@@ -272,10 +310,11 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {
         headers,
       },
       (res) => {
+        responseMessage = res;
         const status = res.statusCode ?? 0;
         const statusText = res.statusMessage ?? '';
 
-        resolve({
+        settle(resolve, {
           status,
           statusText,
           ok: status >= 200 && status < 300,
@@ -294,7 +333,16 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '' } = {
       },
     );
 
-    req.on('error', reject);
+    if (signal) {
+      signal.addEventListener('abort', abortRequest, { once: true });
+      req.on('close', () => {
+        signal.removeEventListener('abort', abortRequest);
+      });
+    }
+
+    req.on('error', (error) => {
+      settle(reject, signal?.aborted ? createAbortError() : error);
+    });
 
     // Keep the TCP connection alive so routers / NATs don't silently drop long
     // streaming responses before the model finishes generating.
@@ -348,7 +396,9 @@ async function assertProviderResponse(response) {
   }
 }
 
-async function postJsonStream(endpoint, bodyString, headers) {
+async function postJsonStream(endpoint, bodyString, headers, signal = null) {
+  throwIfAborted(signal);
+
   const response = await nodeRequest(endpoint, {
     method: 'POST',
     headers: {
@@ -356,6 +406,7 @@ async function postJsonStream(endpoint, bodyString, headers) {
       'content-length': Buffer.byteLength(bodyString),
     },
     body: bodyString,
+    signal,
   });
 
   await assertProviderResponse(response);
@@ -367,12 +418,13 @@ async function postJsonStream(endpoint, bodyString, headers) {
 // Yields { event, data } for every complete SSE event.
 // ---------------------------------------------------------------------------
 
-async function* parseSSE(nodeResponse) {
+async function* parseSSE(nodeResponse, signal = null) {
   let buffer = '';
   let eventType = 'message';
   let dataLines = [];
 
   for await (const rawChunk of nodeResponse) {
+    throwIfAborted(signal);
     buffer += rawChunk.toString('utf8');
 
     const parts = buffer.split('\n');
@@ -420,7 +472,10 @@ async function streamGoogleMessage({
   messages,
   systemPrompt,
   onChunk,
+  signal,
 }) {
+  throwIfAborted(signal);
+
   const apiKey = resolveCredential(provider, providerDetails);
 
   if (!apiKey) {
@@ -455,12 +510,17 @@ async function streamGoogleMessage({
 
   const streamBodyStr = JSON.stringify(googleBody);
 
-  const response = await postJsonStream(streamUrl, streamBodyStr, {
-    'content-type': 'application/json',
-    [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
-  });
+  const response = await postJsonStream(
+    streamUrl,
+    streamBodyStr,
+    {
+      'content-type': 'application/json',
+      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
+    },
+    signal,
+  );
 
-  for await (const { data } of parseSSE(response.body)) {
+  for await (const { data } of parseSSE(response.body, signal)) {
     if (!data || typeof data !== 'object') continue;
 
     const text = (data.candidates ?? [])
@@ -483,7 +543,10 @@ async function streamAnthropicMessage({
   messages,
   systemPrompt,
   onChunk,
+  signal,
 }) {
+  throwIfAborted(signal);
+
   const apiKey = resolveCredential(provider, providerDetails);
 
   if (!apiKey) {
@@ -526,13 +589,18 @@ async function streamAnthropicMessage({
 
   const streamReqBodyStr = JSON.stringify(requestBody);
 
-  const response = await postJsonStream(endpoint, streamReqBodyStr, {
-    'content-type': 'application/json',
-    'anthropic-version': '2023-06-01',
-    [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
-  });
+  const response = await postJsonStream(
+    endpoint,
+    streamReqBodyStr,
+    {
+      'content-type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      [provider.authHeader]: `${provider.authPrefix ?? ''}${apiKey}`,
+    },
+    signal,
+  );
 
-  for await (const { data } of parseSSE(response.body)) {
+  for await (const { data } of parseSSE(response.body, signal)) {
     if (!data || typeof data !== 'object') continue;
 
     if (data.type === 'content_block_delta') {
@@ -561,7 +629,10 @@ async function streamOpenAiCompatibleMessage({
   messages,
   systemPrompt,
   onChunk,
+  signal,
 }) {
+  throwIfAborted(signal);
+
   const headers = { 'content-type': 'application/json' };
 
   if (provider.requiresApiKey) {
@@ -599,9 +670,9 @@ async function streamOpenAiCompatibleMessage({
     stream: true,
   });
 
-  const response = await postJsonStream(endpoint, streamOaiBodyStr, headers);
+  const response = await postJsonStream(endpoint, streamOaiBodyStr, headers, signal);
 
-  for await (const { data } of parseSSE(response.body)) {
+  for await (const { data } of parseSSE(response.body, signal)) {
     if (!data || typeof data !== 'object') continue;
 
     const delta = data.choices?.[0]?.delta;
@@ -656,14 +727,33 @@ function isRetryable(error) {
   return false;
 }
 
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function delay(ms, signal = null) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(createAbortError());
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', abortDelay);
+      resolve();
+    }, ms);
+
+    const abortDelay = () => {
+      clearTimeout(timer);
+      reject(createAbortError());
+    };
+
+    signal?.addEventListener('abort', abortDelay, { once: true });
+  });
 }
 
-async function requestChatCompletionStreamWithRetry({ user, providers, request, onChunk }) {
+async function requestChatCompletionStreamWithRetry({ user, providers, request, onChunk, signal }) {
   let lastError;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    throwIfAborted(signal);
+
     let tokensEmitted = false;
 
     const guardedChunk = (chunk) => {
@@ -677,13 +767,14 @@ async function requestChatCompletionStreamWithRetry({ user, providers, request, 
         providers,
         request,
         onChunk: guardedChunk,
+        signal,
       });
 
       // If the stream ended cleanly but produced zero tokens, treat it as a
       // transient failure and retry — this is the root cause of "No response
       // received" / "Empty Response" on weaker models.
       if (!tokensEmitted && attempt < MAX_ATTEMPTS) {
-        await delay(BASE_DELAY_MS * 2 ** (attempt - 1));
+        await delay(BASE_DELAY_MS * 2 ** (attempt - 1), signal);
         continue;
       }
 
@@ -694,18 +785,20 @@ async function requestChatCompletionStreamWithRetry({ user, providers, request, 
       // Once tokens are streaming we cannot retry — surface immediately.
       if (tokensEmitted) throw error;
 
-      const willRetry = attempt < MAX_ATTEMPTS && isRetryable(error);
+      const willRetry = !isAbortError(error) && attempt < MAX_ATTEMPTS && isRetryable(error);
       if (!willRetry) throw error;
 
       const backoff = BASE_DELAY_MS * 2 ** (attempt - 1);
-      await delay(backoff);
+      await delay(backoff, signal);
     }
   }
 
   throw lastError ?? new Error('Empty response after retries.');
 }
 
-async function requestChatCompletionStream({ user, providers, request, onChunk }) {
+async function requestChatCompletionStream({ user, providers, request, onChunk, signal }) {
+  throwIfAborted(signal);
+
   const messages = sanitizeConversationMessages(request?.messages);
   const parts = [];
   if (typeof request?.baseSystemPrompt === 'string' && request.baseSystemPrompt.trim()) {
@@ -818,6 +911,7 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
       messages,
       systemPrompt: groundedSystemPrompt,
       onChunk: trackingChunk,
+      signal,
     });
   } else if (provider.id === 'anthropic') {
     await streamAnthropicMessage({
@@ -828,6 +922,7 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
       messages,
       systemPrompt: groundedSystemPrompt,
       onChunk: trackingChunk,
+      signal,
     });
   } else if (openAiCompatibleProviders.has(provider.id)) {
     await streamOpenAiCompatibleMessage({
@@ -838,6 +933,7 @@ async function requestChatCompletionStream({ user, providers, request, onChunk }
       messages,
       systemPrompt: groundedSystemPrompt,
       onChunk: trackingChunk,
+      signal,
     });
   } else {
     throw new Error(`${provider.label} chat is not wired up yet.`);
@@ -876,10 +972,14 @@ export function createChatStateManager({ rootDirectory }) {
           providers,
           request: { ...request, baseSystemPrompt },
           onChunk,
+          signal: request?.signal ?? null,
         });
 
         onDone(meta);
       } catch (error) {
+        if (isAbortError(error)) {
+          return;
+        }
         onError(error);
       }
     },
@@ -901,6 +1001,7 @@ export function createChatStateManager({ rootDirectory }) {
           if (chunk?.type === 'text' && chunk.text) text += chunk.text;
           if (chunk?.type === 'thinking' && chunk.text) thinking += chunk.text;
         },
+        signal: request?.signal ?? null,
       });
 
       return { ...meta, text, thinking };
@@ -929,6 +1030,7 @@ export function createChatStateManager({ rootDirectory }) {
         onChunk(chunk) {
           if (chunk?.type === 'text' && chunk.text) text += chunk.text;
         },
+        signal: null,
       });
 
       return { ...meta, text: text.trim() };

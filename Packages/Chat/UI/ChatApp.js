@@ -19,7 +19,6 @@ import {
   executeTerminalTool as executeRendererTerminalTool,
   formatToolsetResultForModel,
   parseToolRequests,
-  parseAllTerminalToolRequests,
   parseAllToolRequests,
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
 import { createAttachmentPill } from './AttachmentPill.js';
@@ -46,8 +45,7 @@ import {
   buildModelContent,
   generateSessionId,
   getFirstName,
-  stripNativeToolCalls,
-  stripToolCallBlocks,
+  sanitizeAssistantVisibleContent,
   toAttachmentSummary,
 } from './Utils.js';
 import {
@@ -136,6 +134,8 @@ export async function createChatView(
   let prevHasMessages = false;
   let streamDisposers = [];
   let generationToken = 0;
+  let streamSequence = 0;
+  let activeStreamId = null;
   let modelPickerPanel = null;
   let modelPickerDispose = null;
   let modelPickerOpen = false;
@@ -383,6 +383,24 @@ export async function createChatView(
     streamDisposers = [];
   }
 
+  function createStreamId(runToken) {
+    streamSequence += 1;
+    return `${sessionId ?? 'chat'}-${runToken}-${streamSequence}-${Date.now()}`;
+  }
+
+  function clearActiveStreamId(streamId) {
+    if (activeStreamId === streamId) {
+      activeStreamId = null;
+    }
+  }
+
+  function cancelActiveStream() {
+    const streamId = activeStreamId;
+    if (!streamId) return;
+    activeStreamId = null;
+    void invokeIpc('chat:cancel-stream', { streamId }).catch(() => {});
+  }
+
   async function saveCurrentSession() {
     if (isPrivate) return;
     if (!sessionId || messages.length === 0) return;
@@ -392,16 +410,26 @@ export async function createChatView(
     const now = new Date().toISOString();
     const sessionMessages = messages
       .filter(
-        (message) => !message.hidden && !message.streaming && !message.pending && message.content,
+        (message) =>
+          !message.hidden &&
+          !message.streaming &&
+          !message.pending &&
+          (message.content || message.terminal),
       )
       .map(({ role, content, thinking, modelContent, attachments, terminal }) => {
-        const entry = { role, content };
-        if (thinking) entry.thinking = thinking;
+        const safeContent =
+          role === 'assistant' ? sanitizeAssistantVisibleContent(content) : content;
+        const entry = { role, content: safeContent };
+        if (thinking) {
+          entry.thinking =
+            role === 'assistant' ? sanitizeAssistantVisibleContent(thinking) : thinking;
+        }
         if (modelContent && modelContent !== content) entry.modelContent = modelContent;
         if (attachments?.length) entry.attachments = attachments.map(toAttachmentSummary);
         if (terminal) entry.terminal = terminal;
         return entry;
-      });
+      })
+      .filter((message) => message.content || message.terminal);
 
     const sessionData = {
       id: sessionId,
@@ -1151,7 +1179,7 @@ export async function createChatView(
 
   function normalizeGeneratedCommitMessage(text = '') {
     const parsed = parseThinkingFromText(String(text ?? ''));
-    const visible = stripNativeToolCalls(stripToolCallBlocks(parsed.content || text));
+    const visible = sanitizeAssistantVisibleContent(parsed.content || text);
     return visible
       .replace(/^```(?:text|gitcommit|commit)?\s*/i, '')
       .replace(/```$/i, '')
@@ -1439,20 +1467,33 @@ export async function createChatView(
 
   async function loadSession(id) {
     try {
+      cancelActiveStream();
+      generationToken += 1;
+      removeStreamListeners();
+      clearTimeout(diagTimer);
+      diagTimer = null;
+      diagPanel?.hide();
+      isSending = false;
+      accText = '';
+      accThinking = '';
       const session = await invokeIpc('history:load-session', id, activeProject?.id);
       messages = (session.messages ?? [])
-        .map((message) => ({
-          role: message.role === 'assistant' ? 'assistant' : 'user',
-          content: typeof message.content === 'string' ? message.content : '',
-          modelContent: typeof message.modelContent === 'string' ? message.modelContent : null,
-          attachments: Array.isArray(message.attachments)
-            ? message.attachments.map(toAttachmentSummary)
-            : [],
-          terminal: message.terminal ?? null,
-          thinking: message.thinking ?? '',
-          streaming: false,
-        }))
-        .filter((message) => message.content);
+        .map((message) => {
+          const role = message.role === 'assistant' ? 'assistant' : 'user';
+          const content = typeof message.content === 'string' ? message.content : '';
+          return {
+            role,
+            content: role === 'assistant' ? sanitizeAssistantVisibleContent(content) : content,
+            modelContent: typeof message.modelContent === 'string' ? message.modelContent : null,
+            attachments: Array.isArray(message.attachments)
+              ? message.attachments.map(toAttachmentSummary)
+              : [],
+            terminal: message.terminal ?? null,
+            thinking: sanitizeAssistantVisibleContent(message.thinking ?? ''),
+            streaming: false,
+          };
+        })
+        .filter((message) => message.content || message.terminal);
 
       sessionId = session.id;
       sessionCreatedAt = session.createdAt ?? new Date().toISOString();
@@ -1899,12 +1940,13 @@ export async function createChatView(
     diagTimer = null;
     diagPanel?.hide();
     markCompletionSoundAborted();
+    cancelActiveStream();
     removeStreamListeners();
     const stoppedNote = strings.composer.generationStopped;
     messages = messages.map((message, index) => {
       if (index !== messages.length - 1) return message;
       const { content: parsedStopped, thinking: inlineStopped } = parseThinkingFromText(accText);
-      const cleanedStopped = stripNativeToolCalls(stripToolCallBlocks(parsedStopped));
+      const cleanedStopped = sanitizeAssistantVisibleContent(parsedStopped);
       const content = cleanedStopped ? `${cleanedStopped}\n\n${stoppedNote}` : stoppedNote;
       return {
         role: 'assistant',
@@ -2030,6 +2072,7 @@ export async function createChatView(
 
   function clearConversation() {
     generationToken += 1;
+    cancelActiveStream();
     messages = [];
     draftValue = '';
     pendingAttachments = [];
@@ -2339,9 +2382,10 @@ export async function createChatView(
   async function executeTerminalTool(action) {
     // ── Dedup guard: skip exact repeated write_local_file calls within a session ──
     if (action?.tool === 'write_local_file') {
-      const dedupKey = `${action.payload?.filePath ?? ''}::${action.payload?.content ?? ''}`;
+      const filePath = action.payload?.path ?? action.payload?.filePath ?? '';
+      const dedupKey = `${filePath}::${action.payload?.content ?? ''}`;
       if (completedWrites.has(dedupKey)) {
-        return { ok: true, path: action.payload?.filePath, bytes: 0, _skippedDuplicate: true };
+        return { ok: true, path: filePath, bytes: 0, _skippedDuplicate: true };
       }
     }
 
@@ -2371,7 +2415,8 @@ export async function createChatView(
 
     // Track successful writes for dedup
     if (action?.tool === 'write_local_file' && result?.ok) {
-      const dedupKey = `${action.payload?.filePath ?? ''}::${action.payload?.content ?? ''}`;
+      const filePath = action.payload?.path ?? action.payload?.filePath ?? '';
+      const dedupKey = `${filePath}::${action.payload?.content ?? ''}`;
       completedWrites.add(dedupKey);
     }
 
@@ -2481,7 +2526,7 @@ export async function createChatView(
       if (!terminalAction && !toolsetAction) {
         return {
           ...lastMeta,
-          text: parsedContent || strings.composer.emptyResponse,
+          text: sanitizeAssistantVisibleContent(parsedContent) || strings.composer.emptyResponse,
           charCountIn: usage.input,
           charCountOut: usage.output,
         };
@@ -2490,7 +2535,7 @@ export async function createChatView(
       if (depth >= MAX_SUB_AGENT_TOOL_CALLS) {
         return {
           ...lastMeta,
-          text: stripNativeToolCalls(parsedContent) || strings.terminal.unsupportedTool,
+          text: sanitizeAssistantVisibleContent(parsedContent) || strings.terminal.unsupportedTool,
           charCountIn: usage.input,
           charCountOut: usage.output,
         };
@@ -2511,7 +2556,8 @@ export async function createChatView(
         localMessages.push({
           role: 'assistant',
           content:
-            stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool,
+            sanitizeAssistantVisibleContent(terminalAction.visibleContent) ||
+            strings.terminal.runningTool,
         });
       } else {
         const toolsetResult =
@@ -2533,7 +2579,9 @@ export async function createChatView(
         }
         localMessages.push({
           role: 'assistant',
-          content: stripNativeToolCalls(toolsetAction.visibleContent) || strings.tools.runningTool,
+          content:
+            sanitizeAssistantVisibleContent(toolsetAction.visibleContent) ||
+            strings.tools.runningTool,
         });
       }
 
@@ -2630,6 +2678,12 @@ export async function createChatView(
     );
   }
 
+  function updateAssistantMessageAt(messageIndex, updater) {
+    messages = messages.map((message, index) =>
+      index !== messageIndex ? message : updater(message),
+    );
+  }
+
   function buildTerminalDisplayOutput(result) {
     const parts = [];
     if (result?.stdout) parts.push(result.stdout);
@@ -2661,8 +2715,14 @@ export async function createChatView(
     terminalDepth,
     runToken,
     generationStartTime,
+    extraToolsetActions = [],
   ) {
-    const actions = Array.isArray(actionOrActions) ? actionOrActions : [actionOrActions];
+    const actions = (Array.isArray(actionOrActions) ? actionOrActions : [actionOrActions]).filter(
+      Boolean,
+    );
+    const toolsetActions = (
+      Array.isArray(extraToolsetActions) ? extraToolsetActions : [extraToolsetActions]
+    ).filter(Boolean);
 
     const executionResults = [];
 
@@ -2679,7 +2739,9 @@ export async function createChatView(
           ...messages,
           {
             role: 'assistant',
-            content: stripNativeToolCalls(action.visibleContent) || strings.terminal.runningTool,
+            content:
+              sanitizeAssistantVisibleContent(action.visibleContent) ||
+              strings.terminal.runningTool,
             thinking: '',
             streaming: false,
             providerLabel: activeProvider?.label ?? 'AI',
@@ -2753,10 +2815,82 @@ export async function createChatView(
 
     if (runToken !== generationToken) return;
 
-    const allOk = executionResults.every(({ result }) => result?.ok !== false && !result?.error);
-    const combinedParts = executionResults.map(({ action, result }) =>
-      formatTerminalResultForModel(strings, action, result),
-    );
+    const toolsetExecutionResults = [];
+    const toolsetMessageIndexes = [];
+
+    if (toolsetActions.length > 0) {
+      const toolsetMessages = [];
+      for (const action of toolsetActions) {
+        const isSubAgentAction = action.tool === 'spawn_sub_agents';
+        toolsetMessageIndexes.push(messages.length + toolsetMessages.length);
+        toolsetMessages.push({
+          role: 'assistant',
+          content:
+            sanitizeAssistantVisibleContent(action.visibleContent) ||
+            (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
+          thinking: '',
+          streaming: false,
+          providerLabel: activeProvider?.label ?? 'AI',
+          modelLabel: activeModelLabel,
+          terminal: {
+            label: isSubAgentAction ? strings.tools.subAgentsLabel : action.tool,
+            command: action.tool,
+            status: 'running',
+            statusLabel: strings.terminal.running,
+          },
+        });
+      }
+
+      messages = [...messages, ...toolsetMessages];
+      syncComposer();
+      renderThread();
+      scheduleScrollToBottom();
+
+      const results = await Promise.all(
+        toolsetActions.map(async (action, index) => {
+          try {
+            const result = await executeToolsetTool(action);
+            return { action, index, result };
+          } catch (error) {
+            return {
+              action,
+              index,
+              result: { ok: false, error: error?.message ?? String(error), tool: action.tool },
+            };
+          }
+        }),
+      );
+      toolsetExecutionResults.push(...results);
+
+      if (runToken !== generationToken) return;
+
+      for (const { index, result } of toolsetExecutionResults) {
+        const ok = result?.ok !== false && !result?.error;
+        updateAssistantMessageAt(toolsetMessageIndexes[index], (message) => ({
+          ...message,
+          terminal: {
+            ...(message.terminal ?? {}),
+            status: ok ? 'completed' : 'failed',
+            statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
+            output: result?.output ?? result?.error ?? '',
+          },
+        }));
+      }
+
+      renderThread();
+      scheduleScrollToBottom();
+    }
+
+    const allResults = [...executionResults, ...toolsetExecutionResults];
+    const allOk = allResults.every(({ result }) => result?.ok !== false && !result?.error);
+    const combinedParts = [
+      ...executionResults.map(({ action, result }) =>
+        formatTerminalResultForModel(strings, action, result),
+      ),
+      ...toolsetExecutionResults.map(({ action, result }) =>
+        formatToolsetResultForModel(action, result),
+      ),
+    ];
     const baseModelResult = combinedParts.join('\n\n---\n\n');
     const modelResult = allOk
       ? baseModelResult +
@@ -2801,11 +2935,14 @@ export async function createChatView(
     runToken,
     generationStartTime,
   ) {
-    const actions = Array.isArray(actionOrActions) ? actionOrActions : [actionOrActions];
+    const actions = (Array.isArray(actionOrActions) ? actionOrActions : [actionOrActions]).filter(
+      Boolean,
+    );
     const primaryAction = actions[0];
+    if (!primaryAction) return;
 
     // ── Sub-agents: special-cased for live per-task progress ─────────────────
-    if (primaryAction.tool === 'spawn_sub_agents') {
+    if (actions.length === 1 && primaryAction.tool === 'spawn_sub_agents') {
       const initTasks = normalizeSubAgentTasks(
         primaryAction.payload?.parameters?.tasks ?? primaryAction.payload?.tasks,
       );
@@ -2909,33 +3046,77 @@ export async function createChatView(
     }
 
     // ── All other toolset tools ───────────────────────────────────────────────
-    let result;
+    const toolMessageIndexes = [messages.length - 1];
+    const additionalMessages = [];
 
-    try {
-      result = await executeToolsetTool(primaryAction);
-    } catch (error) {
-      result = { ok: false, error: error?.message ?? String(error), tool: primaryAction.tool };
+    for (let index = 1; index < actions.length; index += 1) {
+      const action = actions[index];
+      const isSubAgentAction = action.tool === 'spawn_sub_agents';
+      toolMessageIndexes.push(messages.length + additionalMessages.length);
+      additionalMessages.push({
+        role: 'assistant',
+        content:
+          sanitizeAssistantVisibleContent(action.visibleContent) ||
+          (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
+        thinking: '',
+        streaming: false,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel,
+        terminal: {
+          label: isSubAgentAction ? strings.tools.subAgentsLabel : action.tool,
+          command: action.tool,
+          status: 'running',
+          statusLabel: strings.terminal.running,
+        },
+      });
     }
+
+    if (additionalMessages.length > 0) {
+      messages = [...messages, ...additionalMessages];
+      syncComposer();
+      renderThread();
+      scheduleScrollToBottom();
+    }
+
+    const executionResults = await Promise.all(
+      actions.map(async (action, index) => {
+        try {
+          const result = await executeToolsetTool(action);
+          return { action, index, result };
+        } catch (error) {
+          return {
+            action,
+            index,
+            result: { ok: false, error: error?.message ?? String(error), tool: action.tool },
+          };
+        }
+      }),
+    );
 
     if (runToken !== generationToken) return;
 
-    const ok = result?.ok !== false && !result?.error;
-    const baseModelResult = formatToolsetResultForModel(primaryAction, result);
-    const modelResult = ok
-      ? baseModelResult +
-        "\n\nThe tool completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tool again with the same arguments."
-      : baseModelResult +
-        '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal. Do not repeat the exact same failing call.';
+    for (const { index, result } of executionResults) {
+      const ok = result?.ok !== false && !result?.error;
+      updateAssistantMessageAt(toolMessageIndexes[index], (message) => ({
+        ...message,
+        terminal: {
+          ...(message.terminal ?? {}),
+          status: ok ? 'completed' : 'failed',
+          statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
+          output: result?.output ?? result?.error ?? '',
+        },
+      }));
+    }
 
-    updateLastAssistantMessage((message) => ({
-      ...message,
-      terminal: {
-        ...(message.terminal ?? {}),
-        status: ok ? 'completed' : 'failed',
-        statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
-        output: result?.output ?? result?.error ?? '',
-      },
-    }));
+    const allOk = executionResults.every(({ result }) => result?.ok !== false && !result?.error);
+    const baseModelResult = executionResults
+      .map(({ action, result }) => formatToolsetResultForModel(action, result))
+      .join('\n\n---\n\n');
+    const modelResult = allOk
+      ? baseModelResult +
+        "\n\nAll tool calls completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tools again with the same arguments."
+      : baseModelResult +
+        '\n\nOne or more tool calls failed. Diagnose the errors, then retry with corrected approaches. Do not repeat exact same failing calls.';
 
     messages = [
       ...messages,
@@ -2975,6 +3156,10 @@ export async function createChatView(
     generationStartTime,
   }) {
     removeStreamListeners();
+    const streamId = createStreamId(runToken);
+    activeStreamId = streamId;
+    const isCurrentStreamEvent = (payload) =>
+      runToken === generationToken && activeStreamId === streamId && payload?.streamId === streamId;
 
     // Start the diagnostic timer only on the first turn (not tool continuations).
     // If the model hasn't sent a single token after 10 seconds, show the panel
@@ -3041,20 +3226,24 @@ export async function createChatView(
 
     streamDisposers.push(
       onIpc('chat:stream-chunk', (chunk) => {
-        if (runToken !== generationToken) return;
+        if (!isCurrentStreamEvent(chunk)) return;
         if (chunk?.type === 'text' && chunk.text) accText += chunk.text;
         if (chunk?.type === 'thinking' && chunk.text) accThinking += chunk.text;
         const { content: displayContent, thinking: inlineThinking } =
           parseThinkingFromText(accText);
         const displayThinking = accThinking || inlineThinking;
-        updateLastStreamingMessage(thread, { content: displayContent, thinking: displayThinking });
+        updateLastStreamingMessage(thread, {
+          content: sanitizeAssistantVisibleContent(displayContent),
+          thinking: sanitizeAssistantVisibleContent(displayThinking),
+        });
         scheduleScrollToBottom();
       }),
     );
 
     streamDisposers.push(
       onIpc('chat:stream-done', (meta) => {
-        if (runToken !== generationToken) return;
+        if (!isCurrentStreamEvent(meta)) return;
+        clearActiveStreamId(streamId);
         clearTimeout(diagTimer);
         diagTimer = null;
         diagPanel?.hide();
@@ -3063,37 +3252,26 @@ export async function createChatView(
         // Some models (e.g. Nemotron) embed tool calls inside their reasoning/thinking blocks.
         // Search content first, then fall back to thinking text so we never miss a tool call.
         const thinkingText = accThinking || inlineThinking || '';
-        let terminalActions =
-          parseAllTerminalToolRequests(parsedContent)?.terminalActions ??
-          parseAllTerminalToolRequests(thinkingText)?.terminalActions ??
-          null;
-        terminalActions = terminalActions?.length ? terminalActions : null;
+        const primaryTools = parseAllToolRequests(parsedContent);
+        const fallback = primaryTools.hasTools
+          ? primaryTools
+          : thinkingText
+            ? parseAllToolRequests(thinkingText)
+            : null;
+        const terminalActions = fallback?.terminalActions.length ? fallback.terminalActions : null;
         let terminalAction = terminalActions?.[0] ?? null;
-        let toolsetAction = null;
-        let toolsetActions = null;
-        if (!terminalAction) {
-          const primaryFallback = parseAllToolRequests(parsedContent);
-          const fallback = primaryFallback.hasTools
-            ? primaryFallback
-            : thinkingText
-              ? parseAllToolRequests(thinkingText)
-              : null;
-          if (fallback?.hasTools) {
-            terminalActions = fallback.terminalActions.length ? fallback.terminalActions : null;
-            terminalAction = terminalActions?.[0] ?? null;
-            toolsetActions = fallback.toolsetActions.length ? fallback.toolsetActions : null;
-            toolsetAction = toolsetActions?.[0] ?? null;
-          }
-          if (terminalAction && !terminalActions) terminalActions = [terminalAction];
-        }
+        const toolsetActions = fallback?.toolsetActions.length ? fallback.toolsetActions : null;
+        const toolsetAction = toolsetActions?.[0] ?? null;
 
         if ((terminalAction || toolsetAction) && terminalDepth >= MAX_TERMINAL_TOOL_CALLS) {
           const action = terminalAction || toolsetAction;
           updateLastAssistantMessage((message) => ({
             ...message,
             role: 'assistant',
-            content: action.visibleContent || strings.terminal.unsupportedTool,
-            thinking: accThinking || inlineThinking,
+            content:
+              sanitizeAssistantVisibleContent(action.visibleContent) ||
+              strings.terminal.unsupportedTool,
+            thinking: sanitizeAssistantVisibleContent(accThinking || inlineThinking),
             streaming: false,
             error: true,
             providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
@@ -3114,8 +3292,9 @@ export async function createChatView(
             ...message,
             role: 'assistant',
             content:
-              stripNativeToolCalls(terminalAction.visibleContent) || strings.terminal.runningTool,
-            thinking: accThinking || inlineThinking,
+              sanitizeAssistantVisibleContent(terminalAction.visibleContent) ||
+              strings.terminal.runningTool,
+            thinking: sanitizeAssistantVisibleContent(accThinking || inlineThinking),
             streaming: false,
             providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
             modelLabel: meta?.modelLabel ?? activeModelLabel,
@@ -3144,6 +3323,7 @@ export async function createChatView(
             terminalDepth,
             runToken,
             generationStartTime,
+            toolsetActions,
           );
           return;
         }
@@ -3154,9 +3334,9 @@ export async function createChatView(
             ...message,
             role: 'assistant',
             content:
-              stripNativeToolCalls(toolsetAction.visibleContent) ||
+              sanitizeAssistantVisibleContent(toolsetAction.visibleContent) ||
               (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
-            thinking: accThinking || inlineThinking,
+            thinking: sanitizeAssistantVisibleContent(accThinking || inlineThinking),
             streaming: false,
             providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
             modelLabel: meta?.modelLabel ?? activeModelLabel,
@@ -3170,7 +3350,7 @@ export async function createChatView(
           syncComposer();
           renderThread();
           void continueAfterToolsetTool(
-            toolsetAction,
+            toolsetActions ?? toolsetAction,
             terminalDepth,
             runToken,
             generationStartTime,
@@ -3178,11 +3358,13 @@ export async function createChatView(
           return;
         }
 
-        const isEmpty = !parsedContent && !accThinking;
+        const finalContent = sanitizeAssistantVisibleContent(parsedContent);
+        const finalThinking = sanitizeAssistantVisibleContent(accThinking || inlineThinking);
+        const isEmpty = !finalContent && !finalThinking;
         updateLastAssistantMessage(() => ({
           role: 'assistant',
-          content: parsedContent || strings.composer.emptyResponse,
-          thinking: accThinking || inlineThinking,
+          content: finalContent || strings.composer.emptyResponse,
+          thinking: finalThinking,
           streaming: false,
           empty: isEmpty,
           durationMs: Date.now() - generationStartTime,
@@ -3199,7 +3381,8 @@ export async function createChatView(
 
     streamDisposers.push(
       onIpc('chat:stream-error', (error) => {
-        if (runToken !== generationToken) return;
+        if (!isCurrentStreamEvent(error)) return;
+        clearActiveStreamId(streamId);
         clearTimeout(diagTimer);
         diagTimer = null;
         diagPanel?.hide();
@@ -3207,7 +3390,7 @@ export async function createChatView(
         updateLastAssistantMessage(() => ({
           role: 'assistant',
           content: error?.message || strings.composer.responseError,
-          thinking: accThinking,
+          thinking: sanitizeAssistantVisibleContent(accThinking),
           streaming: false,
           error: true,
           providerLabel: activeProvider?.label ?? 'AI',
@@ -3238,6 +3421,7 @@ export async function createChatView(
 
     void invokeIpc('chat:stream-message', {
       messages: historyToSend,
+      streamId,
       providerId: activeProvider?.id ?? null,
       modelId: activeModel?.id ?? null,
       memoryContext: memoryContext || null,
