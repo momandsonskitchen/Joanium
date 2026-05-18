@@ -21,11 +21,11 @@
   },
   "z-ai/glm4.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T12:11:03.995Z"
+    "checkedAt": "2026-05-18T14:52:14.756Z"
   },
   "qwen/qwen3.5-397b-a17b": {
-    "status": "green",
-    "checkedAt": "2026-05-17T13:12:36.902Z"
+    "status": "yellow",
+    "checkedAt": "2026-05-18T14:52:29.665Z"
   },
   "minimaxai/minimax-m2.7": {
     "status": "yellow",
