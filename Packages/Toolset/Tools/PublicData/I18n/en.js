@@ -180,6 +180,85 @@ const publicDataStrings = {
       toolHint:
         'Ask to inspect a URL, generate a QR code URL, check RDAP info, or trace redirects.',
     },
+    {
+      id: 'calculator',
+      label: 'Calculator',
+      description: 'Precise math expression evaluator using JavaScript Math built-ins.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to evaluate any arithmetic or Math expression reliably.',
+    },
+    {
+      id: 'datetime',
+      label: 'Date & Time',
+      description:
+        'Current date and time in any timezone, date differences, date arithmetic, and day-of-week lookup.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint:
+        'Ask for the current time, how many days between dates, or what day a date falls on.',
+    },
+    {
+      id: 'arxiv',
+      label: 'arXiv',
+      description: 'Academic paper search and full abstract retrieval from arXiv.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint:
+        'Ask to search academic papers by topic, category, or fetch a specific arXiv paper.',
+    },
+    {
+      id: 'reddit',
+      label: 'Reddit',
+      description: 'Subreddit post browsing and cross-Reddit search using the public JSON API.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to browse a subreddit or search Reddit for community opinions on any topic.',
+    },
+    {
+      id: 'openlibrary',
+      label: 'Open Library',
+      description: 'Book search by title, author, keyword, or ISBN from Open Library.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to search books, look up an author, or retrieve details for an ISBN.',
+    },
+    {
+      id: 'worldbank',
+      label: 'World Bank',
+      description:
+        'Country economic indicators including GDP, population, inflation, unemployment, and life expectancy.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint:
+        'Ask for World Bank economic data for any country, such as GDP, population, or CO2 emissions.',
+    },
+    {
+      id: 'usgs_earthquakes',
+      label: 'USGS Earthquakes',
+      description:
+        'Real-time earthquake feed from the USGS, filterable by magnitude, time, and location.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask about recent earthquakes worldwide or near a specific location.',
+    },
+    {
+      id: 'openfoodfacts',
+      label: 'Open Food Facts',
+      description:
+        'Nutritional information for food products by name or barcode, including Nutri-Score and macros.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for nutrition facts on any food product by name or barcode.',
+    },
   ],
 };
 

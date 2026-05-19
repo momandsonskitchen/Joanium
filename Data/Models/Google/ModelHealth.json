@@ -14,5 +14,9 @@
   "gemini-2.5-flash": {
     "status": "green",
     "checkedAt": "2026-05-19T08:47:07.488Z"
+  },
+  "gemini-2.5-pro": {
+    "status": "green",
+    "checkedAt": "2026-05-19T10:32:14.513Z"
   }
 }

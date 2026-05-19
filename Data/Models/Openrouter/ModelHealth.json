@@ -37,7 +37,7 @@
   },
   "openai/gpt-5.4": {
     "status": "yellow",
-    "checkedAt": "2026-05-19T08:47:07.573Z"
+    "checkedAt": "2026-05-19T10:32:15.487Z"
   },
   "google/gemini-3.1-pro-preview": {
     "status": "green",

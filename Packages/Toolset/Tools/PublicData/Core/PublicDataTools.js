@@ -378,6 +378,235 @@ export const PUBLIC_DATA_TOOL_DEFINITIONS = [
       description: 'Array of { lat, lon } objects, or JSON string.',
     },
   }),
+
+  // ── Calculator ─────────────────────────────────────────────────────────────────
+  tool(
+    'calculate',
+    'Evaluate a mathematical expression precisely. Supports arithmetic, Math.sqrt, Math.pow, Math.sin, Math.cos, Math.log, Math.PI, Math.E, exponentiation (**), and all other Math built-ins. Always use this for any numeric calculation instead of computing in your head.',
+    'math',
+    {
+      expression: {
+        type: 'string',
+        required: true,
+        description:
+          'Math expression, e.g. "Math.sqrt(144)", "(1000 * Math.pow(1.05, 10)).toFixed(2)", "Math.PI * 10 ** 2"',
+      },
+    },
+  ),
+
+  // ── Date & Time ───────────────────────────────────────────────────────────
+  tool(
+    'get_current_datetime',
+    'Get the current date and time in any IANA timezone. Returns date, time, day of week, week number, day of year, and Unix timestamp. Always use this when the user asks about the current time, date, or day — never guess.',
+    'datetime',
+    {
+      timezone: {
+        type: 'string',
+        required: false,
+        description:
+          'IANA timezone name e.g. "America/New_York", "Asia/Kolkata", "Europe/London". Defaults to system timezone.',
+      },
+    },
+  ),
+  tool(
+    'date_calculator',
+    'Perform date arithmetic: calculate the difference between two dates in days/weeks/months, add or subtract days/months/years from a date, or find the day of the week for any historical or future date.',
+    'datetime',
+    {
+      operation: {
+        type: 'string',
+        required: true,
+        description:
+          '"diff" (days between two dates), "add" (add/subtract time from a date), or "weekday" (day of week for a date).',
+      },
+      date: {
+        type: 'string',
+        required: true,
+        description: 'Primary date in YYYY-MM-DD format, or "today", "tomorrow", "yesterday".',
+      },
+      date2: {
+        type: 'string',
+        required: false,
+        description: 'Second date for "diff" operation (YYYY-MM-DD).',
+      },
+      days: {
+        type: 'number',
+        required: false,
+        description: 'Days to add (positive) or subtract (negative) for "add" operation.',
+      },
+      months: {
+        type: 'number',
+        required: false,
+        description: 'Months to add or subtract for "add" operation.',
+      },
+      years: {
+        type: 'number',
+        required: false,
+        description: 'Years to add or subtract for "add" operation.',
+      },
+    },
+  ),
+
+  // ── arXiv ──────────────────────────────────────────────────────────────────────
+  tool(
+    'search_arxiv',
+    'Search arXiv for academic and scientific papers. Returns title, authors, abstract, and link. Use for research questions, AI/ML papers, math, physics, computer science, and any academic topic.',
+    'research',
+    {
+      query: { type: 'string', required: true, description: 'Search query.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+      category: {
+        type: 'string',
+        required: false,
+        description:
+          'Optional arXiv category: cs (computer science), math, physics, stat, q-bio, econ, eess.',
+      },
+    },
+  ),
+  tool(
+    'get_arxiv_paper',
+    'Fetch full details and complete abstract of a specific arXiv paper by its ID (e.g. "2301.00001" or "cs/0501022").',
+    'research',
+    {
+      id: { type: 'string', required: true, description: 'arXiv paper ID.' },
+    },
+  ),
+
+  // ── Reddit ───────────────────────────────────────────────────────────────────
+  tool(
+    'get_reddit_posts',
+    'Fetch posts from any subreddit. Use to find community discussions, real-world opinions, personal experiences, and niche knowledge on any topic.',
+    'social',
+    {
+      subreddit: {
+        type: 'string',
+        required: true,
+        description: 'Subreddit name without r/ prefix.',
+      },
+      sort: {
+        type: 'string',
+        required: false,
+        description: 'hot, new, top, or rising. Default: hot.',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 10, max 25.' },
+    },
+  ),
+  tool(
+    'search_reddit',
+    'Search Reddit posts and discussions across all subreddits or within a specific one. Great for finding community opinions, product experiences, and practical advice.',
+    'social',
+    {
+      query: { type: 'string', required: true, description: 'Search query.' },
+      subreddit: {
+        type: 'string',
+        required: false,
+        description: 'Optional subreddit to restrict search to.',
+      },
+      sort: {
+        type: 'string',
+        required: false,
+        description: 'relevance, hot, new, or top. Default: relevance.',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 10, max 25.' },
+    },
+  ),
+
+  // ── Open Library ───────────────────────────────────────────────────────────
+  tool(
+    'search_books',
+    'Search Open Library for books by title, author, subject, or keyword. Returns title, author, year, page count, ISBN, and subject tags.',
+    'books',
+    {
+      query: {
+        type: 'string',
+        required: true,
+        description: 'Search query: book title, author name, ISBN, or subject.',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'get_book_by_isbn',
+    'Get detailed information about a book by its ISBN-10 or ISBN-13 from Open Library.',
+    'books',
+    {
+      isbn: {
+        type: 'string',
+        required: true,
+        description: 'ISBN-10 or ISBN-13 (with or without dashes).',
+      },
+    },
+  ),
+
+  // ── World Bank ──────────────────────────────────────────────────────────────
+  tool(
+    'get_world_bank_data',
+    'Get World Bank economic and development indicators for any country. Without an indicator returns a summary of GDP, population, inflation, unemployment, and life expectancy. Indicator options: gdp, gdp_per_capita, gdp_growth, population, inflation, unemployment, co2, life_expectancy, internet_usage, literacy, exports, imports — or any raw World Bank indicator code.',
+    'economics',
+    {
+      country: {
+        type: 'string',
+        required: true,
+        description: 'Country name or ISO 2-letter code (e.g. "India" or "IN").',
+      },
+      indicator: {
+        type: 'string',
+        required: false,
+        description: 'Indicator name or World Bank code. Omit for a key-indicators summary.',
+      },
+      years: {
+        type: 'number',
+        required: false,
+        description: 'Number of recent years to return, default 5, max 20.',
+      },
+    },
+  ),
+
+  // ── USGS Earthquakes ───────────────────────────────────────────────────────
+  tool(
+    'get_earthquakes',
+    'Fetch recent earthquakes from the USGS real-time feed. Filter by magnitude, time window, and optionally by proximity to a location. Use for natural disaster awareness, geology questions, or checking if an earthquake happened near the user.',
+    'geoscience',
+    {
+      min_magnitude: {
+        type: 'number',
+        required: false,
+        description: 'Minimum magnitude, default 4.0.',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 10, max 50.' },
+      days: {
+        type: 'number',
+        required: false,
+        description: 'Past number of days to search, default 7, max 30.',
+      },
+      lat: { type: 'number', required: false, description: 'Latitude for nearby search.' },
+      lon: { type: 'number', required: false, description: 'Longitude for nearby search.' },
+      radius_km: {
+        type: 'number',
+        required: false,
+        description: 'Search radius in km when lat/lon provided, default 500.',
+      },
+    },
+  ),
+
+  // ── Open Food Facts ─────────────────────────────────────────────────────────
+  tool(
+    'search_food',
+    'Search Open Food Facts for food products by name or ingredient. Returns product name, brand, Nutri-Score, and per-100g macronutrients (calories, fat, carbs, protein, sugar, salt). Use for nutrition and dietary questions.',
+    'nutrition',
+    {
+      query: { type: 'string', required: true, description: 'Food product name or ingredient.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'get_food_by_barcode',
+    'Get complete nutritional information for a food product by its barcode (EAN-13, UPC-A, etc.) from Open Food Facts.',
+    'nutrition',
+    {
+      barcode: { type: 'string', required: true, description: 'Product barcode number.' },
+    },
+  ),
 ];
 
 function clampInteger(value, fallback, min, max) {
@@ -1148,6 +1377,19 @@ async function getIssLocation() {
   ].join('\n');
 }
 
+function parseUrlValue(value) {
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`Invalid URL: ${value}`);
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('Only http and https URLs are supported.');
+  }
+  return parsed;
+}
+
 async function shortenUrl(params) {
   const input = requireText(params, 'url');
   parseUrlValue(input);
@@ -1388,6 +1630,524 @@ async function getElevation(params) {
   );
 }
 
+// ── Calculator ──────────────────────────────────────────────────────────────────
+function calculate(params) {
+  const expression = requireText(params, 'expression');
+  if (
+    /import|require|process|global|\beval\b|Function|__proto__|prototype|constructor/i.test(
+      expression,
+    )
+  ) {
+    throw new Error('Expression contains disallowed keywords.');
+  }
+  let result;
+  try {
+    result = new Function(
+      'Math',
+      'Number',
+      'Infinity',
+      'NaN',
+      'isFinite',
+      'isNaN',
+      `'use strict'; return (${expression});`,
+    )(Math, Number, Infinity, NaN, isFinite, isNaN);
+  } catch (error) {
+    throw new Error(`Calculation error: ${error.message}`);
+  }
+  if (result === undefined || result === null) throw new Error('Expression returned no value.');
+  return `Result: ${result}`;
+}
+
+// ── Date & Time ───────────────────────────────────────────────────────────────
+function getCurrentDatetime(params) {
+  const timezone =
+    String(params.timezone ?? '').trim() || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const now = new Date();
+  let parts;
+  try {
+    parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      weekday: 'long',
+      hour12: false,
+    }).formatToParts(now);
+  } catch {
+    throw new Error(
+      `Unknown timezone: "${timezone}". Use an IANA timezone name like "America/New_York".`,
+    );
+  }
+  const part = (type) => parts.find((p) => p.type === type)?.value ?? '';
+  const year = Number(part('year'));
+  const month = Number(part('month'));
+  const day = Number(part('day'));
+  const rawHour = part('hour');
+  const hour = rawHour === '24' ? '00' : rawHour;
+  const minute = part('minute');
+  const second = part('second');
+  const weekday = part('weekday');
+  // ISO 8601 week number
+  const d = new Date(Date.UTC(year, month - 1, day));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNumber = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+  // Day of year
+  const dayOfYear =
+    Math.round(
+      (new Date(Date.UTC(year, month - 1, day)) - new Date(Date.UTC(year, 0, 1))) / 86400000,
+    ) + 1;
+  return [
+    `Current date and time`,
+    `Timezone: ${timezone}`,
+    `Date: ${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+    `Time: ${hour}:${minute}:${second}`,
+    `Day: ${weekday}`,
+    `Week: ${weekNumber} of ${year}`,
+    `Day of year: ${dayOfYear}`,
+    `Unix timestamp: ${Math.floor(now.getTime() / 1000)}`,
+  ].join('\n');
+}
+
+function dateCalculator(params) {
+  const operation = requireText(params, 'operation').toLowerCase();
+  const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const parseDate = (value) => {
+    const str = String(value ?? '')
+      .trim()
+      .toLowerCase();
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    if (str === 'today') return new Date(today);
+    if (str === 'tomorrow') {
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() + 1);
+      return d;
+    }
+    if (str === 'yesterday') {
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - 1);
+      return d;
+    }
+    const parsed = new Date(`${str}T00:00:00Z`);
+    if (isNaN(parsed.getTime()))
+      throw new Error(`Invalid date: "${value}". Use YYYY-MM-DD format.`);
+    return parsed;
+  };
+  if (operation === 'weekday') {
+    const date = parseDate(requireText(params, 'date'));
+    return [
+      `Day of week`,
+      `Date: ${date.toISOString().slice(0, 10)}`,
+      `Day: ${WEEKDAYS[date.getUTCDay()]}`,
+    ].join('\n');
+  }
+  if (operation === 'diff') {
+    const date1 = parseDate(requireText(params, 'date'));
+    const date2 = parseDate(requireText(params, 'date2'));
+    const diffDays = Math.round((date2 - date1) / 86400000);
+    const absDays = Math.abs(diffDays);
+    return [
+      `Date difference`,
+      `From: ${date1.toISOString().slice(0, 10)} (${WEEKDAYS[date1.getUTCDay()]})`,
+      `To: ${date2.toISOString().slice(0, 10)} (${WEEKDAYS[date2.getUTCDay()]})`,
+      `Difference: ${diffDays} days`,
+      `Weeks: ${Math.floor(absDays / 7)} weeks and ${absDays % 7} days`,
+      `Months (approx): ${(absDays / 30.44).toFixed(1)}`,
+    ].join('\n');
+  }
+  if (operation === 'add') {
+    const date = parseDate(requireText(params, 'date'));
+    const days = Number(params.days ?? 0);
+    const months = Number(params.months ?? 0);
+    const years = Number(params.years ?? 0);
+    const result = new Date(date);
+    if (years) result.setUTCFullYear(result.getUTCFullYear() + years);
+    if (months) result.setUTCMonth(result.getUTCMonth() + months);
+    if (days) result.setUTCDate(result.getUTCDate() + days);
+    const diffDays = Math.round((result - date) / 86400000);
+    const parts = [
+      years ? `${years} year(s)` : null,
+      months ? `${months} month(s)` : null,
+      days ? `${days} day(s)` : null,
+    ].filter(Boolean);
+    return [
+      `Date calculation`,
+      `Start: ${date.toISOString().slice(0, 10)} (${WEEKDAYS[date.getUTCDay()]})`,
+      `Added: ${parts.join(', ') || 'nothing'}`,
+      `Result: ${result.toISOString().slice(0, 10)} (${WEEKDAYS[result.getUTCDay()]})`,
+      `Total change: ${diffDays} days`,
+    ].join('\n');
+  }
+  throw new Error('operation must be "diff", "add", or "weekday".');
+}
+
+// ── arXiv ──────────────────────────────────────────────────────────────────────
+function parseAtomXml(xml) {
+  const entries = [];
+  for (const match of xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
+    const block = match[1];
+    const text = (tag) => {
+      const m = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
+      return m ? m[1].replace(/<[^>]+>/g, '').trim() : '';
+    };
+    const attr = (tag, attribute) => {
+      const m = block.match(new RegExp(`<${tag}[^>]*\\s${attribute}="([^"]*)"[^>]*(?:\\/>|>)`));
+      return m ? m[1] : '';
+    };
+    const allAuthors = [
+      ...block.matchAll(/<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/g),
+    ].map((m) => m[1].trim());
+    const rawId = text('id');
+    const id = rawId.replace(/^https?:\/\/arxiv\.org\/abs\//, '');
+    entries.push({
+      id,
+      title: text('title').replace(/\s+/g, ' '),
+      summary: text('summary').replace(/\s+/g, ' '),
+      authors: allAuthors,
+      published: text('published').slice(0, 10),
+      link: attr('link', 'href') || `https://arxiv.org/abs/${id}`,
+    });
+  }
+  return entries;
+}
+
+async function searchArxiv(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const category = String(params.category ?? '').trim();
+  const encodedQuery = encodeURIComponent(query);
+  const searchQuery = category
+    ? `cat:${encodeURIComponent(category)}+AND+all:${encodedQuery}`
+    : `all:${encodedQuery}`;
+  const xml = await fetchText(
+    `https://export.arxiv.org/api/query?search_query=${searchQuery}&start=0&max_results=${limit}&sortBy=relevance&sortOrder=descending`,
+    { headers: { accept: 'application/xml' } },
+  );
+  const entries = parseAtomXml(xml);
+  if (!entries.length) return `No arXiv papers found for "${query}".`;
+  const rows = entries.map((entry) =>
+    [
+      entry.title,
+      `Authors: ${entry.authors.slice(0, 3).join(', ')}${entry.authors.length > 3 ? ` +${entry.authors.length - 3} more` : ''}`,
+      `Published: ${entry.published}`,
+      `Abstract: ${entry.summary.slice(0, 300)}${entry.summary.length > 300 ? '...' : ''}`,
+      `Link: https://arxiv.org/abs/${entry.id}`,
+    ].join('\n   '),
+  );
+  return formatList(`arXiv search: ${query}`, rows);
+}
+
+async function getArxivPaper(params) {
+  const id = requireText(params, 'id').replace(/^https?:\/\/arxiv\.org\/abs\//, '');
+  const xml = await fetchText(
+    `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(id)}`,
+    { headers: { accept: 'application/xml' } },
+  );
+  const entries = parseAtomXml(xml);
+  const entry = entries[0];
+  if (!entry?.title) throw new Error(`arXiv paper not found: ${id}`);
+  return [
+    `arXiv: ${entry.title}`,
+    `ID: ${entry.id}`,
+    `Authors: ${entry.authors.join(', ')}`,
+    `Published: ${entry.published}`,
+    `Link: https://arxiv.org/abs/${entry.id}`,
+    '',
+    'Abstract:',
+    entry.summary,
+  ].join('\n');
+}
+
+// ── Reddit ────────────────────────────────────────────────────────────────────
+async function getRedditPosts(params) {
+  const subreddit = requireText(params, 'subreddit').replace(/^r\//, '');
+  const sort = ['hot', 'new', 'top', 'rising'].includes(String(params.sort ?? 'hot').toLowerCase())
+    ? String(params.sort).toLowerCase()
+    : 'hot';
+  const limit = clampInteger(params.limit, 10, 1, 25);
+  const data = await fetchJson(
+    `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/${sort}.json?limit=${limit}`,
+  );
+  const posts = data?.data?.children ?? [];
+  if (!posts.length) return `No posts found in r/${subreddit}.`;
+  const rows = posts.map(({ data: post }) =>
+    [
+      post.title,
+      `Score: ${post.score ?? 0}, comments: ${post.num_comments ?? 0}`,
+      post.selftext
+        ? `Text: ${post.selftext.slice(0, 200)}${post.selftext.length > 200 ? '...' : ''}`
+        : null,
+      `Link: https://reddit.com${post.permalink}`,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`r/${subreddit} (${sort})`, rows);
+}
+
+async function searchReddit(params) {
+  const query = requireText(params, 'query');
+  const subreddit = String(params.subreddit ?? '')
+    .trim()
+    .replace(/^r\//, '');
+  const sort = ['relevance', 'hot', 'new', 'top'].includes(
+    String(params.sort ?? 'relevance').toLowerCase(),
+  )
+    ? String(params.sort).toLowerCase()
+    : 'relevance';
+  const limit = clampInteger(params.limit, 10, 1, 25);
+  const base = subreddit
+    ? `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/search.json`
+    : 'https://www.reddit.com/search.json';
+  const url = new URL(base);
+  url.searchParams.set('q', query);
+  url.searchParams.set('sort', sort);
+  url.searchParams.set('limit', String(limit));
+  if (!subreddit) url.searchParams.set('restrict_sr', '0');
+  const data = await fetchJson(url.toString());
+  const posts = data?.data?.children ?? [];
+  if (!posts.length) return `No Reddit results for "${query}".`;
+  const rows = posts.map(({ data: post }) =>
+    [
+      post.title,
+      `r/${post.subreddit} — Score: ${post.score ?? 0}, comments: ${post.num_comments ?? 0}`,
+      `Link: https://reddit.com${post.permalink}`,
+    ].join('\n   '),
+  );
+  return formatList(`Reddit search: ${query}`, rows);
+}
+
+// ── Open Library ─────────────────────────────────────────────────────────────
+async function searchBooks(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const data = await fetchJson(
+    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=${limit}&fields=key,title,author_name,first_publish_year,number_of_pages_median,isbn,subject`,
+  );
+  const docs = data.docs ?? [];
+  if (!docs.length) return `No books found for "${query}".`;
+  const rows = docs.map((book) =>
+    [
+      book.title,
+      `Author: ${(book.author_name ?? []).slice(0, 2).join(', ') || 'Unknown'}`,
+      book.first_publish_year ? `Year: ${book.first_publish_year}` : null,
+      book.number_of_pages_median ? `Pages: ${book.number_of_pages_median}` : null,
+      book.isbn?.[0] ? `ISBN: ${book.isbn[0]}` : null,
+      book.subject?.length ? `Subjects: ${book.subject.slice(0, 3).join(', ')}` : null,
+      `Link: https://openlibrary.org${book.key}`,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`Book search: ${query}`, rows);
+}
+
+async function getBookByIsbn(params) {
+  const isbn = requireText(params, 'isbn').replace(/[\s\-]/g, '');
+  const data = await fetchJson(
+    `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&jscmd=details&format=json`,
+  );
+  const book = data[`ISBN:${isbn}`];
+  if (!book) throw new Error(`No book found for ISBN ${isbn}.`);
+  const details = book.details ?? {};
+  return [
+    `Book: ${details.title ?? 'Unknown'}`,
+    `Authors: ${(details.authors ?? []).map((a) => a.name).join(', ') || 'Unknown'}`,
+    `ISBN: ${isbn}`,
+    `Publisher: ${(details.publishers ?? []).join(', ') || 'n/a'}`,
+    `Published: ${details.publish_date ?? 'n/a'}`,
+    `Pages: ${details.number_of_pages ?? 'n/a'}`,
+    `Subjects: ${
+      (details.subjects ?? [])
+        .slice(0, 5)
+        .map((s) => (typeof s === 'string' ? s : s.name))
+        .join(', ') || 'n/a'
+    }`,
+    `Link: ${book.info_url ?? `https://openlibrary.org/isbn/${isbn}`}`,
+  ].join('\n');
+}
+
+// ── World Bank ────────────────────────────────────────────────────────────────
+const WORLD_BANK_INDICATORS = Object.freeze({
+  gdp: 'NY.GDP.MKTP.CD',
+  gdp_per_capita: 'NY.GDP.PCAP.CD',
+  gdp_growth: 'NY.GDP.MKTP.KD.ZG',
+  population: 'SP.POP.TOTL',
+  inflation: 'FP.CPI.TOTL.ZG',
+  unemployment: 'SL.UEM.TOTL.ZS',
+  co2: 'EN.ATM.CO2E.PC',
+  life_expectancy: 'SP.DYN.LE00.IN',
+  internet_usage: 'IT.NET.USER.ZS',
+  literacy: 'SE.ADT.LITR.ZS',
+  exports: 'NE.EXP.GNFS.ZS',
+  imports: 'NE.IMP.GNFS.ZS',
+});
+
+async function fetchWorldBankIndicator(countryCode, indicatorCode, years) {
+  const data = await fetchJson(
+    `https://api.worldbank.org/v2/country/${encodeURIComponent(countryCode)}/indicator/${indicatorCode}?format=json&mrv=${years}&per_page=${years}`,
+  );
+  const rows = Array.isArray(data) ? data[1] : null;
+  return (rows ?? []).filter((row) => row.value != null).slice(0, years);
+}
+
+async function getWorldBankData(params) {
+  const countryInput = requireText(params, 'country');
+  const years = clampInteger(params.years, 5, 1, 20);
+  let countryCode;
+  if (countryInput.length <= 3) {
+    countryCode = countryInput.toUpperCase();
+  } else {
+    const search = await fetchJson(
+      `https://api.worldbank.org/v2/country?name=${encodeURIComponent(countryInput)}&format=json&per_page=5`,
+    ).catch(() => null);
+    const countries = Array.isArray(search) ? search[1] : null;
+    countryCode = countries?.[0]?.id ?? countryInput.slice(0, 3).toUpperCase();
+  }
+  const indicatorInput = String(params.indicator ?? '')
+    .trim()
+    .toLowerCase();
+  if (!indicatorInput) {
+    const summaryIndicators = [
+      { name: 'GDP (current USD)', code: WORLD_BANK_INDICATORS.gdp },
+      { name: 'GDP per capita (USD)', code: WORLD_BANK_INDICATORS.gdp_per_capita },
+      { name: 'Population', code: WORLD_BANK_INDICATORS.population },
+      { name: 'Inflation (%)', code: WORLD_BANK_INDICATORS.inflation },
+      { name: 'Unemployment (%)', code: WORLD_BANK_INDICATORS.unemployment },
+      { name: 'Life expectancy (years)', code: WORLD_BANK_INDICATORS.life_expectancy },
+    ];
+    const results = await Promise.all(
+      summaryIndicators.map(async (indicator) => {
+        const rows = await fetchWorldBankIndicator(countryCode, indicator.code, 1).catch(() => []);
+        const latest = rows[0];
+        return latest
+          ? `${indicator.name}: ${Number(latest.value).toLocaleString('en-US')} (${latest.date})`
+          : `${indicator.name}: n/a`;
+      }),
+    );
+    return [`World Bank data: ${countryInput} (${countryCode})`, '', ...results].join('\n');
+  }
+  const resolvedCode = WORLD_BANK_INDICATORS[indicatorInput] ?? indicatorInput.toUpperCase();
+  const rows = await fetchWorldBankIndicator(countryCode, resolvedCode, years);
+  if (!rows.length)
+    throw new Error(
+      `No World Bank data found for country "${countryInput}", indicator "${indicatorInput}".`,
+    );
+  const indicatorName = rows[0]?.indicator?.value ?? resolvedCode;
+  return [
+    `World Bank: ${indicatorName}`,
+    `Country: ${rows[0]?.country?.value ?? countryInput} (${countryCode})`,
+    '',
+    ...rows.map((row) => `${row.date}: ${Number(row.value).toLocaleString('en-US')}`),
+  ].join('\n');
+}
+
+// ── USGS Earthquakes ─────────────────────────────────────────────────────────
+async function getEarthquakes(params) {
+  const minMagnitude = Number(params.min_magnitude ?? 4.0);
+  const limit = clampInteger(params.limit, 10, 1, 50);
+  const days = clampInteger(params.days, 7, 1, 30);
+  const endTime = new Date();
+  const startTime = new Date(endTime.getTime() - days * 86400000);
+  const url = new URL('https://earthquake.usgs.gov/fdsnws/event/1/query');
+  url.searchParams.set('format', 'geojson');
+  url.searchParams.set('starttime', startTime.toISOString().slice(0, 10));
+  url.searchParams.set('endtime', endTime.toISOString().slice(0, 10));
+  url.searchParams.set('minmagnitude', String(minMagnitude));
+  url.searchParams.set('limit', String(limit));
+  url.searchParams.set('orderby', 'magnitude');
+  if (params.lat != null && params.lon != null) {
+    url.searchParams.set('latitude', String(requireNumberParam(params, 'lat')));
+    url.searchParams.set('longitude', String(requireNumberParam(params, 'lon')));
+    url.searchParams.set('maxradiuskm', String(clampInteger(params.radius_km, 500, 1, 20000)));
+  }
+  const data = await fetchJson(url.toString());
+  const features = data.features ?? [];
+  if (!features.length)
+    return `No earthquakes found with magnitude >= ${minMagnitude} in the past ${days} days.`;
+  const rows = features.map((feature) => {
+    const props = feature.properties ?? {};
+    const time = new Date(props.time ?? 0).toISOString().slice(0, 19).replace('T', ' ');
+    const depth = feature.geometry?.coordinates?.[2];
+    return [
+      `M${props.mag?.toFixed(1) ?? 'n/a'} — ${props.place ?? 'Unknown location'}`,
+      `Time: ${time} UTC`,
+      `Depth: ${depth != null ? `${depth} km` : 'n/a'}, Status: ${props.status ?? 'n/a'}`,
+      `Link: ${props.url ?? 'https://earthquake.usgs.gov/earthquakes/map/'}`,
+    ].join('\n   ');
+  });
+  return formatList(`Recent earthquakes (past ${days} days, M >= ${minMagnitude})`, rows);
+}
+
+// ── Open Food Facts ──────────────────────────────────────────────────────────
+async function searchFood(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const data = await fetchJson(
+    `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=${limit}&fields=product_name,brands,nutriscore_grade,nutriments,categories_tags`,
+  );
+  const products = (data.products ?? []).filter((p) => p.product_name);
+  if (!products.length) return `No food products found for "${query}".`;
+  const rows = products.slice(0, limit).map((product) => {
+    const n = product.nutriments ?? {};
+    const parts = [
+      product.product_name,
+      product.brands ? `Brand: ${product.brands.split(',')[0].trim()}` : null,
+      product.nutriscore_grade ? `Nutri-Score: ${product.nutriscore_grade.toUpperCase()}` : null,
+      [
+        n['energy-kcal_100g'] != null ? `Cal: ${Math.round(n['energy-kcal_100g'])} kcal` : null,
+        n['fat_100g'] != null ? `Fat: ${n['fat_100g']} g` : null,
+        n['carbohydrates_100g'] != null ? `Carbs: ${n['carbohydrates_100g']} g` : null,
+        n['proteins_100g'] != null ? `Protein: ${n['proteins_100g']} g` : null,
+        n['sugars_100g'] != null ? `Sugars: ${n['sugars_100g']} g` : null,
+        n['salt_100g'] != null ? `Salt: ${n['salt_100g']} g` : null,
+      ]
+        .filter(Boolean)
+        .join(', ') || null,
+    ].filter(Boolean);
+    return parts.join('\n   ');
+  });
+  return formatList(`Food search: ${query}`, rows);
+}
+
+async function getFoodByBarcode(params) {
+  const barcode = requireText(params, 'barcode').replace(/\s/g, '');
+  const data = await fetchJson(
+    `https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(barcode)}.json`,
+  );
+  if (data.status === 0) throw new Error(`No product found for barcode ${barcode}.`);
+  const product = data.product ?? {};
+  const n = product.nutriments ?? {};
+  const macros = [
+    n['energy-kcal_100g'] != null ? `Calories: ${Math.round(n['energy-kcal_100g'])} kcal` : null,
+    n['fat_100g'] != null ? `Fat: ${n['fat_100g']} g` : null,
+    n['saturated-fat_100g'] != null ? `Saturated fat: ${n['saturated-fat_100g']} g` : null,
+    n['carbohydrates_100g'] != null ? `Carbs: ${n['carbohydrates_100g']} g` : null,
+    n['sugars_100g'] != null ? `Sugars: ${n['sugars_100g']} g` : null,
+    n['fiber_100g'] != null ? `Fiber: ${n['fiber_100g']} g` : null,
+    n['proteins_100g'] != null ? `Protein: ${n['proteins_100g']} g` : null,
+    n['salt_100g'] != null ? `Salt: ${n['salt_100g']} g` : null,
+  ].filter(Boolean);
+  return [
+    `Product: ${product.product_name ?? 'Unknown'}`,
+    `Brand: ${product.brands ?? 'n/a'}`,
+    `Barcode: ${barcode}`,
+    `Nutri-Score: ${product.nutriscore_grade ? product.nutriscore_grade.toUpperCase() : 'n/a'}`,
+    `NOVA group: ${product.nova_group ?? 'n/a'}`,
+    `Quantity: ${product.quantity ?? 'n/a'}`,
+    `Ingredients: ${(product.ingredients_text ?? 'n/a').slice(0, 300)}`,
+    '',
+    'Nutrition per 100g:',
+    ...macros,
+    '',
+    `Link: https://world.openfoodfacts.org/product/${barcode}`,
+  ].join('\n');
+}
+
 export function createPublicDataToolHandlers() {
   return {
     search_web: searchWeb,
@@ -1438,5 +2198,25 @@ export function createPublicDataToolHandlers() {
     search_places: searchPlaces,
     get_postal_code_info: getPostalCodeInfo,
     get_elevation: getElevation,
+    // math & datetime
+    calculate,
+    get_current_datetime: getCurrentDatetime,
+    date_calculator: dateCalculator,
+    // research
+    search_arxiv: searchArxiv,
+    get_arxiv_paper: getArxivPaper,
+    // social
+    get_reddit_posts: getRedditPosts,
+    search_reddit: searchReddit,
+    // books
+    search_books: searchBooks,
+    get_book_by_isbn: getBookByIsbn,
+    // economics
+    get_world_bank_data: getWorldBankData,
+    // geoscience
+    get_earthquakes: getEarthquakes,
+    // nutrition
+    search_food: searchFood,
+    get_food_by_barcode: getFoodByBarcode,
   };
 }
