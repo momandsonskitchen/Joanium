@@ -1,7 +1,7 @@
 {
   "deepseek-ai/deepseek-v3.2": {
     "status": "red",
-    "checkedAt": "2026-05-19T05:08:34.315Z"
+    "checkedAt": "2026-05-19T11:20:05.626Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",

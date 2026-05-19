@@ -1,7 +1,7 @@
 {
   "mistralai/mistral-small-4": {
     "status": "red",
-    "checkedAt": "2026-05-19T05:04:03.224Z"
+    "checkedAt": "2026-05-19T11:20:05.924Z"
   },
   "qwen/qwen3.6-plus-preview:free": {
     "status": "red",
@@ -37,7 +37,7 @@
   },
   "openai/gpt-5.4": {
     "status": "yellow",
-    "checkedAt": "2026-05-19T10:32:15.487Z"
+    "checkedAt": "2026-05-19T11:20:07.336Z"
   },
   "google/gemini-3.1-pro-preview": {
     "status": "green",
