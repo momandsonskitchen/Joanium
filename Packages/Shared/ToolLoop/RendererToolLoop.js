@@ -61,6 +61,48 @@ function parseJsonToolBlock(text, blockRegex) {
   }
 }
 
+// Fallback: some reasoning/thinking models output tool calls as plain JSON or
+// inside a generic ```json block instead of a ```joanium-tool block.
+// This catches those cases so tool calls are never silently dropped.
+const PLAIN_JSON_BLOCK_RE = /```(?:json)?\s*(\{[\s\S]*?\})\s*```/i;
+const TOOL_KEY_RE = /^\s*(\{[\s\S]+\})\s*$/;
+
+function extractPlainJsonToolPayloads(text) {
+  const rawText = String(text ?? '');
+  const candidates = [];
+
+  // Try generic code blocks first
+  const re = new RegExp(PLAIN_JSON_BLOCK_RE.source, 'gi');
+  let match;
+  while ((match = re.exec(rawText)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1].trim());
+      if (typeof parsed?.tool === 'string' && parsed.tool) {
+        candidates.push({ payload: parsed, fullMatch: match[0] });
+      }
+    } catch {
+      // not valid JSON
+    }
+  }
+
+  if (candidates.length > 0) return candidates;
+
+  // Try the entire response as bare JSON (no code fences)
+  const bare = TOOL_KEY_RE.exec(rawText);
+  if (bare) {
+    try {
+      const parsed = JSON.parse(bare[1]);
+      if (typeof parsed?.tool === 'string' && parsed.tool) {
+        return [{ payload: parsed, fullMatch: bare[1] }];
+      }
+    } catch {
+      // not valid JSON
+    }
+  }
+
+  return [];
+}
+
 function emitFileChangedEvent(result = {}) {
   if (
     typeof window === 'undefined' ||
@@ -208,12 +250,18 @@ export function parseAllToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOO
   const terminalBlocks = matchAllBlocks(rawText, '```joanium-terminal\\s*([\\s\\S]*?)```');
   const toolsetBlocks = matchAllBlocks(rawText, '```joanium-tool\\s*([\\s\\S]*?)```');
 
-  if (terminalBlocks.length === 0 && toolsetBlocks.length === 0) {
+  // Fallback: catch plain JSON or ```json blocks output by reasoning models
+  const fallbackBlocks =
+    terminalBlocks.length === 0 && toolsetBlocks.length === 0
+      ? extractPlainJsonToolPayloads(rawText)
+      : [];
+
+  if (terminalBlocks.length === 0 && toolsetBlocks.length === 0 && fallbackBlocks.length === 0) {
     return { terminalActions: [], toolsetActions: [], hasTools: false, visibleContent: rawText };
   }
 
   let visibleContent = rawText;
-  for (const { fullMatch } of [...terminalBlocks, ...toolsetBlocks]) {
+  for (const { fullMatch } of [...terminalBlocks, ...toolsetBlocks, ...fallbackBlocks]) {
     visibleContent = visibleContent.replace(fullMatch, '');
   }
   visibleContent = visibleContent.trim();
@@ -224,7 +272,20 @@ export function parseAllToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOO
   });
 
   const toolsetActions = [];
-  for (const { payload } of toolsetBlocks) {
+  const allToolsetPayloads = [
+    ...toolsetBlocks,
+    ...fallbackBlocks.filter(({ payload }) => !normalized.has(String(payload?.tool ?? '').trim())),
+  ];
+  const allFallbackTerminal = fallbackBlocks.filter(({ payload }) =>
+    normalized.has(String(payload?.tool ?? '').trim()),
+  );
+
+  for (const { payload } of [...allFallbackTerminal]) {
+    const tool = String(payload?.tool ?? '').trim();
+    terminalActions.push({ tool, payload, unsupported: false, visibleContent });
+  }
+
+  for (const { payload } of allToolsetPayloads) {
     const tool = String(payload?.tool ?? '').trim();
     const action = { tool, payload, visibleContent };
     const coerced = coerceToolsetTerminalRequest(action, supportedTools);
@@ -455,9 +516,16 @@ export async function executeTerminalTool(
 
 export async function executeToolsetTool(action) {
   const payload = action?.payload ?? {};
+  // Normalize parameters: models sometimes put params at the top level of the
+  // tool JSON instead of inside a `parameters` key (e.g. browser_navigate
+  // with {"tool":"browser_navigate","url":"…"} instead of {"parameters":{"url":"…"}}).
+  // Merge top-level properties into parameters so both forms work, mirroring
+  // the normalizeTerminalPayload behaviour used for terminal tools.
+  const { tool: _tool, parameters: explicitParams, arguments: explicitArgs, ...topLevel } = payload;
+  const parameters = { ...topLevel, ...(explicitArgs ?? {}), ...(explicitParams ?? {}) };
   return invokeIpc('toolset:execute-tool', {
     tool: action.tool,
-    parameters: payload.parameters ?? {},
+    parameters,
   });
 }
 

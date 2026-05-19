@@ -766,8 +766,12 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
 
     switch (tool) {
       case 'browser_navigate': {
-        const state = await loadUrl(params.url, { referrer: url });
-        return formatText(browserStrings.messages.opened, { url: state.url });
+        const rawUrl = params.url ?? params.URL ?? params.href ?? '';
+        const state = await loadUrl(rawUrl, { referrer: url });
+        return (
+          formatText(browserStrings.messages.opened, { url: state.url }) +
+          '\nPage is now loaded. Call browser_snapshot to see interactive elements or browser_get_text to read the page content.'
+        );
       }
       case 'browser_get_state':
         return formatBrowserState(getState());

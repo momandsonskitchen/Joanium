@@ -1,7 +1,7 @@
 {
   "deepseek-ai/deepseek-v3.2": {
     "status": "red",
-    "checkedAt": "2026-05-18T10:56:54.566Z"
+    "checkedAt": "2026-05-19T05:08:34.315Z"
   },
   "openai/gpt-oss-20b": {
     "status": "green",
@@ -16,20 +16,20 @@
     "checkedAt": "2026-05-18T09:54:22.787Z"
   },
   "moonshotai/kimi-k2.6": {
-    "status": "green",
-    "checkedAt": "2026-05-17T11:39:38.839Z"
+    "status": "yellow",
+    "checkedAt": "2026-05-19T05:25:20.632Z"
   },
   "z-ai/glm4.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T14:52:14.756Z"
+    "checkedAt": "2026-05-19T06:46:05.036Z"
   },
   "qwen/qwen3.5-397b-a17b": {
-    "status": "yellow",
-    "checkedAt": "2026-05-18T14:52:29.665Z"
+    "status": "green",
+    "checkedAt": "2026-05-19T05:25:13.681Z"
   },
   "minimaxai/minimax-m2.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T13:33:24.786Z"
+    "checkedAt": "2026-05-19T06:46:19.943Z"
   },
   "moonshotai/kimi-k2-instruct": {
     "status": "yellow",
