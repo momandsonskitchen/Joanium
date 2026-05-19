@@ -17,11 +17,11 @@
   },
   "moonshotai/kimi-k2.6": {
     "status": "yellow",
-    "checkedAt": "2026-05-19T07:31:40.803Z"
+    "checkedAt": "2026-05-19T08:47:21.591Z"
   },
   "z-ai/glm4.7": {
     "status": "yellow",
-    "checkedAt": "2026-05-19T07:31:25.824Z"
+    "checkedAt": "2026-05-19T08:47:06.357Z"
   },
   "qwen/qwen3.5-397b-a17b": {
     "status": "green",
@@ -33,7 +33,7 @@
   },
   "moonshotai/kimi-k2-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-18T13:33:09.856Z"
+    "checkedAt": "2026-05-19T08:46:51.370Z"
   },
   "google/gemma-4-31b-it": {
     "status": "green",
