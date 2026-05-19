@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
-import { readUserState } from '../../Shared/UserData/UserData.js';
+import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 
 const openAiCompatibleProviders = new Set([
@@ -848,6 +848,23 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
     if (requestedProvider && requestedModel) {
       provider = requestedProvider;
       model = requestedModel;
+    }
+  }
+
+  // Fall back to the user's chosen default model (set in Settings) before
+  // blindly using the first model in the provider catalog. This ensures
+  // channels, agents, and any other caller that omits providerId/modelId
+  // still run on the same model the user picked in the UI.
+  if (!provider) {
+    const defaultModel = sanitizeDefaultModel(user?.appSettings?.defaultModel);
+    if (defaultModel) {
+      const defaultProvider = providers.find((p) => p.id === defaultModel.providerId) ?? null;
+      const defaultModelEntry =
+        defaultProvider?.models?.find((m) => m.id === defaultModel.modelId) ?? null;
+      if (defaultProvider && defaultModelEntry && canUseProvider(user, defaultProvider)) {
+        provider = defaultProvider;
+        model = defaultModelEntry;
+      }
     }
   }
 
