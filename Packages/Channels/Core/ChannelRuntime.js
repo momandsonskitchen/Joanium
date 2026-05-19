@@ -384,14 +384,19 @@ export function createChannelRuntime({ channelStateManager }) {
         }
 
         messages = (data.result ?? [])
-          .filter((update) => update.message?.text)
-          .map((update) => ({
-            updateId: update.update_id,
-            chatId: update.message.chat.id,
-            text: update.message.text,
-            from: update.message.from?.first_name ?? 'User',
-            receivedAt: toIso(update.message?.date ? update.message.date * 1000 : null),
-          }));
+          .filter((update) => update.message?.text || update.channel_post?.text)
+          .map((update) => {
+            // Channel posts (sent via a Telegram channel) arrive as `channel_post`,
+            // not `message`. Fall back to channel_post so both sources are handled.
+            const msg = update.message ?? update.channel_post;
+            return {
+              updateId: update.update_id,
+              chatId: msg.chat.id,
+              text: msg.text,
+              from: update.message?.from?.first_name ?? msg.chat?.title ?? 'Channel',
+              receivedAt: toIso(msg.date ? msg.date * 1000 : null),
+            };
+          });
       } finally {
         clearTimeout(timeout);
       }
