@@ -164,12 +164,14 @@ export function createMemoryPanel(strings) {
 
   function buildMemoryCard(memory) {
     const card = createElement(
-      'button',
+      'div',
       `chat-memory__card${activeFilename === memory.filename ? ' chat-memory__card--active' : ''}`,
     );
-    card.type = 'button';
     card.__memoryFilename = memory.filename;
-    card.append(
+
+    const cardBody = createElement('button', 'chat-memory__card-body');
+    cardBody.type = 'button';
+    cardBody.append(
       createElement('span', 'chat-memory__card-title', memory.title),
       createElement(
         'span',
@@ -179,9 +181,32 @@ export function createMemoryPanel(strings) {
         }),
       ),
     );
-    card.addEventListener('click', () => {
+    cardBody.addEventListener('click', () => {
       void loadMemory(memory.filename);
     });
+
+    const deleteBtn = createElement(
+      'button',
+      'chat-memory__card-btn chat-memory__card-btn--danger',
+    );
+    deleteBtn.type = 'button';
+    deleteBtn.setAttribute('aria-label', strings.delete);
+    deleteBtn.append(createIcon('trash', 'chat-memory__card-btn-icon'));
+    deleteBtn.addEventListener('click', async (event) => {
+      event.stopPropagation();
+      deleteBtn.disabled = true;
+      try {
+        await invokeIpc('memory:delete', memory.filename);
+        if (activeFilename === memory.filename) renderEmptyEditor();
+        await populateList(search?.getValue().trim() ?? '');
+      } catch {
+        deleteBtn.disabled = false;
+      }
+    });
+
+    const cardActions = createElement('div', 'chat-memory__card-actions');
+    cardActions.append(deleteBtn);
+    card.append(cardBody, cardActions);
     return card;
   }
 

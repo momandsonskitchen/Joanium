@@ -14,6 +14,9 @@ const en = {
   saved: 'Saved',
   saving: 'Saving',
   saveFailed: 'Save failed',
+  delete: 'Delete',
+  deleteConfirm: 'Sure?',
+  deleteFailedLabel: 'Delete failed',
   editorLabel: 'Memory Content',
   emptyEditor: 'Choose a memory file from the list.',
   importMemory: {

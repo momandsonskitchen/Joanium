@@ -97,13 +97,11 @@
 .chat-memory__card {
   width: 100%;
   min-height: 68px;
-  padding: 12px 14px;
+  padding: 0;
   border-radius: 16px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 5px;
+  flex-direction: row;
+  align-items: stretch;
   text-align: left;
   background: rgba(255, 255, 255, 0.54);
   color: var(--color-chat-text-title);
@@ -114,6 +112,7 @@
     transform 140ms ease,
     background-color 140ms ease,
     box-shadow 140ms ease;
+  overflow: hidden;
 }
 
 .chat-memory__card:hover,
@@ -123,6 +122,83 @@
   box-shadow:
     inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.2),
     0 8px 20px rgba(130, 95, 65, 0.08);
+}
+
+.chat-memory__card-body {
+  flex: 1;
+  min-width: 0;
+  min-height: 68px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border-radius: 0;
+}
+
+.chat-memory__card-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.chat-memory__card:hover .chat-memory__card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chat-memory__card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-chat-text-muted);
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.chat-memory__card-btn:hover {
+  background: var(--color-chat-hover-surface);
+  color: var(--color-chat-text-title);
+  transform: translateY(-1px);
+}
+
+.chat-memory__card-btn--danger:hover {
+  background: rgba(220, 60, 40, 0.09);
+  color: #c0392b;
+}
+
+.chat-memory__card-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.chat-memory__card-btn-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+  pointer-events: none;
+}
+
+.chat-memory__card-btn-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .chat-memory__card-title {

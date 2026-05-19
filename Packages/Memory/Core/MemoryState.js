@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, stat, unlink, writeFile } from 'node:fs/promises';
 import { sanitizeMarkdownFilename } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
@@ -391,10 +391,17 @@ export function createMemoryStateManager({ rootDirectory }) {
     return readFile(promptPath, 'utf8');
   }
 
+  async function deleteMemory(filename) {
+    const safeFilename = normalizeFilename(filename);
+    const filePath = path.join(memoriesDir, safeFilename);
+    await unlink(filePath);
+  }
+
   return {
     listMemories,
     readMemoryFile,
     saveMemory,
+    deleteMemory,
     searchMemories,
     getMemoryContext,
     getMemoryCatalog,

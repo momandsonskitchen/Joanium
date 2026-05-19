@@ -43,6 +43,10 @@ export async function createPackage({ rootDirectory }) {
         channel: 'memory:apply-updates',
         handler: async (_event, payload) => memoryStateManager.applyMemoryUpdates(payload),
       },
+      {
+        channel: 'memory:delete',
+        handler: async (_event, filename) => memoryStateManager.deleteMemory(filename),
+      },
     ],
   };
 }
