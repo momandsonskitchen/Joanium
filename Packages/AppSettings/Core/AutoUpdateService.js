@@ -60,6 +60,15 @@ function setState(patch) {
   return snapshot();
 }
 
+function isReleasePublishingInProgress(error) {
+  const message = error?.message ?? String(error ?? '');
+  return (
+    message.includes('latest.yml') ||
+    message.includes('HttpError: 404') ||
+    (message.includes('404') && message.includes('releases/download'))
+  );
+}
+
 function canCheck() {
   return Boolean(state.enabled && state.supported && autoUpdater && app.isPackaged);
 }
@@ -97,6 +106,10 @@ async function checkForUpdatesNow() {
     return snapshot();
   } catch (error) {
     const message = error?.stack ?? error?.message ?? String(error);
+    if (isReleasePublishingInProgress(error)) {
+      writeLog('check:publishing-in-progress', message);
+      return setState({ status: 'current', progress: null, error: null });
+    }
     writeLog('check:error', message);
     return setState({ status: 'error', error: error?.message ?? String(error) });
   }
@@ -180,6 +193,11 @@ function bindUpdaterEvents() {
 
   autoUpdater.on('error', (error) => {
     const message = error?.stack ?? error?.message ?? String(error);
+    if (isReleasePublishingInProgress(error)) {
+      writeLog('updater:publishing-in-progress', message);
+      setState({ status: 'current', progress: null, downloaded: false, error: null });
+      return;
+    }
     writeLog('updater:error', message);
     setState({ status: 'error', error: error?.message ?? String(error) });
   });
