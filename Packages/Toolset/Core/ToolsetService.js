@@ -1985,7 +1985,7 @@ function buildToolsPrompt(tools, promptSections = []) {
       const params = Object.entries(tool.parameters ?? {})
         .map(([key, value]) => `${key}${value.required ? '' : '?'}:${value.type}`)
         .join(', ');
-      return `- ${tool.name}: ${tool.description}${params ? ` Parameters: ${params}.` : ''}`;
+      return `- ${tool.name}: ${tool.description}${params ? ` Parameters (all inside the "parameters" key): ${params}.` : ''}`;
     }),
     ...promptSections.map((section) => String(section ?? '').trim()).filter(Boolean),
     'IMPORTANT: Use only the joanium-tool code block format shown above. Do not use any other tool invocation format — no XML tags, no JSON outside a code block, no provider-specific or model-specific markup of any kind.',
@@ -2166,8 +2166,18 @@ export function createToolsetService({
       const tool = String(payload.tool ?? '').trim();
       const handler = handlers[tool];
       if (!handler) return { ok: false, error: strings.errors.unknownTool, tool };
+      // Normalize parameters: merge top-level keys into parameters so both
+      // {"tool":"x","parameters":{"key":"val"}} and {"tool":"x","key":"val"}
+      // formats are accepted. Mirrors the renderer-side normalizeTerminalPayload.
+      const {
+        tool: _tool,
+        parameters: explicitParams,
+        arguments: explicitArgs,
+        ...topLevel
+      } = payload;
+      const parameters = { ...topLevel, ...(explicitArgs ?? {}), ...(explicitParams ?? {}) };
       try {
-        return { ok: true, tool, output: await handler(payload.parameters ?? {}, context) };
+        return { ok: true, tool, output: await handler(parameters, context) };
       } catch (error) {
         return { ok: false, tool, error: error?.message ?? String(error) };
       }

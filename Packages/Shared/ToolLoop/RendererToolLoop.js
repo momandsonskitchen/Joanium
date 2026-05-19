@@ -161,6 +161,7 @@ function normalizeTerminalPayload(payload = {}) {
       ? payload.arguments
       : {};
   const normalized = { ...parameters, ...args, ...payload };
+  delete normalized.tool;
   delete normalized.parameters;
   delete normalized.arguments;
   return normalized;

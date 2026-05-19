@@ -391,6 +391,12 @@ function requireText(params, key) {
   return value;
 }
 
+function requireNumberParam(params, key) {
+  const value = Number(params?.[key]);
+  if (!Number.isFinite(value)) throw new Error(`Missing or invalid parameter: ${key}.`);
+  return value;
+}
+
 function stripHtml(value = '') {
   return String(value)
     .replace(/<script[\s\S]*?<\/script>/gi, '')
