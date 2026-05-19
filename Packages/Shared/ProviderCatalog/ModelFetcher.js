@@ -1,0 +1,254 @@
+/**
+ * ModelFetcher.js
+ *
+ * Fetches the live list of available models from each provider's API.
+ * Returns Array<{ id, name, context_window?, max_output?, pricing?, inputs?, description? }>
+ * or null when the provider doesn't expose a listing API.
+ */
+
+// No filtering — all models returned by the API are included (chat, image, video, audio, etc.).
+
+// ── HTTP helper ───────────────────────────────────────────────────────────────
+
+async function fetchJson(url, headers = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 14000);
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json', ...headers },
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} fetching ${url}`);
+    }
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ── Metadata helpers ──────────────────────────────────────────────────────────
+
+/** Strip undefined/null keys so the JSON stays clean. */
+function compact(obj) {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v != null));
+}
+
+/** Convert a per-token price to per-million-token price (2 decimal places). */
+function perMillion(perToken) {
+  if (perToken == null || Number.isNaN(Number(perToken))) return null;
+  const v = Number(perToken) * 1_000_000;
+  return Math.round(v * 100) / 100;
+}
+
+// ── Provider-specific fetchers ─────────────────────────────────────────────────
+
+/**
+ * OpenAI-compatible format: { data: [{ id, context_window?, ... }] }
+ */
+async function openAICompat(url, authHeader) {
+  const headers = authHeader ? { Authorization: authHeader } : {};
+  const body = await fetchJson(url, headers);
+  const items = Array.isArray(body?.data) ? body.data : [];
+  return items.map((m) =>
+    compact({
+      id: String(m.id),
+      name: String(m.id),
+      context_window: m.context_window ?? null,
+    }),
+  );
+}
+
+/**
+ * Anthropic: GET /v1/models → { data: [{ id, display_name }] }
+ */
+async function fetchAnthropicModels(apiKey) {
+  const body = await fetchJson('https://api.anthropic.com/v1/models', {
+    'x-api-key': apiKey,
+    'anthropic-version': '2023-06-01',
+  });
+  const items = Array.isArray(body?.data) ? body.data : [];
+  return items.map((m) =>
+    compact({
+      id: String(m.id),
+      name: String(m.display_name ?? m.id),
+    }),
+  );
+}
+
+/**
+ * Google Generative AI: GET /v1beta/models?key=...
+ * Returns inputTokenLimit and outputTokenLimit for context/output sizes.
+ */
+async function fetchGoogleModels(apiKey) {
+  const body = await fetchJson(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}&pageSize=200`,
+  );
+  const items = Array.isArray(body?.models) ? body.models : [];
+  return items
+    .filter(
+      (m) =>
+        Array.isArray(m.supportedGenerationMethods) &&
+        m.supportedGenerationMethods.includes('generateContent'),
+    )
+    .map((m) =>
+      compact({
+        id: String(m.name).replace(/^models\//, ''),
+        name: String(m.displayName ?? m.name).replace(/^models\//, ''),
+        context_window: m.inputTokenLimit ?? null,
+        max_output: m.outputTokenLimit ?? null,
+      }),
+    );
+}
+
+/**
+ * OpenRouter: GET /api/v1/models → { data: [{ id, name, context_length, pricing, architecture }] }
+ * Richest source — returns pricing, context, and input modalities.
+ */
+async function fetchOpenRouterModels(apiKey) {
+  const headers = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const body = await fetchJson('https://openrouter.ai/api/v1/models', headers);
+  const items = Array.isArray(body?.data) ? body.data : [];
+  return items.map((m) => {
+    const inputModalities = m.architecture?.input_modalities ?? [];
+    const inputPrice = perMillion(m.pricing?.prompt);
+    const outputPrice = perMillion(m.pricing?.completion);
+    return compact({
+      id: String(m.id),
+      name: String(m.name ?? m.id),
+      description: m.description ? String(m.description).slice(0, 300) : null,
+      context_window: m.context_length ?? null,
+      pricing:
+        inputPrice != null && outputPrice != null
+          ? { input: inputPrice, output: outputPrice }
+          : null,
+      inputs: compact({
+        text: true,
+        image: inputModalities.includes('image') || null,
+      }),
+    });
+  });
+}
+
+/**
+ * Cohere: GET /v2/models → { models: [{ name, context_length, endpoints }] }
+ */
+async function fetchCohereModels(apiKey) {
+  const body = await fetchJson('https://api.cohere.com/v2/models', {
+    Authorization: `Bearer ${apiKey}`,
+  });
+  const items = Array.isArray(body?.models) ? body.models : [];
+  return items.map((m) =>
+    compact({
+      id: String(m.name),
+      name: String(m.name),
+      context_window: m.context_length ?? null,
+    }),
+  );
+}
+
+/**
+ * Together AI: GET /v1/models → array [{ id, display_name, context_length, type }]
+ */
+async function fetchTogetherModels(apiKey) {
+  const body = await fetchJson('https://api.together.xyz/v1/models', {
+    Authorization: `Bearer ${apiKey}`,
+  });
+  const items = Array.isArray(body) ? body : Array.isArray(body?.data) ? body.data : [];
+  return items
+    .filter((m) => !m.type || m.type === 'chat' || m.type === 'language')
+    .map((m) =>
+      compact({
+        id: String(m.id),
+        name: String(m.display_name ?? m.id),
+        context_window: m.context_length ?? null,
+      }),
+    );
+}
+
+/**
+ * Ollama (local): GET {endpoint}/api/tags → { models: [{ name }] }
+ */
+async function fetchOllamaModels(endpoint) {
+  const base = (endpoint ?? 'http://localhost:11434').replace(/\/$/, '');
+  const body = await fetchJson(`${base}/api/tags`);
+  const items = Array.isArray(body?.models) ? body.models : [];
+  return items.map((m) => compact({ id: String(m.name), name: String(m.name) }));
+}
+
+/**
+ * LM Studio (local): GET {endpoint}/v1/models → { data: [{ id }] }
+ */
+async function fetchLmStudioModels(endpoint) {
+  const base = (endpoint ?? 'http://localhost:1234').replace(/\/$/, '');
+  const body = await fetchJson(`${base}/v1/models`);
+  const items = Array.isArray(body?.data) ? body.data : [];
+  return items.map((m) => compact({ id: String(m.id), name: String(m.id) }));
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
+/**
+ * Fetch the live model list for a given provider.
+ *
+ * @param {string} providerId
+ * @param {{ apiKey?: string, endpoint?: string }} credentials
+ * @returns {Promise<Array<{ id: string, name: string, context_window?: number,
+ *   max_output?: number, pricing?: { input: number, output: number },
+ *   inputs?: { text: boolean, image?: boolean }, description?: string }> | null>}
+ */
+export async function fetchProviderModels(providerId, { apiKey = '', endpoint = '' } = {}) {
+  switch (providerId) {
+    case 'anthropic':
+      return fetchAnthropicModels(apiKey);
+
+    case 'openai':
+      return openAICompat('https://api.openai.com/v1/models', `Bearer ${apiKey}`);
+
+    case 'google':
+      return fetchGoogleModels(apiKey);
+
+    case 'mistral':
+      return openAICompat('https://api.mistral.ai/v1/models', `Bearer ${apiKey}`);
+
+    case 'groq':
+      return openAICompat('https://api.groq.com/openai/v1/models', `Bearer ${apiKey}`);
+
+    case 'deepseek':
+      return openAICompat('https://api.deepseek.com/models', `Bearer ${apiKey}`);
+
+    case 'xai':
+      return openAICompat('https://api.x.ai/v1/models', `Bearer ${apiKey}`);
+
+    case 'together':
+      return fetchTogetherModels(apiKey);
+
+    case 'perplexity':
+      return openAICompat('https://api.perplexity.ai/models', `Bearer ${apiKey}`);
+
+    case 'cerebras':
+      return openAICompat('https://api.cerebras.ai/v1/models', `Bearer ${apiKey}`);
+
+    case 'nvidia':
+      return openAICompat('https://integrate.api.nvidia.com/v1/models', `Bearer ${apiKey}`);
+
+    case 'openrouter':
+      return fetchOpenRouterModels(apiKey);
+
+    case 'cohere':
+      return fetchCohereModels(apiKey);
+
+    case 'minimax':
+      // MiniMax does not expose a public model listing endpoint.
+      return null;
+
+    case 'ollama':
+      return fetchOllamaModels(endpoint);
+
+    case 'lmstudio':
+      return fetchLmStudioModels(endpoint);
+
+    default:
+      return null;
+  }
+}

@@ -5,21 +5,11 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "mistral-large-latest": {
-      "name": "Mistral Large 3",
-      "description": "Open-weight flagship — multimodal reasoning with 262K context, Apache 2.0 licensed",
-      "context_window": 262000,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.5,
-        "output": 1.5
-      }
+    "mistral-medium-2505": {
+      "name": "mistral-medium-2505"
+    },
+    "mistral-medium-2508": {
+      "name": "mistral-medium-2508"
     },
     "mistral-medium-latest": {
       "name": "Mistral Medium 3.1",
@@ -37,37 +27,26 @@
         "output": 2
       }
     },
-    "mistral-small-latest": {
-      "name": "Mistral Small 4",
-      "description": "Unified model (Mar 2026) — reasoning, vision, and coding in one endpoint at Apache 2.0, very fast MoE",
-      "context_window": 256000,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.15,
-        "output": 0.6
-      }
+    "mistral-medium": {
+      "name": "mistral-medium"
     },
-    "magistral-medium-latest": {
-      "name": "Magistral Medium",
-      "description": "Mistral's flagship reasoning model — extended chain-of-thought for complex problem solving",
-      "context_window": 131000,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 2,
-        "output": 5
-      }
+    "mistral-vibe-cli-with-tools": {
+      "name": "mistral-vibe-cli-with-tools"
+    },
+    "open-mistral-nemo": {
+      "name": "open-mistral-nemo"
+    },
+    "open-mistral-nemo-2407": {
+      "name": "open-mistral-nemo-2407"
+    },
+    "mistral-tiny-2407": {
+      "name": "mistral-tiny-2407"
+    },
+    "mistral-tiny-latest": {
+      "name": "mistral-tiny-latest"
+    },
+    "codestral-2508": {
+      "name": "codestral-2508"
     },
     "codestral-latest": {
       "name": "Codestral",
@@ -85,6 +64,12 @@
         "output": 0.9
       }
     },
+    "devstral-2512": {
+      "name": "devstral-2512"
+    },
+    "devstral-medium-latest": {
+      "name": "devstral-medium-latest"
+    },
     "devstral-latest": {
       "name": "Devstral 2",
       "description": "Open-weight coding agent (Dec 2025) — SOTA SWE-bench at 72.2%, built for autonomous software tasks",
@@ -100,6 +85,196 @@
         "input": 0.4,
         "output": 2
       }
+    },
+    "mistral-small-2603": {
+      "name": "mistral-small-2603"
+    },
+    "mistral-small-latest": {
+      "name": "Mistral Small 4",
+      "description": "Unified model (Mar 2026) — reasoning, vision, and coding in one endpoint at Apache 2.0, very fast MoE",
+      "context_window": 256000,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.15,
+        "output": 0.6
+      }
+    },
+    "mistral-vibe-cli-fast": {
+      "name": "mistral-vibe-cli-fast"
+    },
+    "magistral-small-latest": {
+      "name": "magistral-small-latest"
+    },
+    "magistral-medium-2509": {
+      "name": "magistral-medium-2509"
+    },
+    "magistral-medium-latest": {
+      "name": "Magistral Medium",
+      "description": "Mistral's flagship reasoning model — extended chain-of-thought for complex problem solving",
+      "context_window": 131000,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 2,
+        "output": 5
+      }
+    },
+    "voxtral-small-2507": {
+      "name": "voxtral-small-2507"
+    },
+    "voxtral-small-latest": {
+      "name": "voxtral-small-latest"
+    },
+    "labs-leanstral-2603": {
+      "name": "labs-leanstral-2603"
+    },
+    "mistral-large-2512": {
+      "name": "mistral-large-2512"
+    },
+    "mistral-large-latest": {
+      "name": "Mistral Large 3",
+      "description": "Open-weight flagship — multimodal reasoning with 262K context, Apache 2.0 licensed",
+      "context_window": 262000,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.5,
+        "output": 1.5
+      }
+    },
+    "ministral-3b-2512": {
+      "name": "ministral-3b-2512"
+    },
+    "ministral-3b-latest": {
+      "name": "ministral-3b-latest"
+    },
+    "ministral-8b-2512": {
+      "name": "ministral-8b-2512"
+    },
+    "ministral-8b-latest": {
+      "name": "ministral-8b-latest"
+    },
+    "ministral-14b-2512": {
+      "name": "ministral-14b-2512"
+    },
+    "ministral-14b-latest": {
+      "name": "ministral-14b-latest"
+    },
+    "mistral-medium-3-5": {
+      "name": "mistral-medium-3-5"
+    },
+    "mistral-medium-3.5": {
+      "name": "mistral-medium-3.5"
+    },
+    "mistral-medium-3": {
+      "name": "mistral-medium-3"
+    },
+    "mistral-medium-2604": {
+      "name": "mistral-medium-2604"
+    },
+    "mistral-medium-c21211-r0-75": {
+      "name": "mistral-medium-c21211-r0-75"
+    },
+    "mistral-vibe-cli-latest": {
+      "name": "mistral-vibe-cli-latest"
+    },
+    "mistral-large-2411": {
+      "name": "mistral-large-2411"
+    },
+    "pixtral-large-2411": {
+      "name": "pixtral-large-2411"
+    },
+    "pixtral-large-latest": {
+      "name": "pixtral-large-latest"
+    },
+    "mistral-large-pixtral-2411": {
+      "name": "mistral-large-pixtral-2411"
+    },
+    "devstral-small-2507": {
+      "name": "devstral-small-2507"
+    },
+    "devstral-medium-2507": {
+      "name": "devstral-medium-2507"
+    },
+    "voxtral-mini-2507": {
+      "name": "voxtral-mini-2507"
+    },
+    "voxtral-mini-latest": {
+      "name": "voxtral-mini-latest"
+    },
+    "magistral-small-2509": {
+      "name": "magistral-small-2509"
+    },
+    "mistral-small-2506": {
+      "name": "mistral-small-2506"
+    },
+    "mistral-embed-2312": {
+      "name": "mistral-embed-2312"
+    },
+    "mistral-embed": {
+      "name": "mistral-embed"
+    },
+    "codestral-embed": {
+      "name": "codestral-embed"
+    },
+    "codestral-embed-2505": {
+      "name": "codestral-embed-2505"
+    },
+    "mistral-moderation-2603": {
+      "name": "mistral-moderation-2603"
+    },
+    "mistral-moderation-2411": {
+      "name": "mistral-moderation-2411"
+    },
+    "mistral-moderation-latest": {
+      "name": "mistral-moderation-latest"
+    },
+    "mistral-ocr-2512": {
+      "name": "mistral-ocr-2512"
+    },
+    "mistral-ocr-latest": {
+      "name": "mistral-ocr-latest"
+    },
+    "mistral-ocr-2505": {
+      "name": "mistral-ocr-2505"
+    },
+    "voxtral-mini-2602": {
+      "name": "voxtral-mini-2602"
+    },
+    "voxtral-mini-transcribe-realtime-2602": {
+      "name": "voxtral-mini-transcribe-realtime-2602"
+    },
+    "voxtral-mini-realtime-2602": {
+      "name": "voxtral-mini-realtime-2602"
+    },
+    "voxtral-mini-realtime-latest": {
+      "name": "voxtral-mini-realtime-latest"
+    },
+    "voxtral-mini-transcribe-2507": {
+      "name": "voxtral-mini-transcribe-2507"
+    },
+    "voxtral-mini-tts-2603": {
+      "name": "voxtral-mini-tts-2603"
+    },
+    "voxtral-mini-tts-latest": {
+      "name": "voxtral-mini-tts-latest"
     }
-  }
+  },
+  "_syncedAt": "2026-05-19T16:50:45.207Z"
 }

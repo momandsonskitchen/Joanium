@@ -1,54 +1,10 @@
 {
-  "mistralai/mistral-small-4": {
-    "status": "red",
-    "checkedAt": "2026-05-19T11:20:05.924Z"
-  },
-  "qwen/qwen3.6-plus-preview:free": {
-    "status": "red",
-    "checkedAt": "2026-05-19T05:04:03.297Z"
-  },
-  "meta-llama/llama-4-scout": {
+  "openrouter/owl-alpha": {
     "status": "green",
-    "checkedAt": "2026-05-19T05:04:03.695Z"
+    "checkedAt": "2026-05-19T16:51:11.391Z"
   },
-  "meta-llama/llama-4-maverick": {
+  "nvidia/nemotron-nano-12b-v2-vl:free": {
     "status": "green",
-    "checkedAt": "2026-05-19T05:04:04.419Z"
-  },
-  "mistralai/mistral-large": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:03.801Z"
-  },
-  "google/gemma-4-31b-it": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:04.462Z"
-  },
-  "minimax/minimax-m2.5:free": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:07.310Z"
-  },
-  "meta-llama/llama-3.3-70b-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:04.513Z"
-  },
-  "qwen/qwen3-235b-a22b": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:04.210Z"
-  },
-  "openai/gpt-5.4": {
-    "status": "yellow",
-    "checkedAt": "2026-05-19T11:20:07.336Z"
-  },
-  "google/gemini-3.1-pro-preview": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:05.446Z"
-  },
-  "anthropic/claude-opus-4-7": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:04.947Z"
-  },
-  "deepseek/deepseek-r1": {
-    "status": "green",
-    "checkedAt": "2026-05-19T05:04:16.804Z"
+    "checkedAt": "2026-05-19T16:51:55.623Z"
   }
 }

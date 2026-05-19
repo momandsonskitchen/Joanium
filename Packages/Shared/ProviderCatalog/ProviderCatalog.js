@@ -99,21 +99,39 @@ function buildProviderRecord(providerConfiguration, rootDirectory) {
   };
 }
 
+let cachedCatalog = null;
+let catalogInflight = null;
+
 export async function readProviderCatalog(rootDirectory) {
-  const modelsDirectory = path.join(rootDirectory, 'Config', 'Models');
-  const indexPath = path.join(modelsDirectory, 'index.json');
-  const indexContents = await readFile(indexPath, 'utf8');
-  const providerFiles = JSON.parse(indexContents);
+  if (cachedCatalog) return cachedCatalog;
 
-  const providers = await Promise.all(
-    providerFiles.map(async (fileName) => {
-      const providerName = path.basename(fileName, '.json');
-      const providerPath = path.join(modelsDirectory, providerName, fileName);
-      const providerContents = await readFile(providerPath, 'utf8');
-      const providerConfiguration = JSON.parse(providerContents);
-      return buildProviderRecord(providerConfiguration, rootDirectory);
-    }),
-  );
+  if (catalogInflight) return catalogInflight;
 
-  return providers;
+  catalogInflight = (async () => {
+    const modelsDirectory = path.join(rootDirectory, 'Config', 'Models');
+    const indexPath = path.join(modelsDirectory, 'index.json');
+    const indexContents = await readFile(indexPath, 'utf8');
+    const providerFiles = JSON.parse(indexContents);
+
+    const providers = await Promise.all(
+      providerFiles.map(async (fileName) => {
+        const providerName = path.basename(fileName, '.json');
+        const providerPath = path.join(modelsDirectory, providerName, fileName);
+        const providerContents = await readFile(providerPath, 'utf8');
+        const providerConfiguration = JSON.parse(providerContents);
+        return buildProviderRecord(providerConfiguration, rootDirectory);
+      }),
+    );
+
+    cachedCatalog = providers;
+    catalogInflight = null;
+    return providers;
+  })();
+
+  return catalogInflight;
+}
+
+export function invalidateProviderCatalogCache() {
+  cachedCatalog = null;
+  catalogInflight = null;
 }

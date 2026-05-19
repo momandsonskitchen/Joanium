@@ -22,5 +22,73 @@
   "mistral-large-latest": {
     "status": "green",
     "checkedAt": "2026-05-19T10:32:14.859Z"
+  },
+  "mistral-medium": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:13.347Z"
+  },
+  "labs-leanstral-2603": {
+    "status": "yellow",
+    "checkedAt": "2026-05-19T15:27:37.388Z"
+  },
+  "mistral-vibe-cli-fast": {
+    "status": "green",
+    "checkedAt": "2026-05-19T15:34:51.086Z"
+  },
+  "mistral-small-2603": {
+    "status": "green",
+    "checkedAt": "2026-05-19T15:34:52.072Z"
+  },
+  "magistral-small-latest": {
+    "status": "green",
+    "checkedAt": "2026-05-19T15:34:53.522Z"
+  },
+  "mistral-medium-2508": {
+    "status": "green",
+    "checkedAt": "2026-05-19T15:37:32.864Z"
+  },
+  "pixtral-large-2411": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:09.682Z"
+  },
+  "voxtral-mini-2602": {
+    "status": "red",
+    "checkedAt": "2026-05-19T16:51:09.744Z"
+  },
+  "mistral-tiny-latest": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:09.910Z"
+  },
+  "mistral-medium-3.5": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:10.083Z"
+  },
+  "ministral-8b-2512": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:10.268Z"
+  },
+  "mistral-medium-3-5": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:10.392Z"
+  },
+  "devstral-medium-2507": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:10.594Z"
+  },
+  "ministral-8b-latest": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:10.741Z"
+  },
+  "devstral-2512": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:11.226Z"
+  },
+  "devstral-medium-latest": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:11.501Z"
+  },
+  "mistral-medium-2505": {
+    "status": "green",
+    "checkedAt": "2026-05-19T16:51:13.657Z"
   }
 }

@@ -18,8 +18,8 @@
         "docx": false
       },
       "pricing": {
-        "input": 5,
-        "output": 25
+        "input": 15,
+        "output": 75
       }
     },
     "claude-opus-4-6": {
@@ -36,8 +36,8 @@
         "docx": false
       },
       "pricing": {
-        "input": 5,
-        "output": 25
+        "input": 15,
+        "output": 75
       }
     },
     "claude-sonnet-4-6": {
@@ -58,11 +58,13 @@
         "output": 15
       }
     },
-    "claude-haiku-4-5-20251001": {
-      "name": "Claude Haiku 4.5",
-      "description": "Fast and compact model for everyday tasks",
+    "claude-opus-4-5": {
+      "name": "Claude Opus 4.5",
+      "description": "Older flagship generation — solid reasoning and multimodal capability",
       "context_window": 200000,
-      "max_output": 16000,
+      "max_output": 32000,
+      "thinking": true,
+      "thinking_budget": 10000,
       "inputs": {
         "text": true,
         "image": true,
@@ -70,8 +72,8 @@
         "docx": false
       },
       "pricing": {
-        "input": 0.25,
-        "output": 1.25
+        "input": 15,
+        "output": 75
       }
     },
     "claude-sonnet-4-5": {
@@ -90,6 +92,22 @@
       "pricing": {
         "input": 3,
         "output": 15
+      }
+    },
+    "claude-haiku-4-5": {
+      "name": "Claude Haiku 4.5",
+      "description": "Fast and compact model for everyday tasks — lowest latency in the Claude 4 family",
+      "context_window": 200000,
+      "max_output": 16000,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": true,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.25,
+        "output": 1.25
       }
     }
   }

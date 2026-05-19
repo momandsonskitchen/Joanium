@@ -4,9 +4,9 @@
   "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
   "auth_header": "x-goog-api-key",
   "models": {
-    "gemini-3.1-pro-preview": {
-      "name": "Gemini 3.1 Pro",
-      "description": "Current flagship — enhanced coding, agentic reliability, and multimodal reasoning with 1M context",
+    "gemini-2.5-flash": {
+      "name": "Gemini 2.5 Flash",
+      "description": "Fast mid-tier model — reliable and affordable with 1M context, thinking support",
       "context_window": 1048576,
       "max_output": 65536,
       "inputs": {
@@ -16,45 +16,13 @@
         "docx": false
       },
       "pricing": {
-        "input": 2,
-        "output": 12
-      }
-    },
-    "gemini-3-flash": {
-      "name": "Gemini 3 Flash",
-      "description": "Best mid-tier — outperforms 2.5 Pro at 3x the speed, strong agentic and coding at low cost",
-      "context_window": 1048576,
-      "max_output": 65536,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": true,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.5,
-        "output": 3
-      }
-    },
-    "gemini-3.1-flash-lite-preview": {
-      "name": "Gemini 3.1 Flash Lite",
-      "description": "Most cost-efficient Gemini — high-volume, low-latency tasks at the lowest price",
-      "context_window": 1048576,
-      "max_output": 65536,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.25,
-        "output": 1.5
+        "input": 0.3,
+        "output": 2.5
       }
     },
     "gemini-2.5-pro": {
       "name": "Gemini 2.5 Pro",
-      "description": "Previous flagship — still solid for long-context reasoning, now superseded by the 3.x series",
+      "description": "Previous flagship — strong long-context reasoning with 1M context window",
       "context_window": 1048576,
       "max_output": 65536,
       "inputs": {
@@ -68,21 +36,174 @@
         "output": 10
       }
     },
-    "gemini-2.5-flash": {
-      "name": "Gemini 2.5 Flash",
-      "description": "Previous mid-tier — reliable and affordable, now superseded by Gemini 3 Flash",
+    "gemini-2.0-flash": {
+      "name": "Gemini 2.0 Flash",
+      "description": "Previous-generation fast model — widely available, 1M context",
+      "context_window": 1048576,
+      "max_output": 8192
+    },
+    "gemini-2.0-flash-001": {
+      "name": "Gemini 2.0 Flash 001",
+      "context_window": 1048576,
+      "max_output": 8192
+    },
+    "gemini-2.0-flash-lite-001": {
+      "name": "Gemini 2.0 Flash-Lite 001",
+      "context_window": 1048576,
+      "max_output": 8192
+    },
+    "gemini-2.0-flash-lite": {
+      "name": "Gemini 2.0 Flash-Lite",
+      "description": "Lightest 2.0 model — optimised for speed and volume",
+      "context_window": 1048576,
+      "max_output": 8192
+    },
+    "gemini-2.5-flash-preview-tts": {
+      "name": "Gemini 2.5 Flash Preview TTS",
+      "context_window": 8192,
+      "max_output": 16384
+    },
+    "gemini-2.5-pro-preview-tts": {
+      "name": "Gemini 2.5 Pro Preview TTS",
+      "context_window": 8192,
+      "max_output": 16384
+    },
+    "gemma-4-26b-a4b-it": {
+      "name": "Gemma 4 26B A4B IT",
+      "context_window": 262144,
+      "max_output": 32768
+    },
+    "gemma-4-31b-it": {
+      "name": "Gemma 4 31B IT",
+      "context_window": 262144,
+      "max_output": 32768
+    },
+    "gemini-flash-latest": {
+      "name": "Gemini Flash Latest",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-flash-lite-latest": {
+      "name": "Gemini Flash-Lite Latest",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-pro-latest": {
+      "name": "Gemini Pro Latest",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-2.5-flash-lite": {
+      "name": "Gemini 2.5 Flash-Lite",
+      "description": "Most cost-efficient Gemini 2.5 — high-volume, low-latency tasks at the lowest price",
       "context_window": 1048576,
       "max_output": 65536,
       "inputs": {
         "text": true,
         "image": true,
-        "pdf": true,
+        "pdf": false,
         "docx": false
       },
       "pricing": {
-        "input": 0.3,
-        "output": 2.5
+        "input": 0.1,
+        "output": 0.4
       }
+    },
+    "gemini-2.5-flash-image": {
+      "name": "Nano Banana",
+      "context_window": 32768,
+      "max_output": 32768
+    },
+    "gemini-3-pro-preview": {
+      "name": "Gemini 3 Pro Preview",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-3-flash-preview": {
+      "name": "Gemini 3 Flash Preview",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-3.1-pro-preview": {
+      "name": "Gemini 3.1 Pro Preview",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-3.1-pro-preview-customtools": {
+      "name": "Gemini 3.1 Pro Preview Custom Tools",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-3.1-flash-lite-preview": {
+      "name": "Gemini 3.1 Flash Lite Preview",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-3.1-flash-lite": {
+      "name": "Gemini 3.1 Flash Lite",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-3-pro-image-preview": {
+      "name": "Nano Banana Pro",
+      "context_window": 131072,
+      "max_output": 32768
+    },
+    "nano-banana-pro-preview": {
+      "name": "Nano Banana Pro",
+      "context_window": 131072,
+      "max_output": 32768
+    },
+    "gemini-3.1-flash-image-preview": {
+      "name": "Nano Banana 2",
+      "context_window": 65536,
+      "max_output": 65536
+    },
+    "lyria-3-clip-preview": {
+      "name": "Lyria 3 Clip Preview",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "lyria-3-pro-preview": {
+      "name": "Lyria 3 Pro Preview",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-3.1-flash-tts-preview": {
+      "name": "Gemini 3.1 Flash TTS Preview",
+      "context_window": 8192,
+      "max_output": 16384
+    },
+    "gemini-robotics-er-1.5-preview": {
+      "name": "Gemini Robotics-ER 1.5 Preview",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
+    "gemini-robotics-er-1.6-preview": {
+      "name": "Gemini Robotics-ER 1.6 Preview",
+      "context_window": 131072,
+      "max_output": 65536
+    },
+    "gemini-2.5-computer-use-preview-10-2025": {
+      "name": "Gemini 2.5 Computer Use Preview 10-2025",
+      "context_window": 131072,
+      "max_output": 65536
+    },
+    "deep-research-max-preview-04-2026": {
+      "name": "Deep Research Max Preview (Apr-21-2026)",
+      "context_window": 131072,
+      "max_output": 65536
+    },
+    "deep-research-preview-04-2026": {
+      "name": "Deep Research Preview (Apr-21-2026)",
+      "context_window": 131072,
+      "max_output": 65536
+    },
+    "deep-research-pro-preview-12-2025": {
+      "name": "Deep Research Pro Preview (Dec-12-2025)",
+      "context_window": 131072,
+      "max_output": 65536
     }
-  }
+  },
+  "_syncedAt": "2026-05-19T16:50:45.599Z"
 }

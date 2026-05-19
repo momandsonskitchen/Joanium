@@ -1,5 +1,9 @@
 import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
-import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
+import {
+  readProviderCatalog,
+  invalidateProviderCatalogCache,
+} from '../../Shared/ProviderCatalog/ProviderCatalog.js';
+import { backgroundSyncAllProviders } from '../../Shared/ProviderCatalog/ModelSync.js';
 
 function isProviderConfigured(provider, details) {
   if (provider.requiresApiKey) {
@@ -17,6 +21,23 @@ function isProviderConfigured(provider, details) {
 }
 
 export function createProviderStateManager({ rootDirectory }) {
+  // In-memory catalog cache — avoids re-reading 16 JSON files on every IPC call.
+  // The chat:health-probe fires very frequently; without this cache it causes EMFILE.
+  // Invalidated whenever provider data changes (save, remove) or after a sync writes new data.
+  let catalogCache = null;
+
+  function invalidateCatalogCache() {
+    catalogCache = null;
+    invalidateProviderCatalogCache();
+  }
+
+  async function getCatalogCached() {
+    if (!catalogCache) {
+      catalogCache = await readProviderCatalog(rootDirectory);
+    }
+    return catalogCache;
+  }
+
   async function readState() {
     return readUserState(rootDirectory);
   }
@@ -29,11 +50,11 @@ export function createProviderStateManager({ rootDirectory }) {
 
   return {
     async getCatalog() {
-      return readProviderCatalog(rootDirectory);
+      return getCatalogCached();
     },
 
     async getConfigured() {
-      const [state, catalog] = await Promise.all([readState(), readProviderCatalog(rootDirectory)]);
+      const [state, catalog] = await Promise.all([readState(), getCatalogCached()]);
 
       return catalog.map((provider) => {
         const details = state.providers.details[provider.id] ?? {};
@@ -51,7 +72,7 @@ export function createProviderStateManager({ rootDirectory }) {
     },
 
     async saveProvider(providerId, incoming) {
-      const catalog = await readProviderCatalog(rootDirectory);
+      const catalog = await getCatalogCached();
       const provider = catalog.find((p) => p.id === providerId);
 
       if (!provider) {
@@ -91,7 +112,7 @@ export function createProviderStateManager({ rootDirectory }) {
 
     async removeProvider(providerId) {
       const state = await readState();
-      const catalog = await readProviderCatalog(rootDirectory);
+      const catalog = await getCatalogCached();
 
       const configuredIds = state.providers.selected.filter((id) => {
         const provider = catalog.find((p) => p.id === id);
@@ -112,7 +133,39 @@ export function createProviderStateManager({ rootDirectory }) {
           ),
         },
       }));
+
+      invalidateCatalogCache();
       return { ok: true };
     },
+
+    /**
+     * Fire-and-forget background sync of all configured providers.
+     * Internally guarded: no-op when app is packaged, no-op when cache is fresh.
+     * Invalidates the in-memory catalog cache after sync so next read picks up new models.
+     */
+    async backgroundSync() {
+      const state = await readState();
+
+      const providerCredentials = state.providers.selected
+        .map((providerId) => {
+          const details = state.providers.details[providerId] ?? {};
+          return {
+            providerId,
+            credentials: {
+              apiKey: details.apiKey ?? '',
+              endpoint: details.endpoint ?? '',
+            },
+          };
+        })
+        .filter(({ credentials }) => credentials.apiKey || credentials.endpoint);
+
+      if (providerCredentials.length === 0) return;
+
+      backgroundSyncAllProviders(rootDirectory, providerCredentials)
+        .then(invalidateCatalogCache)
+        .catch(() => {});
+    },
+
+    invalidateCatalogCache,
   };
 }
