@@ -17,11 +17,11 @@
     "@electron/fuses": "2.1.1",
     "electron": "42.0.1",
     "electron-builder": "^26.10.0",
-    "eslint": "10.3.0",
+    "eslint": "10.4.0",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "9.1.7",
     "jscpd": "4.0.5",
-    "lint-staged": "15.5.2",
+    "lint-staged": "17.0.5",
     "markdownlint-cli": "0.44.0",
     "prettier": "3.5.3"
   },
