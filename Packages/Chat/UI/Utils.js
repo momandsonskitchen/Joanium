@@ -23,7 +23,7 @@ export function stripMarkdown(text) {
     .replace(/^[ \t]*[-*+]\s+/gm, '')
     .replace(/^[ \t]*\d+[.)]\s+/gm, '')
     .replace(/^[-*_]{3,}\s*$/gm, '')
-    .replace(/<[^>]+>/g, '')
+    .replace(/[<>]/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
