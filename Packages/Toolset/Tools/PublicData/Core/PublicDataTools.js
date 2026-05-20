@@ -750,8 +750,8 @@ function requireNumberParam(params, key) {
 
 function stripHtml(value = '') {
   return String(value)
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script[^>]*>/gi, '')
+    .replace(/<style[\s\S]*?<\/style[^>]*>/gi, '')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
