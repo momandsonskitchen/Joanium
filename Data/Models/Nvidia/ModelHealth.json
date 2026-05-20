@@ -53,14 +53,46 @@
   },
   "mistralai/mistral-large-3-675b-instruct-2512": {
     "status": "yellow",
-    "checkedAt": "2026-05-20T10:22:17.853Z"
+    "checkedAt": "2026-05-20T14:14:22.822Z"
   },
   "nvidia/llama-3.3-nemotron-super-49b-v1.5": {
-    "status": "yellow",
-    "checkedAt": "2026-05-20T10:22:18.215Z"
+    "status": "green",
+    "checkedAt": "2026-05-20T14:14:13.530Z"
   },
   "z-ai/glm-5.1": {
     "status": "yellow",
-    "checkedAt": "2026-05-20T10:22:18.417Z"
+    "checkedAt": "2026-05-20T14:14:23.207Z"
+  },
+  "ibm/granite-3.0-3b-a800m-instruct": {
+    "status": "red",
+    "checkedAt": "2026-05-20T14:08:18.213Z"
+  },
+  "nvidia/nemotron-3-super-120b-a12b": {
+    "status": "green",
+    "checkedAt": "2026-05-20T14:08:23.313Z"
+  },
+  "mistralai/mistral-nemotron": {
+    "status": "green",
+    "checkedAt": "2026-05-20T14:08:30.760Z"
+  },
+  "google/gemma-4-31b-it": {
+    "status": "yellow",
+    "checkedAt": "2026-05-20T14:08:32.287Z"
+  },
+  "mistralai/mistral-small-4-119b-2603": {
+    "status": "yellow",
+    "checkedAt": "2026-05-20T14:08:32.722Z"
+  },
+  "writer/palmyra-fin-70b-32k": {
+    "status": "red",
+    "checkedAt": "2026-05-20T14:14:08.976Z"
+  },
+  "meta/llama-3.2-90b-vision-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-20T14:14:12.339Z"
+  },
+  "meta/llama-3.3-70b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-20T14:14:14.545Z"
   }
 }

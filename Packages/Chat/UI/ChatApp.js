@@ -1557,6 +1557,11 @@ export async function createChatView(
           _userOverrodeModel = true;
           const labelEl = triggerButton.querySelector('.chat-composer__model-label');
           if (labelEl) labelEl.textContent = activeModelLabel;
+          const providerIconEl = triggerButton.querySelector('.chat-composer__model-provider-icon');
+          if (providerIconEl) {
+            providerIconEl.src = provider.iconPath ?? '';
+            providerIconEl.hidden = !provider.iconPath;
+          }
           syncPickerActiveStates();
           closeModelPicker();
         },
@@ -3752,7 +3757,18 @@ export async function createChatView(
 
   modelButton = createElement('button', 'chat-composer__model');
   modelButton.type = 'button';
+  const modelProviderIcon = document.createElement('img');
+  modelProviderIcon.className = 'chat-composer__model-provider-icon';
+  modelProviderIcon.alt = '';
+  modelProviderIcon.draggable = false;
+  if (activeProvider?.iconPath) {
+    modelProviderIcon.src = activeProvider.iconPath;
+    modelProviderIcon.hidden = false;
+  } else {
+    modelProviderIcon.hidden = true;
+  }
   modelButton.append(
+    modelProviderIcon,
     createElement('span', 'chat-composer__model-label', activeModelLabel),
     createIcon('chevronDown', 'chat-composer__model-icon'),
   );
@@ -3979,9 +3995,14 @@ export async function createChatView(
         activeModel?.name ?? activeProvider?.featuredModels?.[0] ?? strings.composer.modelFallback;
     }
 
-    // Sync the composer button label.
+    // Sync the composer button label and provider icon.
     const labelEl = modelButton?.querySelector('.chat-composer__model-label');
     if (labelEl) labelEl.textContent = activeModelLabel;
+    const providerIconEl = modelButton?.querySelector('.chat-composer__model-provider-icon');
+    if (providerIconEl) {
+      providerIconEl.src = activeProvider?.iconPath ?? '';
+      providerIconEl.hidden = !activeProvider?.iconPath;
+    }
   }
 
   window.addEventListener('joanium:app-settings-changed', (event) => {

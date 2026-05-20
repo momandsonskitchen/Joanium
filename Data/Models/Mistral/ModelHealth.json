@@ -12,8 +12,8 @@
     "checkedAt": "2026-05-19T08:47:06.886Z"
   },
   "devstral-latest": {
-    "status": "green",
-    "checkedAt": "2026-05-19T08:47:07.313Z"
+    "status": "yellow",
+    "checkedAt": "2026-05-20T14:14:22.315Z"
   },
   "codestral-latest": {
     "status": "green",
@@ -29,7 +29,7 @@
   },
   "labs-leanstral-2603": {
     "status": "yellow",
-    "checkedAt": "2026-05-19T15:27:37.388Z"
+    "checkedAt": "2026-05-20T14:08:18.212Z"
   },
   "mistral-vibe-cli-fast": {
     "status": "green",
@@ -104,7 +104,23 @@
     "checkedAt": "2026-05-20T10:22:06.351Z"
   },
   "mistral-vibe-cli-with-tools": {
+    "status": "green",
+    "checkedAt": "2026-05-20T14:14:17.407Z"
+  },
+  "mistral-moderation-2411": {
+    "status": "red",
+    "checkedAt": "2026-05-20T14:08:18.439Z"
+  },
+  "mistral-medium-3": {
     "status": "yellow",
-    "checkedAt": "2026-05-20T10:22:17.853Z"
+    "checkedAt": "2026-05-20T14:08:28.869Z"
+  },
+  "open-mistral-nemo-2407": {
+    "status": "green",
+    "checkedAt": "2026-05-20T14:14:08.927Z"
+  },
+  "magistral-small-2509": {
+    "status": "green",
+    "checkedAt": "2026-05-20T14:14:09.049Z"
   }
 }

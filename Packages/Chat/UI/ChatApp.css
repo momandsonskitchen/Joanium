@@ -1752,7 +1752,7 @@
   gap: 6px;
   min-height: 42px;
   min-width: 0;
-  padding: 0 12px 0 16px;
+  padding: 0 12px 0 10px;
   border-radius: var(--radius-pill);
   color: var(--color-chat-text-secondary);
 }
@@ -1799,6 +1799,14 @@
 .chat-composer__model-label {
   font-size: 15px;
   font-weight: 600;
+}
+
+.chat-composer__model-provider-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .chat-composer__icon,
