@@ -33,13 +33,23 @@ export function stripMarkdown(text) {
  * the joanium-tool code block. Different models have different tag names
  * (e.g. <tool_call>, <function_call>, <invoke>, vendor-namespaced variants like
  * <vendor:toolcall>, etc.) so we match the shape rather than specific names.
+ *
+ * Each replacement pass is repeated in a loop until the string is stable.
+ * This prevents crafted inputs (e.g. <scr<tool_call></tool_call>ipt>) from
+ * reassembling dangerous tags after a single-pass strip — the CodeQL
+ * "incomplete multi-character sanitization" (js/incomplete-multi-character-sanitization)
+ * vulnerability.
  */
 export function stripNativeToolCalls(text) {
   if (!text) return text;
   // Fast path: no angle brackets means no XML tool-call tags to strip.
   if (!text.includes('<')) return text.trim();
-  return (
-    text
+
+  let current = text;
+  let previous;
+  do {
+    previous = current;
+    current = current
       // Namespaced XML tags: <vendor:anything>...</vendor:anything>
       .replace(/<[a-z][a-z0-9]*:[a-z][a-z0-9_-]*[\s\S]*?<\/[a-z][a-z0-9]*:[a-z][a-z0-9_-]*>/gi, '')
       // Common unnamespaced tool-call wrapper elements (complete pairs only)
@@ -50,9 +60,10 @@ export function stripNativeToolCalls(text) {
       // Orphaned opening tags of the same set (mid-stream cutoff)
       .replace(/<(?:tool_call|tool_use|function_call|invoke|tool_calls)[^>]*>/gi, '')
       // Orphaned closing tags
-      .replace(/<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi, '')
-      .trim()
-  );
+      .replace(/<\/(?:tool_call|tool_use|function_call|invoke|tool_calls)>/gi, '');
+  } while (current !== previous);
+
+  return current.trim();
 }
 
 /**
