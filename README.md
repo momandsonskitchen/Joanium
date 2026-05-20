@@ -21,8 +21,6 @@
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-555555?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/badge/node-%3E%3D24-43853d?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
   <img src="https://img.shields.io/badge/built%20with-Electron-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron">
-  <!-- Replace XXXX with your project ID from https://www.bestpractices.dev/ once registered -->
-  <a href="https://www.bestpractices.dev/projects/12922"><img src="https://www.bestpractices.dev/projects/12922/badge" alt="OpenSSF Best Practices"></a>
 </p>
 
 <p align="center">
