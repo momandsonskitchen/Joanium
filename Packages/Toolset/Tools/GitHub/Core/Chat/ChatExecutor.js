@@ -4299,7 +4299,7 @@ export async function executeGithubChatTool(ctx, toolName, params = {}) {
         `Unread: ${t.unread}`,
         `Updated: ${formatDateTime(t.updated_at)}`,
         t.subject?.url
-          ? `URL: ${t.subject.url.replace('api.github.com/repos', 'github.com').replace('/pulls/', '/pull/').replace('/issues/', '/issues/')}`
+          ? `URL: ${t.subject.url.replace('api.github.com/repos', 'github.com').replace('/pulls/', '/pull/')}`
           : '',
       ]
         .filter(Boolean)
