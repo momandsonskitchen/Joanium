@@ -53,7 +53,7 @@
   },
   "mistralai/mistral-large-3-675b-instruct-2512": {
     "status": "yellow",
-    "checkedAt": "2026-05-20T14:14:22.822Z"
+    "checkedAt": "2026-05-20T15:48:21.486Z"
   },
   "nvidia/llama-3.3-nemotron-super-49b-v1.5": {
     "status": "green",
@@ -61,7 +61,7 @@
   },
   "z-ai/glm-5.1": {
     "status": "yellow",
-    "checkedAt": "2026-05-20T14:14:23.207Z"
+    "checkedAt": "2026-05-20T15:48:21.580Z"
   },
   "ibm/granite-3.0-3b-a800m-instruct": {
     "status": "red",
@@ -94,5 +94,29 @@
   "meta/llama-3.3-70b-instruct": {
     "status": "green",
     "checkedAt": "2026-05-20T14:14:14.545Z"
+  },
+  "deepseek-ai/deepseek-coder-6.7b-instruct": {
+    "status": "red",
+    "checkedAt": "2026-05-20T15:48:06.759Z"
+  },
+  "sarvamai/sarvam-m": {
+    "status": "green",
+    "checkedAt": "2026-05-20T15:48:08.161Z"
+  },
+  "moonshotai/kimi-k2.6": {
+    "status": "green",
+    "checkedAt": "2026-05-20T15:48:08.638Z"
+  },
+  "meta/llama-3.1-70b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-20T15:48:11.771Z"
+  },
+  "mistralai/mistral-medium-3.5-128b": {
+    "status": "green",
+    "checkedAt": "2026-05-20T15:48:17.113Z"
+  },
+  "bytedance/seed-oss-36b-instruct": {
+    "status": "yellow",
+    "checkedAt": "2026-05-20T15:48:21.146Z"
   }
 }

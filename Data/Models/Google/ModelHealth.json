@@ -46,5 +46,9 @@
   "gemini-3.1-flash-image-preview": {
     "status": "green",
     "checkedAt": "2026-05-20T14:14:08.984Z"
+  },
+  "gemini-robotics-er-1.6-preview": {
+    "status": "yellow",
+    "checkedAt": "2026-05-20T15:48:06.757Z"
   }
 }

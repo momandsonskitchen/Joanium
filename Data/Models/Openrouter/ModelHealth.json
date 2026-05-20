@@ -1,10 +1,10 @@
 {
-  "qwen/qwen3-8b": {
-    "status": "yellow",
-    "checkedAt": "2026-05-20T14:14:08.983Z"
-  },
-  "openrouter/free": {
+  "openai/gpt-oss-120b:free": {
     "status": "green",
-    "checkedAt": "2026-05-20T14:14:18.450Z"
+    "checkedAt": "2026-05-20T15:48:09.292Z"
+  },
+  "openrouter/owl-alpha": {
+    "status": "green",
+    "checkedAt": "2026-05-20T15:48:12.878Z"
   }
 }

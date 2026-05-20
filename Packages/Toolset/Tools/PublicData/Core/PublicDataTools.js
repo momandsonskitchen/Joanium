@@ -750,13 +750,24 @@ function requireNumberParam(params, key) {
 
 function stripHtml(value = '') {
   let s = String(value);
-  let prev;
-  do {
-    prev = s;
-    s = s
-      .replace(/<script[\s\S]*?<\/script[^>]*>/gi, '')
-      .replace(/<style[\s\S]*?<\/style[^>]*>/gi, '');
-  } while (s !== prev);
+  // Remove script/style blocks including their inner content.
+  // Uses an index-based slicing approach instead of multi-character regex replacement
+  // to avoid the CodeQL js/incomplete-multi-character-sanitization warning — crafted
+  // inputs like "<scr<script>…</script>ipt>" can reconstruct a tag after one regex
+  // pass even when the replacement is looped.
+  for (const tag of ['script', 'style']) {
+    const openRe = new RegExp(`<${tag}(?=[\\s>])`, 'gi');
+    let m;
+    while ((m = openRe.exec(s)) !== null) {
+      const start = m.index;
+      const closeRe = new RegExp(`<\\/${tag}[^>]*>`, 'gi');
+      closeRe.lastIndex = start;
+      const closeMatch = closeRe.exec(s);
+      const end = closeMatch ? closeRe.lastIndex : s.length;
+      s = s.slice(0, start) + s.slice(end);
+      openRe.lastIndex = start;
+    }
+  }
   return s
     .replace(/<[^>]+>/g, ' ')
     .replace(/&quot;/g, '"')
