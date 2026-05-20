@@ -749,9 +749,15 @@ function requireNumberParam(params, key) {
 }
 
 function stripHtml(value = '') {
-  return String(value)
-    .replace(/<script[\s\S]*?<\/script[^>]*>/gi, '')
-    .replace(/<style[\s\S]*?<\/style[^>]*>/gi, '')
+  let s = String(value);
+  let prev;
+  do {
+    prev = s;
+    s = s
+      .replace(/<script[\s\S]*?<\/script[^>]*>/gi, '')
+      .replace(/<style[\s\S]*?<\/style[^>]*>/gi, '');
+  } while (s !== prev);
+  return s
     .replace(/<[^>]+>/g, ' ')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
