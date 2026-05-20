@@ -5,6 +5,19 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "google/gemini-3.5-flash": {
+      "name": "Google: Gemini 3.5 Flash",
+      "description": "Gemini 3.5 Flash is Google's high-efficiency multimodal model, bringing near-Pro level coding and reasoning at Flash-tier cost and speed. It is highly optimized for coding proficiency and parallel agentic execution...",
+      "context_window": 1048576,
+      "pricing": {
+        "input": 1.5,
+        "output": 9
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "anthropic/claude-opus-4.7-fast": {
       "name": "Anthropic: Claude Opus 4.7 (Fast)",
       "description": "Fast-mode variant of [Opus 4.7](/anthropic/claude-opus-4.7) - identical capabilities with higher output speed at premium 6x pricing.\n\nLearn more in Anthropic's docs: https://platform.claude.com/docs/en/build-with-claude/fast-mode",
@@ -3907,9 +3920,9 @@
         "text": true
       }
     },
-    "inflection/inflection-3-pi": {
-      "name": "Inflection: Inflection 3 Pi",
-      "description": "Inflection 3 Pi powers Inflection's [Pi](https://pi.ai) chatbot, including backstory, emotional intelligence, productivity, and safety. It has access to recent news, and excels in scenarios like customer support and roleplay. Pi...",
+    "inflection/inflection-3-productivity": {
+      "name": "Inflection: Inflection 3 Productivity",
+      "description": "Inflection 3 Productivity is optimized for following instructions. It is better for tasks requiring JSON output or precise adherence to provided guidelines. It has access to recent news. For emotional...",
       "context_window": 8000,
       "pricing": {
         "input": 2.5,
@@ -3919,9 +3932,9 @@
         "text": true
       }
     },
-    "inflection/inflection-3-productivity": {
-      "name": "Inflection: Inflection 3 Productivity",
-      "description": "Inflection 3 Productivity is optimized for following instructions. It is better for tasks requiring JSON output or precise adherence to provided guidelines. It has access to recent news. For emotional...",
+    "inflection/inflection-3-pi": {
+      "name": "Inflection: Inflection 3 Pi",
+      "description": "Inflection 3 Pi powers Inflection's [Pi](https://pi.ai) chatbot, including backstory, emotional intelligence, productivity, and safety. It has access to recent news, and excels in scenarios like customer support and roleplay. Pi...",
       "context_window": 8000,
       "pricing": {
         "input": 2.5,
@@ -3943,18 +3956,6 @@
         "text": true
       }
     },
-    "meta-llama/llama-3.2-1b-instruct": {
-      "name": "Meta: Llama 3.2 1B Instruct",
-      "description": "Llama 3.2 1B is a 1-billion-parameter language model focused on efficiently performing natural language tasks, such as summarization, dialogue, and multilingual text analysis. Its smaller size allows it to operate...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.03,
-        "output": 0.2
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "meta-llama/llama-3.2-11b-vision-instruct": {
       "name": "Meta: Llama 3.2 11B Vision Instruct",
       "description": "Llama 3.2 11B Vision is a multimodal model with 11 billion parameters, designed to handle tasks combining visual and textual data. It excels in tasks such as image captioning and...",
@@ -3966,6 +3967,18 @@
       "inputs": {
         "text": true,
         "image": true
+      }
+    },
+    "meta-llama/llama-3.2-1b-instruct": {
+      "name": "Meta: Llama 3.2 1B Instruct",
+      "description": "Llama 3.2 1B is a 1-billion-parameter language model focused on efficiently performing natural language tasks, such as summarization, dialogue, and multilingual text analysis. Its smaller size allows it to operate...",
+      "context_window": 131072,
+      "pricing": {
+        "input": 0.03,
+        "output": 0.2
+      },
+      "inputs": {
+        "text": true
       }
     },
     "meta-llama/llama-3.2-3b-instruct:free": {
@@ -4101,18 +4114,6 @@
         "image": true
       }
     },
-    "meta-llama/llama-3.1-8b-instruct": {
-      "name": "Meta: Llama 3.1 8B Instruct",
-      "description": "Meta's latest class of model (Llama 3.1) launched with a variety of sizes & flavors. This 8B instruct-tuned version is fast and efficient. It has demonstrated strong performance compared to...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.02,
-        "output": 0.05
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "meta-llama/llama-3.1-70b-instruct": {
       "name": "Meta: Llama 3.1 70B Instruct",
       "description": "Meta's latest class of model (Llama 3.1) launched with a variety of sizes & flavors. This 70B instruct-tuned version is optimized for high quality dialogue usecases. It has demonstrated strong...",
@@ -4120,6 +4121,18 @@
       "pricing": {
         "input": 0.4,
         "output": 0.4
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "meta-llama/llama-3.1-8b-instruct": {
+      "name": "Meta: Llama 3.1 8B Instruct",
+      "description": "Meta's latest class of model (Llama 3.1) launched with a variety of sizes & flavors. This 8B instruct-tuned version is fast and efficient. It has demonstrated strong performance compared to...",
+      "context_window": 131072,
+      "pricing": {
+        "input": 0.02,
+        "output": 0.05
       },
       "inputs": {
         "text": true
@@ -4137,8 +4150,8 @@
         "text": true
       }
     },
-    "openai/gpt-4o-mini": {
-      "name": "OpenAI: GPT-4o-mini",
+    "openai/gpt-4o-mini-2024-07-18": {
+      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -4150,8 +4163,8 @@
         "image": true
       }
     },
-    "openai/gpt-4o-mini-2024-07-18": {
-      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
+    "openai/gpt-4o-mini": {
+      "name": "OpenAI: GPT-4o-mini",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -4199,19 +4212,6 @@
         "text": true
       }
     },
-    "openai/gpt-4o-2024-05-13": {
-      "name": "OpenAI: GPT-4o (2024-05-13)",
-      "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 5,
-        "output": 15
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "openai/gpt-4o": {
       "name": "OpenAI: GPT-4o",
       "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as...",
@@ -4219,6 +4219,19 @@
       "pricing": {
         "input": 2.5,
         "output": 10
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "openai/gpt-4o-2024-05-13": {
+      "name": "OpenAI: GPT-4o (2024-05-13)",
+      "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as...",
+      "context_window": 128000,
+      "pricing": {
+        "input": 5,
+        "output": 15
       },
       "inputs": {
         "text": true,
@@ -4315,18 +4328,6 @@
         "output": 1.5
       }
     },
-    "openai/gpt-4-turbo-preview": {
-      "name": "OpenAI: GPT-4 Turbo Preview",
-      "description": "The preview GPT-4 model with improved instruction following, JSON mode, reproducible outputs, parallel function calling, and more. Training data: up to Dec 2023. **Note:** heavily rate limited by OpenAI while...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 10,
-        "output": 30
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-3.5-turbo-0613": {
       "name": "OpenAI: GPT-3.5 Turbo (older v0613)",
       "description": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
@@ -4334,6 +4335,18 @@
       "pricing": {
         "input": 1,
         "output": 2
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "openai/gpt-4-turbo-preview": {
+      "name": "OpenAI: GPT-4 Turbo Preview",
+      "description": "The preview GPT-4 model with improved instruction following, JSON mode, reproducible outputs, parallel function calling, and more. Training data: up to Dec 2023. **Note:** heavily rate limited by OpenAI while...",
+      "context_window": 128000,
+      "pricing": {
+        "input": 10,
+        "output": 30
       },
       "inputs": {
         "text": true
@@ -4364,18 +4377,6 @@
         "text": true
       }
     },
-    "openai/gpt-3.5-turbo-instruct": {
-      "name": "OpenAI: GPT-3.5 Turbo Instruct",
-      "description": "This model is a variant of GPT-3.5 Turbo tuned for instructional prompts and omitting chat-related optimizations. Training data: up to Sep 2021.",
-      "context_window": 4095,
-      "pricing": {
-        "input": 1.5,
-        "output": 2
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "mistralai/mistral-7b-instruct-v0.1": {
       "name": "Mistral: Mistral 7B Instruct v0.1",
       "description": "A 7.3B parameter model that outperforms Llama 2 13B on all benchmarks, with optimizations for speed and context length.",
@@ -4383,6 +4384,18 @@
       "pricing": {
         "input": 0.11,
         "output": 0.19
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "openai/gpt-3.5-turbo-instruct": {
+      "name": "OpenAI: GPT-3.5 Turbo Instruct",
+      "description": "This model is a variant of GPT-3.5 Turbo tuned for instructional prompts and omitting chat-related optimizations. Training data: up to Sep 2021.",
+      "context_window": 4095,
+      "pricing": {
+        "input": 1.5,
+        "output": 2
       },
       "inputs": {
         "text": true
@@ -4473,5 +4486,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-19T16:50:44.392Z"
+  "_syncedAt": "2026-05-20T05:14:28.074Z"
 }

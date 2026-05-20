@@ -150,8 +150,8 @@ const en = {
   },
   tools: {
     runningTool: 'Running a built-in tool...',
-    completedTool: 'Tool completed.',
-    failedTool: 'Tool failed.',
+    completedTool: 'Completed',
+    failedTool: 'Failed.',
     unsupportedTool: 'Unsupported built-in tool request.',
     hiddenResultLabel: 'Tool result',
     subAgentsLabel: 'Sub-agents',

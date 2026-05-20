@@ -259,6 +259,48 @@ const publicDataStrings = {
       publicTool: true,
       toolHint: 'Ask for nutrition facts on any food product by name or barcode.',
     },
+    {
+      id: 'wikidata',
+      label: 'Wikidata',
+      description:
+        'Structured knowledge entity search and fact lookup from the Wikidata knowledge graph.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint:
+        'Ask to search for entities like people, places, or concepts in Wikidata, or fetch facts by QID.',
+    },
+    {
+      id: 'who_gho',
+      label: 'WHO Health Data',
+      description:
+        'Global Health Observatory indicators including life expectancy, mortality, obesity, and disease burden.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask for global health statistics or WHO indicator data for any country.',
+    },
+    {
+      id: 'pubchem',
+      label: 'PubChem',
+      description:
+        'Chemical compound search, molecular formulas, molecular weights, SMILES, and structural data.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint:
+        'Ask for chemical compound data, molecular weight, formula, or structural info by name or CID.',
+    },
+    {
+      id: 'crossref',
+      label: 'Crossref',
+      description:
+        'Scholarly works search and DOI metadata lookup for journal articles, books, preprints, and datasets.',
+      noCredential: true,
+      optional: true,
+      publicTool: true,
+      toolHint: 'Ask to search academic papers, resolve a DOI, or look up publication metadata.',
+    },
   ],
 };
 

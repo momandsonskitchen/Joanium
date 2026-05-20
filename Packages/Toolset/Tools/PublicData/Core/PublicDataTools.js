@@ -589,6 +589,128 @@ export const PUBLIC_DATA_TOOL_DEFINITIONS = [
     },
   ),
 
+  // ── Wikidata ──────────────────────────────────────────────────────────────
+  tool(
+    'search_wikidata',
+    'Search Wikidata for entities (people, places, organisations, concepts) and return their QIDs and descriptions.',
+    'wikidata',
+    {
+      query: { type: 'string', required: true, description: 'Entity name or concept to search.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'get_wikidata_entity',
+    'Get rich structured data for a Wikidata entity by its QID (e.g. Q42 for Douglas Adams). Returns label, description, aliases, and key claims including: instance of, sex/gender, date of birth/death, place of birth/death, country of citizenship, occupation, notable works, awards received, education, spouse, children, parents, and official website. Entity QID labels are resolved to human-readable names. Use this whenever you need biographical details, occupations, awards, or factual properties about a person, place, or concept.',
+    'wikidata',
+    {
+      id: {
+        type: 'string',
+        required: true,
+        description: 'Wikidata entity QID such as Q42.',
+      },
+    },
+  ),
+
+  // ── WHO Global Health Observatory ─────────────────────────────────────────
+  tool(
+    'list_who_indicators',
+    'List or search WHO Global Health Observatory indicator codes and names. Use this to discover indicator codes before calling get_who_health_data.',
+    'who_gho',
+    {
+      search: {
+        type: 'string',
+        required: false,
+        description: 'Optional keyword to filter indicator names, e.g. "mortality", "obesity".',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 15, max 50.' },
+    },
+  ),
+  tool(
+    'get_who_health_data',
+    'Get WHO Global Health Observatory data for an indicator, optionally filtered by country. Common indicators: WHOSIS_000001 (life expectancy), NCD_BMI_30A (obesity), MDG_0000000001 (infant mortality).',
+    'who_gho',
+    {
+      indicator: {
+        type: 'string',
+        required: true,
+        description:
+          'WHO indicator code, e.g. WHOSIS_000001. Use list_who_indicators to find codes.',
+      },
+      country: {
+        type: 'string',
+        required: false,
+        description: 'Optional ISO 3-letter country code, e.g. IND, USA, GBR, CHN.',
+      },
+      limit: {
+        type: 'number',
+        required: false,
+        description: 'Result count, default 10, max 30.',
+      },
+    },
+  ),
+
+  // ── PubChem ───────────────────────────────────────────────────────────────
+  tool(
+    'search_compound',
+    'Search PubChem for chemical compounds by name, synonym, or formula. Returns CID, molecular formula, molecular weight, and IUPAC name.',
+    'pubchem',
+    {
+      query: {
+        type: 'string',
+        required: true,
+        description:
+          'Compound name, synonym, or molecular formula, e.g. "aspirin", "caffeine", "C6H12O6".',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 10.' },
+    },
+  ),
+  tool(
+    'get_compound_info',
+    'Get detailed chemical property data from PubChem for a specific Compound ID (CID), including SMILES, InChIKey, XLogP, and synonyms.',
+    'pubchem',
+    {
+      cid: {
+        type: 'string',
+        required: true,
+        description: 'PubChem Compound ID (CID), e.g. "2244" for aspirin.',
+      },
+    },
+  ),
+
+  // ── Crossref ──────────────────────────────────────────────────────────────
+  tool(
+    'search_crossref',
+    'Search Crossref for scholarly works (journal articles, books, preprints, datasets) by topic, title, or author. Returns title, authors, year, journal, citation count, and DOI.',
+    'crossref',
+    {
+      query: {
+        type: 'string',
+        required: true,
+        description: 'Search query: topic keywords, paper title, or author name.',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+      type: {
+        type: 'string',
+        required: false,
+        description:
+          'Filter by work type: journal-article, book, proceedings-article, dataset, preprint, or omit for all.',
+      },
+    },
+  ),
+  tool(
+    'get_doi_info',
+    'Retrieve full metadata for a scholarly work by its DOI using Crossref. Returns title, authors, journal, publisher, citation count, and reference count.',
+    'crossref',
+    {
+      doi: {
+        type: 'string',
+        required: true,
+        description: 'DOI string, e.g. "10.1038/nature12373".',
+      },
+    },
+  ),
+
   // ── Open Food Facts ─────────────────────────────────────────────────────────
   tool(
     'search_food',
@@ -2148,6 +2270,318 @@ async function getFoodByBarcode(params) {
   ].join('\n');
 }
 
+// ── Wikidata ───────────────────────────────────────────────────────────────
+async function searchWikidata(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const data = await fetchJson(
+    `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&limit=${limit}&format=json&origin=*`,
+  );
+  const results = data.search ?? [];
+  if (!results.length) return `No Wikidata entities found for "${query}".`;
+  const rows = results.map(
+    (entity) =>
+      `${entity.label ?? entity.id} (${entity.id})\n   ${entity.description ?? 'No description'}\n   https://www.wikidata.org/wiki/${entity.id}`,
+  );
+  return formatList(`Wikidata search: ${query}`, rows);
+}
+
+async function getWikidataEntity(params) {
+  const id = requireText(params, 'id').toUpperCase();
+  const data = await fetchJson(
+    `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${encodeURIComponent(id)}&props=labels|descriptions|aliases|sitelinks|claims&languages=en&format=json&origin=*`,
+  );
+  const entity = data.entities?.[id];
+  if (!entity || entity.missing !== undefined) throw new Error(`Wikidata entity not found: ${id}`);
+
+  const label = entity.labels?.en?.value ?? id;
+  const description = entity.descriptions?.en?.value ?? 'n/a';
+  const aliases = (entity.aliases?.en ?? []).map((a) => a.value).slice(0, 5);
+  const wpTitle = entity.sitelinks?.enwiki?.title;
+  const wpLink = wpTitle
+    ? `https://en.wikipedia.org/wiki/${encodeURIComponent(wpTitle.replace(/ /g, '_'))}`
+    : null;
+
+  // Key properties to surface
+  const KEY_PROPS = {
+    P31: 'Instance of',
+    P21: 'Sex / gender',
+    P569: 'Date of birth',
+    P570: 'Date of death',
+    P19: 'Place of birth',
+    P20: 'Place of death',
+    P27: 'Country of citizenship',
+    P106: 'Occupation',
+    P800: 'Notable work',
+    P166: 'Award received',
+    P69: 'Educated at',
+    P26: 'Spouse',
+    P40: 'Child',
+    P22: 'Father',
+    P25: 'Mother',
+    P856: 'Official website',
+  };
+
+  const claims = entity.claims ?? {};
+  const qidsToResolve = new Set();
+  const claimData = {};
+
+  for (const [prop, propLabel] of Object.entries(KEY_PROPS)) {
+    if (!claims[prop]) continue;
+    const values = [];
+    for (const claim of (claims[prop] ?? []).slice(0, 5)) {
+      const snak = claim.mainsnak;
+      if (snak.snaktype !== 'value') continue;
+      const dv = snak.datavalue;
+      if (dv.type === 'wikibase-entityid') {
+        const qid = dv.value.id;
+        qidsToResolve.add(qid);
+        values.push({ type: 'entity', qid });
+      } else if (dv.type === 'time') {
+        const match = String(dv.value.time ?? '').match(/^[+-]?(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+          const [, year, month, day] = match;
+          const precision = dv.value.precision ?? 11;
+          values.push({
+            type: 'string',
+            value:
+              precision >= 11
+                ? `${year}-${month}-${day}`
+                : precision >= 10
+                  ? `${year}-${month}`
+                  : year,
+          });
+        }
+      } else if (dv.type === 'monolingualtext') {
+        values.push({ type: 'string', value: dv.value?.text ?? '' });
+      } else if (typeof dv.value === 'string') {
+        values.push({ type: 'string', value: dv.value });
+      }
+    }
+    if (values.length) claimData[prop] = { propLabel, values };
+  }
+
+  // Batch-resolve entity QID labels
+  const entityLabels = {};
+  if (qidsToResolve.size > 0) {
+    const qidList = [...qidsToResolve].slice(0, 50).join('|');
+    const labelData = await fetchJson(
+      `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${encodeURIComponent(qidList)}&props=labels&languages=en&format=json&origin=*`,
+    ).catch(() => null);
+    for (const [qid, ent] of Object.entries(labelData?.entities ?? {})) {
+      entityLabels[qid] = ent.labels?.en?.value ?? qid;
+    }
+  }
+
+  const lines = [
+    `Wikidata entity: ${label} (${id})`,
+    `Description: ${description}`,
+    aliases.length ? `Also known as: ${aliases.join(', ')}` : null,
+    '',
+  ];
+
+  for (const { propLabel, values } of Object.values(claimData)) {
+    const resolved = values.map((v) =>
+      v.type === 'entity' ? (entityLabels[v.qid] ?? v.qid) : v.value,
+    );
+    lines.push(`${propLabel}: ${resolved.join(', ')}`);
+  }
+
+  lines.push('');
+  if (wpLink) lines.push(`Wikipedia: ${wpLink}`);
+  lines.push(`Wikidata: https://www.wikidata.org/wiki/${id}`);
+
+  return lines.filter((l) => l !== null).join('\n');
+}
+
+// ── WHO Global Health Observatory ───────────────────────────────────────────
+async function listWhoIndicators(params) {
+  const search = String(params.search ?? '').trim();
+  const limit = clampInteger(params.limit, 15, 1, 50);
+  const filterParam = search
+    ? `?$filter=contains(tolower(IndicatorName),tolower('${encodeURIComponent(search)}'))&$top=${limit}`
+    : `?$top=${limit}`;
+  const data = await fetchJson(`https://ghoapi.azureedge.net/api/Indicator${filterParam}`);
+  const indicators = data.value ?? [];
+  if (!indicators.length)
+    return search ? `No WHO indicators matching "${search}".` : 'No WHO indicators found.';
+  const rows = indicators
+    .slice(0, limit)
+    .map((ind) => `${ind.IndicatorCode}: ${ind.IndicatorName}`);
+  return formatList(search ? `WHO indicators matching "${search}"` : 'WHO indicators', rows);
+}
+
+async function getWhoHealthData(params) {
+  const indicator = requireText(params, 'indicator').toUpperCase();
+  const country = String(params.country ?? '')
+    .trim()
+    .toUpperCase();
+  const limit = clampInteger(params.limit, 10, 1, 30);
+  const filterParam = country
+    ? `?$filter=SpatialDim eq '${country}'&$top=${limit}&$orderby=TimeDim desc`
+    : `?$top=${limit}&$orderby=TimeDim desc`;
+  const data = await fetchJson(
+    `https://ghoapi.azureedge.net/api/${encodeURIComponent(indicator)}${filterParam}`,
+  );
+  const rows = data.value ?? [];
+  if (!rows.length)
+    return `No WHO data found for indicator "${indicator}"${country ? ` in country "${country}"` : ''}.`;
+  const formatted = rows
+    .slice(0, limit)
+    .map(
+      (row) =>
+        `${row.TimeDim ?? 'n/a'} | ${row.SpatialDim ?? 'n/a'} | ${
+          row.NumericValue != null
+            ? Number(row.NumericValue).toLocaleString('en-US', { maximumFractionDigits: 2 })
+            : (row.Value ?? 'n/a')
+        }`,
+    );
+  return [
+    `WHO: ${indicator}${country ? ` — ${country}` : ''}`,
+    'Year | Country | Value',
+    '',
+    ...formatted,
+  ].join('\n');
+}
+
+// ── PubChem ─────────────────────────────────────────────────────────────────
+async function searchCompound(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 10);
+  const propData = await fetchJson(
+    `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(query)}/property/MolecularFormula,MolecularWeight,IUPACName,IsomericSMILES/JSON?MaxRecords=${limit}`,
+  ).catch(() => null);
+  const compounds = propData?.PropertyTable?.Properties ?? [];
+  if (!compounds.length) return `No PubChem compounds found for "${query}".`;
+  const rows = compounds
+    .slice(0, limit)
+    .map((c) =>
+      [
+        `CID: ${c.CID}`,
+        `Formula: ${c.MolecularFormula ?? 'n/a'}, MW: ${c.MolecularWeight ?? 'n/a'} g/mol`,
+        `IUPAC: ${c.IUPACName ?? 'n/a'}`,
+        `SMILES: ${(c.IsomericSMILES ?? 'n/a').slice(0, 80)}`,
+        `Link: https://pubchem.ncbi.nlm.nih.gov/compound/${c.CID}`,
+      ].join('\n   '),
+    );
+  return formatList(`PubChem search: ${query}`, rows);
+}
+
+async function getCompoundInfo(params) {
+  const cid = requireText(params, 'cid').replace(/\D/g, '');
+  if (!cid) throw new Error('Invalid CID.');
+  const [props, synonyms] = await Promise.all([
+    fetchJson(
+      `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,IUPACName,IsomericSMILES,InChIKey,Charge,XLogP,ExactMass/JSON`,
+    ).catch(() => null),
+    fetchJson(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/synonyms/JSON`).catch(
+      () => null,
+    ),
+  ]);
+  const p = props?.PropertyTable?.Properties?.[0];
+  if (!p) throw new Error(`No PubChem compound found for CID ${cid}.`);
+  const names = (synonyms?.InformationList?.Information?.[0]?.Synonym ?? []).slice(0, 5);
+  return [
+    `PubChem compound: CID ${cid}`,
+    `IUPAC name: ${p.IUPACName ?? 'n/a'}`,
+    names.length ? `Common names: ${names.join(', ')}` : null,
+    `Molecular formula: ${p.MolecularFormula ?? 'n/a'}`,
+    `Molecular weight: ${p.MolecularWeight ?? 'n/a'} g/mol`,
+    `Exact mass: ${p.ExactMass ?? 'n/a'}`,
+    `XLogP: ${p.XLogP ?? 'n/a'}`,
+    `InChIKey: ${p.InChIKey ?? 'n/a'}`,
+    `SMILES: ${(p.IsomericSMILES ?? 'n/a').slice(0, 120)}`,
+    `Link: https://pubchem.ncbi.nlm.nih.gov/compound/${cid}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+// ── Crossref ───────────────────────────────────────────────────────────────
+const CROSSREF_HEADERS = Object.freeze({
+  'User-Agent': 'Joanium/2026 (mailto:support@joanium.com)',
+});
+
+async function searchCrossref(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const type = String(params.type ?? '')
+    .trim()
+    .toLowerCase();
+  const url = new URL('https://api.crossref.org/works');
+  url.searchParams.set('query', query);
+  url.searchParams.set('rows', String(limit));
+  url.searchParams.set(
+    'select',
+    'DOI,title,author,published-print,published-online,container-title,type,URL,is-referenced-by-count',
+  );
+  if (type && type !== 'all') url.searchParams.set('filter', `type:${type}`);
+  const data = await fetchJson(url.toString(), { headers: CROSSREF_HEADERS });
+  const items = data.message?.items ?? [];
+  if (!items.length) return `No Crossref works found for "${query}".`;
+  const rows = items.map((item) => {
+    const title = Array.isArray(item.title) ? item.title[0] : (item.title ?? 'Untitled');
+    const authorList = item.author ?? [];
+    const authors = authorList
+      .slice(0, 3)
+      .map((a) => `${a.given ?? ''} ${a.family ?? ''}`.trim())
+      .join(', ');
+    const year =
+      item['published-print']?.['date-parts']?.[0]?.[0] ??
+      item['published-online']?.['date-parts']?.[0]?.[0] ??
+      'n/a';
+    const journal = Array.isArray(item['container-title'])
+      ? item['container-title'][0]
+      : (item['container-title'] ?? 'n/a');
+    const citations = item['is-referenced-by-count'] ?? 0;
+    return [
+      title,
+      authors
+        ? `Authors: ${authors}${authorList.length > 3 ? ` +${authorList.length - 3} more` : ''}`
+        : null,
+      `Year: ${year} | Journal: ${journal}`,
+      `Citations: ${citations} | Type: ${item.type ?? 'n/a'}`,
+      `DOI: ${item.DOI ?? 'n/a'} | ${item.URL ?? `https://doi.org/${item.DOI}`}`,
+    ]
+      .filter(Boolean)
+      .join('\n   ');
+  });
+  return formatList(`Crossref search: ${query}`, rows);
+}
+
+async function getDoiInfo(params) {
+  const doi = requireText(params, 'doi').replace(/^https?:\/\/doi\.org\//, '');
+  const data = await fetchJson(`https://api.crossref.org/works/${encodeURIComponent(doi)}`, {
+    headers: CROSSREF_HEADERS,
+  });
+  const item = data.message ?? {};
+  const title = Array.isArray(item.title) ? item.title[0] : (item.title ?? 'Untitled');
+  const authors = (item.author ?? [])
+    .map((a) => `${a.given ?? ''} ${a.family ?? ''}`.trim())
+    .join(', ');
+  const year =
+    item['published-print']?.['date-parts']?.[0]?.[0] ??
+    item['published-online']?.['date-parts']?.[0]?.[0] ??
+    'n/a';
+  const journal = Array.isArray(item['container-title'])
+    ? item['container-title'][0]
+    : (item['container-title'] ?? 'n/a');
+  return [
+    `Crossref: ${title}`,
+    `Authors: ${authors || 'n/a'}`,
+    `Published: ${year}`,
+    `Journal/Source: ${journal}`,
+    `Type: ${item.type ?? 'n/a'}`,
+    `Publisher: ${item.publisher ?? 'n/a'}`,
+    `Citations: ${item['is-referenced-by-count'] ?? 0}`,
+    `References: ${item['references-count'] ?? 0}`,
+    `DOI: ${item.DOI ?? doi}`,
+    `URL: ${item.URL ?? `https://doi.org/${doi}`}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
 export function createPublicDataToolHandlers() {
   return {
     search_web: searchWeb,
@@ -2218,5 +2652,17 @@ export function createPublicDataToolHandlers() {
     // nutrition
     search_food: searchFood,
     get_food_by_barcode: getFoodByBarcode,
+    // wikidata
+    search_wikidata: searchWikidata,
+    get_wikidata_entity: getWikidataEntity,
+    // who gho
+    list_who_indicators: listWhoIndicators,
+    get_who_health_data: getWhoHealthData,
+    // pubchem
+    search_compound: searchCompound,
+    get_compound_info: getCompoundInfo,
+    // crossref
+    search_crossref: searchCrossref,
+    get_doi_info: getDoiInfo,
   };
 }

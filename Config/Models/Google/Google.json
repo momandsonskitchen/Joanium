@@ -159,6 +159,11 @@
       "context_window": 65536,
       "max_output": 65536
     },
+    "gemini-3.5-flash": {
+      "name": "Gemini 3.5 Flash",
+      "context_window": 1048576,
+      "max_output": 65536
+    },
     "lyria-3-clip-preview": {
       "name": "Lyria 3 Clip Preview",
       "context_window": 1048576,
@@ -189,6 +194,11 @@
       "context_window": 131072,
       "max_output": 65536
     },
+    "antigravity-preview-05-2026": {
+      "name": "Antigravity Agent Preview",
+      "context_window": 131072,
+      "max_output": 65536
+    },
     "deep-research-max-preview-04-2026": {
       "name": "Deep Research Max Preview (Apr-21-2026)",
       "context_window": 131072,
@@ -205,5 +215,5 @@
       "max_output": 65536
     }
   },
-  "_syncedAt": "2026-05-19T16:50:45.599Z"
+  "_syncedAt": "2026-05-20T05:14:30.202Z"
 }
