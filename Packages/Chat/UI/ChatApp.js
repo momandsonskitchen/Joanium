@@ -43,6 +43,7 @@ import {
 } from './TerminalPanel.js';
 import {
   buildModelContent,
+  copyToClipboard,
   generateSessionId,
   getFirstName,
   sanitizeAssistantVisibleContent,
@@ -2302,7 +2303,7 @@ export async function createChatView(
       ...renderGroups.map((group) => {
         if (group.type === 'user') {
           const { message, index } = group.items[0];
-          const onCopy = () => navigator.clipboard.writeText(message.content ?? '').catch(() => {});
+          const onCopy = () => copyToClipboard(message.content ?? '');
           const onRetry = () => {
             if (isSending) return;
             const userMessage = messages[index];
@@ -2325,8 +2326,7 @@ export async function createChatView(
         // Assistant group — find the preceding user message for retry
         const firstIndex = group.items[0].index;
         const lastMessage = group.items[group.items.length - 1].message;
-        const onCopy = () =>
-          navigator.clipboard.writeText(lastMessage.content ?? '').catch(() => {});
+        const onCopy = () => copyToClipboard(lastMessage.content ?? '');
         const onRetry = () => {
           if (isSending) return;
           let userIndex = -1;
