@@ -1931,7 +1931,7 @@ function parseAtomXml(xml) {
     const block = match[1];
     const text = (tag) => {
       const m = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
-      return m ? m[1].replace(/<[^>]+>/g, '').trim() : '';
+      return m ? stripHtml(m[1]) : '';
     };
     const attr = (tag, attribute) => {
       const m = block.match(new RegExp(`<${tag}[^>]*\\s${attribute}="([^"]*)"[^>]*(?:\\/>|>)`));
