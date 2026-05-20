@@ -6,5 +6,13 @@
   "nvidia/nemotron-nano-12b-v2-vl:free": {
     "status": "green",
     "checkedAt": "2026-05-19T16:51:55.623Z"
+  },
+  "qwen/qwen3.5-27b": {
+    "status": "yellow",
+    "checkedAt": "2026-05-20T10:22:03.851Z"
+  },
+  "nvidia/nemotron-3-super-120b-a12b:free": {
+    "status": "green",
+    "checkedAt": "2026-05-20T10:22:04.336Z"
   }
 }

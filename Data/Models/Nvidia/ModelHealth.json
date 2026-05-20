@@ -36,7 +36,31 @@
     "checkedAt": "2026-05-19T16:51:19.052Z"
   },
   "qwen/qwen3-next-80b-a3b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-20T10:22:04.993Z"
+  },
+  "google/gemma-3-4b-it": {
+    "status": "red",
+    "checkedAt": "2026-05-20T10:22:03.870Z"
+  },
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
+    "status": "green",
+    "checkedAt": "2026-05-20T10:22:03.969Z"
+  },
+  "qwen/qwen3-coder-480b-a35b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-20T10:22:05.069Z"
+  },
+  "mistralai/mistral-large-3-675b-instruct-2512": {
     "status": "yellow",
-    "checkedAt": "2026-05-19T16:51:24.239Z"
+    "checkedAt": "2026-05-20T10:22:17.853Z"
+  },
+  "nvidia/llama-3.3-nemotron-super-49b-v1.5": {
+    "status": "yellow",
+    "checkedAt": "2026-05-20T10:22:18.215Z"
+  },
+  "z-ai/glm-5.1": {
+    "status": "yellow",
+    "checkedAt": "2026-05-20T10:22:18.417Z"
   }
 }

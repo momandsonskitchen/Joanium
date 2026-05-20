@@ -15,8 +15,8 @@
   },
   "devDependencies": {
     "@electron/fuses": "2.1.1",
-    "electron": "42.0.1",
-    "electron-builder": "^26.10.0",
+    "electron": "42.2.0",
+    "electron-builder": "^26.11.0",
     "eslint": "10.4.0",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "9.1.7",
