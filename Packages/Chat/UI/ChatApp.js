@@ -3845,8 +3845,13 @@ export async function createChatView(
   const privateBtn = createElement('button', 'chat-private-btn');
   privateBtn.type = 'button';
   privateBtn.setAttribute('aria-label', strings.composer.privateToggle);
+  const privateBtnIcon = document.createElement('img');
+  privateBtnIcon.src = payload.privateIconUrl ?? '';
+  privateBtnIcon.alt = '';
+  privateBtnIcon.draggable = false;
+  privateBtnIcon.className = 'chat-private-btn__icon';
   privateBtn.append(
-    createIcon('lock', 'chat-private-btn__icon'),
+    privateBtnIcon,
     createElement('span', 'chat-private-btn__label', strings.composer.privateLabel),
   );
   const originalGreeting = greeting;

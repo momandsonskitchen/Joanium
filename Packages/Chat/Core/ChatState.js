@@ -3,6 +3,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { TERMINAL_TOOL_NAMES } from '../../Shared/ToolLoop/TerminalToolNames.js';
 import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
@@ -972,7 +973,11 @@ export function createChatStateManager({ rootDirectory }) {
         readMemoryPromptFile(rootDirectory).catch(() => ''),
       ]);
 
-      return { user, providers, terminalPrompt, subAgentPrompt, memoryPrompt };
+      const privateIconUrl = pathToFileURL(
+        path.join(rootDirectory, 'Assets', 'App', 'Private.png'),
+      ).href;
+
+      return { user, providers, terminalPrompt, subAgentPrompt, memoryPrompt, privateIconUrl };
     },
     // Streaming entry point — resolves once the stream ends (or rejects on error).
     // onChunk({ type: 'text'|'thinking', text }) is called for every token.
