@@ -2,6 +2,7 @@ import { formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import {
   loadMemoryContext,
+  loadTerminalPrompt,
   loadToolsetPrompt,
   runRendererToolLoop,
   stripThinking,
@@ -45,6 +46,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
   let started = false;
   let chain = Promise.resolve();
   let dispose = null;
+  let terminalPrompt = null;
   let toolsetPrompt = null;
 
   async function saveMessage({
@@ -80,11 +82,13 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
   async function processIncoming({ id, channelName, from, text, metadata = {} }) {
     const channelLabel = strings.channels[channelName]?.name ?? channelName;
     const activePersona = getActivePersona?.() ?? null;
-    const [memoryContext, loadedToolsetPrompt] = await Promise.all([
+    const [memoryContext, loadedToolsetPrompt, loadedTerminalPrompt] = await Promise.all([
       loadMemoryContext(),
       toolsetPrompt === null ? loadToolsetPrompt() : Promise.resolve(toolsetPrompt),
+      terminalPrompt === null ? loadTerminalPrompt() : Promise.resolve(terminalPrompt),
     ]);
     toolsetPrompt = loadedToolsetPrompt;
+    terminalPrompt = loadedTerminalPrompt;
 
     const promptParts = [
       activePersona?.content ?? '',
@@ -101,7 +105,7 @@ export function createChannelGateway(strings, { chatStrings = {}, getActivePerso
         messages: [{ role: 'user', content: text }],
         persona: promptParts.join('\n\n'),
         memoryContext,
-        terminalTools: chatStrings.terminal?.systemPrompt ?? '',
+        terminalTools: terminalPrompt || '',
         toolsetTools: toolsetPrompt || '',
         isNewSession: false,
       });

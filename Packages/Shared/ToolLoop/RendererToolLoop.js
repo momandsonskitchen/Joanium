@@ -660,6 +660,15 @@ export async function loadMemoryContext(limit = 24000) {
   }
 }
 
+export async function loadTerminalPrompt() {
+  try {
+    const result = await invokeIpc('chat:get-terminal-prompt');
+    return result?.ok ? (result.terminalPrompt ?? '') : '';
+  } catch {
+    return '';
+  }
+}
+
 export async function loadToolsetPrompt() {
   try {
     const result = await invokeIpc('toolset:list-tools');

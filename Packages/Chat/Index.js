@@ -238,6 +238,13 @@ export async function createPackage({ rootDirectory }) {
           return result;
         },
       },
+      {
+        channel: 'chat:get-terminal-prompt',
+        handler: async () => {
+          const { terminalPrompt } = await chatStateManager.getBootstrapPayload();
+          return { ok: true, terminalPrompt: terminalPrompt ?? '' };
+        },
+      },
     ],
   };
 }
