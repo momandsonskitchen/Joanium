@@ -6,5 +6,9 @@
   "chatgpt-image-latest": {
     "status": "green",
     "checkedAt": "2026-05-21T05:00:04.040Z"
+  },
+  "gpt-5.4-mini": {
+    "status": "green",
+    "checkedAt": "2026-05-21T08:30:00.953Z"
   }
 }

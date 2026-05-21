@@ -1,134 +1,18 @@
 {
-  "meta/codellama-70b": {
-    "status": "red",
-    "checkedAt": "2026-05-19T16:51:09.683Z"
-  },
-  "mistralai/mistral-7b-instruct-v0.3": {
-    "status": "red",
-    "checkedAt": "2026-05-19T16:51:09.832Z"
-  },
-  "google/codegemma-7b": {
-    "status": "red",
-    "checkedAt": "2026-05-19T16:51:10.087Z"
-  },
-  "nvidia/llama-3.1-nemoguard-8b-topic-control": {
+  "nvidia/nemotron-3-content-safety": {
     "status": "green",
-    "checkedAt": "2026-05-19T16:51:10.962Z"
+    "checkedAt": "2026-05-21T08:30:01.511Z"
   },
-  "qwen/qwen3.5-397b-a17b": {
-    "status": "green",
-    "checkedAt": "2026-05-19T16:51:12.865Z"
+  "abacusai/dracarys-llama-3.1-70b-instruct": {
+    "status": "yellow",
+    "checkedAt": "2026-05-21T08:30:15.121Z"
   },
-  "stepfun-ai/step-3.5-flash": {
-    "status": "green",
-    "checkedAt": "2026-05-21T05:00:10.234Z"
-  },
-  "nvidia/llama-3.3-nemotron-super-49b-v1": {
-    "status": "green",
-    "checkedAt": "2026-05-19T16:51:15.250Z"
+  "minimaxai/minimax-m2.7": {
+    "status": "yellow",
+    "checkedAt": "2026-05-21T08:30:15.301Z"
   },
   "qwen/qwen3.5-122b-a10b": {
-    "status": "green",
-    "checkedAt": "2026-05-19T16:51:17.181Z"
-  },
-  "deepseek-ai/deepseek-v4-pro": {
-    "status": "green",
-    "checkedAt": "2026-05-19T16:51:19.052Z"
-  },
-  "qwen/qwen3-next-80b-a3b-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-20T10:22:04.993Z"
-  },
-  "google/gemma-3-4b-it": {
-    "status": "red",
-    "checkedAt": "2026-05-20T10:22:03.870Z"
-  },
-  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
-    "status": "green",
-    "checkedAt": "2026-05-20T10:22:03.969Z"
-  },
-  "qwen/qwen3-coder-480b-a35b-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-20T10:22:05.069Z"
-  },
-  "mistralai/mistral-large-3-675b-instruct-2512": {
     "status": "yellow",
-    "checkedAt": "2026-05-20T15:48:21.486Z"
-  },
-  "nvidia/llama-3.3-nemotron-super-49b-v1.5": {
-    "status": "green",
-    "checkedAt": "2026-05-20T14:14:13.530Z"
-  },
-  "z-ai/glm-5.1": {
-    "status": "yellow",
-    "checkedAt": "2026-05-20T15:48:21.580Z"
-  },
-  "ibm/granite-3.0-3b-a800m-instruct": {
-    "status": "red",
-    "checkedAt": "2026-05-20T14:08:18.213Z"
-  },
-  "nvidia/nemotron-3-super-120b-a12b": {
-    "status": "green",
-    "checkedAt": "2026-05-20T14:08:23.313Z"
-  },
-  "mistralai/mistral-nemotron": {
-    "status": "green",
-    "checkedAt": "2026-05-20T14:08:30.760Z"
-  },
-  "google/gemma-4-31b-it": {
-    "status": "yellow",
-    "checkedAt": "2026-05-20T14:08:32.287Z"
-  },
-  "mistralai/mistral-small-4-119b-2603": {
-    "status": "yellow",
-    "checkedAt": "2026-05-20T14:08:32.722Z"
-  },
-  "writer/palmyra-fin-70b-32k": {
-    "status": "red",
-    "checkedAt": "2026-05-20T14:14:08.976Z"
-  },
-  "meta/llama-3.2-90b-vision-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-20T14:14:12.339Z"
-  },
-  "meta/llama-3.3-70b-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-20T14:14:14.545Z"
-  },
-  "deepseek-ai/deepseek-coder-6.7b-instruct": {
-    "status": "red",
-    "checkedAt": "2026-05-20T15:48:06.759Z"
-  },
-  "sarvamai/sarvam-m": {
-    "status": "green",
-    "checkedAt": "2026-05-20T15:48:08.161Z"
-  },
-  "moonshotai/kimi-k2.6": {
-    "status": "green",
-    "checkedAt": "2026-05-20T15:48:08.638Z"
-  },
-  "meta/llama-3.1-70b-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-20T15:48:11.771Z"
-  },
-  "mistralai/mistral-medium-3.5-128b": {
-    "status": "green",
-    "checkedAt": "2026-05-20T15:48:17.113Z"
-  },
-  "bytedance/seed-oss-36b-instruct": {
-    "status": "yellow",
-    "checkedAt": "2026-05-20T15:48:21.146Z"
-  },
-  "meta/llama-3.2-11b-vision-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-21T05:00:04.060Z"
-  },
-  "meta/llama-4-maverick-17b-128e-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-21T05:00:04.651Z"
-  },
-  "deepseek-ai/deepseek-v4-flash": {
-    "status": "yellow",
-    "checkedAt": "2026-05-21T05:00:18.058Z"
+    "checkedAt": "2026-05-21T08:30:15.583Z"
   }
 }

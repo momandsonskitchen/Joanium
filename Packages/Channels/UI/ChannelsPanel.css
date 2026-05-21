@@ -29,9 +29,9 @@
 
 .channels-card--connected {
   box-shadow:
-    inset 0 0 0 1px rgba(76, 163, 112, 0.2),
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
-    0 12px 30px rgba(70, 135, 90, 0.08);
+    0 12px 30px rgba(var(--color-accent-rgb), 0.08);
 }
 
 .channels-card__header {
@@ -122,8 +122,8 @@
 }
 
 .channels-card__status--active {
-  background: rgba(44, 171, 104, 0.12);
-  color: #218556;
+  background: rgba(var(--color-accent-rgb), 0.12);
+  color: var(--color-accent);
 }
 
 .channels-toggle {
@@ -165,7 +165,7 @@
 }
 
 .channels-toggle__input:checked + .channels-toggle__track {
-  background: rgba(44, 171, 104, 0.72);
+  background: rgba(var(--color-accent-rgb), 0.72);
 }
 
 .channels-toggle__input:checked + .channels-toggle__track::after {
@@ -373,7 +373,7 @@
 }
 
 .channels-card__feedback--success {
-  color: #218556;
+  color: var(--color-accent);
 }
 
 .channels-card__feedback--error {
