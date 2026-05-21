@@ -47,6 +47,7 @@ export function createDefaultUserState() {
       completionSound: true,
       autoMemoryUpdates: true,
       autoUpdate: true,
+      showTechFeed: true,
       defaultView: 'chat',
       defaultModel: null,
     },
@@ -259,6 +260,7 @@ function sanitizeAppSettings(candidate) {
       candidate.autoMemoryUpdates ?? candidate.auto_memory_updates ?? defaults.autoMemoryUpdates,
     ),
     autoUpdate: Boolean(candidate.autoUpdate ?? candidate.auto_update ?? defaults.autoUpdate),
+    showTechFeed: Boolean(candidate.showTechFeed ?? defaults.showTechFeed),
     defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
   };

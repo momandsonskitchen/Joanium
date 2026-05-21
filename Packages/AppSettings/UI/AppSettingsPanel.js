@@ -9,7 +9,7 @@ import {
 } from '../../Shared/ProviderCatalog/ModelOptions.js';
 import { createSettingsPanelState } from './Utils.js';
 
-const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound'];
+const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound', 'showTechFeed'];
 
 export function createAppSettingsPanel(strings) {
   const view = createElement('div', 'app-settings');

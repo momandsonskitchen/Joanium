@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS = Object.freeze({
   completionSound: true,
   autoMemoryUpdates: true,
   autoUpdate: true,
+  showTechFeed: true,
   defaultView: 'chat',
   defaultModel: null,
 });
@@ -65,6 +66,7 @@ function normalizeSettings(candidate = {}) {
     completionSound: Boolean(candidate.completionSound ?? DEFAULT_SETTINGS.completionSound),
     autoMemoryUpdates: Boolean(candidate.autoMemoryUpdates ?? DEFAULT_SETTINGS.autoMemoryUpdates),
     autoUpdate: Boolean(candidate.autoUpdate ?? DEFAULT_SETTINGS.autoUpdate),
+    showTechFeed: Boolean(candidate.showTechFeed ?? DEFAULT_SETTINGS.showTechFeed),
     defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
   };

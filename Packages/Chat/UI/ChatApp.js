@@ -2275,8 +2275,17 @@ export async function createChatView(
     } else {
       title.hidden = hasMessages;
       bubblesEl.hidden = hasMessages;
-      if (techFeedEl) techFeedEl.hidden = hasMessages;
-      if (welcomeWrap) welcomeWrap.hidden = hasMessages;
+      if (techFeedEl) {
+        techFeedEl.hidden = hasMessages || currentAppSettings?.showTechFeed === false;
+        techFeedEl.style.display = techFeedEl.hidden ? 'none' : '';
+      }
+      if (welcomeWrap) {
+        welcomeWrap.hidden = hasMessages;
+        welcomeWrap.classList.toggle(
+          'chat-welcome--no-feed',
+          currentAppSettings?.showTechFeed === false,
+        );
+      }
       thread.hidden = !hasMessages;
       composer.classList.toggle('chat-composer--conversation', hasMessages);
       scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
@@ -3592,8 +3601,10 @@ export async function createChatView(
     bubblesEl.append(btn);
   }
 
-  const techFeedPanel = createTechFeedPanel(strings.techFeed);
-  techFeedEl = techFeedPanel.element;
+  if (currentAppSettings?.showTechFeed !== false) {
+    const techFeedPanel = createTechFeedPanel(strings.techFeed);
+    techFeedEl = techFeedPanel.element;
+  }
 
   composer = createElement('section', 'chat-composer');
   projectPill = createElement('div', 'chat-composer__project');
@@ -3834,7 +3845,8 @@ export async function createChatView(
     slashMenu,
   );
   welcomeWrap = createElement('div', 'chat-welcome');
-  welcomeWrap.append(title, bubblesEl, techFeedEl);
+  welcomeWrap.append(title, bubblesEl);
+  if (techFeedEl) welcomeWrap.append(techFeedEl);
   scroll.append(welcomeWrap, thread);
   scrollToBottomBtn = createElement('button', 'chat-scroll-to-bottom-btn');
   scrollToBottomBtn.type = 'button';
@@ -4050,6 +4062,28 @@ export async function createChatView(
     } else {
       scheduleMemorySync(12000);
     }
+
+    // Create feed element on first enable if it was never created.
+    if (currentAppSettings?.showTechFeed !== false && !techFeedEl) {
+      const techFeedPanel = createTechFeedPanel(strings.techFeed);
+      techFeedEl = techFeedPanel.element;
+      if (welcomeWrap) welcomeWrap.append(techFeedEl);
+    }
+
+    // Sync feed visibility immediately — no refresh required.
+    if (techFeedEl) {
+      const feedEnabled = currentAppSettings?.showTechFeed !== false;
+      const feedVisible = feedEnabled && messages.length === 0;
+      techFeedEl.hidden = !feedVisible;
+      techFeedEl.style.display = feedVisible ? '' : 'none';
+    }
+    if (welcomeWrap) {
+      welcomeWrap.classList.toggle(
+        'chat-welcome--no-feed',
+        currentAppSettings?.showTechFeed === false,
+      );
+    }
+    syncComposer();
   });
 
   // Manual memory sync trigger fired from AppSettingsPanel when auto-update is off.

@@ -20,6 +20,10 @@ const en = {
       label: 'Completion sound',
       description: 'Play a sound when a response finishes.',
     },
+    showTechFeed: {
+      label: 'Show tech feed',
+      description: 'Show trending repositories and developer news on the welcome screen.',
+    },
     autoMemoryUpdates: {
       label: 'Auto memory updates',
       description: 'Let Joanium update personal memory from completed conversations while idle.',
