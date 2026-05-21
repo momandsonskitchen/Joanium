@@ -197,6 +197,7 @@ export async function createChatView(
   let title = null;
   let bubblesEl = null;
   let techFeedEl = null;
+  let welcomeWrap = null;
   let composer = null;
   let scroll = null;
   let bottom = null;
@@ -2243,7 +2244,7 @@ export async function createChatView(
 
       // 5. Phase 2 — after welcome is fully gone, reveal and animate thread
       setTimeout(() => {
-        for (const el of [title, bubblesEl, techFeedEl].filter(Boolean)) {
+        for (const el of [welcomeWrap, title, bubblesEl, techFeedEl].filter(Boolean)) {
           el.hidden = true;
           for (const prop of ['position', 'top', 'left', 'width', 'margin', 'zIndex']) {
             el.style[prop] = '';
@@ -2275,6 +2276,7 @@ export async function createChatView(
       title.hidden = hasMessages;
       bubblesEl.hidden = hasMessages;
       if (techFeedEl) techFeedEl.hidden = hasMessages;
+      if (welcomeWrap) welcomeWrap.hidden = hasMessages;
       thread.hidden = !hasMessages;
       composer.classList.toggle('chat-composer--conversation', hasMessages);
       scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
@@ -3831,7 +3833,9 @@ export async function createChatView(
     composerFooter,
     slashMenu,
   );
-  scroll.append(title, bubblesEl, techFeedEl, thread);
+  welcomeWrap = createElement('div', 'chat-welcome');
+  welcomeWrap.append(title, bubblesEl, techFeedEl);
+  scroll.append(welcomeWrap, thread);
   scrollToBottomBtn = createElement('button', 'chat-scroll-to-bottom-btn');
   scrollToBottomBtn.type = 'button';
   scrollToBottomBtn.setAttribute('aria-label', strings.composer.scrollToBottom);

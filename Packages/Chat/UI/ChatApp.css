@@ -291,6 +291,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow-x: hidden;
 }
 
 .chat-stage__scroll--conversation {
@@ -3659,4 +3660,13 @@
 
 .tech-feed__row::-webkit-scrollbar {
   display: none;
+}
+
+/* Welcome wrapper centers the greeting + pills + feed as one group, nudged slightly above center */
+.chat-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-bottom: -20vh; /* Nudges the block upwards by taking space at the bottom */
 }
