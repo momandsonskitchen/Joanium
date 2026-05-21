@@ -9,7 +9,7 @@ When terminal tools are needed, respond with one or more fenced blocks and no fi
 {"tool":"read_local_file","path":"D:/absolute/path/package.json"}
 ```
 
-Supported tools: run_shell_command, assess_shell_command, inspect_workspace, search_workspace, read_local_file, write_local_file, apply_file_patch, delete_local_item, list_directory, create_directory, move_local_file, copy_local_file, git_status, git_diff, git_branches, git_create_branch, git_checkout_branch, git_delete_branch, git_pull, git_commit, git_push, git_push_sync, git_log, git_tags, git_stash, git_remote, git_show, run_project_checks, start_local_server, read_terminal_output, write_process, kill_process.
+Supported tools: {{TERMINAL_TOOL_NAMES}}.
 git_log accepts an optional limit (default 20, max 100). git_stash accepts action: list | push | pop | drop and an optional message for push. git_stash mutations require allow_risky=true. git_show accepts ref/hash/commit (defaults to HEAD). move_local_file and copy_local_file accept source and destination paths. write_process accepts process_id and input. kill_process accepts process_id.
 Git mutation tools require allow_risky=true and should only be used when the user explicitly asks for that Git action. Project context sets the default working directory automatically.
 

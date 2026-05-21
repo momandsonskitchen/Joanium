@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
+import { TERMINAL_TOOL_NAMES } from '../../Shared/ToolLoop/TerminalToolNames.js';
 import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 
@@ -54,7 +55,8 @@ async function readEnhancePromptFile(rootDirectory) {
 }
 
 async function readTerminalPromptFile(rootDirectory) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', 'Terminal.md'), 'utf8')).trim();
+  const template = await readFile(path.join(rootDirectory, 'Prompts', 'Terminal.md'), 'utf8');
+  return template.replace('{{TERMINAL_TOOL_NAMES}}', TERMINAL_TOOL_NAMES.join(', ')).trim();
 }
 
 async function readSubAgentPromptFile(rootDirectory) {

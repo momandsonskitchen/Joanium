@@ -1,42 +1,10 @@
 import { invokeIpc } from '../Ipc/RendererIpc.js';
+import { TERMINAL_TOOL_NAMES } from './TerminalToolNames.js';
+
+export { TERMINAL_TOOL_NAMES };
 
 const TERMINAL_TOOL_BLOCK_RE = /```joanium-terminal\s*([\s\S]*?)```/i;
 const TOOLSET_TOOL_BLOCK_RE = /```joanium-tool\s*([\s\S]*?)```/i;
-
-export const TERMINAL_TOOL_NAMES = Object.freeze([
-  'run_shell_command',
-  'assess_shell_command',
-  'inspect_workspace',
-  'search_workspace',
-  'read_local_file',
-  'write_local_file',
-  'apply_file_patch',
-  'delete_local_item',
-  'list_directory',
-  'create_directory',
-  'move_local_file',
-  'copy_local_file',
-  'git_status',
-  'git_diff',
-  'git_branches',
-  'git_create_branch',
-  'git_checkout_branch',
-  'git_delete_branch',
-  'git_pull',
-  'git_commit',
-  'git_push',
-  'git_push_sync',
-  'git_log',
-  'git_tags',
-  'git_stash',
-  'git_remote',
-  'git_show',
-  'run_project_checks',
-  'start_local_server',
-  'read_terminal_output',
-  'write_process',
-  'kill_process',
-]);
 
 const DEFAULT_TERMINAL_TOOL_SET = new Set(TERMINAL_TOOL_NAMES);
 
