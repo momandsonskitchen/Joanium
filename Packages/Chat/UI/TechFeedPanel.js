@@ -4,11 +4,18 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 const HN_API = 'https://hacker-news.firebaseio.com/v0';
 const HN_TOP_STORIES = `${HN_API}/topstories.json`;
 const HN_ITEM = (id) => `${HN_API}/item/${id}.json`;
-const GITHUB_TRENDING_API =
-  'https://api.github.com/search/repositories?q=created:>DATE&sort=stars&order=desc&per_page=5';
-const DEVTO_API = 'https://dev.to/api/articles?top=7&per_page=5';
-const REDDIT_API = 'https://www.reddit.com/r/programming/top.json?limit=5';
+
+const GITHUB_TRENDING = (date, count) =>
+  `https://api.github.com/search/repositories?q=created:>${date}&sort=stars&order=desc&per_page=${count}`;
+
+const DEVTO_API = 'https://dev.to/api/articles?top=7&per_page=12';
+
+const REDDIT_API = (sub, limit) => `https://www.reddit.com/r/${sub}/top.json?limit=${limit}&t=day`;
+
 const LOBSTERS_API = 'https://lobste.rs/hottest.json';
+
+const STACKOVERFLOW_API =
+  'https://api.stackexchange.com/2.3/questions?order=desc&sort=hot&site=stackoverflow&pagesize=10&filter=default';
 
 const SHIMMER_COUNT = 5;
 
@@ -20,9 +27,6 @@ function todayMinus(days) {
   return d.toISOString().slice(0, 10);
 }
 
-// All HTTP requests are proxied through the main process (chat:fetch-url) so
-// they are never subject to renderer CSP or Firebase origin restrictions in
-// packaged builds.
 async function fetchJson(url) {
   return invokeIpc('chat:fetch-url', url);
 }
@@ -44,37 +48,37 @@ function shuffleArray(array) {
 
 async function fetchHackerNews() {
   const ids = await fetchJson(HN_TOP_STORIES);
-  const top = ids.slice(0, 12);
+  const top = ids.slice(0, 30);
   const items = await Promise.all(top.map((id) => fetchJson(HN_ITEM(id)).catch(() => null)));
   return items
     .filter((item) => item && item.url && item.title)
-    .slice(0, 5)
+    .slice(0, 20)
     .map((item) => ({
       source: 'Hacker News',
       title: item.title,
       description: item.url ? new URL(item.url).hostname.replace('www.', '') : '',
       url: item.url,
-      image: null,
+      image: '../../../Assets/Icons/HackerNews.png',
       meta: `${item.score ?? 0} points · ${item.descendants ?? 0} comments`,
     }));
 }
 
-async function fetchGithubTrending() {
-  const url = GITHUB_TRENDING_API.replace('DATE', todayMinus(7));
+async function fetchGithubTrending(days, count, label) {
+  const url = GITHUB_TRENDING(todayMinus(days), count);
   const data = await fetchJson(url);
-  return (data.items ?? []).slice(0, 5).map((repo) => ({
-    source: 'GitHub',
+  return (data.items ?? []).slice(0, count).map((repo) => ({
+    source: label,
     title: repo.full_name,
     description: truncateText(repo.description, 120),
     url: repo.html_url,
     image: repo.owner?.avatar_url ?? null,
-    meta: `⭐ ${(repo.stargazers_count ?? 0).toLocaleString()} stars`,
+    meta: `⭐ ${(repo.stargazers_count ?? 0).toLocaleString()} stars · ${repo.language ?? 'Code'}`,
   }));
 }
 
 async function fetchDevTo() {
   const articles = await fetchJson(DEVTO_API);
-  return (articles ?? []).slice(0, 5).map((a) => ({
+  return (articles ?? []).slice(0, 12).map((a) => ({
     source: 'DEV Community',
     title: a.title,
     description: truncateText(a.description, 120),
@@ -84,25 +88,25 @@ async function fetchDevTo() {
   }));
 }
 
-async function fetchReddit() {
-  const data = await fetchJson(REDDIT_API);
+async function fetchReddit(subreddit, limit, label) {
+  const data = await fetchJson(REDDIT_API(subreddit, limit));
   const posts = data?.data?.children ?? [];
-  return posts.slice(0, 5).map((p) => {
+  return posts.slice(0, limit).map((p) => {
     const post = p.data;
     return {
-      source: 'Reddit',
+      source: label ?? `r/${subreddit}`,
       title: post.title,
       description: truncateText(post.selftext || `Posted by u/${post.author}`, 120),
       url: `https://reddit.com${post.permalink}`,
       image: post.thumbnail && post.thumbnail.startsWith('http') ? post.thumbnail : null,
-      meta: `⬆️ ${post.ups ?? 0} upvotes · ${post.num_comments ?? 0} comments`,
+      meta: `⬆️ ${post.ups ?? 0} · ${post.num_comments ?? 0} comments`,
     };
   });
 }
 
 async function fetchLobsters() {
   const stories = await fetchJson(LOBSTERS_API);
-  return (stories ?? []).slice(0, 5).map((s) => {
+  return (stories ?? []).slice(0, 12).map((s) => {
     const username =
       typeof s.submitter_user === 'string'
         ? s.submitter_user
@@ -111,7 +115,6 @@ async function fetchLobsters() {
       typeof s.submitter_user === 'object' && s.submitter_user?.avatar_url
         ? `https://lobste.rs${s.submitter_user.avatar_url}`
         : null;
-
     return {
       source: 'Lobste.rs',
       title: s.title,
@@ -121,6 +124,21 @@ async function fetchLobsters() {
       meta: `${s.score ?? 0} points · ${s.comment_count ?? 0} comments`,
     };
   });
+}
+
+async function fetchStackOverflow() {
+  const data = await fetchJson(STACKOVERFLOW_API);
+  return (data?.items ?? []).slice(0, 10).map((q) => ({
+    source: 'Stack Overflow',
+    title: q.title,
+    description: truncateText(
+      q.tags ? q.tags.slice(0, 5).join(' · ') : `by ${q.owner?.display_name ?? 'someone'}`,
+      120,
+    ),
+    url: q.link,
+    image: q.owner?.profile_image ?? null,
+    meta: `👍 ${q.score ?? 0} · 💬 ${q.answer_count ?? 0} answers · ${q.view_count?.toLocaleString() ?? 0} views`,
+  }));
 }
 
 // ── Renderers ─────────────────────────────────────────────────────────────────
