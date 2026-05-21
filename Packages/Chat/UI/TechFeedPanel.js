@@ -10,7 +10,7 @@ const DEVTO_API = 'https://dev.to/api/articles?top=7&per_page=5';
 const REDDIT_API = 'https://www.reddit.com/r/programming/top.json?limit=5';
 const LOBSTERS_API = 'https://lobste.rs/hottest.json';
 
-const SHIMMER_COUNT = 6;
+const SHIMMER_COUNT = 5;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -102,14 +102,25 @@ async function fetchReddit() {
 
 async function fetchLobsters() {
   const stories = await fetchJson(LOBSTERS_API);
-  return (stories ?? []).slice(0, 5).map((s) => ({
-    source: 'Lobste.rs',
-    title: s.title,
-    description: truncateText(s.description || `Posted by ${s.submitter_user?.username}`, 120),
-    url: s.url || s.short_id_url,
-    image: s.submitter_user?.avatar_url ? `https://lobste.rs${s.submitter_user.avatar_url}` : null,
-    meta: `${s.score ?? 0} points · ${s.comment_count ?? 0} comments`,
-  }));
+  return (stories ?? []).slice(0, 5).map((s) => {
+    const username =
+      typeof s.submitter_user === 'string'
+        ? s.submitter_user
+        : s.submitter_user?.username || 'someone';
+    const avatar =
+      typeof s.submitter_user === 'object' && s.submitter_user?.avatar_url
+        ? `https://lobste.rs${s.submitter_user.avatar_url}`
+        : null;
+
+    return {
+      source: 'Lobste.rs',
+      title: s.title,
+      description: truncateText(s.description || `Posted by ${username}`, 120),
+      url: s.url || s.short_id_url,
+      image: avatar,
+      meta: `${s.score ?? 0} points · ${s.comment_count ?? 0} comments`,
+    };
+  });
 }
 
 // ── Renderers ─────────────────────────────────────────────────────────────────
