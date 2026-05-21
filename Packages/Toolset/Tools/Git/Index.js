@@ -46,6 +46,26 @@ export function createToolPackage() {
         channel: 'terminal:git-push-sync',
         handler: async (_event, payload) => gitService.gitPushSync(payload),
       },
+      {
+        channel: 'terminal:git-log',
+        handler: async (_event, payload) => gitService.gitLog(payload),
+      },
+      {
+        channel: 'terminal:git-tags',
+        handler: async (_event, payload) => gitService.gitTags(payload),
+      },
+      {
+        channel: 'terminal:git-stash',
+        handler: async (_event, payload) => gitService.gitStash(payload),
+      },
+      {
+        channel: 'terminal:git-remote',
+        handler: async (_event, payload) => gitService.gitRemote(payload),
+      },
+      {
+        channel: 'terminal:git-show',
+        handler: async (_event, payload) => gitService.gitShow(payload),
+      },
     ],
   };
 }

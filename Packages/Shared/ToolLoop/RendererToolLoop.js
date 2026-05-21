@@ -13,6 +13,9 @@ export const TERMINAL_TOOL_NAMES = Object.freeze([
   'apply_file_patch',
   'delete_local_item',
   'list_directory',
+  'create_directory',
+  'move_local_file',
+  'copy_local_file',
   'git_status',
   'git_diff',
   'git_branches',
@@ -23,9 +26,16 @@ export const TERMINAL_TOOL_NAMES = Object.freeze([
   'git_commit',
   'git_push',
   'git_push_sync',
+  'git_log',
+  'git_tags',
+  'git_stash',
+  'git_remote',
+  'git_show',
   'run_project_checks',
   'start_local_server',
   'read_terminal_output',
+  'write_process',
+  'kill_process',
 ]);
 
 const DEFAULT_TERMINAL_TOOL_SET = new Set(TERMINAL_TOOL_NAMES);
@@ -422,6 +432,29 @@ export async function executeTerminalTool(
     return result;
   }
 
+  if (action.tool === 'create_directory') {
+    return invokeIpc('terminal:create-directory', {
+      path: payload.path,
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+    });
+  }
+
+  if (action.tool === 'move_local_file') {
+    return invokeIpc('terminal:move-file', {
+      source: payload.source ?? payload.src,
+      destination: payload.destination ?? payload.dest,
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+    });
+  }
+
+  if (action.tool === 'copy_local_file') {
+    return invokeIpc('terminal:copy-file', {
+      source: payload.source ?? payload.src,
+      destination: payload.destination ?? payload.dest,
+      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+    });
+  }
+
   if (action.tool === 'list_directory') {
     return invokeIpc('terminal:list-directory', {
       dirPath: payload.path || (await resolveCwd(payload.working_directory)),
@@ -501,6 +534,41 @@ export async function executeTerminalTool(
     });
   }
 
+  if (action.tool === 'git_log') {
+    return invokeIpc('terminal:git-log', {
+      workingDir: await resolveCwd(payload.working_directory ?? payload.path),
+      limit: payload.limit,
+    });
+  }
+
+  if (action.tool === 'git_tags') {
+    return invokeIpc('terminal:git-tags', {
+      workingDir: await resolveCwd(payload.working_directory ?? payload.path),
+    });
+  }
+
+  if (action.tool === 'git_stash') {
+    return invokeIpc('terminal:git-stash', {
+      workingDir: await resolveCwd(payload.working_directory ?? payload.path),
+      action: payload.action,
+      message: payload.message,
+      allowRisky: payload.allow_risky === true,
+    });
+  }
+
+  if (action.tool === 'git_remote') {
+    return invokeIpc('terminal:git-remote', {
+      workingDir: await resolveCwd(payload.working_directory ?? payload.path),
+    });
+  }
+
+  if (action.tool === 'git_show') {
+    return invokeIpc('terminal:git-show', {
+      workingDir: await resolveCwd(payload.working_directory ?? payload.path),
+      ref: payload.ref ?? payload.hash ?? payload.commit,
+    });
+  }
+
   if (action.tool === 'run_project_checks') {
     return invokeIpc('terminal:run-project-checks', {
       workingDir: await resolveCwd(payload.working_directory ?? payload.path),
@@ -523,6 +591,18 @@ export async function executeTerminalTool(
       'terminal:read-output',
       payload.process_id ?? payload.processId ?? payload.pid,
     );
+  }
+
+  if (action.tool === 'write_process') {
+    return invokeIpc(
+      'terminal:write',
+      payload.process_id ?? payload.processId ?? payload.pid,
+      payload.input ?? payload.data ?? '',
+    );
+  }
+
+  if (action.tool === 'kill_process') {
+    return invokeIpc('terminal:kill', payload.process_id ?? payload.processId ?? payload.pid);
   }
 
   return { ok: false, error: unsupportedError ?? `Unsupported terminal tool: ${action.tool}` };

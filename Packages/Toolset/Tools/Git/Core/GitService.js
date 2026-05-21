@@ -290,6 +290,65 @@ export function createGitService() {
       : result;
   }
 
+  async function gitLog(payload = {}) {
+    const directoryError = requireGitWorkingDir(payload);
+    if (directoryError) return directoryError;
+    const limit = Math.min(Math.max(Number(payload.limit) || 20, 1), 100);
+    return runGitArgs(
+      ['log', `--max-count=${limit}`, '--oneline', '--decorate', '--graph'],
+      payload.workingDir,
+      { timeout: 20_000 },
+    );
+  }
+
+  async function gitTags(payload = {}) {
+    const directoryError = requireGitWorkingDir(payload);
+    if (directoryError) return directoryError;
+    return runGitArgs(['tag', '-l', '--sort=-version:refname'], payload.workingDir, {
+      timeout: 20_000,
+    });
+  }
+
+  async function gitStash(payload = {}) {
+    const directoryError = requireGitWorkingDir(payload);
+    if (directoryError) return directoryError;
+    const action = String(payload.action ?? 'list')
+      .trim()
+      .toLowerCase();
+    if (action === 'list') {
+      return runGitArgs(['stash', 'list'], payload.workingDir, { timeout: 20_000 });
+    }
+    const optInError = requireGitMutationOptIn(payload, 'Git stash mutation');
+    if (optInError) return optInError;
+    if (action === 'push') {
+      const args = ['stash', 'push'];
+      if (payload.message) args.push('-m', String(payload.message).trim());
+      return runGitArgs(args, payload.workingDir, { timeout: 30_000 });
+    }
+    if (action === 'pop') {
+      return runGitArgs(['stash', 'pop'], payload.workingDir, { timeout: 30_000 });
+    }
+    if (action === 'drop') {
+      return runGitArgs(['stash', 'drop'], payload.workingDir, { timeout: 20_000 });
+    }
+    return { ok: false, error: `Unknown stash action: ${action}. Use list, push, pop, or drop.` };
+  }
+
+  async function gitRemote(payload = {}) {
+    const directoryError = requireGitWorkingDir(payload);
+    if (directoryError) return directoryError;
+    return runGitArgs(['remote', '-v'], payload.workingDir, { timeout: 20_000 });
+  }
+
+  async function gitShow(payload = {}) {
+    const directoryError = requireGitWorkingDir(payload);
+    if (directoryError) return directoryError;
+    const ref = String(payload.ref ?? payload.hash ?? payload.commit ?? 'HEAD').trim();
+    return runGitArgs(['show', '--stat', '--patch', '--color=never', ref], payload.workingDir, {
+      timeout: 20_000,
+    });
+  }
+
   return {
     gitStatus,
     gitDiff,
@@ -301,5 +360,10 @@ export function createGitService() {
     gitCommit,
     gitPush,
     gitPushSync,
+    gitLog,
+    gitTags,
+    gitStash,
+    gitRemote,
+    gitShow,
   };
 }

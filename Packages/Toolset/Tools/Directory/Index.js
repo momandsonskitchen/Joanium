@@ -34,6 +34,18 @@ export function createToolPackage({ rootDirectory } = {}) {
         channel: 'terminal:inspect-workspace',
         handler: async (_event, payload) => directoryService.inspectWorkspace(payload),
       },
+      {
+        channel: 'terminal:create-directory',
+        handler: async (_event, payload) => directoryService.createDirectory(payload),
+      },
+      {
+        channel: 'terminal:move-file',
+        handler: async (_event, payload) => directoryService.moveLocalFile(payload),
+      },
+      {
+        channel: 'terminal:copy-file',
+        handler: async (_event, payload) => directoryService.copyLocalFile(payload),
+      },
     ],
   };
 }

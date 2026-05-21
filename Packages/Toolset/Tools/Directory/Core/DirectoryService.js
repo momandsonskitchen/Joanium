@@ -249,6 +249,64 @@ export function createDirectoryService({ rootDirectory }) {
     return { ok: true, path: resolvedPath, kind, beforeContent, afterContent: '' };
   }
 
+  function createDirectory(payload = {}) {
+    const dirError = requireString(payload.path, 'No directory path provided.');
+    if (dirError) return dirError;
+    const resolvedPath = resolveDirectory(payload.path, payload.cwd ?? fallbackDirectory);
+    const existed = fs.existsSync(resolvedPath);
+    fs.mkdirSync(resolvedPath, { recursive: true });
+    return { ok: true, path: resolvedPath, created: !existed };
+  }
+
+  function moveLocalFile(payload = {}) {
+    const srcError = requireString(payload.source ?? payload.src, 'No source path provided.');
+    if (srcError) return srcError;
+    const destError = requireString(
+      payload.destination ?? payload.dest,
+      'No destination path provided.',
+    );
+    if (destError) return destError;
+    const resolvedSrc = resolveDirectory(
+      payload.source ?? payload.src,
+      payload.cwd ?? fallbackDirectory,
+    );
+    const resolvedDest = resolveDirectory(
+      payload.destination ?? payload.dest,
+      payload.cwd ?? fallbackDirectory,
+    );
+    if (!fs.existsSync(resolvedSrc))
+      return { ok: false, error: `Source path does not exist: ${resolvedSrc}` };
+    fs.mkdirSync(path.dirname(resolvedDest), { recursive: true });
+    fs.renameSync(resolvedSrc, resolvedDest);
+    return { ok: true, source: resolvedSrc, destination: resolvedDest };
+  }
+
+  function copyLocalFile(payload = {}) {
+    const srcError = requireString(payload.source ?? payload.src, 'No source path provided.');
+    if (srcError) return srcError;
+    const destError = requireString(
+      payload.destination ?? payload.dest,
+      'No destination path provided.',
+    );
+    if (destError) return destError;
+    const resolvedSrc = resolveDirectory(
+      payload.source ?? payload.src,
+      payload.cwd ?? fallbackDirectory,
+    );
+    const resolvedDest = resolveDirectory(
+      payload.destination ?? payload.dest,
+      payload.cwd ?? fallbackDirectory,
+    );
+    if (!fs.existsSync(resolvedSrc))
+      return { ok: false, error: `Source path does not exist: ${resolvedSrc}` };
+    const stat = fs.statSync(resolvedSrc);
+    if (!stat.isFile())
+      return { ok: false, error: 'copy_local_file only supports files, not directories.' };
+    fs.mkdirSync(path.dirname(resolvedDest), { recursive: true });
+    fs.copyFileSync(resolvedSrc, resolvedDest);
+    return { ok: true, source: resolvedSrc, destination: resolvedDest, bytes: stat.size };
+  }
+
   return {
     readTextFile,
     listDirectory,
@@ -257,5 +315,8 @@ export function createDirectoryService({ rootDirectory }) {
     writeFile,
     applyFilePatch,
     deleteItem,
+    createDirectory,
+    moveLocalFile,
+    copyLocalFile,
   };
 }
