@@ -1246,18 +1246,6 @@
         "text": true
       }
     },
-    "arcee-ai/trinity-large-preview": {
-      "name": "Arcee AI: Trinity Large Preview",
-      "description": "Trinity-Large-Preview is a frontier-scale open-weight language model from Arcee, built as a 400B-parameter sparse Mixture-of-Experts with 13B active parameters per token using 4-of-256 expert routing. It excels in creative writing,...",
-      "context_window": 131000,
-      "pricing": {
-        "input": 0.15,
-        "output": 0.45
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "moonshotai/kimi-k2.5": {
       "name": "MoonshotAI: Kimi K2.5",
       "description": "Kimi K2.5 is Moonshot AI's native multimodal model, delivering state-of-the-art visual coding capability and a self-directed agent swarm paradigm. Built on Kimi K2 with continued pretraining over approximately 15T mixed...",
@@ -4499,5 +4487,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-21T12:15:45.516Z"
+  "_syncedAt": "2026-05-21T13:19:59.152Z"
 }

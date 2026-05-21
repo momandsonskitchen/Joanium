@@ -252,7 +252,9 @@ export async function createPackage({ rootDirectory }) {
         channel: 'chat:fetch-url',
         handler: async (_event, url) => {
           const { net } = await import('electron');
-          const res = await net.fetch(url);
+          const res = await net.fetch(url, {
+            headers: { 'User-Agent': 'Joanium/1.0' },
+          });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
         },
