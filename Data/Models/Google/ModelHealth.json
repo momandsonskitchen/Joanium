@@ -24,12 +24,12 @@
     "checkedAt": "2026-05-19T15:27:32.688Z"
   },
   "gemini-2.0-flash": {
-    "status": "yellow",
-    "checkedAt": "2026-05-19T15:34:39.460Z"
+    "status": "green",
+    "checkedAt": "2026-05-21T05:00:04.073Z"
   },
   "gemini-robotics-er-1.5-preview": {
     "status": "yellow",
-    "checkedAt": "2026-05-19T15:37:32.783Z"
+    "checkedAt": "2026-05-21T05:00:04.497Z"
   },
   "deep-research-max-preview-04-2026": {
     "status": "yellow",
