@@ -1,12 +1,14 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 
-const HN_API = 'https://hacker-news.firebaseio.com/v1';
+const HN_API = 'https://hacker-news.firebaseio.com/v0';
 const HN_TOP_STORIES = `${HN_API}/topstories.json`;
 const HN_ITEM = (id) => `${HN_API}/item/${id}.json`;
 const GITHUB_TRENDING_API =
   'https://api.github.com/search/repositories?q=created:>DATE&sort=stars&order=desc&per_page=5';
 const DEVTO_API = 'https://dev.to/api/articles?top=7&per_page=5';
+const REDDIT_API = 'https://www.reddit.com/r/programming/top.json?limit=5';
+const LOBSTERS_API = 'https://lobste.rs/hottest.json';
 
 const SHIMMER_COUNT = 6;
 
@@ -27,7 +29,15 @@ async function fetchJson(url) {
 
 function truncateText(str, max) {
   if (!str) return '';
-  return str.length > max ? `${str.slice(0, max).trimEnd()}…` : str;
+  return str.length > max ? `${str.slice(0, max).trimEnd()}...` : str;
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
 // ── Data fetchers ─────────────────────────────────────────────────────────────
@@ -70,7 +80,35 @@ async function fetchDevTo() {
     description: truncateText(a.description, 120),
     url: a.url,
     image: a.social_image ?? a.cover_image ?? null,
-    meta: `❤ ${a.positive_reactions_count ?? 0} · 🔖 ${a.reading_time_minutes ?? 1} min read`,
+    meta: `👍 ${a.positive_reactions_count ?? 0} · ⏳ ${a.reading_time_minutes ?? 1} min read`,
+  }));
+}
+
+async function fetchReddit() {
+  const data = await fetchJson(REDDIT_API);
+  const posts = data?.data?.children ?? [];
+  return posts.slice(0, 5).map((p) => {
+    const post = p.data;
+    return {
+      source: 'Reddit',
+      title: post.title,
+      description: truncateText(post.selftext || `Posted by u/${post.author}`, 120),
+      url: `https://reddit.com${post.permalink}`,
+      image: post.thumbnail && post.thumbnail.startsWith('http') ? post.thumbnail : null,
+      meta: `⬆️ ${post.ups ?? 0} upvotes · ${post.num_comments ?? 0} comments`,
+    };
+  });
+}
+
+async function fetchLobsters() {
+  const stories = await fetchJson(LOBSTERS_API);
+  return (stories ?? []).slice(0, 5).map((s) => ({
+    source: 'Lobste.rs',
+    title: s.title,
+    description: truncateText(s.description || `Posted by ${s.submitter_user?.username}`, 120),
+    url: s.url || s.short_id_url,
+    image: s.submitter_user?.avatar_url ? `https://lobste.rs${s.submitter_user.avatar_url}` : null,
+    meta: `${s.score ?? 0} points · ${s.comment_count ?? 0} comments`,
   }));
 }
 
@@ -162,19 +200,25 @@ export function createTechFeedPanel(strings) {
 
     showShimmers();
 
-    const [hn, gh, dev] = await Promise.allSettled([
+    const [hn, gh, dev, reddit, lobsters] = await Promise.allSettled([
       fetchHackerNews(),
       fetchGithubTrending(),
       fetchDevTo(),
+      fetchReddit(),
+      fetchLobsters(),
     ]);
 
     if (abortController.signal.aborted) return;
 
-    const items = [
+    let items = [
       ...(hn.status === 'fulfilled' ? hn.value : []),
       ...(gh.status === 'fulfilled' ? gh.value : []),
       ...(dev.status === 'fulfilled' ? dev.value : []),
+      ...(reddit.status === 'fulfilled' ? reddit.value : []),
+      ...(lobsters.status === 'fulfilled' ? lobsters.value : []),
     ];
+
+    items = shuffleArray(items);
 
     el.replaceChildren();
 
