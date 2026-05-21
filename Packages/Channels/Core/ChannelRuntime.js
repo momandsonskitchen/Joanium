@@ -22,6 +22,7 @@ const RUNTIME_ERROR_PATTERNS = Object.freeze([
   /socket hang up/i,
   /etimedout/i,
   /session closed/i,
+  /aborted/i,
 ]);
 
 function splitIntoChunks(value, maxLength) {

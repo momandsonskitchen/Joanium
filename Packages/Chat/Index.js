@@ -255,7 +255,7 @@ export async function createPackage({ rootDirectory }) {
           const res = await net.fetch(url, {
             headers: { 'User-Agent': 'Joanium/1.0' },
           });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) return null;
           return res.json();
         },
       },
