@@ -276,6 +276,13 @@ const en = {
     hint: 'Supported: documents, code, and text',
     hintWithImages: 'Supported: documents, code, text, and images',
   },
+  techFeed: {
+    label: 'Tech feed',
+    hn: 'Hacker News',
+    github: 'Trending on GitHub',
+    dev: 'DEV Community',
+    empty: 'No news available right now.',
+  },
   slash: {
     label: 'Slash commands',
     empty: 'No matching commands',

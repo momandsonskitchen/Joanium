@@ -23,6 +23,7 @@ import {
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
 import { createAttachmentPill } from './AttachmentPill.js';
 import { createBrowserPreviewPanel } from './BrowserPreviewPanel.js';
+import { createTechFeedPanel } from './TechFeedPanel.js';
 import { createDiagnosticPanel, measureFetch, resolveProviderBaseUrl } from './DiagnosticPanel.js';
 import { createDropZoneOverlay } from './DropZoneOverlay.js';
 import { createFileDiffTracker } from './FileDiffTracker.js';
@@ -195,6 +196,7 @@ export async function createChatView(
   let thread = null;
   let title = null;
   let bubblesEl = null;
+  let techFeedEl = null;
   let composer = null;
   let scroll = null;
   let bottom = null;
@@ -2209,12 +2211,15 @@ export async function createChatView(
       // 1. Capture visual positions before any change
       const titleRect = title.getBoundingClientRect();
       const bubblesRect = bubblesEl.getBoundingClientRect();
+      const techFeedRect = techFeedEl ? techFeedEl.getBoundingClientRect() : null;
 
       // 2. Pin elements at their exact screen positions
-      for (const [el, rect] of [
+      const pinTargets = [
         [title, titleRect],
         [bubblesEl, bubblesRect],
-      ]) {
+        ...(techFeedEl && techFeedRect ? [[techFeedEl, techFeedRect]] : []),
+      ];
+      for (const [el, rect] of pinTargets) {
         el.style.position = 'fixed';
         el.style.top = `${rect.top}px`;
         el.style.left = `${rect.left}px`;
@@ -2233,11 +2238,12 @@ export async function createChatView(
       requestAnimationFrame(() => {
         title.classList.add('chat-stage__title--exiting');
         bubblesEl.classList.add('chat-prompt-bubbles--exiting');
+        if (techFeedEl) techFeedEl.classList.add('tech-feed--exiting');
       });
 
       // 5. Phase 2 — after welcome is fully gone, reveal and animate thread
       setTimeout(() => {
-        for (const el of [title, bubblesEl]) {
+        for (const el of [title, bubblesEl, techFeedEl].filter(Boolean)) {
           el.hidden = true;
           for (const prop of ['position', 'top', 'left', 'width', 'margin', 'zIndex']) {
             el.style[prop] = '';
@@ -2245,6 +2251,7 @@ export async function createChatView(
         }
         title.classList.remove('chat-stage__title--exiting');
         bubblesEl.classList.remove('chat-prompt-bubbles--exiting');
+        if (techFeedEl) techFeedEl.classList.remove('tech-feed--exiting');
 
         thread.hidden = false;
         thread.classList.add('chat-thread--entering');
@@ -2267,6 +2274,7 @@ export async function createChatView(
     } else {
       title.hidden = hasMessages;
       bubblesEl.hidden = hasMessages;
+      if (techFeedEl) techFeedEl.hidden = hasMessages;
       thread.hidden = !hasMessages;
       composer.classList.toggle('chat-composer--conversation', hasMessages);
       scroll.classList.toggle('chat-stage__scroll--conversation', hasMessages);
@@ -3582,6 +3590,9 @@ export async function createChatView(
     bubblesEl.append(btn);
   }
 
+  const techFeedPanel = createTechFeedPanel(strings.techFeed);
+  techFeedEl = techFeedPanel.element;
+
   composer = createElement('section', 'chat-composer');
   projectPill = createElement('div', 'chat-composer__project');
   projectPill.hidden = true;
@@ -3820,7 +3831,7 @@ export async function createChatView(
     composerFooter,
     slashMenu,
   );
-  scroll.append(title, bubblesEl, thread);
+  scroll.append(title, bubblesEl, techFeedEl, thread);
   scrollToBottomBtn = createElement('button', 'chat-scroll-to-bottom-btn');
   scrollToBottomBtn.type = 'button';
   scrollToBottomBtn.setAttribute('aria-label', strings.composer.scrollToBottom);

@@ -245,6 +245,18 @@ export async function createPackage({ rootDirectory }) {
           return { ok: true, terminalPrompt: terminalPrompt ?? '' };
         },
       },
+      {
+        // Proxy external HTTP GET requests through the main process so the
+        // renderer is not blocked by CSP or Firebase origin restrictions when
+        // the app is packaged.
+        channel: 'chat:fetch-url',
+        handler: async (_event, url) => {
+          const { net } = await import('electron');
+          const res = await net.fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        },
+      },
     ],
   };
 }

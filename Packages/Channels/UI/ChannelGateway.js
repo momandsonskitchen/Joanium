@@ -42,7 +42,10 @@ async function runChannelAgent({
   });
 }
 
-export function createChannelGateway(strings, { chatStrings = {}, getActivePersona } = {}) {
+export function createChannelGateway(
+  strings,
+  { chatStrings: _chatStrings = {}, getActivePersona } = {},
+) {
   let started = false;
   let chain = Promise.resolve();
   let dispose = null;
