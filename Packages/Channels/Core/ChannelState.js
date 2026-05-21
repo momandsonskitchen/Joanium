@@ -34,6 +34,27 @@ const DEFAULT_CHANNELS = Object.freeze({
     lastMessageTs: null,
     connectedAt: null,
   },
+  zulip: {
+    enabled: false,
+    siteUrl: '',
+    email: '',
+    apiKey: '',
+    stream: '',
+    topic: '',
+    systemPrompt: '',
+    lastMessageId: null,
+    connectedAt: null,
+  },
+  mattermost: {
+    enabled: false,
+    siteUrl: '',
+    accessToken: '',
+    channelId: '',
+    userId: '',
+    systemPrompt: '',
+    lastPostCreateAt: null,
+    connectedAt: null,
+  },
 });
 
 const CHANNEL_NAMES = Object.keys(DEFAULT_CHANNELS);
@@ -118,6 +139,20 @@ function safeChannelConfig(name, config) {
     safe.channelId = config?.channelId ?? '';
   }
 
+  if (name === 'zulip') {
+    safe.siteUrl = config?.siteUrl ?? '';
+    safe.email = config?.email ?? '';
+    safe.apiKeySet = Boolean(config?.apiKey);
+    safe.stream = config?.stream ?? '';
+    safe.topic = config?.topic ?? '';
+  }
+
+  if (name === 'mattermost') {
+    safe.siteUrl = config?.siteUrl ?? '';
+    safe.accessTokenSet = Boolean(config?.accessToken);
+    safe.channelId = config?.channelId ?? '';
+  }
+
   return safe;
 }
 
@@ -132,6 +167,14 @@ export function isConfigured(name, config) {
 
   if (name === 'discord' || name === 'slack') {
     return Boolean(config?.botToken && config?.channelId);
+  }
+
+  if (name === 'zulip') {
+    return Boolean(config?.siteUrl && config?.email && config?.apiKey && config?.stream);
+  }
+
+  if (name === 'mattermost') {
+    return Boolean(config?.siteUrl && config?.accessToken && config?.channelId);
   }
 
   return false;

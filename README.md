@@ -43,7 +43,7 @@ Joanium is a privacy-first, offline-capable desktop app built with Electron and 
 
 - **Multi-model chat** — Anthropic, OpenAI, Gemini, and local models via Ollama
 - **Scheduled agents** — run autonomous tasks on a schedule with full tool access
-- **Channels** — reply to Telegram, WhatsApp, Discord, and Slack through AI
+- **Channels** — reply to Telegram, WhatsApp, Discord, Slack, Zulip, and Mattermost through AI
 - **MCP support** — extend AI capabilities via Model Context Protocol servers
 - **Skills & Personas** — customise how the AI thinks and responds
 - **Built-in tools** — terminal, browser, file operations, Git, calculators, public data, and more

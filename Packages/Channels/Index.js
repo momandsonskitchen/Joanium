@@ -107,6 +107,55 @@ export async function createPackage({ rootDirectory }) {
             return { ...bot, ...channel };
           }
 
+          if (name === 'zulip') {
+            const siteUrl = requireCredential(
+              resolveCredentialValue(credentials.siteUrl, savedConfig.siteUrl),
+              'Zulip site URL',
+            );
+            const email = requireCredential(
+              resolveCredentialValue(credentials.email, savedConfig.email),
+              'Zulip bot email',
+            );
+            const apiKey = requireCredential(
+              resolveCredentialValue(credentials.apiKey, savedConfig.apiKey),
+              'Zulip API key',
+            );
+            const stream = requireCredential(
+              resolveCredentialValue(credentials.stream, savedConfig.stream),
+              'Zulip channel',
+            );
+            const bot = await channelRuntime.validateZulip(siteUrl, email, apiKey);
+            const channel = await channelRuntime.validateZulipStream(
+              siteUrl,
+              email,
+              apiKey,
+              stream,
+            );
+            return { ...bot, ...channel };
+          }
+
+          if (name === 'mattermost') {
+            const siteUrl = requireCredential(
+              resolveCredentialValue(credentials.siteUrl, savedConfig.siteUrl),
+              'Mattermost site URL',
+            );
+            const accessToken = requireCredential(
+              resolveCredentialValue(credentials.accessToken, savedConfig.accessToken),
+              'Mattermost access token',
+            );
+            const channelId = requireCredential(
+              resolveCredentialValue(credentials.channelId, savedConfig.channelId),
+              'Channel ID',
+            );
+            const bot = await channelRuntime.validateMattermost(siteUrl, accessToken);
+            const channel = await channelRuntime.validateMattermostChannel(
+              siteUrl,
+              accessToken,
+              channelId,
+            );
+            return { ...bot, ...channel };
+          }
+
           throw new Error('Unknown channel.');
         },
       },

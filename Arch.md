@@ -63,7 +63,7 @@
 
 * Chat attachments and completion sound: `Packages/Chat` owns file picking, validation, extraction, composer chips, prompt context assembly, and the response completion chime. Attachments support text/code files plus PDF, DOCX, XLSX/XLSM, and PPTX extraction without importing from other packages. Drag-and-drop onto the chat view is supported — the drop overlay is scoped exclusively to the chat view element and never appears on other Shell pages. The overlay label and accepted file types update dynamically based on whether the active model supports image inputs (`model.inputs.image`). Dropped file paths are processed via the `chat:process-dropped-files` IPC channel, which shares the same `readAttachmentFiles` backend as the dialog-based picker.
 * Chat slash commands: `Packages/Chat` owns the inline `/` command palette for chat actions, Shell navigation, prompt templates, and agent prompts. Connector slash scopes from the original app are intentionally not ported.
-* Channels: `Packages/Channels` owns channel state, runtime polling/replies, validation, reply history, and channel-specific system prompts for Telegram, WhatsApp, Discord, and Slack. The channel gateway uses the same bounded agentic tool loop as chat, so external channel replies can use terminal, live browser, connector, memory, and Toolset tools before sending the final message.
+* Channels: `Packages/Channels` owns channel state, runtime polling/replies, validation, reply history, and channel-specific system prompts for Telegram, WhatsApp, Discord, Slack, Zulip, and Mattermost. The channel gateway uses the same bounded agentic tool loop as chat, so external channel replies can use terminal, live browser, connector, memory, and Toolset tools before sending the final message.
 * Browser Preview: `Packages/LiveBrowser` owns the Electron browser view, browser-preview IPC, and live browser AI tools; `Packages/Chat` only provides the visible right-side host panel and bounds syncing.
 * App Settings: `Packages/AppSettings` owns persisted app behavior settings plus keep-awake, tray, assistant language, default model/view, auto memory update, app auto update, and reset runtime side effects. Shell only mounts its settings panel.
 * App Auto Update: `Packages/AppSettings/Core/AutoUpdateService.js` owns packaged-app update checks, download/install state, and update IPC. Packaged release builds resolve updates from the GitHub Releases feed for `Joanium/Joanium`; development builds report updates as unavailable. The App settings panel owns the persisted toggle, while the About page shows live download progress and install readiness.
@@ -145,7 +145,7 @@ Owns persisted app behavior settings plus keep-awake and tray runtime side effec
 #### Channels
 
 * Owned by `Packages/Channels`.
-* Manages connected external messaging channels: Telegram, WhatsApp, Discord, and Slack.
+* Manages connected external messaging channels: Telegram, WhatsApp, Discord, Slack, Zulip, and Mattermost.
 * Each channel entry stores its credentials, polling state, and an optional channel-specific system prompt.
 
 #### Connectors

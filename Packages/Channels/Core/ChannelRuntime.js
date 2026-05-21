@@ -7,6 +7,8 @@ const CHANNEL_LABELS = Object.freeze({
   whatsapp: 'WhatsApp',
   discord: 'Discord',
   slack: 'Slack',
+  zulip: 'Zulip',
+  mattermost: 'Mattermost',
 });
 
 const RECOVERY_DELAYS = Object.freeze([1000, 3000, 5000, 10000, 15000, 30000]);
@@ -59,6 +61,51 @@ function sanitizeRequestTarget(input) {
   } catch {
     return raw;
   }
+}
+
+function normalizeBaseUrl(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return '';
+
+  try {
+    const url = new URL(raw.includes('://') ? raw : `https://${raw}`);
+    url.hash = '';
+    url.search = '';
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    return raw.replace(/\/+$/, '');
+  }
+}
+
+function getBasicAuth(username, password) {
+  return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+}
+
+function getZulipHeaders(config) {
+  return {
+    Authorization: getBasicAuth(config.email, config.apiKey),
+  };
+}
+
+function getMattermostHeaders(accessToken) {
+  return {
+    Authorization: `Bearer ${accessToken}`,
+  };
+}
+
+async function readChannelJson(response, fallbackMessage) {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(
+      data.msg ?? data.message ?? data.error ?? `${fallbackMessage} HTTP ${response.status}`,
+    );
+  }
+
+  return data;
+}
+
+function isZulipSuccess(data) {
+  return data?.result === 'success' || data?.result === undefined;
 }
 
 function attachRequestContext(error, input, init) {
@@ -194,6 +241,97 @@ async function sendSlack(botToken, channelId, text) {
       throw new Error(data.error ?? 'Slack sendMessage API error');
     }
   }
+}
+
+async function sendZulip(config, topic, text) {
+  const baseUrl = normalizeBaseUrl(config.siteUrl);
+  const messageTopic = String(topic || config.topic || 'Joanium').trim() || 'Joanium';
+
+  for (const chunk of splitIntoChunks(text, 5000)) {
+    const body = new URLSearchParams({
+      type: 'channel',
+      to: config.stream,
+      topic: messageTopic,
+      content: chunk,
+    });
+    const response = await channelFetch(`${baseUrl}/api/v1/messages`, {
+      method: 'POST',
+      headers: {
+        ...getZulipHeaders(config),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    });
+    const data = await readChannelJson(response, 'Zulip sendMessage');
+
+    if (!isZulipSuccess(data)) {
+      throw new Error(data.msg ?? 'Zulip sendMessage API error');
+    }
+  }
+}
+
+async function sendMattermost(config, text) {
+  const baseUrl = normalizeBaseUrl(config.siteUrl);
+
+  for (const chunk of splitIntoChunks(text, 4000)) {
+    const response = await channelFetch(`${baseUrl}/api/v4/posts`, {
+      method: 'POST',
+      headers: {
+        ...getMattermostHeaders(config.accessToken),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ channel_id: config.channelId, message: chunk }),
+    });
+
+    await readChannelJson(response, 'Mattermost create post');
+  }
+}
+
+async function getZulipMe(config) {
+  const baseUrl = normalizeBaseUrl(config.siteUrl);
+  const response = await channelFetch(`${baseUrl}/api/v1/users/me`, {
+    headers: getZulipHeaders(config),
+  });
+  const data = await readChannelJson(response, 'Zulip users/me');
+
+  if (!isZulipSuccess(data)) {
+    throw new Error(data.msg ?? 'Invalid Zulip credentials.');
+  }
+
+  return data;
+}
+
+async function getZulipSubscriptions(config) {
+  const baseUrl = normalizeBaseUrl(config.siteUrl);
+  const response = await channelFetch(`${baseUrl}/api/v1/users/me/subscriptions`, {
+    headers: getZulipHeaders(config),
+  });
+  const data = await readChannelJson(response, 'Zulip subscriptions');
+
+  if (!isZulipSuccess(data)) {
+    throw new Error(data.msg ?? 'Could not validate Zulip channel.');
+  }
+
+  return data.subscriptions ?? [];
+}
+
+async function getMattermostMe(config) {
+  const baseUrl = normalizeBaseUrl(config.siteUrl);
+  const response = await channelFetch(`${baseUrl}/api/v4/users/me`, {
+    headers: getMattermostHeaders(config.accessToken),
+  });
+  return readChannelJson(response, 'Mattermost users/me');
+}
+
+async function getMattermostChannel(config) {
+  const baseUrl = normalizeBaseUrl(config.siteUrl);
+  const response = await channelFetch(
+    `${baseUrl}/api/v4/channels/${encodeURIComponent(config.channelId)}`,
+    {
+      headers: getMattermostHeaders(config.accessToken),
+    },
+  );
+  return readChannelJson(response, 'Mattermost channel');
 }
 
 function getReplyWindow() {
@@ -695,6 +833,182 @@ export function createChannelRuntime({ channelStateManager }) {
     }
   }
 
+  async function pollZulip(config) {
+    if (!config?.enabled || !config.siteUrl || !config.email || !config.apiKey || !config.stream) {
+      cancelRecovery('zulip');
+      return;
+    }
+
+    let messages = [];
+    let maxMessageId = Number(config.lastMessageId ?? 0);
+
+    try {
+      const baseUrl = normalizeBaseUrl(config.siteUrl);
+      const url = new URL(`${baseUrl}/api/v1/messages`);
+      const hasCursor = config.lastMessageId !== null && config.lastMessageId !== undefined;
+      const lastMessageId = hasCursor ? Number(config.lastMessageId) : 0;
+      const narrow = [{ operator: 'channel', operand: config.stream }];
+      if (config.topic?.trim()) {
+        narrow.push({ operator: 'topic', operand: config.topic.trim() });
+      }
+
+      url.searchParams.set('anchor', hasCursor ? String(lastMessageId) : 'newest');
+      url.searchParams.set('num_before', hasCursor ? '0' : '10');
+      url.searchParams.set('num_after', hasCursor ? '10' : '0');
+      url.searchParams.set('include_anchor', hasCursor ? 'false' : 'true');
+      url.searchParams.set('apply_markdown', 'false');
+      url.searchParams.set('allow_empty_topic_name', 'true');
+      url.searchParams.set('narrow', JSON.stringify(narrow));
+
+      const response = await channelFetch(url, { headers: getZulipHeaders(config) });
+      const data = await readChannelJson(response, 'Zulip messages');
+      if (!isZulipSuccess(data)) {
+        throw new Error(data.msg ?? 'Zulip API error');
+      }
+
+      const rawMessages = Array.isArray(data.messages) ? data.messages : [];
+      maxMessageId = rawMessages.reduce(
+        (max, message) => Math.max(max, Number(message.id ?? 0)),
+        maxMessageId,
+      );
+
+      if (!hasCursor) {
+        await channelStateManager.updateRuntimeState('zulip', { lastMessageId: maxMessageId });
+        return;
+      }
+
+      messages = rawMessages
+        .filter(
+          (message) =>
+            Number(message.id ?? 0) > lastMessageId &&
+            message.sender_email !== config.email &&
+            String(message.content ?? '').trim(),
+        )
+        .map((message) => ({
+          id: String(message.id),
+          topic: message.topic ?? message.subject ?? config.topic ?? '',
+          text: String(message.content ?? ''),
+          from: message.sender_full_name ?? message.sender_email ?? 'User',
+          receivedAt: toIso(message.timestamp ? message.timestamp * 1000 : null),
+        }));
+    } catch (error) {
+      handlePollFailure('zulip', error);
+      return;
+    }
+
+    handlePollSuccess('zulip');
+
+    if (maxMessageId > Number(config.lastMessageId ?? 0)) {
+      config.lastMessageId = maxMessageId;
+      await channelStateManager.updateRuntimeState('zulip', { lastMessageId: maxMessageId });
+    }
+
+    for (const message of messages) {
+      void (async () => {
+        try {
+          const reply = await requestReply('zulip', message.from, message.text, {
+            externalId: message.id,
+            targetId: config.stream,
+            conversationId: `${config.stream}:${message.topic}`,
+            receivedAt: message.receivedAt,
+            systemPrompt: config.systemPrompt ?? '',
+          });
+          await sendZulip(config, message.topic, reply);
+        } catch (error) {
+          console.error(`[Channels] Zulip reply failed:`, getErrorMessage(error));
+        }
+      })();
+    }
+  }
+
+  async function pollMattermost(config) {
+    if (!config?.enabled || !config.siteUrl || !config.accessToken || !config.channelId) {
+      cancelRecovery('mattermost');
+      return;
+    }
+
+    let messages = [];
+    let maxCreateAt = Number(config.lastPostCreateAt ?? 0);
+
+    try {
+      if (!config.userId) {
+        const user = await getMattermostMe(config);
+        config.userId = user.id ?? '';
+        if (config.userId) {
+          await channelStateManager.updateRuntimeState('mattermost', { userId: config.userId });
+        }
+      }
+
+      const baseUrl = normalizeBaseUrl(config.siteUrl);
+      const response = await channelFetch(
+        `${baseUrl}/api/v4/channels/${encodeURIComponent(config.channelId)}/posts?page=0&per_page=10`,
+        {
+          headers: getMattermostHeaders(config.accessToken),
+        },
+      );
+      const data = await readChannelJson(response, 'Mattermost posts');
+      const rawPosts = Array.isArray(data.order)
+        ? data.order.map((id) => data.posts?.[id]).filter(Boolean)
+        : Object.values(data.posts ?? {});
+      const hasCursor = config.lastPostCreateAt !== null && config.lastPostCreateAt !== undefined;
+      const lastPostCreateAt = hasCursor ? Number(config.lastPostCreateAt) : 0;
+
+      maxCreateAt = rawPosts.reduce(
+        (max, post) => Math.max(max, Number(post.create_at ?? 0)),
+        maxCreateAt,
+      );
+
+      if (!hasCursor) {
+        await channelStateManager.updateRuntimeState('mattermost', {
+          lastPostCreateAt: maxCreateAt,
+        });
+        return;
+      }
+
+      messages = rawPosts
+        .filter(
+          (post) =>
+            Number(post.create_at ?? 0) > lastPostCreateAt &&
+            post.user_id !== config.userId &&
+            String(post.message ?? '').trim(),
+        )
+        .sort((left, right) => Number(left.create_at ?? 0) - Number(right.create_at ?? 0))
+        .map((post) => ({
+          id: post.id,
+          text: String(post.message ?? ''),
+          from: post.user_id ?? 'User',
+          receivedAt: toIso(Number(post.create_at ?? 0)),
+        }));
+    } catch (error) {
+      handlePollFailure('mattermost', error);
+      return;
+    }
+
+    handlePollSuccess('mattermost');
+
+    if (maxCreateAt > Number(config.lastPostCreateAt ?? 0)) {
+      config.lastPostCreateAt = maxCreateAt;
+      await channelStateManager.updateRuntimeState('mattermost', { lastPostCreateAt: maxCreateAt });
+    }
+
+    for (const message of messages) {
+      void (async () => {
+        try {
+          const reply = await requestReply('mattermost', message.from, message.text, {
+            externalId: message.id,
+            targetId: config.channelId,
+            conversationId: config.channelId,
+            receivedAt: message.receivedAt,
+            systemPrompt: config.systemPrompt ?? '',
+          });
+          await sendMattermost(config, reply);
+        } catch (error) {
+          console.error(`[Channels] Mattermost reply failed:`, getErrorMessage(error));
+        }
+      })();
+    }
+  }
+
   async function pollChannel(channelName, config, { ignoreRecoveryGuard = false } = {}) {
     if (!ignoreRecoveryGuard && isRecoveryActive(channelName)) return;
 
@@ -702,6 +1016,8 @@ export function createChannelRuntime({ channelStateManager }) {
     if (channelName === 'whatsapp') return pollWhatsApp(config);
     if (channelName === 'discord') return pollDiscord(config);
     if (channelName === 'slack') return pollSlack(config);
+    if (channelName === 'zulip') return pollZulip(config);
+    if (channelName === 'mattermost') return pollMattermost(config);
   }
 
   async function poll() {
@@ -709,7 +1025,14 @@ export function createChannelRuntime({ channelStateManager }) {
     processing = true;
 
     try {
-      for (const channelName of ['telegram', 'whatsapp', 'discord', 'slack']) {
+      for (const channelName of [
+        'telegram',
+        'whatsapp',
+        'discord',
+        'slack',
+        'zulip',
+        'mattermost',
+      ]) {
         const config = await channelStateManager.getChannel(channelName);
         await pollChannel(channelName, config);
       }
@@ -870,6 +1193,44 @@ export function createChannelRuntime({ channelStateManager }) {
       return {
         channelName: data.channel?.name ?? channelId,
         isMember: data.channel?.is_member ?? true,
+      };
+    },
+
+    async validateZulip(siteUrl, email, apiKey) {
+      const config = { siteUrl, email, apiKey };
+      const data = await getZulipMe(config);
+      return {
+        email: data.email ?? email,
+        fullName: data.full_name ?? data.fullName ?? '',
+      };
+    },
+
+    async validateZulipStream(siteUrl, email, apiKey, stream) {
+      const config = { siteUrl, email, apiKey };
+      const subscriptions = await getZulipSubscriptions(config);
+      const matched = subscriptions.find((subscription) => subscription.name === stream);
+
+      if (!matched) {
+        throw new Error(`Zulip channel "${stream}" was not found in this bot's subscriptions.`);
+      }
+
+      return {
+        streamName: matched.name ?? stream,
+      };
+    },
+
+    async validateMattermost(siteUrl, accessToken) {
+      const data = await getMattermostMe({ siteUrl, accessToken });
+      return {
+        userId: data.id ?? '',
+        username: data.username ?? '',
+      };
+    },
+
+    async validateMattermostChannel(siteUrl, accessToken, channelId) {
+      const data = await getMattermostChannel({ siteUrl, accessToken, channelId });
+      return {
+        channelName: data.display_name || data.name || channelId,
       };
     },
   };

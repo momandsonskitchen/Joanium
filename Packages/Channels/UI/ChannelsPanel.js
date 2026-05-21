@@ -3,7 +3,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
 
-const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack'];
+const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack', 'zulip', 'mattermost'];
 
 function createField({ label, placeholder, type = 'text', multiline = false }) {
   const wrap = createElement('label', 'channels-field');
@@ -49,7 +49,7 @@ function getChannelIconPath(channelName) {
     discord: 'Discord',
     slack: 'Slack',
   };
-  return `../../../Assets/Icons/${names[channelName]}.png`;
+  return names[channelName] ? `../../../Assets/Icons/${names[channelName]}.png` : null;
 }
 
 export function createChannelsPanel(strings) {
@@ -102,6 +102,34 @@ export function createChannelsPanel(strings) {
       refs.secretFields.accountSid.placeholder = refs.placeholders.accountSid;
     }
 
+    if (refs.secretFields.apiKey && config?.apiKeySet) {
+      refs.secretFields.apiKey.placeholder = strings.common.savedSecret;
+    } else if (refs.secretFields.apiKey) {
+      refs.secretFields.apiKey.placeholder = refs.placeholders.apiKey;
+    }
+
+    if (refs.secretFields.accessToken && config?.accessTokenSet) {
+      refs.secretFields.accessToken.placeholder = strings.common.savedSecret;
+    } else if (refs.secretFields.accessToken) {
+      refs.secretFields.accessToken.placeholder = refs.placeholders.accessToken;
+    }
+
+    if (refs.inputs.siteUrl && config?.siteUrl) {
+      refs.inputs.siteUrl.value = config.siteUrl;
+    }
+
+    if (refs.inputs.email && config?.email) {
+      refs.inputs.email.value = config.email;
+    }
+
+    if (refs.inputs.stream && config?.stream) {
+      refs.inputs.stream.value = config.stream;
+    }
+
+    if (refs.inputs.topic) {
+      refs.inputs.topic.value = config?.topic ?? '';
+    }
+
     if (refs.inputs.channelId && config?.channelId) {
       refs.inputs.channelId.value = config.channelId;
     }
@@ -133,6 +161,28 @@ export function createChannelsPanel(strings) {
       const botToken = refs.inputs.botToken.value.trim();
       const channelId = refs.inputs.channelId.value.trim();
       if (botToken) payload.botToken = botToken;
+      payload.channelId = channelId;
+    }
+
+    if (channelName === 'zulip') {
+      const siteUrl = refs.inputs.siteUrl.value.trim();
+      const email = refs.inputs.email.value.trim();
+      const apiKey = refs.inputs.apiKey.value.trim();
+      const stream = refs.inputs.stream.value.trim();
+      const topic = refs.inputs.topic.value.trim();
+      payload.siteUrl = siteUrl;
+      payload.email = email;
+      if (apiKey) payload.apiKey = apiKey;
+      payload.stream = stream;
+      payload.topic = topic;
+    }
+
+    if (channelName === 'mattermost') {
+      const siteUrl = refs.inputs.siteUrl.value.trim();
+      const accessToken = refs.inputs.accessToken.value.trim();
+      const channelId = refs.inputs.channelId.value.trim();
+      payload.siteUrl = siteUrl;
+      if (accessToken) payload.accessToken = accessToken;
       payload.channelId = channelId;
     }
 
@@ -221,6 +271,69 @@ export function createChannelsPanel(strings) {
       }
     }
 
+    if (channelName === 'zulip') {
+      const siteUrl = refs.inputs.siteUrl.value.trim();
+      if (!siteUrl) {
+        refs.inputs.siteUrl.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      const email = refs.inputs.email.value.trim();
+      if (!email) {
+        refs.inputs.email.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      const apiKey = refs.inputs.apiKey.value.trim();
+      if (!apiKey && !hasSavedSecret(refs.inputs.apiKey)) {
+        refs.inputs.apiKey.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      if (apiKey && apiKey.length < 10) {
+        refs.inputs.apiKey.focus();
+        setFeedback(channelName, strings.common.apiKeyTooShort, 'error');
+        return false;
+      }
+      const stream = refs.inputs.stream.value.trim();
+      if (!stream) {
+        refs.inputs.stream.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+    }
+
+    if (channelName === 'mattermost') {
+      const siteUrl = refs.inputs.siteUrl.value.trim();
+      if (!siteUrl) {
+        refs.inputs.siteUrl.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      const accessToken = refs.inputs.accessToken.value.trim();
+      if (!accessToken && !hasSavedSecret(refs.inputs.accessToken)) {
+        refs.inputs.accessToken.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      if (accessToken && accessToken.length < 10) {
+        refs.inputs.accessToken.focus();
+        setFeedback(channelName, strings.common.tokenTooShort, 'error');
+        return false;
+      }
+      const channelIdVal = refs.inputs.channelId.value.trim();
+      if (!channelIdVal) {
+        refs.inputs.channelId.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      if (channelIdVal.length < 5) {
+        refs.inputs.channelId.focus();
+        setFeedback(channelName, strings.common.channelIdTooShort, 'error');
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -281,6 +394,41 @@ export function createChannelsPanel(strings) {
         'success',
       );
     }
+
+    if (channelName === 'zulip' && (payload.apiKey || payload.siteUrl || payload.stream)) {
+      const result = await invokeIpc('channels:validate', channelName, {
+        siteUrl: payload.siteUrl,
+        email: payload.email,
+        apiKey: payload.apiKey,
+        stream: payload.stream,
+      });
+      setFeedback(
+        channelName,
+        formatText(strings.feedback.zulipVerified, {
+          value: result.streamName || result.fullName || strings.channels.zulip.name,
+        }),
+        'success',
+      );
+      return result;
+    }
+
+    if (channelName === 'mattermost' && (payload.accessToken || payload.siteUrl)) {
+      const result = await invokeIpc('channels:validate', channelName, {
+        siteUrl: payload.siteUrl,
+        accessToken: payload.accessToken,
+        channelId: payload.channelId,
+      });
+      setFeedback(
+        channelName,
+        formatText(strings.feedback.mattermostVerified, {
+          value: result.channelName || result.username || strings.channels.mattermost.name,
+        }),
+        'success',
+      );
+      return result;
+    }
+
+    return null;
   }
 
   async function connectChannel(channelName) {
@@ -295,12 +443,15 @@ export function createChannelsPanel(strings) {
 
     try {
       const payload = getPayload(channelName);
-      await validateChannel(channelName, payload);
+      const validation = await validateChannel(channelName, payload);
+      if (validation?.userId) payload.userId = validation.userId;
       const saved = await invokeIpc('channels:save', channelName, payload);
       setCardState(channelName, saved);
       if (refs.inputs.botToken) refs.inputs.botToken.value = '';
       if (refs.inputs.authToken) refs.inputs.authToken.value = '';
       if (refs.inputs.accountSid) refs.inputs.accountSid.value = '';
+      if (refs.inputs.apiKey) refs.inputs.apiKey.value = '';
+      if (refs.inputs.accessToken) refs.inputs.accessToken.value = '';
       setFeedback(channelName, strings.feedback[`${channelName}Connected`], 'success');
       await populate();
     } catch (error) {
@@ -365,11 +516,16 @@ export function createChannelsPanel(strings) {
     // ── Header (always visible) ──────────────────────────────────────────────
     const header = createElement('div', 'channels-card__header');
     const badge = createElement('div', 'channels-card__badge');
-    const badgeImg = document.createElement('img');
-    badgeImg.src = getChannelIconPath(channelName);
-    badgeImg.alt = '';
-    badgeImg.className = 'channels-card__badge-img';
-    badge.append(badgeImg);
+    const iconPath = getChannelIconPath(channelName);
+    if (iconPath) {
+      const badgeImg = document.createElement('img');
+      badgeImg.src = iconPath;
+      badgeImg.alt = '';
+      badgeImg.className = 'channels-card__badge-img';
+      badge.append(badgeImg);
+    } else {
+      badge.append(createIcon('globe', 'channels-card__badge-icon'));
+    }
     const titleWrap = createElement('div', 'channels-card__title-wrap');
     const titleRow = createElement('div', 'channels-card__title-row');
     const status = createElement('span', 'channels-card__status', strings.common.notConnected);
@@ -472,6 +628,72 @@ export function createChannelsPanel(strings) {
           : strings.placeholders.slackToken;
       row.append(botToken.wrap, channelId.wrap);
       form.append(row);
+    }
+
+    if (channelName === 'zulip') {
+      const rowOne = createElement('div', 'channels-card__field-row');
+      const rowTwo = createElement('div', 'channels-card__field-row');
+      const siteUrl = createField({
+        label: strings.fields.siteUrl,
+        placeholder: strings.placeholders.zulipSite,
+      });
+      const email = createField({
+        label: strings.fields.email,
+        placeholder: strings.placeholders.zulipEmail,
+      });
+      const apiKey = createSecretField({
+        label: strings.fields.apiKey,
+        placeholder: strings.placeholders.zulipApiKey,
+        strings,
+      });
+      const stream = createField({
+        label: strings.fields.zulipStream,
+        placeholder: strings.placeholders.zulipStream,
+      });
+      const topic = createField({
+        label: strings.fields.zulipTopic,
+        placeholder: strings.placeholders.zulipTopic,
+      });
+      inputs.siteUrl = siteUrl.input;
+      inputs.email = email.input;
+      inputs.apiKey = apiKey.input;
+      inputs.stream = stream.input;
+      inputs.topic = topic.input;
+      secretFields.apiKey = apiKey.input;
+      placeholders.apiKey = strings.placeholders.zulipApiKey;
+      rowOne.append(siteUrl.wrap, email.wrap);
+      rowTwo.append(apiKey.wrap, stream.wrap);
+      form.append(rowOne, rowTwo, topic.wrap);
+      if (channelStrings.hint) {
+        form.append(createElement('p', 'channels-card__hint', channelStrings.hint));
+      }
+    }
+
+    if (channelName === 'mattermost') {
+      const row = createElement('div', 'channels-card__field-row');
+      const siteUrl = createField({
+        label: strings.fields.siteUrl,
+        placeholder: strings.placeholders.mattermostSite,
+      });
+      const channelId = createField({
+        label: strings.fields.channelId,
+        placeholder: strings.placeholders.mattermostChannel,
+      });
+      const accessToken = createSecretField({
+        label: strings.fields.accessToken,
+        placeholder: strings.placeholders.mattermostToken,
+        strings,
+      });
+      inputs.siteUrl = siteUrl.input;
+      inputs.channelId = channelId.input;
+      inputs.accessToken = accessToken.input;
+      secretFields.accessToken = accessToken.input;
+      placeholders.accessToken = strings.placeholders.mattermostToken;
+      row.append(siteUrl.wrap, channelId.wrap);
+      form.append(row, accessToken.wrap);
+      if (channelStrings.hint) {
+        form.append(createElement('p', 'channels-card__hint', channelStrings.hint));
+      }
     }
 
     const actions = createElement('div', 'channels-card__actions');
