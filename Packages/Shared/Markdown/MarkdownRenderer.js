@@ -65,7 +65,14 @@ export function renderInline(text) {
   // 5. Links  [label](url)
   out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
     const safe = sanitizeEscapedMarkdownUrl(url);
-    return `<a class="md-link" href="${safe}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+    return `<a class="md-link" href="${safe}" data-url="${safe}" rel="noopener noreferrer">${label}</a>`;
+  });
+
+  // 6. Auto-link bare URLs  https://… or http://…
+  //    Must run after [label](url) so already-linked URLs aren't double-processed.
+  out = out.replace(/(?<!href="|data-url=")(https?:\/\/[^\s<>"'\)\]]+)/g, (match) => {
+    const safe = escapeAttributeFromEscapedText(match);
+    return `<a class="md-link" href="${safe}" data-url="${safe}" rel="noopener noreferrer">${match}</a>`;
   });
 
   out = inlineCodeTokens.reduce((next, html, index) => {
@@ -468,5 +475,16 @@ export function renderMarkdown(markdown, extra = '') {
   const root = document.createElement('div');
   root.className = ['md-root', extra].filter(Boolean).join(' ');
   root.append(dom);
+
+  // Open links in the live browser instead of the system browser.
+  root.addEventListener('click', (event) => {
+    const anchor = event.target.closest('a.md-link');
+    if (!anchor) return;
+    const url = anchor.dataset.url || anchor.getAttribute('href');
+    if (!url || url === '#') return;
+    event.preventDefault();
+    root.dispatchEvent(new CustomEvent('jo:open-url', { bubbles: true, detail: { url } }));
+  });
+
   return root;
 }

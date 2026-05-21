@@ -868,9 +868,18 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     async close() {
       visible = false;
       detach();
+
+      // Tear down the resize listener so nothing holds a reference to the old view.
+      if (resizeHandler && windowRef && !windowRef.isDestroyed()) {
+        windowRef.off('resize', resizeHandler);
+      }
+      resizeHandler = null;
+
       const webContents = getViewWebContents(view);
       if (webContents && !webContents.isDestroyed()) {
-        webContents.close();
+        // destroy() immediately kills the renderer process and frees GPU/RAM.
+        // close() alone is only a graceful signal and leaves the process alive.
+        webContents.destroy();
       }
       view = null;
       title = browserStrings.fallbackTitle;

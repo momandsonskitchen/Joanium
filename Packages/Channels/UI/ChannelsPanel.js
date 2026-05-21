@@ -3,7 +3,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
 
-const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack', 'zulip', 'mattermost'];
+const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack', 'zulip', 'mattermost', 'ntfy'];
 
 function createField({ label, placeholder, type = 'text', multiline = false }) {
   const wrap = createElement('label', 'channels-field');
@@ -186,6 +186,13 @@ export function createChannelsPanel(strings) {
       payload.channelId = channelId;
     }
 
+    if (channelName === 'ntfy') {
+      const siteUrl = refs.inputs.siteUrl.value.trim();
+      const topic = refs.inputs.topic.value.trim();
+      payload.siteUrl = siteUrl;
+      payload.topic = topic;
+    }
+
     return payload;
   }
 
@@ -334,6 +341,26 @@ export function createChannelsPanel(strings) {
       }
     }
 
+    if (channelName === 'ntfy') {
+      const siteUrl = refs.inputs.siteUrl.value.trim();
+      if (!siteUrl) {
+        refs.inputs.siteUrl.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      const topic = refs.inputs.topic.value.trim();
+      if (!topic) {
+        refs.inputs.topic.focus();
+        setFeedback(channelName, strings.common.required, 'error');
+        return false;
+      }
+      if (topic.length < 3) {
+        refs.inputs.topic.focus();
+        setFeedback(channelName, strings.common.channelIdTooShort, 'error');
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -422,6 +449,21 @@ export function createChannelsPanel(strings) {
         channelName,
         formatText(strings.feedback.mattermostVerified, {
           value: result.channelName || result.username || strings.channels.mattermost.name,
+        }),
+        'success',
+      );
+      return result;
+    }
+
+    if (channelName === 'ntfy' && payload.siteUrl && payload.topic) {
+      const result = await invokeIpc('channels:validate', channelName, {
+        siteUrl: payload.siteUrl,
+        topic: payload.topic,
+      });
+      setFeedback(
+        channelName,
+        formatText(strings.feedback.ntfyVerified, {
+          value: result.topic || strings.channels.ntfy.name,
         }),
         'success',
       );
@@ -691,6 +733,25 @@ export function createChannelsPanel(strings) {
       placeholders.accessToken = strings.placeholders.mattermostToken;
       row.append(siteUrl.wrap, channelId.wrap);
       form.append(row, accessToken.wrap);
+      if (channelStrings.hint) {
+        form.append(createElement('p', 'channels-card__hint', channelStrings.hint));
+      }
+    }
+
+    if (channelName === 'ntfy') {
+      const row = createElement('div', 'channels-card__field-row');
+      const siteUrl = createField({
+        label: strings.fields.siteUrl,
+        placeholder: strings.placeholders.ntfySite,
+      });
+      const topic = createField({
+        label: strings.fields.ntfyTopic,
+        placeholder: strings.placeholders.ntfyTopic,
+      });
+      inputs.siteUrl = siteUrl.input;
+      inputs.topic = topic.input;
+      row.append(siteUrl.wrap, topic.wrap);
+      form.append(row);
       if (channelStrings.hint) {
         form.append(createElement('p', 'channels-card__hint', channelStrings.hint));
       }

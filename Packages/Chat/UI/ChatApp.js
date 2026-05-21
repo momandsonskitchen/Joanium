@@ -2676,9 +2676,16 @@ export async function createChatView(
     }
 
     const payload = action?.payload ?? {};
+    const {
+      tool: _tool,
+      parameters: explicitParams,
+      arguments: explicitArgs,
+      ...topLevel
+    } = payload;
+    const parameters = { ...topLevel, ...(explicitArgs ?? {}), ...(explicitParams ?? {}) };
     return invokeIpc('toolset:execute-tool', {
       tool: action.tool,
-      parameters: payload.parameters ?? {},
+      parameters,
     });
   }
 
@@ -3884,6 +3891,13 @@ export async function createChatView(
       collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath),
   });
   fileDiffTracker.init();
+
+  // ── Open markdown links in the live browser ───────────────────────────────
+  view.addEventListener('jo:open-url', (event) => {
+    const url = event.detail?.url;
+    if (!url || url === '#') return;
+    void invokeIpc('browser-preview:load-url', url).catch(() => {});
+  });
 
   // ── File drag-and-drop (chat page only) ───────────────────────────────────
   // Scoped entirely to the chat view element so drag events from other Shell

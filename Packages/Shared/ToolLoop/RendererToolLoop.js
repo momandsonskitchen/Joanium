@@ -244,6 +244,16 @@ export function parseAllToolsetToolRequests(text) {
   return { toolsetActions, visibleContent };
 }
 
+function deduplicateActions(actions) {
+  const seen = new Set();
+  return actions.filter((a) => {
+    const key = JSON.stringify({ tool: a.tool, params: a.payload?.parameters ?? a.payload });
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function parseAllToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
   const rawText = String(text ?? '');
   const normalized = normalizeSupportedTools(supportedTools);
@@ -297,10 +307,13 @@ export function parseAllToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOO
     }
   }
 
+  const dedupedTerminal = deduplicateActions(terminalActions);
+  const dedupedToolset = deduplicateActions(toolsetActions);
+
   return {
-    terminalActions,
-    toolsetActions,
-    hasTools: terminalActions.length > 0 || toolsetActions.length > 0,
+    terminalActions: dedupedTerminal,
+    toolsetActions: dedupedToolset,
+    hasTools: dedupedTerminal.length > 0 || dedupedToolset.length > 0,
     visibleContent,
   };
 }

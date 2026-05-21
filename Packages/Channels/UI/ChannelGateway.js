@@ -5,22 +5,11 @@ import {
   loadToolsetPrompt,
   runRendererToolLoop,
   stripThinking,
+  TERMINAL_TOOL_NAMES,
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
 
-const MAX_CHANNEL_TOOL_CALLS = 3;
-const CHANNEL_TERMINAL_TOOLS = new Set([
-  'run_shell_command',
-  'assess_shell_command',
-  'inspect_workspace',
-  'search_workspace',
-  'read_local_file',
-  'list_directory',
-  'git_status',
-  'git_diff',
-  'run_project_checks',
-  'start_local_server',
-  'read_terminal_output',
-]);
+const MAX_CHANNEL_TOOL_CALLS = 10;
+const CHANNEL_TERMINAL_TOOLS = new Set(TERMINAL_TOOL_NAMES);
 
 function toIso(value, fallback = Date.now()) {
   const date = value ? new Date(value) : new Date(fallback);

@@ -1,7 +1,7 @@
 const en = {
   title: 'Channels',
   subtitle:
-    'Let Joanium answer messages from Telegram, WhatsApp, Discord, Slack, Zulip, and Mattermost.',
+    'Let Joanium answer messages from Telegram, WhatsApp, Discord, Slack, Zulip, Mattermost, and ntfy.',
   overview: {
     active: 'Active channels',
     configured: 'Configured',
@@ -62,6 +62,7 @@ const en = {
     slackConnected: 'Slack is connected. Send a message in that channel to test it.',
     zulipConnected: 'Zulip is connected. Send a message in that channel to test it.',
     mattermostConnected: 'Mattermost is connected. Send a message in that channel to test it.',
+    ntfyConnected: 'ntfy is connected. Publish to that topic to test it.',
     disconnected: 'Disconnected.',
     enabled: 'Channel enabled.',
     paused: 'Channel paused.',
@@ -70,6 +71,7 @@ const en = {
     slackVerified: 'Slack verified: {value}',
     zulipVerified: 'Zulip verified: {value}',
     mattermostVerified: 'Mattermost verified: {value}',
+    ntfyVerified: 'ntfy topic verified: {value}',
   },
   fields: {
     botToken: 'Bot token',
@@ -83,6 +85,7 @@ const en = {
     channelId: 'Channel ID',
     zulipStream: 'Zulip channel',
     zulipTopic: 'Topic',
+    ntfyTopic: 'Topic',
   },
   placeholders: {
     telegramToken: '1234567890:ABCdef...',
@@ -101,6 +104,8 @@ const en = {
     mattermostSite: 'https://mattermost.example.com',
     mattermostToken: 'Your personal access token',
     mattermostChannel: 'Channel ID',
+    ntfySite: 'https://ntfy.sh',
+    ntfyTopic: 'joanium-private-topic',
   },
   channels: {
     telegram: {
@@ -164,6 +169,17 @@ const en = {
         'Create a bot or service user in Mattermost.',
         'Create a personal access token for that user.',
         'Add the user to the channel, then paste the channel ID here.',
+      ],
+    },
+    ntfy: {
+      name: 'ntfy',
+      summary: 'Auto-reply through a public or self-hosted ntfy topic.',
+      setupTitle: 'Setup',
+      hint: 'Use a hard-to-guess private topic name if you use the public ntfy.sh server.',
+      steps: [
+        'Choose a private topic name on ntfy.sh or a self-hosted ntfy server.',
+        'Paste the server URL and topic here, then connect.',
+        'Publish a message to the topic from the ntfy app, CLI, or web UI.',
       ],
     },
   },

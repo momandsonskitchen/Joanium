@@ -709,6 +709,50 @@ html.joanium-theme-dark .chat-message__attachments .chat-attachment {
   background: rgba(44, 38, 54, 0.76);
 }
 
+/* Chat file-diff tracker */
+html.joanium-theme-dark .chat-file-diff {
+  background:
+    linear-gradient(180deg, rgba(34, 28, 44, 0.86), rgba(28, 22, 36, 0.92)), rgba(28, 22, 36, 0.9);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 14px 28px rgba(0, 0, 0, 0.26);
+}
+
+html.joanium-theme-dark .chat-file-diff__scroll,
+html.joanium-theme-dark .chat-file-diff__diff {
+  scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
+}
+
+html.joanium-theme-dark .chat-file-diff__card {
+  background: rgba(38, 32, 50, 0.76);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+html.joanium-theme-dark .chat-file-diff__card--open {
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.24),
+    0 10px 22px rgba(0, 0, 0, 0.24);
+}
+
+html.joanium-theme-dark .chat-file-diff__card-button:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+html.joanium-theme-dark .chat-file-diff__diff {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  background: rgba(18, 14, 24, 0.72);
+}
+
+html.joanium-theme-dark .chat-file-diff__line--add {
+  background: rgba(31, 157, 88, 0.12);
+  color: #4ade80;
+}
+
+html.joanium-theme-dark .chat-file-diff__line--remove {
+  background: rgba(196, 77, 52, 0.12);
+  color: #fb8b78;
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    PROMPT BUBBLES
    ════════════════════════════════════════════════════════════════════════════ */

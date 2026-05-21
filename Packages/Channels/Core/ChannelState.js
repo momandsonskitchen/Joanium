@@ -55,6 +55,14 @@ const DEFAULT_CHANNELS = Object.freeze({
     lastPostCreateAt: null,
     connectedAt: null,
   },
+  ntfy: {
+    enabled: false,
+    siteUrl: 'https://ntfy.sh',
+    topic: '',
+    systemPrompt: '',
+    lastMessageId: null,
+    connectedAt: null,
+  },
 });
 
 const CHANNEL_NAMES = Object.keys(DEFAULT_CHANNELS);
@@ -153,6 +161,11 @@ function safeChannelConfig(name, config) {
     safe.channelId = config?.channelId ?? '';
   }
 
+  if (name === 'ntfy') {
+    safe.siteUrl = config?.siteUrl ?? '';
+    safe.topic = config?.topic ?? '';
+  }
+
   return safe;
 }
 
@@ -175,6 +188,10 @@ export function isConfigured(name, config) {
 
   if (name === 'mattermost') {
     return Boolean(config?.siteUrl && config?.accessToken && config?.channelId);
+  }
+
+  if (name === 'ntfy') {
+    return Boolean(config?.siteUrl && config?.topic);
   }
 
   return false;

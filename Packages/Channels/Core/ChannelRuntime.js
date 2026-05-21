@@ -9,6 +9,7 @@ const CHANNEL_LABELS = Object.freeze({
   slack: 'Slack',
   zulip: 'Zulip',
   mattermost: 'Mattermost',
+  ntfy: 'ntfy',
 });
 
 const RECOVERY_DELAYS = Object.freeze([1000, 3000, 5000, 10000, 15000, 30000]);
@@ -287,6 +288,27 @@ async function sendMattermost(config, text) {
   }
 }
 
+async function sendNtfy(config, text) {
+  const baseUrl = normalizeBaseUrl(config.siteUrl);
+  const topic = encodeURIComponent(config.topic);
+
+  for (const chunk of splitIntoChunks(text, 3500)) {
+    const response = await channelFetch(`${baseUrl}/${topic}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        Title: 'Joanium',
+      },
+      body: chunk,
+    });
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      throw new Error(body || `ntfy publish HTTP ${response.status}`);
+    }
+  }
+}
+
 async function getZulipMe(config) {
   const baseUrl = normalizeBaseUrl(config.siteUrl);
   const response = await channelFetch(`${baseUrl}/api/v1/users/me`, {
@@ -332,6 +354,21 @@ async function getMattermostChannel(config) {
     },
   );
   return readChannelJson(response, 'Mattermost channel');
+}
+
+function parseNtfyMessages(text) {
+  return String(text ?? '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
 }
 
 function getReplyWindow() {
@@ -1009,6 +1046,83 @@ export function createChannelRuntime({ channelStateManager }) {
     }
   }
 
+  async function pollNtfy(config) {
+    if (!config?.enabled || !config.siteUrl || !config.topic) {
+      cancelRecovery('ntfy');
+      return;
+    }
+
+    let messages = [];
+    let latestMessageId = config.lastMessageId ?? null;
+
+    try {
+      const baseUrl = normalizeBaseUrl(config.siteUrl);
+      const topic = encodeURIComponent(config.topic);
+      const url = new URL(`${baseUrl}/${topic}/json`);
+      const hasCursor = config.lastMessageId !== null && config.lastMessageId !== undefined;
+
+      url.searchParams.set('poll', '1');
+      url.searchParams.set('since', hasCursor ? String(config.lastMessageId) : 'all');
+
+      const response = await channelFetch(url);
+      if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        throw new Error(body || `ntfy poll HTTP ${response.status}`);
+      }
+
+      const rawMessages = parseNtfyMessages(await response.text());
+      latestMessageId = rawMessages.at(-1)?.id ?? latestMessageId;
+
+      if (!hasCursor) {
+        await channelStateManager.updateRuntimeState('ntfy', { lastMessageId: latestMessageId });
+        return;
+      }
+
+      messages = rawMessages
+        .filter(
+          (message) =>
+            message.event === 'message' &&
+            String(message.message ?? '').trim() &&
+            String(message.title ?? '')
+              .trim()
+              .toLowerCase() !== 'joanium',
+        )
+        .map((message) => ({
+          id: String(message.id ?? ''),
+          text: String(message.message ?? ''),
+          from: message.title || message.name || 'ntfy',
+          receivedAt: toIso(message.time ? message.time * 1000 : null),
+        }));
+    } catch (error) {
+      handlePollFailure('ntfy', error);
+      return;
+    }
+
+    handlePollSuccess('ntfy');
+
+    if (latestMessageId && latestMessageId !== config.lastMessageId) {
+      config.lastMessageId = latestMessageId;
+      await channelStateManager.updateRuntimeState('ntfy', { lastMessageId: latestMessageId });
+    }
+
+    for (const message of messages) {
+      void (async () => {
+        try {
+          const reply = await requestReply('ntfy', message.from, message.text, {
+            externalId: message.id,
+            targetId: config.topic,
+            conversationId: config.topic,
+            receivedAt: message.receivedAt,
+            systemPrompt: config.systemPrompt ?? '',
+          });
+          await sendNtfy(config, reply);
+        } catch (error) {
+          console.error(`[Channels] ntfy reply failed:`, getErrorMessage(error));
+        }
+      })();
+    }
+  }
+
   async function pollChannel(channelName, config, { ignoreRecoveryGuard = false } = {}) {
     if (!ignoreRecoveryGuard && isRecoveryActive(channelName)) return;
 
@@ -1018,6 +1132,7 @@ export function createChannelRuntime({ channelStateManager }) {
     if (channelName === 'slack') return pollSlack(config);
     if (channelName === 'zulip') return pollZulip(config);
     if (channelName === 'mattermost') return pollMattermost(config);
+    if (channelName === 'ntfy') return pollNtfy(config);
   }
 
   async function poll() {
@@ -1032,6 +1147,7 @@ export function createChannelRuntime({ channelStateManager }) {
         'slack',
         'zulip',
         'mattermost',
+        'ntfy',
       ]) {
         const config = await channelStateManager.getChannel(channelName);
         await pollChannel(channelName, config);
@@ -1232,6 +1348,22 @@ export function createChannelRuntime({ channelStateManager }) {
       return {
         channelName: data.display_name || data.name || channelId,
       };
+    },
+
+    async validateNtfy(siteUrl, topic) {
+      const baseUrl = normalizeBaseUrl(siteUrl);
+      const safeTopic = String(topic ?? '').trim();
+      if (!baseUrl || !safeTopic) throw new Error('ntfy site URL and topic are required.');
+
+      const response = await channelFetch(
+        `${baseUrl}/${encodeURIComponent(safeTopic)}/json?poll=1&since=all`,
+      );
+      if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        throw new Error(body || `ntfy validation HTTP ${response.status}`);
+      }
+
+      return { topic: safeTopic };
     },
   };
 }

@@ -5,6 +5,19 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "x-ai/grok-build-0.1": {
+      "name": "xAI: Grok Build 0.1",
+      "description": "Grok Build 0.1 is xAI’s fast coding model trained specifically for agentic software engineering workflows. It supports text and image inputs with text output, and is optimized for interactive coding...",
+      "context_window": 256000,
+      "pricing": {
+        "input": 1,
+        "output": 2
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "google/gemini-3.5-flash": {
       "name": "Google: Gemini 3.5 Flash",
       "description": "Gemini 3.5 Flash is Google's high-efficiency multimodal model, bringing near-Pro level coding and reasoning at Flash-tier cost and speed. It is highly optimized for coding proficiency and parallel agentic execution...",
@@ -4486,5 +4499,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-20T15:47:03.841Z"
+  "_syncedAt": "2026-05-21T03:59:58.067Z"
 }

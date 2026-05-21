@@ -156,6 +156,18 @@ export async function createPackage({ rootDirectory }) {
             return { ...bot, ...channel };
           }
 
+          if (name === 'ntfy') {
+            const siteUrl = requireCredential(
+              resolveCredentialValue(credentials.siteUrl, savedConfig.siteUrl),
+              'ntfy site URL',
+            );
+            const topic = requireCredential(
+              resolveCredentialValue(credentials.topic, savedConfig.topic),
+              'ntfy topic',
+            );
+            return channelRuntime.validateNtfy(siteUrl, topic);
+          }
+
           throw new Error('Unknown channel.');
         },
       },

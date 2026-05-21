@@ -729,6 +729,153 @@ export const PUBLIC_DATA_TOOL_DEFINITIONS = [
       barcode: { type: 'string', required: true, description: 'Product barcode number.' },
     },
   ),
+  tool(
+    'search_openalex_works',
+    'Search OpenAlex for scholarly works and citation metadata.',
+    'openalex',
+    {
+      query: { type: 'string', required: true, description: 'Topic, title, or author search.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'search_europe_pmc',
+    'Search Europe PMC for biomedical and life-science papers.',
+    'europe_pmc',
+    {
+      query: { type: 'string', required: true, description: 'Biomedical literature query.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'search_clinical_trials',
+    'Search ClinicalTrials.gov studies by condition, drug, or topic.',
+    'clinical_trials',
+    {
+      query: {
+        type: 'string',
+        required: true,
+        description: 'Condition, intervention, or study topic.',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'search_drug_labels',
+    'Search openFDA drug labels by brand or generic drug name.',
+    'openfda',
+    {
+      query: { type: 'string', required: true, description: 'Drug brand or generic name.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 3, max 10.' },
+    },
+  ),
+  tool(
+    'search_rxnorm_drugs',
+    'Search RxNorm drug concepts and return RXCUI identifiers.',
+    'rxnorm',
+    {
+      query: { type: 'string', required: true, description: 'Drug name to search.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 8, max 20.' },
+    },
+  ),
+  tool(
+    'search_species',
+    'Search GBIF species taxonomy records by scientific or common name.',
+    'gbif',
+    {
+      query: { type: 'string', required: true, description: 'Species or taxon name.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 8, max 20.' },
+    },
+  ),
+  tool(
+    'search_inaturalist_observations',
+    'Search recent iNaturalist observations by taxon name.',
+    'inaturalist',
+    {
+      query: { type: 'string', required: true, description: 'Taxon name or common name.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool('search_gdelt_news', 'Search the GDELT global news index for recent articles.', 'gdelt', {
+    query: { type: 'string', required: true, description: 'News search query.' },
+    limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    timespan: {
+      type: 'string',
+      required: false,
+      description: 'Optional timespan such as 1d, 7d, or 1m.',
+    },
+  }),
+  tool('search_federal_register', 'Search US Federal Register documents.', 'federal_register', {
+    query: { type: 'string', required: true, description: 'Rule, notice, agency, or topic.' },
+    limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+  }),
+  tool('search_sec_companies', 'Search SEC EDGAR company ticker and CIK records.', 'sec_edgar', {
+    query: { type: 'string', required: true, description: 'Company name, ticker, or CIK.' },
+    limit: { type: 'number', required: false, description: 'Result count, default 8, max 25.' },
+  }),
+  tool(
+    'get_public_holidays',
+    'Get public holidays from Nager.Date for a country and year.',
+    'public_holidays',
+    {
+      country_code: { type: 'string', required: true, description: 'ISO 2-letter country code.' },
+      year: { type: 'number', required: false, description: 'Year, default current year.' },
+    },
+  ),
+  tool('search_musicbrainz_artists', 'Search MusicBrainz artist records.', 'musicbrainz', {
+    query: { type: 'string', required: true, description: 'Artist or band name.' },
+    limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+  }),
+  tool(
+    'search_itunes',
+    'Search the iTunes public catalog for music, podcasts, movies, and apps.',
+    'itunes',
+    {
+      query: { type: 'string', required: true, description: 'Catalog search query.' },
+      media: {
+        type: 'string',
+        required: false,
+        description: 'Optional media type: music, podcast, movie, software, ebook, or all.',
+      },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'search_tv_shows',
+    'Search TVMaze for TV show metadata, status, network, and genres.',
+    'tvmaze',
+    {
+      query: { type: 'string', required: true, description: 'TV show title.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool(
+    'search_breweries',
+    'Search Open Brewery DB by brewery name, city, or region.',
+    'open_brewery_db',
+    {
+      query: { type: 'string', required: true, description: 'Brewery search query.' },
+      limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+    },
+  ),
+  tool('search_anime', 'Search Jikan for anime metadata from MyAnimeList.', 'jikan', {
+    query: { type: 'string', required: true, description: 'Anime title.' },
+    limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+  }),
+  tool('search_recipes', 'Search TheMealDB recipes by meal name.', 'themealdb', {
+    query: { type: 'string', required: true, description: 'Meal or recipe name.' },
+    limit: { type: 'number', required: false, description: 'Result count, default 5, max 20.' },
+  }),
+  tool('query_osv_vulnerabilities', 'Query OSV.dev for known package vulnerabilities.', 'osv', {
+    package_name: { type: 'string', required: true, description: 'Package name.' },
+    ecosystem: {
+      type: 'string',
+      required: true,
+      description: 'Ecosystem such as npm, PyPI, Maven, Go, or crates.io.',
+    },
+    version: { type: 'string', required: false, description: 'Optional package version.' },
+    limit: { type: 'number', required: false, description: 'Result count, default 10, max 20.' },
+  }),
 ];
 
 function clampInteger(value, fallback, min, max) {
@@ -2599,6 +2746,491 @@ async function getDoiInfo(params) {
     .join('\n');
 }
 
+async function searchOpenAlexWorks(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://api.openalex.org/works');
+  url.searchParams.set('search', query);
+  url.searchParams.set('per-page', String(limit));
+  url.searchParams.set('sort', 'cited_by_count:desc');
+  const data = await fetchJson(url.toString());
+  const works = data.results ?? [];
+  if (!works.length) return `No OpenAlex works found for "${query}".`;
+  const rows = works.map((work) => {
+    const authors = (work.authorships ?? [])
+      .slice(0, 3)
+      .map((entry) => entry.author?.display_name)
+      .filter(Boolean)
+      .join(', ');
+    const source = work.primary_location?.source?.display_name ?? 'n/a';
+    return [
+      work.display_name ?? 'Untitled',
+      authors ? `Authors: ${authors}` : null,
+      `Year: ${work.publication_year ?? 'n/a'} | Source: ${source}`,
+      `Citations: ${work.cited_by_count ?? 0}`,
+      `DOI: ${work.doi ?? 'n/a'}`,
+      `OpenAlex: ${work.id ?? 'n/a'}`,
+    ]
+      .filter(Boolean)
+      .join('\n   ');
+  });
+  return formatList(`OpenAlex works: ${query}`, rows);
+}
+
+async function searchEuropePmc(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://www.ebi.ac.uk/europepmc/webservices/rest/search');
+  url.searchParams.set('query', query);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('pageSize', String(limit));
+  const data = await fetchJson(url.toString());
+  const results = data.resultList?.result ?? [];
+  if (!results.length) return `No Europe PMC papers found for "${query}".`;
+  const rows = results.map((item) =>
+    [
+      item.title ?? 'Untitled',
+      item.authorString ? `Authors: ${item.authorString}` : null,
+      `Year: ${item.pubYear ?? 'n/a'} | Journal: ${item.journalTitle ?? 'n/a'}`,
+      `Citations: ${item.citedByCount ?? 0}`,
+      `PMID: ${item.pmid ?? 'n/a'} | DOI: ${item.doi ?? 'n/a'}`,
+      `Link: ${item.fullTextUrlList?.fullTextUrl?.[0]?.url ?? `https://europepmc.org/article/${item.source}/${item.id}`}`,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`Europe PMC: ${query}`, rows);
+}
+
+async function searchClinicalTrials(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://clinicaltrials.gov/api/v2/studies');
+  url.searchParams.set('query.term', query);
+  url.searchParams.set('pageSize', String(limit));
+  const data = await fetchJson(url.toString());
+  const studies = data.studies ?? [];
+  if (!studies.length) return `No ClinicalTrials.gov studies found for "${query}".`;
+  const rows = studies.map((study) => {
+    const protocol = study.protocolSection ?? {};
+    const id = protocol.identificationModule?.nctId ?? 'n/a';
+    const conditions = (protocol.conditionsModule?.conditions ?? []).slice(0, 4).join(', ');
+    const phases = (protocol.designModule?.phases ?? []).join(', ') || 'n/a';
+    const locations = (protocol.contactsLocationsModule?.locations ?? [])
+      .slice(0, 2)
+      .map((loc) => [loc.city, loc.state, loc.country].filter(Boolean).join(', '))
+      .filter(Boolean)
+      .join(' | ');
+    return [
+      protocol.identificationModule?.briefTitle ?? id,
+      `NCT ID: ${id} | Status: ${protocol.statusModule?.overallStatus ?? 'n/a'}`,
+      conditions ? `Conditions: ${conditions}` : null,
+      `Phase: ${phases}`,
+      locations ? `Locations: ${locations}` : null,
+      `Link: https://clinicaltrials.gov/study/${id}`,
+    ]
+      .filter(Boolean)
+      .join('\n   ');
+  });
+  return formatList(`ClinicalTrials.gov: ${query}`, rows);
+}
+
+async function searchDrugLabels(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 3, 1, 10);
+  const labelQuery = `openfda.brand_name:"${query}" OR openfda.generic_name:"${query}"`;
+  const url = new URL('https://api.fda.gov/drug/label.json');
+  url.searchParams.set('search', labelQuery);
+  url.searchParams.set('limit', String(limit));
+  const data = await fetchJson(url.toString()).catch(async () => {
+    const fallback = new URL('https://api.fda.gov/drug/label.json');
+    fallback.searchParams.set('search', query);
+    fallback.searchParams.set('limit', String(limit));
+    return fetchJson(fallback.toString());
+  });
+  const labels = data.results ?? [];
+  if (!labels.length) return `No openFDA drug labels found for "${query}".`;
+  const rows = labels.map((label) => {
+    const fda = label.openfda ?? {};
+    const warnings = (label.warnings ?? label.warnings_and_cautions ?? []).join(' ');
+    return [
+      (fda.brand_name ?? fda.generic_name ?? ['Unknown drug']).slice(0, 3).join(', '),
+      `Generic: ${(fda.generic_name ?? ['n/a']).slice(0, 3).join(', ')}`,
+      `Manufacturer: ${(fda.manufacturer_name ?? ['n/a']).slice(0, 2).join(', ')}`,
+      warnings ? `Warnings: ${stripHtml(warnings).slice(0, 260)}` : null,
+      `Set ID: ${label.set_id ?? 'n/a'}`,
+    ]
+      .filter(Boolean)
+      .join('\n   ');
+  });
+  return formatList(`openFDA drug labels: ${query}`, rows);
+}
+
+async function searchRxNormDrugs(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 8, 1, 20);
+  const data = await fetchJson(
+    `https://rxnav.nlm.nih.gov/REST/drugs.json?name=${encodeURIComponent(query)}`,
+  );
+  const concepts = (data.drugGroup?.conceptGroup ?? [])
+    .flatMap((group) =>
+      (group.conceptProperties ?? []).map((concept) => ({
+        ...concept,
+        tty: concept.tty ?? group.tty,
+      })),
+    )
+    .slice(0, limit);
+  if (!concepts.length) return `No RxNorm concepts found for "${query}".`;
+  const rows = concepts.map((concept) =>
+    [
+      concept.name ?? 'Unnamed concept',
+      `RXCUI: ${concept.rxcui ?? 'n/a'} | TTY: ${concept.tty ?? 'n/a'}`,
+      concept.synonym ? `Synonym: ${concept.synonym}` : null,
+      `Link: https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=${concept.rxcui}`,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`RxNorm drugs: ${query}`, rows);
+}
+
+async function searchSpecies(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 8, 1, 20);
+  const url = new URL('https://api.gbif.org/v1/species/search');
+  url.searchParams.set('q', query);
+  url.searchParams.set('limit', String(limit));
+  const data = await fetchJson(url.toString());
+  const species = data.results ?? [];
+  if (!species.length) return `No GBIF species found for "${query}".`;
+  const rows = species.map((item) =>
+    [
+      item.scientificName ?? item.canonicalName ?? 'Unnamed taxon',
+      `Rank: ${item.rank ?? 'n/a'} | Status: ${item.taxonomicStatus ?? 'n/a'}`,
+      `Kingdom: ${item.kingdom ?? 'n/a'} | Family: ${item.family ?? 'n/a'}`,
+      `GBIF key: ${item.key ?? 'n/a'} | https://www.gbif.org/species/${item.key}`,
+    ].join('\n   '),
+  );
+  return formatList(`GBIF species: ${query}`, rows);
+}
+
+async function searchINaturalistObservations(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://api.inaturalist.org/v1/observations');
+  url.searchParams.set('taxon_name', query);
+  url.searchParams.set('order_by', 'observed_on');
+  url.searchParams.set('per_page', String(limit));
+  const data = await fetchJson(url.toString());
+  const observations = data.results ?? [];
+  if (!observations.length) return `No iNaturalist observations found for "${query}".`;
+  const rows = observations.map((item) => {
+    const taxon = item.taxon ?? {};
+    const name = taxon.preferred_common_name
+      ? `${taxon.preferred_common_name} (${taxon.name})`
+      : (taxon.name ?? query);
+    return [
+      name,
+      `Observed: ${item.observed_on ?? 'n/a'} | Quality: ${item.quality_grade ?? 'n/a'}`,
+      `Place: ${item.place_guess ?? 'n/a'}`,
+      `Link: ${item.uri ?? `https://www.inaturalist.org/observations/${item.id}`}`,
+    ].join('\n   ');
+  });
+  return formatList(`iNaturalist observations: ${query}`, rows);
+}
+
+async function searchGdeltNews(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://api.gdeltproject.org/api/v2/doc/doc');
+  url.searchParams.set('query', query);
+  url.searchParams.set('mode', 'ArtList');
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('maxrecords', String(limit));
+  url.searchParams.set('sort', 'DateDesc');
+  const timespan = String(params.timespan ?? '').trim();
+  if (/^\d+[dmh]$/i.test(timespan)) url.searchParams.set('timespan', timespan);
+  const data = await fetchJson(url.toString());
+  const articles = data.articles ?? [];
+  if (!articles.length) return `No GDELT articles found for "${query}".`;
+  const rows = articles.map((article) =>
+    [
+      article.title ?? 'Untitled',
+      `Source: ${article.domain ?? 'n/a'} | Language: ${article.language ?? 'n/a'}`,
+      `Date: ${article.seendate ?? 'n/a'}`,
+      `URL: ${article.url ?? 'n/a'}`,
+    ].join('\n   '),
+  );
+  return formatList(`GDELT news: ${query}`, rows);
+}
+
+async function searchFederalRegister(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://www.federalregister.gov/api/v1/documents.json');
+  url.searchParams.set('conditions[term]', query);
+  url.searchParams.set('order', 'newest');
+  url.searchParams.set('per_page', String(limit));
+  const data = await fetchJson(url.toString());
+  const documents = data.results ?? [];
+  if (!documents.length) return `No Federal Register documents found for "${query}".`;
+  const rows = documents.map((doc) =>
+    [
+      doc.title ?? 'Untitled',
+      `Date: ${doc.publication_date ?? 'n/a'} | Type: ${doc.type ?? 'n/a'}`,
+      `Agencies: ${(doc.agencies ?? []).map((agency) => agency.name).join(', ') || 'n/a'}`,
+      `Citation: ${doc.citation ?? 'n/a'}`,
+      `URL: ${doc.html_url ?? doc.pdf_url ?? 'n/a'}`,
+    ].join('\n   '),
+  );
+  return formatList(`Federal Register: ${query}`, rows);
+}
+
+async function searchSecCompanies(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 8, 1, 25);
+  const data = await fetchJson('https://www.sec.gov/files/company_tickers.json', {
+    headers: { 'User-Agent': 'Joanium/2026 support@joanium.local' },
+  });
+  const needle = query.toLowerCase();
+  const companies = Object.values(data)
+    .filter((company) => {
+      const cik = String(company.cik_str ?? '');
+      return (
+        String(company.ticker ?? '')
+          .toLowerCase()
+          .includes(needle) ||
+        String(company.title ?? '')
+          .toLowerCase()
+          .includes(needle) ||
+        cik.includes(needle.replace(/^0+/, ''))
+      );
+    })
+    .slice(0, limit);
+  if (!companies.length) return `No SEC company records found for "${query}".`;
+  const rows = companies.map((company) => {
+    const cik = String(company.cik_str ?? '').padStart(10, '0');
+    return [
+      `${company.ticker ?? 'n/a'} - ${company.title ?? 'Unknown company'}`,
+      `CIK: ${cik}`,
+      `EDGAR: https://www.sec.gov/edgar/browse/?CIK=${cik}`,
+    ].join('\n   ');
+  });
+  return formatList(`SEC companies: ${query}`, rows);
+}
+
+async function getPublicHolidays(params) {
+  const country = requireText(params, 'country_code').toUpperCase();
+  const year = clampInteger(params.year, new Date().getFullYear(), 1900, 2100);
+  const holidays = await fetchJson(
+    `https://date.nager.at/api/v3/PublicHolidays/${year}/${encodeURIComponent(country)}`,
+  );
+  if (!Array.isArray(holidays) || !holidays.length) {
+    return `No public holidays found for ${country} in ${year}.`;
+  }
+  const rows = holidays.map((holiday) =>
+    [
+      `${holiday.date} - ${holiday.name}`,
+      holiday.localName && holiday.localName !== holiday.name
+        ? `Local name: ${holiday.localName}`
+        : null,
+      `Global: ${holiday.global ? 'yes' : 'no'}`,
+      Array.isArray(holiday.counties) && holiday.counties.length
+        ? `Counties: ${holiday.counties.join(', ')}`
+        : null,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`Public holidays: ${country} ${year}`, rows);
+}
+
+async function searchMusicBrainzArtists(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://musicbrainz.org/ws/2/artist/');
+  url.searchParams.set('query', query);
+  url.searchParams.set('fmt', 'json');
+  url.searchParams.set('limit', String(limit));
+  const data = await fetchJson(url.toString(), {
+    headers: { 'User-Agent': 'Joanium/2026 support@joanium.local' },
+  });
+  const artists = data.artists ?? [];
+  if (!artists.length) return `No MusicBrainz artists found for "${query}".`;
+  const rows = artists.map((artist) =>
+    [
+      artist.name ?? 'Unnamed artist',
+      `Type: ${artist.type ?? 'n/a'} | Country: ${artist.country ?? 'n/a'} | Score: ${artist.score ?? 'n/a'}`,
+      artist.disambiguation ? `Note: ${artist.disambiguation}` : null,
+      `MBID: ${artist.id}`,
+      `Link: https://musicbrainz.org/artist/${artist.id}`,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`MusicBrainz artists: ${query}`, rows);
+}
+
+async function searchItunes(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const media = String(params.media ?? 'all').trim();
+  const url = new URL('https://itunes.apple.com/search');
+  url.searchParams.set('term', query);
+  url.searchParams.set('limit', String(limit));
+  if (media && media !== 'all') url.searchParams.set('media', media);
+  const data = await fetchJson(url.toString(), { signal: AbortSignal.timeout(10000) });
+  const results = data?.results ?? [];
+  if (!results.length) return `No iTunes catalog results found for "${query}".`;
+  const rows = results.map((item) =>
+    [
+      item.trackName ?? item.collectionName ?? item.artistName ?? 'Untitled',
+      `Artist: ${item.artistName ?? 'n/a'} | Kind: ${item.kind ?? item.wrapperType ?? 'n/a'}`,
+      `Genre: ${item.primaryGenreName ?? 'n/a'}`,
+      `URL: ${item.trackViewUrl ?? item.collectionViewUrl ?? item.artistViewUrl ?? 'n/a'}`,
+      item.previewUrl ? `Preview: ${item.previewUrl}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`iTunes catalog: ${query}`, rows);
+}
+
+async function searchTvShows(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const data = await fetchJson(
+    `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(query)}`,
+  );
+  const shows = Array.isArray(data) ? data.slice(0, limit) : [];
+  if (!shows.length) return `No TVMaze shows found for "${query}".`;
+  const rows = shows.map(({ score, show }) =>
+    [
+      show?.name ?? 'Untitled',
+      `Score: ${Number(score ?? 0).toFixed(2)} | Status: ${show?.status ?? 'n/a'}`,
+      `Premiered: ${show?.premiered ?? 'n/a'} | Genres: ${(show?.genres ?? []).join(', ') || 'n/a'}`,
+      `Network: ${show?.network?.name ?? show?.webChannel?.name ?? 'n/a'}`,
+      `URL: ${show?.url ?? 'n/a'}`,
+    ].join('\n   '),
+  );
+  return formatList(`TVMaze shows: ${query}`, rows);
+}
+
+async function searchBreweries(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://api.openbrewerydb.org/v1/breweries/search');
+  url.searchParams.set('query', query);
+  url.searchParams.set('per_page', String(limit));
+  const data = await fetchJson(url.toString());
+  const breweries = Array.isArray(data) ? data : [];
+  if (!breweries.length) return `No breweries found for "${query}".`;
+  const rows = breweries.map((brewery) =>
+    [
+      brewery.name ?? 'Unnamed brewery',
+      `Type: ${brewery.brewery_type ?? 'n/a'}`,
+      `Location: ${[brewery.city, brewery.state_province, brewery.country].filter(Boolean).join(', ') || 'n/a'}`,
+      brewery.website_url ? `Website: ${brewery.website_url}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n   '),
+  );
+  return formatList(`Open Brewery DB: ${query}`, rows);
+}
+
+async function searchAnime(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const url = new URL('https://api.jikan.moe/v4/anime');
+  url.searchParams.set('q', query);
+  url.searchParams.set('limit', String(limit));
+  const data = await fetchJson(url.toString());
+  const anime = data.data ?? [];
+  if (!anime.length) return `No Jikan anime results found for "${query}".`;
+  const rows = anime.map((item) =>
+    [
+      item.title ?? 'Untitled',
+      `Type: ${item.type ?? 'n/a'} | Episodes: ${item.episodes ?? 'n/a'} | Status: ${item.status ?? 'n/a'}`,
+      `Score: ${item.score ?? 'n/a'} | Year: ${item.year ?? item.aired?.prop?.from?.year ?? 'n/a'}`,
+      `Genres: ${(item.genres ?? []).map((genre) => genre.name).join(', ') || 'n/a'}`,
+      `URL: ${item.url ?? 'n/a'}`,
+    ].join('\n   '),
+  );
+  return formatList(`Jikan anime: ${query}`, rows);
+}
+
+async function searchRecipes(params) {
+  const query = requireText(params, 'query');
+  const limit = clampInteger(params.limit, 5, 1, 20);
+  const data = await fetchJson(
+    `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`,
+  );
+  const meals = (data.meals ?? []).slice(0, limit);
+  if (!meals.length) return `No recipes found for "${query}".`;
+  const rows = meals.map((meal) => {
+    const ingredients = [];
+    for (let index = 1; index <= 20; index += 1) {
+      const ingredient = String(meal[`strIngredient${index}`] ?? '').trim();
+      const measure = String(meal[`strMeasure${index}`] ?? '').trim();
+      if (ingredient) ingredients.push(`${measure ? `${measure} ` : ''}${ingredient}`.trim());
+    }
+    return [
+      meal.strMeal ?? 'Untitled recipe',
+      `Category: ${meal.strCategory ?? 'n/a'} | Area: ${meal.strArea ?? 'n/a'}`,
+      `Ingredients: ${ingredients.slice(0, 10).join(', ') || 'n/a'}`,
+      meal.strSource ? `Source: ${meal.strSource}` : null,
+      meal.strYoutube ? `Video: ${meal.strYoutube}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n   ');
+  });
+  return formatList(`Recipes: ${query}`, rows);
+}
+
+async function queryOsvVulnerabilities(params) {
+  const packageName = requireText(params, 'package_name');
+  const ecosystemInput = requireText(params, 'ecosystem').toLowerCase();
+  const ecosystemMap = {
+    npm: 'npm',
+    pypi: 'PyPI',
+    maven: 'Maven',
+    go: 'Go',
+    'crates.io': 'crates.io',
+    crates: 'crates.io',
+    nuget: 'NuGet',
+    rubygems: 'RubyGems',
+    packagist: 'Packagist',
+  };
+  const ecosystem = ecosystemMap[ecosystemInput] ?? params.ecosystem;
+  const version = String(params.version ?? '').trim();
+  const limit = clampInteger(params.limit, 10, 1, 20);
+  const body = {
+    package: {
+      name: packageName,
+      ecosystem,
+    },
+  };
+  if (version) body.version = version;
+  const data = await fetchJson('https://api.osv.dev/v1/query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const vulns = (data.vulns ?? []).slice(0, limit);
+  if (!vulns.length) {
+    return `No OSV vulnerabilities found for ${ecosystem}/${packageName}${version ? ` ${version}` : ''}.`;
+  }
+  const rows = vulns.map((vuln) =>
+    [
+      `${vuln.id} - ${vuln.summary ?? 'No summary'}`,
+      `Modified: ${vuln.modified ?? 'n/a'} | Published: ${vuln.published ?? 'n/a'}`,
+      `Aliases: ${(vuln.aliases ?? []).slice(0, 5).join(', ') || 'n/a'}`,
+      `Details: ${stripHtml(vuln.details ?? '').slice(0, 240) || 'n/a'}`,
+    ].join('\n   '),
+  );
+  return formatList(`OSV vulnerabilities: ${ecosystem}/${packageName}`, rows);
+}
+
 export function createPublicDataToolHandlers() {
   return {
     search_web: searchWeb,
@@ -2681,5 +3313,24 @@ export function createPublicDataToolHandlers() {
     // crossref
     search_crossref: searchCrossref,
     get_doi_info: getDoiInfo,
+    // additional free public APIs
+    search_openalex_works: searchOpenAlexWorks,
+    search_europe_pmc: searchEuropePmc,
+    search_clinical_trials: searchClinicalTrials,
+    search_drug_labels: searchDrugLabels,
+    search_rxnorm_drugs: searchRxNormDrugs,
+    search_species: searchSpecies,
+    search_inaturalist_observations: searchINaturalistObservations,
+    search_gdelt_news: searchGdeltNews,
+    search_federal_register: searchFederalRegister,
+    search_sec_companies: searchSecCompanies,
+    get_public_holidays: getPublicHolidays,
+    search_musicbrainz_artists: searchMusicBrainzArtists,
+    search_itunes: searchItunes,
+    search_tv_shows: searchTvShows,
+    search_breweries: searchBreweries,
+    search_anime: searchAnime,
+    search_recipes: searchRecipes,
+    query_osv_vulnerabilities: queryOsvVulnerabilities,
   };
 }
