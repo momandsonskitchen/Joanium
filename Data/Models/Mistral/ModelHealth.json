@@ -22,5 +22,13 @@
   "devstral-medium-latest": {
     "status": "green",
     "checkedAt": "2026-05-22T06:09:53.699Z"
+  },
+  "voxtral-mini-transcribe-realtime-2602": {
+    "status": "red",
+    "checkedAt": "2026-05-22T06:29:47.429Z"
+  },
+  "pixtral-large-2411": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:29:47.520Z"
   }
 }

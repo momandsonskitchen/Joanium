@@ -48,11 +48,31 @@
     "checkedAt": "2026-05-22T06:09:59.555Z"
   },
   "bytedance/seed-oss-36b-instruct": {
-    "status": "yellow",
-    "checkedAt": "2026-05-22T06:10:06.860Z"
+    "status": "green",
+    "checkedAt": "2026-05-22T06:29:49.617Z"
   },
   "moonshotai/kimi-k2.6": {
     "status": "yellow",
     "checkedAt": "2026-05-22T06:10:07.310Z"
+  },
+  "nvidia/llama-3.2-nemoretriever-1b-vlm-embed-v1": {
+    "status": "red",
+    "checkedAt": "2026-05-22T06:29:47.437Z"
+  },
+  "meta/llama-3.3-70b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:29:55.840Z"
+  },
+  "meta/llama-3.1-70b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:29:57.917Z"
+  },
+  "mistralai/mistral-large-3-675b-instruct-2512": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T06:30:01.214Z"
+  },
+  "nvidia/llama-3.3-nemotron-super-49b-v1": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T06:30:01.778Z"
   }
 }
