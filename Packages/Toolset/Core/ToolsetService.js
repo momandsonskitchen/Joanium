@@ -6,6 +6,7 @@ import {
   filterToolsByConnectors,
   filterPromptSectionsByPackages,
   buildDisconnectedHint,
+  buildConnectedHint,
 } from './ConnectorFilter.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
@@ -2170,11 +2171,15 @@ export function createToolsetService({
       let activeSections;
 
       if (Array.isArray(connectors) && connectors.length > 0) {
-        const { activeIds, disconnectedLabels } = partitionConnectors(connectors);
+        const { activeIds, activeLabels, disconnectedLabels } = partitionConnectors(connectors);
         tools = filterToolsByConnectors(allTools, activeIds);
         activeSections = filterPromptSectionsByPackages(packages, activeIds);
-        const hint = buildDisconnectedHint(disconnectedLabels);
-        if (hint) activeSections = [...activeSections, hint];
+
+        const connectedHint = buildConnectedHint(activeLabels);
+        if (connectedHint) activeSections.push(connectedHint);
+
+        const disconnectedHint = buildDisconnectedHint(disconnectedLabels);
+        if (disconnectedHint) activeSections.push(disconnectedHint);
       } else {
         tools = allTools;
         activeSections = promptSections;

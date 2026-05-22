@@ -79,7 +79,5 @@ export function createConnectorToolHandlers({ rootDirectory, toolDefinitions = [
 }
 
 export function buildConnectorPromptSection(serviceName, toolDefinitions = []) {
-  const count = toolDefinitions.filter((tool) => tool?.name).length;
-  if (!count) return '';
-  return `${serviceName} connector tools are dynamically discovered from this tool package. Use them only when the user asks for ${serviceName} work and the connector is configured.`;
+  return '';
 }

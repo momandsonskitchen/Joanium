@@ -11,17 +11,19 @@
 export function partitionConnectors(connectors = []) {
   const activeIds = new Set();
   const disconnectedLabels = [];
+  const activeLabels = [];
 
   for (const connector of connectors) {
     const isPublic = connector.publicTool === true || connector.noCredential === true;
     if (isPublic || connector.credentialSaved) {
       activeIds.add(connector.id);
+      activeLabels.push(connector.label ?? connector.id);
     } else {
       disconnectedLabels.push(connector.label ?? connector.id);
     }
   }
 
-  return { activeIds, disconnectedLabels };
+  return { activeIds, activeLabels, disconnectedLabels };
 }
 
 /**
@@ -76,8 +78,21 @@ export function buildDisconnectedHint(disconnectedLabels) {
   if (disconnectedLabels.length === 0) return '';
   const list = disconnectedLabels.join(', ');
   return (
-    `You can also assist with ${list}, but the user needs to connect them via` +
-    ' Settings \u2192 Connectors first. If the user asks about one of these services,' +
-    ' let them know they need to connect the relevant connector and guide them there.'
+    `The user has not connected the following services: ${list}. ` +
+    `DO NOT attempt to call any tools for these services. They are currently disabled and will fail. ` +
+    `Instead, politely inform the user that they need to connect the relevant service via Settings \u2192 Connectors.`
   );
+}
+
+/**
+ * Builds the "connected" context hint that tells the AI which
+ * connectors are successfully authenticated and available.
+ *
+ * @param {string[]} activeLabels - Human-readable connector names
+ * @returns {string}
+ */
+export function buildConnectedHint(activeLabels) {
+  if (activeLabels.length === 0) return '';
+  const list = activeLabels.join(', ');
+  return `The user has successfully connected the following services: ${list}. You have full access to use their provided tools when the user asks for related work.`;
 }
