@@ -51,6 +51,7 @@ const RESET_DATA_ENTRIES = [
   'Memories',
   'Models',
   'Projects',
+  'Screenshots',
   'Security.json',
   'System.json',
   'Templates',

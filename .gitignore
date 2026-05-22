@@ -9,9 +9,12 @@ Data/Templates/
 Data/Chats/
 Data/ChannelMessages/
 Data/Memories/
+Data/Logs/
+Data/Screenshots/
 Data/Avatar.*
 Data/User.json
 Data/Usage.json
 Data/Channels.json
+Data/MCPServers.json
 Data/Security.json
 Data/System.json

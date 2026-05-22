@@ -98,6 +98,11 @@ async function getAllJsFiles(dir) {
   return results;
 }
 
+function isTestFile(filePath) {
+  const normalized = filePath.replace(/\\/g, '/');
+  return normalized.includes('/__tests__/') || /\.(test|spec)\.[cm]?js$/u.test(normalized);
+}
+
 function extractExternalImports(source) {
   const imports = new Set();
   const pattern = /^\s*import\s+.*?from\s+['"]([^'"./][^'"]*)['"]/gm;
@@ -122,7 +127,7 @@ async function checkRuntimeDepsAreDeclared(manifest) {
 
   const runtimeDeps = new Set(Object.keys(manifest.dependencies ?? {}));
   const devDeps = new Set(Object.keys(manifest.devDependencies ?? {}));
-  const files = await getAllJsFiles(PACKAGES_DIR);
+  const files = (await getAllJsFiles(PACKAGES_DIR)).filter((file) => !isTestFile(file));
   const allRuntimeImports = new Set();
 
   for (const file of files) {
@@ -164,7 +169,7 @@ async function checkDevOnlyDepsNotInDependencies(manifest) {
   }
 
   // Also check files in Packages/ to find which deps are ONLY used in Scripts/
-  const packageFiles = await getAllJsFiles(PACKAGES_DIR);
+  const packageFiles = (await getAllJsFiles(PACKAGES_DIR)).filter((file) => !isTestFile(file));
   const packageImports = new Set();
 
   for (const file of packageFiles) {

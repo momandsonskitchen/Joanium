@@ -1,4 +1,4 @@
-import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 
 const HN_API = 'https://hacker-news.firebaseio.com/v0';
@@ -9,21 +9,17 @@ const GITHUB_TRENDING = (date, count) =>
   `https://api.github.com/search/repositories?q=created:>${date}&sort=stars&order=desc&per_page=${count}`;
 
 const DEVTO_API = 'https://dev.to/api/articles?top=7&per_page=12';
-
-const REDDIT_API = (sub, limit) => `https://www.reddit.com/r/${sub}/top.json?limit=${limit}&t=day`;
-
+const REDDIT_API = (subreddit, limit) =>
+  `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/top.json?limit=${limit}&t=day`;
 const LOBSTERS_API = 'https://lobste.rs/hottest.json';
-
 const STACKOVERFLOW_API =
   'https://api.stackexchange.com/2.3/questions?order=desc&sort=hot&site=stackoverflow&pagesize=10&filter=default';
 
 const SHIMMER_COUNT = 5;
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function todayMinus(days) {
   const d = new Date();
-  d.setDate(d.getDate() - days);
+  d.setDate(d.getDate() - Number(days));
   return d.toISOString().slice(0, 10);
 }
 
@@ -44,106 +40,166 @@ function shuffleArray(array) {
   return array;
 }
 
-// ── Data fetchers ─────────────────────────────────────────────────────────────
+function formatCount(value) {
+  const number = Number(value ?? 0);
+  return Number.isFinite(number) ? number.toLocaleString() : '0';
+}
 
-async function fetchHackerNews() {
+function formatMeta(strings, key, replacements) {
+  const template = strings.meta?.[key];
+  return formatTemplate(template, replacements);
+}
+
+function formatTemplate(template, replacements) {
+  return template ? formatText(template, replacements) : '';
+}
+
+function joinMeta(strings, parts) {
+  return parts.filter(Boolean).join(strings.meta?.separator ?? ' ');
+}
+
+function safeHostname(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+async function fetchHackerNews(strings) {
   const ids = await fetchJson(HN_TOP_STORIES);
-  const top = ids.slice(0, 30);
+  const top = Array.isArray(ids) ? ids.slice(0, 30) : [];
   const items = await Promise.all(top.map((id) => fetchJson(HN_ITEM(id)).catch(() => null)));
+
   return items
     .filter((item) => item && item.url && item.title)
     .slice(0, 20)
     .map((item) => ({
-      source: 'Hacker News',
+      source: strings.hn,
       title: item.title,
-      description: item.url ? new URL(item.url).hostname.replace('www.', '') : '',
+      description: safeHostname(item.url),
       url: item.url,
       image: '../../../Assets/Icons/HackerNews.png',
-      meta: `${item.score ?? 0} points · ${item.descendants ?? 0} comments`,
+      meta: joinMeta(strings, [
+        formatMeta(strings, 'points', { count: formatCount(item.score) }),
+        formatMeta(strings, 'comments', { count: formatCount(item.descendants) }),
+      ]),
     }));
 }
 
-async function fetchGithubTrending(days, count, label) {
+async function fetchGithubTrending(strings, { days, count, label }) {
   const url = GITHUB_TRENDING(todayMinus(days), count);
   const data = await fetchJson(url);
-  return (data.items ?? []).slice(0, count).map((repo) => ({
+
+  return (data?.items ?? []).slice(0, count).map((repo) => ({
     source: label,
     title: repo.full_name,
     description: truncateText(repo.description, 120),
     url: repo.html_url,
     image: repo.owner?.avatar_url ?? null,
-    meta: `⭐ ${(repo.stargazers_count ?? 0).toLocaleString()} stars · ${repo.language ?? 'Code'}`,
+    meta: joinMeta(strings, [
+      formatMeta(strings, 'stars', { count: formatCount(repo.stargazers_count) }),
+      repo.language ?? strings.codeFallback,
+    ]),
   }));
 }
 
-async function fetchDevTo() {
+async function fetchDevTo(strings) {
   const articles = await fetchJson(DEVTO_API);
-  return (articles ?? []).slice(0, 12).map((a) => ({
-    source: 'DEV Community',
-    title: a.title,
-    description: truncateText(a.description, 120),
-    url: a.url,
-    image: a.social_image ?? a.cover_image ?? null,
-    meta: `👍 ${a.positive_reactions_count ?? 0} · ⏳ ${a.reading_time_minutes ?? 1} min read`,
+
+  return (articles ?? []).slice(0, 12).map((article) => ({
+    source: strings.dev,
+    title: article.title,
+    description: truncateText(article.description, 120),
+    url: article.url,
+    image: article.social_image ?? article.cover_image ?? null,
+    meta: joinMeta(strings, [
+      formatMeta(strings, 'reactions', { count: formatCount(article.positive_reactions_count) }),
+      formatMeta(strings, 'readTime', { count: formatCount(article.reading_time_minutes ?? 1) }),
+    ]),
   }));
 }
 
-async function fetchReddit(subreddit, limit, label) {
+async function fetchReddit(strings, { subreddit, limit, label }) {
   const data = await fetchJson(REDDIT_API(subreddit, limit));
   const posts = data?.data?.children ?? [];
-  return posts.slice(0, limit).map((p) => {
-    const post = p.data;
+
+  return posts.slice(0, limit).map((entry) => {
+    const post = entry.data;
+    const author = post.author || strings.authorFallback;
     return {
-      source: label ?? `r/${subreddit}`,
+      source: label,
       title: post.title,
-      description: truncateText(post.selftext || `Posted by u/${post.author}`, 120),
+      description: truncateText(
+        post.selftext || formatTemplate(strings.postedBy, { name: author }),
+        120,
+      ),
       url: `https://reddit.com${post.permalink}`,
       image: post.thumbnail && post.thumbnail.startsWith('http') ? post.thumbnail : null,
-      meta: `⬆️ ${post.ups ?? 0} · ${post.num_comments ?? 0} comments`,
+      meta: joinMeta(strings, [
+        formatMeta(strings, 'votes', { count: formatCount(post.ups) }),
+        formatMeta(strings, 'comments', { count: formatCount(post.num_comments) }),
+      ]),
     };
   });
 }
 
-async function fetchLobsters() {
+async function fetchLobsters(strings) {
   const stories = await fetchJson(LOBSTERS_API);
-  return (stories ?? []).slice(0, 12).map((s) => {
+
+  return (stories ?? []).slice(0, 12).map((story) => {
     const username =
-      typeof s.submitter_user === 'string'
-        ? s.submitter_user
-        : s.submitter_user?.username || 'someone';
+      typeof story.submitter_user === 'string'
+        ? story.submitter_user
+        : story.submitter_user?.username || strings.authorFallback;
     const avatar =
-      typeof s.submitter_user === 'object' && s.submitter_user?.avatar_url
-        ? `https://lobste.rs${s.submitter_user.avatar_url}`
+      typeof story.submitter_user === 'object' && story.submitter_user?.avatar_url
+        ? `https://lobste.rs${story.submitter_user.avatar_url}`
         : null;
+
     return {
-      source: 'Lobste.rs',
-      title: s.title,
-      description: truncateText(s.description || `Posted by ${username}`, 120),
-      url: s.url || s.short_id_url,
+      source: strings.lobsters,
+      title: story.title,
+      description: truncateText(
+        story.description || formatTemplate(strings.postedBy, { name: username }),
+        120,
+      ),
+      url: story.url || story.short_id_url,
       image: avatar,
-      meta: `${s.score ?? 0} points · ${s.comment_count ?? 0} comments`,
+      meta: joinMeta(strings, [
+        formatMeta(strings, 'points', { count: formatCount(story.score) }),
+        formatMeta(strings, 'comments', { count: formatCount(story.comment_count) }),
+      ]),
     };
   });
 }
 
-async function fetchStackOverflow() {
+async function fetchStackOverflow(strings) {
   const data = await fetchJson(STACKOVERFLOW_API);
-  return (data?.items ?? []).slice(0, 10).map((q) => ({
-    source: 'Stack Overflow',
-    title: q.title,
+
+  return (data?.items ?? []).slice(0, 10).map((question) => ({
+    source: strings.stackOverflow,
+    title: question.title,
     description: truncateText(
-      q.tags ? q.tags.slice(0, 5).join(' · ') : `by ${q.owner?.display_name ?? 'someone'}`,
+      question.tags
+        ? question.tags.slice(0, 5).join(strings.meta?.separator ?? ' ')
+        : formatTemplate(strings.postedBy, {
+            name: question.owner?.display_name ?? strings.authorFallback,
+          }),
       120,
     ),
-    url: q.link,
-    image: q.owner?.profile_image ?? null,
-    meta: `👍 ${q.score ?? 0} · 💬 ${q.answer_count ?? 0} answers · ${q.view_count?.toLocaleString() ?? 0} views`,
+    url: question.link,
+    image: question.owner?.profile_image ?? null,
+    meta: joinMeta(strings, [
+      formatMeta(strings, 'votes', { count: formatCount(question.score) }),
+      formatMeta(strings, 'answers', { count: formatCount(question.answer_count) }),
+      formatMeta(strings, 'views', { count: formatCount(question.view_count) }),
+    ]),
   }));
 }
 
-// ── Renderers ─────────────────────────────────────────────────────────────────
-
 function openInBrowser(url) {
+  if (!url) return;
   void invokeIpc('browser-preview:load-url', url).catch(() => {});
 }
 
@@ -160,7 +216,7 @@ function createShimmerCard() {
   return card;
 }
 
-function createSourceIcon(source) {
+function createSourceIcon(source = '') {
   const wrap = createElement('span', 'tech-feed__source-icon');
   wrap.textContent = source.slice(0, 2).toUpperCase();
   return wrap;
@@ -206,12 +262,10 @@ function buildCard(item) {
   return card;
 }
 
-// ── Public factory ─────────────────────────────────────────────────────────────
-
-export function createTechFeedPanel(strings) {
+export function createTechFeedPanel(strings = {}) {
   const el = createElement('div', 'tech-feed');
   el.setAttribute('role', 'region');
-  el.setAttribute('aria-label', strings.label ?? 'Tech feed');
+  el.setAttribute('aria-label', strings.label ?? '');
 
   let abortController = null;
 
@@ -224,35 +278,50 @@ export function createTechFeedPanel(strings) {
   }
 
   async function load() {
-    if (abortController) abortController.abort();
-    abortController = new AbortController();
+    abortController?.abort();
+    const requestController = new AbortController();
+    abortController = requestController;
 
     showShimmers();
 
-    const [hn, gh, dev, reddit, lobsters] = await Promise.allSettled([
-      fetchHackerNews(),
-      fetchGithubTrending(),
-      fetchDevTo(),
-      fetchReddit(),
-      fetchLobsters(),
-    ]);
+    const [hn, gh, dev, redditProgramming, redditMachineLearning, lobsters, stackOverflow] =
+      await Promise.allSettled([
+        fetchHackerNews(strings),
+        fetchGithubTrending(strings, { days: 14, count: 12, label: strings.github }),
+        fetchDevTo(strings),
+        fetchReddit(strings, {
+          subreddit: 'programming',
+          limit: 10,
+          label: strings.redditProgramming,
+        }),
+        fetchReddit(strings, {
+          subreddit: 'MachineLearning',
+          limit: 8,
+          label: strings.redditMachineLearning,
+        }),
+        fetchLobsters(strings),
+        fetchStackOverflow(strings),
+      ]);
 
-    if (abortController.signal.aborted) return;
+    if (requestController.signal.aborted || abortController !== requestController) {
+      return;
+    }
 
     let items = [
       ...(hn.status === 'fulfilled' ? hn.value : []),
       ...(gh.status === 'fulfilled' ? gh.value : []),
       ...(dev.status === 'fulfilled' ? dev.value : []),
-      ...(reddit.status === 'fulfilled' ? reddit.value : []),
+      ...(redditProgramming.status === 'fulfilled' ? redditProgramming.value : []),
+      ...(redditMachineLearning.status === 'fulfilled' ? redditMachineLearning.value : []),
       ...(lobsters.status === 'fulfilled' ? lobsters.value : []),
+      ...(stackOverflow.status === 'fulfilled' ? stackOverflow.value : []),
     ];
 
     items = shuffleArray(items);
-
     el.replaceChildren();
 
     if (items.length === 0) {
-      el.append(createElement('p', 'tech-feed__empty', strings.empty ?? 'No news available.'));
+      el.append(createElement('p', 'tech-feed__empty', strings.empty ?? ''));
       return;
     }
 
@@ -264,7 +333,8 @@ export function createTechFeedPanel(strings) {
   }
 
   function destroy() {
-    if (abortController) abortController.abort();
+    abortController?.abort();
+    abortController = null;
   }
 
   showShimmers();

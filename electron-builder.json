@@ -10,6 +10,7 @@
     "Config/**/*",
     "Datasets/**/*",
     "Packages/**/*",
+    "!Packages/**/__tests__/**",
     "Prompts/**/*"
   ],
   "extraResources": [
@@ -23,11 +24,17 @@
         "!Projects/**",
         "!Templates/**",
         "!Chats/**",
+        "!ChannelMessages/**",
         "!Memories/**",
+        "!ModelCache/**",
+        "!Models/**",
+        "!Logs/**",
+        "!Screenshots/**",
         "!Avatar.*",
         "!User.json",
         "!Usage.json",
         "!Channels.json",
+        "!MCPServers.json",
         "!Security.json",
         "!System.json"
       ]

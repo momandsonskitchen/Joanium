@@ -1,18 +1,14 @@
 {
-  "nvidia/nemotron-3-content-safety": {
+  "nvidia/neva-22b": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T03:02:27.477Z"
+  },
+  "deepseek-ai/deepseek-v4-flash": {
     "status": "green",
-    "checkedAt": "2026-05-21T08:30:01.511Z"
+    "checkedAt": "2026-05-22T03:02:40.210Z"
   },
-  "abacusai/dracarys-llama-3.1-70b-instruct": {
+  "microsoft/phi-4-mini-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-21T08:30:15.121Z"
-  },
-  "minimaxai/minimax-m2.7": {
-    "status": "yellow",
-    "checkedAt": "2026-05-21T08:30:15.301Z"
-  },
-  "qwen/qwen3.5-122b-a10b": {
-    "status": "yellow",
-    "checkedAt": "2026-05-21T08:30:15.583Z"
+    "checkedAt": "2026-05-22T03:02:43.867Z"
   }
 }

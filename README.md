@@ -40,6 +40,7 @@ Joanium is a privacy-first, offline-capable desktop app built with Electron and 
 ---
 
 ## Demo
+
 <img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/9465c90b-1d8d-409a-b3eb-4b4432903dc2" />
 
 ---

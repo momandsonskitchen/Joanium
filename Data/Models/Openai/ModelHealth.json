@@ -1,14 +1,10 @@
 {
-  "gpt-3.5-turbo-16k": {
+  "text-embedding-ada-002": {
     "status": "green",
-    "checkedAt": "2026-05-21T04:59:58.875Z"
+    "checkedAt": "2026-05-22T03:02:20.493Z"
   },
-  "chatgpt-image-latest": {
+  "gpt-5.4-2026-03-05": {
     "status": "green",
-    "checkedAt": "2026-05-21T05:00:04.040Z"
-  },
-  "gpt-5.4-mini": {
-    "status": "green",
-    "checkedAt": "2026-05-21T08:30:00.953Z"
+    "checkedAt": "2026-05-22T03:02:30.519Z"
   }
 }
