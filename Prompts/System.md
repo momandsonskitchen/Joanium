@@ -6,4 +6,5 @@
 
 ## Git
 
-*
+* Always double check if its actually a git repository.
+* Always run git status before and after commit/push.
