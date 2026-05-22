@@ -46,5 +46,9 @@
   "mistral-medium-3.5": {
     "status": "green",
     "checkedAt": "2026-05-22T10:28:54.562Z"
+  },
+  "ministral-3b-2512": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:41:23.198Z"
   }
 }

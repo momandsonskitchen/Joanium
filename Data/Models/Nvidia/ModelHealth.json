@@ -13,7 +13,7 @@
   },
   "mistralai/mistral-large-3-675b-instruct-2512": {
     "status": "yellow",
-    "checkedAt": "2026-05-22T10:29:08.774Z"
+    "checkedAt": "2026-05-22T10:41:37.432Z"
   },
   "nvidia/nemotron-3-content-safety": {
     "status": "green",
@@ -68,7 +68,23 @@
     "checkedAt": "2026-05-22T10:29:08.354Z"
   },
   "qwen/qwen3.5-397b-a17b": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:41:34.331Z"
+  },
+  "nvidia/llama-3.1-nemotron-ultra-253b-v1": {
+    "status": "red",
+    "checkedAt": "2026-05-22T10:41:23.193Z"
+  },
+  "nvidia/nemotron-3-nano-30b-a3b": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:41:24.247Z"
+  },
+  "meta/llama-3.2-90b-vision-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-22T10:29:09.191Z"
+    "checkedAt": "2026-05-22T10:41:37.208Z"
+  },
+  "google/gemma-4-31b-it": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:41:38.121Z"
   }
 }
