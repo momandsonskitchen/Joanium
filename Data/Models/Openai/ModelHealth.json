@@ -1,10 +1,14 @@
 {
-  "text-embedding-ada-002": {
+  "gpt-5.5": {
     "status": "green",
-    "checkedAt": "2026-05-22T03:02:20.493Z"
+    "checkedAt": "2026-05-22T05:59:39.050Z"
   },
-  "gpt-5.4-2026-03-05": {
+  "whisper-1": {
     "status": "green",
-    "checkedAt": "2026-05-22T03:02:30.519Z"
+    "checkedAt": "2026-05-22T06:09:48.663Z"
+  },
+  "gpt-5.5-pro": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:09:53.244Z"
   }
 }

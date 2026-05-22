@@ -6,5 +6,21 @@
   "mistral-medium-2508": {
     "status": "green",
     "checkedAt": "2026-05-22T03:02:31.219Z"
+  },
+  "mistral-large-pixtral-2411": {
+    "status": "green",
+    "checkedAt": "2026-05-22T05:59:39.013Z"
+  },
+  "ministral-3b-latest": {
+    "status": "green",
+    "checkedAt": "2026-05-22T05:59:39.620Z"
+  },
+  "mistral-moderation-latest": {
+    "status": "red",
+    "checkedAt": "2026-05-22T06:09:53.264Z"
+  },
+  "devstral-medium-latest": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:09:53.699Z"
   }
 }

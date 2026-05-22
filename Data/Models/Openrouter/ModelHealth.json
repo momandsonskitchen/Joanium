@@ -1,6 +1,18 @@
 {
-  "mancer/weaver": {
+  "nvidia/nemotron-nano-12b-v2-vl:free": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:10:52.721Z"
+  },
+  "openai/o1": {
     "status": "yellow",
-    "checkedAt": "2026-05-22T03:02:28.015Z"
+    "checkedAt": "2026-05-22T06:09:53.251Z"
+  },
+  "nvidia/nemotron-3-super-120b-a12b:free": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:09:56.790Z"
+  },
+  "openai/gpt-oss-20b:free": {
+    "status": "green",
+    "checkedAt": "2026-05-22T06:10:14.761Z"
   }
 }

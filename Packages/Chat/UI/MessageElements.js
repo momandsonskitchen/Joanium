@@ -239,16 +239,25 @@ export function updateLastStreamingMessage(threadEl, { content, thinking }) {
         if (!tailEl) {
           tailEl = document.createElement('p');
           tailEl.className = 'md-p chat-message__stream-tail';
-          const dot = bubble.querySelector('.chat-message__stream-dot');
-          if (dot) bubble.insertBefore(tailEl, dot);
-          else bubble.append(tailEl);
+          // Remove any bubble-level orphan dot before creating tailEl so it
+          // doesn't float as a block sibling and drop to its own line.
+          bubble.querySelector('.chat-message__stream-dot')?.remove();
+          bubble.append(tailEl);
         }
+        // Grab the existing dot BEFORE innerHTML wipes it — reusing the same
+        // element preserves the CSS animation state (no restart flicker).
+        const existingDot = bubble.querySelector('.chat-message__stream-dot');
         tailEl.innerHTML = renderInline(tail);
+        // Dot lives INSIDE the tail paragraph so it flows inline with the text.
+        tailEl.append(existingDot ?? createElement('span', 'chat-message__stream-dot'));
       } else if (tailEl) {
+        // Move the dot out to bubble level before removing tailEl.
+        const dotEl = tailEl.querySelector('.chat-message__stream-dot');
         tailEl.remove();
+        if (dotEl) bubble.append(dotEl);
       }
 
-      // Ensure stream dot is at the end.
+      // No tail (all content settled) — ensure dot is still present.
       if (!bubble.querySelector('.chat-message__stream-dot')) {
         bubble.append(createElement('span', 'chat-message__stream-dot'));
       }
