@@ -269,8 +269,30 @@ export function createTechFeedPanel(strings = {}) {
 
   let abortController = null;
 
+  // Redirect vertical-wheel delta to horizontal scroll. Attached directly
+  // to each row so it fires at the source before the event reaches the
+  // parent scroll container. stopPropagation prevents the chat-stage__scroll
+  // (overflow-x: hidden) from eating the event; preventDefault stops the
+  // browser's default vertical scroll.
+  function attachRowWheel(row) {
+    row.addEventListener(
+      'wheel',
+      (event) => {
+        if (event.deltaY === 0) return;
+        const canLeft = row.scrollLeft > 0;
+        const canRight = row.scrollLeft + row.clientWidth < row.scrollWidth - 1;
+        if ((event.deltaY < 0 && !canLeft) || (event.deltaY > 0 && !canRight)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.scrollBy({ left: event.deltaY, behavior: 'instant' });
+      },
+      { passive: false },
+    );
+  }
+
   function showShimmers() {
     const row = createElement('div', 'tech-feed__row');
+    attachRowWheel(row);
     for (let i = 0; i < SHIMMER_COUNT; i++) {
       row.append(createShimmerCard());
     }
@@ -326,6 +348,7 @@ export function createTechFeedPanel(strings = {}) {
     }
 
     const row = createElement('div', 'tech-feed__row');
+    attachRowWheel(row);
     for (const item of items) {
       row.append(buildCard(item));
     }
