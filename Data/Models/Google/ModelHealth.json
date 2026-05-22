@@ -13,7 +13,7 @@
   },
   "gemma-4-26b-a4b-it": {
     "status": "yellow",
-    "checkedAt": "2026-05-22T06:30:01.778Z"
+    "checkedAt": "2026-05-22T08:00:51.098Z"
   },
   "gemini-3.1-flash-lite-preview": {
     "status": "green",
@@ -42,5 +42,13 @@
   "gemini-3.1-flash-lite": {
     "status": "green",
     "checkedAt": "2026-05-22T06:29:55.516Z"
+  },
+  "deep-research-pro-preview-12-2025": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T07:56:02.160Z"
+  },
+  "gemini-3.1-flash-tts-preview": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T08:00:37.625Z"
   }
 }

@@ -3,12 +3,15 @@ import {
   formatProductKnowledge,
   formatSkill,
   formatSkillList,
+  listSkills,
   readProductKnowledge,
   readSkill,
 } from './Utils.js';
 import { buildKnowledgePromptSection } from './Prompt.js';
 
 export async function createToolPackage({ rootDirectory } = {}) {
+  const skills = await listSkills(rootDirectory, { limit: 50 }).catch(() => []);
+
   return {
     id: 'knowledge',
     toolDefinitions: [
@@ -71,7 +74,7 @@ export async function createToolPackage({ rootDirectory } = {}) {
         return formatSkill(await readSkill(rootDirectory, params), strings);
       },
     },
-    promptSections: [await buildKnowledgePromptSection(rootDirectory)],
+    promptSections: [buildKnowledgePromptSection(skills)],
   };
 }
 

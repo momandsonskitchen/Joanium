@@ -22,5 +22,25 @@
   "openrouter/owl-alpha": {
     "status": "green",
     "checkedAt": "2026-05-22T06:30:12.904Z"
+  },
+  "deepseek/deepseek-chat": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T07:52:08.694Z"
+  },
+  "openai/gpt-oss-120b:free": {
+    "status": "green",
+    "checkedAt": "2026-05-22T07:52:11.695Z"
+  },
+  "qwen/qwen3-max": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T07:56:02.046Z"
+  },
+  "openrouter/free": {
+    "status": "red",
+    "checkedAt": "2026-05-22T07:56:04.174Z"
+  },
+  "mistralai/mistral-medium-3": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T08:00:37.629Z"
   }
 }

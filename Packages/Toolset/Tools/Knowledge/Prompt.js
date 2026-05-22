@@ -1,5 +1,3 @@
-import { listSkills } from './Utils.js';
-
 const PROMPT_STRINGS = {
   title: 'Joanium product knowledge and skills are available as tools.',
   productRule:
@@ -15,8 +13,7 @@ function formatText(template, values = {}) {
   return String(template ?? '').replace(/\{(\w+)\}/g, (_match, key) => values[key] ?? '');
 }
 
-export async function buildKnowledgePromptSection(rootDirectory) {
-  const skills = await listSkills(rootDirectory, { limit: 50 }).catch(() => []);
+export function buildKnowledgePromptSection(skills = []) {
   const skillLines = skills.length
     ? skills.map((skill) =>
         formatText(PROMPT_STRINGS.skillLine, {
