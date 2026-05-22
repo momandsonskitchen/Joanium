@@ -1,6 +1,12 @@
 import { createHash, randomUUID } from 'node:crypto';
 import strings from '../I18n/en.js';
 import { generatePasswordValue } from '../Tools/Security/Core/PasswordTools.js';
+import {
+  partitionConnectors,
+  filterToolsByConnectors,
+  filterPromptSectionsByPackages,
+  buildDisconnectedHint,
+} from './ConnectorFilter.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
 const DAYS = Object.freeze([
@@ -2005,8 +2011,9 @@ export function createToolsetService({
   toolHandlers = {},
   toolDefinitions = [],
   promptSections = [],
+  packages = [],
 } = {}) {
-  const tools = mergeToolDefinitions(strings.tools, toolDefinitions);
+  const allTools = mergeToolDefinitions(strings.tools, toolDefinitions);
   const handlers = {
     calculate_expression(params) {
       const expression = String(params.expression ?? '').trim();
@@ -2155,11 +2162,28 @@ export function createToolsetService({
   };
 
   return {
-    listTools() {
+    listTools({ connectors } = {}) {
+      // When connector state is available, filter tools and prompt sections to only
+      // those whose connector is configured (or public/no-credential). Otherwise fall
+      // back to the full set so nothing breaks for callers that don't pass connectors.
+      let tools;
+      let activeSections;
+
+      if (Array.isArray(connectors) && connectors.length > 0) {
+        const { activeIds, disconnectedLabels } = partitionConnectors(connectors);
+        tools = filterToolsByConnectors(allTools, activeIds);
+        activeSections = filterPromptSectionsByPackages(packages, activeIds);
+        const hint = buildDisconnectedHint(disconnectedLabels);
+        if (hint) activeSections = [...activeSections, hint];
+      } else {
+        tools = allTools;
+        activeSections = promptSections;
+      }
+
       return {
         ok: true,
         tools,
-        systemPrompt: buildToolsPrompt(tools, promptSections),
+        systemPrompt: buildToolsPrompt(tools, activeSections),
       };
     },
     async executeTool(payload = {}, context = {}) {

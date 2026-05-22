@@ -21,6 +21,7 @@ export async function createPackage({ rootDirectory, registry }) {
     toolHandlers: toolPackages.toolHandlers,
     toolDefinitions: toolPackages.toolDefinitions,
     promptSections: toolPackages.promptSections,
+    packages: toolPackages.packages,
   });
 
   return {
@@ -29,7 +30,10 @@ export async function createPackage({ rootDirectory, registry }) {
     ipcHandlers: [
       {
         channel: 'toolset:list-tools',
-        handler: async () => toolsetService.listTools(),
+        handler: async () => {
+          const connectors = await connectorStateManager.listConnectors();
+          return toolsetService.listTools({ connectors });
+        },
       },
       {
         channel: 'toolset:execute-tool',

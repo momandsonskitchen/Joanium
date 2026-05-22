@@ -685,6 +685,10 @@ export async function createChatView(
     return toolsetPrompt;
   }
 
+  window.addEventListener('joanium:connectors-changed', () => {
+    toolsetPrompt = null;
+  });
+
   function applyActiveProject(project) {
     const previousRoot = collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
     activeProject = project

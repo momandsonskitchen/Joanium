@@ -224,6 +224,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
       });
       setCardState(updated);
       setFeedback(connector.id, strings.connectedFeedback, 'success');
+      window.dispatchEvent(new CustomEvent('joanium:connectors-changed'));
     } catch (error) {
       setFeedback(connector.id, error?.message ?? strings.saveFailed, 'error');
     } finally {
@@ -244,6 +245,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
       }
       setCardState({ ...connector, configured: connector.optional, credentialSaved: false });
       setFeedback(connector.id, strings.disconnectedFeedback, 'info');
+      window.dispatchEvent(new CustomEvent('joanium:connectors-changed'));
     } catch (error) {
       setFeedback(connector.id, error?.message ?? strings.disconnectFailed, 'error');
     }
@@ -307,6 +309,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
           const updated = await invokeIpc(connector.oauthChannel, validation.credentials);
           setCardState(updated);
           setFeedback(connector.id, strings.connectedFeedback, 'success');
+          window.dispatchEvent(new CustomEvent('joanium:connectors-changed'));
         } catch (error) {
           setFeedback(connector.id, error?.message ?? strings.oauthFailed, 'error');
         } finally {
