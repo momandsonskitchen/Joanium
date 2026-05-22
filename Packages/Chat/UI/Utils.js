@@ -94,8 +94,16 @@ export function stripToolCallBlocks(text) {
   return text.replace(/```joanium-(?:tool|terminal)[\s\S]*?(?:```|$)/gi, '').trim();
 }
 
+export function stripEmptyCodeFences(text) {
+  if (!text) return text;
+  return String(text)
+    .replace(/```[^\r\n`]*\r?\n[ \t\r\n]*```/g, '')
+    .replace(/```[A-Za-z0-9_-]*[ \t]*```/g, '')
+    .trim();
+}
+
 export function sanitizeAssistantVisibleContent(text) {
-  return stripNativeToolCalls(stripToolCallBlocks(text))
+  return stripEmptyCodeFences(stripNativeToolCalls(stripToolCallBlocks(text)))
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }

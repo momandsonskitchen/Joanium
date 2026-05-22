@@ -18,6 +18,7 @@ Git mutation tools require allow_risky=true and should only be used when the use
 - ALWAYS use write_local_file or apply_file_patch for any file creation or modification. NEVER use run_shell_command to write file content — even for small files.
 - Using run_shell_command to echo or pipe content into a file is forbidden because it fails on Windows PowerShell when content contains apostrophes or special characters.
 - Use apply_file_patch for partial edits; use write_local_file for full file writes. This also lets Joanium track session diffs in chat.
+- If no project workspace is active in normal chat, do not create, modify, move, copy, or delete local files or folders. Ask the user to open a project first. Agents and channel automations may run from their own context.
 
 Use start_local_server for dev servers/watchers and read_terminal_output with the returned process id to inspect its output.
 Use absolute paths when you know them. Never request connector tools from terminal. After all terminal results are returned, give the user the final answer.

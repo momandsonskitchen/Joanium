@@ -1,9 +1,12 @@
 import { formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import {
-  loadMemoryContext,
-  loadTerminalPrompt,
-  loadToolsetPrompt,
+  createAssistantContextCache,
+  joinPromptParts,
+  loadAssistantRuntimeContext,
+  resetAssistantContextCache,
+} from '../../Shared/AssistantRuntime/AssistantContext.js';
+import {
   runRendererToolLoop,
   stripThinking,
   TERMINAL_TOOL_NAMES,
@@ -49,8 +52,11 @@ export function createChannelGateway(
   let started = false;
   let chain = Promise.resolve();
   let dispose = null;
-  let terminalPrompt = null;
-  let toolsetPrompt = null;
+  const contextCache = createAssistantContextCache();
+
+  function handleConnectorsChanged() {
+    resetAssistantContextCache(contextCache);
+  }
 
   async function saveMessage({
     channelName,
@@ -85,15 +91,10 @@ export function createChannelGateway(
   async function processIncoming({ id, channelName, from, text, metadata = {} }) {
     const channelLabel = strings.channels[channelName]?.name ?? channelName;
     const activePersona = getActivePersona?.() ?? null;
-    const [memoryContext, loadedToolsetPrompt, loadedTerminalPrompt] = await Promise.all([
-      loadMemoryContext(),
-      toolsetPrompt === null ? loadToolsetPrompt() : Promise.resolve(toolsetPrompt),
-      terminalPrompt === null ? loadTerminalPrompt() : Promise.resolve(terminalPrompt),
-    ]);
-    toolsetPrompt = loadedToolsetPrompt;
-    terminalPrompt = loadedTerminalPrompt;
+    const { memoryContext, terminalPrompt, toolsetPrompt } =
+      await loadAssistantRuntimeContext(contextCache);
 
-    const promptParts = [
+    const persona = joinPromptParts([
       activePersona?.content ?? '',
       metadata.systemPrompt ?? '',
       formatText(strings.gateway.channelContext, {
@@ -101,12 +102,12 @@ export function createChannelGateway(
         channel: channelLabel,
       }),
       strings.gateway.agentContext ?? '',
-    ].filter((part) => String(part ?? '').trim());
+    ]);
 
     try {
       const result = await runChannelAgent({
         messages: [{ role: 'user', content: text }],
-        persona: promptParts.join('\n\n'),
+        persona,
         memoryContext,
         terminalTools: terminalPrompt || '',
         toolsetTools: toolsetPrompt || '',
@@ -150,6 +151,7 @@ export function createChannelGateway(
     start() {
       if (started) return;
       started = true;
+      window.addEventListener('joanium:connectors-changed', handleConnectorsChanged);
       dispose = onIpc('channels:incoming', (payload) => {
         chain = chain.catch(() => {}).then(() => processIncoming(payload));
       });
@@ -159,6 +161,7 @@ export function createChannelGateway(
       dispose?.();
       dispose = null;
       started = false;
+      window.removeEventListener('joanium:connectors-changed', handleConnectorsChanged);
     },
   };
 }

@@ -404,6 +404,8 @@ export async function executeTerminalTool(
     return invokeIpc('terminal:create-directory', {
       path: payload.path,
       cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+      enforceProjectRoot: payload.enforceProjectRoot === true,
+      projectRoot: payload.projectRoot,
     });
   }
 
@@ -412,6 +414,8 @@ export async function executeTerminalTool(
       source: payload.source ?? payload.src,
       destination: payload.destination ?? payload.dest,
       cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+      enforceProjectRoot: payload.enforceProjectRoot === true,
+      projectRoot: payload.projectRoot,
     });
   }
 
@@ -420,6 +424,8 @@ export async function executeTerminalTool(
       source: payload.source ?? payload.src,
       destination: payload.destination ?? payload.dest,
       cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+      enforceProjectRoot: payload.enforceProjectRoot === true,
+      projectRoot: payload.projectRoot,
     });
   }
 

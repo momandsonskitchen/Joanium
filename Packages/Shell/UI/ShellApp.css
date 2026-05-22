@@ -207,17 +207,52 @@ textarea {
   height: 100%;
 }
 
-/* Memory sync green dot — shown on the memory tab during background sync */
-.chat-sidebar__memory-dot {
+/* Runtime status dot shown on sidebar tabs during background work */
+.chat-sidebar__status-dot {
   position: absolute;
   top: 8px;
   right: 8px;
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #34c759;
-  box-shadow: 0 0 0 1.5px var(--color-chat-surface, #fff);
+  background: var(--color-accent);
+  box-shadow:
+    0 0 0 1.5px rgba(255, 255, 255, 0.95),
+    0 0 0 4px rgba(var(--color-accent-rgb), 0.14);
+  pointer-events: auto;
+}
+
+.chat-sidebar__status-dot::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  white-space: nowrap;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  color: var(--color-chat-text-title);
+  font-size: 12px;
+  font-weight: 580;
+  letter-spacing: 0;
+  box-shadow: var(--shadow-chat-pill);
+  opacity: 0;
   pointer-events: none;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+  z-index: 120;
+}
+
+.chat-sidebar__status-dot:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
 }
 
 .chat-sidebar__avatar-divider {

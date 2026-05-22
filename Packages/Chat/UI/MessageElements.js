@@ -91,7 +91,27 @@ function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, strings })
   return actions;
 }
 
-export function createMessageElement(message, strings, { onCopy, onRetry } = {}) {
+function createContinuationElement(strings, onContinue) {
+  const wrap = createElement('div', 'chat-message__continuation');
+  wrap.append(
+    createElement('p', 'chat-message__continuation-text', strings.composer.responseCutOff),
+  );
+
+  if (typeof onContinue === 'function') {
+    const btn = createElement('button', 'chat-message__continue-button');
+    btn.type = 'button';
+    btn.append(
+      createIcon('play', 'chat-message__continue-icon'),
+      createElement('span', 'chat-message__continue-label', strings.composer.continueResponse),
+    );
+    btn.addEventListener('click', onContinue);
+    wrap.append(btn);
+  }
+
+  return wrap;
+}
+
+export function createMessageElement(message, strings, { onCopy, onRetry, onContinue } = {}) {
   const article = createElement(
     'article',
     [
@@ -110,7 +130,9 @@ export function createMessageElement(message, strings, { onCopy, onRetry } = {})
 
     const bubble = createElement('div', 'chat-message__bubble');
 
-    if (message.pending || (message.streaming && !message.content)) {
+    if (message.needsContinuation) {
+      bubble.append(createContinuationElement(strings, onContinue));
+    } else if (message.pending || (message.streaming && !message.content)) {
       const dots = createElement('span', 'chat-message__dots');
       dots.innerHTML = '<span></span><span></span><span></span>';
       bubble.append(dots);
@@ -145,6 +167,7 @@ export function createMessageElement(message, strings, { onCopy, onRetry } = {})
   if (
     !message.streaming &&
     !message.pending &&
+    !message.needsContinuation &&
     typeof onCopy === 'function' &&
     typeof onRetry === 'function'
   ) {
@@ -348,9 +371,10 @@ export function updateSubAgentCard(threadEl, subAgents, strings) {
  *
  * Action buttons are withheld until every message in the group is finalised.
  */
-export function createAssistantGroupElement(items, strings, { onCopy, onRetry } = {}) {
+export function createAssistantGroupElement(items, strings, { onCopy, onRetry, onContinue } = {}) {
   const lastMessage = items[items.length - 1].message;
   const isStreaming = items.some(({ message }) => message.streaming || message.pending);
+  const needsContinuation = items.some(({ message }) => message.needsContinuation);
 
   const article = createElement(
     'article',
@@ -374,7 +398,9 @@ export function createAssistantGroupElement(items, strings, { onCopy, onRetry } 
     if (!message.terminal) {
       const bubble = createElement('div', 'chat-message__bubble');
 
-      if (message.pending || (message.streaming && !message.content)) {
+      if (message.needsContinuation) {
+        bubble.append(createContinuationElement(strings, onContinue));
+      } else if (message.pending || (message.streaming && !message.content)) {
         const dots = createElement('span', 'chat-message__dots');
         dots.innerHTML = '<span></span><span></span><span></span>';
         bubble.append(dots);
@@ -397,7 +423,12 @@ export function createAssistantGroupElement(items, strings, { onCopy, onRetry } 
   }
 
   // Action buttons — only after the entire response is complete
-  if (!isStreaming && typeof onCopy === 'function' && typeof onRetry === 'function') {
+  if (
+    !isStreaming &&
+    !needsContinuation &&
+    typeof onCopy === 'function' &&
+    typeof onRetry === 'function'
+  ) {
     const onSpeak = (btn) => speakText(lastMessage.content, btn);
     article.append(
       createMessageActions({

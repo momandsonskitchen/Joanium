@@ -16,6 +16,11 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js';
 import {
+  createAssistantContextCache,
+  loadAssistantRuntimeContext,
+  resetAssistantContextCache,
+} from '../../Shared/AssistantRuntime/AssistantContext.js';
+import {
   executeTerminalTool as executeRendererTerminalTool,
   formatToolsetResultForModel,
   parseToolRequests,
@@ -63,6 +68,15 @@ const PROJECT_SCOPED_MUTATION_TOOLS = new Set([
   'write_local_file',
   'apply_file_patch',
   'delete_local_item',
+  'create_directory',
+  'move_local_file',
+  'copy_local_file',
+]);
+const SHELL_FILE_MUTATION_PATTERNS = Object.freeze([
+  />{1,2}/,
+  /\b(?:Set-Content|Add-Content|Out-File|New-Item|Remove-Item)\b/i,
+  /\b(?:mkdir|md|touch|cp|copy|mv|move|rm|del|erase)\b/i,
+  /\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|remove|unlink|link)\b/i,
 ]);
 
 export async function createChatView(
@@ -145,7 +159,6 @@ export async function createChatView(
   let scrollToBottomBtn = null;
   let diagTimer = null;
   let diagPanel = null;
-  let toolsetPrompt = null;
   let memorySyncTimer = null;
   let memorySyncRunning = false;
   let slashCommandsLoaded = false;
@@ -161,6 +174,7 @@ export async function createChatView(
   let terminalProcessCardsWired = false;
   let completedWrites = new Set(); // dedup guard for write_local_file
   let streamUpdateFrame = null;
+  const assistantContextCache = createAssistantContextCache();
 
   let userScrolledUp = false;
   let scrollToBottomFrame = null;
@@ -479,11 +493,11 @@ export async function createChatView(
   }
 
   async function loadMemoryContext() {
-    try {
-      return await invokeIpc('memory:get-context', 24000);
-    } catch {
-      return '';
-    }
+    const { memoryContext } = await loadAssistantRuntimeContext(assistantContextCache, {
+      includeTerminalPrompt: false,
+      includeToolsetPrompt: false,
+    });
+    return memoryContext;
   }
 
   function extractJsonObject(text = '') {
@@ -671,22 +685,15 @@ export async function createChatView(
   }
 
   async function loadToolsetPrompt() {
-    if (toolsetPrompt !== null) {
-      return toolsetPrompt;
-    }
-
-    try {
-      const result = await invokeIpc('toolset:list-tools');
-      toolsetPrompt = result?.ok ? (result.systemPrompt ?? '') : '';
-    } catch {
-      toolsetPrompt = '';
-    }
-
+    const { toolsetPrompt } = await loadAssistantRuntimeContext(assistantContextCache, {
+      includeMemory: false,
+      includeTerminalPrompt: false,
+    });
     return toolsetPrompt;
   }
 
   window.addEventListener('joanium:connectors-changed', () => {
-    toolsetPrompt = null;
+    resetAssistantContextCache(assistantContextCache);
   });
 
   function applyActiveProject(project) {
@@ -718,6 +725,12 @@ export async function createChatView(
 
   function getActiveProjectFolder() {
     return collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
+  }
+
+  function isShellFileMutation(action) {
+    if (action?.tool !== 'run_shell_command') return false;
+    const command = String(action.payload?.command ?? '');
+    return SHELL_FILE_MUTATION_PATTERNS.some((pattern) => pattern.test(command));
   }
 
   function parseGitStatusOutput(stdout = '') {
@@ -2190,6 +2203,49 @@ export async function createChatView(
     });
   }
 
+  async function continueAssistantResponse(messageIndex) {
+    if (isSending) return;
+    const target = messages[messageIndex];
+    if (!target?.needsContinuation) return;
+
+    messages = [
+      ...messages.map((message, index) =>
+        index === messageIndex ? { ...message, needsContinuation: false, empty: true } : message,
+      ),
+      {
+        role: 'user',
+        content: strings.composer.continueHiddenLabel,
+        modelContent: strings.composer.continueInstruction,
+        hidden: true,
+      },
+      {
+        role: 'assistant',
+        content: '',
+        thinking: '',
+        streaming: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel,
+      },
+    ];
+
+    isSending = true;
+    accText = '';
+    accThinking = '';
+    userScrolledUp = false;
+    const generationStartTime = Date.now();
+    const runToken = ++generationToken;
+    syncComposer();
+    renderThread();
+    scheduleScrollToBottom();
+
+    await startAssistantStream({
+      isNewSession: false,
+      terminalDepth: 0,
+      runToken,
+      generationStartTime,
+    });
+  }
+
   function renderThread() {
     if (!thread || !title || !composer || !scroll || !bottom) return;
 
@@ -2354,6 +2410,7 @@ export async function createChatView(
         // Assistant group — find the preceding user message for retry
         const firstIndex = group.items[0].index;
         const lastMessage = group.items[group.items.length - 1].message;
+        const continuationItem = group.items.find(({ message }) => message.needsContinuation);
         const onCopy = () => copyToClipboard(lastMessage.content ?? '');
         const onRetry = () => {
           if (isSending) return;
@@ -2379,8 +2436,13 @@ export async function createChatView(
             imageAttachments: userMessage.imageAttachments ?? [],
           });
         };
+        const onContinue = continuationItem
+          ? () => {
+              void continueAssistantResponse(continuationItem.index);
+            }
+          : undefined;
 
-        return createAssistantGroupElement(group.items, strings, { onCopy, onRetry });
+        return createAssistantGroupElement(group.items, strings, { onCopy, onRetry, onContinue });
       }),
     );
 
@@ -2424,7 +2486,7 @@ export async function createChatView(
 
     let nextAction = action;
 
-    if (PROJECT_SCOPED_MUTATION_TOOLS.has(action?.tool)) {
+    if (PROJECT_SCOPED_MUTATION_TOOLS.has(action?.tool) || isShellFileMutation(action)) {
       const projectRoot = getActiveProjectFolder();
 
       if (!projectRoot) {
@@ -3414,13 +3476,14 @@ export async function createChatView(
 
         const finalContent = sanitizeAssistantVisibleContent(parsedContent);
         const finalThinking = sanitizeAssistantVisibleContent(accThinking || inlineThinking);
-        const isEmpty = !finalContent && !finalThinking;
+        const needsContinuation = !finalContent && Boolean(finalThinking);
         updateLastAssistantMessage(() => ({
           role: 'assistant',
-          content: finalContent || strings.composer.emptyResponse,
+          content: needsContinuation ? '' : finalContent || strings.composer.emptyResponse,
           thinking: finalThinking,
           streaming: false,
-          empty: isEmpty,
+          empty: !finalContent,
+          needsContinuation,
           durationMs: Date.now() - generationStartTime,
           providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
           modelLabel: meta?.modelLabel ?? activeModelLabel,

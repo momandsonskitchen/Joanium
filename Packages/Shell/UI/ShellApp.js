@@ -1,5 +1,5 @@
 import strings from '../I18n/en.js';
-import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
@@ -736,7 +736,7 @@ async function bootstrap() {
 
   // ── Memory sync indicator ─────────────────────────────────────────────────
   // Listens for joanium:memory-sync events dispatched by ChatApp. When active,
-  // adds a green dot to the memory tab and swaps its aria-label to the sync
+  // adds a primary-color dot to the memory tab and swaps its aria-label to the sync
   // message so the existing CSS ::after tooltip shows the message on hover.
   {
     const memoryTab = tabElements.get('memory');
@@ -747,17 +747,69 @@ async function bootstrap() {
       if (!memoryTab) return;
       const { active, message } = event.detail ?? {};
       if (active) {
-        memoryTabOriginalLabel = memoryTab.getAttribute('aria-label') ?? memoryTabOriginalLabel;
-        memoryTab.setAttribute('aria-label', message ?? memoryTabOriginalLabel);
         if (!memorySyncDot) {
-          memorySyncDot = createElement('span', 'chat-sidebar__memory-dot');
+          memoryTabOriginalLabel = memoryTab.getAttribute('aria-label') ?? memoryTabOriginalLabel;
+          memorySyncDot = createElement(
+            'span',
+            'chat-sidebar__status-dot chat-sidebar__memory-dot',
+          );
           memoryTab.append(memorySyncDot);
         }
+        memoryTab.setAttribute('aria-label', message ?? memoryTabOriginalLabel);
+        memorySyncDot.setAttribute('aria-label', message ?? memoryTabOriginalLabel);
       } else {
         memoryTab.setAttribute('aria-label', memoryTabOriginalLabel);
         memorySyncDot?.remove();
         memorySyncDot = null;
       }
+    });
+  }
+
+  {
+    const agentsTab = tabElements.get('agents');
+    const activeAgents = new Map();
+    let agentsTabOriginalLabel = agentsTab?.getAttribute('aria-label') ?? '';
+    let agentRunDot = null;
+
+    function syncAgentRunIndicator() {
+      if (!agentsTab) return;
+      const names = [...activeAgents.values()].filter(Boolean);
+
+      if (names.length > 0) {
+        const label =
+          names.length === 1
+            ? formatText(strings.agents.gateway.runningLabel, { agent: names[0] })
+            : formatText(strings.agents.gateway.runningManyLabel, { agents: names.join(', ') });
+        if (!agentRunDot) {
+          agentsTabOriginalLabel = agentsTab.getAttribute('aria-label') ?? agentsTabOriginalLabel;
+          agentRunDot = createElement('span', 'chat-sidebar__status-dot chat-sidebar__agent-dot');
+          agentsTab.append(agentRunDot);
+        }
+        agentRunDot.setAttribute('aria-label', label);
+        return;
+      }
+
+      agentsTab.setAttribute('aria-label', agentsTabOriginalLabel);
+      agentRunDot?.remove();
+      agentRunDot = null;
+    }
+
+    window.addEventListener('joanium:agent-run', (event) => {
+      if (!agentsTab) return;
+      const detail = event.detail ?? {};
+      const id = String(detail.id ?? '').trim();
+      if (!id) return;
+
+      if (detail.active) {
+        activeAgents.set(
+          id,
+          collapseWhitespace(detail.name) || strings.agents.gateway.runningFallback,
+        );
+      } else {
+        activeAgents.delete(id);
+      }
+
+      syncAgentRunIndicator();
     });
   }
 

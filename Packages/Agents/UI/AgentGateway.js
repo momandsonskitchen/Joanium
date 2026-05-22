@@ -1,7 +1,11 @@
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import {
-  loadMemoryContext,
-  loadToolsetPrompt,
+  createAssistantContextCache,
+  joinPromptParts,
+  loadAssistantRuntimeContext,
+  resetAssistantContextCache,
+} from '../../Shared/AssistantRuntime/AssistantContext.js';
+import {
   runRendererToolLoop,
   TERMINAL_TOOL_NAMES,
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
@@ -42,13 +46,17 @@ async function runAgentWithTools({
 export function createAgentGateway(strings, { chatStrings = {}, getActivePersona } = {}) {
   let started = false;
   let dispose = null;
-  let toolsetPrompt = null;
+  const contextCache = createAssistantContextCache();
 
   let nextStreamId = 0;
   const pendingStreams = new Map();
   let disposeChunk = null;
   let disposeDone = null;
   let disposeStreamErr = null;
+
+  function handleConnectorsChanged() {
+    resetAssistantContextCache(contextCache);
+  }
 
   function setupStreamListeners() {
     disposeChunk = onIpc('agents:stream-chunk', ({ streamId, type, text }) => {
@@ -108,51 +116,67 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
     });
   }
 
-  async function processRun({ id, agentName, prompt, providerId, modelId }) {
-    const activePersona = getActivePersona?.() ?? null;
-
-    const [memoryContext, loadedToolsetPrompt] = await Promise.all([
-      loadMemoryContext(),
-      toolsetPrompt === null ? loadToolsetPrompt() : Promise.resolve(toolsetPrompt),
-    ]);
-    toolsetPrompt = loadedToolsetPrompt;
-
-    const personaParts = [activePersona?.content ?? '', strings.gateway?.agentContext ?? ''].filter(
-      (part) => String(part ?? '').trim(),
+  function emitAgentRunStatus({ id, agentName, active }) {
+    window.dispatchEvent(
+      new CustomEvent('joanium:agent-run', {
+        detail: {
+          id,
+          name: agentName,
+          active,
+        },
+      }),
     );
+  }
 
-    const onProgress = (data) => invokeIpc('agents:progress', id, data);
+  async function processRun({ id, agentName, prompt, providerId, modelId }) {
+    emitAgentRunStatus({ id, agentName, active: true });
 
-    let result;
     try {
-      result = await runAgentWithTools({
-        messages: [{ role: 'user', content: prompt }],
-        persona: personaParts.join('\n\n'),
-        memoryContext,
-        terminalTools: chatStrings.terminal?.systemPrompt ?? '',
-        toolsetTools: toolsetPrompt || '',
-        providerId: providerId ?? null,
-        modelId: modelId ?? null,
-        onProgress,
-        streamChat: (req, opts) => streamChatForAgent(req, opts),
-      });
-    } catch (error) {
-      result = {
-        text: strings.gateway?.errorPrefix
-          ? strings.gateway.errorPrefix.replace('{message}', error?.message ?? String(error))
-          : `Agent error: ${error?.message ?? String(error)}`,
-        thinking: '',
-        providerLabel: null,
-        modelLabel: null,
-        charCountIn: 0,
-        charCountOut: 0,
-      };
-      console.error(`[AgentGateway] Agent "${agentName}" tool loop error:`, error);
-    }
+      const activePersona = getActivePersona?.() ?? null;
 
-    await invokeIpc('agents:tool-reply', id, result).catch((err) => {
-      console.error(`[AgentGateway] Failed to deliver tool reply for agent "${agentName}":`, err);
-    });
+      const { memoryContext, terminalPrompt, toolsetPrompt } =
+        await loadAssistantRuntimeContext(contextCache);
+
+      const persona = joinPromptParts([
+        activePersona?.content ?? '',
+        strings.gateway?.agentContext ?? '',
+      ]);
+
+      const onProgress = (data) => invokeIpc('agents:progress', id, data);
+
+      let result;
+      try {
+        result = await runAgentWithTools({
+          messages: [{ role: 'user', content: prompt }],
+          persona,
+          memoryContext,
+          terminalTools: terminalPrompt || chatStrings.terminal?.systemPrompt || '',
+          toolsetTools: toolsetPrompt || '',
+          providerId: providerId ?? null,
+          modelId: modelId ?? null,
+          onProgress,
+          streamChat: (req, opts) => streamChatForAgent(req, opts),
+        });
+      } catch (error) {
+        result = {
+          text: strings.gateway?.errorPrefix
+            ? strings.gateway.errorPrefix.replace('{message}', error?.message ?? String(error))
+            : `Agent error: ${error?.message ?? String(error)}`,
+          thinking: '',
+          providerLabel: null,
+          modelLabel: null,
+          charCountIn: 0,
+          charCountOut: 0,
+        };
+        console.error(`[AgentGateway] Agent "${agentName}" tool loop error:`, error);
+      }
+
+      await invokeIpc('agents:tool-reply', id, result).catch((err) => {
+        console.error(`[AgentGateway] Failed to deliver tool reply for agent "${agentName}":`, err);
+      });
+    } finally {
+      emitAgentRunStatus({ id, agentName, active: false });
+    }
   }
 
   return {
@@ -161,6 +185,7 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       started = true;
 
       setupStreamListeners();
+      window.addEventListener('joanium:connectors-changed', handleConnectorsChanged);
 
       dispose = onIpc('agents:run-with-tools', (payload) => {
         void processRun(payload);
@@ -176,6 +201,7 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       dispose = null;
       started = false;
       teardownStreamListeners();
+      window.removeEventListener('joanium:connectors-changed', handleConnectorsChanged);
     },
   };
 }

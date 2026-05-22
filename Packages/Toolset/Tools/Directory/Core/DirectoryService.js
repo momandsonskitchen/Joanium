@@ -253,6 +253,9 @@ export function createDirectoryService({ rootDirectory }) {
     const dirError = requireString(payload.path, 'No directory path provided.');
     if (dirError) return dirError;
     const resolvedPath = resolveDirectory(payload.path, payload.cwd ?? fallbackDirectory);
+    const projectError = requireProjectScopedPath(resolvedPath, payload);
+    if (projectError) return projectError;
+
     const existed = fs.existsSync(resolvedPath);
     fs.mkdirSync(resolvedPath, { recursive: true });
     return { ok: true, path: resolvedPath, created: !existed };
@@ -274,6 +277,11 @@ export function createDirectoryService({ rootDirectory }) {
       payload.destination ?? payload.dest,
       payload.cwd ?? fallbackDirectory,
     );
+    const srcProjectError = requireProjectScopedPath(resolvedSrc, payload);
+    if (srcProjectError) return srcProjectError;
+    const destProjectError = requireProjectScopedPath(resolvedDest, payload);
+    if (destProjectError) return destProjectError;
+
     if (!fs.existsSync(resolvedSrc))
       return { ok: false, error: `Source path does not exist: ${resolvedSrc}` };
     fs.mkdirSync(path.dirname(resolvedDest), { recursive: true });
@@ -297,6 +305,11 @@ export function createDirectoryService({ rootDirectory }) {
       payload.destination ?? payload.dest,
       payload.cwd ?? fallbackDirectory,
     );
+    const srcProjectError = requireProjectScopedPath(resolvedSrc, payload);
+    if (srcProjectError) return srcProjectError;
+    const destProjectError = requireProjectScopedPath(resolvedDest, payload);
+    if (destProjectError) return destProjectError;
+
     if (!fs.existsSync(resolvedSrc))
       return { ok: false, error: `Source path does not exist: ${resolvedSrc}` };
     const stat = fs.statSync(resolvedSrc);

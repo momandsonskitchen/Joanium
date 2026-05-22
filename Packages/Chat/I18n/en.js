@@ -25,6 +25,11 @@ const en = {
     unknownAttachment: 'Attachment',
     reasoning: 'Reasoning',
     emptyResponse: 'No response received.',
+    responseCutOff: "Joanium's response got cut off before the final answer.",
+    continueResponse: 'Continue',
+    continueHiddenLabel: 'Continue response',
+    continueInstruction:
+      'Continue the previous assistant response. The prior turn produced reasoning but no final answer. Give the final answer now without repeating the reasoning.',
     responseError: 'Unable to get a response right now.',
     workedFor: 'Worked for {duration}',
     healthGreen: 'Model is available',
