@@ -1,54 +1,10 @@
 {
-  "mistral-small-2506": {
-    "status": "green",
-    "checkedAt": "2026-05-22T08:00:37.753Z"
-  },
-  "mistral-medium": {
-    "status": "green",
-    "checkedAt": "2026-05-22T08:00:41.090Z"
-  },
-  "devstral-2512": {
-    "status": "green",
-    "checkedAt": "2026-05-22T08:00:41.690Z"
-  },
-  "magistral-medium-2509": {
-    "status": "green",
-    "checkedAt": "2026-05-22T08:00:42.551Z"
-  },
-  "voxtral-mini-latest": {
-    "status": "green",
-    "checkedAt": "2026-05-22T09:30:18.479Z"
-  },
-  "mistral-medium-2508": {
-    "status": "green",
-    "checkedAt": "2026-05-22T09:30:18.668Z"
-  },
-  "codestral-2508": {
-    "status": "green",
-    "checkedAt": "2026-05-22T09:45:37.086Z"
-  },
-  "open-mistral-nemo": {
-    "status": "green",
-    "checkedAt": "2026-05-22T09:45:37.219Z"
-  },
-  "mistral-large-pixtral-2411": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:03:34.617Z"
-  },
-  "voxtral-mini-realtime-latest": {
+  "voxtral-mini-transcribe-2507": {
     "status": "red",
-    "checkedAt": "2026-05-22T10:27:59.095Z"
+    "checkedAt": "2026-05-22T12:20:19.108Z"
   },
-  "mistral-large-2512": {
+  "mistral-large-latest": {
     "status": "green",
-    "checkedAt": "2026-05-22T10:27:59.272Z"
-  },
-  "mistral-medium-3.5": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:28:54.562Z"
-  },
-  "ministral-3b-2512": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:41:23.198Z"
+    "checkedAt": "2026-05-22T12:20:21.269Z"
   }
 }

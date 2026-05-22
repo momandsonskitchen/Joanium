@@ -1,50 +1,6 @@
 {
-  "gpt-5": {
-    "status": "green",
-    "checkedAt": "2026-05-22T07:52:08.800Z"
-  },
-  "gpt-5.5-pro-2026-04-23": {
-    "status": "green",
-    "checkedAt": "2026-05-22T07:56:02.045Z"
-  },
-  "gpt-4o-2024-05-13": {
-    "status": "green",
-    "checkedAt": "2026-05-22T08:00:37.604Z"
-  },
-  "gpt-realtime-whisper": {
-    "status": "green",
-    "checkedAt": "2026-05-22T09:30:18.416Z"
-  },
-  "text-embedding-ada-002": {
-    "status": "green",
-    "checkedAt": "2026-05-22T09:45:33.346Z"
-  },
-  "gpt-5-search-api": {
-    "status": "green",
-    "checkedAt": "2026-05-22T09:45:37.103Z"
-  },
-  "gpt-realtime-2": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:03:34.614Z"
-  },
-  "sora-2": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:27:59.066Z"
-  },
-  "davinci-002": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:28:47.979Z"
-  },
-  "gpt-realtime-1.5": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:28:54.532Z"
-  },
-  "gpt-image-1-mini": {
+  "gpt-5.4-pro-2026-03-05": {
     "status": "red",
-    "checkedAt": "2026-05-22T10:28:55.761Z"
-  },
-  "gpt-5.1-codex-mini": {
-    "status": "green",
-    "checkedAt": "2026-05-22T10:41:23.141Z"
+    "checkedAt": "2026-05-22T12:20:18.771Z"
   }
 }

@@ -62,5 +62,9 @@
   "gemini-robotics-er-1.5-preview": {
     "status": "red",
     "checkedAt": "2026-05-22T10:28:54.563Z"
+  },
+  "deep-research-max-preview-04-2026": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T12:20:18.765Z"
   }
 }
