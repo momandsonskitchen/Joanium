@@ -112,7 +112,7 @@ export function buildExecInvocation(command) {
   if (process.platform === 'win32') {
     return {
       cmd: `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command ${JSON.stringify(command)}`,
-      options: { shell: false },
+      options: { env: { ...process.env } },
     };
   }
 

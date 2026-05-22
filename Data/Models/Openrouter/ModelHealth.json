@@ -25,7 +25,7 @@
   },
   "deepseek/deepseek-chat": {
     "status": "yellow",
-    "checkedAt": "2026-05-22T07:52:08.694Z"
+    "checkedAt": "2026-05-22T09:30:18.495Z"
   },
   "openai/gpt-oss-120b:free": {
     "status": "green",
@@ -42,5 +42,21 @@
   "mistralai/mistral-medium-3": {
     "status": "yellow",
     "checkedAt": "2026-05-22T08:00:37.629Z"
+  },
+  "deepseek/deepseek-r1": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T09:45:37.103Z"
+  },
+  "qwen/qwen3-235b-a22b-2507": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:03:34.643Z"
+  },
+  "alfredpros/codellama-7b-instruct-solidity": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:27:59.100Z"
+  },
+  "openai/gpt-3.5-turbo-16k": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:28:54.562Z"
   }
 }

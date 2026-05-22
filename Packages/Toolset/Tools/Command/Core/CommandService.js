@@ -160,7 +160,14 @@ export function createCommandService({ rootDirectory }) {
       process.platform === 'win32'
         ? spawn(
             'powershell.exe',
-            ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', payload.command],
+            [
+              '-NoProfile',
+              '-NonInteractive',
+              '-ExecutionPolicy',
+              'Bypass',
+              '-Command',
+              payload.command,
+            ],
             { cwd, env: { ...process.env } },
           )
         : spawn(payload.command, {
@@ -171,6 +178,31 @@ export function createCommandService({ rootDirectory }) {
 
     activeProcesses.set(processId, child);
     processBuffers.set(processId, '');
+
+    const spawnTimeout = Math.min(
+      Math.max(Number(payload.timeout) || DEFAULT_TIMEOUT, 1000),
+      MAX_TIMEOUT,
+    );
+    const timeoutHandle = setTimeout(() => {
+      if (activeProcesses.has(processId)) {
+        child.kill();
+        activeProcesses.delete(processId);
+        appendProcessBuffer(processId, `\nProcess timed out after ${spawnTimeout / 1000}s.\n`);
+        sendToRenderer(sender, 'terminal:process-output', {
+          processId,
+          stream: 'stderr',
+          text: `\nProcess timed out after ${spawnTimeout / 1000}s.\n`,
+        });
+        sendToRenderer(sender, 'terminal:process-exit', {
+          processId,
+          code: null,
+          signal: 'SIGTERM',
+          running: false,
+          timedOut: true,
+        });
+      }
+    }, spawnTimeout);
+    child.once('exit', () => clearTimeout(timeoutHandle));
 
     const onOutput = (stream, chunk) => {
       const text = chunk.toString();

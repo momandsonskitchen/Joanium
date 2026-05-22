@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { OUTPUT_LIMIT, requireString, truncateText } from '../../../Utils/WorkspaceUtils.js';
 
 const GIT_ERROR_CATEGORY = Object.freeze({
@@ -92,6 +93,39 @@ function runGitArgs(args, workingDir, opts = {}) {
           return;
         }
 
+        // Spawn-level failure — stderr/stdout are empty in these cases.
+        // ENOENT means either the cwd path doesn't exist or git isn't in PATH.
+        if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
+          const dirMissing = workingDir && !existsSync(workingDir);
+          const hint = dirMissing
+            ? `Directory not found: "${workingDir}". Check the path — it may have different casing or use spaces.`
+            : 'git executable not found. Ensure Git is installed and available in PATH.';
+          resolve({
+            ok: false,
+            stdout: '',
+            stderr: '',
+            exitCode: 0,
+            category: GIT_ERROR_CATEGORY.NOT_REPO,
+            hint,
+            error: hint,
+          });
+          return;
+        }
+
+        if (error.killed) {
+          const hint = 'Git command timed out.';
+          resolve({
+            ok: false,
+            stdout: truncateText(stdout),
+            stderr: truncateText(stderr),
+            exitCode: 0,
+            category: GIT_ERROR_CATEGORY.UNKNOWN,
+            hint,
+            error: hint,
+          });
+          return;
+        }
+
         const { category, hint } = normalizeGitError(stderr, stdout);
         resolve({
           ok: false,
@@ -105,12 +139,6 @@ function runGitArgs(args, workingDir, opts = {}) {
       },
     );
   });
-}
-
-function requireGitMutationOptIn(payload = {}, action = 'This Git operation') {
-  return normalizeBool(payload.allowRisky ?? payload.allow_risky)
-    ? null
-    : { ok: false, error: `${action} requires allow_risky=true.` };
 }
 
 function requireGitWorkingDir(payload = {}) {
@@ -161,8 +189,6 @@ export function createGitService() {
   async function gitCreateBranch(payload = {}) {
     const directoryError = requireGitWorkingDir(payload);
     if (directoryError) return directoryError;
-    const optInError = requireGitMutationOptIn(payload, 'Creating a Git branch');
-    if (optInError) return optInError;
     const branchError = requireString(payload.branch, 'No branch name provided.');
     if (branchError) return branchError;
     return runGitArgs(['checkout', '-b', String(payload.branch).trim()], payload.workingDir, {
@@ -173,8 +199,6 @@ export function createGitService() {
   async function gitCheckoutBranch(payload = {}) {
     const directoryError = requireGitWorkingDir(payload);
     if (directoryError) return directoryError;
-    const optInError = requireGitMutationOptIn(payload, 'Checking out a Git branch');
-    if (optInError) return optInError;
     const branchError = requireString(payload.branch, 'No branch name provided.');
     if (branchError) return branchError;
     return runGitArgs(['checkout', String(payload.branch).trim()], payload.workingDir, {
@@ -185,8 +209,6 @@ export function createGitService() {
   async function gitDeleteBranch(payload = {}) {
     const directoryError = requireGitWorkingDir(payload);
     if (directoryError) return directoryError;
-    const optInError = requireGitMutationOptIn(payload, 'Deleting a Git branch');
-    if (optInError) return optInError;
     const branchError = requireString(payload.branch, 'No branch name provided.');
     if (branchError) return branchError;
     return runGitArgs(['branch', '-D', String(payload.branch).trim()], payload.workingDir, {
@@ -197,8 +219,6 @@ export function createGitService() {
   async function gitPull(payload = {}) {
     const directoryError = requireGitWorkingDir(payload);
     if (directoryError) return directoryError;
-    const optInError = requireGitMutationOptIn(payload, 'Pulling from a Git remote');
-    if (optInError) return optInError;
     const result = await runGitArgs(['pull', '--no-rebase'], payload.workingDir, {
       timeout: 60_000,
     });
@@ -210,8 +230,6 @@ export function createGitService() {
   async function gitCommit(payload = {}) {
     const directoryError = requireGitWorkingDir(payload);
     if (directoryError) return directoryError;
-    const optInError = requireGitMutationOptIn(payload, 'Creating a Git commit');
-    if (optInError) return optInError;
     const messageError = requireString(payload.message, 'No commit message provided.');
     if (messageError) return messageError;
 
@@ -244,9 +262,6 @@ export function createGitService() {
   async function gitPush(payload = {}) {
     const directoryError = requireGitWorkingDir(payload);
     if (directoryError) return directoryError;
-    const optInError = requireGitMutationOptIn(payload, 'Pushing to a Git remote');
-    if (optInError) return optInError;
-
     let result = await runGitArgs(['push'], payload.workingDir, { timeout: 60_000 });
     if (result.ok) return result;
     if (result.category === GIT_ERROR_CATEGORY.NO_UPSTREAM) {
@@ -268,9 +283,6 @@ export function createGitService() {
   async function gitPushSync(payload = {}) {
     const directoryError = requireGitWorkingDir(payload);
     if (directoryError) return directoryError;
-    const optInError = requireGitMutationOptIn(payload, 'Pulling and pushing Git changes');
-    if (optInError) return optInError;
-
     await runGitArgs(['rebase', '--abort'], payload.workingDir, { timeout: 20_000 }).catch(
       () => {},
     );
@@ -318,8 +330,6 @@ export function createGitService() {
     if (action === 'list') {
       return runGitArgs(['stash', 'list'], payload.workingDir, { timeout: 20_000 });
     }
-    const optInError = requireGitMutationOptIn(payload, 'Git stash mutation');
-    if (optInError) return optInError;
     if (action === 'push') {
       const args = ['stash', 'push'];
       if (payload.message) args.push('-m', String(payload.message).trim());

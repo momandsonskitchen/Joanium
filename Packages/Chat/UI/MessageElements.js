@@ -371,7 +371,11 @@ export function updateSubAgentCard(threadEl, subAgents, strings) {
  *
  * Action buttons are withheld until every message in the group is finalised.
  */
-export function createAssistantGroupElement(items, strings, { onCopy, onRetry, onContinue } = {}) {
+export function createAssistantGroupElement(
+  items,
+  strings,
+  { onCopy, onRetry, onContinue, isGenerating = false } = {},
+) {
   const lastMessage = items[items.length - 1].message;
   const isStreaming = items.some(({ message }) => message.streaming || message.pending);
   const needsContinuation = items.some(({ message }) => message.needsContinuation);
@@ -422,10 +426,11 @@ export function createAssistantGroupElement(items, strings, { onCopy, onRetry, o
     }
   }
 
-  // Action buttons — only after the entire response is complete
+  // Action buttons — only after the entire response is complete and no generation is in flight
   if (
     !isStreaming &&
     !needsContinuation &&
+    !isGenerating &&
     typeof onCopy === 'function' &&
     typeof onRetry === 'function'
   ) {

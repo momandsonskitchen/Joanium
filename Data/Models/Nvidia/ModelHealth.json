@@ -1,10 +1,74 @@
 {
-  "nvidia/llama-3.3-nemotron-super-49b-v1": {
+  "nvidia/ising-calibration-1-35b-a3b": {
     "status": "green",
-    "checkedAt": "2026-05-22T08:00:38.515Z"
+    "checkedAt": "2026-05-22T10:03:34.696Z"
+  },
+  "z-ai/glm-5.1": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:03:39.744Z"
+  },
+  "openai/gpt-oss-120b": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:03:45.536Z"
+  },
+  "mistralai/mistral-large-3-675b-instruct-2512": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:29:08.774Z"
+  },
+  "nvidia/nemotron-3-content-safety": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:27:59.096Z"
+  },
+  "stepfun-ai/step-3.5-flash": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:27:59.557Z"
+  },
+  "microsoft/phi-4-multimodal-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:28:00.984Z"
+  },
+  "qwen/qwen3.5-122b-a10b": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:28:01.811Z"
+  },
+  "meta/llama-3.3-70b-instruct": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:28:07.063Z"
+  },
+  "moonshotai/kimi-k2.6": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:28:11.626Z"
+  },
+  "deepseek-ai/deepseek-v4-pro": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:28:12.941Z"
+  },
+  "qwen/qwen3-coder-480b-a35b-instruct": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:28:13.364Z"
+  },
+  "aisingapore/sea-lion-7b-instruct": {
+    "status": "red",
+    "checkedAt": "2026-05-22T10:28:54.547Z"
+  },
+  "mistralai/mixtral-8x7b-instruct-v0.1": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:28:54.690Z"
+  },
+  "nvidia/nemotron-3-super-120b-a12b": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:28:56.001Z"
+  },
+  "mistralai/mistral-medium-3.5-128b": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:29:01.549Z"
   },
   "microsoft/phi-4-mini-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-22T08:00:51.642Z"
+    "checkedAt": "2026-05-22T10:29:08.354Z"
+  },
+  "qwen/qwen3.5-397b-a17b": {
+    "status": "yellow",
+    "checkedAt": "2026-05-22T10:29:09.191Z"
   }
 }

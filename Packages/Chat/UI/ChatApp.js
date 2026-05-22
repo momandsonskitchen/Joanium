@@ -2442,7 +2442,12 @@ export async function createChatView(
             }
           : undefined;
 
-        return createAssistantGroupElement(group.items, strings, { onCopy, onRetry, onContinue });
+        return createAssistantGroupElement(group.items, strings, {
+          onCopy,
+          onRetry,
+          onContinue,
+          isGenerating: isSending,
+        });
       }),
     );
 

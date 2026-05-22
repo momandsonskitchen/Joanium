@@ -14,5 +14,37 @@
   "magistral-medium-2509": {
     "status": "green",
     "checkedAt": "2026-05-22T08:00:42.551Z"
+  },
+  "voxtral-mini-latest": {
+    "status": "green",
+    "checkedAt": "2026-05-22T09:30:18.479Z"
+  },
+  "mistral-medium-2508": {
+    "status": "green",
+    "checkedAt": "2026-05-22T09:30:18.668Z"
+  },
+  "codestral-2508": {
+    "status": "green",
+    "checkedAt": "2026-05-22T09:45:37.086Z"
+  },
+  "open-mistral-nemo": {
+    "status": "green",
+    "checkedAt": "2026-05-22T09:45:37.219Z"
+  },
+  "mistral-large-pixtral-2411": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:03:34.617Z"
+  },
+  "voxtral-mini-realtime-latest": {
+    "status": "red",
+    "checkedAt": "2026-05-22T10:27:59.095Z"
+  },
+  "mistral-large-2512": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:27:59.272Z"
+  },
+  "mistral-medium-3.5": {
+    "status": "green",
+    "checkedAt": "2026-05-22T10:28:54.562Z"
   }
 }
