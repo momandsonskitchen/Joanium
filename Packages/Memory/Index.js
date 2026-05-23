@@ -36,6 +36,10 @@ export async function createPackage({ rootDirectory }) {
         handler: async () => memoryStateManager.getExportPrompt(),
       },
       {
+        channel: 'memory:get-triage-prompt',
+        handler: async () => memoryStateManager.getTriagePrompt(),
+      },
+      {
         channel: 'memory:get-import-prompt',
         handler: async () => memoryStateManager.getImportPrompt(),
       },

@@ -386,6 +386,11 @@ export function createMemoryStateManager({ rootDirectory }) {
     return readFile(promptPath, 'utf8');
   }
 
+  async function getTriagePrompt() {
+    const promptPath = path.join(rootDirectory, 'Prompts', 'TriageMemory.md');
+    return readFile(promptPath, 'utf8');
+  }
+
   async function getImportPrompt() {
     const promptPath = path.join(rootDirectory, 'Prompts', 'ImportMemory.md');
     return readFile(promptPath, 'utf8');
@@ -407,6 +412,7 @@ export function createMemoryStateManager({ rootDirectory }) {
     getMemoryCatalog,
     applyMemoryUpdates,
     getExportPrompt,
+    getTriagePrompt,
     getImportPrompt,
   };
 }

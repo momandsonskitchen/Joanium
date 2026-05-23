@@ -371,26 +371,62 @@ export function createMemoryPanel(strings) {
     showImportLoader();
 
     try {
-      const [catalog, bootstrap, appSettings, importPromptTemplate] = await Promise.all([
-        invokeIpc('memory:get-catalog'),
-        invokeIpc('chat:bootstrap'),
-        invokeIpc('app-settings:get').catch(() => ({})),
-        invokeIpc('memory:get-import-prompt'),
-      ]);
+      const [catalog, bootstrap, appSettings, triagePromptTemplate, importPromptTemplate] =
+        await Promise.all([
+          invokeIpc('memory:get-catalog'),
+          invokeIpc('chat:bootstrap'),
+          invokeIpc('app-settings:get').catch(() => ({})),
+          invokeIpc('memory:get-triage-prompt'),
+          invokeIpc('memory:get-import-prompt'),
+        ]);
 
-      const fileRegistry = buildFileRegistry(catalog);
-      const existingContent = buildExistingContentBlock(catalog, strings.importMemory.emptyCatalog);
       const selectedModel = resolveImportModel(bootstrap, appSettings);
-      const prompt = importPromptTemplate
-        .replace('{fileRegistry}', () => fileRegistry)
-        .replace('{existingContent}', () => existingContent)
+
+      // ── Phase 1: triage ───────────────────────────────────────────────────
+      // Tiny call: file registry (names + descriptions only, no content) +
+      // import text. Returns just the filenames that need updating.
+      const triagePrompt = triagePromptTemplate
+        .replace('{fileRegistry}', () => buildFileRegistry(catalog))
+        .replace('{importedText}', () => importedText);
+
+      const triageResult = await invokeIpc('chat:complete-message', {
+        messages: [{ role: 'user', content: triagePrompt }],
+        providerId: selectedModel?.providerId ?? null,
+        modelId: selectedModel?.modelId ?? null,
+        maxTokens: 256,
+        isNewSession: false,
+      });
+
+      // Parse the filename array; fall back to full catalog so no data is lost.
+      let targetCatalog;
+      try {
+        const raw = String(triageResult?.text ?? '').trim();
+        const start = raw.indexOf('[');
+        const end = raw.lastIndexOf(']');
+        const filenames = JSON.parse(raw.slice(start, end + 1));
+        if (!Array.isArray(filenames) || filenames.length === 0) throw new Error();
+        const targetSet = new Set(filenames.map((name) => String(name).trim()));
+        targetCatalog = catalog.filter((entry) => targetSet.has(entry.filename));
+        if (targetCatalog.length === 0) throw new Error();
+      } catch {
+        targetCatalog = catalog;
+      }
+
+      // ── Phase 2: merge ────────────────────────────────────────────────────
+      // Focused call: only the relevant files with their existing content.
+      const mergePrompt = importPromptTemplate
+        .replace('{fileRegistry}', () => buildFileRegistry(targetCatalog))
+        .replace('{existingContent}', () =>
+          buildExistingContentBlock(targetCatalog, strings.importMemory.emptyCatalog),
+        )
         .replace('{importedText}', () => importedText);
 
       const result = await invokeIpc('chat:complete-message', {
-        messages: [{ role: 'user', content: prompt }],
+        messages: [{ role: 'user', content: mergePrompt }],
         providerId: selectedModel?.providerId ?? null,
         modelId: selectedModel?.modelId ?? null,
         modeInstruction: strings.importMemory.systemInstruction,
+        maxTokens: 2048,
         isNewSession: false,
       });
 
