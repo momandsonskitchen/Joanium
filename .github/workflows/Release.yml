@@ -80,6 +80,90 @@ jobs:
             --title "${VERSION}" \
             --notes "${RELEASE_NOTES}"
 
+          # Expose CHANGES so the next step can write CHANGELOG.md directly.
+          # We can't rely on sync-changelog.yml triggering here because GitHub
+          # does not fire workflow runs for events created by GITHUB_TOKEN.
+          {
+            printf 'changes<<CHANGES_EOF\n'
+            printf '%s\n' "${CHANGES}"
+            printf 'CHANGES_EOF\n'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update CHANGELOG.md
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          VERSION: ${{ steps.prepare.outputs.version }}
+          TAG_NAME: ${{ steps.prepare.outputs.tag_name }}
+          CHANGES: ${{ steps.prepare.outputs.changes }}
+        with:
+          script: |
+            const fs = await import('fs');
+            const { VERSION: version, TAG_NAME: tagName, CHANGES: changes } = process.env;
+
+            if (!changes || !changes.trim()) {
+              console.log('No changes — skipping CHANGELOG update.');
+              return;
+            }
+
+            // Derive the release date from the version number (YYYY.MMDD.patch).
+            let dateStr = new Date().toISOString().split('T')[0];
+            const vMatch = version.match(/^(\d{4})\.(\d{3,4})\.(\d+)$/);
+            if (vMatch) {
+              const monthday = vMatch[2].padStart(4, '0');
+              dateStr = `${vMatch[1]}-${monthday.slice(0, 2)}-${monthday.slice(2, 4)}`;
+            }
+
+            const repoUrl = context.payload.repository.html_url;
+            const newEntry = `## [${version}] - ${dateStr}\n\n${changes.trim()}\n\n---\n\n`;
+            const linkLine = `[${version}]: ${repoUrl}/releases/tag/${tagName}`;
+
+            let changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+
+            const escapedVersion = version.replace(/\./g, '\\.');
+            const existingRe = new RegExp(
+              `## \\[${escapedVersion}\\][^\\n]*\\n[\\s\\S]*?(?=\\n## \\[|\\n\\[Unreleased\\]:|$)`
+            );
+
+            if (existingRe.test(changelog)) {
+              changelog = changelog.replace(existingRe, newEntry.trimEnd());
+            } else {
+              const sep = '---\n\n';
+              const insertAt = changelog.indexOf(sep);
+              if (insertAt === -1) {
+                changelog += '\n' + newEntry;
+              } else {
+                const pos = insertAt + sep.length;
+                changelog = changelog.slice(0, pos) + newEntry + changelog.slice(pos);
+              }
+            }
+
+            const linkRe = new RegExp(`^\\[${escapedVersion}\\]:.*$`, 'm');
+            if (linkRe.test(changelog)) {
+              changelog = changelog.replace(linkRe, linkLine);
+            } else {
+              changelog = changelog.replace(
+                /^(\[Unreleased\]:.*)/m,
+                `$1\n${linkLine}`
+              );
+              changelog = changelog.replace(
+                /\[Unreleased\]: .+\/compare\/.+\.\.\.HEAD/,
+                `[Unreleased]: ${repoUrl}/compare/${tagName}...HEAD`
+              );
+            }
+
+            fs.writeFileSync('CHANGELOG.md', changelog);
+            console.log(`CHANGELOG.md updated for ${version} (${dateStr})`);
+
+            await exec.exec('git', ['add', 'CHANGELOG.md']);
+            const diffResult = await exec.getExecOutput(
+              'git', ['diff', '--cached', '--quiet'],
+              { ignoreReturnCode: true }
+            );
+            if (diffResult.exitCode !== 0) {
+              await exec.exec('git', ['commit', '-m', `docs(changelog): sync ${tagName} [skip ci]`]);
+              await exec.exec('git', ['push', 'origin', 'HEAD']);
+            }
+
   build-and-upload:
     needs: prepare-release
     permissions:
