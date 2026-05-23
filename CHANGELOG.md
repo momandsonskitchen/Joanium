@@ -11,37 +11,3 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 * chore(release): bump version to 2026.523.2
 * feat: add triage prompt for imported profiles and update synced timestamps in model configurations
 * feat(changelog): automate CHANGELOG.md updates with release changes
-
----
-
-## [Unreleased]
-
-### Added
-
-- (list new features here)
-
-### Changed
-
-- (list changes to existing features here)
-
-### Fixed
-
-- (list bug fixes here)
-
-### Removed
-
-- (list removed features here)
-
----
-
-## [2026.511.0] – 2026-05-11
-
-### Added
-
-- Initial v2 release of Joanium
-- Multi-model chat (Anthropic, OpenAI, Gemini, Ollama)
-- Local-first desktop app via Electron
-- MCP (Model Context Protocol) integration
-- Scheduled agents and automations
-- GitHub and Gmail integrations
-- Personas and Skills system
