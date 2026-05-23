@@ -1,6 +1,6 @@
 {
   "name": "Joanium",
-  "version": "2026.522.0",
+  "version": "2026.523.0",
   "description": "Local-first AI desktop assistant with multi-model chat, automations, agents, MCP, and real integrations. Works with Anthropic, OpenAI, Gemini, Ollama and more.",
   "type": "module",
   "engines": {
