@@ -358,14 +358,14 @@
   padding: 14px 18px;
   border-radius: 20px;
   font-size: 15px;
-  line-height: 1;
+  line-height: 1.55;
   white-space: pre-wrap;
   min-width: 0;
 }
 
 .chat-message--user .chat-message__bubble {
-  background: var(--color-chat-user-bubble-surface);
-  color: var(--color-chat-user-bubble-text);
+  background: rgba(var(--color-accent-rgb), 0.88);
+  color: rgba(255, 255, 255, 0.97);
   border-bottom-right-radius: 6px;
 }
 

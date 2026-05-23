@@ -4,6 +4,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { copyToClipboard } from '../../Chat/UI/Utils.js';
 
 function extractJsonObject(text = '') {
   const source = String(text ?? '').trim();
@@ -344,7 +345,7 @@ export function createMemoryPanel(strings) {
 
     try {
       const promptText = await invokeIpc('memory:get-export-prompt');
-      await navigator.clipboard.writeText(promptText);
+      await copyToClipboard(promptText);
       copyPromptLabelEl.textContent = strings.importMemory.getPrompt.copied;
       copyPromptBtn.classList.add('chat-memory__copy-prompt--copied');
       copyPromptResetTimer = setTimeout(resetCopyPromptButton, 2000);
