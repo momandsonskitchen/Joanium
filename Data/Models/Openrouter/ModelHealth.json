@@ -1,7 +1,7 @@
 {
   "nvidia/nemotron-nano-12b-v2-vl:free": {
     "status": "green",
-    "checkedAt": "2026-05-22T06:10:52.721Z"
+    "checkedAt": "2026-05-23T13:38:49.456Z"
   },
   "openai/o1": {
     "status": "yellow",
@@ -13,7 +13,7 @@
   },
   "openai/gpt-oss-20b:free": {
     "status": "green",
-    "checkedAt": "2026-05-22T06:10:14.761Z"
+    "checkedAt": "2026-05-23T13:38:00.292Z"
   },
   "sao10k/l3.1-70b-hanami-x1": {
     "status": "yellow",
@@ -29,15 +29,15 @@
   },
   "openai/gpt-oss-120b:free": {
     "status": "green",
-    "checkedAt": "2026-05-22T07:52:11.695Z"
+    "checkedAt": "2026-05-23T13:37:52.114Z"
   },
   "qwen/qwen3-max": {
     "status": "yellow",
     "checkedAt": "2026-05-22T07:56:02.046Z"
   },
   "openrouter/free": {
-    "status": "red",
-    "checkedAt": "2026-05-22T07:56:04.174Z"
+    "status": "green",
+    "checkedAt": "2026-05-23T13:38:02.471Z"
   },
   "mistralai/mistral-medium-3": {
     "status": "yellow",
@@ -66,5 +66,9 @@
   "qwen/qwen3-next-80b-a3b-instruct": {
     "status": "yellow",
     "checkedAt": "2026-05-22T12:20:19.240Z"
+  },
+  "xiaomi/mimo-v2.5": {
+    "status": "yellow",
+    "checkedAt": "2026-05-23T13:37:50.234Z"
   }
 }

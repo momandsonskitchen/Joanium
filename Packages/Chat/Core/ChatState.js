@@ -408,7 +408,9 @@ function formatProviderError(response, data, rawText) {
 async function assertProviderResponse(response) {
   if (!response.ok) {
     const { data, rawText } = await parseResponse(response);
-    throw new Error(formatProviderError(response, data, rawText));
+    const error = new Error(formatProviderError(response, data, rawText));
+    error.statusCode = response.status;
+    throw error;
   }
 }
 

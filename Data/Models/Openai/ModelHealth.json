@@ -2,5 +2,13 @@
   "gpt-5.4-pro-2026-03-05": {
     "status": "red",
     "checkedAt": "2026-05-22T12:20:18.771Z"
+  },
+  "gpt-3.5-turbo-16k": {
+    "status": "green",
+    "checkedAt": "2026-05-23T13:37:44.091Z"
+  },
+  "gpt-realtime-translate": {
+    "status": "green",
+    "checkedAt": "2026-05-23T13:37:50.312Z"
   }
 }

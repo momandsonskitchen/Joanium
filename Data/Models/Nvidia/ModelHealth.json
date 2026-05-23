@@ -25,7 +25,7 @@
   },
   "microsoft/phi-4-multimodal-instruct": {
     "status": "green",
-    "checkedAt": "2026-05-22T10:28:00.984Z"
+    "checkedAt": "2026-05-23T13:37:50.330Z"
   },
   "qwen/qwen3.5-122b-a10b": {
     "status": "green",
@@ -45,7 +45,7 @@
   },
   "qwen/qwen3-coder-480b-a35b-instruct": {
     "status": "yellow",
-    "checkedAt": "2026-05-22T10:28:13.364Z"
+    "checkedAt": "2026-05-23T13:38:04.969Z"
   },
   "aisingapore/sea-lion-7b-instruct": {
     "status": "red",
@@ -61,7 +61,7 @@
   },
   "mistralai/mistral-medium-3.5-128b": {
     "status": "green",
-    "checkedAt": "2026-05-22T10:29:01.549Z"
+    "checkedAt": "2026-05-23T13:38:01.605Z"
   },
   "microsoft/phi-4-mini-instruct": {
     "status": "yellow",
@@ -69,7 +69,7 @@
   },
   "qwen/qwen3.5-397b-a17b": {
     "status": "green",
-    "checkedAt": "2026-05-22T10:41:34.331Z"
+    "checkedAt": "2026-05-23T13:37:53.159Z"
   },
   "nvidia/llama-3.1-nemotron-ultra-253b-v1": {
     "status": "red",
@@ -96,8 +96,8 @@
     "checkedAt": "2026-05-22T12:20:19.057Z"
   },
   "meta/llama-4-maverick-17b-128e-instruct": {
-    "status": "green",
-    "checkedAt": "2026-05-22T12:20:19.427Z"
+    "status": "yellow",
+    "checkedAt": "2026-05-23T13:38:04.358Z"
   },
   "deepseek-ai/deepseek-v4-flash": {
     "status": "green",

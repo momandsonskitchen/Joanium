@@ -13,11 +13,11 @@
   },
   "gemma-4-26b-a4b-it": {
     "status": "green",
-    "checkedAt": "2026-05-22T10:28:59.869Z"
+    "checkedAt": "2026-05-23T13:38:03.167Z"
   },
   "gemini-3.1-flash-lite-preview": {
     "status": "green",
-    "checkedAt": "2026-05-22T06:09:53.277Z"
+    "checkedAt": "2026-05-23T13:37:51.305Z"
   },
   "gemini-robotics-er-1.6-preview": {
     "status": "green",
@@ -29,7 +29,7 @@
   },
   "gemini-2.5-flash-lite": {
     "status": "green",
-    "checkedAt": "2026-05-22T06:09:55.617Z"
+    "checkedAt": "2026-05-23T13:37:53.513Z"
   },
   "gemini-flash-latest": {
     "status": "green",
@@ -66,5 +66,9 @@
   "deep-research-max-preview-04-2026": {
     "status": "yellow",
     "checkedAt": "2026-05-22T12:20:18.765Z"
+  },
+  "gemini-2.5-pro-preview-tts": {
+    "status": "green",
+    "checkedAt": "2026-05-23T13:37:50.347Z"
   }
 }

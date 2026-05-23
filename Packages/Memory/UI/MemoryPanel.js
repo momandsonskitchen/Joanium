@@ -370,6 +370,8 @@ export function createMemoryPanel(strings) {
     importStatusEl.className = 'chat-memory__import-status';
     showImportLoader();
 
+    let selectedModel = null;
+
     try {
       const [catalog, bootstrap, appSettings, triagePromptTemplate, importPromptTemplate] =
         await Promise.all([
@@ -380,7 +382,7 @@ export function createMemoryPanel(strings) {
           invokeIpc('memory:get-import-prompt'),
         ]);
 
-      const selectedModel = resolveImportModel(bootstrap, appSettings);
+      selectedModel = resolveImportModel(bootstrap, appSettings);
 
       // ── Phase 1: triage ───────────────────────────────────────────────────
       // Tiny call: file registry (names + descriptions only, no content) +
@@ -447,8 +449,18 @@ export function createMemoryPanel(strings) {
         setTimeout(showEditorView, 900);
       });
     } catch (error) {
+      const msg = String(error?.message ?? '');
+      const isServerError =
+        (typeof error?.statusCode === 'number' && error.statusCode >= 500) ||
+        /\b5\d{2}\b/.test(msg) ||
+        /gateway.?timeout|service.?unavailable|bad.?gateway|timed?.out/i.test(msg);
+      const displayName = selectedModel?.modelId ?? 'the selected model';
+      const errorText = isServerError
+        ? formatText(strings.importMemory.modelContextLimit, { modelName: displayName })
+        : error?.message || strings.importMemory.failed;
+
       hideImportLoader(() => {
-        importStatusEl.textContent = error?.message || strings.importMemory.failed;
+        importStatusEl.textContent = errorText;
         importStatusEl.className = 'chat-memory__import-status chat-memory__import-status--error';
         importTextarea.disabled = false;
         importSaveBtn.disabled = false;
