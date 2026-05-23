@@ -2,8 +2,10 @@ import path from 'node:path';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { bootstrapApplication } from './Packages/Index.js';
+import { DebugLogger } from './Packages/Shared/Index.js';
 
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
+DebugLogger.configureDebugLogger({ rootDirectory });
 
 function writeBootLog(message, details = '') {
   try {
@@ -29,11 +31,14 @@ process.on('unhandledRejection', (error) => {
 });
 
 writeBootLog('App:start');
+DebugLogger.debugLog('App', 'Starting Joanium', { rootDirectory });
 
 try {
   await bootstrapApplication();
   writeBootLog('App:bootstrapApplication-resolved');
+  DebugLogger.debugLog('App', 'bootstrapApplication resolved');
 } catch (error) {
   writeBootLog('App:bootstrapApplication-rejected', error?.stack ?? String(error));
+  DebugLogger.debugLog('App', 'bootstrapApplication rejected', error?.stack ?? String(error));
   throw error;
 }

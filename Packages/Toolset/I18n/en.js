@@ -2,6 +2,7 @@ const en = {
   resultHeader: 'Tool result',
   errors: {
     unknownTool: 'Unknown tool.',
+    toolTimeout: 'Tool "{tool}" timed out after {timeoutMs}ms.',
     missingExpression: 'Missing required parameter: expression.',
     missingText: 'Missing required parameter: text.',
     missingJson: 'Missing required parameter: json.',

@@ -2,6 +2,8 @@ import { createToolsetService } from './Core/ToolsetService.js';
 import { createConnectorStateManager } from './Core/ConnectorState.js';
 import { startGoogleOAuthFlow } from './Core/GoogleOAuth.js';
 import { discoverToolPackages } from './Core/ToolDiscovery.js';
+import { debugLog } from '../Shared/Debug/DebugLogger.js';
+import { summarizeToolDefinitions } from './Core/Utils.js';
 
 function ownerWindow(event) {
   return event?.sender?.getOwnerBrowserWindow?.() ?? null;
@@ -12,6 +14,17 @@ export async function createPackage({ rootDirectory, registry }) {
     rootDirectory,
     registry,
     externalPackageIds: ['LiveBrowser'],
+  });
+  debugLog('Toolset', 'Discovered tool packages', {
+    packageCount: toolPackages.packages.length,
+    toolCount: toolPackages.toolDefinitions.length,
+    promptSectionCount: toolPackages.promptSections.length,
+    packages: toolPackages.packages.map((toolPackage) => ({
+      id: toolPackage.id,
+      toolCount: toolPackage.toolDefinitions.length,
+      connectorIds: toolPackage.connectors.map((connector) => connector.id),
+    })),
+    tools: summarizeToolDefinitions(toolPackages.toolDefinitions),
   });
   const connectorStateManager = createConnectorStateManager({
     rootDirectory,
@@ -32,7 +45,14 @@ export async function createPackage({ rootDirectory, registry }) {
         channel: 'toolset:list-tools',
         handler: async () => {
           const connectors = await connectorStateManager.listConnectors();
-          return toolsetService.listTools({ connectors });
+          const result = toolsetService.listTools({ connectors });
+          debugLog('Toolset', 'Listed active tools', {
+            connectorCount: connectors.length,
+            activeToolCount: result.tools.length,
+            tools: summarizeToolDefinitions(result.tools),
+            promptLength: result.systemPrompt.length,
+          });
+          return result;
         },
       },
       {

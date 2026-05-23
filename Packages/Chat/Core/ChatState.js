@@ -8,6 +8,7 @@ import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalo
 import { TERMINAL_TOOL_NAMES } from '../../Shared/ToolLoop/TerminalToolNames.js';
 import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 
 const openAiCompatibleProviders = new Set([
   'cerebras',
@@ -66,6 +67,18 @@ async function readSubAgentPromptFile(rootDirectory) {
 
 async function readMemoryPromptFile(rootDirectory) {
   return (await readFile(path.join(rootDirectory, 'Prompts', 'Memory.md'), 'utf8')).trim();
+}
+
+async function readProjectContextPromptFile(rootDirectory) {
+  return (await readFile(path.join(rootDirectory, 'Prompts', 'ProjectContext.md'), 'utf8')).trim();
+}
+
+async function readGitCommitPromptFile(rootDirectory) {
+  return (await readFile(path.join(rootDirectory, 'Prompts', 'GitCommit.md'), 'utf8')).trim();
+}
+
+async function readGitCommitDiffPromptFile(rootDirectory) {
+  return (await readFile(path.join(rootDirectory, 'Prompts', 'GitCommitDiff.md'), 'utf8')).trim();
 }
 
 async function buildBaseSystemPrompt(rootDirectory, user) {
@@ -889,6 +902,19 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
     throw new Error(`No model is configured for ${provider.label}.`);
   }
 
+  debugLog('Chat', 'Resolved chat completion request', {
+    source: request?.source ?? 'chat',
+    messageCount: messages.length,
+    providerId: provider.id,
+    modelId: model.id,
+    hasProjectInfo: Boolean(request?.projectInfo),
+    hasPersona: Boolean(request?.persona),
+    hasModeInstruction: Boolean(request?.modeInstruction),
+    memoryChars: String(request?.memoryContext ?? '').length,
+    terminalToolPromptChars: String(request?.terminalTools ?? '').length,
+    toolsetPromptChars: String(request?.toolsetTools ?? '').length,
+  });
+
   const endpoint = resolveProviderEndpoint(provider, providerDetails, model.id);
 
   if (!endpoint) {
@@ -965,19 +991,41 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
 export function createChatStateManager({ rootDirectory }) {
   return {
     async getBootstrapPayload() {
-      const [user, providers, terminalPrompt, subAgentPrompt, memoryPrompt] = await Promise.all([
+      const [
+        user,
+        providers,
+        terminalPrompt,
+        subAgentPrompt,
+        memoryPrompt,
+        projectContextPrompt,
+        gitCommitPrompt,
+        gitCommitDiffPrompt,
+      ] = await Promise.all([
         readUserState(rootDirectory),
         readProviderCatalog(rootDirectory),
         readTerminalPromptFile(rootDirectory),
         readSubAgentPromptFile(rootDirectory),
         readMemoryPromptFile(rootDirectory).catch(() => ''),
+        readProjectContextPromptFile(rootDirectory),
+        readGitCommitPromptFile(rootDirectory),
+        readGitCommitDiffPromptFile(rootDirectory),
       ]);
 
       const privateIconUrl = pathToFileURL(
         path.join(rootDirectory, 'Assets', 'App', 'Private.png'),
       ).href;
 
-      return { user, providers, terminalPrompt, subAgentPrompt, memoryPrompt, privateIconUrl };
+      return {
+        user,
+        providers,
+        terminalPrompt,
+        subAgentPrompt,
+        memoryPrompt,
+        projectContextPrompt,
+        gitCommitPrompt,
+        gitCommitDiffPrompt,
+        privateIconUrl,
+      };
     },
     // Streaming entry point — resolves once the stream ends (or rejects on error).
     // onChunk({ type: 'text'|'thinking', text }) is called for every token.

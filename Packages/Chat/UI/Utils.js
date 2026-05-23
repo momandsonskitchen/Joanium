@@ -174,6 +174,17 @@ export function buildModelContent(strings, prompt, attachments) {
   return [prompt, attachmentContext].filter(Boolean).join('\n\n');
 }
 
+export function formatPromptTemplate(template, replacements = {}) {
+  const activeLines = String(template ?? '')
+    .split(/\r?\n/)
+    .filter((line) =>
+      Object.entries(replacements).every(([key, value]) => value || !line.includes(`{${key}}`)),
+    )
+    .join('\n');
+
+  return formatText(activeLines, replacements).trim();
+}
+
 /**
  * Copies text to the clipboard. Tries the modern async Clipboard API first
  * (which can fail silently in Electron when the window loses focus on click),

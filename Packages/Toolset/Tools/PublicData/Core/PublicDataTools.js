@@ -2,6 +2,7 @@ const DEFAULT_HEADERS = Object.freeze({
   accept: 'application/json',
   'user-agent': 'Joanium/2026 Toolset',
 });
+const DEFAULT_FETCH_TIMEOUT_MS = 12000;
 
 const WEATHER_CODES = new Map([
   [0, 'Clear sky'],
@@ -926,11 +927,29 @@ function stripHtml(value = '') {
     .trim();
 }
 
+function withDefaultFetchSignal(options) {
+  if (options.signal) return options;
+  return { ...options, signal: AbortSignal.timeout(DEFAULT_FETCH_TIMEOUT_MS) };
+}
+
+function normalizeFetchError(error) {
+  if (error?.name === 'AbortError' || error?.name === 'TimeoutError') {
+    return new Error(`Request timed out after ${DEFAULT_FETCH_TIMEOUT_MS}ms.`);
+  }
+
+  return error;
+}
+
 async function fetchJson(url, { headers = {}, ...options } = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: { ...DEFAULT_HEADERS, ...headers },
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      ...withDefaultFetchSignal(options),
+      headers: { ...DEFAULT_HEADERS, ...headers },
+    });
+  } catch (error) {
+    throw normalizeFetchError(error);
+  }
   const text = await response.text();
   let data = null;
   try {
@@ -946,10 +965,15 @@ async function fetchJson(url, { headers = {}, ...options } = {}) {
 }
 
 async function fetchText(url, { headers = {}, ...options } = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: { ...DEFAULT_HEADERS, ...headers },
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      ...withDefaultFetchSignal(options),
+      headers: { ...DEFAULT_HEADERS, ...headers },
+    });
+  } catch (error) {
+    throw normalizeFetchError(error);
+  }
   const text = await response.text();
   if (!response.ok) throw new Error(text || `HTTP ${response.status}`);
   return text;

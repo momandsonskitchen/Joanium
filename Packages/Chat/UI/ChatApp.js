@@ -51,6 +51,7 @@ import {
 import {
   buildModelContent,
   copyToClipboard,
+  formatPromptTemplate,
   generateSessionId,
   getFirstName,
   sanitizeAssistantVisibleContent,
@@ -477,20 +478,14 @@ export async function createChatView(
   function buildProjectContext(project) {
     if (!project) return '';
 
-    const lines = [formatText(strings.projects.systemContextName, { name: project.name ?? '' })];
     const info = collapseWhitespace(project.info);
     const folder = collapseWhitespace(project.folderPath ?? project.rootPath);
 
-    if (info) {
-      lines.push(formatText(strings.projects.systemContextInfo, { info }));
-    }
-
-    if (folder) {
-      lines.push(formatText(strings.projects.systemContextFolder, { folder }));
-      lines.push(strings.projects.systemContextGit);
-    }
-
-    return lines.filter(Boolean).join('\n');
+    return formatPromptTemplate(payload.projectContextPrompt, {
+      name: collapseWhitespace(project.name),
+      info,
+      folder,
+    });
   }
 
   async function loadMemoryContext() {
@@ -1264,12 +1259,12 @@ export async function createChatView(
         messages: [
           {
             role: 'user',
-            content: formatText(strings.git.aiCommitUserPrompt, { diff: cappedDiff }),
+            content: formatPromptTemplate(payload.gitCommitDiffPrompt, { diff: cappedDiff }),
           },
         ],
         providerId: activeProvider?.id ?? null,
         modelId: activeModel?.id ?? null,
-        modeInstruction: strings.git.aiCommitInstruction,
+        modeInstruction: payload.gitCommitPrompt,
         isNewSession: false,
       });
 

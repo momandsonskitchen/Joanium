@@ -57,11 +57,6 @@ const en = {
   projects: {
     activeHint: 'This project context will be used in new chats.',
     removeActive: 'Remove active project',
-    systemContextName: 'Project name: {name}',
-    systemContextInfo: 'Project context: {info}',
-    systemContextFolder: 'Project workspace folder: {folder}',
-    systemContextGit:
-      'Use the project workspace folder as the default working directory for terminal, git status, git diff, and project checks.',
   },
   browserPreview: {
     eyebrow: 'Browser',
@@ -250,9 +245,6 @@ const en = {
     diffTruncated: '(diff truncated for commit message generation)',
     aiCommitEmpty: 'AI returned an empty commit message.',
     aiCommitFailed: 'Could not generate a commit message.',
-    aiCommitInstruction:
-      'You are a commit message generator. Read the provided git diff and write a concise imperative commit message. Use a conventional commit prefix when it fits. Keep the first line under 72 characters. Add a short body only if it adds useful context. Return only the commit message text.',
-    aiCommitUserPrompt: 'Git diff:\n\n{diff}',
     commitStatus: {
       generating: 'Generating message...',
       staging: 'Staging files...',

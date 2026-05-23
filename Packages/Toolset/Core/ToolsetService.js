@@ -8,8 +8,11 @@ import {
   buildDisconnectedHint,
   buildConnectedHint,
 } from './ConnectorFilter.js';
+import { debugLog } from '../../Shared/Debug/DebugLogger.js';
+import { summarizeToolDefinitions, withTimeout } from './Utils.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
+const DEFAULT_TOOL_TIMEOUT_MS = 30000;
 const DAYS = Object.freeze([
   'Sunday',
   'Monday',
@@ -2185,6 +2188,13 @@ export function createToolsetService({
         activeSections = promptSections;
       }
 
+      debugLog('Toolset', 'Tool prompt built', {
+        requestedConnectorCount: connectors?.length ?? 0,
+        activeToolCount: tools.length,
+        promptSectionCount: activeSections.length,
+        tools: summarizeToolDefinitions(tools),
+      });
+
       return {
         ok: true,
         tools,
@@ -2205,9 +2215,30 @@ export function createToolsetService({
         ...topLevel
       } = payload;
       const parameters = { ...topLevel, ...(explicitArgs ?? {}), ...(explicitParams ?? {}) };
+      const startedAt = Date.now();
+      const timeoutMs = Number(context.timeoutMs) || DEFAULT_TOOL_TIMEOUT_MS;
+      debugLog('Toolset', 'Executing tool', { tool, parameters, timeoutMs });
       try {
-        return { ok: true, tool, output: await handler(parameters, context) };
+        const timeoutMessage = strings.errors.toolTimeout
+          .replace('{tool}', tool)
+          .replace('{timeoutMs}', String(timeoutMs));
+        const output = await withTimeout(
+          Promise.resolve(handler(parameters, context)),
+          timeoutMs,
+          timeoutMessage,
+        );
+        debugLog('Toolset', 'Tool completed', {
+          tool,
+          durationMs: Date.now() - startedAt,
+          outputLength: String(output ?? '').length,
+        });
+        return { ok: true, tool, output };
       } catch (error) {
+        debugLog('Toolset', 'Tool failed', {
+          tool,
+          durationMs: Date.now() - startedAt,
+          error: error?.message ?? String(error),
+        });
         return { ok: false, tool, error: error?.message ?? String(error) };
       }
     },

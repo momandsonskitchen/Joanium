@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { discoverPackages, loadPackageModule, createBootLogger } from './Boot/Index.js';
+import { debugLog } from './Shared/Debug/DebugLogger.js';
 
 const packagesDirectory = path.dirname(fileURLToPath(import.meta.url));
 const rootDirectory = path.resolve(packagesDirectory, '..');
@@ -13,6 +14,10 @@ export async function bootstrapApplication() {
   writeBootLog('bootstrapApplication:start');
   const registry = await discoverPackages(packagesDirectory);
   writeBootLog('bootstrapApplication:registry-ready', String(registry.size));
+  debugLog('Boot', 'Package registry ready', {
+    count: registry.size,
+    packages: [...registry.keys()].sort(),
+  });
   const electronModule = await loadPackageModule(registry, 'Electron');
   writeBootLog('bootstrapApplication:electron-loaded');
   const setupModule = await loadPackageModule(registry, 'Setup');
@@ -25,6 +30,7 @@ export async function bootstrapApplication() {
 
     seenPackageIds.add(packageName);
     const packageModule = await loadPackageModule(registry, packageName);
+    debugLog('Boot', 'Creating package', { packageName });
 
     if (typeof packageModule.createPackage !== 'function') {
       throw new Error(`Package "${packageName}" does not export createPackage().`);
@@ -62,6 +68,7 @@ export async function bootstrapApplication() {
   }
 
   writeBootLog('bootstrapApplication:entry-package', entryPackageName);
+  debugLog('Boot', 'Resolved entry package', { entryPackageName });
   const entryPackage = await createPackage(entryPackageName);
   writeBootLog('bootstrapApplication:entry-package-created', entryPackage.id);
 
