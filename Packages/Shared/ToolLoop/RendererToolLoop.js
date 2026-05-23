@@ -692,6 +692,8 @@ export async function runRendererToolLoop({
   toolsetTools,
   providerId = null,
   modelId = null,
+  projectInfo = null,
+  modeInstruction = null,
   onProgress = null,
   completeMessage,
   source,
@@ -725,6 +727,8 @@ export async function runRendererToolLoop({
       memoryContext,
       terminalTools,
       toolsetTools,
+      projectInfo,
+      modeInstruction,
       isNewSession: Boolean(isNewSession) && depth === 0,
       source,
     };

@@ -1,47 +1,13 @@
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import {
   createAssistantContextCache,
-  joinPromptParts,
-  loadAssistantRuntimeContext,
+  runAssistantPipeline,
   resetAssistantContextCache,
-} from '../../Shared/AssistantRuntime/AssistantContext.js';
-import {
-  runRendererToolLoop,
   TERMINAL_TOOL_NAMES,
-} from '../../Shared/ToolLoop/RendererToolLoop.js';
+} from '../../Shared/AssistantRuntime/AssistantPipeline.js';
 
 const MAX_AGENT_TOOL_CALLS = 10;
 const AGENT_TERMINAL_TOOLS = new Set(TERMINAL_TOOL_NAMES);
-
-async function runAgentWithTools({
-  messages,
-  persona,
-  memoryContext,
-  terminalTools,
-  toolsetTools,
-  providerId,
-  modelId,
-  onProgress,
-  streamChat,
-}) {
-  return runRendererToolLoop({
-    messages,
-    persona,
-    memoryContext,
-    terminalTools,
-    toolsetTools,
-    providerId,
-    modelId,
-    onProgress,
-    maxToolCalls: MAX_AGENT_TOOL_CALLS,
-    supportedTerminalTools: AGENT_TERMINAL_TOOLS,
-    source: 'agent',
-    isNewSession: true,
-    toolLimitMessage: 'Agent reached the tool call limit.',
-    fallbackText: 'Agent could not complete the requested workflow.',
-    completeMessage: (request, options) => streamChat(request, options),
-  });
-}
 
 export function createAgentGateway(strings, { chatStrings = {}, getActivePersona } = {}) {
   let started = false;
@@ -134,28 +100,25 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
     try {
       const activePersona = getActivePersona?.() ?? null;
 
-      const { memoryContext, terminalPrompt, toolsetPrompt } =
-        await loadAssistantRuntimeContext(contextCache);
-
-      const persona = joinPromptParts([
-        activePersona?.content ?? '',
-        strings.gateway?.agentContext ?? '',
-      ]);
-
       const onProgress = (data) => invokeIpc('agents:progress', id, data);
 
       let result;
       try {
-        result = await runAgentWithTools({
+        result = await runAssistantPipeline({
           messages: [{ role: 'user', content: prompt }],
-          persona,
-          memoryContext,
-          terminalTools: terminalPrompt || chatStrings.terminal?.systemPrompt || '',
-          toolsetTools: toolsetPrompt || '',
+          contextCache,
+          personaParts: [activePersona?.content ?? '', strings.gateway?.agentContext ?? ''],
+          terminalToolsFallback: chatStrings.terminal?.systemPrompt || '',
           providerId: providerId ?? null,
           modelId: modelId ?? null,
           onProgress,
-          streamChat: (req, opts) => streamChatForAgent(req, opts),
+          maxToolCalls: MAX_AGENT_TOOL_CALLS,
+          supportedTerminalTools: AGENT_TERMINAL_TOOLS,
+          source: 'agent',
+          isNewSession: true,
+          toolLimitMessage: 'Agent reached the tool call limit.',
+          fallbackText: 'Agent could not complete the requested workflow.',
+          completeMessage: (request, options) => streamChatForAgent(request, options),
         });
       } catch (error) {
         result = {

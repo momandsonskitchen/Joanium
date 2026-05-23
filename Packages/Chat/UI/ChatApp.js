@@ -17,9 +17,10 @@ import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js';
 import {
   createAssistantContextCache,
-  loadAssistantRuntimeContext,
+  createAssistantPipelineRequest,
+  loadAssistantPipelineRuntime,
   resetAssistantContextCache,
-} from '../../Shared/AssistantRuntime/AssistantContext.js';
+} from '../../Shared/AssistantRuntime/AssistantPipeline.js';
 import {
   executeTerminalTool as executeRendererTerminalTool,
   formatToolsetResultForModel,
@@ -493,7 +494,8 @@ export async function createChatView(
   }
 
   async function loadMemoryContext() {
-    const { memoryContext } = await loadAssistantRuntimeContext(assistantContextCache, {
+    const { memoryContext } = await loadAssistantPipelineRuntime({
+      contextCache: assistantContextCache,
       includeTerminalPrompt: false,
       includeToolsetPrompt: false,
     });
@@ -685,11 +687,12 @@ export async function createChatView(
   }
 
   async function loadToolsetPrompt() {
-    const { toolsetPrompt } = await loadAssistantRuntimeContext(assistantContextCache, {
+    const { toolsetTools } = await loadAssistantPipelineRuntime({
+      contextCache: assistantContextCache,
       includeMemory: false,
       includeTerminalPrompt: false,
     });
-    return toolsetPrompt;
+    return toolsetTools;
   }
 
   window.addEventListener('joanium:connectors-changed', () => {
@@ -3538,25 +3541,24 @@ export async function createChatView(
         if (!imageAttachments?.length) return { role, content: textContent };
         return { role, content: textContent, imageAttachments };
       });
-    const [memoryContext, toolsetTools] = await Promise.all([
-      loadMemoryContext(),
-      loadToolsetPrompt(),
-    ]);
-
-    if (runToken !== generationToken) return;
-
-    void invokeIpc('chat:stream-message', {
+    const pipelineRequest = await createAssistantPipelineRequest({
       messages: historyToSend,
-      streamId,
+      contextCache: assistantContextCache,
       providerId: activeProvider?.id ?? null,
       modelId: activeModel?.id ?? null,
-      memoryContext: memoryContext || null,
       projectInfo: buildProjectContext(activeProject) || null,
       persona: (getActivePersona?.() ?? activePersona)?.content || null,
       modeInstruction: getModeInstruction(),
       terminalTools: payload.terminalPrompt,
-      toolsetTools: toolsetTools || null,
       isNewSession,
+      source: 'chat',
+    });
+
+    if (runToken !== generationToken) return;
+
+    void invokeIpc('chat:stream-message', {
+      ...pipelineRequest,
+      streamId,
     });
   }
 

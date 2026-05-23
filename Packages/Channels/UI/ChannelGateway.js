@@ -2,15 +2,11 @@ import { formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import {
   createAssistantContextCache,
-  joinPromptParts,
-  loadAssistantRuntimeContext,
+  runAssistantPipeline,
   resetAssistantContextCache,
-} from '../../Shared/AssistantRuntime/AssistantContext.js';
-import {
-  runRendererToolLoop,
   stripThinking,
   TERMINAL_TOOL_NAMES,
-} from '../../Shared/ToolLoop/RendererToolLoop.js';
+} from '../../Shared/AssistantRuntime/AssistantPipeline.js';
 
 const MAX_CHANNEL_TOOL_CALLS = 10;
 const CHANNEL_TERMINAL_TOOLS = new Set(TERMINAL_TOOL_NAMES);
@@ -20,20 +16,11 @@ function toIso(value, fallback = Date.now()) {
   return Number.isNaN(date.getTime()) ? new Date(fallback).toISOString() : date.toISOString();
 }
 
-async function runChannelAgent({
-  messages,
-  persona,
-  memoryContext,
-  terminalTools,
-  toolsetTools,
-  isNewSession,
-}) {
-  return runRendererToolLoop({
+async function runChannelAgent({ messages, contextCache, personaParts, isNewSession }) {
+  return runAssistantPipeline({
     messages,
-    persona,
-    memoryContext,
-    terminalTools,
-    toolsetTools,
+    contextCache,
+    personaParts,
     isNewSession,
     maxToolCalls: MAX_CHANNEL_TOOL_CALLS,
     supportedTerminalTools: CHANNEL_TERMINAL_TOOLS,
@@ -91,10 +78,7 @@ export function createChannelGateway(
   async function processIncoming({ id, channelName, from, text, metadata = {} }) {
     const channelLabel = strings.channels[channelName]?.name ?? channelName;
     const activePersona = getActivePersona?.() ?? null;
-    const { memoryContext, terminalPrompt, toolsetPrompt } =
-      await loadAssistantRuntimeContext(contextCache);
-
-    const persona = joinPromptParts([
+    const personaParts = [
       activePersona?.content ?? '',
       metadata.systemPrompt ?? '',
       formatText(strings.gateway.channelContext, {
@@ -102,15 +86,13 @@ export function createChannelGateway(
         channel: channelLabel,
       }),
       strings.gateway.agentContext ?? '',
-    ]);
+    ];
 
     try {
       const result = await runChannelAgent({
         messages: [{ role: 'user', content: text }],
-        persona,
-        memoryContext,
-        terminalTools: terminalPrompt || '',
-        toolsetTools: toolsetPrompt || '',
+        contextCache,
+        personaParts,
         isNewSession: false,
       });
 
