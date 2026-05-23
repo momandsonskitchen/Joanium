@@ -1,0 +1,3 @@
+Git diff:
+
+{diff}
