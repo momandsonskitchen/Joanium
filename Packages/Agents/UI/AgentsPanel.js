@@ -151,21 +151,7 @@ export function createAgentsPanel(strings) {
     const wrapper = createElement('div', 'agents-form__avatar-section');
     const label = createElement('label', 'agents-form__field-label', strings.avatarLabel);
     wrapper.append(label);
-
     avatarGridEl = createElement('div', 'agents-form__avatar-grid');
-
-    const randomTile = createElement(
-      'button',
-      'agents-form__avatar-tile agents-form__avatar-tile--random',
-    );
-    randomTile.type = 'button';
-    randomTile.setAttribute('aria-label', strings.avatarRandom);
-    randomTile.append(
-      createElement('span', 'agents-form__avatar-random-label', strings.avatarRandom),
-    );
-    randomTile.addEventListener('click', () => selectAvatar(null));
-    avatarGridEl.append(randomTile);
-
     wrapper.append(avatarGridEl);
     return wrapper;
   }
@@ -178,6 +164,9 @@ export function createAgentsPanel(strings) {
     }
 
     if (!avatarGridEl) return;
+
+    // Shuffle so the order is different every time
+    availableAvatars = availableAvatars.slice().sort(() => Math.random() - 0.5);
 
     const existingTiles = avatarGridEl.querySelectorAll('.agents-form__avatar-tile--image');
     for (const tile of existingTiles) tile.remove();
@@ -208,11 +197,14 @@ export function createAgentsPanel(strings) {
       });
 
       tile.append(spinner, img);
-
       tile.addEventListener('click', () => selectAvatar(avatar.filename));
       avatarGridEl.append(tile);
     }
 
+    // Default to the first avatar (random since list is shuffled)
+    if (!draftAvatar && !editingAgentId && availableAvatars.length > 0) {
+      draftAvatar = availableAvatars[0].filename;
+    }
     syncAvatarTileSelection();
   }
 
@@ -223,10 +215,11 @@ export function createAgentsPanel(strings) {
 
   function syncAvatarTileSelection() {
     if (!avatarGridEl) return;
-    for (const tile of avatarGridEl.querySelectorAll('.agents-form__avatar-tile')) {
-      const isRandom = tile.classList.contains('agents-form__avatar-tile--random');
-      const isSelected = isRandom ? draftAvatar === null : tile._avatarFilename === draftAvatar;
-      tile.classList.toggle('agents-form__avatar-tile--selected', isSelected);
+    for (const tile of avatarGridEl.querySelectorAll('.agents-form__avatar-tile--image')) {
+      tile.classList.toggle(
+        'agents-form__avatar-tile--selected',
+        tile._avatarFilename === draftAvatar,
+      );
     }
   }
 
@@ -334,7 +327,7 @@ export function createAgentsPanel(strings) {
     editingAgentId = null;
     editingCreatedAt = null;
     draftName = '';
-    draftAvatar = null;
+    draftAvatar = availableAvatars.length > 0 ? pickRandomItem(availableAvatars).filename : null;
     draftScheduleType = 'startup';
     draftTime = '09:00';
     draftDay = 1;
@@ -685,10 +678,9 @@ export function createAgentsPanel(strings) {
       const prompt = draftPrompt.trim();
       if (!name || !prompt) return;
 
-      let avatar = draftAvatar;
-      if (!avatar && availableAvatars.length > 0) {
-        avatar = pickRandomItem(availableAvatars).filename;
-      }
+      const avatar =
+        draftAvatar ??
+        (availableAvatars.length > 0 ? pickRandomItem(availableAvatars).filename : null);
 
       const now = new Date().toISOString();
       const schedule =
