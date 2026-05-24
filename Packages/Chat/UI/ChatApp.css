@@ -697,7 +697,7 @@
 .chat-composer__project {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -806,6 +806,7 @@
 }
 
 .chat-composer__project--commit-mode {
+  flex-wrap: wrap;
   align-items: stretch;
 }
 
@@ -829,6 +830,7 @@
   min-width: 0;
   max-width: min(420px, 44vw);
   flex: 0 1 auto;
+  overflow: hidden;
   -webkit-app-region: no-drag;
 }
 
@@ -2634,6 +2636,15 @@
 .chat-model-picker__option--active {
   color: var(--color-chat-text-title);
   font-weight: 650;
+}
+
+.chat-model-picker__option-provider-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .chat-model-picker__option-label {

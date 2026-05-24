@@ -3941,9 +3941,11 @@ export async function createChatView(
   ];
   function _updateDatetimePill() {
     const _now = new Date();
-    const _h = String(_now.getHours()).padStart(2, '0');
+    const _rawH = _now.getHours();
+    const _h = String(_rawH % 12 || 12);
     const _m = String(_now.getMinutes()).padStart(2, '0');
-    datetimePill.textContent = `${_dtDayNames[_now.getDay()]} ${_now.getDate()} ${_dtMonthNames[_now.getMonth()]}  ·  ${_h}:${_m}`;
+    const _ampm = _rawH < 12 ? 'AM' : 'PM';
+    datetimePill.textContent = `${_dtDayNames[_now.getDay()]} ${_now.getDate()} ${_dtMonthNames[_now.getMonth()]}  ·  ${_h}:${_m} ${_ampm}`;
   }
   _updateDatetimePill();
   setInterval(_updateDatetimePill, 1000);

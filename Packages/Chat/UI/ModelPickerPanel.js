@@ -51,6 +51,15 @@ export function createModelPickerPanel({ providers, userProviderDetails, onSelec
       option._pickerProviderId = provider.id;
       option._pickerModelId = model.id;
 
+      if (provider.iconPath) {
+        const providerIcon = document.createElement('img');
+        providerIcon.className = 'chat-model-picker__option-provider-icon';
+        providerIcon.src = provider.iconPath;
+        providerIcon.alt = provider.label ?? '';
+        providerIcon.draggable = false;
+        option.append(providerIcon);
+      }
+
       const label = createElement(
         'span',
         'chat-model-picker__option-label',
