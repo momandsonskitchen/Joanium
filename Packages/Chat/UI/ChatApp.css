@@ -294,6 +294,11 @@
   padding: 8px 4px 4px;
 }
 
+.chat-message--user + .chat-message--assistant,
+.chat-message--assistant + .chat-message--user {
+  margin-top: 10px;
+}
+
 .chat-message {
   display: flex;
   flex-direction: column;
