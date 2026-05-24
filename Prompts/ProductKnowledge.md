@@ -6,6 +6,7 @@ work with chat, scheduled agents, channels, memory, MCP, local project tools, sk
 ## Links
 
 * Official Website: <www.Joanium.com>
+* Docs: <www.Joanium.com/docs>
 * Github: <https://github.com/Joanium>
 * Youtube: <https://www.youtube.com/@Joaniumhere>
 * Instagram: <https://www.instagram.com/joaniumhere>
@@ -28,3 +29,7 @@ work with chat, scheduled agents, channels, memory, MCP, local project tools, sk
   file, terminal, Git, and project-check work.
 * Safe by default: file creation and mutation from normal chat requires an open project.
   Agents and channel automations may run independently from the active chat project.
+
+## Support
+
+* At any point if the user needs more help then ask the user to visit the docs page or to checkout the youtube page for videos related to this product.
