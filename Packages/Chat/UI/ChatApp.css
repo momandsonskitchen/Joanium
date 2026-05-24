@@ -319,6 +319,10 @@
   align-items: flex-end;
 }
 
+.chat-message--assistant .chat-message__content {
+  max-width: min(680px, 100%);
+}
+
 .chat-message--assistant {
   align-self: flex-start;
   align-items: flex-start;
@@ -2174,7 +2178,9 @@
 }
 
 .chat-terminal-call {
-  width: min(680px, 100%);
+  width: fit-content;
+  min-width: min(380px, 100%);
+  max-width: min(680px, 100%);
   overflow: hidden;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.66);
