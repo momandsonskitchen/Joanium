@@ -4,7 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
+import { app } from 'electron';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
+import { createLiveModelFilter } from '../../Shared/ProviderCatalog/LiveModelFilter.js';
 import { TERMINAL_TOOL_NAMES } from '../../Shared/ToolLoop/TerminalToolNames.js';
 import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
@@ -991,6 +993,10 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
 }
 
 export function createChatStateManager({ rootDirectory }) {
+  // One filter instance per manager so the in-memory cache is shared across
+  // all getBootstrapPayload() calls within the same app session.
+  const liveModelFilter = createLiveModelFilter();
+
   return {
     async getBootstrapPayload() {
       const [
@@ -1017,9 +1023,17 @@ export function createChatStateManager({ rootDirectory }) {
         path.join(rootDirectory, 'Assets', 'App', 'Private.png'),
       ).href;
 
+      // In packaged builds the Config/Models JSONs are frozen inside the asar
+      // archive and ModelSync never runs. Use the live model filter to cross-
+      // reference each provider's API and remove models no longer listed.
+      // In dev mode ModelSync already keeps the JSONs up-to-date on disk.
+      const activeProviders = app.isPackaged
+        ? await liveModelFilter.filterProviders(providers, user)
+        : providers;
+
       return {
         user,
-        providers,
+        providers: activeProviders,
         terminalPrompt,
         subAgentPrompt,
         memoryPrompt,

@@ -1,6 +1,5 @@
 import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
-import { createModelHealthChecker } from './Core/ModelHealthCheck.js';
 import {
   getSupportedAttachmentExtensions,
   getImageAttachmentExtensions,
@@ -10,7 +9,6 @@ import { createUsageTracker, estimateTokens } from '../Shared/UsageTracker/Usage
 
 export async function createPackage({ rootDirectory }) {
   const chatStateManager = createChatStateManager({ rootDirectory });
-  const healthChecker = createModelHealthChecker({ rootDirectory });
   const usageTracker = createUsageTracker({ rootDirectory });
   const activeStreams = new Map();
 
@@ -210,32 +208,6 @@ export async function createPackage({ rootDirectory }) {
           const allowImages = Boolean(options?.allowImages);
           if (filePaths.length === 0) return { attachments: [], rejected: [] };
           return readAttachmentFiles(filePaths, { allowImages });
-        },
-      },
-      // ── Model health ─────────────────────────────────────────────────────────
-      {
-        channel: 'chat:health-get',
-        handler: async () => {
-          const { providers } = await chatStateManager.getBootstrapPayload();
-          return healthChecker.getHealthMap(providers);
-        },
-      },
-      {
-        channel: 'chat:health-probe',
-        handler: async (event, providerId, modelId) => {
-          const { user, providers } = await chatStateManager.getBootstrapPayload();
-          const provider = providers.find((p) => p.id === providerId);
-          const model = provider?.models?.find((m) => m.id === modelId);
-          if (!provider || !model) return null;
-
-          const providerDetails = user?.providers?.details?.[providerId] ?? {};
-          const result = await healthChecker.probeAndCache(provider, model, providerDetails);
-
-          if (!event.sender.isDestroyed()) {
-            event.sender.send('chat:health-update', result);
-          }
-
-          return result;
         },
       },
       {

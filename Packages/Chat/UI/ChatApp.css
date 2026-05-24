@@ -1846,6 +1846,7 @@
 }
 
 .chat-composer__model-provider-icon {
+  display: block;
   width: 18px;
   height: 18px;
   border-radius: 4px;
