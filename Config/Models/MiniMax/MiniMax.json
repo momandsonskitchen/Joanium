@@ -7,9 +7,25 @@
   "models": {
     "MiniMax-M2.7": {
       "name": "MiniMax M2.7",
-      "description": "Latest flagship — advanced reasoning and coding with long context",
+      "description": "Flagship model — top real-world engineering, professional office delivery, character-rich interaction (~60 tps)",
       "context_window": 204800,
-      "max_output": 16384,
+      "max_output": 40960,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      }
+    },
+    "MiniMax-M2.7-highspeed": {
+      "name": "MiniMax M2.7 High-Speed",
+      "description": "Same performance as M2.7 with significantly faster inference (~100 tps)",
+      "context_window": 204800,
+      "max_output": 40960,
       "inputs": {
         "text": true,
         "image": false,
@@ -23,9 +39,9 @@
     },
     "MiniMax-M2.5": {
       "name": "MiniMax M2.5",
-      "description": "Balanced flagship for reasoning and coding tasks",
+      "description": "Peak performance and value — optimised for code generation and complex tasks (~60 tps)",
       "context_window": 204800,
-      "max_output": 8192,
+      "max_output": 40960,
       "inputs": {
         "text": true,
         "image": false,
@@ -39,9 +55,9 @@
     },
     "MiniMax-M2.5-highspeed": {
       "name": "MiniMax M2.5 High-Speed",
-      "description": "Faster M2.5 variant for lower-latency workloads",
+      "description": "Same performance as M2.5 with significantly faster inference (~100 tps)",
       "context_window": 204800,
-      "max_output": 8192,
+      "max_output": 40960,
       "inputs": {
         "text": true,
         "image": false,
@@ -49,9 +65,58 @@
         "docx": false
       },
       "pricing": {
-        "input": 0.6,
-        "output": 2.4
+        "input": 0.3,
+        "output": 1.2
+      }
+    },
+    "MiniMax-M2.1": {
+      "name": "MiniMax M2.1",
+      "description": "230B total parameters, 10B activated — powerful multilingual programming and enhanced reasoning (~60 tps)",
+      "context_window": 204800,
+      "max_output": 40960,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      }
+    },
+    "MiniMax-M2.1-highspeed": {
+      "name": "MiniMax M2.1 High-Speed",
+      "description": "Same performance as M2.1 with significantly faster inference (~100 tps)",
+      "context_window": 204800,
+      "max_output": 40960,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      }
+    },
+    "MiniMax-M2": {
+      "name": "MiniMax M2",
+      "description": "200k context window, agentic capabilities, function calling, and advanced reasoning",
+      "context_window": 204800,
+      "max_output": 40960,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
       }
     }
-  }
+  },
+  "_syncedAt": "2026-05-24T16:21:51.750Z"
 }

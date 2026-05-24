@@ -239,8 +239,7 @@ export async function fetchProviderModels(providerId, { apiKey = '', endpoint = 
       return fetchCohereModels(apiKey);
 
     case 'minimax':
-      // MiniMax does not expose a public model listing endpoint.
-      return null;
+      return openAICompat('https://api.minimax.io/v1/models', `Bearer ${apiKey}`);
 
     case 'ollama':
       return fetchOllamaModels(endpoint);

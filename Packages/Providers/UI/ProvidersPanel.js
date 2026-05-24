@@ -126,6 +126,7 @@ export function createProvidersPanel(strings) {
       setCardState(providerId, saved);
       refreshDisconnectGuards();
       setFeedback(providerId, strings.connected_feedback, 'success');
+      window.dispatchEvent(new CustomEvent('joanium:providers-changed'));
     } catch (error) {
       setFeedback(providerId, error?.message ?? strings.saveFailed, 'error');
     } finally {
@@ -146,6 +147,7 @@ export function createProvidersPanel(strings) {
       setCardState(providerId, { configured: false });
       refreshDisconnectGuards();
       setFeedback(providerId, strings.disconnected_feedback, 'info');
+      window.dispatchEvent(new CustomEvent('joanium:providers-changed'));
     } catch (error) {
       const message =
         error?.message === 'last_provider'

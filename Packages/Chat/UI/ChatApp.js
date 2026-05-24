@@ -734,6 +734,28 @@ export async function createChatView(
     resetAssistantContextCache(assistantContextCache);
   });
 
+  // Re-fetch provider data whenever the user connects or disconnects a provider.
+  // The initial payload (providers + user details incl. API keys) is fetched once
+  // at boot and cached — without this refresh, newly-saved API keys are invisible
+  // to the model picker, so the provider never appears as selectable.
+  window.addEventListener('joanium:providers-changed', () => {
+    invokeIpc('chat:bootstrap')
+      .then((freshPayload) => {
+        payload.providers = freshPayload.providers;
+        payload.user = freshPayload.user;
+        // Destroy the cached picker panel so it rebuilds with the updated
+        // provider list and API-key details on the next open.
+        if (modelPickerPanel) {
+          closeModelPicker();
+          modelPickerPanel = null;
+          modelPickerDispose = null;
+        }
+      })
+      .catch(() => {
+        // Silent fail — stale data is better than a crash.
+      });
+  });
+
   function applyActiveProject(project) {
     const previousRoot = collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
     activeProject = project
