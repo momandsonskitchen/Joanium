@@ -1,4 +1,5 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
+import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown, renderInline } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createAttachmentPill } from './AttachmentPill.js';
@@ -8,6 +9,41 @@ import { createThinkingBlock } from './ThinkingBlock.js';
 import { formatDuration, stripMarkdown } from './Utils.js';
 
 let activeSpeakBtn = null;
+
+function getInitials(name) {
+  const parts = collapseWhitespace(name ?? '')
+    .split(' ')
+    .filter(Boolean);
+  if (parts.length >= 2) {
+    const firstLetter = parts[0][0].toUpperCase();
+    const lastWord = parts[parts.length - 1];
+    const secondLetter = (lastWord[1] ?? lastWord[0]).toUpperCase();
+    return `${firstLetter}${secondLetter}`;
+  }
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return '?';
+}
+
+function toFileUrl(filePath) {
+  return 'file:///' + filePath.replace(/\\/g, '/');
+}
+
+function createUserAvatar(userProfile) {
+  const avatarEl = createElement('div', 'chat-message__avatar chat-message__avatar--user');
+  const path = typeof userProfile?.avatarPath === 'string' ? userProfile.avatarPath.trim() : '';
+  if (path) {
+    const img = document.createElement('img');
+    img.src = toFileUrl(path);
+    img.alt = '';
+    img.draggable = false;
+    img.className = 'chat-message__avatar-img';
+    avatarEl.append(img);
+  } else {
+    const initials = getInitials(typeof userProfile?.name === 'string' ? userProfile.name : '');
+    avatarEl.textContent = initials;
+  }
+  return avatarEl;
+}
 
 export function resetSpeakButton(btn) {
   if (!btn) return;
@@ -111,7 +147,11 @@ function createContinuationElement(strings, onContinue) {
   return wrap;
 }
 
-export function createMessageElement(message, strings, { onCopy, onRetry, onContinue } = {}) {
+export function createMessageElement(
+  message,
+  strings,
+  { onCopy, onRetry, onContinue, userProfile } = {},
+) {
   const article = createElement(
     'article',
     [
@@ -137,27 +177,30 @@ export function createMessageElement(message, strings, { onCopy, onRetry, onCont
       dots.innerHTML = '<span></span><span></span><span></span>';
       bubble.append(dots);
     } else if (message.streaming) {
-      // Live stream — render partial markdown + cursor dot
       bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
       bubble.append(createElement('span', 'chat-message__stream-dot'));
     } else {
-      // Finalised — render as markdown
       bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
     }
 
     article.append(bubble);
   } else {
-    article.append(createElement('div', 'chat-message__bubble', message.content));
-  }
+    // User message: [content column] + [avatar] in a row
+    const row = createElement('div', 'chat-message__row');
+    const contentEl = createElement('div', 'chat-message__content');
 
-  if (message.attachments?.length) {
-    const attachmentList = createElement('div', 'chat-message__attachments');
+    contentEl.append(createElement('div', 'chat-message__bubble', message.content));
 
-    for (const attachment of message.attachments) {
-      attachmentList.append(createAttachmentPill(attachment, strings));
+    if (message.attachments?.length) {
+      const attachmentList = createElement('div', 'chat-message__attachments');
+      for (const attachment of message.attachments) {
+        attachmentList.append(createAttachmentPill(attachment, strings));
+      }
+      contentEl.append(attachmentList);
     }
 
-    article.append(attachmentList);
+    row.append(contentEl, createUserAvatar(userProfile));
+    article.append(row);
   }
 
   if (message.terminal) {
@@ -374,9 +417,10 @@ export function updateSubAgentCard(threadEl, subAgents, strings) {
 export function createAssistantGroupElement(
   items,
   strings,
-  { onCopy, onRetry, onContinue, isGenerating = false } = {},
+  { onCopy, onRetry, onContinue, isGenerating = false, getProviderIcon } = {},
 ) {
   const lastMessage = items[items.length - 1].message;
+  const firstMessage = items[0].message;
   const isStreaming = items.some(({ message }) => message.streaming || message.pending);
   const needsContinuation = items.some(({ message }) => message.needsContinuation);
 
@@ -393,9 +437,27 @@ export function createAssistantGroupElement(
       .join(' '),
   );
 
+  // Row: [provider avatar] + [content column]
+  const row = createElement('div', 'chat-message__row');
+
+  // Provider avatar
+  const iconPath = typeof getProviderIcon === 'function' ? getProviderIcon(firstMessage) : '';
+  const avatarEl = createElement('div', 'chat-message__avatar chat-message__avatar--provider');
+  if (iconPath) {
+    const img = document.createElement('img');
+    img.src = iconPath;
+    img.alt = firstMessage.providerLabel ?? 'AI';
+    img.draggable = false;
+    avatarEl.append(img);
+  } else {
+    avatarEl.textContent = '✦';
+  }
+
+  const contentEl = createElement('div', 'chat-message__content');
+
   for (const { message } of items) {
     // 1. Thinking block — always first so it appears before the text it precedes
-    article.append(createThinkingBlock(strings, message.thinking ?? ''));
+    contentEl.append(createThinkingBlock(strings, message.thinking ?? ''));
 
     // 2. Text bubble — skipped for intermediate turns that have no visible content,
     //    and skipped entirely for tool messages (terminal card renders below instead).
@@ -416,15 +478,18 @@ export function createAssistantGroupElement(
       }
 
       if (bubble.childElementCount > 0) {
-        article.append(bubble);
+        contentEl.append(bubble);
       }
     }
 
     // 3. Tool card — appears after the text that triggered it
     if (message.terminal) {
-      article.append(createTerminalCallElement(message.terminal, strings));
+      contentEl.append(createTerminalCallElement(message.terminal, strings));
     }
   }
+
+  row.append(avatarEl, contentEl);
+  article.append(row);
 
   // Action buttons — only after the entire response is complete and no generation is in flight
   if (

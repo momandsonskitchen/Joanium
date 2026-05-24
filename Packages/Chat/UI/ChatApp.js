@@ -440,7 +440,7 @@ export async function createChatView(
           !message.pending &&
           (message.content || message.terminal),
       )
-      .map(({ role, content, thinking, modelContent, attachments, terminal }) => {
+      .map(({ role, content, thinking, modelContent, attachments, terminal, providerLabel }) => {
         const safeContent =
           role === 'assistant' ? sanitizeAssistantVisibleContent(content) : content;
         const entry = { role, content: safeContent };
@@ -451,6 +451,7 @@ export async function createChatView(
         if (modelContent && modelContent !== content) entry.modelContent = modelContent;
         if (attachments?.length) entry.attachments = attachments.map(toAttachmentSummary);
         if (terminal) entry.terminal = terminal;
+        if (providerLabel && role === 'assistant') entry.providerLabel = providerLabel;
         return entry;
       })
       .filter((message) => message.content || message.terminal);
@@ -1513,6 +1514,7 @@ export async function createChatView(
               : [],
             terminal: message.terminal ?? null,
             thinking: sanitizeAssistantVisibleContent(message.thinking ?? ''),
+            providerLabel: typeof message.providerLabel === 'string' ? message.providerLabel : '',
             streaming: false,
           };
         })
@@ -2252,6 +2254,8 @@ export async function createChatView(
   function renderThread() {
     if (!thread || !title || !composer || !scroll || !bottom) return;
 
+    const currentProfile = getProfile?.() ?? profile;
+
     if (window.speechSynthesis && activeSpeakBtn) {
       window.speechSynthesis.cancel();
       resetSpeakButton(activeSpeakBtn);
@@ -2386,6 +2390,12 @@ export async function createChatView(
     }
     if (assistantGroup) renderGroups.push({ type: 'assistant', items: assistantGroup });
 
+    const _providerIconByLabel = new Map(payload.providers.map((p) => [p.label, p.iconPath ?? '']));
+    const getProviderIcon = (message) =>
+      (message.providerLabel ? (_providerIconByLabel.get(message.providerLabel) ?? '') : '') ||
+      activeProvider?.iconPath ||
+      '';
+
     thread.replaceChildren(
       ...renderGroups.map((group) => {
         if (group.type === 'user') {
@@ -2407,7 +2417,11 @@ export async function createChatView(
               imageAttachments: userMessage.imageAttachments ?? [],
             });
           };
-          return createMessageElement(message, strings, { onCopy, onRetry });
+          return createMessageElement(message, strings, {
+            onCopy,
+            onRetry,
+            userProfile: currentProfile,
+          });
         }
 
         // Assistant group — find the preceding user message for retry
@@ -2450,6 +2464,7 @@ export async function createChatView(
           onRetry,
           onContinue,
           isGenerating: isSending,
+          getProviderIcon,
         });
       }),
     );
