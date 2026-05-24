@@ -32,4 +32,4 @@ work with chat, scheduled agents, channels, memory, MCP, local project tools, sk
 
 ## Support
 
-* At any point if the user needs more help then ask the user to visit the docs page or to checkout the youtube page for videos related to this product.
+* At any point if the user needs more help then ask the user to check the docs or the youtube page for videos related to this product.
