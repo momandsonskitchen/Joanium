@@ -440,20 +440,32 @@ export async function createChatView(
           !message.pending &&
           (message.content || message.terminal),
       )
-      .map(({ role, content, thinking, modelContent, attachments, terminal, providerLabel }) => {
-        const safeContent =
-          role === 'assistant' ? sanitizeAssistantVisibleContent(content) : content;
-        const entry = { role, content: safeContent };
-        if (thinking) {
-          entry.thinking =
-            role === 'assistant' ? sanitizeAssistantVisibleContent(thinking) : thinking;
-        }
-        if (modelContent && modelContent !== content) entry.modelContent = modelContent;
-        if (attachments?.length) entry.attachments = attachments.map(toAttachmentSummary);
-        if (terminal) entry.terminal = terminal;
-        if (providerLabel && role === 'assistant') entry.providerLabel = providerLabel;
-        return entry;
-      })
+      .map(
+        ({
+          role,
+          content,
+          thinking,
+          modelContent,
+          attachments,
+          terminal,
+          providerLabel,
+          modelLabel,
+        }) => {
+          const safeContent =
+            role === 'assistant' ? sanitizeAssistantVisibleContent(content) : content;
+          const entry = { role, content: safeContent };
+          if (thinking) {
+            entry.thinking =
+              role === 'assistant' ? sanitizeAssistantVisibleContent(thinking) : thinking;
+          }
+          if (modelContent && modelContent !== content) entry.modelContent = modelContent;
+          if (attachments?.length) entry.attachments = attachments.map(toAttachmentSummary);
+          if (terminal) entry.terminal = terminal;
+          if (providerLabel && role === 'assistant') entry.providerLabel = providerLabel;
+          if (modelLabel && role === 'assistant') entry.modelLabel = modelLabel;
+          return entry;
+        },
+      )
       .filter((message) => message.content || message.terminal);
 
     const sessionData = {
@@ -1515,6 +1527,7 @@ export async function createChatView(
             terminal: message.terminal ?? null,
             thinking: sanitizeAssistantVisibleContent(message.thinking ?? ''),
             providerLabel: typeof message.providerLabel === 'string' ? message.providerLabel : '',
+            modelLabel: typeof message.modelLabel === 'string' ? message.modelLabel : '',
             streaming: false,
           };
         })

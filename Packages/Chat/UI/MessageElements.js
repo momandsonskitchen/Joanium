@@ -84,7 +84,7 @@ function speakText(rawText, btn) {
   window.speechSynthesis.speak(utterance);
 }
 
-function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, strings }) {
+function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, modelLabel, strings }) {
   const actions = createElement('div', 'chat-message__actions');
 
   const copyBtn = createElement('button', 'chat-message__action-button');
@@ -122,6 +122,11 @@ function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, strings })
       formatText(strings.composer.workedFor, { duration: formatDuration(durationMs) }),
     );
     actions.append(durationEl);
+  }
+
+  if (modelLabel) {
+    const modelEl = createElement('span', 'chat-message__model-label', modelLabel);
+    actions.append(modelEl);
   }
 
   return actions;
@@ -506,6 +511,7 @@ export function createAssistantGroupElement(
         onRetry,
         onSpeak,
         durationMs: lastMessage.durationMs,
+        modelLabel: lastMessage.modelLabel,
         strings,
       }),
     );
