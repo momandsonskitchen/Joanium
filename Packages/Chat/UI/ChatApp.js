@@ -1593,7 +1593,13 @@ export async function createChatView(
     const rect = triggerButton.getBoundingClientRect();
     modelPickerPanel.style.left = `${rect.left}px`;
     modelPickerPanel.style.bottom = `${window.innerHeight - rect.top + 8}px`;
-    requestAnimationFrame(() => modelPickerPanel?.classList.add('chat-model-picker--open'));
+    requestAnimationFrame(() => {
+      modelPickerPanel?.classList.add('chat-model-picker--open');
+      const activeOption = modelPickerPanel?.querySelector('.chat-model-picker__option--active');
+      if (activeOption) {
+        activeOption.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+      }
+    });
 
     const onDocClick = (event) => {
       if (!modelPickerPanel?.contains(event.target) && !triggerButton.contains(event.target)) {
