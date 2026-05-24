@@ -727,6 +727,10 @@
   word-break: break-word;
 }
 
+.joanium-theme-dark .chat-message__thinking-text {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .chat-message__stream-dot {
   display: inline-block;
   width: 7px;
