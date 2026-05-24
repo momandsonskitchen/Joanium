@@ -37,6 +37,7 @@ import { createGitBranchPickerPanel, orderGitBranches } from './GitBranchPickerP
 import {
   createAssistantGroupElement,
   createMessageElement,
+  createUserAvatar,
   updateLastStreamingMessage,
   updateSubAgentCard,
   resetSpeakButton,
@@ -199,6 +200,31 @@ export async function createChatView(
     scrollToBottomBtn.classList.toggle('chat-scroll-to-bottom-btn--visible', userScrolledUp);
   }
 
+  function showUserTyping() {
+    if (!thread || thread.hidden) return;
+    if (!userTypingEl) {
+      userTypingEl = createElement('div', 'chat-message chat-message--user chat-message--typing');
+      const row = createElement('div', 'chat-message__row');
+      const contentEl = createElement('div', 'chat-message__content');
+      const bubble = createElement('div', 'chat-message__bubble');
+      const dots = createElement('span', 'chat-message__dots');
+      dots.innerHTML = '<span></span><span></span><span></span>';
+      bubble.append(dots);
+      contentEl.append(bubble);
+      const currentProfile = getProfile?.() ?? profile;
+      row.append(contentEl, createUserAvatar(currentProfile));
+      userTypingEl.append(row);
+    }
+    if (!userTypingEl.isConnected) thread.append(userTypingEl);
+    scheduleScrollToBottom();
+  }
+
+  function hideUserTyping() {
+    clearTimeout(userTypingTimer);
+    userTypingTimer = null;
+    userTypingEl?.remove();
+  }
+
   let composerField = null;
   let attachmentsEl = null;
   let attachmentNotice = null;
@@ -209,6 +235,8 @@ export async function createChatView(
   let attachBtn = null;
   let terminalBtn = null;
   let thread = null;
+  let userTypingEl = null;
+  let userTypingTimer = null;
   let title = null;
   let bubblesEl = null;
   let techFeedEl = null;
@@ -2269,6 +2297,9 @@ export async function createChatView(
 
     const currentProfile = getProfile?.() ?? profile;
 
+    hideUserTyping();
+    userTypingEl = null; // rebuild fresh on next type so profile/avatar stays current
+
     if (window.speechSynthesis && activeSpeakBtn) {
       window.speechSynthesis.cancel();
       resetSpeakButton(activeSpeakBtn);
@@ -3591,6 +3622,7 @@ export async function createChatView(
   }
 
   async function submitPrompt(resend = null) {
+    hideUserTyping();
     const isResend = resend !== null;
 
     // Display summaries shown in the thread (no base64 — safe to store in session).
@@ -3835,6 +3867,14 @@ export async function createChatView(
     syncComposerFieldHeight();
     syncComposer();
     void updateSlashMenu();
+    // User typing indicator
+    if (draftValue.trim() && messages.length > 0) {
+      clearTimeout(userTypingTimer);
+      showUserTyping();
+      userTypingTimer = setTimeout(hideUserTyping, 2000);
+    } else {
+      hideUserTyping();
+    }
   });
   composerField.addEventListener('keydown', (event) => {
     if (handleSlashKeydown(event)) return;

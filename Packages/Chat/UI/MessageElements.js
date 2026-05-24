@@ -28,7 +28,7 @@ function toFileUrl(filePath) {
   return 'file:///' + filePath.replace(/\\/g, '/');
 }
 
-function createUserAvatar(userProfile) {
+export function createUserAvatar(userProfile) {
   const avatarEl = createElement('div', 'chat-message__avatar chat-message__avatar--user');
   const path = typeof userProfile?.avatarPath === 'string' ? userProfile.avatarPath.trim() : '';
   if (path) {

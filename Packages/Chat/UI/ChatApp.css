@@ -299,6 +299,10 @@
   margin-top: 10px;
 }
 
+.chat-message--typing {
+  animation: chat-message-enter 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .chat-message {
   display: flex;
   flex-direction: column;
@@ -751,6 +755,10 @@
 
 .chat-message__dots span:nth-child(3) {
   animation-delay: 0.36s;
+}
+
+.chat-message--typing .chat-message__dots span {
+  background: rgba(255, 255, 255, 0.9);
 }
 
 @keyframes chat-dot-bounce {
