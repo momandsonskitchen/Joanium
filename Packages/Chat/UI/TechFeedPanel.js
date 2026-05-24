@@ -198,6 +198,145 @@ async function fetchStackOverflow(strings) {
   }));
 }
 
+// ---------------------------------------------------------------------------
+// Usage-mode → source configs
+// Each entry in an array is a descriptor the load() function will dispatch
+// to the right fetcher. Reddit entries auto-generate their source label from
+// the subreddit name so no i18n keys are needed for the long tail.
+// ---------------------------------------------------------------------------
+
+const USAGE_MODE_SOURCES = {
+  coding: [
+    { type: 'hn' },
+    { type: 'github', days: 14, count: 12 },
+    { type: 'devto' },
+    { type: 'lobsters' },
+    { type: 'stackoverflow' },
+    { type: 'reddit', subreddit: 'programming', limit: 10 },
+    { type: 'reddit', subreddit: 'webdev', limit: 8 },
+  ],
+  designing: [
+    { type: 'github', days: 14, count: 8 },
+    { type: 'devto' },
+    { type: 'reddit', subreddit: 'design', limit: 8 },
+    { type: 'reddit', subreddit: 'userexperience', limit: 8 },
+    { type: 'reddit', subreddit: 'UI_Design', limit: 6 },
+  ],
+  writing: [
+    { type: 'hn' },
+    { type: 'devto' },
+    { type: 'reddit', subreddit: 'writing', limit: 10 },
+    { type: 'reddit', subreddit: 'technicalwriting', limit: 8 },
+  ],
+  research: [
+    { type: 'hn' },
+    { type: 'lobsters' },
+    { type: 'reddit', subreddit: 'science', limit: 10 },
+    { type: 'reddit', subreddit: 'technology', limit: 8 },
+    { type: 'reddit', subreddit: 'artificial', limit: 8 },
+  ],
+  learning: [
+    { type: 'hn' },
+    { type: 'devto' },
+    { type: 'stackoverflow' },
+    { type: 'reddit', subreddit: 'learnprogramming', limit: 10 },
+    { type: 'reddit', subreddit: 'learnmachinelearning', limit: 8 },
+  ],
+  productivity: [
+    { type: 'hn' },
+    { type: 'reddit', subreddit: 'productivity', limit: 10 },
+    { type: 'reddit', subreddit: 'getdisciplined', limit: 8 },
+    { type: 'reddit', subreddit: 'selfimprovement', limit: 8 },
+  ],
+  marketing: [
+    { type: 'devto' },
+    { type: 'reddit', subreddit: 'marketing', limit: 10 },
+    { type: 'reddit', subreddit: 'digital_marketing', limit: 8 },
+    { type: 'reddit', subreddit: 'SEO', limit: 8 },
+  ],
+  finance: [
+    { type: 'hn' },
+    { type: 'reddit', subreddit: 'personalfinance', limit: 10 },
+    { type: 'reddit', subreddit: 'investing', limit: 8 },
+    { type: 'reddit', subreddit: 'financialindependence', limit: 6 },
+  ],
+  data: [
+    { type: 'github', days: 14, count: 8 },
+    { type: 'stackoverflow' },
+    { type: 'reddit', subreddit: 'datascience', limit: 10 },
+    { type: 'reddit', subreddit: 'MachineLearning', limit: 10 },
+    { type: 'reddit', subreddit: 'statistics', limit: 6 },
+  ],
+  legal: [
+    { type: 'hn' },
+    { type: 'reddit', subreddit: 'law', limit: 10 },
+    { type: 'reddit', subreddit: 'legaladvice', limit: 8 },
+  ],
+  healthcare: [
+    { type: 'hn' },
+    { type: 'reddit', subreddit: 'medicine', limit: 10 },
+    { type: 'reddit', subreddit: 'health', limit: 8 },
+  ],
+  education: [
+    { type: 'devto' },
+    { type: 'stackoverflow' },
+    { type: 'reddit', subreddit: 'education', limit: 10 },
+    { type: 'reddit', subreddit: 'learnprogramming', limit: 8 },
+  ],
+};
+
+const DEFAULT_SOURCES = [
+  { type: 'hn' },
+  { type: 'github', days: 14, count: 12 },
+  { type: 'devto' },
+  { type: 'lobsters' },
+  { type: 'stackoverflow' },
+  { type: 'reddit', subreddit: 'programming', limit: 10 },
+  { type: 'reddit', subreddit: 'MachineLearning', limit: 8 },
+];
+
+// Hard cap: never fire more than this many concurrent fetches regardless of
+// how many modes the user has selected.
+const MAX_FEED_CONFIGS = 12;
+
+// Aim for roughly this many cards total across all sources so the feed
+// stays readable even when many modes are active.
+const TARGET_FEED_CARDS = 72;
+
+// Collect deduplicated source configs for the given usage modes.
+// Falls back to DEFAULT_SOURCES when modes is empty or unrecognised —
+// e.g. if the user somehow clears usageModes in User.json.
+function buildFetchConfigs(usageModes) {
+  const modes = Array.isArray(usageModes) && usageModes.length > 0 ? usageModes : null;
+
+  // No modes set → generic tech feed, same as before personalisation.
+  if (!modes) return DEFAULT_SOURCES;
+
+  const seen = new Set();
+  const configs = [];
+
+  for (const mode of modes) {
+    for (const source of USAGE_MODE_SOURCES[mode] ?? []) {
+      // Non-reddit sources are singletons (one HN, one GitHub, etc.) so the
+      // type alone is a sufficient dedup key. Reddit can appear many times
+      // with different subreddits, so we include the subreddit in the key so
+      // each subreddit is fetched at most once even if multiple modes request it.
+      const key = source.type === 'reddit' ? `reddit:${source.subreddit}` : source.type;
+      if (!seen.has(key)) {
+        seen.add(key);
+        configs.push(source);
+      }
+    }
+  }
+
+  // If no known mode matched at all, fall back gracefully.
+  const final = configs.length > 0 ? configs : DEFAULT_SOURCES;
+
+  // Cap at MAX_FEED_CONFIGS — earlier modes get priority since they were
+  // added to `configs` first.
+  return final.slice(0, MAX_FEED_CONFIGS);
+}
+
 function openInBrowser(url) {
   if (!url) return;
   void invokeIpc('browser-preview:load-url', url).catch(() => {});
@@ -262,7 +401,7 @@ function buildCard(item) {
   return card;
 }
 
-export function createTechFeedPanel(strings = {}) {
+export function createTechFeedPanel(strings = {}, usageModes = []) {
   const el = createElement('div', 'tech-feed');
   el.setAttribute('role', 'region');
   el.setAttribute('aria-label', strings.label ?? '');
@@ -306,38 +445,57 @@ export function createTechFeedPanel(strings = {}) {
 
     showShimmers();
 
-    const [hn, gh, dev, redditProgramming, redditMachineLearning, lobsters, stackOverflow] =
-      await Promise.allSettled([
-        fetchHackerNews(strings),
-        fetchGithubTrending(strings, { days: 14, count: 12, label: strings.github }),
-        fetchDevTo(strings),
-        fetchReddit(strings, {
-          subreddit: 'programming',
-          limit: 10,
-          label: strings.redditProgramming,
-        }),
-        fetchReddit(strings, {
-          subreddit: 'MachineLearning',
-          limit: 8,
-          label: strings.redditMachineLearning,
-        }),
-        fetchLobsters(strings),
-        fetchStackOverflow(strings),
-      ]);
+    const configs = buildFetchConfigs(usageModes);
+
+    // Scale items-per-source so the total card count stays near TARGET_FEED_CARDS
+    // regardless of how many sources are active. Floor at 4 so every source
+    // contributes something meaningful.
+    const perSource = Math.max(4, Math.floor(TARGET_FEED_CARDS / configs.length));
+
+    const results = await Promise.allSettled(
+      configs.map((cfg) => {
+        let promise;
+        switch (cfg.type) {
+          case 'hn':
+            promise = fetchHackerNews(strings);
+            break;
+          case 'github':
+            promise = fetchGithubTrending(strings, {
+              days: cfg.days ?? 14,
+              count: Math.min(cfg.count ?? 12, perSource),
+              label: strings.github,
+            });
+            break;
+          case 'devto':
+            promise = fetchDevTo(strings);
+            break;
+          case 'lobsters':
+            promise = fetchLobsters(strings);
+            break;
+          case 'stackoverflow':
+            promise = fetchStackOverflow(strings);
+            break;
+          case 'reddit':
+            promise = fetchReddit(strings, {
+              subreddit: cfg.subreddit,
+              limit: Math.min(cfg.limit ?? 8, perSource),
+              label: `Reddit /r/${cfg.subreddit}`,
+            });
+            break;
+          default:
+            promise = Promise.resolve([]);
+        }
+        // Slice after fetch for sources whose item count is
+        // controlled internally (hn, devto, lobsters, stackoverflow).
+        return promise.then((items) => items.slice(0, perSource));
+      }),
+    );
 
     if (requestController.signal.aborted || abortController !== requestController) {
       return;
     }
 
-    let items = [
-      ...(hn.status === 'fulfilled' ? hn.value : []),
-      ...(gh.status === 'fulfilled' ? gh.value : []),
-      ...(dev.status === 'fulfilled' ? dev.value : []),
-      ...(redditProgramming.status === 'fulfilled' ? redditProgramming.value : []),
-      ...(redditMachineLearning.status === 'fulfilled' ? redditMachineLearning.value : []),
-      ...(lobsters.status === 'fulfilled' ? lobsters.value : []),
-      ...(stackOverflow.status === 'fulfilled' ? stackOverflow.value : []),
-    ];
+    let items = results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []));
 
     items = shuffleArray(items);
     el.replaceChildren();

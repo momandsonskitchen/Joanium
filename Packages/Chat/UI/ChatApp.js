@@ -3736,7 +3736,7 @@ export async function createChatView(
   }
 
   if (currentAppSettings?.showTechFeed !== false) {
-    const techFeedPanel = createTechFeedPanel(strings.techFeed);
+    const techFeedPanel = createTechFeedPanel(strings.techFeed, payload.user?.usageModes ?? []);
     techFeedEl = techFeedPanel.element;
   }
 
@@ -4244,7 +4244,7 @@ export async function createChatView(
 
     // Create feed element on first enable if it was never created.
     if (currentAppSettings?.showTechFeed !== false && !techFeedEl) {
-      const techFeedPanel = createTechFeedPanel(strings.techFeed);
+      const techFeedPanel = createTechFeedPanel(strings.techFeed, payload.user?.usageModes ?? []);
       techFeedEl = techFeedPanel.element;
       if (welcomeWrap) welcomeWrap.append(techFeedEl);
     }
