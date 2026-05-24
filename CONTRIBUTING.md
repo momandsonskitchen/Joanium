@@ -7,9 +7,8 @@ Thanks for taking the time to contribute! Please read this before opening issues
 ## Getting Started
 
 ```bash
-git clone https://github.com/withinjoel/joanium.git
-cd joanium/v2
-cp .env.example .env   # fill in your API keys
+git clone https://github.com/joanium/joanium.git
+cd joanium/joanium
 npm install
 npm start
 ```
@@ -39,14 +38,14 @@ npm run build      # build distributable
 
 ## Reporting Bugs
 
-Use the [bug report template](https://github.com/withinjoel/joanium/issues/new?template=bug_report.md).  
+Use the [bug report template](https://github.com/joanium/joanium/issues/new?template=bug_report.md).
 Include steps to reproduce, expected vs actual behaviour, and your OS + Node version.
 
 ---
 
 ## Suggesting Features
 
-Use the [feature request template](https://github.com/withinjoel/joanium/issues/new?template=feature_request.md).  
+Use the [feature request template](https://github.com/joanium/joanium/issues/new?template=feature_request.md).
 Explain the problem it solves, not just what you want.
 
 ---

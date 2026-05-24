@@ -195,7 +195,7 @@ export function createAboutPanel(strings) {
       'chat-profile__about-version',
       formatText(strings.version, { version: info.version || '' }),
     );
-    const descEl = createElement('p', 'chat-profile__about-desc', info.description || '');
+    const descEl = createElement('p', 'chat-profile__about-desc', strings.description || '');
 
     const iconWrap = createElement('div', 'chat-profile__about-icon-wrap');
     const iconImg = document.createElement('img');

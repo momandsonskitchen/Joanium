@@ -1,5 +1,8 @@
 const en = {
   version: 'Version {version}',
+  description:
+    "Joanium is your all-in-one AI-powered desktop companion — built for the way you think, work, and create. Chat with the world's most powerful AI models, automate complex workflows, manage your tools, and build incredible things, all without ever leaving your desktop.",
+
   author: 'Author',
   lastUpdated: 'Last Updated',
   unknownValue: 'Not Available',
