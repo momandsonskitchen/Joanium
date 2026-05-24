@@ -5,6 +5,18 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "c4ai-aya-expanse-32b": {
+      "name": "c4ai-aya-expanse-32b",
+      "context_window": 128000
+    },
+    "c4ai-aya-vision-32b": {
+      "name": "c4ai-aya-vision-32b",
+      "context_window": 16384
+    },
+    "cohere-transcribe-03-2026": {
+      "name": "cohere-transcribe-03-2026",
+      "context_window": 32768
+    },
     "command-a-03-2025": {
       "name": "Command A",
       "description": "Cohere's flagship model (Mar 2025) — 256K context, best-in-class RAG and enterprise tool use",
@@ -18,24 +30,24 @@
       },
       "pricing": {
         "input": 2.5,
-        "output": 10.0
+        "output": 10
       }
     },
-    "command-r-plus-08-2024": {
-      "name": "Command R+",
-      "description": "High-accuracy model optimised for complex RAG workflows, multi-step tool calling, and long documents",
-      "context_window": 128000,
-      "max_output": 4096,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 2.5,
-        "output": 10.0
-      }
+    "command-a-plus-05-2026": {
+      "name": "command-a-plus-05-2026",
+      "context_window": 128000
+    },
+    "command-a-reasoning-08-2025": {
+      "name": "command-a-reasoning-08-2025",
+      "context_window": 288768
+    },
+    "command-a-translate-08-2025": {
+      "name": "command-a-translate-08-2025",
+      "context_window": 8992
+    },
+    "command-a-vision-07-2025": {
+      "name": "command-a-vision-07-2025",
+      "context_window": 128000
     },
     "command-r-08-2024": {
       "name": "Command R",
@@ -53,6 +65,22 @@
         "output": 0.6
       }
     },
+    "command-r-plus-08-2024": {
+      "name": "Command R+",
+      "description": "High-accuracy model optimised for complex RAG workflows, multi-step tool calling, and long documents",
+      "context_window": 128000,
+      "max_output": 4096,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 2.5,
+        "output": 10
+      }
+    },
     "command-r7b-12-2024": {
       "name": "Command R7B",
       "description": "Ultra-fast 7B model — lowest latency in the Command family, ideal for high-throughput and edge deployments",
@@ -68,6 +96,43 @@
         "input": 0.0375,
         "output": 0.15
       }
+    },
+    "command-r7b-arabic-02-2025": {
+      "name": "command-r7b-arabic-02-2025",
+      "context_window": 128000
+    },
+    "embed-english-light-v3.0": {
+      "name": "embed-english-light-v3.0",
+      "context_window": 512
+    },
+    "embed-english-light-v3.0-image": {
+      "name": "embed-english-light-v3.0-image",
+      "context_window": 0
+    },
+    "embed-english-v3.0": {
+      "name": "embed-english-v3.0",
+      "context_window": 512
+    },
+    "embed-english-v3.0-image": {
+      "name": "embed-english-v3.0-image",
+      "context_window": 0
+    },
+    "embed-multilingual-light-v3.0": {
+      "name": "embed-multilingual-light-v3.0",
+      "context_window": 512
+    },
+    "embed-multilingual-light-v3.0-image": {
+      "name": "embed-multilingual-light-v3.0-image",
+      "context_window": 0
+    },
+    "embed-multilingual-v3.0": {
+      "name": "embed-multilingual-v3.0",
+      "context_window": 512
+    },
+    "embed-multilingual-v3.0-image": {
+      "name": "embed-multilingual-v3.0-image",
+      "context_window": 0
     }
-  }
+  },
+  "_syncedAt": "2026-05-24T08:15:35.577Z"
 }
