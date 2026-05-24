@@ -1,0 +1,41 @@
+{
+  "provider": "ai21",
+  "label": "AI21 Labs",
+  "endpoint": "https://api.ai21.com/studio/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "jamba-large": {
+      "name": "Jamba Large 1.7",
+      "description": "AI21's flagship hybrid SSM-Transformer model — 256K context, MoE architecture, best for long-doc analysis and enterprise workflows",
+      "context_window": 256000,
+      "max_output": 4096,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 2.0,
+        "output": 8.0
+      }
+    },
+    "jamba-mini": {
+      "name": "Jamba Mini 2",
+      "description": "AI21's efficient 12B-active hybrid model — 256K context, fast and affordable for document Q&A and summarization",
+      "context_window": 256000,
+      "max_output": 4096,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.2,
+        "output": 0.4
+      }
+    }
+  }
+}

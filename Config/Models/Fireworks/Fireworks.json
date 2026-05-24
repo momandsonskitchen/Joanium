@@ -1,0 +1,89 @@
+{
+  "provider": "fireworks",
+  "label": "Fireworks AI",
+  "endpoint": "https://api.fireworks.ai/inference/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "accounts/fireworks/models/kimi-k2p6": {
+      "name": "Kimi K2.6",
+      "description": "Moonshot AI's frontier MoE model — top-tier coding, reasoning, and agentic tasks with 262K context",
+      "context_window": 262144,
+      "max_output": 32768,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.95,
+        "output": 4.0
+      }
+    },
+    "accounts/fireworks/models/deepseek-v4-pro": {
+      "name": "DeepSeek V4 Pro",
+      "description": "DeepSeek's latest frontier model — strong reasoning, coding, and math at competitive pricing with 1M context",
+      "context_window": 1000000,
+      "max_output": 32768,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 1.74,
+        "output": 3.48
+      }
+    },
+    "accounts/fireworks/models/gpt-oss-120b": {
+      "name": "GPT OSS 120B",
+      "description": "OpenAI's open-weight 120B model — blazing-fast inference on Fireworks, outperforms many proprietary models",
+      "context_window": 131072,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.15,
+        "output": 0.6
+      }
+    },
+    "accounts/fireworks/models/minimax-m2p7": {
+      "name": "MiniMax M2.7",
+      "description": "MiniMax's latest efficient MoE model — strong performance across text tasks with a long 256K context window",
+      "context_window": 262144,
+      "max_output": 32768,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      }
+    },
+    "accounts/fireworks/models/llama-v3p3-70b-instruct": {
+      "name": "Llama 3.3 70B",
+      "description": "Meta's 70B open-weight model — excellent instruction following and reasoning at very low cost on Fireworks",
+      "context_window": 131072,
+      "max_output": 8192,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.9,
+        "output": 0.9
+      }
+    }
+  }
+}

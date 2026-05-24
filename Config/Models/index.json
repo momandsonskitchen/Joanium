@@ -14,5 +14,10 @@
   "Perplexity.json",
   "Cerebras.json",
   "Ollama.json",
-  "LMStudio.json"
+  "LMStudio.json",
+  "Fireworks.json",
+  "SambaNova.json",
+  "AI21.json",
+  "Lambda.json",
+  "Hyperbolic.json"
 ]

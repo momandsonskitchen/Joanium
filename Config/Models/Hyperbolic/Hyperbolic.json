@@ -1,0 +1,91 @@
+{
+  "provider": "hyperbolic",
+  "label": "Hyperbolic",
+  "endpoint": "https://api.hyperbolic.xyz/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "openai/gpt-oss-120b": {
+      "name": "GPT OSS 120B (High)",
+      "description": "OpenAI's open-weight 120B on Hyperbolic — 571 tokens/sec, lowest latency on the platform, top intelligence",
+      "context_window": 131072,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.2,
+        "output": 0.5
+      }
+    },
+    "deepseek-ai/DeepSeek-R1-0528": {
+      "name": "DeepSeek R1 0528",
+      "description": "DeepSeek's strongest reasoning model — 87.5% on AIME 2025, rival to OpenAI o3, with chain-of-thought output",
+      "context_window": 131072,
+      "max_output": 32768,
+      "thinking": true,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.5,
+        "output": 2.5
+      }
+    },
+    "Qwen/Qwen3-Next-80B": {
+      "name": "Qwen3 Next 80B",
+      "description": "Alibaba's Qwen3 reasoning model — dual thinking modes, strong multilingual support with 262K context",
+      "context_window": 262144,
+      "max_output": 32768,
+      "thinking": true,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.4,
+        "output": 1.2
+      }
+    },
+    "deepseek-ai/DeepSeek-V3-0324": {
+      "name": "DeepSeek V3 0324",
+      "description": "DeepSeek's best non-reasoning model — first open-weight to outperform all proprietary non-reasoning models",
+      "context_window": 131072,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.2,
+        "output": 0.6
+      }
+    },
+    "meta-llama/Meta-Llama-3.3-70B-Instruct": {
+      "name": "Llama 3.3 70B",
+      "description": "Meta's proven 70B model on Hyperbolic — affordable and reliable for most chat and coding tasks",
+      "context_window": 131072,
+      "max_output": 8192,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.1,
+        "output": 0.3
+      }
+    }
+  }
+}
