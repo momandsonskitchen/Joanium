@@ -3914,7 +3914,42 @@ export async function createChatView(
     slashMenu,
   );
   welcomeWrap = createElement('div', 'chat-welcome');
-  welcomeWrap.append(title, bubblesEl);
+
+  // ── Live date/time pill ──────────────────────────────────────────────────
+  const datetimePill = createElement('div', 'chat-datetime-pill');
+  const _dtDayNames = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+  const _dtMonthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  function _updateDatetimePill() {
+    const _now = new Date();
+    const _h = String(_now.getHours()).padStart(2, '0');
+    const _m = String(_now.getMinutes()).padStart(2, '0');
+    datetimePill.textContent = `${_dtDayNames[_now.getDay()]} ${_now.getDate()} ${_dtMonthNames[_now.getMonth()]}  ·  ${_h}:${_m}`;
+  }
+  _updateDatetimePill();
+  setInterval(_updateDatetimePill, 1000);
+
+  welcomeWrap.append(datetimePill, title, bubblesEl);
   if (techFeedEl) welcomeWrap.append(techFeedEl);
   scroll.append(welcomeWrap, thread);
   scrollToBottomBtn = createElement('button', 'chat-scroll-to-bottom-btn');
