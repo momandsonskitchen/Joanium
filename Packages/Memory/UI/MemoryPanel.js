@@ -1,10 +1,9 @@
-import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
+import { copyToClipboard, createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
-import { copyToClipboard } from '../../Chat/UI/Utils.js';
 
 function extractJsonObject(text = '') {
   const source = String(text ?? '').trim();

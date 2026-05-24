@@ -9,7 +9,7 @@ import {
   getPrivateGreeting,
 } from '../../../Datasets/Messages.js';
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
-import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
+import { copyToClipboard, createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -50,7 +50,6 @@ import {
 } from './TerminalPanel.js';
 import {
   buildModelContent,
-  copyToClipboard,
   formatPromptTemplate,
   generateSessionId,
   getFirstName,

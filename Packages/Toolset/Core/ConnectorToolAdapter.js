@@ -78,6 +78,6 @@ export function createConnectorToolHandlers({ rootDirectory, toolDefinitions = [
   );
 }
 
-export function buildConnectorPromptSection(serviceName, toolDefinitions = []) {
+export function buildConnectorPromptSection() {
   return '';
 }

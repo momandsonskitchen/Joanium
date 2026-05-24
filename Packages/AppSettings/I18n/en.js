@@ -1,6 +1,4 @@
 const en = {
-  title: 'App',
-  subtitle: 'Control how Joanium behaves outside the chat window.',
   saved: 'Saved',
   saveFailed: 'Could not update this setting.',
   options: {
@@ -99,38 +97,6 @@ const en = {
     description: 'Manually run memory learning on recent conversations.',
     button: 'Update Memory',
     updating: 'Updating...',
-  },
-  runtime: {
-    title: 'Runtime',
-    keepAwake: 'Keep awake service',
-    tray: 'System tray service',
-    active: 'Active',
-    inactive: 'Inactive',
-  },
-  autoUpdate: {
-    label: 'Auto update status',
-    check: 'Check',
-    checking: 'Checking...',
-    install: 'Install',
-    checkFailed: 'Could not check for updates.',
-    statuses: {
-      idle: 'Idle',
-      disabled: 'Disabled',
-      unsupported: 'Unavailable',
-      checking: 'Checking',
-      current: 'Up to date',
-      downloading: 'Downloading',
-      downloaded: 'Ready to install',
-      error: 'Error',
-    },
-    details: {
-      idle: 'Updates are enabled and will be checked automatically.',
-      disabled: 'Enable app auto update to check for new releases.',
-      unsupported: 'Updates are only available in packaged builds.',
-      current: 'This build is current.',
-      downloading: 'Downloading update: {percent}%',
-      downloaded: 'The update has been downloaded.',
-    },
   },
   reset: {
     title: 'Danger zone',

@@ -1,6 +1,4 @@
 const en = {
-  title: 'Appearance',
-  subtitle: 'Control Joanium theme and motion preferences.',
   mode: {
     label: 'Theme',
     system: 'System',

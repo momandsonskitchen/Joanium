@@ -24,8 +24,6 @@ const en = {
   empty: 'No projects yet',
   emptyHint: 'Create your first project to get started.',
   active: 'Active',
-  activeHint: 'This project context will be used in new chats.',
-  removeActive: 'Remove active project',
   open: 'Open',
   edit: 'Edit',
   delete: 'Delete',

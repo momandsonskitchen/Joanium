@@ -27,7 +27,6 @@
 
 .browser-preview__header,
 .browser-preview__controls,
-.browser-preview__form,
 .browser-preview__status-row {
   display: flex;
   align-items: center;
@@ -120,57 +119,15 @@
   opacity: 0.35;
 }
 
-.browser-preview__control-icon,
-.browser-preview__open-icon {
+.browser-preview__control-icon {
   display: inline-flex;
   width: 16px;
   height: 16px;
 }
 
-.browser-preview__control-icon svg,
-.browser-preview__open-icon svg {
+.browser-preview__control-icon svg {
   width: 100%;
   height: 100%;
-}
-
-.browser-preview__form {
-  gap: 8px;
-  padding: 8px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.1);
-  flex-shrink: 0;
-}
-
-.browser-preview__input {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--color-chat-text-title);
-  font-size: 13px;
-  user-select: text;
-  -webkit-user-select: text;
-  cursor: text;
-}
-
-.browser-preview__input::placeholder {
-  color: var(--color-chat-text-placeholder);
-}
-
-.browser-preview__open {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: var(--radius-pill);
-  color: #ffffff;
-  background: rgba(var(--color-accent-rgb), 0.88);
-  font-size: 12px;
-  font-weight: 700;
 }
 
 .browser-preview__status-row {
@@ -887,28 +844,6 @@
   flex: 0 1 auto;
 }
 
-.chat-gitbar__branch-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
-  border-radius: 12px;
-  color: rgba(54, 38, 68, 0.72);
-  transition:
-    transform 140ms ease,
-    background-color 140ms ease,
-    color 140ms ease;
-}
-
-.chat-gitbar__branch-button:hover,
-.chat-gitbar__branch-button--open {
-  background: var(--color-chat-hover-surface);
-  color: var(--color-chat-text-title);
-  transform: translateY(-1px);
-}
-
 .chat-gitbar__actions {
   gap: 8px;
   flex-shrink: 0;
@@ -1107,7 +1042,6 @@
   background: rgba(var(--color-accent-rgb), 1);
 }
 
-.chat-gitbar__branch-button:disabled,
 .chat-gitbar__icon-button:disabled,
 .chat-gitbar__menu-button:disabled,
 .chat-gitbar__secondary:disabled,
@@ -1500,34 +1434,6 @@
   gap: 8px;
   margin-bottom: 12px;
   -webkit-app-region: no-drag;
-}
-
-.chat-composer__private-notice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  border-radius: 14px;
-  background: rgba(124, 58, 237, 0.07);
-  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.14);
-  font-size: 12.5px;
-  font-weight: 560;
-  color: #7c3aed;
-  -webkit-app-region: no-drag;
-}
-
-.chat-composer__private-notice-icon {
-  display: inline-flex;
-  flex-shrink: 0;
-  width: 13px;
-  height: 13px;
-  color: currentColor;
-}
-
-.chat-composer__private-notice-icon svg {
-  width: 100%;
-  height: 100%;
 }
 
 .chat-composer__notice {
@@ -2948,42 +2854,6 @@
   display: inline;
 }
 
-.chat-memory-sync {
-  position: absolute;
-  top: 22px;
-  right: 26px;
-  z-index: 18;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 34px;
-  padding: 0 13px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.76);
-  backdrop-filter: blur(18px) saturate(1.45);
-  -webkit-backdrop-filter: blur(18px) saturate(1.45);
-  box-shadow:
-    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
-    0 8px 22px rgba(130, 95, 65, 0.09);
-  color: var(--color-chat-text-secondary);
-  font-size: 12px;
-  font-weight: 680;
-  -webkit-app-region: no-drag;
-}
-
-.chat-memory-sync__icon {
-  display: inline-flex;
-  width: 15px;
-  height: 15px;
-  color: var(--color-accent);
-  animation: chat-spin 1.2s linear infinite;
-}
-
-.chat-memory-sync__icon svg {
-  width: 100%;
-  height: 100%;
-}
-
 /* ── Conversation track ───────────────────────────────────────────────────── */
 
 .chat-thread-track {
@@ -3469,30 +3339,6 @@
   pointer-events: none;
 }
 
-/* Grid: single vertical column of cards */
-.tech-feed__grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-/* Section header */
-.tech-feed__section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 20px 4px 8px;
-  font-size: 11px;
-  font-weight: 760;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-chat-text-label, rgba(120, 80, 160, 0.55));
-}
-
-.tech-feed__section-header:first-child {
-  padding-top: 0;
-}
-
 /* Card */
 .tech-feed__card {
   display: flex;
@@ -3682,14 +3528,6 @@
 }
 
 /* -- Tech Feed horizontal row layout additions ------------------------- */
-
-/* Each source section: header + scrollable row */
-.tech-feed__section {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-bottom: 8px;
-}
 
 /* Horizontal scroll row � no visible scrollbar */
 .tech-feed__row {

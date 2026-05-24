@@ -43,8 +43,6 @@ const en = {
   errorGeneric: 'Something went wrong. Please try again.',
 
   // Success
-  successEnabled: 'App Lock enabled.',
-  successDisabled: 'App Lock disabled.',
   successPasswordChanged: 'Password updated.',
 
   // Lock screen
@@ -60,7 +58,6 @@ const en = {
   lockRateLimitMsg: 'Too many attempts. Try again in {time}.',
   lockWrongPassword: 'Incorrect password.',
   lockWrongAnswer: 'Incorrect answer.',
-  lockAttemptsLeft: '{n} attempt{s} remaining before lockout.',
 
   // Guest lock screen (security not configured)
   lockGuestSubtitle: 'App is locked',

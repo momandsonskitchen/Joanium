@@ -13,10 +13,6 @@ const GIT_ERROR_CATEGORY = Object.freeze({
   UNKNOWN: 'unknown',
 });
 
-function normalizeBool(value) {
-  return value === true || value === 'true';
-}
-
 function normalizeGitError(stderr = '', stdout = '') {
   const text = `${stderr}\n${stdout}`.toLowerCase();
   if (/nothing to commit|nothing added to commit|no changes added/.test(text)) {

@@ -184,34 +184,3 @@ export function formatPromptTemplate(template, replacements = {}) {
 
   return formatText(activeLines, replacements).trim();
 }
-
-/**
- * Copies text to the clipboard. Tries the modern async Clipboard API first
- * (which can fail silently in Electron when the window loses focus on click),
- * then falls back to the legacy execCommand approach so the button always works.
- */
-export function copyToClipboard(text) {
-  const str = String(text ?? '');
-
-  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-    return navigator.clipboard.writeText(str).catch(() => _execCommandCopy(str));
-  }
-
-  _execCommandCopy(str);
-  return Promise.resolve();
-}
-
-function _execCommandCopy(text) {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
-  document.body.appendChild(textarea);
-  textarea.focus();
-  textarea.select();
-  try {
-    document.execCommand('copy');
-  } catch {
-    // Nothing more we can do.
-  }
-  document.body.removeChild(textarea);
-}

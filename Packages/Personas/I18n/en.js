@@ -8,11 +8,9 @@ const en = {
   emptyHint: 'Add Markdown persona files to the Personas directory to get started.',
   activate: 'Activate',
   active: 'Active',
-  deactivate: 'Deactivate',
   delete: 'Delete',
   author: 'Author',
   selectPrompt: 'Select a persona to read its content',
-  removeActive: 'Remove active persona',
 };
 
 export default en;

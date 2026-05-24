@@ -53,7 +53,7 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       const stream = pendingStreams.get(streamId);
       if (!stream) return;
       pendingStreams.delete(streamId);
-      stream.reject(new Error(message ?? 'Agent stream error.'));
+      stream.reject(new Error(message ?? strings.gateway?.streamError ?? 'Agent stream error.'));
     });
   }
 
@@ -116,8 +116,8 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
           supportedTerminalTools: AGENT_TERMINAL_TOOLS,
           source: 'agent',
           isNewSession: true,
-          toolLimitMessage: 'Agent reached the tool call limit.',
-          fallbackText: 'Agent could not complete the requested workflow.',
+          toolLimitMessage: strings.gateway?.toolLimit ?? '',
+          fallbackText: strings.gateway?.fallbackText ?? '',
           completeMessage: (request, options) => streamChatForAgent(request, options),
         });
       } catch (error) {

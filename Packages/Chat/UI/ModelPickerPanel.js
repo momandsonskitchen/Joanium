@@ -25,7 +25,7 @@ export function getPreferredProvider(payload) {
   );
 }
 
-export function createModelPickerPanel({ providers, userProviderDetails, strings, onSelect }) {
+export function createModelPickerPanel({ providers, userProviderDetails, onSelect }) {
   const panel = createElement('div', 'chat-model-picker');
   document.body.append(panel);
 

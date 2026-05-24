@@ -75,7 +75,7 @@ export function mountLockScreen(strings, initialStatus) {
     renderAvatar(null);
 
     // ── Name + subtitle ───────────────────────────────────────────────────
-    const nameEl = createElement('h1', 'lock-screen__name', 'Joanium');
+    const nameEl = createElement('h1', 'lock-screen__name', strings.lockTitle);
     const subtitleEl = createElement('p', 'lock-screen__subtitle', strings.lockSubtitle);
 
     invokeIpc('user:get-profile')
@@ -186,7 +186,11 @@ export function mountLockScreen(strings, initialStatus) {
     const answerSection = createElement('div', 'lock-screen__section');
 
     const questionBlock = createElement('div', 'lock-screen__question-block');
-    const questionEyebrow = createElement('p', 'lock-screen__question-eyebrow', 'Secret question');
+    const questionEyebrow = createElement(
+      'p',
+      'lock-screen__question-eyebrow',
+      strings.lockQuestionLabel,
+    );
     const questionLabel = createElement(
       'p',
       'lock-screen__question-label',

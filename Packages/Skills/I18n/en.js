@@ -7,9 +7,7 @@ const en = {
   empty: 'No skills found',
   emptyHint: 'Add Markdown skill files to the Skills directory to get started.',
   delete: 'Delete',
-  viewContent: 'View content',
   trigger: 'Triggers',
-  namespace: 'Namespace',
   author: 'Author',
   selectPrompt: 'Select a skill to read its content',
 };
