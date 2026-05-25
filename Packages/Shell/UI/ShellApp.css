@@ -559,3 +559,49 @@ textarea {
     transform: translateY(0);
   }
 }
+
+/* ── Dark mode overrides ──────────────────────────────────────────────────── */
+
+.joanium-theme-dark .chat-sidebar__tabs {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 14px rgba(10, 4, 20, 0.22);
+}
+
+.joanium-theme-dark .chat-sidebar__tab::after,
+.joanium-theme-dark .chat-sidebar__avatar::after {
+  background: rgba(30, 16, 46, 0.96);
+  box-shadow: var(--shadow-chat-pill);
+  color: var(--color-chat-text-title);
+}
+
+.joanium-theme-dark .chat-sidebar__status-dot::after {
+  background: rgba(30, 16, 46, 0.96);
+  box-shadow: var(--shadow-chat-pill);
+  color: var(--color-chat-text-title);
+}
+
+.joanium-theme-dark .chat-sidebar__tab:hover:not(.chat-sidebar__tab--active) {
+  color: rgba(230, 210, 255, 0.88);
+}
+
+.joanium-theme-dark .chat-shortcuts__rows {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.1),
+    0 1px 3px rgba(10, 4, 20, 0.18);
+}
+
+.joanium-theme-dark .chat-shortcuts__row {
+  border-bottom-color: rgba(180, 130, 220, 0.08);
+}
+
+.joanium-theme-dark .chat-shortcuts__key {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.18),
+    inset 0 -2px 0 rgba(10, 4, 20, 0.2),
+    0 1px 2px rgba(10, 4, 20, 0.12);
+}
