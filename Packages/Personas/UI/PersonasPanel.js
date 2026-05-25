@@ -7,6 +7,23 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Converts a raw filename-derived name (e.g. "leslie-chow", "john_doe")
+ * into a properly capitalised display name ("Leslie Chow", "John Doe").
+ * Has no effect on names that are already well-formed.
+ */
+function formatPersonaName(name) {
+  return String(name ?? '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+// ---------------------------------------------------------------------------
 // Panel factory
 // ---------------------------------------------------------------------------
 
@@ -136,7 +153,9 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     const header = createElement('div', 'chat-personas__viewer-header');
 
     const headerLeft = createElement('div', 'chat-personas__viewer-header-left');
-    headerLeft.append(createElement('h3', 'chat-personas__viewer-title', fullPersona.name));
+    headerLeft.append(
+      createElement('h3', 'chat-personas__viewer-title', formatPersonaName(fullPersona.name)),
+    );
 
     const author = createElement('div', 'chat-personas__viewer-author');
     author.append(
@@ -190,7 +209,9 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
 
     // Name row — name + optional active badge side by side
     const nameRow = createElement('div', 'chat-personas__card-name-row');
-    nameRow.append(createElement('span', 'chat-personas__card-name', persona.name));
+    nameRow.append(
+      createElement('span', 'chat-personas__card-name', formatPersonaName(persona.name)),
+    );
     if (isActive) {
       nameRow.append(createElement('span', 'chat-personas__card-active-badge', strings.active));
     }
