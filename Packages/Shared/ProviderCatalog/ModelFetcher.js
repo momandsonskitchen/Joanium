@@ -34,6 +34,71 @@ function compact(obj) {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v != null));
 }
 
+/**
+ * Convert a raw model ID into a human-readable display name.
+ * e.g. "accounts/fireworks/models/flux-1-dev"  → "Flux 1 Dev"
+ *      "deepseek-ai/DeepSeek-R1-0528"          → "DeepSeek R1 0528"
+ *      "meta-llama/Meta-Llama-3.3-70B-Instruct" → "Meta Llama 3.3 70B Instruct"
+ */
+function modelIdToName(id) {
+  // Take the last path segment when the ID contains slashes.
+  const slug = id.includes('/') ? id.split('/').pop() : id;
+
+  // Known version/size/precision tokens that should be fully uppercased.
+  const upperTokens = new Set([
+    'v1',
+    'v2',
+    'v3',
+    'v4',
+    'v5',
+    'r1',
+    'r2',
+    'b',
+    'm',
+    'k',
+    'fp8',
+    'fp16',
+    'bf16',
+    'int4',
+    'int8',
+    'oss',
+    'moe',
+    'vl',
+    'vlm',
+    'pro',
+    'max',
+    'mini',
+    'plus',
+    'ultra',
+    'lite',
+    'turbo',
+    'fast',
+    'flash',
+    'api',
+    'sdk',
+    'llm',
+  ]);
+
+  return slug
+    .replace(/[_\.]/g, '-')
+    .split('-')
+    .filter(Boolean)
+    .map((token) => {
+      const lower = token.toLowerCase();
+      // Pure numbers stay as-is (e.g. "3", "70", "0528").
+      if (/^\d+$/.test(token)) return token;
+      // Size tokens like "70b", "8b", "405b", "1.5b".
+      if (/^\d+(\.\d+)?[bBmMkK]$/.test(token)) return token.toUpperCase();
+      // Version tokens like "v3", "v3p1", "r1".
+      if (/^[vVrR]\d/.test(token)) return token.toUpperCase();
+      // Known reserved words.
+      if (upperTokens.has(lower)) return token.toUpperCase();
+      // Default: capitalise first letter.
+      return token.charAt(0).toUpperCase() + token.slice(1);
+    })
+    .join(' ');
+}
+
 /** Convert a per-token price to per-million-token price (2 decimal places). */
 function perMillion(perToken) {
   if (perToken == null || Number.isNaN(Number(perToken))) return null;
@@ -53,7 +118,7 @@ async function openAICompat(url, authHeader) {
   return items.map((m) =>
     compact({
       id: String(m.id),
-      name: String(m.id),
+      name: modelIdToName(String(m.id)),
       context_window: m.context_window ?? null,
     }),
   );
@@ -186,6 +251,48 @@ async function fetchLmStudioModels(endpoint) {
   return items.map((m) => compact({ id: String(m.id), name: String(m.id) }));
 }
 
+/**
+ * Fireworks AI: GET /inference/v1/models → { data: [{ id, object }] }
+ * Filters to chat/text models only — excludes image generation models
+ * (Flux, Stable Diffusion, Playground, etc.) that don't support /chat/completions.
+ */
+async function fetchFireworksModels(apiKey) {
+  const body = await fetchJson('https://api.fireworks.ai/inference/v1/models', {
+    Authorization: `Bearer ${apiKey}`,
+  });
+  const items = Array.isArray(body?.data) ? body.data : [];
+
+  // Known image/audio/video model slug patterns that don't support chat completions.
+  const nonChatPatterns = [
+    /flux/i,
+    /stable-diffusion/i,
+    /sdxl/i,
+    /playground/i,
+    /kandinsky/i,
+    /dall-e/i,
+    /whisper/i,
+    /tts/i,
+    /speech/i,
+    /audio/i,
+    /video/i,
+    /image-/i,
+    /-image/i,
+  ];
+
+  return items
+    .filter((m) => {
+      const id = String(m.id);
+      return !nonChatPatterns.some((re) => re.test(id));
+    })
+    .map((m) =>
+      compact({
+        id: String(m.id),
+        name: modelIdToName(String(m.id)),
+        context_window: m.context_window ?? null,
+      }),
+    );
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
@@ -246,6 +353,21 @@ export async function fetchProviderModels(providerId, { apiKey = '', endpoint = 
 
     case 'lmstudio':
       return fetchLmStudioModels(endpoint);
+
+    case 'fireworks':
+      return fetchFireworksModels(apiKey);
+
+    case 'lambda':
+      return openAICompat('https://api.lambda.ai/v1/models', `Bearer ${apiKey}`);
+
+    case 'sambanova':
+      return openAICompat('https://api.sambanova.ai/v1/models', `Bearer ${apiKey}`);
+
+    // Hyperbolic and AI21 don't expose a public models listing endpoint —
+    // returning null keeps all bundled models (fail-safe behaviour).
+    case 'hyperbolic':
+    case 'ai21':
+      return null;
 
     default:
       return null;

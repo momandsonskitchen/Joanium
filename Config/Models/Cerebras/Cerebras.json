@@ -5,27 +5,8 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "qwen-3-235b-a22b-instruct-2507": {
-      "name": "qwen-3-235b-a22b-instruct-2507"
-    },
     "llama3.1-8b": {
       "name": "llama3.1-8b"
-    },
-    "zai-glm-4.7": {
-      "name": "Z.ai GLM 4.7",
-      "description": "355B parameter reasoning model from Z.ai — strong multilingual performance and chain-of-thought on Cerebras silicon",
-      "context_window": 32768,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.5,
-        "output": 0.5
-      }
     },
     "gpt-oss-120b": {
       "name": "GPT OSS 120B",
@@ -42,7 +23,26 @@
         "input": 0.6,
         "output": 0.6
       }
+    },
+    "qwen-3-235b-a22b-instruct-2507": {
+      "name": "qwen-3-235b-a22b-instruct-2507"
+    },
+    "zai-glm-4.7": {
+      "name": "Z.ai GLM 4.7",
+      "description": "355B parameter reasoning model from Z.ai — strong multilingual performance and chain-of-thought on Cerebras silicon",
+      "context_window": 32768,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.5,
+        "output": 0.5
+      }
     }
   },
-  "_syncedAt": "2026-05-24T17:40:07.413Z"
+  "_syncedAt": "2026-05-25T11:21:29.050Z"
 }

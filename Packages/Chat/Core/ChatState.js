@@ -13,11 +13,15 @@ import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 
 const openAiCompatibleProviders = new Set([
+  'ai21',
   'cerebras',
   'cohere',
   'deepseek',
+  'fireworks',
   'google-openai',
   'groq',
+  'hyperbolic',
+  'lambda',
   'lmstudio',
   'minimax',
   'mistral',
@@ -26,6 +30,7 @@ const openAiCompatibleProviders = new Set([
   'openai',
   'openrouter',
   'perplexity',
+  'sambanova',
   'together',
   'xai',
 ]);
