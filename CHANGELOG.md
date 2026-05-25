@@ -6,6 +6,26 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.525.0] - 2026-05-25
+
+* chore(release): bump version to 2026.525.0
+* Version bump for electron-builder and prettier
+* Model List Update
+* Fireworks AI API Fix
+* Added 5 new AI Providers
+* Updated Cerebras Models List
+* Updated MiniMax Endpoint
+* Added New Agents Avatars
+* Updated the nav bar active button
+* History Buttons Color Fix
+* feat: personalise tech feed by usage modes + fix dark theme status panel
+* Fix: Reasoning text color
+* ProductKnowledge Update
+* Fixed the text in the reasoning block in the dark mode
+* Reduced the width of the tool call box
+
+---
+
 ## [2026.524.0] - 2026-05-24
 
 * chore(release): bump version to 2026.524.0
