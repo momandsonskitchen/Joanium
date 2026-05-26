@@ -55,4 +55,18 @@ export const TERMINAL_TOOL_NAMES = Object.freeze([
 
   // ── Project ───────────────────────────────────────────────────────────────
   'run_project_checks',
+
+  // ── Live Browser ─────────────────────────────────────────────────────────
+  'browser_navigate',
+  'browser_get_state',
+  'browser_snapshot',
+  'browser_get_text',
+  'browser_click',
+  'browser_type',
+  'browser_press_key',
+  'browser_scroll',
+  'browser_back',
+  'browser_forward',
+  'browser_refresh',
+  'browser_screenshot',
 ]);

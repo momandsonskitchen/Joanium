@@ -78,6 +78,19 @@ export async function createPackage({ rootDirectory }) {
         channel: 'browser-preview:close',
         handler: async () => browserPreviewService.close(),
       },
+      {
+        channel: 'browser-preview:execute-tool',
+        handler: async (event, { tool, params } = {}) => {
+          try {
+            const result = await browserPreviewService.executeTool(tool, params ?? {}, {
+              ownerWindow: ownerWindow(event),
+            });
+            return { ok: true, output: String(result ?? '') };
+          } catch (error) {
+            return { ok: false, error: error?.message ?? String(error) };
+          }
+        },
+      },
     ],
   };
 }

@@ -552,6 +552,13 @@ export async function executeTerminalTool(
     });
   }
 
+  if (String(action.tool).startsWith('browser_')) {
+    return invokeIpc('browser-preview:execute-tool', {
+      tool: action.tool,
+      params: payload,
+    });
+  }
+
   if (action.tool === 'start_local_server') {
     return invokeIpc('terminal:spawn-command', {
       command: payload.command,
@@ -640,6 +647,7 @@ export function formatTerminalResultForModel(
     lines.push(`Entries:\n${JSON.stringify(result.entries, null, 2)}`);
   }
   if (result?.content) lines.push(`Content:\n${result.content}`);
+  if (result?.output) lines.push(`Output:\n${result.output}`);
   if (result?.buffer) lines.push(`Output buffer:\n${result.buffer}`);
 
   if (lines.length === 2) {
