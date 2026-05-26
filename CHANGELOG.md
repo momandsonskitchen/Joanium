@@ -6,6 +6,21 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.526.0] - 2026-05-26
+
+* chore(release): bump version to 2026.526.0
+* Added The ability to read live browser when invoked by the user
+* Fixed the message pausing when the user types
+* Added the ability to read skills
+* Dark Theme Fix For Updates Panel
+* Fixed the flickering issue during the switch to history
+* AI Models Update
+* Stripped the formatPersonaName from PersonaPanel to Utils
+* Personas Title Rendering Issue Fix
+* Added Support For Dark Theme For Memory Update Pill
+
+---
+
 ## [2026.525.0] - 2026-05-25
 
 * chore(release): bump version to 2026.525.0
