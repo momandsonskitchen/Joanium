@@ -150,6 +150,7 @@ export async function createChatView(
   let sessionCreatedAt = null;
   let messages = [];
   let prevHasMessages = false;
+  let isLoadingSession = false;
   let streamDisposers = [];
   let generationToken = 0;
   let streamSequence = 0;
@@ -1562,7 +1563,10 @@ export async function createChatView(
       isSending = false;
       accText = '';
       accThinking = '';
+      isLoadingSession = true;
+      renderThread();
       const session = await invokeIpc('history:load-session', id, activeProject?.id);
+      isLoadingSession = false;
       messages = (session.messages ?? [])
         .map((message) => {
           const role = message.role === 'assistant' ? 'assistant' : 'user';
@@ -1592,6 +1596,8 @@ export async function createChatView(
       focusComposer();
     } catch (error) {
       console.error('[Joanium] Failed to load session:', error);
+    } finally {
+      isLoadingSession = false;
     }
   }
 
@@ -2328,7 +2334,7 @@ export async function createChatView(
       activeSpeakBtn = null;
     }
 
-    const hasMessages = messages.length > 0;
+    const hasMessages = messages.length > 0 || isLoadingSession;
     const isFirstMessage = hasMessages && !prevHasMessages;
     prevHasMessages = hasMessages;
 
