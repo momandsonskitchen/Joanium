@@ -228,8 +228,10 @@ export function createMessageElement(
 }
 
 export function updateLastStreamingMessage(threadEl, { content, thinking }) {
-  const lastEl = threadEl?.lastElementChild;
-  if (!lastEl || !lastEl.classList.contains('chat-message--assistant')) return;
+  const lastEl = Array.from(threadEl?.children ?? [])
+    .reverse()
+    .find((element) => element.classList.contains('chat-message--assistant'));
+  if (!lastEl) return;
 
   // Target the LAST thinking/bubble element — works for both single-turn and
   // grouped multi-turn articles where tool loop iterations are merged into one.
