@@ -1,4 +1,5 @@
 import { formatText } from '../../Shared/Utils/DomUtils.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 
 export function getFirstName(name, fallback) {
@@ -172,6 +173,41 @@ export function buildAttachmentContext(strings, attachments) {
 export function buildModelContent(strings, prompt, attachments) {
   const attachmentContext = buildAttachmentContext(strings, attachments);
   return [prompt, attachmentContext].filter(Boolean).join('\n\n');
+}
+
+export function buildLiveBrowserContext(strings, state = {}) {
+  if (!state?.hasPage || !state.url) return '';
+
+  const browserContext = strings.composer?.liveBrowserContext;
+  if (!browserContext) return '';
+
+  const formatFlag = (value) => (value ? browserContext.yes : browserContext.no);
+  const lines = [
+    browserContext.header,
+    browserContext.open,
+    formatText(browserContext.title, { title: state.title || browserContext.untitled }),
+    formatText(browserContext.url, { url: state.url }),
+    formatText(browserContext.visible, { visible: formatFlag(state.visible) }),
+    formatText(browserContext.loading, { loading: formatFlag(state.loading) }),
+    formatText(browserContext.status, { status: state.status || browserContext.ready }),
+    '',
+    browserContext.instruction,
+    browserContext.navigationInstruction,
+  ];
+
+  return lines
+    .filter((line) => line !== undefined && line !== null)
+    .join('\n')
+    .trim();
+}
+
+export async function loadLiveBrowserContext(strings) {
+  try {
+    const state = await invokeIpc('browser-preview:get-state');
+    return buildLiveBrowserContext(strings, state);
+  } catch {
+    return '';
+  }
 }
 
 export function formatPromptTemplate(template, replacements = {}) {

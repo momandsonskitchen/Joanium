@@ -30,6 +30,23 @@ const en = {
     privateToggle: 'Toggle private chat',
     privateLabel: 'Private',
     scrollToBottom: 'Scroll to bottom',
+    liveBrowserContext: {
+      header: '# Live browser context',
+      open: 'A live browser tab is currently open.',
+      title: 'Title: {title}',
+      url: 'URL: {url}',
+      visible: 'Visible: {visible}',
+      loading: 'Loading: {loading}',
+      status: 'Status: {status}',
+      yes: 'yes',
+      no: 'no',
+      untitled: 'Untitled page',
+      ready: 'Ready',
+      instruction:
+        'If the latest user message refers to this tab, page, article, site, or asks to summarize or explain it, use browser_get_text or browser_snapshot directly on the current page before answering.',
+      navigationInstruction:
+        'Do not say you cannot see the opened tab. Do not call browser_navigate first unless you need to change to a different URL.',
+    },
   },
   diag: {
     statusLabel: 'Status',

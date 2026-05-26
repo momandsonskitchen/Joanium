@@ -18,6 +18,7 @@ import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js'
 import {
   createAssistantContextCache,
   createAssistantPipelineRequest,
+  joinPromptParts,
   loadAssistantPipelineRuntime,
   resetAssistantContextCache,
 } from '../../Shared/AssistantRuntime/AssistantPipeline.js';
@@ -54,6 +55,7 @@ import {
   formatPromptTemplate,
   generateSessionId,
   getFirstName,
+  loadLiveBrowserContext,
   sanitizeAssistantVisibleContent,
   toAttachmentSummary,
 } from './Utils.js';
@@ -3665,6 +3667,7 @@ export async function createChatView(
         if (!imageAttachments?.length) return { role, content: textContent };
         return { role, content: textContent, imageAttachments };
       });
+    const liveBrowserContext = await loadLiveBrowserContext(strings);
     const pipelineRequest = await createAssistantPipelineRequest({
       messages: historyToSend,
       contextCache: assistantContextCache,
@@ -3672,7 +3675,7 @@ export async function createChatView(
       modelId: activeModel?.id ?? null,
       projectInfo: buildProjectContext(activeProject) || null,
       persona: (getActivePersona?.() ?? activePersona)?.content || null,
-      modeInstruction: getModeInstruction(),
+      modeInstruction: joinPromptParts([getModeInstruction(), liveBrowserContext]),
       terminalTools: payload.terminalPrompt,
       isNewSession,
       source: 'chat',
