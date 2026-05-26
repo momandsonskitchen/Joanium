@@ -850,6 +850,9 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
   if (typeof request?.toolsetTools === 'string' && request.toolsetTools.trim()) {
     parts.push(request.toolsetTools.trim());
   }
+  if (typeof request?.skillsContext === 'string' && request.skillsContext.trim()) {
+    parts.push(request.skillsContext.trim());
+  }
 
   const systemPrompt = parts.length > 0 ? parts.join('\n\n') : null;
 

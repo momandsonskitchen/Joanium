@@ -27,20 +27,24 @@ export async function loadAssistantPipelineRuntime({
   includeMemory = true,
   includeTerminalPrompt = true,
   includeToolsetPrompt = true,
+  includeSkillsContext = true,
   memoryContext,
   terminalTools,
   toolsetTools,
+  skillsContext,
   terminalToolsFallback = '',
   toolsetToolsFallback = '',
 } = {}) {
   const shouldLoadMemory = includeMemory && !hasExplicitValue(memoryContext);
   const shouldLoadTerminalPrompt = includeTerminalPrompt && !hasExplicitValue(terminalTools);
   const shouldLoadToolsetPrompt = includeToolsetPrompt && !hasExplicitValue(toolsetTools);
+  const shouldLoadSkillsContext = includeSkillsContext && !hasExplicitValue(skillsContext);
 
   const runtimeContext = await loadAssistantRuntimeContext(contextCache, {
     includeMemory: shouldLoadMemory,
     includeTerminalPrompt: shouldLoadTerminalPrompt,
     includeToolsetPrompt: shouldLoadToolsetPrompt,
+    includeSkillsContext: shouldLoadSkillsContext,
   });
 
   return {
@@ -55,6 +59,7 @@ export async function loadAssistantPipelineRuntime({
       runtimeContext.toolsetPrompt,
       toolsetToolsFallback,
     ),
+    skillsContext: resolveRuntimeValue(skillsContext, runtimeContext.skillsContext),
   };
 }
 
@@ -66,6 +71,7 @@ export async function createAssistantPipelineRequest({
   memoryContext,
   terminalTools,
   toolsetTools,
+  skillsContext,
   terminalToolsFallback = '',
   toolsetToolsFallback = '',
   providerId = null,
@@ -77,15 +83,18 @@ export async function createAssistantPipelineRequest({
   includeMemory = true,
   includeTerminalPrompt = true,
   includeToolsetPrompt = true,
+  includeSkillsContext = true,
 } = {}) {
   const runtimeContext = await loadAssistantPipelineRuntime({
     contextCache,
     includeMemory,
     includeTerminalPrompt,
     includeToolsetPrompt,
+    includeSkillsContext,
     memoryContext,
     terminalTools,
     toolsetTools,
+    skillsContext,
     terminalToolsFallback,
     toolsetToolsFallback,
   });
@@ -99,6 +108,7 @@ export async function createAssistantPipelineRequest({
   applyOptionalRequestValue(request, 'memoryContext', runtimeContext.memoryContext);
   applyOptionalRequestValue(request, 'terminalTools', runtimeContext.terminalTools);
   applyOptionalRequestValue(request, 'toolsetTools', runtimeContext.toolsetTools);
+  applyOptionalRequestValue(request, 'skillsContext', runtimeContext.skillsContext);
   applyOptionalRequestValue(request, 'providerId', providerId);
   applyOptionalRequestValue(request, 'modelId', modelId);
   applyOptionalRequestValue(request, 'projectInfo', projectInfo);

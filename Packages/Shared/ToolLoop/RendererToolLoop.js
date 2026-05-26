@@ -684,6 +684,34 @@ export async function loadToolsetPrompt() {
   }
 }
 
+export async function loadSkillsContext() {
+  try {
+    const skills = await invokeIpc('skills:list-skills');
+    if (!Array.isArray(skills) || skills.length === 0) return '';
+
+    const catalog = skills
+      .map(
+        (s) =>
+          `- **${s.name}**${s.description ? `: ${s.description}` : ''} [namespace: ${s.namespace}, file: ${s.filename}]`,
+      )
+      .join('\n');
+
+    return [
+      '# Skills',
+      "You have curated skill documents available. When the user's request would clearly benefit from a specific skill, load it by emitting exactly this block (do not load speculatively):",
+      '```joanium-tool',
+      '{"tool":"read_skill","namespace":"<namespace>","filename":"<filename>"}',
+      '```',
+      'Load at most one skill per turn. The skill content will be injected as a tool result so you can use it in your next reply.',
+      '',
+      'Available skills:',
+      catalog,
+    ].join('\n');
+  } catch {
+    return '';
+  }
+}
+
 export async function runRendererToolLoop({
   messages,
   persona,

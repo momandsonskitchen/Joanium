@@ -2851,6 +2851,30 @@ export async function createChatView(
   }
 
   async function executeToolsetTool(action) {
+    // ── read_skill: fetch a skill document and inject it as context ──────────
+    if (action?.tool === 'read_skill') {
+      const namespace = String(
+        action.payload?.namespace ?? action.payload?.parameters?.namespace ?? '',
+      ).trim();
+      const filename = String(
+        action.payload?.filename ?? action.payload?.parameters?.filename ?? '',
+      ).trim();
+      try {
+        const skill = await invokeIpc('skills:load-skill', namespace, filename);
+        return {
+          ok: true,
+          tool: 'read_skill',
+          output: `# Skill: ${skill.name}\n\n${skill.content}`,
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          tool: 'read_skill',
+          error: error?.message ?? 'Skill not found.',
+        };
+      }
+    }
+
     if (action?.tool === 'spawn_sub_agents') {
       return executeSubAgentTool(action);
     }
@@ -2867,6 +2891,19 @@ export async function createChatView(
       tool: action.tool,
       parameters,
     });
+  }
+
+  // Returns a human-readable card label for a toolset action.
+  function getToolsetCardLabel(action) {
+    if (action?.tool === 'spawn_sub_agents') return strings.tools.subAgentsLabel;
+    if (action?.tool === 'read_skill') {
+      const raw =
+        String(action.payload?.filename ?? '').replace(/\.md$/i, '') ||
+        String(action.payload?.namespace ?? '') ||
+        'skill';
+      return `Reading ${raw}`;
+    }
+    return action?.tool || strings.tools.runningTool;
   }
 
   function updateLastAssistantMessage(updater) {
@@ -3030,7 +3067,7 @@ export async function createChatView(
           providerLabel: activeProvider?.label ?? 'AI',
           modelLabel: activeModelLabel,
           terminal: {
-            label: isSubAgentAction ? strings.tools.subAgentsLabel : action.tool,
+            label: getToolsetCardLabel(action),
             command: action.tool,
             status: 'running',
             statusLabel: strings.terminal.running,
@@ -3260,7 +3297,7 @@ export async function createChatView(
         providerLabel: activeProvider?.label ?? 'AI',
         modelLabel: activeModelLabel,
         terminal: {
-          label: isSubAgentAction ? strings.tools.subAgentsLabel : action.tool,
+          label: getToolsetCardLabel(action),
           command: action.tool,
           status: 'running',
           statusLabel: strings.terminal.running,
@@ -3552,7 +3589,7 @@ export async function createChatView(
             providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
             modelLabel: meta?.modelLabel ?? activeModelLabel,
             terminal: {
-              label: isSubAgentAction ? strings.tools.subAgentsLabel : toolsetAction.tool,
+              label: getToolsetCardLabel(toolsetAction),
               command: toolsetAction.tool,
               status: 'running',
               statusLabel: strings.terminal.running,

@@ -2,12 +2,14 @@ import {
   loadMemoryContext,
   loadTerminalPrompt,
   loadToolsetPrompt,
+  loadSkillsContext,
 } from '../ToolLoop/RendererToolLoop.js';
 
 export function createAssistantContextCache() {
   return {
     terminalPrompt: null,
     toolsetPrompt: null,
+    skillsContext: null,
   };
 }
 
@@ -15,6 +17,7 @@ export function resetAssistantContextCache(cache) {
   if (!cache) return;
   cache.terminalPrompt = null;
   cache.toolsetPrompt = null;
+  cache.skillsContext = null;
 }
 
 export function joinPromptParts(parts = []) {
@@ -26,7 +29,12 @@ export function joinPromptParts(parts = []) {
 
 export async function loadAssistantRuntimeContext(
   cache = createAssistantContextCache(),
-  { includeMemory = true, includeTerminalPrompt = true, includeToolsetPrompt = true } = {},
+  {
+    includeMemory = true,
+    includeTerminalPrompt = true,
+    includeToolsetPrompt = true,
+    includeSkillsContext = true,
+  } = {},
 ) {
   const memoryPromise = includeMemory ? loadMemoryContext() : Promise.resolve('');
   const terminalPromise =
@@ -37,11 +45,16 @@ export async function loadAssistantRuntimeContext(
     includeToolsetPrompt && cache.toolsetPrompt === null
       ? loadToolsetPrompt()
       : Promise.resolve(cache.toolsetPrompt ?? '');
+  const skillsPromise =
+    includeSkillsContext && cache.skillsContext === null
+      ? loadSkillsContext()
+      : Promise.resolve(cache.skillsContext ?? '');
 
-  const [memoryContext, terminalPrompt, toolsetPrompt] = await Promise.all([
+  const [memoryContext, terminalPrompt, toolsetPrompt, skillsContext] = await Promise.all([
     memoryPromise,
     terminalPromise,
     toolsetPromise,
+    skillsPromise,
   ]);
 
   if (includeTerminalPrompt) {
@@ -52,9 +65,14 @@ export async function loadAssistantRuntimeContext(
     cache.toolsetPrompt = toolsetPrompt ?? '';
   }
 
+  if (includeSkillsContext) {
+    cache.skillsContext = skillsContext ?? '';
+  }
+
   return {
     memoryContext: memoryContext ?? '',
     terminalPrompt: terminalPrompt ?? '',
     toolsetPrompt: toolsetPrompt ?? '',
+    skillsContext: skillsContext ?? '',
   };
 }
