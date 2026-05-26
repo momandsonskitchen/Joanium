@@ -5,8 +5,8 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "qwen-3-235b-a22b-instruct-2507": {
-      "name": "qwen-3-235b-a22b-instruct-2507"
+    "llama3.1-8b": {
+      "name": "llama3.1-8b"
     },
     "gpt-oss-120b": {
       "name": "GPT OSS 120B",
@@ -24,6 +24,9 @@
         "output": 0.6
       }
     },
+    "qwen-3-235b-a22b-instruct-2507": {
+      "name": "qwen-3-235b-a22b-instruct-2507"
+    },
     "zai-glm-4.7": {
       "name": "Z.ai GLM 4.7",
       "description": "355B parameter reasoning model from Z.ai — strong multilingual performance and chain-of-thought on Cerebras silicon",
@@ -39,10 +42,7 @@
         "input": 0.5,
         "output": 0.5
       }
-    },
-    "llama3.1-8b": {
-      "name": "llama3.1-8b"
     }
   },
-  "_syncedAt": "2026-05-25T13:48:06.535Z"
+  "_syncedAt": "2026-05-26T03:04:06.007Z"
 }
