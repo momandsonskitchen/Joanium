@@ -94,6 +94,149 @@
   flex-shrink: 0;
 }
 
+/* ── Chrome-style omnibox / address bar ─────────────────────────────────── */
+
+.browser-preview__nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.browser-preview__search-bar-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 134, 104, 0.18),
+    0 2px 8px rgba(130, 95, 65, 0.07);
+  transition:
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.browser-preview__search-bar-wrap:focus-within {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.38),
+    0 0 0 3px rgba(var(--color-accent-rgb), 0.09),
+    0 4px 14px rgba(130, 95, 65, 0.1);
+}
+
+.browser-preview__omnibox-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--color-chat-text-muted);
+}
+
+.browser-preview__omnibox-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.browser-preview__omnibox-icon--secure {
+  color: #16a34a;
+}
+
+.browser-preview__omnibox-icon--warn {
+  color: #d97706;
+}
+
+.browser-preview__search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-chat-text-title);
+  caret-color: var(--color-accent);
+}
+
+.browser-preview__search-input::placeholder {
+  color: var(--color-chat-text-placeholder, rgba(100, 70, 50, 0.38));
+}
+
+.browser-preview__search-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-chat-text-muted);
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.browser-preview__search-go:hover {
+  background: rgba(var(--color-accent-rgb), 0.12);
+  color: var(--color-accent);
+  transform: translateX(1px);
+}
+
+.browser-preview__search-go-icon {
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+}
+
+.browser-preview__search-go-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Dark theme overrides for browser preview omnibox ──────────────────── */
+
+.joanium-theme-dark .browser-preview__search-bar-wrap {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+}
+
+.joanium-theme-dark
+  .browser-preview__search-bar-wrap:not(.browser-preview__search-bar-wrap--editable) {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.joanium-theme-dark .browser-preview__search-bar-wrap:focus-within {
+  background: rgba(255, 255, 255, 0.11);
+}
+
+/* Always hide identity — omnibox handles URL display in both modes */
+.browser-preview__identity {
+  display: none;
+}
+
+/* Readonly omnibox (AI-opened) — muted, not interactive */
+.browser-preview__search-bar-wrap:not(.browser-preview__search-bar-wrap--editable) {
+  background: rgba(255, 255, 255, 0.38);
+  cursor: default;
+}
+
+.browser-preview__search-bar-wrap:not(.browser-preview__search-bar-wrap--editable)
+  .browser-preview__search-input {
+  cursor: default;
+  pointer-events: none;
+  color: var(--color-chat-text-muted);
+}
+
 .browser-preview__control {
   display: inline-flex;
   align-items: center;

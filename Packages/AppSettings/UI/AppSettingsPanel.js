@@ -26,6 +26,7 @@ export function createAppSettingsPanel(strings) {
   let languageDropdown = null;
   let defaultViewDropdown = null;
   let defaultModelDropdown = null;
+  let defaultSearchEngineDropdown = null;
   let resetConfirmTimer = null;
   let resetConfirming = false;
   let disposed = false;
@@ -63,6 +64,14 @@ export function createAppSettingsPanel(strings) {
     }
   }
 
+  async function updateDefaultSearchEngine(value) {
+    try {
+      await state.savePatch({ defaultSearchEngine: value });
+    } catch {
+      state.setStatus(strings.saveFailed, 'error');
+    }
+  }
+
   async function populate() {
     // Fetch app settings and provider catalog in parallel.
     const [nextSettings, bootstrap] = await Promise.all([
@@ -84,6 +93,8 @@ export function createAppSettingsPanel(strings) {
     defaultViewDropdown = null;
     defaultModelDropdown?.dispose();
     defaultModelDropdown = null;
+    defaultSearchEngineDropdown?.dispose();
+    defaultSearchEngineDropdown = null;
 
     languageDropdown = createDropDown({
       label: '',
@@ -171,6 +182,25 @@ export function createAppSettingsPanel(strings) {
     modelRow.append(modelMeta, defaultModelDropdown.element);
     options.append(modelRow);
 
+    // ── Default search engine row ──────────────────────────────────────────
+    defaultSearchEngineDropdown = createDropDown({
+      label: '',
+      options: strings.defaultSearchEngine.options,
+      selectedValue: state.settings.defaultSearchEngine ?? 'google',
+      onChange: (value) => {
+        void updateDefaultSearchEngine(value);
+      },
+    });
+
+    const searchEngineRow = createElement('div', 'app-settings__dropdown-row');
+    const searchEngineMeta = createElement('div', 'app-settings__dropdown-meta');
+    searchEngineMeta.append(
+      createElement('span', 'app-settings__dropdown-label', strings.defaultSearchEngine.label),
+      createElement('span', 'app-settings__dropdown-desc', strings.defaultSearchEngine.description),
+    );
+    searchEngineRow.append(searchEngineMeta, defaultSearchEngineDropdown.element);
+    options.append(searchEngineRow);
+
     // ── Boolean toggles ───────────────────────────────────────────────────
     for (const key of OPTION_KEYS) {
       const option = strings.options[key];
@@ -242,6 +272,7 @@ export function createAppSettingsPanel(strings) {
     languageDropdown?.dispose();
     defaultViewDropdown?.dispose();
     defaultModelDropdown?.dispose();
+    defaultSearchEngineDropdown?.dispose();
   };
 
   view.append(options, danger, status);

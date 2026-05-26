@@ -92,12 +92,15 @@ export const iconMarkup = {
     </svg>
   `,
 
+  // Earth/globe with equator, two meridians, and two latitude parallels
   globe: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10" />
       <path d="M2 12h20" />
       <path d="M12 2a15.3 15.3 0 0 1 0 20" />
       <path d="M12 2a15.3 15.3 0 0 0 0 20" />
+      <path d="M3.34 7h17.32" />
+      <path d="M3.34 17h17.32" />
     </svg>
   `,
 

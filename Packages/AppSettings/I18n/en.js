@@ -48,6 +48,22 @@ const en = {
       usage: 'Usage',
     },
   },
+  defaultSearchEngine: {
+    label: 'Default search engine',
+    description: 'The search engine opened when you launch the browser from the composer.',
+    options: [
+      { value: 'google', label: 'Google' },
+      { value: 'bing', label: 'Bing' },
+      { value: 'duckduckgo', label: 'DuckDuckGo' },
+      { value: 'yandex', label: 'Yandex' },
+      { value: 'yahoo', label: 'Yahoo' },
+      { value: 'brave', label: 'Brave Search' },
+      { value: 'ecosia', label: 'Ecosia' },
+      { value: 'kagi', label: 'Kagi' },
+      { value: 'perplexity', label: 'Perplexity' },
+      { value: 'startpage', label: 'Startpage' },
+    ],
+  },
   language: {
     label: 'Assistant language',
     description: 'The locale sent with chat context so Joana can respond in the right language.',

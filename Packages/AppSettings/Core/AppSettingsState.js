@@ -4,6 +4,19 @@ import {
   writeUserState,
 } from '../../Shared/UserData/UserData.js';
 
+const VALID_SEARCH_ENGINES = new Set([
+  'google',
+  'bing',
+  'duckduckgo',
+  'yandex',
+  'yahoo',
+  'brave',
+  'ecosia',
+  'kagi',
+  'perplexity',
+  'startpage',
+]);
+
 const DEFAULT_SETTINGS = Object.freeze({
   runOnStartup: false,
   systemTray: false,
@@ -14,6 +27,7 @@ const DEFAULT_SETTINGS = Object.freeze({
   showTechFeed: true,
   defaultView: 'chat',
   defaultModel: null,
+  defaultSearchEngine: 'google',
 });
 
 const SUPPORTED_LOCALES = new Set([
@@ -69,6 +83,9 @@ function normalizeSettings(candidate = {}) {
     showTechFeed: Boolean(candidate.showTechFeed ?? DEFAULT_SETTINGS.showTechFeed),
     defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
+    defaultSearchEngine: VALID_SEARCH_ENGINES.has(candidate.defaultSearchEngine)
+      ? candidate.defaultSearchEngine
+      : DEFAULT_SETTINGS.defaultSearchEngine,
   };
 }
 

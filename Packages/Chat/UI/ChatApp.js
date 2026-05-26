@@ -67,6 +67,19 @@ import {
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
 
+const SEARCH_ENGINE_HOME_URLS = {
+  google: 'https://www.google.com',
+  bing: 'https://www.bing.com',
+  duckduckgo: 'https://duckduckgo.com',
+  yandex: 'https://yandex.com',
+  yahoo: 'https://search.yahoo.com',
+  brave: 'https://search.brave.com',
+  ecosia: 'https://www.ecosia.org',
+  kagi: 'https://kagi.com',
+  perplexity: 'https://www.perplexity.ai',
+  startpage: 'https://www.startpage.com',
+};
+
 const MAX_TERMINAL_TOOL_CALLS = 100;
 const PROJECT_SCOPED_MUTATION_TOOLS = new Set([
   'write_local_file',
@@ -181,6 +194,10 @@ export async function createChatView(
   let streamUpdateFrame = null;
   const assistantContextCache = createAssistantContextCache();
 
+  // Tracks whether the live browser panel is currently visible so the
+  // composer browser button can reflect the active state correctly.
+  let isBrowserOpen = false;
+
   let userScrolledUp = false;
   let scrollToBottomFrame = null;
 
@@ -237,6 +254,7 @@ export async function createChatView(
   let enhanceBtn = null;
   let attachBtn = null;
   let terminalBtn = null;
+  let browserBtn = null;
   let thread = null;
   let userTypingEl = null;
   let userTypingTimer = null;
@@ -2162,6 +2180,11 @@ export async function createChatView(
       );
     }
 
+    if (browserBtn) {
+      browserBtn.disabled = isEnhancing;
+      browserBtn.classList.toggle('chat-composer__icon-button--active', isBrowserOpen);
+    }
+
     if (composer) {
       composer.classList.toggle('chat-composer--enhancing', isEnhancing);
     }
@@ -2344,7 +2367,7 @@ export async function createChatView(
       // ── Sequential FLIP transition ──────────────────────────────────────────
       // Phase 1: pin welcome elements at their visual coords, swap the layout
       // class (fixed elements are immune to the reflow), then animate them out.
-      // Phase 2: only after they’re fully gone, reveal and animate the thread in.
+      // Phase 2: only after they're fully gone, reveal and animate the thread in.
       // No overlap — no z-index battles, no bleed-through.
 
       const WELCOME_EXIT_MS = 220;
@@ -3954,6 +3977,7 @@ export async function createChatView(
 
   const composerFooter = createElement('div', 'chat-composer__footer');
   const composerActions = createElement('div', 'chat-composer__actions');
+
   attachBtn = createElement('button', 'chat-composer__icon-button');
   attachBtn.type = 'button';
   attachBtn.setAttribute('aria-label', strings.composer.attachFiles);
@@ -3978,7 +4002,22 @@ export async function createChatView(
     terminalPanel?.toggle();
   });
 
-  composerActions.append(attachBtn, enhanceBtn, terminalBtn);
+  // ── Browser button ────────────────────────────────────────────────────────
+  // Opens the live browser panel with a search bar. The search bar is only
+  // shown when the browser is opened via this button — not when it opens from
+  // a link click inside a chat message.
+  browserBtn = createElement('button', 'chat-composer__icon-button');
+  browserBtn.type = 'button';
+  browserBtn.setAttribute('aria-label', strings.composer.openBrowser ?? 'Open browser');
+  browserBtn.append(createIcon('globe', 'chat-composer__icon'));
+  browserBtn.addEventListener('click', () => {
+    const engineKey = currentAppSettings?.defaultSearchEngine ?? 'google';
+    const homeUrl = SEARCH_ENGINE_HOME_URLS[engineKey] ?? 'https://www.google.com';
+    browserPreview.showWithSearchBar(homeUrl, engineKey);
+  });
+  // ─────────────────────────────────────────────────────────────────────────
+
+  composerActions.append(attachBtn, enhanceBtn, terminalBtn, browserBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   gitBranchButton = createElement('button', 'chat-composer__branch');
@@ -4105,11 +4144,18 @@ export async function createChatView(
     syncScrollToBottomBtn();
   });
   bottom.append(scrollToBottomBtn, composer);
+
   const browserPreview = createBrowserPreviewPanel(strings.browserPreview, {
     onVisibilityChange: (visible) => {
+      isBrowserOpen = visible;
       view.classList.toggle('chat-view--browser-preview', visible);
+      // Keep the composer browser button active state in sync.
+      if (browserBtn) {
+        browserBtn.classList.toggle('chat-composer__icon-button--active', visible);
+      }
     },
   });
+
   terminalPanel = createChatTerminalPanel(strings, {
     onOpenChange: (open) => {
       view.classList.toggle('chat-view--terminal', open);
