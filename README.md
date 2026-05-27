@@ -33,115 +33,117 @@
 
 ---
 
-> Local-first AI desktop assistant with multi-model chat, agents, automations, MCP, and real integrations.
+## wait, what even is this?
 
-Joanium is a privacy-first, offline-capable desktop app built with Electron and vanilla JavaScript. It runs on your machine, connects to the AI providers you choose, and keeps your data yours.
+**Joanium is a local-first AI desktop agent that actually *does* stuff** — not just talks about doing stuff.
 
----
+You know how every AI tool is just a really fancy chat box? You type. It replies. You lose context by tomorrow and you're back to copy-pasting your entire codebase into a prompt like it's 2023. Every. Single. Morning.
 
-## Demo
+Yeah. We got tired of that too.
 
-<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/9465c90b-1d8d-409a-b3eb-4b4432903dc2" />
-
----
-
-## Features
-
-- **Multi-model chat** — Anthropic, OpenAI, Gemini, and local models via Ollama
-- **Scheduled agents** — run autonomous tasks on a schedule with full tool access
-- **Channels** — reply to Telegram, WhatsApp, Discord, Slack, Zulip, and Mattermost through AI
-- **MCP support** — extend AI capabilities via Model Context Protocol servers
-- **Skills & Personas** — customise how the AI thinks and responds
-- **Built-in tools** — terminal, browser, file operations, Git, calculators, public data, and more
-- **Connectors** — GitHub, Gmail, Google Drive, Calendar, and more
-- **Memory** — persistent long-term memory across conversations
-- **Project workspaces** — context-aware chat scoped to a local codebase or folder
-- **Privacy-first** — all user data stays local in the `Data/` folder
+Joanium **lives on your machine**. It knows your files. It runs jobs while you sleep. And your data? It never leaves your device. Not even a little bit.
 
 ---
 
-## Tech Stack
+## a real example of what it actually does
 
-- [Electron](https://www.electronjs.org/) — desktop shell
-- Vanilla JavaScript (ESM) — no frameworks, no React
-- Node.js ≥ 24
-- CSS — Material 3 Expressive design language
+> *Every morning at 8am, Joanium pulls my GitHub issues, summarises them with AI, and drops a priority list into my Slack. I set it up once. It just runs. Forever.*
+
+That's not a chatbot. That's an **actual agent**.
 
 ---
 
-## Getting Started
+## what's inside
 
-### Prerequisites
+**🧠 Multi-model, zero lock-in**
+Switch between Gemini, Claude, GPT, Grok, Mistral, or go fully offline with Ollama / LM Studio. 10+ providers. Use whatever model won the benchmark this week — we genuinely don't care.
 
-- [Node.js 24+](https://nodejs.org/) (use [nvm](https://github.com/nvm-sh/nvm): `nvm use`)
-- [Git](https://git-scm.com/)
+**🤖 Background Agents**
+Reusable prompts that run on a schedule. Daily code reviews. PR summaries. Changelog monitoring. Happening in the background, without you touching a thing. Set it once, profit forever.
 
-### Installation
+**💬 Channels**
+Reply to Telegram, WhatsApp, Discord, Slack, Zulip, and Mattermost — all through AI. Your assistant meets you where you already are.
+
+**🔌 Real integrations (not wrappers)**
+GitHub, Gmail, Google Drive, Calendar, Sheets, Docs. These aren't fake pass-throughs — they're first-class tools the AI can invoke naturally, mid-conversation.
+
+**🧩 MCP Support**
+Plug in any MCP-compatible server and Joanium instantly gets new superpowers. The ecosystem is exploding in 2026 and Joanium keeps up.
+
+**🎭 Personas & Skills**
+Drop in a *"senior code reviewer"* and your AI thinks differently, talks differently, reviews differently. Skills are markdown files you write once that teach your assistant exactly how *you* work.
+
+**🧠 Long-term Memory**
+Remembers things across conversations. Not in a creepy way. In a "finally, an AI that doesn't have goldfish memory" way.
+
+**🗂️ Project Workspaces**
+Scope your AI's context to a specific codebase or folder. No more explaining your project structure from scratch every session.
+
+**🔒 Fully offline, fully private**
+Zero internet. Zero API keys. Zero cloud. Zero excuses. Everything stays in your `Data/` folder, on your machine, under your control.
+
+---
+
+## vs the competition (yeah we went there)
+
+Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
+
+| | **Joanium** | Codex | Claude Code | OpenHuman | OpenClaw | Hermes Agent |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Runs on your machine | ✅ | ❌ cloud | ❌ CLI/cloud | ⚠️ | ✅ | ❌ cloud-only |
+| Your data stays private | ✅ always | ❌ | ❌ | ⚠️ | ✅ | ❌ |
+| Works fully offline | ✅ Ollama/LM Studio | ❌ | ❌ | ❌ | ⚠️ limited | ❌ |
+| Multi-model (10+ providers) | ✅ | ❌ GPT-only | ❌ Claude-only | ⚠️ | ⚠️ | ⚠️ |
+| Desktop GUI app | ✅ | ❌ web/IDE | ❌ terminal | ⚠️ web | ❌ chat only | ❌ |
+| Background scheduled agents | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ cloud-only |
+| Personas & Skills system | ✅ | ❌ | ❌ | ⚠️ basic | ❌ | ⚠️ |
+| MCP support | ✅ | ⚠️ | ✅ | ❌ | ❌ | ❌ |
+| Real integrations (Drive, Gmail…) | ✅ | ❌ | ⚠️ | ❌ | ⚠️ | ❌ |
+| Messaging channels (Slack, Discord…) | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| Long-term memory | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ cloud |
+| Open source | ✅ Apache 2.0 | ❌ | ❌ | ✅ | ✅ MIT | ⚠️ |
+| Free (bring your own key) | ✅ | ❌ | ❌ | ✅ | ✅ | ⚠️ |
+
+> **tl;dr** — Codex and Claude Code are coding agents for the terminal. Hermes lives in the cloud. OpenClaw handles chat. Joanium is the only one that's a full desktop app, multi-model, offline-capable, open source, integrates with your real work tools, *and* talks to your messaging apps. Different category.
+
+---
+
+## get running in 60 seconds
 
 ```bash
-git clone https://github.com/withinjoel/joanium.git
-cd joanium/v2
-cp .env.example .env   # add your API keys
+git clone https://github.com/joanium/joanium.git
+cd joanium
 npm install
 npm start
 ```
 
----
-
-## Scripts
-
-| Command | Description |
-|---|---|
-| `npm start` | Run the app in development mode |
-| `npm run build` | Build distributable for the current platform |
-| `npm run lint` | Check for lint errors |
-| `npm run format` | Auto-format all source files |
-| `npm run format:check` | Check formatting without writing |
+Or skip the terminal entirely → **[download the app](https://www.joanium.com/download)**. We don't judge.
 
 ---
 
-## Project Structure
+## the marketplace 🛍️
 
-```markdown
-v2/
-├── App.js               # Electron entry point
-├── Packages/            # Feature packages (microservice architecture)
-│   ├── Chat/            # Core chat engine
-│   ├── Agents/          # Scheduled agents
-│   ├── Channels/        # External messaging channels
-│   ├── MCP/             # Model Context Protocol
-│   ├── Memory/          # Long-term memory
-│   ├── Providers/       # AI model providers
-│   ├── Toolset/         # Built-in AI tools
-│   └── ...
-├── Assets/              # Images, audio, video (read-only)
-├── Config/              # App configuration (read-only)
-├── Data/                # User data (read-write, gitignored)
-├── Datasets/            # Static datasets
-├── Personas/            # AI persona definitions
-├── Prompts/             # System prompt files
-├── Scripts/             # Build scripts
-├── Skills/              # AI skill definitions
-└── electron-builder.json
-```
-
-See [Arch.md](Arch.md) for full architecture documentation.
+Community-built Skills and Personas. Drop in a *"startup growth hacker"*, a *"brutally honest code reviewer"*, or a *"3am rubber duck debugger"*. Browse and publish at [joanium.com/marketplace](https://joanium.com/marketplace).
 
 ---
 
-## Contributing
+## contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
-Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+PRs are genuinely welcome — not in the "we value all contributions" corporate way, in the actual "please help us make this better" way.
 
----
-
-## Security
-
-To report a vulnerability, see [SECURITY.md](SECURITY.md).
+Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECURITY.md) for responsible disclosure. Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
 
-## License
+## if this helped you
 
-Apache-2.0 license
+Hit ⭐ star. It takes 0.3 seconds and means everything for an open source project.
+
+Share it. Tweet it. Tell your developer friends who are still copy-pasting context into ChatGPT every morning. They need this.
+
+---
+
+<p align="center">
+  Made with stubbornness and caffeine ·
+  <a href="https://joanium.com">joanium.com</a>
+</p>
