@@ -6,6 +6,14 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.527.0] - 2026-05-27
+
+* chore(release): bump version to 2026.527.0
+* Added Missing Tools
+* Browser Preview UI Update
+
+---
+
 ## [2026.526.0] - 2026-05-26
 
 * chore(release): bump version to 2026.526.0
