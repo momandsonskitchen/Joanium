@@ -263,9 +263,9 @@ export async function executeContactsChatTool(ctx, toolName, params = {}) {
         `Found ${groups.length} potential duplicate group${1 !== groups.length ? 's' : ''}:\n`,
       ];
       for (const g of groups)
-        lines.push(`**${g.reason}**`),
+        (lines.push(`**${g.reason}**`),
           g.contacts.forEach((c, i) => lines.push(formatPerson(c, i + 1))),
-          lines.push('');
+          lines.push(''));
       return lines.join('\n');
     }
     case 'contacts_export_csv': {

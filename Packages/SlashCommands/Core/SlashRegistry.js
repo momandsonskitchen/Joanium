@@ -1,11 +1,11 @@
 import COMMANDS from './Commands.js';
+import { readBundledPromptFile } from '../../Shared/Utils/PromptUtils.js';
 
-export function createSlashRegistry() {
-  // Build a lookup map for O(1) mode instruction access.
-  const modeInstructions = new Map(
+export function createSlashRegistry(rootDirectory) {
+  const modePromptFiles = new Map(
     COMMANDS.filter((command) => command.type === 'mode').map((command) => [
       command.id,
-      command.instruction ?? '',
+      `Modes/${command.id}.md`,
     ]),
   );
 
@@ -25,11 +25,13 @@ export function createSlashRegistry() {
      * or null if the mode is unknown.
      *
      * @param {string} modeId
-     * @returns {string|null}
+     * @returns {Promise<string|null>}
      */
-    getModeInstruction(modeId) {
+    async getModeInstruction(modeId) {
       if (!modeId) return null;
-      return modeInstructions.get(modeId) ?? null;
+      const promptFile = modePromptFiles.get(modeId);
+      if (!promptFile) return null;
+      return readBundledPromptFile(rootDirectory, promptFile).catch(() => null);
     },
   };
 }

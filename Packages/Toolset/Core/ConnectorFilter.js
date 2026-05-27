@@ -1,3 +1,9 @@
+import { TOOLSET_PROMPTS } from './Prompts.js';
+
+function formatText(template, values = {}) {
+  return String(template ?? '').replace(/\{(\w+)\}/g, (_match, key) => values[key] ?? '');
+}
+
 /**
  * Partitions a connector list into active IDs and disconnected labels.
  *
@@ -76,12 +82,9 @@ export function filterPromptSectionsByPackages(packages, activeIds) {
  */
 export function buildDisconnectedHint(disconnectedLabels) {
   if (disconnectedLabels.length === 0) return '';
-  const list = disconnectedLabels.join(', ');
-  return (
-    `The user has not connected the following services: ${list}. ` +
-    `DO NOT attempt to call any tools for these services. They are currently disabled and will fail. ` +
-    `Instead, politely inform the user that they need to connect the relevant service via Settings \u2192 Connectors.`
-  );
+  return formatText(TOOLSET_PROMPTS.disconnectedHint, {
+    services: disconnectedLabels.join(', '),
+  });
 }
 
 /**
@@ -93,6 +96,7 @@ export function buildDisconnectedHint(disconnectedLabels) {
  */
 export function buildConnectedHint(activeLabels) {
   if (activeLabels.length === 0) return '';
-  const list = activeLabels.join(', ');
-  return `The user has successfully connected the following services: ${list}. You have full access to use their provided tools when the user asks for related work.`;
+  return formatText(TOOLSET_PROMPTS.connectedHint, {
+    services: activeLabels.join(', '),
+  });
 }

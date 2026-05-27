@@ -53,8 +53,8 @@ export async function listFiles(
   } = {},
 ) {
   const conditions = ['trashed=false'];
-  folderId && conditions.push(`'${folderId}' in parents`),
-    mimeType && conditions.push(`mimeType='${mimeType}'`);
+  (folderId && conditions.push(`'${folderId}' in parents`),
+    mimeType && conditions.push(`mimeType='${mimeType}'`));
   const params = new URLSearchParams({
     q: conditions.join(' and '),
     pageSize: String(Math.min(pageSize, 100)),

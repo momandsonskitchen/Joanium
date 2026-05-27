@@ -5,6 +5,7 @@ import {
   resetAssistantContextCache,
   TERMINAL_TOOL_NAMES,
 } from '../../Shared/AssistantRuntime/AssistantPipeline.js';
+import { AGENT_PROMPTS } from './Prompts.js';
 
 const MAX_AGENT_TOOL_CALLS = 10;
 const AGENT_TERMINAL_TOOLS = new Set(TERMINAL_TOOL_NAMES);
@@ -107,7 +108,7 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
         result = await runAssistantPipeline({
           messages: [{ role: 'user', content: prompt }],
           contextCache,
-          personaParts: [activePersona?.content ?? '', strings.gateway?.agentContext ?? ''],
+          personaParts: [activePersona?.content ?? '', AGENT_PROMPTS.agentContext],
           terminalToolsFallback: chatStrings.terminal?.systemPrompt || '',
           providerId: providerId ?? null,
           modelId: modelId ?? null,

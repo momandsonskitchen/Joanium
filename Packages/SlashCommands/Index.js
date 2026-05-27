@@ -1,7 +1,7 @@
 import { createSlashRegistry } from './Core/SlashRegistry.js';
 
-export async function createPackage() {
-  const registry = createSlashRegistry();
+export async function createPackage({ rootDirectory } = {}) {
+  const registry = createSlashRegistry(rootDirectory);
 
   return {
     id: 'SlashCommands',

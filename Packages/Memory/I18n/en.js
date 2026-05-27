@@ -30,8 +30,6 @@ const en = {
     noUpdates: 'No memory updates were found in the imported text.',
     modelContextLimit:
       'This AI model {modelName} could not sync your memories — please select a better AI model in Settings → Default Model.',
-    systemInstruction:
-      'You update structured personal memory files. Return only valid JSON and never include markdown fences.',
     getPrompt: {
       copyPrompt: 'Copy prompt',
       copied: 'Copied!',

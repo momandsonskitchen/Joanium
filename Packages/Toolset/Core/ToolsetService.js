@@ -10,6 +10,7 @@ import {
 } from './ConnectorFilter.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 import { summarizeToolDefinitions, withTimeout } from './Utils.js';
+import { formatPromptTemplate } from '../../Shared/Utils/PromptUtils.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
 const DEFAULT_TOOL_TIMEOUT_MS = 30000;
@@ -1980,27 +1981,24 @@ function getMapUrl(params) {
   return lines.join('\n');
 }
 
-function buildToolsPrompt(tools, promptSections = []) {
-  return [
-    'Built-in tools are available when the user asks for calculations, conversions, local date/time utilities, URL helpers, geospatial math, text utilities, JSON formatting, hashing, UUIDs, timezone lookup, password generation, connector lookups, public web/reference data, package registries, weather, crypto/finance data, Stack Overflow, Wikipedia, or live browser work.',
-    'When tools are needed, respond with one or more fenced blocks — one per call — before any final answer. Tools that do not depend on each other must be batched in the same response:',
-    '```joanium-tool',
-    '{"tool":"calculate_expression","parameters":{"expression":"sqrt(144) + pi","precision":4}}',
-    '```',
-    '```joanium-tool',
-    '{"tool":"generate_uuid","parameters":{"count":2}}',
-    '```',
-    'Supported tools:',
-    ...tools.map((tool) => {
+function buildToolsPrompt(tools, promptSections = [], promptTemplate = '') {
+  const toolList = tools
+    .map((tool) => {
       const params = Object.entries(tool.parameters ?? {})
         .map(([key, value]) => `${key}${value.required ? '' : '?'}:${value.type}`)
         .join(', ');
       return `- ${tool.name}: ${tool.description}${params ? ` Parameters (all inside the "parameters" key): ${params}.` : ''}`;
-    }),
-    ...promptSections.map((section) => String(section ?? '').trim()).filter(Boolean),
-    'IMPORTANT: Use only the joanium-tool code block format shown above. Do not use any other tool invocation format — no XML tags, no JSON outside a code block, no provider-specific or model-specific markup of any kind.',
-    'After the tool result is returned, give the user the final answer.',
-  ].join('\n');
+    })
+    .join('\n');
+  const extraPromptSections = promptSections
+    .map((section) => String(section ?? '').trim())
+    .filter(Boolean)
+    .join('\n');
+
+  return formatPromptTemplate(promptTemplate, {
+    TOOL_LIST: toolList,
+    PROMPT_SECTIONS: extraPromptSections,
+  });
 }
 
 function mergeToolDefinitions(...toolGroups) {
@@ -2016,6 +2014,7 @@ export function createToolsetService({
   toolDefinitions = [],
   promptSections = [],
   packages = [],
+  promptTemplate = '',
 } = {}) {
   const allTools = mergeToolDefinitions(strings.tools, toolDefinitions);
   const handlers = {
@@ -2198,7 +2197,7 @@ export function createToolsetService({
       return {
         ok: true,
         tools,
-        systemPrompt: buildToolsPrompt(tools, activeSections),
+        systemPrompt: buildToolsPrompt(tools, activeSections, promptTemplate),
       };
     },
     async executeTool(payload = {}, context = {}) {

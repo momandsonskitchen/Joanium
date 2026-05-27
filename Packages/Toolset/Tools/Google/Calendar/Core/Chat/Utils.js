@@ -24,11 +24,11 @@ export function formatEvent(event, index) {
       `${index}. **${event.summary || '(No title)'}**`,
       `   Time: ${start}${end && end !== start ? ` -> ${end}` : ''}`,
     ];
-  event.location && lines.push(`   Location: ${event.location}`),
+  (event.location && lines.push(`   Location: ${event.location}`),
     event.description &&
       lines.push(
         `   Notes: ${event.description.slice(0, 100)}${event.description.length > 100 ? '...' : ''}`,
-      );
+      ));
   const attendeeCount = event.attendees?.length ?? 0;
   if (attendeeCount > 0) {
     const names = event.attendees

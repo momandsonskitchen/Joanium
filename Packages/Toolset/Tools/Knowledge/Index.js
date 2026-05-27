@@ -8,9 +8,13 @@ import {
   readSkill,
 } from './Utils.js';
 import { buildKnowledgePromptSection } from './Prompt.js';
+import { readBundledPromptFile } from '../../../Shared/Utils/PromptUtils.js';
 
 export async function createToolPackage({ rootDirectory } = {}) {
-  const skills = await listSkills(rootDirectory, { limit: 50 }).catch(() => []);
+  const [skills, knowledgePrompt] = await Promise.all([
+    listSkills(rootDirectory, { limit: 50 }).catch(() => []),
+    readBundledPromptFile(rootDirectory, 'Knowledge.md'),
+  ]);
 
   return {
     id: 'knowledge',
@@ -74,7 +78,7 @@ export async function createToolPackage({ rootDirectory } = {}) {
         return formatSkill(await readSkill(rootDirectory, params), strings);
       },
     },
-    promptSections: [buildKnowledgePromptSection(skills)],
+    promptSections: [buildKnowledgePromptSection(skills, knowledgePrompt)],
   };
 }
 

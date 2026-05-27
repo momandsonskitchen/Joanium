@@ -48,8 +48,8 @@ export async function addSlide(
   { insertionIndex: insertionIndex, layoutId: layoutId } = {},
 ) {
   const request = { createSlide: {} };
-  null != insertionIndex && (request.createSlide.insertionIndex = insertionIndex),
-    layoutId && (request.createSlide.slideLayoutReference = { layoutId: layoutId });
+  (null != insertionIndex && (request.createSlide.insertionIndex = insertionIndex),
+    layoutId && (request.createSlide.slideLayoutReference = { layoutId: layoutId }));
   const result = await slidesFetch(creds, `${SLIDES_BASE}/${presentationId}:batchUpdate`, {
     method: 'POST',
     body: JSON.stringify({ requests: [request] }),

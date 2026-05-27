@@ -442,7 +442,7 @@ export async function getWorkflowRuns(
   { branch: branch = '', event: event = '', perPage: perPage = 20 } = {},
 ) {
   const qs = new URLSearchParams({ per_page: String(perPage || 20) });
-  branch && qs.set('ref', branch), event && qs.set('source', event);
+  (branch && qs.set('ref', branch), event && qs.set('source', event));
   const pipelines = await gitlabFetch(
     `/projects/${pid(owner, repo)}/pipelines?${qs.toString()}`,
     credentials.token,
@@ -1674,7 +1674,7 @@ export async function createOrUpdateFile(
 ) {
   const encodedPath = filePath.split('/').map(encodeURIComponent).join('%2F'),
     payload = { commit_message: message, content: content };
-  branch && (payload.branch = branch), sha && (payload.last_commit_id = sha);
+  (branch && (payload.branch = branch), sha && (payload.last_commit_id = sha));
   const method = sha ? 'PUT' : 'POST';
   return gitlabFetch(
     `/projects/${pid(owner, repo)}/repository/files/${encodedPath}`,
@@ -1805,12 +1805,12 @@ export async function updateGist(
   { description: description, files: files } = {},
 ) {
   const payload = {};
-  void 0 !== description && ((payload.title = description), (payload.description = description)),
+  (void 0 !== description && ((payload.title = description), (payload.description = description)),
     void 0 !== files &&
       (payload.files = Object.entries(files).map(([filename, { content: content }]) => ({
         file_name: filename,
         content: content ?? '',
-      })));
+      }))));
   const snippet = await gitlabFetch(`/snippets/${gistId}`, credentials.token, {
     method: 'PUT',
     body: JSON.stringify(payload),

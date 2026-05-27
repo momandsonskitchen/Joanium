@@ -11,6 +11,7 @@ import { TERMINAL_TOOL_NAMES } from '../../Shared/ToolLoop/TerminalToolNames.js'
 import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
+import { CHAT_PROMPTS } from '../Prompts/Prompts.js';
 
 const openAiCompatibleProviders = new Set([
   'ai21',
@@ -104,7 +105,7 @@ async function buildBaseSystemPrompt(rootDirectory, user) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
 
   return [
-    prompt || 'You are running inside Joanium, a local-first AI desktop assistant.',
+    prompt || CHAT_PROMPTS.fallbackSystem,
     '# Runtime',
     `- User: ${displayName}`,
     `- Local time: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}`,
@@ -866,8 +867,8 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
   // Prepend a lightweight multi-turn anchor so weaker models always know
   // which message they should be responding to, even in long conversations.
   const groundedSystemPrompt = systemPrompt
-    ? `You are in a multi-turn conversation. Respond only to the most recent user message.\n\n${systemPrompt}`
-    : 'You are in a multi-turn conversation. Respond only to the most recent user message.';
+    ? `${CHAT_PROMPTS.latestUserMessageAnchor}\n\n${systemPrompt}`
+    : CHAT_PROMPTS.latestUserMessageAnchor;
 
   if (messages.length === 0) {
     throw new Error('A message is required to start the chat.');

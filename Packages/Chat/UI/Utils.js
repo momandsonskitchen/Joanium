@@ -1,6 +1,7 @@
 import { formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { ATTACHMENT_CONTEXT_PROMPTS, LIVE_BROWSER_CONTEXT_PROMPTS } from '../Prompts/Prompts.js';
 
 export function getFirstName(name, fallback) {
   const normalized = collapseWhitespace(name);
@@ -150,24 +151,24 @@ export function toAttachmentSummary(attachment) {
 }
 
 export function buildAttachmentContext(strings, attachments) {
-  // Images are sent as multimodal content blocks — exclude them from text context.
+  // Images are sent as multimodal content blocks - exclude them from text context.
   const textAttachments = attachments.filter((a) => a.kind !== 'image' && a.text);
   if (!textAttachments.length) return '';
 
   const blocks = textAttachments.map((attachment, index) => {
-    const header = formatText(strings.composer.attachmentContextItem, {
+    const header = formatText(ATTACHMENT_CONTEXT_PROMPTS.item, {
       index: String(index + 1),
-      name: attachment.name ?? strings.composer.unknownAttachment,
+      name: attachment.name ?? ATTACHMENT_CONTEXT_PROMPTS.unknownAttachment,
     });
     const summary = attachment.summary
-      ? formatText(strings.composer.attachmentContextSummary, { summary: attachment.summary })
+      ? formatText(ATTACHMENT_CONTEXT_PROMPTS.summary, { summary: attachment.summary })
       : '';
-    const truncated = attachment.truncated ? strings.composer.attachmentContextTruncated : '';
+    const truncated = attachment.truncated ? ATTACHMENT_CONTEXT_PROMPTS.truncated : '';
 
     return [header, summary, truncated, attachment.text ?? ''].filter(Boolean).join('\n');
   });
 
-  return `${strings.composer.attachmentContextHeader}\n\n${blocks.join('\n\n')}`;
+  return `${ATTACHMENT_CONTEXT_PROMPTS.header}\n\n${blocks.join('\n\n')}`;
 }
 
 export function buildModelContent(strings, prompt, attachments) {
@@ -178,8 +179,7 @@ export function buildModelContent(strings, prompt, attachments) {
 export function buildLiveBrowserContext(strings, state = {}) {
   if (!state?.hasPage || !state.url) return '';
 
-  const browserContext = strings.composer?.liveBrowserContext;
-  if (!browserContext) return '';
+  const browserContext = LIVE_BROWSER_CONTEXT_PROMPTS;
 
   const formatFlag = (value) => (value ? browserContext.yes : browserContext.no);
   const lines = [

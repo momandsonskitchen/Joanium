@@ -3,10 +3,6 @@ const en = {
     noProvider: 'No AI provider is configured yet. Open Joanium settings and add a provider first.',
     timeout: 'Sorry, the response took too long. Please try again.',
     errorPrefix: 'Sorry, something went wrong: {message}',
-    channelContext:
-      'You are replying to {from} through {channel}. Keep the reply concise unless the request needs detail.',
-    agentContext:
-      'You have the same agentic capabilities as the main chat, including terminal tools, live browser tools, connector tools, memory context, and MCP-backed tools when available. Use tools when they are needed, then answer with the result.',
   },
   common: {
     expand: 'Expand',

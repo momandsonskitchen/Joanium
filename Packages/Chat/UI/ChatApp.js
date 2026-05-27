@@ -66,6 +66,7 @@ import {
 } from './CompletionSound.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
+import { CHAT_PROMPTS } from '../Prompts/Prompts.js';
 
 const SEARCH_ENGINE_HOME_URLS = {
   google: 'https://www.google.com',
@@ -2314,7 +2315,7 @@ export async function createChatView(
       {
         role: 'user',
         content: strings.composer.continueHiddenLabel,
-        modelContent: strings.composer.continueInstruction,
+        modelContent: CHAT_PROMPTS.continueWithoutReasoning,
         hidden: true,
       },
       {
@@ -2765,8 +2766,7 @@ export async function createChatView(
         }));
         modelResult = formatTerminalResultForModel(strings, terminalAction, terminalResult);
         if (!terminalResult?.ok && terminalResult?.error) {
-          modelResult +=
-            '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
+          modelResult += `\n\n${CHAT_PROMPTS.toolFailureRetry}`;
         }
         localMessages.push({
           role: 'assistant',
@@ -2780,7 +2780,7 @@ export async function createChatView(
             ? {
                 ok: false,
                 tool: toolsetAction.tool,
-                error: 'Nested sub-agents are not available inside a sub-agent task.',
+                error: CHAT_PROMPTS.nestedSubAgentsUnavailable,
               }
             : await executeToolsetTool(toolsetAction).catch((error) => ({
                 ok: false,
@@ -2789,8 +2789,7 @@ export async function createChatView(
               }));
         modelResult = formatToolsetResultForModel(toolsetAction, toolsetResult);
         if (!toolsetResult?.ok && toolsetResult?.error) {
-          modelResult +=
-            '\n\nThe tool failed. Diagnose the error, then retry with a corrected approach or use an alternative method to accomplish the same goal.';
+          modelResult += `\n\n${CHAT_PROMPTS.toolFailureRetry}`;
         }
         localMessages.push({
           role: 'assistant',
@@ -2830,7 +2829,7 @@ export async function createChatView(
     const coordinationGoal = collapseWhitespace(
       payload.parameters?.coordination_goal ??
         payload.coordination_goal ??
-        strings.tools.subAgentFallbackGoal,
+        CHAT_PROMPTS.subAgentFallbackGoal,
     );
     const conversationContext = getSubAgentConversationContext();
     const memoryContext = await loadMemoryContext();
@@ -3152,10 +3151,8 @@ export async function createChatView(
     ];
     const baseModelResult = combinedParts.join('\n\n---\n\n');
     const modelResult = allOk
-      ? baseModelResult +
-        "\n\nAll tool calls completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tools again."
-      : baseModelResult +
-        '\n\nOne or more tool calls failed. Diagnose the errors, then retry with corrected approaches. Do not repeat exact same failing calls.';
+      ? `${baseModelResult}\n\n${CHAT_PROMPTS.terminalToolsCompleted}`
+      : `${baseModelResult}\n\n${CHAT_PROMPTS.toolCallsFailedRetry}`;
 
     messages = [
       ...messages,
@@ -3372,10 +3369,8 @@ export async function createChatView(
       .map(({ action, result }) => formatToolsetResultForModel(action, result))
       .join('\n\n---\n\n');
     const modelResult = allOk
-      ? baseModelResult +
-        "\n\nAll tool calls completed successfully. If this fully satisfies the user's request, respond with a brief confirmation of what was accomplished. Do NOT call the same tools again with the same arguments."
-      : baseModelResult +
-        '\n\nOne or more tool calls failed. Diagnose the errors, then retry with corrected approaches. Do not repeat exact same failing calls.';
+      ? `${baseModelResult}\n\n${CHAT_PROMPTS.toolsetToolsCompleted}`
+      : `${baseModelResult}\n\n${CHAT_PROMPTS.toolCallsFailedRetry}`;
 
     messages = [
       ...messages,
@@ -3741,7 +3736,7 @@ export async function createChatView(
 
     const prompt =
       String(resend?.content ?? draftValue).trim() ||
-      (allDisplayAttachments.length ? strings.composer.attachmentOnlyPrompt : '');
+      (allDisplayAttachments.length ? CHAT_PROMPTS.attachmentOnly : '');
 
     if ((!prompt && allDisplayAttachments.length === 0) || isSending) return;
     cancelScheduledMemorySync();

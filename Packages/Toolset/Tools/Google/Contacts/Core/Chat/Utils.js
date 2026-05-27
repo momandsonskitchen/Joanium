@@ -27,8 +27,8 @@ export function formatPerson(person, index) {
 }
 export function formatBirthday({ year: year, month: month, day: day }) {
   const parts = [];
-  month && parts.push(String(month).padStart(2, '0')),
-    day && parts.push(String(day).padStart(2, '0'));
+  (month && parts.push(String(month).padStart(2, '0')),
+    day && parts.push(String(day).padStart(2, '0')));
   const base = parts.join('/');
   return year ? `${year}/${base}` : base;
 }

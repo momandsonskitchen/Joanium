@@ -31,7 +31,7 @@ export function extractQuestions(form) {
     };
     if (item.questionItem) {
       const question = item.questionItem.question;
-      (q.questionId = question?.questionId ?? null),
+      ((q.questionId = question?.questionId ?? null),
         (q.required = question?.required ?? !1),
         question?.choiceQuestion
           ? (q.type = question.choiceQuestion.type)
@@ -49,7 +49,7 @@ export function extractQuestions(form) {
         question?.choiceQuestion?.options &&
           (q.options = question.choiceQuestion.options.map((o) => o.value)),
         question?.scaleQuestion &&
-          (q.scale = { low: question.scaleQuestion.low, high: question.scaleQuestion.high });
+          (q.scale = { low: question.scaleQuestion.low, high: question.scaleQuestion.high }));
     } else
       item.questionGroupItem
         ? (q.type = 'QUESTION_GROUP')

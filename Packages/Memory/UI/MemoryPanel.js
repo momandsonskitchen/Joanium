@@ -4,6 +4,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { MEMORY_PROMPTS } from './Prompts.js';
 
 function extractJsonObject(text = '') {
   const source = String(text ?? '').trim();
@@ -426,7 +427,7 @@ export function createMemoryPanel(strings) {
         messages: [{ role: 'user', content: mergePrompt }],
         providerId: selectedModel?.providerId ?? null,
         modelId: selectedModel?.modelId ?? null,
-        modeInstruction: strings.importMemory.systemInstruction,
+        modeInstruction: MEMORY_PROMPTS.importSystemInstruction,
         maxTokens: 2048,
         isNewSession: false,
       });

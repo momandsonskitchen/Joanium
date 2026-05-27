@@ -74,12 +74,12 @@ export async function createEvent(
   let start, end;
   if (allDay) {
     const startDate = startDateTime.split('T')[0];
-    (start = { date: startDate }),
-      (end = { date: endDateTime ? endDateTime.split('T')[0] : startDate });
+    ((start = { date: startDate }),
+      (end = { date: endDateTime ? endDateTime.split('T')[0] : startDate }));
   } else {
     const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    (start = { dateTime: toRFC3339(startDateTime), timeZone: tz }),
-      (end = { dateTime: toRFC3339(endDateTime || startDateTime), timeZone: tz });
+    ((start = { dateTime: toRFC3339(startDateTime), timeZone: tz }),
+      (end = { dateTime: toRFC3339(endDateTime || startDateTime), timeZone: tz }));
   }
   const body = {
     summary: summary,
@@ -204,10 +204,10 @@ export async function getFreeSlots(creds, dateStr, workStart = 9, workEnd = 18, 
     slots = [];
   let cursor = dayStart;
   for (const { start: start, end: end } of busy)
-    cursor < start &&
+    (cursor < start &&
       (start - cursor) / 6e4 >= minMinutes &&
       slots.push({ start: new Date(cursor), end: new Date(start) }),
-      end > cursor && (cursor = end);
+      end > cursor && (cursor = end));
   return (
     cursor < dayEnd &&
       (dayEnd - cursor) / 6e4 >= minMinutes &&
@@ -262,19 +262,19 @@ export async function duplicateEvent(creds, calendarId = 'primary', eventId, shi
   ) {
     const shift = 864e5 * shiftDays;
     if (clone.start?.dateTime)
-      (clone.start = {
+      ((clone.start = {
         ...clone.start,
         dateTime: new Date(new Date(clone.start.dateTime).getTime() + shift).toISOString(),
       }),
         (clone.end = {
           ...clone.end,
           dateTime: new Date(new Date(clone.end.dateTime).getTime() + shift).toISOString(),
-        });
+        }));
     else if (clone.start?.date) {
       const shiftDate = (d) =>
         new Date(new Date(`${d}T00:00:00`).getTime() + shift).toISOString().split('T')[0];
-      (clone.start = { date: shiftDate(clone.start.date) }),
-        (clone.end = { date: shiftDate(clone.end.date) });
+      ((clone.start = { date: shiftDate(clone.start.date) }),
+        (clone.end = { date: shiftDate(clone.end.date) }));
     }
   }
   return calFetch(creds, `${CALENDAR_BASE}/calendars/${encodeURIComponent(calendarId)}/events`, {
@@ -307,7 +307,10 @@ export async function clearDay(creds, calendarId = 'primary', dateStr) {
       singleEvents: !0,
       orderBy: 'startTime',
     });
-  return await Promise.all(events.map((e) => deleteEvent(creds, calendarId, e.id))), events.length;
+  return (
+    await Promise.all(events.map((e) => deleteEvent(creds, calendarId, e.id))),
+    events.length
+  );
 }
 export async function getEventsByLocation(creds, locationQuery, maxResults = 20) {
   return searchEvents(creds, locationQuery, maxResults);
@@ -617,19 +620,19 @@ export async function copyDayEvents(creds, calendarId = 'primary', sourceDateStr
         delete clone.recurringEventId,
         clone.start?.dateTime)
       )
-        (clone.start = {
+        ((clone.start = {
           ...clone.start,
           dateTime: new Date(new Date(clone.start.dateTime).getTime() + shiftMs).toISOString(),
         }),
           (clone.end = {
             ...clone.end,
             dateTime: new Date(new Date(clone.end.dateTime).getTime() + shiftMs).toISOString(),
-          });
+          }));
       else if (clone.start?.date) {
         const shift = (d) =>
           new Date(new Date(`${d}T00:00:00`).getTime() + shiftMs).toISOString().slice(0, 10);
-        (clone.start = { date: shift(clone.start.date) }),
-          (clone.end = { date: shift(clone.end.date) });
+        ((clone.start = { date: shift(clone.start.date) }),
+          (clone.end = { date: shift(clone.end.date) }));
       }
       return calFetch(
         creds,

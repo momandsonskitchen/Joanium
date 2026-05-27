@@ -1,5 +1,6 @@
 import { invokeIpc } from '../Ipc/RendererIpc.js';
 import { TERMINAL_TOOL_NAMES } from './TerminalToolNames.js';
+import { TOOL_LOOP_PROMPTS, SKILLS_CONTEXT_PROMPT_TEMPLATE } from './Prompts.js';
 
 export { TERMINAL_TOOL_NAMES };
 
@@ -704,17 +705,7 @@ export async function loadSkillsContext() {
       )
       .join('\n');
 
-    return [
-      '# Skills',
-      "You have curated skill documents available. When the user's request would clearly benefit from a specific skill, load it by emitting exactly this block (do not load speculatively):",
-      '```joanium-tool',
-      '{"tool":"read_skill","namespace":"<namespace>","filename":"<filename>"}',
-      '```',
-      'Load at most one skill per turn. The skill content will be injected as a tool result so you can use it in your next reply.',
-      '',
-      'Available skills:',
-      catalog,
-    ].join('\n');
+    return SKILLS_CONTEXT_PROMPT_TEMPLATE.replace('{{SKILL_CATALOG}}', catalog).trim();
   } catch {
     return '';
   }
@@ -740,9 +731,9 @@ export async function runRendererToolLoop({
   executeToolset = executeToolsetTool,
   formatTerminalResult = (action, result) => formatTerminalResultForModel(action, result),
   formatToolsetResult = formatToolsetResultForModel,
-  toolStepMessage = 'Let me check that.',
-  toolLimitMessage = 'I could not finish the requested tool workflow.',
-  fallbackText = 'I could not finish the requested workflow.',
+  toolStepMessage = TOOL_LOOP_PROMPTS.toolStepMessage,
+  toolLimitMessage = TOOL_LOOP_PROMPTS.toolLimitMessage,
+  fallbackText = TOOL_LOOP_PROMPTS.fallbackText,
 } = {}) {
   if (typeof completeMessage !== 'function') {
     throw new TypeError('completeMessage is required.');

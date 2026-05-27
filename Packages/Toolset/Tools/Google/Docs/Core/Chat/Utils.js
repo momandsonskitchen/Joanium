@@ -17,6 +17,6 @@ export function findAllOccurrences(text, query) {
   const results = [];
   let pos = 0;
   for (; -1 !== (pos = text.indexOf(query, pos)); )
-    results.push({ start: pos, end: pos + query.length }), (pos += query.length);
+    (results.push({ start: pos, end: pos + query.length }), (pos += query.length));
   return results;
 }

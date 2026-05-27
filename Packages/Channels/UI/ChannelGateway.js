@@ -7,6 +7,7 @@ import {
   stripThinking,
   TERMINAL_TOOL_NAMES,
 } from '../../Shared/AssistantRuntime/AssistantPipeline.js';
+import { CHANNEL_PROMPTS } from './Prompts.js';
 
 const MAX_CHANNEL_TOOL_CALLS = 10;
 const CHANNEL_TERMINAL_TOOLS = new Set(TERMINAL_TOOL_NAMES);
@@ -25,9 +26,9 @@ async function runChannelAgent({ messages, contextCache, personaParts, isNewSess
     maxToolCalls: MAX_CHANNEL_TOOL_CALLS,
     supportedTerminalTools: CHANNEL_TERMINAL_TOOLS,
     source: 'channel',
-    toolStepMessage: 'I am checking that now.',
-    toolLimitMessage: 'I could not finish the requested tool workflow.',
-    fallbackText: 'I could not finish the requested tool workflow.',
+    toolStepMessage: CHANNEL_PROMPTS.toolStepMessage,
+    toolLimitMessage: CHANNEL_PROMPTS.toolLimitMessage,
+    fallbackText: CHANNEL_PROMPTS.fallbackText,
     completeMessage: (request) => invokeIpc('chat:complete-message', request),
   });
 }
@@ -81,11 +82,11 @@ export function createChannelGateway(
     const personaParts = [
       activePersona?.content ?? '',
       metadata.systemPrompt ?? '',
-      formatText(strings.gateway.channelContext, {
+      formatText(CHANNEL_PROMPTS.channelContext, {
         from: from || 'User',
         channel: channelLabel,
       }),
-      strings.gateway.agentContext ?? '',
+      CHANNEL_PROMPTS.agentContext,
     ];
 
     try {

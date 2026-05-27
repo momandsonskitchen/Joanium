@@ -4,6 +4,7 @@ import { startGoogleOAuthFlow } from './Core/GoogleOAuth.js';
 import { discoverToolPackages } from './Core/ToolDiscovery.js';
 import { debugLog } from '../Shared/Debug/DebugLogger.js';
 import { summarizeToolDefinitions } from './Core/Utils.js';
+import { readBundledPromptFile } from '../Shared/Utils/PromptUtils.js';
 
 function ownerWindow(event) {
   return event?.sender?.getOwnerBrowserWindow?.() ?? null;
@@ -30,11 +31,13 @@ export async function createPackage({ rootDirectory, registry }) {
     rootDirectory,
     connectorCatalog: toolPackages.connectors,
   });
+  const toolsetPrompt = await readBundledPromptFile(rootDirectory, 'Toolset.md');
   const toolsetService = createToolsetService({
     toolHandlers: toolPackages.toolHandlers,
     toolDefinitions: toolPackages.toolDefinitions,
     promptSections: toolPackages.promptSections,
     packages: toolPackages.packages,
+    promptTemplate: toolsetPrompt,
   });
 
   return {
