@@ -5,24 +5,11 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "gpt-oss-120b": {
-      "name": "GPT OSS 120B",
-      "description": "Cerebras' flagship open-source model — MoE architecture optimised for agentic and reasoning tasks at wafer-scale speed",
-      "context_window": 32768,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.6,
-        "output": 0.6
-      }
-    },
     "qwen-3-235b-a22b-instruct-2507": {
       "name": "qwen-3-235b-a22b-instruct-2507"
+    },
+    "llama3.1-8b": {
+      "name": "llama3.1-8b"
     },
     "zai-glm-4.7": {
       "name": "Z.ai GLM 4.7",
@@ -40,9 +27,22 @@
         "output": 0.5
       }
     },
-    "llama3.1-8b": {
-      "name": "llama3.1-8b"
+    "gpt-oss-120b": {
+      "name": "GPT OSS 120B",
+      "description": "Cerebras' flagship open-source model — MoE architecture optimised for agentic and reasoning tasks at wafer-scale speed",
+      "context_window": 32768,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.6,
+        "output": 0.6
+      }
     }
   },
-  "_syncedAt": "2026-05-27T06:56:12.564Z"
+  "_syncedAt": "2026-05-27T08:04:35.929Z"
 }
