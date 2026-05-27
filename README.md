@@ -117,13 +117,15 @@ npm install
 npm start
 ```
 
-Or skip the terminal entirely → **[download the app](https://www.joanium.com/download)**. We don't judge.
+Not a terminal person? **[Download the app →](https://www.joanium.com/download)** One click. You're in. Go.
 
 ---
 
 ## the marketplace 🛍️
 
-Community-built Skills and Personas. Drop in a *"startup growth hacker"*, a *"brutally honest code reviewer"*, or a *"3am rubber duck debugger"*. Browse and publish at [joanium.com/marketplace](https://joanium.com/marketplace).
+The Skills and Personas in this repo come **pre-installed** with Joanium — they're your out-of-the-box starting point.
+
+But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketplace)** — a separate community repo where you can browse, create, and publish your own. Drop in a *"startup growth hacker"*, a *"brutally honest code reviewer"*, a *"3am rubber duck debugger"* — or build one that's uniquely yours. No code required, just show up and create.
 
 ---
 
