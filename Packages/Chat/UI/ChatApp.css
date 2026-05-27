@@ -1462,9 +1462,7 @@
 }
 
 .chat-gitbar__menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
+  position: fixed;
   z-index: 45;
   min-width: 228px;
   max-width: min(280px, calc(100vw - 32px));

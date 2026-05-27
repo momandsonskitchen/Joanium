@@ -94,18 +94,6 @@
         "image": true
       }
     },
-    "baidu/cobuddy:free": {
-      "name": "Baidu Qianfan: CoBuddy (free)",
-      "description": "CoBuddy is a code generation model from Baidu, optimized for coding tasks and AI Agent workflows. It features high inference throughput and low end-to-end latency, with native support for tool...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-chat-latest": {
       "name": "OpenAI: GPT Chat Latest",
       "description": "GPT Chat Latest points to OpenAI's stable API alias `chat-latest` that always resolves to the latest Instant chat model used in ChatGPT. As OpenAI rolls out new Instant model updates...",
@@ -4475,5 +4463,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-27T11:30:03.059Z"
+  "_syncedAt": "2026-05-27T14:29:04.884Z"
 }

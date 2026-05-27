@@ -1133,12 +1133,12 @@ export async function createChatView(
   function buildGitActionMenuItems() {
     if (!gitState) return [];
     if (gitState.dirty) {
-      return ['commit', 'commitPush', 'commitSync'];
+      return ['commit', 'commitPush', 'commitSync', 'pull'];
     }
     if (gitState.ahead > 0) {
-      return ['push', 'sync'];
+      return ['push', 'pull', 'sync'];
     }
-    return [];
+    return ['pull'];
   }
 
   function renderGitActionMenu() {
@@ -3891,14 +3891,33 @@ export async function createChatView(
     event.stopPropagation();
     if (gitBusy || !gitActionMenuEl) return;
     const willOpen = gitActionMenuEl.hidden;
-    gitActionMenuEl.hidden = !willOpen;
-    gitMenuBtn.classList.toggle('chat-gitbar__menu-button--open', willOpen);
+    if (willOpen) {
+      const rect = gitMenuBtn.getBoundingClientRect();
+      // Tentatively open below the button
+      gitActionMenuEl.style.top = `${rect.bottom + 4}px`;
+      gitActionMenuEl.style.bottom = '';
+      gitActionMenuEl.style.right = `${window.innerWidth - rect.right}px`;
+      gitActionMenuEl.hidden = false;
+      gitMenuBtn.classList.add('chat-gitbar__menu-button--open');
+      // After render, flip upward if it clips the bottom of the viewport
+      requestAnimationFrame(() => {
+        const menuRect = gitActionMenuEl.getBoundingClientRect();
+        if (menuRect.bottom > window.innerHeight - 8) {
+          gitActionMenuEl.style.top = '';
+          gitActionMenuEl.style.bottom = `${window.innerHeight - rect.top + 4}px`;
+        }
+      });
+    } else {
+      gitActionMenuEl.hidden = true;
+      gitMenuBtn.classList.remove('chat-gitbar__menu-button--open');
+    }
   });
 
   gitActionMenuEl = createElement('div', 'chat-gitbar__menu');
   gitActionMenuEl.hidden = true;
 
-  gitActionWrap.append(gitPrimaryBtn, gitMenuBtn, gitActionMenuEl);
+  gitActionWrap.append(gitPrimaryBtn, gitMenuBtn);
+  document.body.append(gitActionMenuEl);
   gitActions.append(gitRefreshBtn, gitSecondaryBtn, gitActionWrap);
   gitBarEl.append(gitIdentityEl, gitActions);
 

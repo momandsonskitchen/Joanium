@@ -165,6 +165,7 @@ const en = {
     },
     actionMeta: {
       push: 'Push local commits',
+      pull: 'Pull remote changes',
       sync: 'Pull, then push',
       commit: 'Stage files and create a commit',
       commitPush: 'Commit, then push',
