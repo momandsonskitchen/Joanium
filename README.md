@@ -108,16 +108,9 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 
 ---
 
-## get running in 60 seconds
+## get running in less than 60 seconds
 
-```bash
-git clone https://github.com/joanium/joanium.git
-cd joanium
-npm install
-npm start
-```
-
-Not a terminal person? **[Download the app →](https://www.joanium.com/download)** One click. You're in. Go.
+**[Download the app →](https://www.joanium.com/download)** One click. You're in. Go.
 
 ---
 
@@ -146,6 +139,6 @@ Share it. Tweet it. Tell your developer friends who are still copy-pasting conte
 ---
 
 <p align="center">
-  Made with stubbornness and caffeine ·
+  Made with ❤️ by Joel Jolly
   <a href="https://joanium.com">joanium.com</a>
 </p>
