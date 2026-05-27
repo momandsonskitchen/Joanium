@@ -23,7 +23,6 @@ export function createAppSettingsPanel(strings) {
   const options = createElement('div', 'app-settings__options');
   const danger = createElement('section', 'app-settings__danger');
   const status = createElement('p', 'app-settings__status');
-  let languageDropdown = null;
   let defaultViewDropdown = null;
   let defaultModelDropdown = null;
   let defaultSearchEngineDropdown = null;
@@ -42,14 +41,6 @@ export function createAppSettingsPanel(strings) {
   async function updateDefaultView(value) {
     try {
       await state.savePatch({ defaultView: value });
-    } catch {
-      state.setStatus(strings.saveFailed, 'error');
-    }
-  }
-
-  async function updateLanguage(value) {
-    try {
-      await state.savePatch({ locale: value });
     } catch {
       state.setStatus(strings.saveFailed, 'error');
     }
@@ -87,32 +78,12 @@ export function createAppSettingsPanel(strings) {
     resetConfirming = false;
     options.replaceChildren();
     danger.replaceChildren();
-    languageDropdown?.dispose();
-    languageDropdown = null;
     defaultViewDropdown?.dispose();
     defaultViewDropdown = null;
     defaultModelDropdown?.dispose();
     defaultModelDropdown = null;
     defaultSearchEngineDropdown?.dispose();
     defaultSearchEngineDropdown = null;
-
-    languageDropdown = createDropDown({
-      label: '',
-      options: strings.language.options,
-      selectedValue: state.settings.locale ?? 'en',
-      onChange: (value) => {
-        void updateLanguage(value);
-      },
-    });
-
-    const languageRow = createElement('div', 'app-settings__dropdown-row');
-    const languageMeta = createElement('div', 'app-settings__dropdown-meta');
-    languageMeta.append(
-      createElement('span', 'app-settings__dropdown-label', strings.language.label),
-      createElement('span', 'app-settings__dropdown-desc', strings.language.description),
-    );
-    languageRow.append(languageMeta, languageDropdown.element);
-    options.append(languageRow);
 
     // ── Default view row ───────────────────────────────────────────────────
     const viewOptions = Object.entries(strings.defaultView.views).map(([value, label]) => ({
@@ -269,7 +240,6 @@ export function createAppSettingsPanel(strings) {
     clearTimeout(resetConfirmTimer);
     removeSettingsChangeListener?.();
     removeSettingsChangeListener = null;
-    languageDropdown?.dispose();
     defaultViewDropdown?.dispose();
     defaultModelDropdown?.dispose();
     defaultSearchEngineDropdown?.dispose();
