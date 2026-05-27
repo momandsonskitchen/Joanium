@@ -1,0 +1,50 @@
+{
+  "provider": "moonshot",
+  "label": "Moonshot AI",
+  "endpoint": "https://api.moonshot.ai/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "moonshot-v1-auto": {
+      "name": "Moonshot V1 Auto"
+    },
+    "moonshot-v1-128k": {
+      "name": "Moonshot V1 128K"
+    },
+    "moonshot-v1-128k-vision-preview": {
+      "name": "Moonshot V1 128K Vision Preview"
+    },
+    "moonshot-v1-32k": {
+      "name": "Moonshot V1 32K"
+    },
+    "moonshot-v1-32k-vision-preview": {
+      "name": "Moonshot V1 32K Vision Preview"
+    },
+    "moonshot-v1-8k": {
+      "name": "Moonshot V1 8K"
+    },
+    "moonshot-v1-8k-vision-preview": {
+      "name": "Moonshot V1 8K Vision Preview"
+    },
+    "kimi-k2.6": {
+      "name": "Kimi K2.6",
+      "description": "Current Kimi flagship model for long-context chat and agent workflows",
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "kimi-k2.5": {
+      "name": "Kimi K2.5",
+      "description": "Multimodal Kimi model for long-context and agent workflows",
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    }
+  }
+}

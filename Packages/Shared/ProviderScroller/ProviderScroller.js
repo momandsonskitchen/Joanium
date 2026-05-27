@@ -4,10 +4,22 @@ function createProviderTile({ provider, selectedIds, onToggle }) {
   card.className = 'joanium-provider-tile';
   card.style.setProperty('--provider-tint', provider.palette.tint);
 
-  const iconImage = document.createElement('img');
-  iconImage.className = 'joanium-provider-tile__icon-image';
-  iconImage.src = provider.iconPath;
-  iconImage.alt = `${provider.label} icon`;
+  const icon =
+    provider.iconPath && provider.iconPath.trim()
+      ? document.createElement('img')
+      : document.createElement('span');
+
+  if (icon instanceof HTMLImageElement) {
+    icon.className = 'joanium-provider-tile__icon-image';
+    icon.src = provider.iconPath;
+    icon.alt = provider.label;
+  } else {
+    icon.className = 'joanium-provider-tile__icon-fallback';
+    icon.textContent = String(provider.label ?? '')
+      .trim()
+      .charAt(0)
+      .toUpperCase();
+  }
 
   const name = document.createElement('span');
   name.className = 'joanium-provider-tile__name';
@@ -16,7 +28,7 @@ function createProviderTile({ provider, selectedIds, onToggle }) {
   const tick = document.createElement('span');
   tick.className = 'joanium-provider-tile__tick';
 
-  card.append(iconImage, name, tick);
+  card.append(icon, name, tick);
   card.classList.toggle('is-selected', selectedIds.has(provider.id));
   card.providerId = provider.id;
 

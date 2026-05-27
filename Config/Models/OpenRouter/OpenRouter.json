@@ -667,18 +667,6 @@
         "image": true
       }
     },
-    "arcee-ai/trinity-large-thinking:free": {
-      "name": "Arcee AI: Trinity Large Thinking (free)",
-      "description": "Trinity Large Thinking is a powerful open source reasoning model from the team at Arcee AI. It shows strong performance in PinchBench, agentic workloads, and reasoning tasks. Launch video: https://youtu.be/Gc82AXLa0Rg?si=4RLn6WBz33qT--B7...",
-      "context_window": 262144,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "arcee-ai/trinity-large-thinking": {
       "name": "Arcee AI: Trinity Large Thinking",
       "description": "Trinity Large Thinking is a powerful open source reasoning model from the team at Arcee AI. It shows strong performance in PinchBench, agentic workloads, and reasoning tasks. Launch video: https://youtu.be/Gc82AXLa0Rg?si=4RLn6WBz33qT--B7...",
@@ -4487,5 +4475,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-26T06:29:03.227Z"
+  "_syncedAt": "2026-05-27T06:56:04.534Z"
 }

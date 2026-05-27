@@ -1,0 +1,29 @@
+{
+  "provider": "writer",
+  "label": "Writer",
+  "endpoint": "https://api.writer.com/v1/chat",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "palmyra-x5": {
+      "name": "Palmyra X5",
+      "description": "Writer's flagship model — 1M context window, vision, and enterprise-grade accuracy across reasoning, code, and writing",
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "palmyra-x5-mini": {
+      "name": "Palmyra X5 Mini",
+      "description": "Compact, cost-effective Palmyra model for fast chat and lightweight tasks",
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      }
+    }
+  }
+}

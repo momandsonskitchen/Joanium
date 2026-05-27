@@ -18,6 +18,7 @@ const ICON_MAP = {
   slack: 'Slack',
   discord: 'Discord',
   telegram: 'Telegram',
+  todoist: 'Tasks',
   spotify: 'Spotify',
   stripe: 'Stripe',
   supabase: 'Supabase',

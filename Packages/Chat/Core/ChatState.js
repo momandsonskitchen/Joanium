@@ -14,25 +14,32 @@ import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 
 const openAiCompatibleProviders = new Set([
   'ai21',
+  'alibaba',
   'cerebras',
   'cohere',
   'deepseek',
   'fireworks',
   'google-openai',
   'groq',
+  'huggingface',
   'hyperbolic',
+  'moonshot',
   'lambda',
   'lmstudio',
   'minimax',
   'mistral',
+  'mulerouter',
   'nvidia',
   'ollama',
   'openai',
   'openrouter',
   'perplexity',
   'sambanova',
+  'siliconflow',
   'together',
+  'writer',
   'xai',
+  'zai',
 ]);
 
 function createAbortError() {

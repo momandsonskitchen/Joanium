@@ -1,0 +1,49 @@
+{
+  "provider": "alibaba",
+  "label": "Alibaba Cloud",
+  "endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "qwen3-max": {
+      "name": "Qwen3 Max",
+      "description": "Flagship Qwen3 model — top-tier reasoning, coding, and multimodal tasks via Alibaba Cloud Model Studio",
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "qwen3-plus": {
+      "name": "Qwen3 Plus",
+      "description": "Balanced Qwen3 model with strong performance across reasoning and general tasks",
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "qwen-plus": {
+      "name": "Qwen Plus",
+      "description": "Mid-tier Qwen model suited for everyday chat and productivity workflows",
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "qwen-flash": {
+      "name": "Qwen Flash",
+      "description": "Lightweight, low-latency Qwen model for fast everyday responses",
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      }
+    }
+  }
+}

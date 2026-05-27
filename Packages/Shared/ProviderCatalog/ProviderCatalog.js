@@ -10,7 +10,9 @@ const providerPalette = {
   fireworks: { tint: '#b89aee', glow: '#ede7ff' },
   google: { tint: '#7f97ff', glow: '#edf1ff' },
   groq: { tint: '#f5a876', glow: '#ffebdd' },
+  huggingface: { tint: '#f6c860', glow: '#fff6d7' },
   hyperbolic: { tint: '#9e96f5', glow: '#edeaff' },
+  moonshot: { tint: '#94c9ff', glow: '#eaf5ff' },
   lambda: { tint: '#a5a8f5', glow: '#eeeeff' },
   lmstudio: { tint: '#ff9f84', glow: '#ffe8df' },
   minimax: { tint: '#ef8fd2', glow: '#ffebf8' },
@@ -21,9 +23,14 @@ const providerPalette = {
   openrouter: { tint: '#c7a8ff', glow: '#f3ecff' },
   perplexity: { tint: '#8fc7ff', glow: '#eaf5ff' },
   sambanova: { tint: '#ffb88a', glow: '#fff3e8' },
+  siliconflow: { tint: '#7cc6b3', glow: '#e6f8f2' },
   ai21: { tint: '#ff9ab5', glow: '#ffe6ee' },
   together: { tint: '#ff9a9a', glow: '#ffebeb' },
   xai: { tint: '#c9b6a8', glow: '#f4eee9' },
+  zai: { tint: '#9ab4ff', glow: '#edf2ff' },
+  alibaba: { tint: '#ff7b00', glow: '#fff1e0' },
+  mulerouter: { tint: '#a78bfa', glow: '#ede9ff' },
+  writer: { tint: '#2563eb', glow: '#dbeafe' },
 };
 
 const providerIconMap = {
@@ -48,6 +55,13 @@ const providerIconMap = {
   ai21: 'AI21.png',
   together: 'Together.png',
   xai: 'xAI.png',
+  zai: 'Zai.png',
+  huggingface: 'HuggingFace.png',
+  moonshot: 'MoonShot.png',
+  siliconflow: 'SiliconFlow.png',
+  alibaba: 'Alibaba.png',
+  mulerouter: 'MuleRouter.png',
+  writer: 'Writer.png',
 };
 
 function summarizeModels(models) {

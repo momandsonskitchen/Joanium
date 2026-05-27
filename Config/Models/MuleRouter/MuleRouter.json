@@ -1,0 +1,49 @@
+{
+  "provider": "mulerouter",
+  "label": "MuleRouter",
+  "endpoint": "https://api.mulerouter.ai/vendors/openai/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "qwen3-6-plus": {
+      "name": "Qwen3.6 Plus",
+      "description": "Qwen3.6 Plus multimodal flagship — 1M context, vision understanding, and extended reasoning via MuleRouter",
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "qwen3-6-max-preview": {
+      "name": "Qwen3.6 Max Preview",
+      "description": "Preview of the next-gen Qwen3.6 Max — 256K context, enhanced reasoning and coding",
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "qwen3-5-plus": {
+      "name": "Qwen3.5 Plus",
+      "description": "Qwen3.5 Plus via MuleRouter — 1M context, native multimodal, built-in tool use and reasoning",
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "qwen3-max": {
+      "name": "Qwen3 Max",
+      "description": "Qwen3 flagship model for complex reasoning and coding tasks, routed through MuleRouter",
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      }
+    }
+  }
+}

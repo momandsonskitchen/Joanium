@@ -315,6 +315,15 @@ export async function fetchProviderModels(providerId, { apiKey = '', endpoint = 
     case 'google':
       return fetchGoogleModels(apiKey);
 
+    case 'qwen':
+      return openAICompat(
+        'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models',
+        `Bearer ${apiKey}`,
+      );
+
+    case 'kimi':
+      return openAICompat('https://api.moonshot.ai/v1/models', `Bearer ${apiKey}`);
+
     case 'mistral':
       return openAICompat('https://api.mistral.ai/v1/models', `Bearer ${apiKey}`);
 
@@ -357,16 +366,23 @@ export async function fetchProviderModels(providerId, { apiKey = '', endpoint = 
     case 'fireworks':
       return fetchFireworksModels(apiKey);
 
+    case 'siliconflow':
+      return openAICompat('https://api.siliconflow.com/v1/models', `Bearer ${apiKey}`);
+
+    case 'huggingface':
+      return openAICompat('https://router.huggingface.co/v1/models', `Bearer ${apiKey}`);
+
     case 'lambda':
       return openAICompat('https://api.lambda.ai/v1/models', `Bearer ${apiKey}`);
 
     case 'sambanova':
       return openAICompat('https://api.sambanova.ai/v1/models', `Bearer ${apiKey}`);
 
-    // Hyperbolic and AI21 don't expose a public models listing endpoint —
+    // Hyperbolic, AI21, and Z.ai don't expose a public models listing endpoint —
     // returning null keeps all bundled models (fail-safe behaviour).
     case 'hyperbolic':
     case 'ai21':
+    case 'zai':
       return null;
 
     default:
