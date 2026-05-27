@@ -39,6 +39,12 @@ const ICON_MAP = {
   whatsapp: 'WhatsApp',
   cloudflare: 'Cloudflare',
   hackernews: 'HackerNews',
+  airtable: 'Airtable',
+  arxiv: 'Arxiv',
+  npm: 'Npm',
+  reddit: 'Reddit',
+  stackoverflow: 'StackOverflow',
+  itunes: 'iTunes',
 };
 
 function getConnectorIconPath(connectorId) {
