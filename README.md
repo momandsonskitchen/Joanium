@@ -33,7 +33,7 @@
 
 ---
 
-## wait, what even is this?
+## Wait, what even is this?
 
 **Joanium is a local-first AI desktop agent that actually *does* stuff** — not just talks about doing stuff.
 
@@ -45,7 +45,7 @@ Joanium **lives on your machine**. It knows your files. It runs jobs while you s
 
 ---
 
-## a real example of what it actually does
+## A real example of what it actually does
 
 > *Every morning at 8am, Joanium pulls my GitHub issues, summarises them with AI, and drops a priority list into my Slack. I set it up once. It just runs. Forever.*
 
@@ -53,7 +53,7 @@ That's not a chatbot. That's an **actual agent**.
 
 ---
 
-## what's inside
+## What's inside?
 
 **🧠 Multi-model, zero lock-in**
 Switch between Gemini, Claude, GPT, Grok, Mistral, or go fully offline with Ollama / LM Studio. 10+ providers. Use whatever model won the benchmark this week — we genuinely don't care.
@@ -84,7 +84,7 @@ Zero internet. Zero API keys. Zero cloud. Zero excuses. Everything stays in your
 
 ---
 
-## vs the competition (yeah we went there)
+## Joanium vs the competition (yeah we went there)
 
 Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 
@@ -108,13 +108,13 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 
 ---
 
-## get running in less than 60 seconds
+## Get running in less than 60 seconds
 
 **[Download the app →](https://www.joanium.com/download)** One click. You're in. Go.
 
 ---
 
-## the marketplace 🛍️
+## Marketplace 🛍️
 
 The Skills and Personas in this repo come **pre-installed** with Joanium — they're your out-of-the-box starting point.
 
@@ -122,7 +122,7 @@ But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketpla
 
 ---
 
-## contributing
+## Contributing
 
 PRs are genuinely welcome — not in the "we value all contributions" corporate way, in the actual "please help us make this better" way.
 
@@ -130,7 +130,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECU
 
 ---
 
-## if this helped you
+## If this helped you
 
 Hit ⭐ star. It takes 0.3 seconds and means everything for an open source project.
 
@@ -139,6 +139,6 @@ Share it. Tweet it. Tell your developer friends who are still copy-pasting conte
 ---
 
 <p align="center">
-  Made with ❤️ by Joel Jolly
-  <a href="https://joanium.com">joanium.com</a>
+  Made with ❤️ by
+  <a href="https://joeljolly.vercel.app">Joel Jolly</a>
 </p>
