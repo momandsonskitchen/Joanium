@@ -1,3 +1,5 @@
+<a name="readme-top"></a>
+
 # Joanium
 
 <p align="center">
@@ -28,8 +30,33 @@
   <a href="https://joanium.com/docs">📖 Docs</a> ·
   <a href="https://joanium.com/marketplace">🛍️ Marketplace</a> ·
   <a href="https://www.joanium.com/download">⬇️ Download</a> ·
-  <a href="https://github.com/joanium/joanium/discussions">💬 Discussions</a>
+  <a href="https://github.com/joanium/joanium/releases">📋 Changelog</a> ·
+  <a href="https://github.com/joanium/joanium/discussions">💬 Discussions</a> ·
+  <a href="https://github.com/joanium/joanium/issues">🐛 Feedback</a>
 </p>
+
+<p align="center">
+  <b>Share Joanium</b><br/>
+  <a href="https://x.com/intent/tweet?text=Check%20out%20Joanium%20%E2%80%94%20a%20local-first%20AI%20desktop%20agent%20that%20actually%20does%20stuff.%20Open%20source%2C%20fully%20private%2C%20multi-model.&url=https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
+    <img src="https://img.shields.io/badge/-share%20on%20x-black?labelColor=black&logo=x&logoColor=white&style=flat-square" alt="Share on X">
+  </a>
+  <a href="https://t.me/share/url?text=Check%20out%20Joanium%20%E2%80%94%20a%20local-first%20AI%20desktop%20agent%20that%20actually%20does%20stuff.&url=https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
+    <img src="https://img.shields.io/badge/-share%20on%20telegram-black?labelColor=black&logo=telegram&logoColor=white&style=flat-square" alt="Share on Telegram">
+  </a>
+  <a href="https://api.whatsapp.com/send?text=Check%20out%20Joanium%20%E2%80%94%20a%20local-first%20AI%20desktop%20agent%20that%20actually%20does%20stuff.%20https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
+    <img src="https://img.shields.io/badge/-share%20on%20whatsapp-black?labelColor=black&logo=whatsapp&logoColor=white&style=flat-square" alt="Share on WhatsApp">
+  </a>
+  <a href="https://www.reddit.com/submit?title=Joanium%20%E2%80%94%20local-first%20AI%20desktop%20agent&url=https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
+    <img src="https://img.shields.io/badge/-share%20on%20reddit-black?labelColor=black&logo=reddit&logoColor=white&style=flat-square" alt="Share on Reddit">
+  </a>
+</p>
+
+---
+
+> [!IMPORTANT]
+> **Star Us** to get all release notifications from GitHub without any delay ⭐️
+
+[![Star History Chart](https://api.star-history.com/svg?repos=joanium/joanium&type=Date)](https://github.com/joanium/joanium/stargazers)
 
 ---
 
@@ -82,6 +109,8 @@ Scope your AI's context to a specific codebase or folder. No more explaining you
 **🔒 Fully offline, fully private**
 Zero internet. Zero API keys. Zero cloud. Zero excuses. Everything stays in your `Data/` folder, on your machine, under your control.
 
+[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
 ---
 
 ## Joanium vs the competition (yeah we went there)
@@ -106,6 +135,8 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 
 > **tl;dr** — Codex and Claude Code are coding agents for the terminal. Hermes lives in the cloud. OpenClaw handles chat. Joanium is the only one that's a full desktop app, multi-model, offline-capable, open source, integrates with your real work tools, *and* talks to your messaging apps. Different category.
 
+[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
 ---
 
 ## Get running in less than 60 seconds
@@ -120,6 +151,8 @@ The Skills and Personas in this repo come **pre-installed** with Joanium — the
 
 But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketplace)** — a separate community repo where you can browse, create, and publish your own. Drop in a *"startup growth hacker"*, a *"brutally honest code reviewer"*, a *"3am rubber duck debugger"* — or build one that's uniquely yours. No code required, just show up and create.
 
+[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
+
 ---
 
 ## Contributing
@@ -127,6 +160,10 @@ But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketpla
 PRs are genuinely welcome — not in the "we value all contributions" corporate way, in the actual "please help us make this better" way.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECURITY.md) for responsible disclosure. Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+[![Contributors](https://contrib.rocks/image?repo=joanium/joanium)](https://github.com/joanium/joanium/graphs/contributors)
+
+[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
 
 ---
 
