@@ -130,14 +130,17 @@
   width: 100%;
   border: 0;
   border-radius: var(--radius-sm);
-  padding: 13px 16px;
+  padding: 10px 14px;
   text-align: left;
   font: inherit;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 550;
   color: var(--dropdown-color-text);
   background: transparent;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   transition:
     background-color 140ms ease,
     color 140ms ease;
@@ -151,4 +154,20 @@
   background: var(--dropdown-color-option-selected);
   font-weight: 700;
   color: var(--dropdown-color-text-selected);
+}
+
+.joanium-dropdown__option-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.joanium-dropdown__trigger-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: contain;
 }

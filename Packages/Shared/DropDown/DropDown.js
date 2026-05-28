@@ -46,6 +46,18 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
     const match = options.find((o) => o.value === currentValue);
     triggerText.textContent = match ? match.label : (placeholder ?? 'Select');
     triggerText.classList.toggle('joanium-dropdown__trigger-text--placeholder', !match);
+
+    // Show provider icon in the trigger when the selected option has one.
+    const existingIcon = trigger.querySelector('.joanium-dropdown__trigger-icon');
+    existingIcon?.remove();
+    if (match?.iconPath) {
+      const icon = document.createElement('img');
+      icon.className = 'joanium-dropdown__trigger-icon';
+      icon.src = match.iconPath;
+      icon.alt = '';
+      icon.draggable = false;
+      trigger.prepend(icon);
+    }
   }
 
   function buildOptions() {
@@ -56,8 +68,21 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
       item.type = 'button';
       item.className = 'joanium-dropdown__option';
       item.setAttribute('role', 'option');
-      item.textContent = option.label;
       item.classList.toggle('is-selected', option.value === currentValue);
+
+      if (option.iconPath) {
+        const icon = document.createElement('img');
+        icon.className = 'joanium-dropdown__option-icon';
+        icon.src = option.iconPath;
+        icon.alt = '';
+        icon.draggable = false;
+        item.append(icon);
+      }
+
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = option.label;
+      item.append(labelSpan);
+
       item.addEventListener('click', (event) => {
         event.stopPropagation();
         currentValue = option.value;
