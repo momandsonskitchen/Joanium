@@ -136,7 +136,7 @@ PRs are genuinely welcome — not in the "we value all contributions" corporate 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECURITY.md) for responsible disclosure. Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 <!-- contributors-start -->
-<a href="https://github.com/withinJoel"><img src="https://avatars.githubusercontent.com/u/128782382?v=4&s=48" width="48" height="48" alt="withinJoel" title="withinJoel" style="border-radius:50%;margin:4px"/></a>
+<a href="https://github.com/withinJoel"><img src="https://avatars.githubusercontent.com/u/128782382?v=4&s=48" width="48" height="48" alt="withinJoel" title="withinJoel" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/joaniumhere"><img src="https://avatars.githubusercontent.com/u/274259721?v=4&s=48" width="48" height="48" alt="joaniumhere" title="joaniumhere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/joeljollyhere"><img src="https://avatars.githubusercontent.com/u/177291397?v=4&s=48" width="48" height="48" alt="joeljollyhere" title="joeljollyhere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/evelinahere"><img src="https://avatars.githubusercontent.com/u/274233490?v=4&s=48" width="48" height="48" alt="evelinahere" title="evelinahere" style="border-radius:50%;margin:4px"/></a>
 <!-- contributors-end -->
 
 ---
