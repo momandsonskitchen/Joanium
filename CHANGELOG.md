@@ -6,6 +6,15 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.528.5] - 2026-05-28
+
+* chore(release): bump version to 2026.528.5
+* User Onboarding Race Condition Fix
+* SiliconFlow.png Icon Fix
+* Siliconflow icon update
+
+---
+
 ## [2026.528.4] - 2026-05-28
 
 * chore(release): bump version to 2026.528.4
