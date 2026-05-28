@@ -371,11 +371,24 @@ export async function readUserState(rootDirectory) {
   }
 }
 
-export async function writeUserState(rootDirectory, nextState) {
+// Serialise all disk writes so concurrent save-draft IPC calls never race
+// over the same .tmp file on Windows (EPERM on rename when the file is still
+// open / locked by the previous write).
+let _writeQueue = Promise.resolve();
+
+async function _doWriteUserState(rootDirectory, nextState) {
   const userFilePath = getUserDataFilePath(rootDirectory);
   const tempFilePath = `${userFilePath}.tmp`;
   await mkdir(path.dirname(userFilePath), { recursive: true });
   await writeFile(tempFilePath, `${JSON.stringify(nextState, null, 2)}\n`, 'utf8');
   await rename(tempFilePath, userFilePath);
   return nextState;
+}
+
+export function writeUserState(rootDirectory, nextState) {
+  // Chain onto the current tail of the queue. Use the same callback for both
+  // fulfilled and rejected so a failed write never stalls subsequent ones.
+  const task = () => _doWriteUserState(rootDirectory, nextState);
+  _writeQueue = _writeQueue.then(task, task);
+  return _writeQueue;
 }

@@ -20,7 +20,7 @@
 }
 
 .joanium-provider-tile {
-  width: 120px;
+  width: 136px;
   min-height: 120px;
   border: 0;
   border-radius: var(--radius-xl);
@@ -75,7 +75,7 @@
 
 .joanium-provider-tile__name {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--color-text);
   text-align: center;
 }
