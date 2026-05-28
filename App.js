@@ -9,7 +9,12 @@ DebugLogger.configureDebugLogger({ rootDirectory });
 
 function writeBootLog(message, details = '') {
   try {
-    const logDirectory = path.join(rootDirectory, 'Build', 'Logs');
+    // In packaged builds, rootDirectory resolves inside the read-only asar archive.
+    // process.resourcesPath is the writable resources/ folder next to the executable.
+    // In dev, process.resourcesPath is undefined so we fall back to Build/Logs.
+    const logDirectory = process.resourcesPath
+      ? path.join(process.resourcesPath, 'Logs')
+      : path.join(rootDirectory, 'Build', 'Logs');
     mkdirSync(logDirectory, { recursive: true });
     const suffix = details ? ` ${details}` : '';
     appendFileSync(

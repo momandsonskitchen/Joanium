@@ -82,8 +82,12 @@ function applyProductionHardening(webContents) {
   });
 }
 
+// In packaged builds, process.cwd() may point to a non-writable install directory.
+// Use process.resourcesPath/Logs instead — it's always writable next to the asar.
 const writeBootLog = createBootLogger(
-  path.join(process.cwd(), 'Build', 'Logs', 'electron-boot.log'),
+  process.resourcesPath
+    ? path.join(process.resourcesPath, 'Logs', 'electron-boot.log')
+    : path.join(process.cwd(), 'Build', 'Logs', 'electron-boot.log'),
 );
 
 function registerIpcHandlers(handlerDefinitions = []) {
@@ -151,6 +155,16 @@ async function createMainWindow(entryPackage) {
       }
     }, 1500);
   };
+
+  browserWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    // level: 0=verbose, 1=info, 2=warning, 3=error
+    if (level >= 2) {
+      writeBootLog(
+        'renderer:console',
+        JSON.stringify({ level, message, line: line ?? 0, source: sourceId ?? '' }),
+      );
+    }
+  });
 
   browserWindow.once('ready-to-show', ensureVisible);
   browserWindow.webContents.once('did-finish-load', ensureVisible);

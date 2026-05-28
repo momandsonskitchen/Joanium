@@ -6,8 +6,12 @@ import { debugLog } from './Shared/Debug/DebugLogger.js';
 const packagesDirectory = path.dirname(fileURLToPath(import.meta.url));
 const rootDirectory = path.resolve(packagesDirectory, '..');
 
+// In packaged builds, rootDirectory is inside the read-only asar archive.
+// Redirect logs to process.resourcesPath/Logs which is always writable.
 const writeBootLog = createBootLogger(
-  path.join(rootDirectory, 'Build', 'Logs', 'electron-boot.log'),
+  process.resourcesPath
+    ? path.join(process.resourcesPath, 'Logs', 'electron-boot.log')
+    : path.join(rootDirectory, 'Build', 'Logs', 'electron-boot.log'),
 );
 
 export async function bootstrapApplication() {
