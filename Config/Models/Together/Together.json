@@ -189,6 +189,10 @@
       "name": "Nemotron 3 Nano Omni 30B A3b Reasoning Fp8",
       "context_window": 131072
     },
+    "meta-llama/Llama-3.3-70B-Instruct": {
+      "name": "meta-llama/Llama-3.3-70B-Instruct",
+      "context_window": 131072
+    },
     "deepcogito/cogito-v1-preview-llama-8B": {
       "name": "Cogito V1 Preview Llama 8B",
       "context_window": 131072
@@ -580,10 +584,6 @@
       "name": "Qwen3 Coder Next Fp8",
       "context_window": 262144
     },
-    "meta-llama/Llama-3.3-70B-Instruct": {
-      "name": "meta-llama/Llama-3.3-70B-Instruct",
-      "context_window": 131072
-    },
     "meta-llama/Llama-3.3-70B-Instruct-FP8-Lora": {
       "name": "Llama 3.3 70B Instruct FP8 Lora",
       "context_window": 131072
@@ -700,5 +700,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-05-27T14:29:10.904Z"
+  "_syncedAt": "2026-05-28T03:45:43.612Z"
 }

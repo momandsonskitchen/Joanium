@@ -1,5 +1,6 @@
 import { dialog } from 'electron';
 import { createProjectStateManager } from './Core/ProjectState.js';
+import { readProjectDocs, formatProjectDocsPrompt } from './Core/ProjectDocReader.js';
 
 // ---------------------------------------------------------------------------
 // Projects package — backend-only, no renderer.
@@ -42,6 +43,13 @@ export async function createPackage({ rootDirectory }) {
             ],
           });
           return result.canceled ? null : (result.filePaths[0] ?? null);
+        },
+      },
+      {
+        channel: 'projects:read-project-docs',
+        handler: async (_event, folderPath) => {
+          const docs = await readProjectDocs(folderPath);
+          return formatProjectDocsPrompt(docs);
         },
       },
       {

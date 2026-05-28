@@ -537,17 +537,30 @@ export async function createChatView(
     return savedSession;
   }
 
-  function buildProjectContext(project) {
+  async function buildProjectContext(project) {
     if (!project) return '';
 
     const info = collapseWhitespace(project.info);
     const folder = collapseWhitespace(project.folderPath ?? project.rootPath);
 
-    return formatPromptTemplate(payload.projectContextPrompt, {
+    const base = formatPromptTemplate(payload.projectContextPrompt, {
       name: collapseWhitespace(project.name),
       info,
       folder,
     });
+
+    // Automatically inject key doc files from the project folder so the AI
+    // always has full project context without the user needing to attach them.
+    let docsPrompt = '';
+    if (folder) {
+      try {
+        docsPrompt = (await invokeIpc('projects:read-project-docs', folder)) ?? '';
+      } catch {
+        // Non-fatal — proceed without doc injection if the IPC fails.
+      }
+    }
+
+    return docsPrompt ? `${base}\n\n${docsPrompt}` : base;
   }
 
   async function loadMemoryContext() {
@@ -2722,7 +2735,7 @@ export async function createChatView(
         providerId: activeProvider?.id ?? null,
         modelId: activeModel?.id ?? null,
         memoryContext: memoryContext || null,
-        projectInfo: buildProjectContext(activeProject) || null,
+        projectInfo: (await buildProjectContext(activeProject)) || null,
         persona: (getActivePersona?.() ?? activePersona)?.content || null,
         modeInstruction: getModeInstruction(),
         terminalTools: payload.terminalPrompt,
@@ -3691,7 +3704,7 @@ export async function createChatView(
       contextCache: assistantContextCache,
       providerId: activeProvider?.id ?? null,
       modelId: activeModel?.id ?? null,
-      projectInfo: buildProjectContext(activeProject) || null,
+      projectInfo: (await buildProjectContext(activeProject)) || null,
       persona: (getActivePersona?.() ?? activePersona)?.content || null,
       modeInstruction: joinPromptParts([getModeInstruction(), liveBrowserContext]),
       terminalTools: payload.terminalPrompt,
