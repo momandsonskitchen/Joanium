@@ -32,7 +32,7 @@
         "!Screenshots/**",
         "!Avatar.*",
         "!User.json",
-        "!Usage.json",
+        "!Usage/**",
         "!Channels.json",
         "!MCPServers.json",
         "!Security.json",
