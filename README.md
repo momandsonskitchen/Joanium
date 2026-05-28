@@ -36,7 +36,7 @@
 
 ---
 
-> [!IMPORTANT]
+> [!IMPORTAN
 > **Star Us** to get all release notifications from GitHub without any delay ⭐️
 
 [![Star History Chart](https://api.star-history.com/svg?repos=joanium/joanium&type=Date)](https://github.com/joanium/joanium/stargazers)
