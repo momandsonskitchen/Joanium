@@ -6,6 +6,13 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.528.2] - 2026-05-28
+
+* chore(release): bump version to 2026.528.2
+* Skipped Usage
+
+---
+
 ## [2026.528.1] - 2026-05-28
 
 * chore(release): bump version to 2026.528.1
