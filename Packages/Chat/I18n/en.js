@@ -130,6 +130,8 @@ const en = {
     subAgentPromptSection: 'Prompt',
     subAgentOutputSection: 'Output',
     subAgentErrorSection: 'Error',
+    subAgentDepthLimit:
+      'Task reached the tool call limit before completing. Returning partial progress.',
   },
   git: {
     refresh: 'Refresh git status',

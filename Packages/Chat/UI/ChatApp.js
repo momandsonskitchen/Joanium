@@ -25,7 +25,6 @@ import {
 import {
   executeTerminalTool as executeRendererTerminalTool,
   formatToolsetResultForModel,
-  parseToolRequests,
   parseAllToolRequests,
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
 import { createAttachmentPill } from './AttachmentPill.js';
@@ -2653,7 +2652,10 @@ export async function createChatView(
   }
 
   function buildSubAgentTaskPrompt(task, coordinationGoal, index, total) {
-    return payload.subAgentPrompt
+    const template =
+      String(payload.subAgentPrompt ?? '').trim() ||
+      'You are sub-agent {index} of {total}.\n\nTeam objective: {coordinationGoal}\n\n## Task\n{title}: {goal}\n{context}\n{deliverable}';
+    return template
       .replace('{index}', String(index + 1))
       .replace('{total}', String(total))
       .replace('{coordinationGoal}', coordinationGoal ? `Team objective: ${coordinationGoal}` : '')
@@ -2672,14 +2674,14 @@ export async function createChatView(
         (message) => !message.hidden && !message.streaming && !message.pending && message.content,
       )
       .filter((message) => message.role === 'user' || message.role === 'assistant')
-      .slice(-8)
+      .slice(-12)
       .map((message) => ({
         role: message.role,
         content: message.modelContent || message.content,
       }));
   }
 
-  function formatSubAgentOutput(tasks, results, coordinationGoal) {
+  function formatSubAgentOutput(tasks, results, coordinationGoal, synthesisStyle = 'detailed') {
     const lines = [strings.tools.subAgentsResultHeader];
 
     if (coordinationGoal) {
@@ -2706,10 +2708,40 @@ export async function createChatView(
         );
       }
 
-      if (result.ok) {
-        lines.push('', `${strings.tools.subAgentsHandoff}:\n${result.text}`);
-      } else {
+      if (!result.ok) {
         lines.push('', `${strings.tools.subAgentsError}:\n${result.error}`);
+        return;
+      }
+
+      if (synthesisStyle === 'brief') {
+        // Compact — first 300 chars of handoff only
+        const summary = result.text.length > 300 ? `${result.text.slice(0, 300)}…` : result.text;
+        lines.push('', `Summary: ${summary}`);
+      } else if (synthesisStyle === 'action_items') {
+        // Surface action-oriented lines: lines starting with verbs, numbers, dashes, or "Action"/"Next"
+        const actionLines = result.text
+          .split('\n')
+          .map((l) => l.trim())
+          .filter(
+            (l) =>
+              l &&
+              (l.match(
+                /^(\d+[.)\s]|[-*•]|Action|Next|Step|TODO|Fix|Add|Update|Create|Run|Deploy|Implement)/i,
+              ) ||
+                l.startsWith('Action') ||
+                l.startsWith('Next')),
+          );
+        if (actionLines.length > 0) {
+          lines.push('', 'Action items:', ...actionLines.map((l) => `  • ${l}`));
+        } else {
+          lines.push('', `${strings.tools.subAgentsHandoff}:\n${result.text}`);
+        }
+      } else if (synthesisStyle === 'comparison') {
+        // Label result with agent index for easy side-by-side reading
+        lines.push('', `[Agent ${index + 1} — ${task.title}]:\n${result.text}`);
+      } else {
+        // Default: detailed (full handoff)
+        lines.push('', `${strings.tools.subAgentsHandoff}:\n${result.text}`);
       }
     });
 
@@ -2727,7 +2759,7 @@ export async function createChatView(
     const toolsetTools = await loadToolsetPrompt();
     let usage = { input: 0, output: 0 };
     let lastMeta = {};
-    const MAX_SUB_AGENT_TOOL_CALLS = 10;
+    const MAX_SUB_AGENT_TOOL_CALLS = 25;
 
     for (let depth = 0; depth <= MAX_SUB_AGENT_TOOL_CALLS; depth += 1) {
       const result = await invokeIpc('chat:complete-message', {
@@ -2737,7 +2769,12 @@ export async function createChatView(
         memoryContext: memoryContext || null,
         projectInfo: (await buildProjectContext(activeProject)) || null,
         persona: (getActivePersona?.() ?? activePersona)?.content || null,
-        modeInstruction: getModeInstruction(),
+        modeInstruction: [
+          getModeInstruction(),
+          'You are operating as a focused autonomous sub-agent. Execute the task fully and independently. Do not ask for clarification — use your best judgment. Use all available tools as needed. Return a structured handoff when done.',
+        ]
+          .filter(Boolean)
+          .join('\n\n'),
         terminalTools: payload.terminalPrompt,
         toolsetTools: toolsetTools || null,
         isNewSession: false,
@@ -2750,9 +2787,10 @@ export async function createChatView(
       lastMeta = result ?? {};
 
       const { content: parsedContent } = parseThinkingFromText(String(result?.text ?? ''));
-      const { terminalAction, toolsetAction } = parseToolRequests(parsedContent);
+      const { terminalActions, toolsetActions, hasTools, visibleContent } =
+        parseAllToolRequests(parsedContent);
 
-      if (!terminalAction && !toolsetAction) {
+      if (!hasTools) {
         return {
           ...lastMeta,
           text: sanitizeAssistantVisibleContent(parsedContent) || strings.composer.emptyResponse,
@@ -2764,57 +2802,68 @@ export async function createChatView(
       if (depth >= MAX_SUB_AGENT_TOOL_CALLS) {
         return {
           ...lastMeta,
-          text: sanitizeAssistantVisibleContent(parsedContent) || strings.terminal.unsupportedTool,
+          text:
+            sanitizeAssistantVisibleContent(visibleContent || parsedContent) ||
+            strings.tools.subAgentDepthLimit,
           charCountIn: usage.input,
           charCountOut: usage.output,
         };
       }
 
-      let modelResult;
+      // Execute all tool calls from this turn in parallel
+      const allActions = [
+        ...terminalActions.map((a) => ({ ...a, _kind: 'terminal' })),
+        ...toolsetActions.map((a) => ({ ...a, _kind: 'toolset' })),
+      ];
 
-      if (terminalAction) {
-        const terminalResult = await executeTerminalTool(terminalAction).catch((error) => ({
-          ok: false,
-          error: error?.message ?? String(error),
-        }));
-        modelResult = formatTerminalResultForModel(strings, terminalAction, terminalResult);
-        if (!terminalResult?.ok && terminalResult?.error) {
-          modelResult += `\n\n${CHAT_PROMPTS.toolFailureRetry}`;
-        }
-        localMessages.push({
-          role: 'assistant',
-          content:
-            sanitizeAssistantVisibleContent(terminalAction.visibleContent) ||
-            strings.terminal.runningTool,
-        });
-      } else {
-        const toolsetResult =
-          toolsetAction.tool === 'spawn_sub_agents'
-            ? {
+      const allResults = await Promise.all(
+        allActions.map(async (action) => {
+          try {
+            if (action._kind === 'terminal') {
+              const toolResult = await executeTerminalTool(action).catch((error) => ({
                 ok: false,
-                tool: toolsetAction.tool,
-                error: CHAT_PROMPTS.nestedSubAgentsUnavailable,
-              }
-            : await executeToolsetTool(toolsetAction).catch((error) => ({
-                ok: false,
-                tool: toolsetAction.tool,
                 error: error?.message ?? String(error),
               }));
-        modelResult = formatToolsetResultForModel(toolsetAction, toolsetResult);
-        if (!toolsetResult?.ok && toolsetResult?.error) {
-          modelResult += `\n\n${CHAT_PROMPTS.toolFailureRetry}`;
+              return { action, result: toolResult };
+            }
+
+            const toolResult =
+              action.tool === 'spawn_sub_agents'
+                ? {
+                    ok: false,
+                    tool: action.tool,
+                    error: CHAT_PROMPTS.nestedSubAgentsUnavailable,
+                  }
+                : await executeToolsetTool(action).catch((error) => ({
+                    ok: false,
+                    tool: action.tool,
+                    error: error?.message ?? String(error),
+                  }));
+            return { action, result: toolResult };
+          } catch (error) {
+            return { action, result: { ok: false, error: error?.message ?? String(error) } };
+          }
+        }),
+      );
+
+      const modelParts = allResults.map(({ action, result }) => {
+        if (action._kind === 'terminal') {
+          let part = formatTerminalResultForModel(strings, action, result);
+          if (!result?.ok && result?.error) part += `\n\n${CHAT_PROMPTS.toolFailureRetry}`;
+          return part;
         }
-        localMessages.push({
-          role: 'assistant',
-          content:
-            sanitizeAssistantVisibleContent(toolsetAction.visibleContent) ||
-            strings.tools.runningTool,
-        });
-      }
+        let part = formatToolsetResultForModel(action, result);
+        if (!result?.ok && result?.error) part += `\n\n${CHAT_PROMPTS.toolFailureRetry}`;
+        return part;
+      });
 
       localMessages.push({
+        role: 'assistant',
+        content: sanitizeAssistantVisibleContent(visibleContent) || strings.terminal.runningTool,
+      });
+      localMessages.push({
         role: 'user',
-        content: modelResult,
+        content: modelParts.join('\n\n---\n\n'),
       });
     }
 
@@ -2843,6 +2892,9 @@ export async function createChatView(
       payload.parameters?.coordination_goal ??
         payload.coordination_goal ??
         CHAT_PROMPTS.subAgentFallbackGoal,
+    );
+    const synthesisStyle = collapseWhitespace(
+      payload.parameters?.synthesis_style ?? payload.synthesis_style ?? 'detailed',
     );
     const conversationContext = getSubAgentConversationContext();
     const memoryContext = await loadMemoryContext();
@@ -2882,7 +2934,7 @@ export async function createChatView(
     return {
       ok: results.some((result) => result.ok),
       tool: action.tool,
-      output: formatSubAgentOutput(tasks, results, coordinationGoal),
+      output: formatSubAgentOutput(tasks, results, coordinationGoal, synthesisStyle),
       results,
     };
   }
