@@ -32,13 +32,17 @@ jobs:
               per_page: 100
             });
 
+            const humanContributors = contributors.filter(
+              c => c.type !== 'Bot' && !c.login.endsWith('[bot]') && c.login !== 'invalid-email-address'
+            );
+
             const lines = [
               `# 🤝 Contributors`,
               ``,
               `Thanks to everyone who has contributed to **Joanium**!`,
               `This file is automatically regenerated every week. 🤖`,
               ``,
-              `> **Total contributors:** ${contributors.length}  `,
+              `> **Total contributors:** ${humanContributors.length}  `,
               `> **Last updated:** ${new Date().toUTCString()}`,
               ``,
               `---`,
@@ -47,8 +51,7 @@ jobs:
               `|---|---|---|`,
             ];
 
-            for (const c of contributors) {
-              if (c.login === 'invalid-email-address') continue;
+            for (const c of humanContributors) {
               lines.push(
                 `| <img src="${c.avatar_url}&s=32" width="32" height="32" alt="${c.login} avatar" style="border-radius:50%"/> | [@${c.login}](${c.html_url}) | ${c.contributions} |`
               );
