@@ -8,6 +8,9 @@
     "accounts/fireworks/models/kimi-k2p5": {
       "name": "Kimi K2p5"
     },
+    "accounts/fireworks/models/glm-5p1": {
+      "name": "Glm 5p1"
+    },
     "accounts/fireworks/models/kimi-k2p6": {
       "name": "Kimi K2.6",
       "description": "Moonshot AI's frontier MoE model — top-tier coding, reasoning, and agentic tasks with 262K context",
@@ -40,9 +43,6 @@
         "output": 0.6
       }
     },
-    "accounts/fireworks/models/glm-5p1": {
-      "name": "Glm 5p1"
-    },
     "accounts/fireworks/models/deepseek-v4-pro": {
       "name": "DeepSeek V4 Pro",
       "description": "DeepSeek's latest frontier model — strong reasoning, coding, and math at competitive pricing with 1M context",
@@ -60,5 +60,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-28T04:53:39.896Z"
+  "_syncedAt": "2026-05-28T07:08:27.261Z"
 }
