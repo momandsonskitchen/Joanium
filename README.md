@@ -109,8 +109,6 @@ Scope your AI's context to a specific codebase or folder. No more explaining you
 **🔒 Fully offline, fully private**
 Zero internet. Zero API keys. Zero cloud. Zero excuses. Everything stays in your `Data/` folder, on your machine, under your control.
 
-[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
-
 ---
 
 ## Joanium vs the competition (yeah we went there)
@@ -135,8 +133,6 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 
 > **tl;dr** — Codex and Claude Code are coding agents for the terminal. Hermes lives in the cloud. OpenClaw handles chat. Joanium is the only one that's a full desktop app, multi-model, offline-capable, open source, integrates with your real work tools, *and* talks to your messaging apps. Different category.
 
-[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
-
 ---
 
 ## Get running in less than 60 seconds
@@ -151,8 +147,6 @@ The Skills and Personas in this repo come **pre-installed** with Joanium — the
 
 But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketplace)** — a separate community repo where you can browse, create, and publish your own. Drop in a *"startup growth hacker"*, a *"brutally honest code reviewer"*, a *"3am rubber duck debugger"* — or build one that's uniquely yours. No code required, just show up and create.
 
-[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
-
 ---
 
 ## Contributing
@@ -162,8 +156,6 @@ PRs are genuinely welcome — not in the "we value all contributions" corporate 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECURITY.md) for responsible disclosure. Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 [![Contributors](https://contrib.rocks/image?repo=joanium/joanium)](https://github.com/joanium/joanium/graphs/contributors)
-
-[![Back to Top](https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square)](#readme-top)
 
 ---
 
