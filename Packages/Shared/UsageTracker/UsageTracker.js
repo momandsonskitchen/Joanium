@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../Storage/ResourcePaths.js';
 
 // ---------------------------------------------------------------------------
@@ -14,26 +14,49 @@ export function estimateTokens(charCount) {
 }
 
 // ---------------------------------------------------------------------------
-// Storage helpers
+// Path helpers
 // ---------------------------------------------------------------------------
 
-function getUsageFilePath(rootDirectory) {
-  return path.join(getWritableDataDirectory(rootDirectory), 'Usage.json');
+function getUsageDir(rootDirectory) {
+  return path.join(getWritableDataDirectory(rootDirectory), 'Usage');
 }
 
-function todayKey() {
+// Data/Usage/{year}/{MM}/Daily.json
+function getMonthDailyFilePath(rootDirectory, year, month) {
+  return path.join(
+    getUsageDir(rootDirectory),
+    String(year),
+    String(month).padStart(2, '0'),
+    'Daily.json',
+  );
+}
+
+function getModelsFilePath(rootDirectory) {
+  return path.join(getUsageDir(rootDirectory), 'Models.json');
+}
+
+function getTotalsFilePath(rootDirectory) {
+  return path.join(getUsageDir(rootDirectory), 'Totals.json');
+}
+
+function todayParts() {
   const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return {
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    key: [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+    ].join('-'),
+  };
 }
 
 export function createEmptyUsageStore() {
   return {
     // daily[YYYY-MM-DD] = { tokensIn, tokensOut, messages }
     daily: {},
-    // models[modelId]   = { tokensIn, tokensOut, messages, label, providerLabel }
+    // models[modelId]   = { tokensIn, tokensOut, messages, label, providerLabel, providerIconPath }
     models: {},
     // running totals across all time
     totals: {
@@ -44,6 +67,10 @@ export function createEmptyUsageStore() {
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Sanitizers
+// ---------------------------------------------------------------------------
 
 function sanitizeNumber(v) {
   return typeof v === 'number' && isFinite(v) ? Math.max(0, Math.floor(v)) : 0;
@@ -79,6 +106,17 @@ function sanitizeModelEntry(entry) {
   };
 }
 
+function sanitizeTotals(raw) {
+  if (!raw || typeof raw !== 'object')
+    return { tokensIn: 0, tokensOut: 0, messages: 0, sessions: 0 };
+  return {
+    tokensIn: sanitizeNumber(raw.tokensIn),
+    tokensOut: sanitizeNumber(raw.tokensOut),
+    messages: sanitizeNumber(raw.messages),
+    sessions: sanitizeNumber(raw.sessions),
+  };
+}
+
 function sanitizeRawStore(raw) {
   const store = createEmptyUsageStore();
 
@@ -96,33 +134,71 @@ function sanitizeRawStore(raw) {
     }
   }
 
-  if (raw?.totals && typeof raw.totals === 'object') {
-    store.totals = {
-      tokensIn: sanitizeNumber(raw.totals.tokensIn),
-      tokensOut: sanitizeNumber(raw.totals.tokensOut),
-      messages: sanitizeNumber(raw.totals.messages),
-      sessions: sanitizeNumber(raw.totals.sessions),
-    };
-  }
+  store.totals = sanitizeTotals(raw?.totals);
 
   return store;
 }
 
-async function readRawStore(rootDirectory) {
-  const filePath = getUsageFilePath(rootDirectory);
+// ---------------------------------------------------------------------------
+// File I/O helpers
+// ---------------------------------------------------------------------------
+
+async function readJsonFile(filePath) {
   try {
     const contents = await readFile(filePath, 'utf8');
-    if (!contents.trim()) return createEmptyUsageStore();
-    return sanitizeRawStore(JSON.parse(contents));
+    if (!contents.trim()) return null;
+    return JSON.parse(contents);
   } catch {
-    return createEmptyUsageStore();
+    return null;
   }
 }
 
-async function persistStore(rootDirectory, store) {
-  const filePath = getUsageFilePath(rootDirectory);
+async function writeJsonFile(filePath, data) {
   await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(store, null, 2)}\n`, 'utf8');
+  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+}
+
+// ---------------------------------------------------------------------------
+// Read all monthly Daily.json files across the year/month tree.
+// Data/Usage/{year}/{MM}/Daily.json
+// ---------------------------------------------------------------------------
+
+async function readAllMonthlyDailyFiles(rootDirectory) {
+  const usageDir = getUsageDir(rootDirectory);
+  const daily = {};
+
+  let yearEntries;
+  try {
+    yearEntries = await readdir(usageDir, { withFileTypes: true });
+  } catch {
+    return daily;
+  }
+
+  await Promise.all(
+    yearEntries
+      .filter((e) => e.isDirectory() && /^\d{4}$/.test(e.name))
+      .map(async (yearEntry) => {
+        const yearDir = path.join(usageDir, yearEntry.name);
+        let monthEntries;
+        try {
+          monthEntries = await readdir(yearDir, { withFileTypes: true });
+        } catch {
+          return;
+        }
+        await Promise.all(
+          monthEntries
+            .filter((e) => e.isDirectory() && /^\d{2}$/.test(e.name))
+            .map(async (monthEntry) => {
+              const data = await readJsonFile(path.join(yearDir, monthEntry.name, 'Daily.json'));
+              if (data && typeof data === 'object') {
+                Object.assign(daily, data);
+              }
+            }),
+        );
+      }),
+  );
+
+  return daily;
 }
 
 // ---------------------------------------------------------------------------
@@ -132,9 +208,7 @@ async function persistStore(rootDirectory, store) {
 export function createUsageTracker({ rootDirectory }) {
   /**
    * Record one completed AI exchange.
-   * @param {{ tokensIn: number, tokensOut: number, modelId: string|null,
-   *           modelLabel: string|null, providerLabel: string|null,
-   *           isNewSession: boolean }} params
+   * Only reads/writes the current month's Daily.json — never touches other months.
    */
   async function recordExchange({
     tokensIn,
@@ -145,21 +219,33 @@ export function createUsageTracker({ rootDirectory }) {
     providerIconPath,
     isNewSession,
   }) {
-    const store = await readRawStore(rootDirectory);
-    const day = todayKey();
+    const { year, month, key: day } = todayParts();
+    const monthFilePath = getMonthDailyFilePath(rootDirectory, year, month);
 
-    // Daily bucket
-    if (!store.daily[day]) {
-      store.daily[day] = { tokensIn: 0, tokensOut: 0, messages: 0 };
+    const [monthDailyRaw, modelsRaw, totalsRaw] = await Promise.all([
+      readJsonFile(monthFilePath),
+      readJsonFile(getModelsFilePath(rootDirectory)),
+      readJsonFile(getTotalsFilePath(rootDirectory)),
+    ]);
+
+    // Daily bucket (current month only)
+    const monthDaily =
+      monthDailyRaw && typeof monthDailyRaw === 'object' ? { ...monthDailyRaw } : {};
+    if (!monthDaily[day]) monthDaily[day] = { tokensIn: 0, tokensOut: 0, messages: 0 };
+    monthDaily[day].tokensIn += tokensIn;
+    monthDaily[day].tokensOut += tokensOut;
+    monthDaily[day].messages += 1;
+
+    // Models
+    const models = {};
+    if (modelsRaw?.models && typeof modelsRaw.models === 'object') {
+      for (const [k, v] of Object.entries(modelsRaw.models)) {
+        if (k) models[k] = sanitizeModelEntry(v);
+      }
     }
-    store.daily[day].tokensIn += tokensIn;
-    store.daily[day].tokensOut += tokensOut;
-    store.daily[day].messages += 1;
-
-    // Per-model bucket
     if (modelId) {
-      if (!store.models[modelId]) {
-        store.models[modelId] = {
+      if (!models[modelId]) {
+        models[modelId] = {
           tokensIn: 0,
           tokensOut: 0,
           messages: 0,
@@ -168,29 +254,44 @@ export function createUsageTracker({ rootDirectory }) {
           providerIconPath: providerIconPath ?? null,
         };
       }
-      store.models[modelId].tokensIn += tokensIn;
-      store.models[modelId].tokensOut += tokensOut;
-      store.models[modelId].messages += 1;
-      if (modelLabel) store.models[modelId].label = modelLabel;
-      if (providerLabel) store.models[modelId].providerLabel = providerLabel;
-      if (providerIconPath) store.models[modelId].providerIconPath = providerIconPath;
+      models[modelId].tokensIn += tokensIn;
+      models[modelId].tokensOut += tokensOut;
+      models[modelId].messages += 1;
+      if (modelLabel) models[modelId].label = modelLabel;
+      if (providerLabel) models[modelId].providerLabel = providerLabel;
+      if (providerIconPath) models[modelId].providerIconPath = providerIconPath;
     }
 
-    // Running totals
-    store.totals.tokensIn += tokensIn;
-    store.totals.tokensOut += tokensOut;
-    store.totals.messages += 1;
-    if (isNewSession) store.totals.sessions += 1;
+    // Totals
+    const totals = sanitizeTotals(totalsRaw);
+    totals.tokensIn += tokensIn;
+    totals.tokensOut += tokensOut;
+    totals.messages += 1;
+    if (isNewSession) totals.sessions += 1;
 
-    await persistStore(rootDirectory, store);
+    await Promise.all([
+      writeJsonFile(monthFilePath, monthDaily),
+      writeJsonFile(getModelsFilePath(rootDirectory), { models }),
+      writeJsonFile(getTotalsFilePath(rootDirectory), totals),
+    ]);
   }
 
   /**
    * Return the full store for rendering.
-   * @returns {Promise<object>}
+   * Scans all year/month Daily.json files in parallel.
    */
   async function getUsageData() {
-    return readRawStore(rootDirectory);
+    const [allDaily, modelsRaw, totalsRaw] = await Promise.all([
+      readAllMonthlyDailyFiles(rootDirectory),
+      readJsonFile(getModelsFilePath(rootDirectory)),
+      readJsonFile(getTotalsFilePath(rootDirectory)),
+    ]);
+
+    return sanitizeRawStore({
+      daily: allDaily,
+      models: modelsRaw?.models ?? {},
+      totals: totalsRaw ?? {},
+    });
   }
 
   return { recordExchange, getUsageData };
