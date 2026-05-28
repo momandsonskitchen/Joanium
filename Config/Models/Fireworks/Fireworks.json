@@ -8,6 +8,9 @@
     "accounts/fireworks/models/kimi-k2p5": {
       "name": "Kimi K2p5"
     },
+    "accounts/fireworks/models/glm-5p1": {
+      "name": "Glm 5p1"
+    },
     "accounts/fireworks/models/kimi-k2p6": {
       "name": "Kimi K2.6",
       "description": "Moonshot AI's frontier MoE model — top-tier coding, reasoning, and agentic tasks with 262K context",
@@ -23,9 +26,6 @@
         "input": 0.95,
         "output": 4
       }
-    },
-    "accounts/fireworks/models/glm-5p1": {
-      "name": "Glm 5p1"
     },
     "accounts/fireworks/models/gpt-oss-120b": {
       "name": "GPT OSS 120B",
@@ -60,5 +60,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-28T08:57:08.246Z"
+  "_syncedAt": "2026-05-28T11:48:27.511Z"
 }

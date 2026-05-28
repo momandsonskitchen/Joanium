@@ -2388,6 +2388,17 @@
   height: 100%;
 }
 
+/* ── Connector-branded icon (img) inside a tool card ─────────────────────
+   Replaces the generic terminal SVG glyph for tools that belong to a known
+   connector (gmail, drive, notion, etc.). Same 18×18 footprint; rounded
+   corners and contain-fit match the style used in ConnectorsPanel cards.
+   ─────────────────────────────────────────────────────────────────────── */
+.chat-terminal-call__icon--connector {
+  display: block;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
 .chat-terminal-call__copy {
   min-width: 0;
   display: flex;
@@ -3618,7 +3629,7 @@
    News cards rendered on the welcome screen below the suggestion bubbles.
    ------------------------------------------------------------------------------ */
 
-/* Container � bleeds to edges by cancelling the scroll's 38px side padding */
+/* Container — bleeds to edges by cancelling the scroll's 38px side padding */
 .tech-feed {
   width: calc(100% + 76px);
   margin: 0 -38px 40px;
@@ -3820,7 +3831,7 @@
 
 /* -- Tech Feed horizontal row layout additions ------------------------- */
 
-/* Horizontal scroll row � no visible scrollbar */
+/* Horizontal scroll row — no visible scrollbar */
 .tech-feed__row {
   display: flex;
   flex-direction: row;

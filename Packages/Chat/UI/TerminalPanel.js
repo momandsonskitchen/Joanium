@@ -4,6 +4,105 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { formatTerminalResultForModel as formatRendererTerminalResultForModel } from '../../Shared/ToolLoop/RendererToolLoop.js';
 import { createSubAgentOutputSection, createSubAgentPromptSection } from './SubAgentSections.js';
 
+// ── Connector icon map: connector id → filename in Assets/Icons/ ─────────────
+// Mirrors the ICON_MAP in ConnectorsPanel.js so tool cards can show the right
+// service logo instead of the generic terminal glyph.
+const CONNECTOR_ICON_MAP = {
+  github: 'Github',
+  openweather: 'OpenWeatherMap',
+  open_meteo: 'OpenMeteo',
+  coingecko: 'CoinGecko',
+  google: 'Google',
+  gmail: 'Gmail',
+  drive: 'Drive',
+  calendar: 'Calendar',
+  notion: 'Notion',
+  slack: 'Slack',
+  discord: 'Discord',
+  telegram: 'Telegram',
+  todoist: 'Tasks',
+  spotify: 'Spotify',
+  stripe: 'Stripe',
+  supabase: 'Supabase',
+  vercel: 'Vercel',
+  netlify: 'Netlify',
+  gitlab: 'Gitlab',
+  jira: 'Jira',
+  linear: 'Linear',
+  hubspot: 'Hubspot',
+  sentry: 'Sentry',
+  figma: 'Figma',
+  unsplash: 'Unsplash',
+  wikipedia: 'Wikipedia',
+  wikimedia: 'Wikipedia',
+  nasa: 'Nasa',
+  perplexity: 'Perplexity',
+  youtube: 'Youtube',
+  whatsapp: 'WhatsApp',
+  cloudflare: 'Cloudflare',
+  hackernews: 'HackerNews',
+  airtable: 'Airtable',
+  arxiv: 'Arxiv',
+  npm: 'Npm',
+  reddit: 'Reddit',
+  stackoverflow: 'StackOverflow',
+  itunes: 'iTunes',
+};
+
+/**
+ * Resolves the icon path for a connector by its ID.
+ * Path is relative to Packages/Shell/UI/App.html (the renderer entry point).
+ * Returns null when no icon is registered for that connector.
+ *
+ * @param {string} connectorId
+ * @returns {string|null}
+ */
+function getConnectorIconPath(connectorId) {
+  const file = CONNECTOR_ICON_MAP[String(connectorId ?? '').toLowerCase()];
+  return file ? `../../../Assets/Icons/${file}.png` : null;
+}
+
+/**
+ * Derives the likely connector ID from a tool name by splitting on the first
+ * underscore.  For example:
+ *   gmail_search_emails → gmail
+ *   drive_list_files    → drive
+ *   run_shell_command   → run  (no match → falls back to terminal icon)
+ *
+ * @param {string} toolName
+ * @returns {string}
+ */
+function connectorIdFromToolName(toolName) {
+  return String(toolName ?? '')
+    .split('_')[0]
+    .toLowerCase();
+}
+
+/**
+ * Creates the icon element for a tool card header.
+ * Uses the connector's branded image when one exists; otherwise falls back to
+ * the generic terminal glyph so built-in tools look unchanged.
+ *
+ * @param {string} toolName  The raw tool name stored in terminal.command
+ * @returns {HTMLElement}
+ */
+function createToolCardIcon(toolName) {
+  const connectorId = connectorIdFromToolName(toolName);
+  const iconPath = getConnectorIconPath(connectorId);
+
+  if (iconPath) {
+    const img = document.createElement('img');
+    img.src = iconPath;
+    img.alt = '';
+    img.className = 'chat-terminal-call__icon chat-terminal-call__icon--connector';
+    return img;
+  }
+
+  return createIcon('terminal', 'chat-terminal-call__icon');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function getTerminalToolLabel(strings, tool) {
   return strings.terminal?.toolLabels?.[tool] ?? tool;
 }
@@ -128,7 +227,11 @@ export function createTerminalCallElement(terminal, strings) {
   const card = createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
   const header = createElement('div', 'chat-terminal-call__header');
   const identity = createElement('div', 'chat-terminal-call__identity');
-  const icon = createIcon('terminal', 'chat-terminal-call__icon');
+
+  // Use the connector's branded icon when the tool belongs to a known connector;
+  // otherwise fall back to the generic terminal glyph.
+  const icon = createToolCardIcon(terminal.command ?? '');
+
   const copy = createElement('div', 'chat-terminal-call__copy');
   const label = createElement(
     'div',
