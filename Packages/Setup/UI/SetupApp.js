@@ -332,6 +332,7 @@ async function bootstrap() {
       focusKey: 'profile.dob.day',
       inputMode: 'numeric',
       maxLength: 2,
+      allow: 'numeric',
       onInput: (value) => {
         patchState(
           (draft) => {
@@ -349,6 +350,7 @@ async function bootstrap() {
       focusKey: 'profile.dob.year',
       inputMode: 'numeric',
       maxLength: 4,
+      allow: 'numeric',
       onInput: (value) => {
         patchState(
           (draft) => {
