@@ -101,7 +101,7 @@ export async function createPackage({ rootDirectory }) {
     if (settings.systemTray) enableTray(rootDirectory, windowRef);
     else disableTray();
 
-    setAutoUpdateEnabled(settings.autoUpdate);
+    setAutoUpdateEnabled(true);
 
     return runtimeStatus(settings);
   }
@@ -119,7 +119,7 @@ export async function createPackage({ rootDirectory }) {
   app
     .whenReady()
     .then(() => {
-      setupAutoUpdates({ rootDirectory, enabled: cachedSettings.autoUpdate });
+      setupAutoUpdates({ rootDirectory, enabled: true });
       applySettings(cachedSettings, BrowserWindow.getAllWindows()[0] ?? null);
     })
     .catch(() => {});

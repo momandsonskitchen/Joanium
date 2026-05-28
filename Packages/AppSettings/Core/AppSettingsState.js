@@ -37,7 +37,7 @@ function normalizeSettings(candidate = {}) {
     keepAwake: Boolean(candidate.keepAwake ?? DEFAULT_SETTINGS.keepAwake),
     completionSound: Boolean(candidate.completionSound ?? DEFAULT_SETTINGS.completionSound),
     autoMemoryUpdates: Boolean(candidate.autoMemoryUpdates ?? DEFAULT_SETTINGS.autoMemoryUpdates),
-    autoUpdate: Boolean(candidate.autoUpdate ?? DEFAULT_SETTINGS.autoUpdate),
+    autoUpdate: true, // always on — not user-configurable
     showTechFeed: Boolean(candidate.showTechFeed ?? DEFAULT_SETTINGS.showTechFeed),
     defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
