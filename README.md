@@ -35,22 +35,6 @@
   <a href="https://github.com/joanium/joanium/issues">🐛 Feedback</a>
 </p>
 
-<p align="center">
-  <b>Share Joanium</b><br/>
-  <a href="https://x.com/intent/tweet?text=Check%20out%20Joanium%20%E2%80%94%20a%20local-first%20AI%20desktop%20agent%20that%20actually%20does%20stuff.%20Open%20source%2C%20fully%20private%2C%20multi-model.&url=https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
-    <img src="https://img.shields.io/badge/-share%20on%20x-black?labelColor=black&logo=x&logoColor=white&style=flat-square" alt="Share on X">
-  </a>
-  <a href="https://t.me/share/url?text=Check%20out%20Joanium%20%E2%80%94%20a%20local-first%20AI%20desktop%20agent%20that%20actually%20does%20stuff.&url=https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
-    <img src="https://img.shields.io/badge/-share%20on%20telegram-black?labelColor=black&logo=telegram&logoColor=white&style=flat-square" alt="Share on Telegram">
-  </a>
-  <a href="https://api.whatsapp.com/send?text=Check%20out%20Joanium%20%E2%80%94%20a%20local-first%20AI%20desktop%20agent%20that%20actually%20does%20stuff.%20https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
-    <img src="https://img.shields.io/badge/-share%20on%20whatsapp-black?labelColor=black&logo=whatsapp&logoColor=white&style=flat-square" alt="Share on WhatsApp">
-  </a>
-  <a href="https://www.reddit.com/submit?title=Joanium%20%E2%80%94%20local-first%20AI%20desktop%20agent&url=https%3A%2F%2Fgithub.com%2Fjoanium%2Fjoanium">
-    <img src="https://img.shields.io/badge/-share%20on%20reddit-black?labelColor=black&logo=reddit&logoColor=white&style=flat-square" alt="Share on Reddit">
-  </a>
-</p>
-
 ---
 
 > [!IMPORTANT]
