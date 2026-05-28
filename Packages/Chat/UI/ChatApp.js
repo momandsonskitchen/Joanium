@@ -2759,7 +2759,7 @@ export async function createChatView(
     const toolsetTools = await loadToolsetPrompt();
     let usage = { input: 0, output: 0 };
     let lastMeta = {};
-    const MAX_SUB_AGENT_TOOL_CALLS = 25;
+    const MAX_SUB_AGENT_TOOL_CALLS = 1000;
 
     for (let depth = 0; depth <= MAX_SUB_AGENT_TOOL_CALLS; depth += 1) {
       const result = await invokeIpc('chat:complete-message', {

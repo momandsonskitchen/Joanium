@@ -7,7 +7,7 @@ import {
 } from '../../Shared/AssistantRuntime/AssistantPipeline.js';
 import { AGENT_PROMPTS } from './Prompts.js';
 
-const MAX_AGENT_TOOL_CALLS = 25;
+const MAX_AGENT_TOOL_CALLS = 1000;
 const AGENT_TERMINAL_TOOLS = new Set(TERMINAL_TOOL_NAMES);
 
 export function createAgentGateway(strings, { chatStrings = {}, getActivePersona } = {}) {
