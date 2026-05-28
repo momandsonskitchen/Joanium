@@ -135,7 +135,8 @@ PRs are genuinely welcome — not in the "we value all contributions" corporate 
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECURITY.md) for responsible disclosure. Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-[![Contributors](https://contrib.rocks/image?repo=joanium/joanium&exclude=github-actions%5Bbot%5D,dependabot%5Bbot%5D)](https://github.com/joanium/joanium/graphs/contributors)
+<!-- contributors-start -->
+<!-- contributors-end -->
 
 ---
 

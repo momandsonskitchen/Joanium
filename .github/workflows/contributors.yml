@@ -65,16 +65,33 @@ jobs:
 
             const fs = require('fs');
             fs.writeFileSync('CONTRIBUTORS.md', lines.join('\n'));
-            console.log(`✅ Written ${contributors.length} contributors`);
+            console.log(`✅ Written ${humanContributors.length} contributors to CONTRIBUTORS.md`);
+
+            // Update README.md contributor avatars between markers
+            const avatarHtml = humanContributors
+              .map(c => `<a href="${c.html_url}"><img src="${c.avatar_url}&s=48" width="48" height="48" alt="${c.login}" title="${c.login}" style="border-radius:50%;margin:4px"/></a>`)
+              .join('');
+            const readmePath = 'README.md';
+            let readme = fs.readFileSync(readmePath, 'utf8');
+            const start = '<!-- contributors-start -->';
+            const end = '<!-- contributors-end -->';
+            const block = `${start}\n${avatarHtml}\n${end}`;
+            if (readme.includes(start) && readme.includes(end)) {
+              readme = readme.replace(new RegExp(`${start}[\\s\\S]*?${end}`), block);
+            } else {
+              console.log('⚠️  No contributor markers found in README.md — skipping README update');
+            }
+            fs.writeFileSync(readmePath, readme);
+            console.log(`✅ Updated README.md with ${humanContributors.length} contributor avatars`);
 
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CONTRIBUTORS.md
+          git add CONTRIBUTORS.md README.md
           if git diff --staged --quiet; then
             echo "No changes."
           else
-            git commit -m "chore: 🤖 auto-update CONTRIBUTORS.md [skip ci]"
+            git commit -m "chore: 🤖 auto-update contributors [skip ci]"
             git push
           fi
