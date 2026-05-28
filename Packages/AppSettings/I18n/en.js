@@ -26,10 +26,6 @@ const en = {
       label: 'Auto memory updates',
       description: 'Let Joanium update personal memory from completed conversations while idle.',
     },
-    autoUpdate: {
-      label: 'App auto update',
-      description: 'Check for packaged app updates and download them when available.',
-    },
   },
   defaultView: {
     label: 'Default view',
