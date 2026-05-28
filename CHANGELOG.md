@@ -6,6 +6,15 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.528.4] - 2026-05-28
+
+* chore(release): bump version to 2026.528.4
+* ZAI Models Refreshed
+* Model Info Refreshed
+* Removed the breaking process in the latest dependencies
+
+---
+
 ## [2026.528.3] - 2026-05-28
 
 * chore(release): bump version to 2026.528.3
