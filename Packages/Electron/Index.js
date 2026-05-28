@@ -44,10 +44,6 @@ let navigationSequence = Promise.resolve();
 // across the main window and any secondary web contents that may be created.
 
 function applyProductionHardening(webContents) {
-  // Disable DevTools at the WebContents level — blocks Ctrl+Shift+I, F12,
-  // and the "Inspect Element" context-menu entry.
-  webContents.setDevToolsEnabled(false);
-
   // Block all keyboard shortcuts that could reload, inspect, or expose
   // internal content. Intercepted before Chromium acts on them.
   webContents.on('before-input-event', (event, input) => {
@@ -128,6 +124,9 @@ async function createMainWindow(entryPackage) {
       nodeIntegration: false,
       spellcheck: false,
       backgroundThrottling: false,
+      // Disable DevTools in packaged builds. setDevToolsEnabled() was removed
+      // in Electron 36+ — webPreferences.devTools is the correct replacement.
+      devTools: !app.isPackaged,
     },
     ...entryPackage.window,
   });

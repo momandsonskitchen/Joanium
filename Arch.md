@@ -220,3 +220,7 @@ Owns persisted app behavior settings plus keep-awake and tray runtime side effec
 * Do not hard code text in js or in html they all must come from i18n files only (English is the fallback and the default language).
 * the app should feel like macos like app.
 * also if you have helpers for the main code that you are working keep it in Utils.js
+
+## Logs Path
+
+* Windows: C:\Users\username\AppData\Local\Programs\Joanium\resources\Logs
