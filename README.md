@@ -136,6 +136,7 @@ PRs are genuinely welcome — not in the "we value all contributions" corporate 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECURITY.md) for responsible disclosure. Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 <!-- contributors-start -->
+<a href="https://github.com/withinJoel"><img src="https://avatars.githubusercontent.com/u/128782382?v=4&s=48" width="48" height="48" alt="withinJoel" title="withinJoel" style="border-radius:50%;margin:4px"/></a>
 <!-- contributors-end -->
 
 ---
