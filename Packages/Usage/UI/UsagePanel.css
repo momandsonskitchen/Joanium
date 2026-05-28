@@ -460,6 +460,23 @@
   white-space: nowrap;
 }
 
+.usage-models__provider-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1;
+}
+
+.usage-models__provider-icon {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.8;
+  display: block;
+}
+
 .usage-models__model-provider {
   font-size: 11.5px;
   color: var(--color-chat-text-muted);

@@ -29,6 +29,7 @@ export async function createPackage({ rootDirectory }) {
       modelId: meta?.modelId ?? null,
       modelLabel: meta?.modelLabel ?? null,
       providerLabel: meta?.providerLabel ?? null,
+      providerIconPath: meta?.providerIconPath ?? null,
       isNewSession,
     };
   }

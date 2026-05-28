@@ -617,9 +617,23 @@ function buildModelTable(strings, models) {
     const barFill = createElement('div', 'usage-models__bar-fill');
     barFill.style.width = `${barWidth}%`;
     barWrap.append(barFill);
+
+    const providerRow = createElement('div', 'usage-models__provider-row');
+    if (model.providerIconPath) {
+      const providerIcon = document.createElement('img');
+      providerIcon.className = 'usage-models__provider-icon';
+      providerIcon.src = model.providerIconPath;
+      providerIcon.alt = '';
+      providerIcon.draggable = false;
+      providerRow.append(providerIcon);
+    }
+    providerRow.append(
+      createElement('span', 'usage-models__model-provider', model.providerLabel || ''),
+    );
+
     nameCell.append(
       createElement('div', 'usage-models__model-name', model.label || modelId),
-      createElement('div', 'usage-models__model-provider', model.providerLabel || ''),
+      providerRow,
       barWrap,
     );
 

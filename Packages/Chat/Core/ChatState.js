@@ -944,6 +944,7 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
   const meta = {
     providerId: provider.id,
     providerLabel: provider.label,
+    providerIconPath: provider.iconPath ?? null,
     modelId: model.id,
     modelLabel: model.name,
   };

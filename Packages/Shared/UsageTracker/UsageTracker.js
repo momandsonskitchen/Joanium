@@ -60,7 +60,14 @@ function sanitizeDailyEntry(entry) {
 
 function sanitizeModelEntry(entry) {
   if (!entry || typeof entry !== 'object') {
-    return { tokensIn: 0, tokensOut: 0, messages: 0, label: '', providerLabel: '' };
+    return {
+      tokensIn: 0,
+      tokensOut: 0,
+      messages: 0,
+      label: '',
+      providerLabel: '',
+      providerIconPath: null,
+    };
   }
   return {
     tokensIn: sanitizeNumber(entry.tokensIn),
@@ -68,6 +75,7 @@ function sanitizeModelEntry(entry) {
     messages: sanitizeNumber(entry.messages),
     label: typeof entry.label === 'string' ? entry.label : '',
     providerLabel: typeof entry.providerLabel === 'string' ? entry.providerLabel : '',
+    providerIconPath: typeof entry.providerIconPath === 'string' ? entry.providerIconPath : null,
   };
 }
 
@@ -134,6 +142,7 @@ export function createUsageTracker({ rootDirectory }) {
     modelId,
     modelLabel,
     providerLabel,
+    providerIconPath,
     isNewSession,
   }) {
     const store = await readRawStore(rootDirectory);
@@ -156,6 +165,7 @@ export function createUsageTracker({ rootDirectory }) {
           messages: 0,
           label: modelLabel ?? modelId,
           providerLabel: providerLabel ?? '',
+          providerIconPath: providerIconPath ?? null,
         };
       }
       store.models[modelId].tokensIn += tokensIn;
@@ -163,6 +173,7 @@ export function createUsageTracker({ rootDirectory }) {
       store.models[modelId].messages += 1;
       if (modelLabel) store.models[modelId].label = modelLabel;
       if (providerLabel) store.models[modelId].providerLabel = providerLabel;
+      if (providerIconPath) store.models[modelId].providerIconPath = providerIconPath;
     }
 
     // Running totals
