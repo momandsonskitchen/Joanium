@@ -68,7 +68,6 @@ export function createDiagnosticPanel(strings) {
     // Mark status mode so updateLastStreamingMessage knows to exit gracefully.
     wrap.__statusMode = true;
     wrap.hidden = false;
-    wrap.open = true;
 
     // Replace the thinking body with a fresh items container.
     itemsContainer = createElement('div', 'chat-diag');
