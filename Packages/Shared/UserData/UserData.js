@@ -9,6 +9,19 @@ export { getWritableDataDirectory };
 
 const DEFAULT_ACTIVE_PERSONA = { namespace: 'Joanium', filename: 'Joana.md' };
 
+const VALID_SEARCH_ENGINES = new Set([
+  'google',
+  'bing',
+  'duckduckgo',
+  'yandex',
+  'yahoo',
+  'brave',
+  'ecosia',
+  'kagi',
+  'perplexity',
+  'startpage',
+]);
+
 export function createDefaultUserState() {
   return {
     locale: 'en',
@@ -50,6 +63,7 @@ export function createDefaultUserState() {
       showTechFeed: true,
       defaultView: 'chat',
       defaultModel: null,
+      defaultSearchEngine: 'google',
     },
     theme: {
       mode: 'system',
@@ -263,6 +277,9 @@ function sanitizeAppSettings(candidate) {
     showTechFeed: Boolean(candidate.showTechFeed ?? defaults.showTechFeed),
     defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
+    defaultSearchEngine: VALID_SEARCH_ENGINES.has(candidate.defaultSearchEngine)
+      ? candidate.defaultSearchEngine
+      : defaults.defaultSearchEngine,
   };
 }
 
