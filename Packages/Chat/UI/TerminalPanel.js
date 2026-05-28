@@ -224,8 +224,20 @@ export function createTerminalCallElement(terminal, strings) {
   }
 
   const status = terminal.status ?? 'running';
-  const card = createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
-  const header = createElement('div', 'chat-terminal-call__header');
+  const output = [terminal.output, terminal.error].filter(Boolean).join('\n\n').trim();
+  const hasOutput = Boolean(output);
+
+  // When there's output the card becomes a <details> so the header row
+  // itself is the toggle — no separate "Output" row needed.
+  const card = hasOutput
+    ? Object.assign(document.createElement('details'), {
+        className: `chat-terminal-call chat-terminal-call--${status}`,
+      })
+    : createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
+
+  // Use <summary> as header when the card is a <details>, plain <div> otherwise.
+  const header = createElement(hasOutput ? 'summary' : 'div', 'chat-terminal-call__header');
+
   const identity = createElement('div', 'chat-terminal-call__identity');
 
   // Use the connector's branded icon when the tool belongs to a known connector;
@@ -245,26 +257,25 @@ export function createTerminalCallElement(terminal, strings) {
   );
   copy.append(label, command);
   identity.append(icon, copy);
+
   const statusEl = createElement(
     'span',
     'chat-terminal-call__status',
     terminal.statusLabel ?? status,
   );
-  header.append(identity, statusEl);
-  card.append(header);
 
-  const output = [terminal.output, terminal.error].filter(Boolean).join('\n\n').trim();
-  if (output) {
-    const details = document.createElement('details');
-    details.className = 'chat-terminal-call__details';
-    const summary = createElement('summary', 'chat-terminal-call__details-summary');
-    summary.append(
-      createIcon('chevronDown', 'chat-terminal-call__details-icon'),
-      createElement('span', '', strings.terminal.outputLabel),
-    );
+  header.append(identity);
+
+  if (hasOutput) {
+    // Group status + chevron so they sit flush together on the right.
+    const trailing = createElement('div', 'chat-terminal-call__trailing');
+    trailing.append(statusEl, createIcon('chevronDown', 'chat-terminal-call__details-icon'));
+    header.append(trailing);
     const pre = createElement('pre', 'chat-terminal-call__output', output);
-    details.append(summary, pre);
-    card.append(details);
+    card.append(header, pre);
+  } else {
+    header.append(statusEl);
+    card.append(header);
   }
 
   return card;

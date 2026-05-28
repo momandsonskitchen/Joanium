@@ -2370,6 +2370,26 @@
   padding: 10px 12px;
 }
 
+/* Clickable when the card is a <details> */
+summary.chat-terminal-call__header {
+  list-style: none;
+  cursor: pointer;
+}
+
+summary.chat-terminal-call__header::-webkit-details-marker,
+summary.chat-terminal-call__header::marker {
+  display: none;
+  content: '';
+}
+
+/* Status badge + chevron grouped flush on the right */
+.chat-terminal-call__trailing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .chat-terminal-call__identity {
   min-width: 0;
   gap: 9px;
@@ -2447,31 +2467,21 @@
   background: rgba(var(--color-accent-rgb), 0.14);
 }
 
-.chat-terminal-call__details {
-  border-top: 1px solid rgba(170, 134, 104, 0.1);
-}
-
-.chat-terminal-call__details-summary {
-  gap: 7px;
-  padding: 9px 12px;
-  list-style: none;
-  cursor: pointer;
-  color: var(--color-chat-text-muted);
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.chat-terminal-call__details-summary::-webkit-details-marker,
-.chat-terminal-call__details-summary::marker {
+/* Suppress the native <details> marker on the card itself */
+.chat-terminal-call > summary::-webkit-details-marker,
+.chat-terminal-call > summary::marker {
   display: none;
   content: '';
 }
 
+/* Chevron that lives to the right of the status badge */
 .chat-terminal-call__details-icon {
   display: inline-flex;
+  flex-shrink: 0;
   width: 14px;
   height: 14px;
   transition: transform 160ms ease;
+  color: var(--color-chat-text-muted);
 }
 
 .chat-terminal-call__details-icon svg {
@@ -2479,8 +2489,13 @@
   height: 100%;
 }
 
-.chat-terminal-call__details[open] .chat-terminal-call__details-icon {
+.chat-terminal-call[open] .chat-terminal-call__details-icon {
   transform: rotate(180deg);
+}
+
+/* Output <pre> is now a direct child of the card <details> */
+.chat-terminal-call > .chat-terminal-call__output {
+  border-top: 1px solid rgba(170, 134, 104, 0.1);
 }
 
 .chat-terminal-call__output {
