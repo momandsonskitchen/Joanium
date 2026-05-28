@@ -546,6 +546,11 @@ async function bootstrap() {
 
   function renderWelcomeScene() {
     const stage = createElement('section', 'setup-stage setup-stage--welcome');
+
+    const badge = createElement('span', 'setup-success-badge');
+    badge.textContent = '✦  Setup complete';
+    stage.append(badge);
+
     stage.append(
       createElement(
         'h1',
@@ -565,15 +570,19 @@ async function bootstrap() {
     );
 
     const featureGrid = createElement('div', 'setup-feature-grid');
-    for (const feature of strings.welcome.features) {
+    strings.welcome.features.forEach((feature, index) => {
       const card = createElement('article', 'setup-feature-card');
-      card.append(
-        createElement('span', 'setup-feature-card__icon', feature.icon),
+      card.style.setProperty('--card-index', String(index));
+      const iconWrap = createElement('span', 'setup-feature-card__icon-wrap');
+      iconWrap.append(createElement('span', 'setup-feature-card__icon', feature.icon));
+      const content = createElement('div', 'setup-feature-card__content');
+      content.append(
         createElement('strong', 'setup-feature-card__title', feature.title),
         createElement('p', 'setup-feature-card__body', feature.body),
       );
+      card.append(iconWrap, content);
       featureGrid.append(card);
-    }
+    });
     stage.append(featureGrid);
 
     return stage;
