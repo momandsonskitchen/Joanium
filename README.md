@@ -142,7 +142,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECU
 
 ## If this helped you
 
-Hit ⭐ star. It takes 0.3 seconds and means everything for an open source project.
+Hit ⭐ star. It takes less than a second and means everything for an open source project.
 
 Share it. Tweet it. Tell your developer friends who are still copy-pasting context into ChatGPT every morning. They need this.
 
