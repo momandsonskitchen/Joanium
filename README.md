@@ -33,7 +33,7 @@
 
 ---
 
-## Wait, what even is this?
+## Wait, What even is this?
 
 <img width="1536" height="1024" alt="Joanium Features" src="https://github.com/user-attachments/assets/2c96cfa4-db09-49d6-8213-9ee14a1d22dc" />
 
