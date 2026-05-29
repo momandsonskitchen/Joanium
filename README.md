@@ -55,7 +55,7 @@ That's not a chatbot. That's an **actual agent**.
 
 ## What's inside?
 
-<img width="1774" height="887" alt="ChatGPT Image May 29, 2026, 08_17_44 PM" src="https://github.com/user-attachments/assets/29d23de1-7dd3-44fa-be18-6157ac9e42ab" />
+<img width="1774" height="887" alt="Joanium - What's Inside?" src="https://github.com/user-attachments/assets/29d23de1-7dd3-44fa-be18-6157ac9e42ab" />
 
 **🧠 Multi-model, zero lock-in**
 Switch between Gemini, Claude, GPT, Grok, Mistral, or go fully offline with Ollama / LM Studio. 10+ providers. Use whatever model won the benchmark this week — we genuinely don't care.
@@ -117,7 +117,7 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 ---
 
 ## Marketplace 🛍️
-
+<img width="1774" height="887" alt="Joanium Marketplace" src="https://github.com/user-attachments/assets/4108fe5b-ae12-40d7-beb7-2ad19a22b493" />
 The Skills and Personas in this repo come **pre-installed** with Joanium — they're your out-of-the-box starting point.
 
 But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketplace)** — a separate community repo where you can browse, create, and publish your own. Drop in a *"startup growth hacker"*, a *"brutally honest code reviewer"*, a *"3am rubber duck debugger"* — or build one that's uniquely yours. No code required, just show up and create.
