@@ -33,7 +33,7 @@
 
 ---
 
-## Wait, what even is this?
+## Wait, What Even Is This?
 
 <img width="1536" height="1024" alt="Joanium Features" src="https://github.com/user-attachments/assets/2c96cfa4-db09-49d6-8213-9ee14a1d22dc" />
 
@@ -128,7 +128,7 @@ But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketpla
 
 ---
 
-## Contributing
+## Contributing 😎
 
 PRs are genuinely welcome — not in the "we value all contributions" corporate way, in the actual "please help us make this better" way.
 
@@ -140,7 +140,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECU
 
 ---
 
-## If this helped you
+## If this helped you 😊
 
 Hit ⭐ star. It takes less than a second and means everything for an open source project.
 
