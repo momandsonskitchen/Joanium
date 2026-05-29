@@ -37,6 +37,9 @@ export function createDirectoryService({ rootDirectory }) {
     if (fileError) return fileError;
 
     const resolvedPath = resolveDirectory(payload.filePath, payload.cwd ?? fallbackDirectory);
+    if (!fs.existsSync(resolvedPath)) {
+      return { ok: false, error: `File not found: "${resolvedPath}"` };
+    }
     const stat = fs.statSync(resolvedPath);
     if (!stat.isFile()) {
       return { ok: false, error: `"${resolvedPath}" is not a file.` };
