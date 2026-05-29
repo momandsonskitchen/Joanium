@@ -40,11 +40,11 @@ const ICON_MAP = {
   cloudflare: 'Cloudflare',
   hackernews: 'HackerNews',
   airtable: 'Airtable',
-  arxiv: 'Arxiv',
+  arxiv: 'ArXiv',
   npm: 'Npm',
   reddit: 'Reddit',
   stackoverflow: 'StackOverflow',
-  itunes: 'iTunes',
+  itunes: 'Itunes',
 };
 
 function getConnectorIconPath(connectorId) {
