@@ -3,7 +3,8 @@ const subAgentStrings = {
     {
       name: 'spawn_sub_agents',
       description:
-        'Delegate a medium or high complexity request into multiple focused sub-agents, then return their structured handoffs to the coordinator.',
+        'Delegate a medium or high complexity request into multiple focused read-only research ' +
+        'sub-agents, then return their structured handoffs to the coordinator.',
       category: 'sub_agents',
       parameters: {
         tasks: {

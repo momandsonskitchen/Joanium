@@ -2692,6 +2692,20 @@ summary.chat-terminal-call__header::marker {
   cursor: text;
 }
 
+.chat-subagent-call__agent-task {
+  margin: 0;
+  max-height: 140px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.58;
+  color: var(--color-chat-text-secondary);
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
 .chat-subagent-call__agent-output {
   margin: 0;
   max-height: 220px;

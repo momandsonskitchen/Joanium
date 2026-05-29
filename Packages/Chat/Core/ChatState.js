@@ -7,7 +7,10 @@ import { pathToFileURL } from 'node:url';
 import { app } from 'electron';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { createLiveModelFilter } from '../../Shared/ProviderCatalog/LiveModelFilter.js';
-import { TERMINAL_TOOL_NAMES } from '../../Shared/ToolLoop/TerminalToolNames.js';
+import {
+  SUB_AGENT_TERMINAL_TOOL_NAMES,
+  TERMINAL_TOOL_NAMES,
+} from '../../Shared/ToolLoop/TerminalToolNames.js';
 import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
@@ -78,6 +81,16 @@ async function readTerminalPromptFile(rootDirectory) {
 
 async function readSubAgentPromptFile(rootDirectory) {
   return (await readFile(path.join(rootDirectory, 'Prompts', 'SubAgent.md'), 'utf8')).trim();
+}
+
+async function readSubAgentTerminalPromptFile(rootDirectory) {
+  const template = await readFile(
+    path.join(rootDirectory, 'Prompts', 'SubAgentTerminal.md'),
+    'utf8',
+  );
+  return template
+    .replace('{{SUB_AGENT_TERMINAL_TOOL_NAMES}}', SUB_AGENT_TERMINAL_TOOL_NAMES.join(', '))
+    .trim();
 }
 
 async function readMemoryPromptFile(rootDirectory) {
@@ -1021,6 +1034,7 @@ export function createChatStateManager({ rootDirectory }) {
         providers,
         terminalPrompt,
         subAgentPrompt,
+        subAgentTerminalPrompt,
         memoryPrompt,
         projectContextPrompt,
         gitCommitPrompt,
@@ -1030,6 +1044,7 @@ export function createChatStateManager({ rootDirectory }) {
         readProviderCatalog(rootDirectory),
         readTerminalPromptFile(rootDirectory),
         readSubAgentPromptFile(rootDirectory),
+        readSubAgentTerminalPromptFile(rootDirectory),
         readMemoryPromptFile(rootDirectory).catch(() => ''),
         readProjectContextPromptFile(rootDirectory),
         readGitCommitPromptFile(rootDirectory),
@@ -1053,6 +1068,7 @@ export function createChatStateManager({ rootDirectory }) {
         providers: activeProviders,
         terminalPrompt,
         subAgentPrompt,
+        subAgentTerminalPrompt,
         memoryPrompt,
         projectContextPrompt,
         gitCommitPrompt,

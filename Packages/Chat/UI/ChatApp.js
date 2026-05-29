@@ -27,6 +27,7 @@ import {
   formatToolsetResultForModel,
   parseAllToolRequests,
 } from '../../Shared/ToolLoop/RendererToolLoop.js';
+import { SUB_AGENT_TERMINAL_TOOL_NAMES } from '../../Shared/ToolLoop/TerminalToolNames.js';
 import { createAttachmentPill } from './AttachmentPill.js';
 import { createBrowserPreviewPanel } from './BrowserPreviewPanel.js';
 import { createTechFeedPanel } from './TechFeedPanel.js';
@@ -55,6 +56,7 @@ import {
   generateSessionId,
   getFirstName,
   loadLiveBrowserContext,
+  normalizeSubAgentPayloadParameters,
   sanitizeAssistantVisibleContent,
   toAttachmentSummary,
 } from './Utils.js';
@@ -81,6 +83,7 @@ const SEARCH_ENGINE_HOME_URLS = {
 };
 
 const MAX_TERMINAL_TOOL_CALLS = 100;
+const SUB_AGENT_TERMINAL_TOOL_SET = new Set(SUB_AGENT_TERMINAL_TOOL_NAMES);
 const PROJECT_SCOPED_MUTATION_TOOLS = new Set([
   'write_local_file',
   'apply_file_patch',
@@ -753,15 +756,6 @@ export async function createChatView(
         scheduleMemorySync(90000);
       }
     }
-  }
-
-  async function loadToolsetPrompt() {
-    const { toolsetTools } = await loadAssistantPipelineRuntime({
-      contextCache: assistantContextCache,
-      includeMemory: false,
-      includeTerminalPrompt: false,
-    });
-    return toolsetTools;
   }
 
   window.addEventListener('joanium:connectors-changed', () => {
@@ -2756,7 +2750,6 @@ export async function createChatView(
         content: prompt,
       },
     ];
-    const toolsetTools = await loadToolsetPrompt();
     let usage = { input: 0, output: 0 };
     let lastMeta = {};
     const MAX_SUB_AGENT_TOOL_CALLS = 1000;
@@ -2769,14 +2762,11 @@ export async function createChatView(
         memoryContext: memoryContext || null,
         projectInfo: (await buildProjectContext(activeProject)) || null,
         persona: (getActivePersona?.() ?? activePersona)?.content || null,
-        modeInstruction: [
-          getModeInstruction(),
-          'You are operating as a focused autonomous sub-agent. Execute the task fully and independently. Do not ask for clarification — use your best judgment. Use all available tools as needed. Return a structured handoff when done.',
-        ]
+        modeInstruction: [getModeInstruction(), CHAT_PROMPTS.subAgentResearchMode]
           .filter(Boolean)
           .join('\n\n'),
-        terminalTools: payload.terminalPrompt,
-        toolsetTools: toolsetTools || null,
+        terminalTools: payload.subAgentTerminalPrompt || null,
+        toolsetTools: null,
         isNewSession: false,
       });
 
@@ -2787,8 +2777,10 @@ export async function createChatView(
       lastMeta = result ?? {};
 
       const { content: parsedContent } = parseThinkingFromText(String(result?.text ?? ''));
-      const { terminalActions, toolsetActions, hasTools, visibleContent } =
-        parseAllToolRequests(parsedContent);
+      const { terminalActions, toolsetActions, hasTools, visibleContent } = parseAllToolRequests(
+        parsedContent,
+        SUB_AGENT_TERMINAL_TOOL_SET,
+      );
 
       if (!hasTools) {
         return {
@@ -2827,18 +2819,17 @@ export async function createChatView(
               return { action, result: toolResult };
             }
 
-            const toolResult =
-              action.tool === 'spawn_sub_agents'
-                ? {
-                    ok: false,
-                    tool: action.tool,
-                    error: CHAT_PROMPTS.nestedSubAgentsUnavailable,
-                  }
-                : await executeToolsetTool(action).catch((error) => ({
-                    ok: false,
-                    tool: action.tool,
-                    error: error?.message ?? String(error),
-                  }));
+            const toolResult = {
+              ok: false,
+              tool: action.tool,
+              error:
+                action.tool === 'spawn_sub_agents'
+                  ? CHAT_PROMPTS.nestedSubAgentsUnavailable
+                  : CHAT_PROMPTS.subAgentToolAccessDenied.replace(
+                      '{tool}',
+                      action.tool || 'unknown',
+                    ),
+            };
             return { action, result: toolResult };
           } catch (error) {
             return { action, result: { ok: false, error: error?.message ?? String(error) } };
@@ -2878,7 +2869,8 @@ export async function createChatView(
 
   async function executeSubAgentTool(action, onProgress) {
     const payload = action?.payload ?? {};
-    const tasks = normalizeSubAgentTasks(payload.parameters?.tasks ?? payload.tasks);
+    const parameters = normalizeSubAgentPayloadParameters(payload);
+    const tasks = normalizeSubAgentTasks(parameters);
 
     if (!tasks.length) {
       return {
@@ -2889,12 +2881,12 @@ export async function createChatView(
     }
 
     const coordinationGoal = collapseWhitespace(
-      payload.parameters?.coordination_goal ??
-        payload.coordination_goal ??
+      parameters.coordination_goal ??
+        parameters.coordinationGoal ??
         CHAT_PROMPTS.subAgentFallbackGoal,
     );
     const synthesisStyle = collapseWhitespace(
-      payload.parameters?.synthesis_style ?? payload.synthesis_style ?? 'detailed',
+      parameters.synthesis_style ?? parameters.synthesisStyle ?? 'detailed',
     );
     const conversationContext = getSubAgentConversationContext();
     const memoryContext = await loadMemoryContext();
@@ -3265,11 +3257,12 @@ export async function createChatView(
     // ── Sub-agents: special-cased for live per-task progress ─────────────────
     if (actions.length === 1 && primaryAction.tool === 'spawn_sub_agents') {
       const initTasks = normalizeSubAgentTasks(
-        primaryAction.payload?.parameters?.tasks ?? primaryAction.payload?.tasks,
+        normalizeSubAgentPayloadParameters(primaryAction.payload),
       );
       let currentSubAgents = initTasks.map((task) => ({
         title: task.title,
         goal: task.goal,
+        deliverable: task.deliverable,
         prompt: '',
         status: 'queued',
         output: '',

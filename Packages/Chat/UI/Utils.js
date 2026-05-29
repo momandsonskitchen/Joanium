@@ -220,3 +220,37 @@ export function formatPromptTemplate(template, replacements = {}) {
 
   return formatText(activeLines, replacements).trim();
 }
+
+function parseToolObject(value) {
+  if (!value || typeof value !== 'string') return value;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+function mergeToolArgument(target, value) {
+  if (value === undefined || value === null) return;
+
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    Object.assign(target, value);
+    return;
+  }
+
+  if (target.tasks === undefined) {
+    target.tasks = value;
+  }
+}
+
+export function normalizeSubAgentPayloadParameters(toolPayload = {}) {
+  const parameters = parseToolObject(toolPayload.parameters);
+  const args = parseToolObject(toolPayload.arguments);
+  const { tool: _tool, parameters: _parameters, arguments: _arguments, ...topLevel } = toolPayload;
+
+  const normalized = { ...topLevel };
+  mergeToolArgument(normalized, args);
+  mergeToolArgument(normalized, parameters);
+  return normalized;
+}

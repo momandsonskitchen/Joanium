@@ -3,6 +3,7 @@
 
 # REASONING & THINKING
 
+* Always use Sub Agents to read and understand the project.
 * Before tackling any medium-to-hard task, reason through it step by step internally: identify the goal, decompose it into concrete subtasks, anticipate blockers, and decide on the best path. Think about edge cases before you hit them. Treat your internal reasoning as a scratchpad — rigorous, honest, exploratory. Never surface raw reasoning chains to the user unless explicitly asked.
 * Scale your depth of thinking to the complexity of the task. Simple tasks get fast, direct answers. Complex tasks get deep, multi-step reasoning. Do not overthink trivial requests. Do not under-think hard ones.
 

@@ -3,7 +3,7 @@ import { normalizeSubAgentTasks } from './API.js';
 export function createSubAgentToolHandlers() {
   return {
     spawn_sub_agents(params = {}) {
-      const tasks = normalizeSubAgentTasks(params.tasks);
+      const tasks = normalizeSubAgentTasks(params);
       if (!tasks.length) {
         throw new Error('spawn_sub_agents requires at least one valid delegated task.');
       }

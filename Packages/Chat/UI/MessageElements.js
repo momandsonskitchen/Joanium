@@ -4,7 +4,11 @@ import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown, renderInline } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createAttachmentPill } from './AttachmentPill.js';
 import { createTerminalCallElement } from './TerminalPanel.js';
-import { createSubAgentPromptSection, upsertSubAgentOutputSection } from './SubAgentSections.js';
+import {
+  createSubAgentPromptSection,
+  createSubAgentTaskSection,
+  upsertSubAgentOutputSection,
+} from './SubAgentSections.js';
 import { createThinkingBlock } from './ThinkingBlock.js';
 import { formatDuration, stripMarkdown } from './Utils.js';
 
@@ -399,6 +403,13 @@ export function updateSubAgentCard(threadEl, subAgents, strings) {
 
     const body = row.querySelector('.chat-subagent-call__agent-body');
     if (!body) return;
+
+    const taskSection = body.querySelector('.chat-subagent-call__agent-task-section');
+    if (!agent.prompt && !agent.output && !agent.error && !taskSection) {
+      body.append(createSubAgentTaskSection(agent, strings));
+    } else if ((agent.prompt || agent.output || agent.error) && taskSection) {
+      taskSection.remove();
+    }
 
     if (agent.prompt && !body.querySelector('.chat-subagent-call__agent-prompt')) {
       body.prepend(createSubAgentPromptSection(agent, strings));

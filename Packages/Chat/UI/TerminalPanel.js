@@ -2,7 +2,11 @@ import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { formatTerminalResultForModel as formatRendererTerminalResultForModel } from '../../Shared/ToolLoop/RendererToolLoop.js';
-import { createSubAgentOutputSection, createSubAgentPromptSection } from './SubAgentSections.js';
+import {
+  createSubAgentOutputSection,
+  createSubAgentPromptSection,
+  createSubAgentTaskSection,
+} from './SubAgentSections.js';
 
 // ── Connector icon map: connector id → filename in Assets/Icons/ ─────────────
 // Mirrors the ICON_MAP in ConnectorsPanel.js so tool cards can show the right
@@ -200,7 +204,9 @@ function createSubAgentCallElement(terminal, strings) {
 
       const body = createElement('div', 'chat-subagent-call__agent-body');
 
-      if (agent.prompt) {
+      if (!agent.prompt && !agent.output && !agent.error) {
+        body.append(createSubAgentTaskSection(agent, strings));
+      } else if (agent.prompt) {
         body.append(createSubAgentPromptSection(agent, strings));
       }
 

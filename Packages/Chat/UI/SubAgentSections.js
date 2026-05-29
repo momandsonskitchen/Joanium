@@ -1,7 +1,30 @@
-import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 import { createThinkingBlock, updateThinkingBlockText } from './ThinkingBlock.js';
+
+export function createSubAgentTaskSection(agent, strings) {
+  const taskSection = createElement(
+    'div',
+    'chat-subagent-call__agent-section chat-subagent-call__agent-task-section',
+  );
+  const taskTitle = createElement(
+    'h4',
+    'chat-subagent-call__agent-section-title',
+    strings.tools.subAgentTaskSection,
+  );
+  const taskText = [
+    agent.goal,
+    agent.deliverable
+      ? formatText(strings.tools.subAgentsDeliverable, { deliverable: agent.deliverable })
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  const taskEl = renderMarkdown(taskText, 'chat-subagent-call__agent-task');
+  taskSection.append(taskTitle, taskEl);
+  return taskSection;
+}
 
 export function createSubAgentPromptSection(agent, strings) {
   const promptSection = createElement('div', 'chat-subagent-call__agent-section');

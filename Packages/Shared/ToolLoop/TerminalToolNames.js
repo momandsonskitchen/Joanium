@@ -70,3 +70,10 @@ export const TERMINAL_TOOL_NAMES = Object.freeze([
   'browser_refresh',
   'browser_screenshot',
 ]);
+
+export const SUB_AGENT_TERMINAL_TOOL_NAMES = Object.freeze([
+  'inspect_workspace',
+  'search_workspace',
+  'read_local_file',
+  'list_directory',
+]);

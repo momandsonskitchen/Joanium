@@ -1,20 +1,76 @@
 import { truncate } from '../Utils/StringUtils.js';
 
-export function normalizeSubAgentTasks(rawTasks, { maxTasks = 8 } = {}) {
-  let parsed = rawTasks;
+const TASK_COLLECTION_KEYS = Object.freeze([
+  'parameters',
+  'arguments',
+  'tasks',
+  'subtasks',
+  'sub_tasks',
+  'agents',
+  'sub_agents',
+  'agent_tasks',
+  'delegated_tasks',
+  'delegations',
+]);
 
-  if (typeof rawTasks === 'string') {
-    const text = rawTasks.trim();
+function parseJsonString(value) {
+  if (typeof value !== 'string') return value;
+
+  const text = value.trim();
+  if (!text) return '';
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return value;
+  }
+}
+
+function hasTaskShape(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+
+  if (typeof value.task === 'string') return true;
+
+  return ['title', 'name', 'goal', 'objective', 'prompt', 'context', 'deliverable'].some(
+    (key) => value[key] !== undefined,
+  );
+}
+
+function unwrapTaskInput(rawTasks) {
+  const parsed = parseJsonString(rawTasks);
+
+  if (Array.isArray(parsed) || typeof parsed !== 'object' || parsed === null) {
+    return parsed;
+  }
+
+  for (const key of TASK_COLLECTION_KEYS) {
+    if (parsed[key] !== undefined) {
+      return unwrapTaskInput(parsed[key]);
+    }
+  }
+
+  if (hasTaskShape(parsed)) {
+    return [parsed];
+  }
+
+  if (parsed.task !== undefined) {
+    return unwrapTaskInput(parsed.task);
+  }
+
+  return parsed;
+}
+
+export function normalizeSubAgentTasks(rawTasks, { maxTasks = 8 } = {}) {
+  let parsed = unwrapTaskInput(rawTasks);
+
+  if (typeof parsed === 'string') {
+    const text = parsed.trim();
     if (!text) return [];
 
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      parsed = text
-        .split('\n')
-        .map((line) => line.replace(/^[\-\*\d\.\)\s]+/, '').trim())
-        .filter(Boolean);
-    }
+    parsed = text
+      .split('\n')
+      .map((line) => line.replace(/^[\-\*\d\.\)\s]+/, '').trim())
+      .filter(Boolean);
   }
 
   if (!Array.isArray(parsed)) return [];

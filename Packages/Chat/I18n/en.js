@@ -127,6 +127,7 @@ const en = {
     subAgentStatusRunning: 'Working',
     subAgentStatusDone: 'Done',
     subAgentStatusFailed: 'Failed',
+    subAgentTaskSection: 'Task',
     subAgentPromptSection: 'Prompt',
     subAgentOutputSection: 'Output',
     subAgentErrorSection: 'Error',

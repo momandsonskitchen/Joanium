@@ -20,8 +20,15 @@ export const CHAT_PROMPTS = Object.freeze({
     'One or more tool calls failed. Diagnose the errors, then retry with corrected approaches. ' +
     'Do not repeat exact same failing calls.',
   nestedSubAgentsUnavailable: 'Nested sub-agents are not available inside a sub-agent task.',
+  subAgentToolAccessDenied:
+    'Sub-agent tool access is limited to read-only file research tools. Tool "{tool}" is not ' +
+    'available to sub-agents.',
   subAgentFallbackGoal:
     'Help the coordinator finish the user request by combining focused delegated handoffs.',
+  subAgentResearchMode:
+    'You are operating as a focused research-only sub-agent. Use only the listed read-only file ' +
+    'research tools. Do not write files, run commands, use browser/API/connector tools, mutate ' +
+    'state, or ask for clarification. Return a structured handoff when done.',
 });
 
 export const ATTACHMENT_CONTEXT_PROMPTS = Object.freeze({
