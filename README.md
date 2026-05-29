@@ -55,6 +55,8 @@ That's not a chatbot. That's an **actual agent**.
 
 ## What's inside?
 
+<img width="1774" height="887" alt="ChatGPT Image May 29, 2026, 08_17_44 PM" src="https://github.com/user-attachments/assets/29d23de1-7dd3-44fa-be18-6157ac9e42ab" />
+
 **🧠 Multi-model, zero lock-in**
 Switch between Gemini, Claude, GPT, Grok, Mistral, or go fully offline with Ollama / LM Studio. 10+ providers. Use whatever model won the benchmark this week — we genuinely don't care.
 
