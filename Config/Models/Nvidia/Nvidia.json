@@ -424,6 +424,9 @@
     "stepfun-ai/step-3.5-flash": {
       "name": "stepfun-ai/step-3.5-flash"
     },
+    "stepfun-ai/step-3.7-flash": {
+      "name": "Step 3 7 FLASH"
+    },
     "stockmark/stockmark-2-100b-instruct": {
       "name": "stockmark/stockmark-2-100b-instruct"
     },
@@ -449,5 +452,5 @@
       "name": "zyphra/zamba2-7b-instruct"
     }
   },
-  "_syncedAt": "2026-05-28T16:32:55.530Z"
+  "_syncedAt": "2026-05-29T04:37:48.630Z"
 }

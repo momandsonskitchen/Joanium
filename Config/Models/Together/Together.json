@@ -197,6 +197,10 @@
       "name": "Cogito V1 Preview Llama 8B",
       "context_window": 131072
     },
+    "MiniMaxAI/MiniMax-M2.5-FP4": {
+      "name": "MiniMax M2.5 FP4",
+      "context_window": 8192
+    },
     "deepcogito/cogito-v1-preview-qwen-14B": {
       "name": "Cogito V1 Preview Qwen 14B",
       "context_window": 131072
@@ -639,6 +643,10 @@
     "google/gemma-3-27b-it-lora": {
       "name": "Gemma 3 27B It Lora"
     },
+    "moonshotai/Kimi-K2.5-fp4": {
+      "name": "Kimi K2.5 FP4",
+      "context_window": 262144
+    },
     "Qwen/Qwen2.5-72B-Instruct-Turbo": {
       "name": "Qwen 2.5 72B Turbo",
       "description": "Alibaba's Qwen 2.5 72B — strong at math, coding, and multilingual tasks with a 128K context window",
@@ -654,6 +662,14 @@
         "input": 1.2,
         "output": 1.2
       }
+    },
+    "deepseek-ai/DeepSeek-V3.1": {
+      "name": "Deepseek V3.1 NVFP4",
+      "context_window": 131072
+    },
+    "deepseek-ai/DeepSeek-R1-0528": {
+      "name": "DeepSeek R1 0528 NVFP4",
+      "context_window": 163840
     },
     "nim/nvidia/llama-3.3-nemotron-super-49b-v1": {
       "name": "nim/nvidia/llama-3.3-nemotron-super-49b-v1",
@@ -700,5 +716,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-05-28T16:33:01.057Z"
+  "_syncedAt": "2026-05-29T04:37:55.457Z"
 }
