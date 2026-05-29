@@ -48,6 +48,9 @@ function getChannelIconPath(channelName) {
     whatsapp: 'WhatsApp',
     discord: 'Discord',
     slack: 'Slack',
+    mattermost: 'MatterMost',
+    zulip: 'Zulip',
+    ntfy: 'Ntfy',
   };
   return names[channelName] ? `../../../Assets/Icons/${names[channelName]}.png` : null;
 }

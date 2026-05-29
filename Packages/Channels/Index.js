@@ -31,6 +31,9 @@ export async function createPackage({ rootDirectory }) {
             whatsapp: path.join(iconsDirectory, 'WhatsApp.png'),
             discord: path.join(iconsDirectory, 'Discord.png'),
             slack: path.join(iconsDirectory, 'Slack.png'),
+            mattermost: path.join(iconsDirectory, 'MatterMost.png'),
+            zulip: path.join(iconsDirectory, 'Zulip.png'),
+            ntfy: path.join(iconsDirectory, 'ntfy.png'),
           };
         },
       },
