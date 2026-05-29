@@ -128,7 +128,7 @@ But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketpla
 
 ---
 
-## Contributing
+## Contributing 😎
 
 PRs are genuinely welcome — not in the "we value all contributions" corporate way, in the actual "please help us make this better" way.
 
@@ -140,7 +140,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECU
 
 ---
 
-## If this helped you
+## If this helped you 😊
 
 Hit ⭐ star. It takes 0.3 seconds and means everything for an open source project.
 
