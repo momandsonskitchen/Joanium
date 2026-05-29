@@ -6,6 +6,27 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.529.0] - 2026-05-29
+
+* chore(release): bump version to 2026.529.0
+* Models Info Update
+* Increased Agent Tool Calls From 25 to 1000
+* Sub Agents Reasoner Fix
+* Updated System.md
+* Updated The Readme Contributors Section Automatically
+* Contributors Contributing Updates In Real Time
+* Update README.md
+* Update README.md
+* Update README.md
+* Removed the extra space
+* Removed Share Option
+* Removed Back To The Top Buttons
+* Improved Readme
+* Improved Connector Rendering
+* Added Connector Icon To The Tool Connector
+
+---
+
 ## [2026.528.5] - 2026-05-28
 
 * chore(release): bump version to 2026.528.5
