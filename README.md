@@ -34,7 +34,7 @@
 ---
 
 ## Wait, what even is this?
-
+<img width="1536" height="1024" alt="Joanium Features" src="https://github.com/user-attachments/assets/2c96cfa4-db09-49d6-8213-9ee14a1d22dc" />
 **Joanium is a local-first AI desktop agent that actually *does* stuff** — not just talks about doing stuff.
 
 You know how every AI tool is just a really fancy chat box? You type. It replies. You lose context by tomorrow and you're back to copy-pasting your entire codebase into a prompt like it's 2023. Every. Single. Morning.
