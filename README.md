@@ -88,6 +88,8 @@ Zero internet. Zero API keys. Zero cloud. Zero excuses. Everything stays in your
 
 ## Joanium vs the competition (yeah we went there)
 
+<img width="1536" height="1024" alt="Joanium vs Other AI Agents" src="https://github.com/user-attachments/assets/71072789-50a3-45f0-ab8c-4fa95c90320a" />
+
 Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 
 | | **Joanium** | Codex | Claude Code | OpenHuman | OpenClaw | Hermes Agent |
