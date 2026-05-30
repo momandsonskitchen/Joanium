@@ -81,7 +81,22 @@ export function createHistoryStateManager({ rootDirectory }) {
     await mkdir(targetDir, { recursive: true });
     const filePath = path.join(targetDir, `${safeId}.json`);
     const existing = await readExistingSession(filePath);
-    const record = withPersonalMemoryState({ ...session, id: safeId }, existing);
+
+    // Preserve fork provenance from disk — saveCurrentSession in ChatApp only
+    // sends the base session fields (id, title, messages, …) and has no
+    // knowledge of forkedFromId/forkedFromTitle.  Without this guard the first
+    // auto-save after opening a fork would silently wipe the badge metadata.
+    const forkedFromId = session.forkedFromId ?? existing?.forkedFromId ?? null;
+    const forkedFromTitle = session.forkedFromTitle ?? existing?.forkedFromTitle ?? null;
+
+    const merged = {
+      ...session,
+      id: safeId,
+      ...(forkedFromId != null ? { forkedFromId } : {}),
+      ...(forkedFromTitle != null ? { forkedFromTitle } : {}),
+    };
+
+    const record = withPersonalMemoryState(merged, existing);
     await writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
     return record;
   }
