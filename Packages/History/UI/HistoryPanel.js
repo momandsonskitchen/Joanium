@@ -46,7 +46,8 @@ function formatSessionTime(isoString) {
 //   strings  — the `history` i18n namespace (strings.history from caller)
 //   options  — {
 //     onNewChat()              — callback: start a fresh conversation
-//     onLoadSession(session)   — callback: restore a saved session into chat
+//     onLoadSession(id)        — callback: restore a saved session into chat
+//     onForkSession(id)        — callback: open a freshly-forked session in chat
 //     getCurrentSessionId()    — getter: returns the active session ID (or null)
 //     getActiveProject()       — getter: returns the active project (or null)
 //   }
@@ -58,7 +59,7 @@ function formatSessionTime(isoString) {
 
 export function createHistoryPanel(
   strings,
-  { onNewChat, onLoadSession, getCurrentSessionId, getActiveProject } = {},
+  { onNewChat, onLoadSession, onForkSession, getCurrentSessionId, getActiveProject } = {},
 ) {
   // ── Session card — inline rename helper ────────────────────────────────
 
@@ -123,11 +124,55 @@ export function createHistoryPanel(
       'chat-history__card-title',
       session.title || strings.appName,
     );
-    const metaEl = createElement(
-      'div',
-      'chat-history__card-meta',
+
+    // Meta line: message count · time · optional forked-from pill
+    const metaEl = createElement('div', 'chat-history__card-meta');
+    const metaText = document.createTextNode(
       `${msgLabel} · ${formatSessionTime(session.updatedAt)}`,
     );
+    metaEl.append(metaText);
+
+    if (session.forkedFromId) {
+      const forkedBadge = createElement('span', 'chat-history__card-forked-badge');
+      forkedBadge.append(createIcon('gitBranch', 'chat-history__card-forked-icon'));
+      const forkedLabel = document.createElement('span');
+      forkedLabel.textContent = session.forkedFromTitle
+        ? `${strings.forkedFrom} "${session.forkedFromTitle}"`
+        : strings.forkedFrom;
+      forkedBadge.append(forkedLabel);
+
+      // Clicking the badge navigates to the original session
+      if (session.forkedFromId) {
+        forkedBadge.setAttribute('role', 'button');
+        forkedBadge.setAttribute('tabindex', '0');
+        forkedBadge.setAttribute(
+          'aria-label',
+          `${strings.forkedFrom}: ${session.forkedFromTitle || session.forkedFromId}`,
+        );
+        const openOriginal = async (e) => {
+          e.stopPropagation();
+          // Guard: source may have been deleted since the last list refresh.
+          // Try loading it; if it fails, strip the badge and repaint.
+          try {
+            await invokeIpc('history:load-session', session.forkedFromId, getActiveProject?.()?.id);
+            void onLoadSession?.(session.forkedFromId);
+          } catch {
+            // Source is gone — refresh the list so the badge disappears.
+            await populateList(contentEl, query);
+          }
+        };
+        forkedBadge.addEventListener('click', openOriginal);
+        forkedBadge.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openOriginal(e);
+          }
+        });
+      }
+
+      metaEl.append(forkedBadge);
+    }
+
     body.append(titleEl, metaEl);
     body.addEventListener('click', () => void onLoadSession?.(session.id));
 
@@ -153,6 +198,31 @@ export function createHistoryPanel(
         );
       } catch (err) {
         console.error('[Joanium] Failed to pin session:', err);
+      }
+      await populateList(contentEl, query);
+    });
+
+    // Fork
+    const forkBtn = createElement('button', 'chat-history__card-btn');
+    forkBtn.type = 'button';
+    forkBtn.setAttribute('aria-label', strings.fork);
+    forkBtn.append(createIcon('gitBranch', 'chat-history__card-btn-icon'));
+    forkBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        // Fork at the end of the conversation (all messages included)
+        const forked = await invokeIpc(
+          'history:fork-session',
+          session.id,
+          null, // upToMessageIndex = null means full conversation
+          getActiveProject?.()?.id,
+        );
+        if (forked?.id) {
+          // Open the new fork immediately
+          await onLoadSession?.(forked.id);
+        }
+      } catch (err) {
+        console.error('[Joanium] Failed to fork session:', err);
       }
       await populateList(contentEl, query);
     });
@@ -189,7 +259,7 @@ export function createHistoryPanel(
       await populateList(contentEl, query);
     });
 
-    actions.append(pinBtn, renameBtn, deleteBtn);
+    actions.append(pinBtn, forkBtn, renameBtn, deleteBtn);
     card.append(body, actions);
     return card;
   }

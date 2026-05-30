@@ -44,6 +44,11 @@ export async function createPackage({ rootDirectory }) {
         channel: 'history:mark-memory-synced',
         handler: async (_event, id, options) => historyStateManager.markMemorySynced(id, options),
       },
+      {
+        channel: 'history:fork-session',
+        handler: async (_event, id, upToMessageIndex, projectId) =>
+          historyStateManager.forkSession(id, upToMessageIndex, projectId),
+      },
     ],
   };
 }

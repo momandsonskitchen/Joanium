@@ -262,6 +262,12 @@ async function bootstrap() {
             await showRoute('chat');
             chat.focusComposer();
           },
+          onForkSession: async (id) => {
+            const chat = await ensureChatView();
+            await chat.loadSession(id);
+            await showRoute('chat');
+            chat.focusComposer();
+          },
           getCurrentSessionId: () => chatView?.getCurrentSessionId() ?? null,
           getActiveProject: () => activeProject,
         });

@@ -16,6 +16,8 @@ const en = {
   pin: 'Pin',
   unpin: 'Unpin',
   rename: 'Rename',
+  fork: 'Fork',
+  forkedFrom: 'forked from',
   deleteChat: 'Delete',
   deleteAll: 'Delete All',
   deleteAllConfirm: 'Confirm?',
