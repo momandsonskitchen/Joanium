@@ -20,11 +20,11 @@
     "moonshotai/Kimi-K2.6": {
       "name": "Kimi K2 6"
     },
-    "meta-llama/Llama-3.1-8B-Instruct": {
-      "name": "Llama 3 1 8B Instruct"
-    },
     "google/gemma-4-26B-A4B-it": {
       "name": "Gemma 4 26B A4B It"
+    },
+    "meta-llama/Llama-3.1-8B-Instruct": {
+      "name": "Llama 3 1 8B Instruct"
     },
     "openai/gpt-oss-120b": {
       "name": "GPT OSS 120B",
@@ -387,5 +387,5 @@
       "name": "MiniMax M2 1"
     }
   },
-  "_syncedAt": "2026-05-30T10:43:50.327Z"
+  "_syncedAt": "2026-05-30T13:01:46.373Z"
 }
