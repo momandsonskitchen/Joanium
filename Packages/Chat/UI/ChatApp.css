@@ -847,6 +847,37 @@
 .chat-message__thinking-body {
   padding: 0 12px 10px;
   animation: chat-thinking-body-in 200ms ease 120ms both;
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Custom scrollbar — thin purple-tinted track to match the thinking block */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(140, 80, 200, 0.25) transparent;
+}
+
+.chat-message__thinking-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-message__thinking-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-message__thinking-body::-webkit-scrollbar-thumb {
+  background: rgba(140, 80, 200, 0.28);
+  border-radius: 99px;
+}
+
+.chat-message__thinking-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 80, 200, 0.46);
+}
+
+.joanium-theme-dark .chat-message__thinking-body::-webkit-scrollbar-thumb {
+  background: rgba(200, 165, 255, 0.22);
+}
+
+.joanium-theme-dark .chat-message__thinking-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 165, 255, 0.38);
 }
 
 @keyframes chat-thinking-body-in {
