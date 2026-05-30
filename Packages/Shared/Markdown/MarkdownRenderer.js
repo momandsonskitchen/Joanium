@@ -283,7 +283,8 @@ function buildDom(blocks) {
 
         const langLabel = document.createElement('span');
         langLabel.className = 'md-codeblock__lang';
-        langLabel.textContent = block.lang || 'text';
+        const rawLang = block.lang || 'text';
+        langLabel.textContent = rawLang.charAt(0).toUpperCase() + rawLang.slice(1).toLowerCase();
         header.append(langLabel);
 
         const actions = document.createElement('div');
