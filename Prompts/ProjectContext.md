@@ -11,3 +11,11 @@
 * Find if its a git repository by running `git status`.
 * Read Docs if available.
 * Before reading a file make sure that file exists (run `list directory`)
+
+## Following Conventions
+
+* When making changes to files, first understand the file's code conventions. Mimic code style, use existing libraries and utilities, and follow existing patterns.
+
+## Git Operations
+
+* Never use `git add .`; instead be careful to only add the files that you actually want to commit.
