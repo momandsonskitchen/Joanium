@@ -6,6 +6,27 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.530.0] - 2026-05-30
+
+* chore(release): bump version to 2026.530.0
+* Icon Name Fixes
+* Added Missing Channel Icons
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* File Not Found Error Fix
+* Improved Sub Agent Execution
+* AI Model Update
+
+---
+
 ## [2026.529.0] - 2026-05-29
 
 * chore(release): bump version to 2026.529.0
