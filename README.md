@@ -151,6 +151,7 @@ Share it. Tweet it. Tell your developer friends who are still copy-pasting conte
 ---
 
 <p align="center">
-  Made with ❤️ by
-  <a href="https://joeljolly.vercel.app">Joel Jolly</a>
+  <a href="https://joeljolly.vercel.app">
+    <img width="1942" height="809" alt="Footer" src="https://github.com/user-attachments/assets/8f951b1c-24f7-4e97-a921-3711f19fa4b6" />
+  </a>
 </p>
