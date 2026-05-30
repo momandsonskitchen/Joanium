@@ -4369,18 +4369,6 @@
         "text": true
       }
     },
-    "mistralai/mistral-7b-instruct-v0.1": {
-      "name": "Mistral: Mistral 7B Instruct v0.1",
-      "description": "A 7.3B parameter model that outperforms Llama 2 13B on all benchmarks, with optimizations for speed and context length.",
-      "context_window": 4096,
-      "pricing": {
-        "input": 0.11,
-        "output": 0.19
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-3.5-turbo-instruct": {
       "name": "OpenAI: GPT-3.5 Turbo Instruct",
       "description": "This model is a variant of GPT-3.5 Turbo tuned for instructional prompts and omitting chat-related optimizations. Training data: up to Sep 2021.",
@@ -4478,5 +4466,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-30T13:01:37.915Z"
+  "_syncedAt": "2026-05-30T15:06:45.710Z"
 }
