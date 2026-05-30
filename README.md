@@ -1,3 +1,4 @@
+
 <img width="1280" height="720" alt="Joanium Cover" src="https://github.com/user-attachments/assets/0bbfc584-5622-4f91-93bc-78ffab2f0cdb" />
 
 
@@ -129,19 +130,20 @@ But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketpla
 ---
 
 ## Contributing 😎
+<img width="1672" height="941" alt="Contribute" src="https://github.com/user-attachments/assets/d61f79af-a82d-4693-970b-69cdc50f85a5" />
 
 PRs are genuinely welcome — not in the "we value all contributions" corporate way, in the actual "please help us make this better" way.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECURITY.md) for responsible disclosure. Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 <!-- contributors-start -->
-<a href="https://github.com/withinJoel"><img src="https://avatars.githubusercontent.com/u/128782382?v=4&s=48" width="48" height="48" alt="withinJoel" title="withinJoel" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/joaniumhere"><img src="https://avatars.githubusercontent.com/u/274259721?v=4&s=48" width="48" height="48" alt="joaniumhere" title="joaniumhere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/joeljollyhere"><img src="https://avatars.githubusercontent.com/u/177291397?v=4&s=48" width="48" height="48" alt="joeljollyhere" title="joeljollyhere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/evelinahere"><img src="https://avatars.githubusercontent.com/u/274233490?v=4&s=48" width="48" height="48" alt="evelinahere" title="evelinahere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/withinjoeltest"><img src="https://avatars.githubusercontent.com/u/240428632?v=4&s=48" width="48" height="48" alt="withinjoeltest" title="withinjoeltest" style="border-radius:50%;margin:4px"/></a>
+<a href="https://github.com/withinJoel"><img src="https://avatars.githubusercontent.com/u/128782382?v=4&s=48" width="48" height="48" alt="withinJoel" title="withinJoel" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/Jessiescookbook"><img src="https://avatars.githubusercontent.com/u/176266976?v=4&s=48" width="48" height="48" alt="Jessiescookbook" title="Jessiescookbook" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/Jessiejollyrose"><img src="https://avatars.githubusercontent.com/u/176211197?v=4&s=48" width="48" height="48" alt="Jessiejollyrose" title="Jessiejollyrose" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/joaniumhere"><img src="https://avatars.githubusercontent.com/u/274259721?v=4&s=48" width="48" height="48" alt="joaniumhere" title="joaniumhere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/joeljollyhere"><img src="https://avatars.githubusercontent.com/u/177291397?v=4&s=48" width="48" height="48" alt="joeljollyhere" title="joeljollyhere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/evelinahere"><img src="https://avatars.githubusercontent.com/u/274233490?v=4&s=48" width="48" height="48" alt="evelinahere" title="evelinahere" style="border-radius:50%;margin:4px"/></a><a href="https://github.com/withinjoeltest"><img src="https://avatars.githubusercontent.com/u/240428632?v=4&s=48" width="48" height="48" alt="withinjoeltest" title="withinjoeltest" style="border-radius:50%;margin:4px"/></a>
 <!-- contributors-end -->
 
 ---
 
 ## If this helped you 😊
-
+<img width="1672" height="941" alt="Support" src="https://github.com/user-attachments/assets/baea6a1a-1cc6-47a8-86c9-22cc06d0da43" />
 Hit ⭐ star. It takes less than a second and means everything for an open source project.
 
 Share it. Tweet it. Tell your developer friends who are still copy-pasting context into ChatGPT every morning. They need this.
@@ -149,6 +151,7 @@ Share it. Tweet it. Tell your developer friends who are still copy-pasting conte
 ---
 
 <p align="center">
-  Made with ❤️ by
-  <a href="https://joeljolly.vercel.app">Joel Jolly</a>
+  <a href="https://joeljolly.vercel.app">
+    <img width="1942" height="809" alt="Footer" src="https://github.com/user-attachments/assets/8f951b1c-24f7-4e97-a921-3711f19fa4b6" />
+  </a>
 </p>
