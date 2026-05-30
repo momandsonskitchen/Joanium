@@ -117,12 +117,21 @@ async function buildBaseSystemPrompt(rootDirectory, user) {
     collapseWhitespace(user?.locale) || Intl.DateTimeFormat().resolvedOptions().locale || 'en';
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
 
+  let appVersion = 'unknown';
+  try {
+    const pkg = JSON.parse(await readFile(path.join(rootDirectory, 'package.json'), 'utf8'));
+    appVersion = pkg.version ?? 'unknown';
+  } catch {
+    // package.json unreadable — fall back to 'unknown'
+  }
+
   return [
     prompt || CHAT_PROMPTS.fallbackSystem,
-    '# Runtime',
+    '# Runtime And User Info',
     `- User: ${displayName}`,
+    `- Joanium version: ${appVersion} (yyyy.month-date.sub version)`,
     `- Local time: ${now.toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}`,
-    `- Timezone: ${timezone}`,
+    `- Timezone: ${timezone} (Do not assume this is the user's location. Multiple locations can share the same timezone, and the user's device timezone may differ from their physical location.)`,
     `- Locale: ${locale}`,
     `- Platform: ${os.type()} ${os.release()} (${os.platform()} ${os.arch()})`,
     `- Home directory: ${os.homedir()}`,
