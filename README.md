@@ -1,5 +1,4 @@
-<img width="1280" height="720" alt="Joanium Cove" src="https://github.com/user-attachments/assets/0bbfc584-5622-4f91-93bc-78ffab2f0cdb" />
-
+<img width="1280" height="720" alt="Joanium Cover" src="https://github.com/user-attachments/assets/0bbfc584-5622-4f91-93bc-78ffab2f0cdb" />
 
 <p align="center">
   <strong>The AI desktop assistant that actually lives on your machine.</strong><br>
@@ -121,6 +120,7 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 ---
 
 ## Marketplace 🛍️
+
 <img width="1774" height="887" alt="Joanium Marketplace" src="https://github.com/user-attachments/assets/4108fe5b-ae12-40d7-beb7-2ad19a22b493" />
 The Skills and Personas in this repo come **pre-installed** with Joanium — they're your out-of-the-box starting point.
 
@@ -129,6 +129,7 @@ But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketpla
 ---
 
 ## Contributing 😎
+
 <img width="1672" height="941" alt="Contribute" src="https://github.com/user-attachments/assets/d61f79af-a82d-4693-970b-69cdc50f85a5" />
 
 PRs are genuinely welcome — not in the "we value all contributions" corporate way, in the actual "please help us make this better" way.
@@ -142,6 +143,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Check [SECURITY.md](SECU
 ---
 
 ## If this helped you 😊
+
 <img width="1672" height="941" alt="Support" src="https://github.com/user-attachments/assets/baea6a1a-1cc6-47a8-86c9-22cc06d0da43" />
 Hit ⭐ star. It takes less than a second and means everything for an open source project.
 
