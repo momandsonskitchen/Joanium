@@ -21,11 +21,11 @@
         "output": 4
       }
     },
-    "accounts/fireworks/models/kimi-k2p5": {
-      "name": "Kimi K2p5"
-    },
     "accounts/fireworks/models/glm-5p1": {
       "name": "Glm 5p1"
+    },
+    "accounts/fireworks/models/kimi-k2p5": {
+      "name": "Kimi K2p5"
     },
     "accounts/fireworks/models/gpt-oss-120b": {
       "name": "GPT OSS 120B",
@@ -60,5 +60,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-29T16:05:46.094Z"
+  "_syncedAt": "2026-05-30T07:53:13.131Z"
 }

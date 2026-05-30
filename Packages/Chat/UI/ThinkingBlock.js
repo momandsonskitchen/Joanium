@@ -23,3 +23,12 @@ export function updateThinkingBlockText(thinkingWrap, thinking = '') {
   const thinkingText = thinkingWrap?.querySelector('.chat-message__thinking-text');
   if (thinkingText) thinkingText.textContent = thinking;
 }
+
+/**
+ * Called once streaming is done — flips the label from "Reasoning" → "Reasoned".
+ */
+export function finalizeThinkingBlock(thinkingWrap, strings) {
+  if (!thinkingWrap) return;
+  const label = thinkingWrap.querySelector('.chat-message__thinking-label');
+  if (label && strings?.composer?.reasoned) label.textContent = strings.composer.reasoned;
+}

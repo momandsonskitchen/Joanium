@@ -9,7 +9,7 @@ import {
   createSubAgentTaskSection,
   upsertSubAgentOutputSection,
 } from './SubAgentSections.js';
-import { createThinkingBlock } from './ThinkingBlock.js';
+import { createThinkingBlock, finalizeThinkingBlock } from './ThinkingBlock.js';
 import { formatDuration, stripMarkdown } from './Utils.js';
 
 let activeSpeakBtn = null;
@@ -175,7 +175,12 @@ export function createMessageElement(
   );
 
   if (message.role === 'assistant') {
-    article.append(createThinkingBlock(strings, message.thinking ?? ''));
+    const thinkingBlock = createThinkingBlock(strings, message.thinking ?? '');
+    // If this message is already complete (not streaming), label it "Reasoned".
+    if (!message.streaming && !message.pending && message.thinking) {
+      finalizeThinkingBlock(thinkingBlock, strings);
+    }
+    article.append(thinkingBlock);
 
     const bubble = createElement('div', 'chat-message__bubble');
 
@@ -475,7 +480,12 @@ export function createAssistantGroupElement(
 
   for (const { message } of items) {
     // 1. Thinking block — always first so it appears before the text it precedes
-    contentEl.append(createThinkingBlock(strings, message.thinking ?? ''));
+    const thinkingBlock = createThinkingBlock(strings, message.thinking ?? '');
+    // Flip label to "Reasoned" once this turn is fully done.
+    if (!message.streaming && !message.pending && message.thinking) {
+      finalizeThinkingBlock(thinkingBlock, strings);
+    }
+    contentEl.append(thinkingBlock);
 
     // 2. Text bubble — skipped for intermediate turns that have no visible content,
     //    and skipped entirely for tool messages (terminal card renders below instead).

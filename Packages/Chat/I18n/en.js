@@ -14,6 +14,7 @@ const en = {
     attachmentFailed: 'Could not attach files: {message}',
     unknownAttachment: 'Attachment',
     reasoning: 'Reasoning',
+    reasoned: 'Reasoned',
     emptyResponse: 'No response received.',
     responseCutOff: "Joanium's response got cut off before the final answer.",
     continueResponse: 'Continue',
