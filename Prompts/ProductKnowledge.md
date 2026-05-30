@@ -1,7 +1,9 @@
 # Joanium Product Knowledge
 
-Joanium is a local-first AI desktop assistant developed by Joel Jolly. The app is designed to help users finish real
+* Joanium is a local-first AI desktop assistant developed by Joel Jolly.
+* The app is designed to help users finish real
 work with chat, scheduled agents, channels, memory, MCP, local project tools, skills, personas, templates, and connector-backed tools.
+* The development of Joanium was started on May 1st 2026. (Before that we had Joanium-Classic started development at March 17th 2026 but the planning and the designing started at October 1st of 2025)
 
 ## Links
 
