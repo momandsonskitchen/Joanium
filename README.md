@@ -1,5 +1,5 @@
 
-<img width="1280" height="720" alt="Joanium Cover" src="https://github.com/user-attachments/assets/0bbfc584-5622-4f91-93bc-78ffab2f0cdb" />
+<img width="1280" height="720" alt="Joanium Cove" src="https://github.com/user-attachments/assets/0bbfc584-5622-4f91-93bc-78ffab2f0cdb" />
 
 
 <p align="center">
