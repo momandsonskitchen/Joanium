@@ -194,30 +194,6 @@
     "mistral-vibe-cli-latest": {
       "name": "mistral-vibe-cli-latest"
     },
-    "mistral-large-2411": {
-      "name": "mistral-large-2411"
-    },
-    "pixtral-large-2411": {
-      "name": "pixtral-large-2411"
-    },
-    "pixtral-large-latest": {
-      "name": "pixtral-large-latest"
-    },
-    "mistral-large-pixtral-2411": {
-      "name": "mistral-large-pixtral-2411"
-    },
-    "devstral-small-2507": {
-      "name": "devstral-small-2507"
-    },
-    "devstral-medium-2507": {
-      "name": "devstral-medium-2507"
-    },
-    "voxtral-mini-2507": {
-      "name": "voxtral-mini-2507"
-    },
-    "voxtral-mini-latest": {
-      "name": "voxtral-mini-latest"
-    },
     "magistral-small-2509": {
       "name": "magistral-small-2509"
     },
@@ -251,11 +227,11 @@
     "mistral-ocr-latest": {
       "name": "mistral-ocr-latest"
     },
-    "mistral-ocr-2505": {
-      "name": "mistral-ocr-2505"
-    },
     "voxtral-mini-2602": {
       "name": "voxtral-mini-2602"
+    },
+    "voxtral-mini-latest": {
+      "name": "voxtral-mini-latest"
     },
     "voxtral-mini-transcribe-realtime-2602": {
       "name": "voxtral-mini-transcribe-realtime-2602"
@@ -266,9 +242,6 @@
     "voxtral-mini-realtime-latest": {
       "name": "voxtral-mini-realtime-latest"
     },
-    "voxtral-mini-transcribe-2507": {
-      "name": "voxtral-mini-transcribe-2507"
-    },
     "voxtral-mini-tts-2603": {
       "name": "voxtral-mini-tts-2603"
     },
@@ -276,5 +249,5 @@
       "name": "voxtral-mini-tts-latest"
     }
   },
-  "_syncedAt": "2026-05-31T11:09:23.462Z"
+  "_syncedAt": "2026-05-31T12:19:08.338Z"
 }
