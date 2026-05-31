@@ -5,21 +5,17 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "moonshotai/kimi-k2-instruct": {
-      "name": "Kimi K2",
-      "description": "Moonshot AI's frontier model — 1T MoE architecture, top-tier coding and agentic tasks, via Groq",
-      "context_window": 131072,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 1.0,
-        "output": 3.0
-      }
+    "meta-llama/llama-4-scout-17b-16e-instruct": {
+      "name": "Llama 4 Scout 17B 16e Instruct",
+      "context_window": 131072
+    },
+    "qwen/qwen3-32b": {
+      "name": "Qwen3 32B",
+      "context_window": 131072
+    },
+    "canopylabs/orpheus-arabic-saudi": {
+      "name": "Orpheus Arabic Saudi",
+      "context_window": 4000
     },
     "llama-3.3-70b-versatile": {
       "name": "Llama 3.3 70B",
@@ -37,6 +33,18 @@
         "output": 0.79
       }
     },
+    "groq/compound-mini": {
+      "name": "Compound MINI",
+      "context_window": 131072
+    },
+    "whisper-large-v3": {
+      "name": "Whisper Large V3",
+      "context_window": 448
+    },
+    "meta-llama/llama-prompt-guard-2-86m": {
+      "name": "Llama Prompt Guard 2 86M",
+      "context_window": 512
+    },
     "llama-3.1-8b-instant": {
       "name": "Llama 3.1 8B Instant",
       "description": "Ultra-fast 8B model — best-in-class speed for quick tasks, coding assistance, and real-time apps",
@@ -53,37 +61,38 @@
         "output": 0.08
       }
     },
-    "meta-llama/llama-4-maverick-17b-128e-instruct": {
-      "name": "Llama 4 Maverick",
-      "description": "Meta's multimodal Llama 4 — 17B active params, 128 experts MoE, image understanding, strong benchmarks",
-      "context_window": 131072,
-      "max_output": 8192,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.2,
-        "output": 0.6
-      }
+    "openai/gpt-oss-120b": {
+      "name": "Gpt OSS 120B",
+      "context_window": 131072
     },
-    "compound-beta": {
-      "name": "Compound Beta",
-      "description": "Groq's agentic compound system — combines LLMs with built-in tool use for search and code execution",
-      "context_window": 131072,
-      "max_output": 8192,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.0,
-        "output": 0.0
-      }
+    "allam-2-7b": {
+      "name": "Allam 2 7B",
+      "context_window": 4096
+    },
+    "canopylabs/orpheus-v1-english": {
+      "name": "Orpheus V1 English",
+      "context_window": 4000
+    },
+    "openai/gpt-oss-safeguard-20b": {
+      "name": "Gpt OSS Safeguard 20B",
+      "context_window": 131072
+    },
+    "whisper-large-v3-turbo": {
+      "name": "Whisper Large V3 TURBO",
+      "context_window": 448
+    },
+    "meta-llama/llama-prompt-guard-2-22m": {
+      "name": "Llama Prompt Guard 2 22M",
+      "context_window": 512
+    },
+    "groq/compound": {
+      "name": "Compound",
+      "context_window": 131072
+    },
+    "openai/gpt-oss-20b": {
+      "name": "Gpt OSS 20B",
+      "context_window": 131072
     }
-  }
+  },
+  "_syncedAt": "2026-05-31T04:31:31.569Z"
 }
