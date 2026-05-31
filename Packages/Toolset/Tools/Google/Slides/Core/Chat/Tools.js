@@ -65,7 +65,8 @@ export const SLIDES_TOOLS = [
   },
   {
     name: 'slides_create',
-    description: 'Create a new blank Google Slides presentation.',
+    description:
+      "Create a new blank Google Slides presentation. Returns the presentation ID needed for all subsequent calls. The new presentation contains one blank slide — use slides_list_slides immediately after to get that slide's object ID before adding any content.",
     category: 'slides',
     parameters: {
       title: { type: 'string', required: !0, description: 'Title for the new presentation.' },
@@ -73,7 +74,8 @@ export const SLIDES_TOOLS = [
   },
   {
     name: 'slides_add_slide',
-    description: 'Add a new blank slide to an existing Google Slides presentation.',
+    description:
+      'Add a new blank slide to an existing Google Slides presentation. IMPORTANT: the response contains the new slide\'s object ID in the "Slide ID" field — you MUST read that ID from the tool result and use it for any subsequent slides_add_text_box, slides_add_shape, slides_update_background, etc. calls targeting this slide. Never guess or reuse a slide ID from a previous call.',
     category: 'slides',
     parameters: {
       presentation_id: {
@@ -91,7 +93,7 @@ export const SLIDES_TOOLS = [
   {
     name: 'slides_delete_slide',
     description:
-      'Delete a slide from a presentation by its object ID. Get object IDs from slides_read.',
+      'Delete a slide from a presentation by its object ID. Get object IDs from slides_list_slides.',
     category: 'slides',
     parameters: {
       presentation_id: {
@@ -102,7 +104,7 @@ export const SLIDES_TOOLS = [
       slide_object_id: {
         type: 'string',
         required: !0,
-        description: 'Object ID of the slide to delete (from slides_read).',
+        description: 'Object ID of the slide to delete (from slides_list_slides).',
       },
     },
   },
@@ -145,7 +147,7 @@ export const SLIDES_TOOLS = [
   {
     name: 'slides_list_slides',
     description:
-      'List all slides in a presentation with their object IDs, index positions, and element counts. Use this to get the slide_object_id values needed for other tools.',
+      'List all slides in a presentation with their object IDs, index positions, and element counts. Always call this after slides_create or whenever you need slide object IDs to target content operations.',
     category: 'slides',
     parameters: {
       presentation_id: {
@@ -199,7 +201,7 @@ export const SLIDES_TOOLS = [
   {
     name: 'slides_add_text_box',
     description:
-      'Insert a text box containing specified text onto a slide at a given position and size. All position and size values are in points.',
+      'Insert a text box containing specified text onto a slide. IMPORTANT: slide_object_id must be a real ID returned by slides_add_slide, slides_list_slides, or slides_create — never a placeholder or guessed value. All position and size values are in points.',
     category: 'slides',
     parameters: {
       presentation_id: {
@@ -210,7 +212,8 @@ export const SLIDES_TOOLS = [
       slide_object_id: {
         type: 'string',
         required: !0,
-        description: 'Object ID of the slide to add the text box to.',
+        description:
+          'Object ID of the slide to add the text box to. Must come from a prior tool result.',
       },
       text: {
         type: 'string',

@@ -1,17 +1,38 @@
 import { shell } from 'electron';
 import http from 'node:http';
 
+// NOTE: https://www.googleapis.com/auth/keep is intentionally excluded.
+// The Google Keep REST API (keep.googleapis.com) is NOT available for standard
+// third-party OAuth consent flows — it requires Google Workspace domain-wide
+// delegation only. Including it causes an `invalid_scope` / "Access blocked:
+// Authorization Error" for ALL users, blocking the entire OAuth flow.
 const GOOGLE_OAUTH_SCOPES = [
   'openid',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/admin.directory.group.readonly',
+  'https://www.googleapis.com/auth/admin.directory.group.member.readonly',
+  'https://www.googleapis.com/auth/admin.directory.user.readonly',
   'https://mail.google.com/',
   'https://www.googleapis.com/auth/calendar',
+  'https://www.googleapis.com/auth/chat.messages.create',
+  'https://www.googleapis.com/auth/chat.messages.readonly',
+  'https://www.googleapis.com/auth/chat.spaces.readonly',
+  'https://www.googleapis.com/auth/classroom.courses.readonly',
+  'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+  'https://www.googleapis.com/auth/classroom.coursework.students.readonly',
+  'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
+  'https://www.googleapis.com/auth/classroom.profile.emails',
+  'https://www.googleapis.com/auth/classroom.rosters.readonly',
+  'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
+  'https://www.googleapis.com/auth/classroom.student-submissions.students.readonly',
   'https://www.googleapis.com/auth/contacts',
   'https://www.googleapis.com/auth/documents',
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/forms.body',
   'https://www.googleapis.com/auth/forms.responses.readonly',
+  'https://www.googleapis.com/auth/meetings.space.created',
+  'https://www.googleapis.com/auth/meetings.space.readonly',
   'https://www.googleapis.com/auth/photoslibrary.readonly',
   'https://www.googleapis.com/auth/presentations',
   'https://www.googleapis.com/auth/spreadsheets',
@@ -85,6 +106,7 @@ export async function startGoogleOAuthFlow({ clientId, clientSecret }) {
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('scope', GOOGLE_OAUTH_SCOPES);
   authUrl.searchParams.set('access_type', 'offline');
+  authUrl.searchParams.set('include_granted_scopes', 'true');
   authUrl.searchParams.set('prompt', 'consent'); // always return refresh_token
 
   await shell.openExternal(authUrl.toString());

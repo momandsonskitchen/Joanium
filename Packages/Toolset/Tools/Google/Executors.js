@@ -1,21 +1,29 @@
 import { createConnectorToolHandlers } from '../../Core/ConnectorToolAdapter.js';
+import { ADMIN_DIRECTORY_TOOLS } from './AdminDirectory/Core/Chat/Tools.js';
 import { CALENDAR_TOOLS } from './Calendar/Core/Chat/Tools.js';
+import { CHAT_TOOLS } from './Chat/Core/Chat/Tools.js';
+import { CLASSROOM_TOOLS } from './Classroom/Core/Chat/Tools.js';
 import { CONTACTS_TOOLS } from './Contacts/Core/Chat/Tools.js';
 import { DOCS_TOOLS } from './Docs/Core/Chat/Tools.js';
 import { DRIVE_TOOLS } from './Drive/Core/Chat/Tools.js';
 import { FORMS_TOOLS } from './Forms/Core/Chat/Tools.js';
 import { GMAIL_TOOLS } from './Gmail/Core/Chat/Tools.js';
+import { MEET_TOOLS } from './Meet/Core/Chat/Tools.js';
 import { PHOTOS_TOOLS } from './Photos/Core/Chat/Tools.js';
 import { SHEETS_TOOLS } from './Sheets/Core/Chat/Tools.js';
 import { SLIDES_TOOLS } from './Slides/Core/Chat/Tools.js';
 import { TASKS_TOOLS } from './Tasks/Core/Chat/Tools.js';
 import { YOUTUBE_TOOLS } from './Youtube/Core/Chat/Tools.js';
+import { executeAdminDirectoryChatTool } from './AdminDirectory/Core/Chat/ChatExecutor.js';
 import { executeCalendarChatTool } from './Calendar/Core/Chat/ChatExecutor.js';
+import { executeGoogleChatTool } from './Chat/Core/Chat/ChatExecutor.js';
+import { executeClassroomChatTool } from './Classroom/Core/Chat/ChatExecutor.js';
 import { executeContactsChatTool } from './Contacts/Core/Chat/ChatExecutor.js';
 import { executeDocsChatTool } from './Docs/Core/Chat/ChatExecutor.js';
 import { executeDriveChatTool } from './Drive/Core/Chat/ChatExecutor.js';
 import { executeFormsChatTool } from './Forms/Core/Chat/ChatExecutor.js';
 import { executeGmailChatTool } from './Gmail/Core/Chat/ChatExecutor.js';
+import { executeMeetChatTool } from './Meet/Core/Chat/ChatExecutor.js';
 import { executePhotosChatTool } from './Photos/Core/Chat/ChatExecutor.js';
 import { executeSheetsChatTool } from './Sheets/Core/Chat/ChatExecutor.js';
 import { executeSlidesChatTool } from './Slides/Core/Chat/ChatExecutor.js';
@@ -23,12 +31,16 @@ import { executeTasksChatTool } from './Tasks/Core/Chat/ChatExecutor.js';
 import { executeYouTubeChatTool } from './Youtube/Core/Chat/ChatExecutor.js';
 
 export {
+  executeAdminDirectoryChatTool,
   executeCalendarChatTool,
+  executeGoogleChatTool,
+  executeClassroomChatTool,
   executeContactsChatTool,
   executeDocsChatTool,
   executeDriveChatTool,
   executeFormsChatTool,
   executeGmailChatTool,
+  executeMeetChatTool,
   executePhotosChatTool,
   executeSheetsChatTool,
   executeSlidesChatTool,
@@ -40,8 +52,23 @@ export function createGoogleConnectorToolHandlers({ rootDirectory }) {
   return {
     ...createConnectorToolHandlers({
       rootDirectory,
+      toolDefinitions: ADMIN_DIRECTORY_TOOLS,
+      executeTool: executeAdminDirectoryChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
       toolDefinitions: CALENDAR_TOOLS,
       executeTool: executeCalendarChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: CHAT_TOOLS,
+      executeTool: executeGoogleChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: CLASSROOM_TOOLS,
+      executeTool: executeClassroomChatTool,
     }),
     ...createConnectorToolHandlers({
       rootDirectory,
@@ -67,6 +94,11 @@ export function createGoogleConnectorToolHandlers({ rootDirectory }) {
       rootDirectory,
       toolDefinitions: GMAIL_TOOLS,
       executeTool: executeGmailChatTool,
+    }),
+    ...createConnectorToolHandlers({
+      rootDirectory,
+      toolDefinitions: MEET_TOOLS,
+      executeTool: executeMeetChatTool,
     }),
     ...createConnectorToolHandlers({
       rootDirectory,

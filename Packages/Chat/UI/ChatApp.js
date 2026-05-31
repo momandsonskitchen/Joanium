@@ -2850,7 +2850,7 @@ export async function createChatView(
 
       localMessages.push({
         role: 'assistant',
-        content: sanitizeAssistantVisibleContent(visibleContent) || strings.terminal.runningTool,
+        content: sanitizeAssistantVisibleContent(visibleContent) || null,
       });
       localMessages.push({
         role: 'user',
@@ -3054,9 +3054,7 @@ export async function createChatView(
           ...messages,
           {
             role: 'assistant',
-            content:
-              sanitizeAssistantVisibleContent(action.visibleContent) ||
-              strings.terminal.runningTool,
+            content: sanitizeAssistantVisibleContent(action.visibleContent) || null,
             thinking: '',
             streaming: false,
             providerLabel: activeProvider?.label ?? 'AI',
@@ -3140,9 +3138,7 @@ export async function createChatView(
         toolsetMessageIndexes.push(messages.length + toolsetMessages.length);
         toolsetMessages.push({
           role: 'assistant',
-          content:
-            sanitizeAssistantVisibleContent(action.visibleContent) ||
-            (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
+          content: sanitizeAssistantVisibleContent(action.visibleContent) || null,
           thinking: '',
           streaming: false,
           providerLabel: activeProvider?.label ?? 'AI',
@@ -3369,9 +3365,7 @@ export async function createChatView(
       toolMessageIndexes.push(messages.length + additionalMessages.length);
       additionalMessages.push({
         role: 'assistant',
-        content:
-          sanitizeAssistantVisibleContent(action.visibleContent) ||
-          (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
+        content: sanitizeAssistantVisibleContent(action.visibleContent) || null,
         thinking: '',
         streaming: false,
         providerLabel: activeProvider?.label ?? 'AI',
@@ -3617,9 +3611,7 @@ export async function createChatView(
           updateLastAssistantMessage((message) => ({
             ...message,
             role: 'assistant',
-            content:
-              sanitizeAssistantVisibleContent(terminalAction.visibleContent) ||
-              strings.terminal.runningTool,
+            content: sanitizeAssistantVisibleContent(terminalAction.visibleContent) || null,
             thinking: sanitizeAssistantVisibleContent(accThinking || inlineThinking),
             streaming: false,
             providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
@@ -3659,9 +3651,7 @@ export async function createChatView(
           updateLastAssistantMessage((message) => ({
             ...message,
             role: 'assistant',
-            content:
-              sanitizeAssistantVisibleContent(toolsetAction.visibleContent) ||
-              (isSubAgentAction ? strings.tools.subAgentsRunning : strings.tools.runningTool),
+            content: sanitizeAssistantVisibleContent(toolsetAction.visibleContent) || null,
             thinking: sanitizeAssistantVisibleContent(accThinking || inlineThinking),
             streaming: false,
             providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',

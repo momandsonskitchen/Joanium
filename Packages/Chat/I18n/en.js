@@ -70,7 +70,6 @@ const en = {
     defaultError: 'Command failed.',
     processExited: 'Process exited with code {code}.',
     processStopped: 'Process stopped.',
-    runningTool: 'Running a terminal tool...',
     completedTool: 'Completed',
     failedTool: 'Failed',
     blockedTool: 'Blocked',
@@ -107,7 +106,6 @@ const en = {
     },
   },
   tools: {
-    runningTool: 'Running a built-in tool...',
     completedTool: 'Completed',
     failedTool: 'Failed.',
     hiddenResultLabel: 'Tool result',

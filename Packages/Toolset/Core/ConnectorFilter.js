@@ -4,6 +4,38 @@ function formatText(template, values = {}) {
   return String(template ?? '').replace(/\{(\w+)\}/g, (_match, key) => values[key] ?? '');
 }
 
+// Maps tool category names to their parent connector ID.
+// Needed for connectors (like Google Workspace) where a single connector
+// covers many tool sub-categories (gmail, slides, sheets, docs, etc.).
+const CONNECTOR_CATEGORY_MAP = new Map([
+  ['gmail', 'google'],
+  ['slides', 'google'],
+  ['sheets', 'google'],
+  ['docs', 'google'],
+  ['drive', 'google'],
+  ['calendar', 'google'],
+  ['contacts', 'google'],
+  ['tasks', 'google'],
+  ['forms', 'google'],
+  ['meet', 'google'],
+  ['chat', 'google'],
+  ['photos', 'google'],
+  ['youtube', 'google'],
+  ['classroom', 'google'],
+  ['admin_directory', 'google'],
+]);
+
+/**
+ * Resolves a tool's category to the connector ID that owns it.
+ * Falls back to the category itself when there is no mapping.
+ *
+ * @param {string} category
+ * @returns {string}
+ */
+function resolveConnectorId(category) {
+  return CONNECTOR_CATEGORY_MAP.get(category) ?? category;
+}
+
 /**
  * Partitions a connector list into active IDs and disconnected labels.
  *
@@ -12,7 +44,7 @@ function formatText(template, values = {}) {
  * Everything else is disconnected and the user must connect it via Settings → Connectors.
  *
  * @param {Array<object>} connectors - View-model connectors from ConnectorState.listConnectors()
- * @returns {{ activeIds: Set<string>, disconnectedLabels: string[] }}
+ * @returns {{ activeIds: Set<string>, activeLabels: string[], disconnectedLabels: string[] }}
  */
 export function partitionConnectors(connectors = []) {
   const activeIds = new Set();
@@ -35,6 +67,8 @@ export function partitionConnectors(connectors = []) {
 /**
  * Filters a flat tool-definitions array to only tools whose category is active.
  * Tools with no category (built-ins) are always included.
+ * Sub-categories (e.g. 'gmail', 'slides') are resolved to their parent connector
+ * ID via CONNECTOR_CATEGORY_MAP before checking activeIds.
  *
  * @param {Array<object>} toolDefinitions
  * @param {Set<string>} activeIds
@@ -43,7 +77,7 @@ export function partitionConnectors(connectors = []) {
 export function filterToolsByConnectors(toolDefinitions, activeIds) {
   return toolDefinitions.filter((tool) => {
     if (!tool?.category) return true;
-    return activeIds.has(tool.category);
+    return activeIds.has(resolveConnectorId(tool.category));
   });
 }
 

@@ -478,6 +478,10 @@ export function createAssistantGroupElement(
 
   const contentEl = createElement('div', 'chat-message__content');
 
+  // Track text content already shown in this group to avoid repeating the same
+  // bubble before every tool card when the model reuses the same preamble text.
+  const shownContent = new Set();
+
   for (const { message } of items) {
     // 1. Thinking block — always first so it appears before the text it precedes
     const thinkingBlock = createThinkingBlock(strings, message.thinking ?? '');
@@ -487,22 +491,32 @@ export function createAssistantGroupElement(
     }
     contentEl.append(thinkingBlock);
 
-    // 2. Text bubble — skipped for intermediate turns that have no visible content,
-    //    and skipped entirely for tool messages (terminal card renders below instead).
-    if (!message.terminal) {
+    // 2. Text bubble — shown when there is visible text content.
+    //    For tool messages, only render a bubble if the content is unique
+    //    (i.e. not already shown in a previous turn of this group). This
+    //    prevents the same "Now let me…" line repeating before every tool card.
+    {
+      const contentTrimmed = (message.content ?? '').trimStart();
+      const isDuplicate = message.terminal && shownContent.has(contentTrimmed);
+      if (contentTrimmed) shownContent.add(contentTrimmed);
+
       const bubble = createElement('div', 'chat-message__bubble');
 
-      if (message.needsContinuation) {
-        bubble.append(createContinuationElement(strings, onContinue));
-      } else if (message.pending || (message.streaming && !message.content)) {
-        const dots = createElement('span', 'chat-message__dots');
-        dots.innerHTML = '<span></span><span></span><span></span>';
-        bubble.append(dots);
-      } else if (message.streaming) {
-        bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
-        bubble.append(createElement('span', 'chat-message__stream-dot'));
-      } else if (message.content) {
-        bubble.append(renderMarkdown((message.content ?? '').trimStart(), 'chat-message__md'));
+      if (!isDuplicate) {
+        if (message.needsContinuation) {
+          bubble.append(createContinuationElement(strings, onContinue));
+        } else if (message.pending || (message.streaming && !message.content)) {
+          if (!message.terminal) {
+            const dots = createElement('span', 'chat-message__dots');
+            dots.innerHTML = '<span></span><span></span><span></span>';
+            bubble.append(dots);
+          }
+        } else if (message.streaming && contentTrimmed) {
+          bubble.append(renderMarkdown(contentTrimmed, 'chat-message__md'));
+          bubble.append(createElement('span', 'chat-message__stream-dot'));
+        } else if (contentTrimmed) {
+          bubble.append(renderMarkdown(contentTrimmed, 'chat-message__md'));
+        }
       }
 
       if (bubble.childElementCount > 0) {
