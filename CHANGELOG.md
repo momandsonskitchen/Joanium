@@ -6,6 +6,24 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.531.0] - 2026-05-31
+
+* chore(release): bump version to 2026.531.0
+* Package.json Update
+* Prompt Updates
+* Readme Update
+* Update README.md
+* Update README.md
+* Added a fixed height to reasoning block
+* AI Models Update
+* Improved Prompts
+* AI now has the info of the version that its running and more info about itself.
+* Bug Fix: Fork Issue During Pinning A Chat
+* Added The Ability To Fork A Message
+* AI Models Update
+
+---
+
 ## [2026.530.0] - 2026-05-30
 
 * chore(release): bump version to 2026.530.0
