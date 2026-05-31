@@ -196,7 +196,136 @@ async function fetchOpenRouterModels(apiKey) {
 }
 
 /**
- * Cohere: GET /v2/models → { models: [{ name, context_length, endpoints }] }
+ * GitHub Models: GET /catalog/models -> [{ id, name, limits, modalities }]
+ */
+async function fetchGitHubModels(apiKey) {
+  const headers = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2026-03-10',
+  };
+
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+
+  const body = await fetchJson('https://models.github.ai/catalog/models', headers);
+  const items = Array.isArray(body) ? body : [];
+  return items
+    .filter((m) => {
+      const outputs = m.supported_output_modalities ?? [];
+      const capabilities = m.capabilities ?? [];
+      return outputs.includes('text') && capabilities.includes('streaming');
+    })
+    .map((m) => {
+      const inputs = m.supported_input_modalities ?? [];
+      return compact({
+        id: String(m.id),
+        name: String(m.name ?? m.id),
+        description: m.summary ? String(m.summary).slice(0, 300) : null,
+        context_window: m.limits?.max_input_tokens ?? null,
+        max_output: m.limits?.max_output_tokens ?? null,
+        inputs: compact({
+          text: true,
+          image: inputs.includes('image') || null,
+        }),
+      });
+    });
+}
+
+/**
+ * Vercel AI Gateway: GET /v1/models -> { data: [{ id, name, pricing, tags }] }
+ */
+async function fetchVercelAiGatewayModels(apiKey) {
+  const headers = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const body = await fetchJson('https://ai-gateway.vercel.sh/v1/models', headers);
+  const items = Array.isArray(body?.data) ? body.data : [];
+  return items
+    .filter((m) => !m.type || m.type === 'language')
+    .map((m) => {
+      const inputPrice = perMillion(m.pricing?.input);
+      const outputPrice = perMillion(m.pricing?.output);
+      const tags = Array.isArray(m.tags) ? m.tags : [];
+      return compact({
+        id: String(m.id),
+        name: String(m.name ?? m.id),
+        description: m.description ? String(m.description).slice(0, 300) : null,
+        context_window: m.context_window ?? null,
+        max_output: m.max_tokens ?? null,
+        pricing:
+          inputPrice != null && outputPrice != null
+            ? { input: inputPrice, output: outputPrice }
+            : null,
+        inputs: compact({
+          text: true,
+          image: tags.includes('vision') || null,
+        }),
+      });
+    });
+}
+
+/**
+ * Requesty: GET /v1/models -> { data: [{ id, api, pricing, capabilities }] }
+ */
+async function fetchRequestyModels(apiKey) {
+  const headers = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const body = await fetchJson('https://router.requesty.ai/v1/models', headers);
+  const items = Array.isArray(body?.data) ? body.data : [];
+  return items
+    .filter((m) => !m.api || m.api === 'chat')
+    .map((m) => {
+      const inputPrice = perMillion(m.input_price);
+      const outputPrice = perMillion(m.output_price);
+      return compact({
+        id: String(m.id),
+        name: modelIdToName(String(m.id)),
+        description: m.description ? String(m.description).slice(0, 300) : null,
+        context_window: m.context_window ?? null,
+        max_output: m.max_output_tokens ?? null,
+        pricing:
+          inputPrice != null && outputPrice != null
+            ? { input: inputPrice, output: outputPrice }
+            : null,
+        inputs: compact({
+          text: true,
+          image: m.supports_vision || null,
+        }),
+      });
+    });
+}
+
+/**
+ * Novita AI: GET /openai/v1/models -> { data: [{ id, model_type, endpoints }] }
+ */
+async function fetchNovitaModels(apiKey) {
+  const headers = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const body = await fetchJson('https://api.novita.ai/openai/v1/models', headers);
+  const items = Array.isArray(body?.data) ? body.data : [];
+  return items
+    .filter(
+      (m) =>
+        m.status !== 0 &&
+        m.model_type === 'chat' &&
+        Array.isArray(m.endpoints) &&
+        m.endpoints.includes('chat/completions'),
+    )
+    .map((m) => {
+      const inputs = Array.isArray(m.input_modalities) ? m.input_modalities : [];
+      return compact({
+        id: String(m.id),
+        name: String(m.display_name ?? m.title ?? m.id),
+        description: m.description ? String(m.description).slice(0, 300) : null,
+        context_window: m.context_size ?? null,
+        max_output: m.max_output_tokens ?? null,
+        inputs: compact({
+          text: true,
+          image: inputs.includes('image') || null,
+        }),
+      });
+    });
+}
+
+/**
+ * Cohere: GET /v2/models -> { models: [{ name, context_length, endpoints }] }
  */
 async function fetchCohereModels(apiKey) {
   const body = await fetchJson('https://api.cohere.com/v2/models', {
@@ -314,6 +443,18 @@ export async function fetchProviderModels(providerId, { apiKey = '', endpoint = 
 
     case 'google':
       return fetchGoogleModels(apiKey);
+
+    case 'githubmodels':
+      return fetchGitHubModels(apiKey);
+
+    case 'vercelaigateway':
+      return fetchVercelAiGatewayModels(apiKey);
+
+    case 'requesty':
+      return fetchRequestyModels(apiKey);
+
+    case 'novita':
+      return fetchNovitaModels(apiKey);
 
     case 'qwen':
       return openAICompat(

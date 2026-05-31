@@ -24,6 +24,7 @@ const openAiCompatibleProviders = new Set([
   'deepseek',
   'fireworks',
   'google-openai',
+  'githubmodels',
   'groq',
   'huggingface',
   'hyperbolic',
@@ -34,13 +35,16 @@ const openAiCompatibleProviders = new Set([
   'mistral',
   'mulerouter',
   'nvidia',
+  'novita',
   'ollama',
   'openai',
   'openrouter',
   'perplexity',
+  'requesty',
   'sambanova',
   'siliconflow',
   'together',
+  'vercelaigateway',
   'writer',
   'xai',
   'zai',
@@ -689,6 +693,11 @@ async function streamOpenAiCompatibleMessage({
   throwIfAborted(signal);
 
   const headers = { 'content-type': 'application/json' };
+
+  if (provider.id === 'githubmodels') {
+    headers.Accept = 'application/vnd.github+json';
+    headers['X-GitHub-Api-Version'] = '2026-03-10';
+  }
 
   if (provider.requiresApiKey) {
     const apiKey = resolveCredential(provider, providerDetails);

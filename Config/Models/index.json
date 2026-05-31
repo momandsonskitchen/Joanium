@@ -3,6 +3,9 @@
   "OpenAI.json",
   "Google.json",
   "OpenRouter.json",
+  "GitHubModels.json",
+  "VercelAIGateway.json",
+  "Requesty.json",
   "Mistral.json",
   "Nvidia.json",
   "DeepSeek.json",
@@ -26,5 +29,6 @@
   "Moonshot.json",
   "ZAI.json",
   "SiliconFlow.json",
-  "HuggingFace.json"
+  "HuggingFace.json",
+  "Novita.json"
 ]
