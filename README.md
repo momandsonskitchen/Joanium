@@ -122,6 +122,7 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 ## Marketplace 🛍️
 
 <img width="1774" height="887" alt="Joanium Marketplace" src="https://github.com/user-attachments/assets/4108fe5b-ae12-40d7-beb7-2ad19a22b493" />
+
 The Skills and Personas in this repo come **pre-installed** with Joanium — they're your out-of-the-box starting point.
 
 But the real fun is at **[joanium.com/marketplace](https://joanium.com/marketplace)** — a separate community repo where you can browse, create, and publish your own. Drop in a *"startup growth hacker"*, a *"brutally honest code reviewer"*, a *"3am rubber duck debugger"* — or build one that's uniquely yours. No code required, just show up and create.
