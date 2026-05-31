@@ -1171,22 +1171,6 @@
         "image": true
       }
     },
-    "minimax/minimax-m2.5:free": {
-      "name": "MiniMax M2.5 (Free)",
-      "description": "MiniMax M2.5 served for free via OpenRouter",
-      "context_window": 131072,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0,
-        "output": 0
-      }
-    },
     "minimax/minimax-m2.5": {
       "name": "MiniMax: MiniMax M2.5",
       "description": "MiniMax-M2.5 is a SOTA large language model designed for real-world productivity. Trained in a diverse range of complex real-world digital working environments, M2.5 builds upon the coding expertise of M2.1...",
@@ -1284,18 +1268,6 @@
       "inputs": {
         "text": true,
         "image": true
-      }
-    },
-    "upstage/solar-pro-3": {
-      "name": "Upstage: Solar Pro 3",
-      "description": "Solar Pro 3 is Upstage's powerful Mixture-of-Experts (MoE) language model. With 102B total parameters and 12B active parameters per forward pass, it delivers exceptional performance while maintaining computational efficiency. Optimized...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 0.15,
-        "output": 0.6
-      },
-      "inputs": {
-        "text": true
       }
     },
     "minimax/minimax-m2-her": {
@@ -2049,18 +2021,6 @@
         "text": true
       }
     },
-    "baidu/ernie-4.5-21b-a3b-thinking": {
-      "name": "Baidu: ERNIE 4.5 21B A3B Thinking",
-      "description": "ERNIE-4.5-21B-A3B-Thinking is Baidu's upgraded lightweight MoE model, refined to boost reasoning depth and quality for top-tier performance in logical puzzles, math, science, coding, text generation, and expert-level academic benchmarks.",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.07,
-        "output": 0.28
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "google/gemini-2.5-flash-image": {
       "name": "Google: Nano Banana (Gemini 2.5 Flash Image)",
       "description": "Gemini 2.5 Flash Image, a.k.a. \"Nano Banana,\" is now generally available. It is a state of the art image generation model with contextual understanding. It is capable of image generation,...",
@@ -2429,18 +2389,6 @@
       "inputs": {
         "text": true,
         "image": true
-      }
-    },
-    "baidu/ernie-4.5-21b-a3b": {
-      "name": "Baidu: ERNIE 4.5 21B A3B",
-      "description": "A sophisticated text-based Mixture-of-Experts (MoE) model featuring 21B total parameters with 3B activated per token, delivering exceptional multimodal understanding and generation through heterogeneous MoE structures and modality-isolated routing. Supporting an...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.07,
-        "output": 0.28
-      },
-      "inputs": {
-        "text": true
       }
     },
     "baidu/ernie-4.5-vl-28b-a3b": {
@@ -3228,18 +3176,6 @@
       "inputs": {
         "text": true,
         "image": true
-      }
-    },
-    "alfredpros/codellama-7b-instruct-solidity": {
-      "name": "AlfredPros: CodeLLaMa 7B Instruct Solidity",
-      "description": "A finetuned 7 billion parameters Code LLaMA - Instruct model to generate Solidity smart contract using 4-bit QLoRA finetuning provided by PEFT library.",
-      "context_window": 4096,
-      "pricing": {
-        "input": 0.8,
-        "output": 1.2
-      },
-      "inputs": {
-        "text": true
       }
     },
     "meta-llama/llama-4-maverick": {
@@ -4466,5 +4402,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-30T15:06:45.710Z"
+  "_syncedAt": "2026-05-31T03:41:28.366Z"
 }
