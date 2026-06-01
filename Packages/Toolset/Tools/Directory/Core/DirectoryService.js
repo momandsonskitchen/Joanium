@@ -234,18 +234,24 @@ export function createDirectoryService({ rootDirectory }) {
 
     let beforeContent = '';
     let kind = 'other';
+    let fd = null;
     try {
-      const stat = fs.statSync(resolvedPath);
+      fd = fs.openSync(resolvedPath, 'r');
+      const stat = fs.fstatSync(fd);
       if (stat.isFile()) {
         kind = 'file';
         if (stat.size <= MAX_FILE_SIZE) {
-          beforeContent = fs.readFileSync(resolvedPath, 'utf8');
+          const buf = Buffer.alloc(stat.size);
+          fs.readSync(fd, buf, 0, stat.size, 0);
+          beforeContent = buf.toString('utf8');
         }
       } else if (stat.isDirectory()) {
         kind = 'directory';
       }
     } catch {
       // Ignore pre-delete snapshot failures.
+    } finally {
+      if (fd !== null) fs.closeSync(fd);
     }
 
     fs.rmSync(resolvedPath, { recursive: true, force: true });
