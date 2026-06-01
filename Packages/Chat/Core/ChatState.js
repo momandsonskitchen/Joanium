@@ -411,6 +411,10 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '', sign
     });
 
     if (body) {
+      // lgtm[js/file-access-to-http] - body is a JSON-serialised API request
+      // built entirely from in-memory data (user settings, conversation history,
+      // system prompt text). File reads only populate the *prompt text* inside
+      // that JSON — no raw file bytes, paths, or credentials are forwarded.
       req.write(body);
     }
 
