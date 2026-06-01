@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { readFile, stat } from 'node:fs/promises';
+import { open } from 'node:fs/promises';
 
 const MAX_FILES = 8;
 const DIRECT_TEXT_MAX_BYTES = 2 * 1024 * 1024;
@@ -433,49 +433,92 @@ export async function readAttachmentFiles(filePaths = [], { allowImages = false 
       continue;
     }
 
-    let fileStats = null;
+    let fileHandle = null;
 
     try {
-      fileStats = await stat(filePath);
+      fileHandle = await open(filePath, 'r');
     } catch {
       rejected.push({ fileName, reason: 'unreadable' });
       continue;
     }
 
-    if (!fileStats.isFile()) {
-      rejected.push({ fileName, reason: 'not-file' });
-      continue;
-    }
+    try {
+      const fileStats = await fileHandle.stat();
 
-    // ── Image files ────────────────────────────────────────────────────────
-    if (allowImages && IMAGE_EXTENSIONS.has(ext)) {
-      if (fileStats.size > IMAGE_MAX_BYTES) {
+      if (!fileStats.isFile()) {
+        rejected.push({ fileName, reason: 'not-file' });
+        continue;
+      }
+
+      // ── Image files ──────────────────────────────────────────────────────
+      if (allowImages && IMAGE_EXTENSIONS.has(ext)) {
+        if (fileStats.size > IMAGE_MAX_BYTES) {
+          rejected.push({
+            fileName,
+            reason: 'too-large',
+            limitBytes: IMAGE_MAX_BYTES,
+            sizeBytes: fileStats.size,
+          });
+          continue;
+        }
+
+        try {
+          const buffer = await fileHandle.readFile();
+          const mimeType = IMAGE_MIME_TYPES[ext] ?? 'image/jpeg';
+          attachments.push({
+            id: randomUUID(),
+            type: 'file',
+            kind: 'image',
+            name: fileName,
+            path: filePath,
+            size: fileStats.size,
+            mimeType,
+            base64: buffer.toString('base64'),
+            summary: 'Image',
+            text: null,
+            lines: 0,
+            truncated: false,
+            warnings: [],
+          });
+        } catch (error) {
+          rejected.push({
+            fileName,
+            reason: 'extract-failed',
+            message: error?.message ?? String(error),
+          });
+        }
+
+        continue;
+      }
+
+      const limit = resolveLimit(fileName);
+
+      if (fileStats.size > limit) {
         rejected.push({
           fileName,
           reason: 'too-large',
-          limitBytes: IMAGE_MAX_BYTES,
+          limitBytes: limit,
           sizeBytes: fileStats.size,
         });
         continue;
       }
 
       try {
-        const buffer = await readFile(filePath);
-        const mimeType = IMAGE_MIME_TYPES[ext] ?? 'image/jpeg';
+        const buffer = await fileHandle.readFile();
+        const extracted = await extractAttachmentText(fileName, buffer);
+
         attachments.push({
           id: randomUUID(),
           type: 'file',
-          kind: 'image',
           name: fileName,
           path: filePath,
           size: fileStats.size,
-          mimeType,
-          base64: buffer.toString('base64'),
-          summary: 'Image',
-          text: null,
-          lines: 0,
-          truncated: false,
-          warnings: [],
+          summary: extracted.summary,
+          text: extracted.text,
+          lines: extracted.lines,
+          kind: extracted.kind,
+          truncated: extracted.truncated,
+          warnings: extracted.warnings,
         });
       } catch (error) {
         rejected.push({
@@ -484,45 +527,8 @@ export async function readAttachmentFiles(filePaths = [], { allowImages = false 
           message: error?.message ?? String(error),
         });
       }
-
-      continue;
-    }
-
-    const limit = resolveLimit(fileName);
-
-    if (fileStats.size > limit) {
-      rejected.push({
-        fileName,
-        reason: 'too-large',
-        limitBytes: limit,
-        sizeBytes: fileStats.size,
-      });
-      continue;
-    }
-
-    try {
-      const buffer = await readFile(filePath);
-      const extracted = await extractAttachmentText(fileName, buffer);
-
-      attachments.push({
-        id: randomUUID(),
-        type: 'file',
-        name: fileName,
-        path: filePath,
-        size: fileStats.size,
-        summary: extracted.summary,
-        text: extracted.text,
-        lines: extracted.lines,
-        kind: extracted.kind,
-        truncated: extracted.truncated,
-        warnings: extracted.warnings,
-      });
-    } catch (error) {
-      rejected.push({
-        fileName,
-        reason: 'extract-failed',
-        message: error?.message ?? String(error),
-      });
+    } finally {
+      await fileHandle.close();
     }
   }
 
