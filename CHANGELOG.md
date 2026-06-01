@@ -6,6 +6,20 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.601.0] - 2026-06-01
+
+* chore(release): bump version to 2026.601.0
+* AI Model Update
+* AI Models Update
+* Added New Google Connectors
+* Added 4 new AI Providers: Novita, Requesty, Github Models and Vercel
+* Update README.md
+* Deepseek AI Models Update
+* Groq AI Models Update
+* AI Models Update
+
+---
+
 ## [2026.531.0] - 2026-05-31
 
 * chore(release): bump version to 2026.531.0
