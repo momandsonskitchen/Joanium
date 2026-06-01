@@ -78,6 +78,27 @@ export function createConnectorToolHandlers({ rootDirectory, toolDefinitions = [
   );
 }
 
-export function buildConnectorPromptSection() {
-  return '';
+export function buildConnectorPromptSection(connectorName, toolDefinitions) {
+  const name = String(connectorName ?? '').trim();
+  const tools = Array.isArray(toolDefinitions) ? toolDefinitions : [];
+
+  if (!name || tools.length === 0) {
+    return '';
+  }
+
+  const toolLines = tools
+    .filter((tool) => tool?.name)
+    .map((tool) => {
+      const params = Object.entries(tool.parameters ?? {})
+        .map(([key, value]) => `${key}${value.required ? '' : '?'}:${value.type}`)
+        .join(', ');
+      return `- ${tool.name}: ${tool.description ?? ''}${params ? ` Parameters: ${params}.` : ''}`;
+    })
+    .join('\n');
+
+  if (!toolLines) {
+    return '';
+  }
+
+  return `## ${name} Tools\n${toolLines}`;
 }
