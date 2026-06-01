@@ -1,0 +1,235 @@
+{
+  "provider": "parasail",
+  "label": "Parasail",
+  "endpoint": "https://api.parasail.io/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "parasail-llama-33-70b-fp8": {
+      "name": "Parasail Llama 33 70B FP8"
+    },
+    "meta-llama/Llama-3.3-70B-Instruct": {
+      "name": "Llama 3 3 70B Instruct"
+    },
+    "parasail-qwen25-vl-72b-instruct": {
+      "name": "Parasail Qwen25 VL 72B Instruct"
+    },
+    "Qwen/Qwen2.5-VL-72B-Instruct": {
+      "name": "Qwen2 5 VL 72B Instruct"
+    },
+    "parasail-skyfall-36b-v2-fp8": {
+      "name": "Parasail Skyfall 36B V2 FP8"
+    },
+    "TheDrummer/Skyfall-36B-v2": {
+      "name": "Skyfall 36B V2"
+    },
+    "parasail-gemma3-27b-it": {
+      "name": "Parasail Gemma3 27B It"
+    },
+    "google/gemma-3-27b-it": {
+      "name": "Gemma 3 27B It"
+    },
+    "parasail-llama-4-maverick-instruct-fp8": {
+      "name": "Parasail Llama 4 Maverick Instruct FP8"
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct": {
+      "name": "Llama 4 Maverick 17B 128E Instruct"
+    },
+    "parasail-ui-tars-1p5-7b": {
+      "name": "Parasail Ui Tars 1p5 7B"
+    },
+    "ByteDance-Seed/UI-TARS-1.5-7B": {
+      "name": "UI TARS 1 5 7B"
+    },
+    "parasail-mistral-small-32-24b": {
+      "name": "Parasail Mistral Small 32 24B"
+    },
+    "mistralai/Mistral-Small-3.2-24B-Instruct-2506": {
+      "name": "Mistral Small 3 2 24B Instruct 2506"
+    },
+    "parasail-qwen3-235b-a22b-instruct-2507": {
+      "name": "Parasail Qwen3 235B A22b Instruct 2507"
+    },
+    "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+      "name": "Qwen3 235B A22B Instruct 2507"
+    },
+    "parasail-gpt-oss-120b": {
+      "name": "Parasail Gpt OSS 120B"
+    },
+    "openai/gpt-oss-120b": {
+      "name": "Gpt OSS 120B"
+    },
+    "parasail-cydonia-24-v41": {
+      "name": "Parasail Cydonia 24 V41"
+    },
+    "TheDrummer/Cydonia-24B-v4.1": {
+      "name": "Cydonia 24B V4 1"
+    },
+    "parasail-qwen-3-next-80b-instruct": {
+      "name": "Parasail Qwen 3 Next 80B Instruct"
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Instruct": {
+      "name": "Qwen3 Next 80B A3B Instruct"
+    },
+    "parasail-qwen3-vl-235b-a22b-instruct": {
+      "name": "Parasail Qwen3 VL 235B A22b Instruct"
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Instruct": {
+      "name": "Qwen3 VL 235B A22B Instruct"
+    },
+    "parasail-gpt-oss-20b": {
+      "name": "Parasail Gpt OSS 20B"
+    },
+    "openai/gpt-oss-20b": {
+      "name": "Gpt OSS 20B"
+    },
+    "parasail-resemble-tts-en": {
+      "name": "Parasail Resemble Tts En"
+    },
+    "parasail-qwen3vl-8b-instruct": {
+      "name": "Parasail Qwen3vl 8B Instruct"
+    },
+    "Qwen/Qwen3-VL-8B-Instruct": {
+      "name": "Qwen3 VL 8B Instruct"
+    },
+    "parasail-deepseek-v32": {
+      "name": "Parasail Deepseek V32"
+    },
+    "deepseek-ai/DeepSeek-V3.2": {
+      "name": "DeepSeek V3 2"
+    },
+    "deepseek-chat": {
+      "name": "Deepseek Chat"
+    },
+    "parasail-glm47": {
+      "name": "Parasail Glm47"
+    },
+    "zai-org/GLM-4.7": {
+      "name": "GLM 4 7"
+    },
+    "zai-org/GLM-4.7-FP8": {
+      "name": "GLM 4 7 FP8"
+    },
+    "parasail-kimi-k25": {
+      "name": "Parasail Kimi K25"
+    },
+    "moonshotai/Kimi-K2.5": {
+      "name": "Kimi K2 5"
+    },
+    "moonshotai/kimi-k2.5": {
+      "name": "Kimi K2 5"
+    },
+    "parasail-qwen3-coder-next": {
+      "name": "Parasail Qwen3 Coder Next"
+    },
+    "Qwen/Qwen3-Coder-Next": {
+      "name": "Qwen3 Coder Next"
+    },
+    "parasail-glm-5": {
+      "name": "Parasail Glm 5"
+    },
+    "zai-org/GLM-5": {
+      "name": "GLM 5"
+    },
+    "zai-org/GLM-5-FP8": {
+      "name": "GLM 5 FP8"
+    },
+    "parasail-minimax-m25": {
+      "name": "Parasail Minimax M25"
+    },
+    "MiniMaxAI/MiniMax-M2.5": {
+      "name": "MiniMax M2 5"
+    },
+    "parasail-qwen35-397b-a17b": {
+      "name": "Parasail Qwen35 397B A17b"
+    },
+    "Qwen/Qwen3.5-397B-A17B": {
+      "name": "Qwen3 5 397B A17B"
+    },
+    "parasail-qwen3p5-35b-a3b": {
+      "name": "Parasail Qwen3p5 35B A3b"
+    },
+    "Qwen/Qwen3.5-35B-A3B": {
+      "name": "Qwen3 5 35B A3B"
+    },
+    "Qwen/Qwen3.5-35B-A3B-FP8": {
+      "name": "Qwen3 5 35B A3B FP8"
+    },
+    "parasail-skyfall-31b-v42": {
+      "name": "Parasail Skyfall 31B V42"
+    },
+    "TheDrummer/Skyfall-31B-v4.2": {
+      "name": "Skyfall 31B V4 2"
+    },
+    "parasail-gemma-4-31b-it": {
+      "name": "Parasail Gemma 4 31B It"
+    },
+    "google/gemma-4-31B-it": {
+      "name": "Gemma 4 31B It"
+    },
+    "google/gemma-4-31B": {
+      "name": "Gemma 4 31B"
+    },
+    "google/gemma-4-31b-it": {
+      "name": "Gemma 4 31B It"
+    },
+    "parasail-trinity-large-thinking": {
+      "name": "Parasail Trinity Large Thinking"
+    },
+    "arcee-ai/Trinity-Large-Thinking": {
+      "name": "Trinity Large Thinking"
+    },
+    "arcee-ai/Trinity-Large-Thinking-FP8-Block": {
+      "name": "Trinity Large Thinking FP8 Block"
+    },
+    "parasail-gemma-4-26b-a4b-it": {
+      "name": "Parasail Gemma 4 26B A4b It"
+    },
+    "google/gemma-4-26B-A4B-it": {
+      "name": "Gemma 4 26B A4B It"
+    },
+    "google/gemma-4-26B-A4B": {
+      "name": "Gemma 4 26B A4B"
+    },
+    "parasail-glm-51": {
+      "name": "Parasail Glm 51"
+    },
+    "zai-org/GLM-5.1": {
+      "name": "GLM 5 1"
+    },
+    "zai-org/GLM-5.1-FP8": {
+      "name": "GLM 5 1 FP8"
+    },
+    "parasail-bge-m3": {
+      "name": "Parasail Bge M3"
+    },
+    "BAAI/bge-m3": {
+      "name": "Bge M3"
+    },
+    "parasail-kimi-k26": {
+      "name": "Parasail Kimi K26"
+    },
+    "moonshotai/Kimi-K2.6": {
+      "name": "Kimi K2 6"
+    },
+    "parasail-qwen3p6-35b-a3b": {
+      "name": "Parasail Qwen3p6 35B A3b"
+    },
+    "Qwen/Qwen3.6-35B-A3B": {
+      "name": "Qwen3 6 35B A3B"
+    },
+    "parasail-deepseek-v4-pro": {
+      "name": "Parasail Deepseek V4 PRO"
+    },
+    "deepseek-ai/DeepSeek-V4-Pro": {
+      "name": "DeepSeek V4 PRO"
+    },
+    "parasail-deepseek-v4-flash": {
+      "name": "Parasail Deepseek V4 FLASH"
+    },
+    "deepseek-ai/DeepSeek-V4-Flash": {
+      "name": "DeepSeek V4 FLASH"
+    }
+  },
+  "_syncedAt": "2026-06-01T11:19:18.984Z"
+}

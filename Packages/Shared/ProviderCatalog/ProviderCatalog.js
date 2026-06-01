@@ -34,6 +34,9 @@ const providerPalette = {
   zai: { tint: '#9ab4ff', glow: '#edf2ff' },
   alibaba: { tint: '#ff7b00', glow: '#fff1e0' },
   mulerouter: { tint: '#a78bfa', glow: '#ede9ff' },
+  parasail: { tint: '#21b8a3', glow: '#dff8f4' },
+  poe: { tint: '#8b5cf6', glow: '#f0e9ff' },
+  stepfun: { tint: '#35b17f', glow: '#e3f7ee' },
   writer: { tint: '#2563eb', glow: '#dbeafe' },
 };
 
@@ -70,6 +73,9 @@ const providerIconMap = {
   alibaba: 'Alibaba.png',
   mulerouter: 'MuleRouter.png',
   writer: 'Writer.png',
+  poe: 'Poe.png',
+  parasail: 'Parasail.png',
+  stepfun: 'StepFun.png',
 };
 
 function summarizeModels(models) {

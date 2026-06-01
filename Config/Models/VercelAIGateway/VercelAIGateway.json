@@ -1,6 +1,6 @@
 {
   "provider": "vercelaigateway",
-  "label": "Vercel AI Gateway",
+  "label": "Vercel AI",
   "endpoint": "https://ai-gateway.vercel.sh/v1/chat/completions",
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
@@ -2619,5 +2619,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-01T10:07:52.582Z"
+  "_syncedAt": "2026-06-01T11:11:49.980Z"
 }

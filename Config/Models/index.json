@@ -7,6 +7,7 @@
   "VercelAIGateway.json",
   "Requesty.json",
   "Mistral.json",
+  "StepFun.json",
   "Nvidia.json",
   "DeepSeek.json",
   "MiniMax.json",
@@ -30,5 +31,7 @@
   "ZAI.json",
   "SiliconFlow.json",
   "HuggingFace.json",
-  "Novita.json"
+  "Novita.json",
+  "Parasail.json",
+  "Poe.json"
 ]

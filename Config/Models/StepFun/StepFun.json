@@ -1,0 +1,55 @@
+{
+  "provider": "stepfun",
+  "label": "StepFun",
+  "endpoint": "https://api.stepfun.ai/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "step-tts-2": {
+      "name": "Step Tts 2"
+    },
+    "step-3.5-flash": {
+      "name": "Step 3.5 Flash",
+      "description": "Efficient StepFun MoE model for reasoning, tool use, coding, and chat",
+      "thinking": true,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "step-3.5-flash-2603": {
+      "name": "Step 3.5 Flash 2603",
+      "description": "Agent-optimized Step 3.5 Flash variant with configurable reasoning effort",
+      "thinking": true,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      }
+    },
+    "stepaudio-2.5-tts": {
+      "name": "Stepaudio 2 5 Tts"
+    },
+    "stepaudio-2.5-asr": {
+      "name": "Stepaudio 2 5 Asr"
+    },
+    "step-image-edit-2": {
+      "name": "Step Image Edit 2"
+    },
+    "step-3.7-flash": {
+      "name": "Step 3.7 Flash",
+      "description": "Current StepFun flash model for agentic, coding, multimodal, and reasoning workflows",
+      "thinking": true,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      }
+    }
+  },
+  "_syncedAt": "2026-06-01T11:12:12.786Z"
+}

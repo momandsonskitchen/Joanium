@@ -1,0 +1,1740 @@
+{
+  "provider": "poe",
+  "label": "Poe",
+  "endpoint": "https://api.poe.com/v1/chat/completions",
+  "auth_header": "Authorization",
+  "auth_prefix": "Bearer ",
+  "models": {
+    "assistant": {
+      "name": "Assistant",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "claude-opus-4.8": {
+      "name": "Claude Opus 4 8",
+      "context_window": {
+        "context_length": 1048576,
+        "max_output_tokens": 128000
+      }
+    },
+    "claude-opus-4.7": {
+      "name": "Claude Opus 4 7",
+      "context_window": {
+        "context_length": 1048576,
+        "max_output_tokens": 128000
+      }
+    },
+    "nano-banana-2": {
+      "name": "Nano Banana 2",
+      "context_window": {
+        "context_length": 65536,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-image-2": {
+      "name": "Gpt Image 2",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-5.5": {
+      "name": "Gpt 5 5",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gpt-5.5-pro": {
+      "name": "Gpt 5 5 PRO",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gemini-3.5-flash": {
+      "name": "Gemini 3 5 FLASH",
+      "context_window": {
+        "context_length": 1048576,
+        "max_output_tokens": 65536
+      }
+    },
+    "grok-4.3": {
+      "name": "Grok 4 3"
+    },
+    "gpt-5.4": {
+      "name": "Gpt 5 4",
+      "context_window": {
+        "context_length": 1050000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gpt-5.4-nano": {
+      "name": "Gpt 5 4 Nano",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gpt-5.4-mini": {
+      "name": "Gpt 5 4 MINI",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gemini-3.1-pro": {
+      "name": "Gemini 3 1 PRO",
+      "context_window": {
+        "context_length": 1048576,
+        "max_output_tokens": 65536
+      }
+    },
+    "script-bot-creator": {
+      "name": "Script Bot Creator"
+    },
+    "canvas-creator": {
+      "name": "Canvas Creator"
+    },
+    "gpt-5.4-pro": {
+      "name": "Gpt 5 4 PRO",
+      "context_window": {
+        "context_length": 1050000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gemini-3.1-flash-lite": {
+      "name": "Gemini 3 1 FLASH LITE",
+      "context_window": {
+        "context_length": 1048576,
+        "max_output_tokens": 65536
+      }
+    },
+    "gpt-5.3-codex": {
+      "name": "Gpt 5 3 Codex",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gemma-4-31b": {
+      "name": "Gemma 4 31B",
+      "context_window": {
+        "context_length": 262144,
+        "max_output_tokens": 8192
+      }
+    },
+    "glm-5.1-fw": {
+      "name": "Glm 5 1 Fw"
+    },
+    "gpt-5.3-instant": {
+      "name": "Gpt 5 3 Instant",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 16384
+      }
+    },
+    "grok-4.20-multi-agent": {
+      "name": "Grok 4 20 Multi Agent",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "qwen3.6-plus": {
+      "name": "Qwen3 6 PLUS"
+    },
+    "kimi-k2.5": {
+      "name": "Kimi K2 5",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "minimax-m2.7": {
+      "name": "Minimax M2 7"
+    },
+    "mistral-small-4": {
+      "name": "Mistral Small 4"
+    },
+    "mimo-v2-flash": {
+      "name": "Mimo V2 FLASH"
+    },
+    "qwen3.5-plus": {
+      "name": "Qwen3 5 PLUS"
+    },
+    "qwen3.5-omni-flash": {
+      "name": "Qwen3 5 Omni FLASH"
+    },
+    "qwen3.5-flash": {
+      "name": "Qwen3 5 FLASH"
+    },
+    "seed-2.0-lite": {
+      "name": "Seed 2 0 LITE"
+    },
+    "qwen3.5-omni-plus": {
+      "name": "Qwen3 5 Omni PLUS"
+    },
+    "mimo-v2-omni": {
+      "name": "Mimo V2 Omni"
+    },
+    "gemma-4-26b-a4b": {
+      "name": "Gemma 4 26B A4b"
+    },
+    "seedance-2-fast": {
+      "name": "Seedance 2 FAST"
+    },
+    "seedance-2.0": {
+      "name": "Seedance 2 0"
+    },
+    "mimo-v2-pro": {
+      "name": "Mimo V2 PRO"
+    },
+    "claude-opus-4.6": {
+      "name": "Claude Opus 4 6",
+      "context_window": {
+        "context_length": 983040,
+        "max_output_tokens": 128000
+      }
+    },
+    "claude-haiku-4.5": {
+      "name": "Claude Haiku 4 5",
+      "context_window": {
+        "context_length": 192000,
+        "max_output_tokens": 64000
+      }
+    },
+    "qwen3.5-397b-a17b-t": {
+      "name": "Qwen3 5 397B A17b T"
+    },
+    "seed-2.0-mini": {
+      "name": "Seed 2 0 MINI"
+    },
+    "claude-sonnet-4.6": {
+      "name": "Claude Sonnet 4 6",
+      "context_window": {
+        "context_length": 983040,
+        "max_output_tokens": 128000
+      }
+    },
+    "qwen3.5-397b-a17b": {
+      "name": "Qwen3 5 397B A17b"
+    },
+    "mimo-v2-flash-el": {
+      "name": "Mimo V2 FLASH El"
+    },
+    "gemma-4-31b-n": {
+      "name": "Gemma 4 31B N"
+    },
+    "grok-imagine-image": {
+      "name": "Grok Imagine Image"
+    },
+    "kimi-k2.5-fw": {
+      "name": "Kimi K2 5 Fw"
+    },
+    "seed-2.0-pro": {
+      "name": "Seed 2 0 PRO"
+    },
+    "minimax-speech-2.8": {
+      "name": "Minimax Speech 2 8"
+    },
+    "manus": {
+      "name": "Manus"
+    },
+    "glm-5": {
+      "name": "Glm 5"
+    },
+    "gpt-5.2": {
+      "name": "Gpt 5 2",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gemini-3-flash": {
+      "name": "Gemini 3 FLASH",
+      "context_window": {
+        "context_length": 1048576,
+        "max_output_tokens": 65536
+      }
+    },
+    "gpt-5.2-instant": {
+      "name": "Gpt 5 2 Instant",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 16384
+      }
+    },
+    "grok-4.1-fast-reasoning": {
+      "name": "Grok 4 1 FAST Reasoning",
+      "context_window": {
+        "context_length": 2000000,
+        "max_output_tokens": null
+      }
+    },
+    "veo-3.1-lite": {
+      "name": "Veo 3 1 LITE",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "qwen3-max-thinking": {
+      "name": "Qwen3 MAX Thinking"
+    },
+    "grok-imagine-video": {
+      "name": "Grok Imagine Video",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "claude-sonnet-4.5": {
+      "name": "Claude Sonnet 4 5",
+      "context_window": {
+        "context_length": 983040,
+        "max_output_tokens": 32768
+      }
+    },
+    "seedream-5.0-lite": {
+      "name": "Seedream 5 0 LITE"
+    },
+    "kling-v3-motion-ctrl": {
+      "name": "Kling V3 Motion Ctrl"
+    },
+    "runway-gen-4.5": {
+      "name": "Runway Gen 4 5",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "qwen3-coder-next": {
+      "name": "Qwen3 Coder Next"
+    },
+    "minimax-m2.5": {
+      "name": "Minimax M2 5"
+    },
+    "grok-4.1-fast-non-reasoning": {
+      "name": "Grok 4 1 FAST Non Reasoning",
+      "context_window": {
+        "context_length": 2000000,
+        "max_output_tokens": null
+      }
+    },
+    "kimi-k2-thinking": {
+      "name": "Kimi K2 Thinking"
+    },
+    "glm-5.1-t": {
+      "name": "Glm 5 1 T"
+    },
+    "gpt-5.2-codex": {
+      "name": "Gpt 5 2 Codex",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "deepseek-v3.2": {
+      "name": "Deepseek V3 2",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "gemma-4-31b-t": {
+      "name": "Gemma 4 31B T"
+    },
+    "grok-4": {
+      "name": "Grok 4",
+      "context_window": {
+        "context_length": 256000,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-image-1.5": {
+      "name": "Gpt Image 1 5",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "claude-code": {
+      "name": "Claude Code"
+    },
+    "minimax-m2.1": {
+      "name": "Minimax M2 1"
+    },
+    "qwen-image-2.0": {
+      "name": "Qwen Image 2 0"
+    },
+    "perplexity-adv-deep-research": {
+      "name": "Perplexity Adv Deep Research"
+    },
+    "deepseek-v3.2-el": {
+      "name": "Deepseek V3 2 El"
+    },
+    "perplexity-search": {
+      "name": "Perplexity Search"
+    },
+    "wan2.7-image": {
+      "name": "Wan2 7 Image"
+    },
+    "qwen-image-2-pro": {
+      "name": "Qwen Image 2 PRO"
+    },
+    "pixverse-v5.6": {
+      "name": "Pixverse V5 6"
+    },
+    "moss-video-and-audio": {
+      "name": "Moss Video And Audio"
+    },
+    "qwen-image-2": {
+      "name": "Qwen Image 2"
+    },
+    "wan-2.7": {
+      "name": "Wan 2 7"
+    },
+    "seedream-4.5": {
+      "name": "Seedream 4 5"
+    },
+    "kling-v3-pro": {
+      "name": "Kling V3 PRO",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "claude-opus-4.5": {
+      "name": "Claude Opus 4 5",
+      "context_window": {
+        "context_length": 196608,
+        "max_output_tokens": 64000
+      }
+    },
+    "gemini-2.5-flash": {
+      "name": "Gemini 2 5 FLASH",
+      "context_window": {
+        "context_length": 1065535,
+        "max_output_tokens": 65535
+      }
+    },
+    "kling-o3": {
+      "name": "Kling O3",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "kling-v3": {
+      "name": "Kling V3"
+    },
+    "gemini-2.5-pro": {
+      "name": "Gemini 2 5 PRO",
+      "context_window": {
+        "context_length": 1065535,
+        "max_output_tokens": 65535
+      }
+    },
+    "gpt-5.2-pro": {
+      "name": "Gpt 5 2 PRO",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "kling-omni": {
+      "name": "Kling Omni"
+    },
+    "glm-4.7-flash": {
+      "name": "Glm 4 7 FLASH"
+    },
+    "gpt-5.1-instant": {
+      "name": "Gpt 5 1 Instant",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 16384
+      }
+    },
+    "gpt-5.1-codex": {
+      "name": "Gpt 5 1 Codex",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "elevenlabs-v3": {
+      "name": "Elevenlabs V3",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-audio-mini": {
+      "name": "Gpt Audio MINI"
+    },
+    "gpt-audio-1.5": {
+      "name": "Gpt Audio 1 5"
+    },
+    "glm-4.7-n": {
+      "name": "Glm 4 7 N"
+    },
+    "gpt-audio": {
+      "name": "Gpt Audio"
+    },
+    "gpt-5.1": {
+      "name": "Gpt 5 1",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gpt-5-pro": {
+      "name": "Gpt 5 PRO",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "seedance-2.0-pro-el": {
+      "name": "Seedance 2 0 PRO El"
+    },
+    "gpt-5-chat": {
+      "name": "Gpt 5 Chat",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 16384
+      }
+    },
+    "claude-opus-4.1": {
+      "name": "Claude Opus 4 1",
+      "context_window": {
+        "context_length": 196608,
+        "max_output_tokens": 32000
+      }
+    },
+    "glm-4.6": {
+      "name": "Glm 4 6"
+    },
+    "gpt-5.1-codex-mini": {
+      "name": "Gpt 5 1 Codex MINI",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gpt-5.1-codex-max": {
+      "name": "Gpt 5 1 Codex MAX",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "glm-4.6v": {
+      "name": "Glm 4 6v"
+    },
+    "nano-banana-pro": {
+      "name": "Nano Banana PRO",
+      "context_window": {
+        "context_length": 65536,
+        "max_output_tokens": null
+      }
+    },
+    "nano-banana": {
+      "name": "Nano Banana",
+      "context_window": {
+        "context_length": 65536,
+        "max_output_tokens": null
+      }
+    },
+    "glm-5-t": {
+      "name": "Glm 5 T"
+    },
+    "gpt-5": {
+      "name": "Gpt 5",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "seedance-2.0-fast-el": {
+      "name": "Seedance 2 0 FAST El"
+    },
+    "gpt-5-nano": {
+      "name": "Gpt 5 Nano",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gpt-5-mini": {
+      "name": "Gpt 5 MINI",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "gemini-2.5-flash-lite": {
+      "name": "Gemini 2 5 FLASH LITE",
+      "context_window": {
+        "context_length": 1024000,
+        "max_output_tokens": 64000
+      }
+    },
+    "gpt-5-codex": {
+      "name": "Gpt 5 Codex",
+      "context_window": {
+        "context_length": 400000,
+        "max_output_tokens": 128000
+      }
+    },
+    "grok-4-fast-non-reasoning": {
+      "name": "Grok 4 FAST Non Reasoning",
+      "context_window": {
+        "context_length": 2000000,
+        "max_output_tokens": null
+      }
+    },
+    "qwen-3-next-80b-think": {
+      "name": "Qwen 3 Next 80B Think"
+    },
+    "qwen3-next-80b": {
+      "name": "Qwen3 Next 80B"
+    },
+    "deepseek-v3.2-exp": {
+      "name": "Deepseek V3 2 Exp"
+    },
+    "nova-pro-1.0": {
+      "name": "Nova PRO 1 0"
+    },
+    "nova-premier-1.0": {
+      "name": "Nova Premier 1 0"
+    },
+    "grok-4-fast-reasoning": {
+      "name": "Grok 4 FAST Reasoning",
+      "context_window": {
+        "context_length": 2000000,
+        "max_output_tokens": null
+      }
+    },
+    "nova-micro-1.0": {
+      "name": "Nova Micro 1 0"
+    },
+    "nova-lite-1.0": {
+      "name": "Nova LITE 1 0"
+    },
+    "minimax-m2": {
+      "name": "Minimax M2"
+    },
+    "hunyuan-image-3": {
+      "name": "Hunyuan Image 3"
+    },
+    "kling-image-o1": {
+      "name": "Kling Image O1"
+    },
+    "kling-2.6-pro": {
+      "name": "Kling 2 6 PRO",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "flux-2-pro": {
+      "name": "Flux 2 PRO"
+    },
+    "flux-2-flex": {
+      "name": "Flux 2 Flex"
+    },
+    "flux-2-dev": {
+      "name": "Flux 2 Dev"
+    },
+    "mistral-medium-3.1": {
+      "name": "Mistral Medium 3 1"
+    },
+    "exa-answer": {
+      "name": "Exa Answer"
+    },
+    "exa-search": {
+      "name": "Exa Search"
+    },
+    "exa-research": {
+      "name": "Exa Research"
+    },
+    "nova-lite-2": {
+      "name": "Nova LITE 2"
+    },
+    "gpt-oss-120b-t": {
+      "name": "Gpt OSS 120B T",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-oss-20b-t": {
+      "name": "Gpt OSS 20B T"
+    },
+    "amazon-nova-reel-1.1": {
+      "name": "Amazon Nova Reel 1 1"
+    },
+    "amazon-nova-canvas": {
+      "name": "Amazon Nova Canvas"
+    },
+    "kimi-k2": {
+      "name": "Kimi K2"
+    },
+    "pika-v1.5-effects": {
+      "name": "Pika V1 5 Effects"
+    },
+    "glm-4.5": {
+      "name": "Glm 4 5"
+    },
+    "deepseek-v3.1-n": {
+      "name": "Deepseek V3 1 N"
+    },
+    "claude-sonnet-4": {
+      "name": "Claude Sonnet 4",
+      "context_window": {
+        "context_length": 983040,
+        "max_output_tokens": 64000
+      }
+    },
+    "claude-opus-4": {
+      "name": "Claude Opus 4",
+      "context_window": {
+        "context_length": 192512,
+        "max_output_tokens": 28672
+      }
+    },
+    "o4-mini": {
+      "name": "O4 MINI",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "gpt-4o": {
+      "name": "Gpt 4o",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 8192
+      }
+    },
+    "o3-pro": {
+      "name": "O3 PRO",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "o4-mini-deep-research": {
+      "name": "O4 MINI Deep Research",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "grok-3": {
+      "name": "Grok 3",
+      "context_window": {
+        "context_length": 131072,
+        "max_output_tokens": null
+      }
+    },
+    "grok-3-mini": {
+      "name": "Grok 3 MINI",
+      "context_window": {
+        "context_length": 131072,
+        "max_output_tokens": null
+      }
+    },
+    "o3": {
+      "name": "O3",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "o3-deep-research": {
+      "name": "O3 Deep Research",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "deepseek-v3.1-tm": {
+      "name": "Deepseek V3 1 Tm"
+    },
+    "gpt-4.1": {
+      "name": "Gpt 4 1",
+      "context_window": {
+        "context_length": 1047576,
+        "max_output_tokens": 32768
+      }
+    },
+    "gpt-4.1-mini": {
+      "name": "Gpt 4 1 MINI",
+      "context_window": {
+        "context_length": 1047576,
+        "max_output_tokens": 32768
+      }
+    },
+    "gpt-4.1-nano": {
+      "name": "Gpt 4 1 Nano",
+      "context_window": {
+        "context_length": 1047576,
+        "max_output_tokens": 32768
+      }
+    },
+    "qwen3-max": {
+      "name": "Qwen3 MAX"
+    },
+    "gpt-oss-120b": {
+      "name": "Gpt OSS 120B"
+    },
+    "gpt-oss-20b": {
+      "name": "Gpt OSS 20B"
+    },
+    "gpt-oss-120b-cs": {
+      "name": "Gpt OSS 120B Cs",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "openai-gpt-oss-120b": {
+      "name": "Openai Gpt OSS 120B",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "openai-gpt-oss-20b": {
+      "name": "Openai Gpt OSS 20B",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "qwen3-max-n": {
+      "name": "Qwen3 MAX N"
+    },
+    "qwen3-vl-235b-a22b-t": {
+      "name": "Qwen3 VL 235B A22b T"
+    },
+    "qwen3-vl-235b-a22b-i": {
+      "name": "Qwen3 VL 235B A22b I"
+    },
+    "qwen-3-235b-2507-t": {
+      "name": "Qwen 3 235B 2507 T",
+      "context_window": {
+        "context_length": 40960,
+        "max_output_tokens": null
+      }
+    },
+    "qwen3-coder-480b-t": {
+      "name": "Qwen3 Coder 480B T"
+    },
+    "qwen3-coder-480b-n": {
+      "name": "Qwen3 Coder 480B N"
+    },
+    "qwen3-235b-a22b-di": {
+      "name": "Qwen3 235B A22b Di",
+      "context_window": {
+        "context_length": 32000,
+        "max_output_tokens": null
+      }
+    },
+    "qwen3-235b-a22b-n": {
+      "name": "Qwen3 235B A22b N"
+    },
+    "magistral-medium-el": {
+      "name": "Magistral Medium El"
+    },
+    "o1": {
+      "name": "O1",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "o1-pro": {
+      "name": "O1 PRO",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "cartesia-ink-whisper": {
+      "name": "Cartesia Ink Whisper"
+    },
+    "gpt-4o-mini": {
+      "name": "Gpt 4o MINI",
+      "context_window": {
+        "context_length": 124096,
+        "max_output_tokens": 4096
+      }
+    },
+    "qwen3-max-preview": {
+      "name": "Qwen3 MAX Preview"
+    },
+    "o3-mini": {
+      "name": "O3 MINI",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "o3-mini-high": {
+      "name": "O3 MINI High",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": 100000
+      }
+    },
+    "llama-3.1-8b-di": {
+      "name": "Llama 3 1 8B Di",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "mistral-medium-3": {
+      "name": "Mistral Medium 3"
+    },
+    "mistral-medium": {
+      "name": "Mistral Medium",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 4096
+      }
+    },
+    "llama-3.3-70b-fw": {
+      "name": "Llama 3 3 70B Fw",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "llama-3.3-70b": {
+      "name": "Llama 3 3 70B",
+      "context_window": {
+        "context_length": 131072,
+        "max_output_tokens": null
+      }
+    },
+    "deepseek-prover-v2": {
+      "name": "Deepseek Prover V2"
+    },
+    "deepseek-v3.2-fw": {
+      "name": "Deepseek V3 2 Fw",
+      "context_window": {
+        "context_length": 160000,
+        "max_output_tokens": null
+      }
+    },
+    "deepseek-r1-di": {
+      "name": "Deepseek R1 Di",
+      "context_window": {
+        "context_length": 64000,
+        "max_output_tokens": null
+      }
+    },
+    "deepseek-r1-n": {
+      "name": "Deepseek R1 N"
+    },
+    "llama-3.3-70b-n": {
+      "name": "Llama 3 3 70B N"
+    },
+    "gpt-researcher": {
+      "name": "Gpt Researcher"
+    },
+    "gpt-4o-search": {
+      "name": "Gpt 4o Search",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 8192
+      }
+    },
+    "reka-research": {
+      "name": "Reka Research"
+    },
+    "perplexity-sonar": {
+      "name": "Perplexity Sonar",
+      "context_window": {
+        "context_length": 127000,
+        "max_output_tokens": null
+      }
+    },
+    "linkup-deep-search": {
+      "name": "Linkup Deep Search"
+    },
+    "linkup-standard": {
+      "name": "Linkup Standard"
+    },
+    "perplexity-pro-search": {
+      "name": "Perplexity PRO Search"
+    },
+    "perplexity-sonar-pro": {
+      "name": "Perplexity Sonar PRO",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": null
+      }
+    },
+    "perplexity-sonar-rsn-pro": {
+      "name": "Perplexity Sonar Rsn PRO",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "perplexity-deep-research": {
+      "name": "Perplexity Deep Research",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "flux-pro-1.1-ultra": {
+      "name": "Flux PRO 1 1 ULTRA",
+      "context_window": {
+        "context_length": 250,
+        "max_output_tokens": null
+      }
+    },
+    "mistral-small-3.1": {
+      "name": "Mistral Small 3 1"
+    },
+    "sonic-3.0": {
+      "name": "Sonic 3 0"
+    },
+    "hailuo-music-v1.5": {
+      "name": "Hailuo Music V1 5"
+    },
+    "elevenlabs-music": {
+      "name": "Elevenlabs Music",
+      "context_window": {
+        "context_length": 2000,
+        "max_output_tokens": null
+      }
+    },
+    "whisper-v3-large-t": {
+      "name": "Whisper V3 Large T"
+    },
+    "stable-audio-2.5": {
+      "name": "Stable Audio 2 5"
+    },
+    "stable-audio-2.0": {
+      "name": "Stable Audio 2 0"
+    },
+    "hailuo-speech-02": {
+      "name": "Hailuo Speech 02"
+    },
+    "elevenlabs-v2.5-turbo": {
+      "name": "Elevenlabs V2 5 TURBO",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "gemini-2.5-flash-tts": {
+      "name": "Gemini 2 5 FLASH Tts"
+    },
+    "gemini-2.5-pro-tts": {
+      "name": "Gemini 2 5 PRO Tts"
+    },
+    "orpheus-tts": {
+      "name": "Orpheus Tts"
+    },
+    "deepgram-nova-3": {
+      "name": "Deepgram Nova 3"
+    },
+    "unreal-speech-tts": {
+      "name": "Unreal Speech Tts"
+    },
+    "flux-2-max": {
+      "name": "Flux 2 MAX"
+    },
+    "z-image-lightning": {
+      "name": "Z Image Lightning"
+    },
+    "flux-2-klein-4b-base": {
+      "name": "Flux 2 Klein 4B Base"
+    },
+    "flux-2-klein-9b-base": {
+      "name": "Flux 2 Klein 9B Base"
+    },
+    "imagen-4-ultra": {
+      "name": "Imagen 4 ULTRA",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "imagen-4-fast": {
+      "name": "Imagen 4 FAST",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "flux-2-klein-4b": {
+      "name": "Flux 2 Klein 4B"
+    },
+    "imagen-4": {
+      "name": "Imagen 4",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "phoenix-1.0": {
+      "name": "Phoenix 1 0"
+    },
+    "dreamina-3.1": {
+      "name": "Dreamina 3 1"
+    },
+    "qwen-image": {
+      "name": "Qwen Image"
+    },
+    "qwen-image-20b": {
+      "name": "Qwen Image 20B"
+    },
+    "svi-2.0-pro": {
+      "name": "Svi 2 0 PRO"
+    },
+    "hunyuan-video-1.5": {
+      "name": "Hunyuan Video 1 5"
+    },
+    "flux-2-flash": {
+      "name": "Flux 2 FLASH"
+    },
+    "flux-2-turbo": {
+      "name": "Flux 2 TURBO",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "flux-kontext-max": {
+      "name": "Flux Kontext MAX"
+    },
+    "flux-kontext-pro": {
+      "name": "Flux Kontext PRO"
+    },
+    "flux-krea": {
+      "name": "Flux Krea"
+    },
+    "imagen-3": {
+      "name": "Imagen 3",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "wan-animate": {
+      "name": "Wan Animate"
+    },
+    "imagen-3-fast": {
+      "name": "Imagen 3 FAST",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "seedream-3.0": {
+      "name": "Seedream 3 0"
+    },
+    "seedance-1.0-pro": {
+      "name": "Seedance 1 0 PRO"
+    },
+    "seedance-1.0-lite": {
+      "name": "Seedance 1 0 LITE"
+    },
+    "ideogram-v3": {
+      "name": "Ideogram V3"
+    },
+    "ideogram-v2": {
+      "name": "Ideogram V2",
+      "context_window": {
+        "context_length": 150,
+        "max_output_tokens": null
+      }
+    },
+    "flux-dev-di": {
+      "name": "Flux Dev Di"
+    },
+    "flux-schnell-di": {
+      "name": "Flux Schnell Di",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "flux-pro-1.1": {
+      "name": "Flux PRO 1 1",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "luma-photon-flash": {
+      "name": "Luma Photon FLASH"
+    },
+    "hidream-i1-full": {
+      "name": "Hidream I1 Full"
+    },
+    "retro-diffusion-core": {
+      "name": "Retro Diffusion Core"
+    },
+    "stablediffusion3.5-l": {
+      "name": "Stablediffusion3 5 L"
+    },
+    "glm-4.7-fw": {
+      "name": "Glm 4 7 Fw"
+    },
+    "flux-schnell": {
+      "name": "Flux Schnell",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-image-1": {
+      "name": "Gpt Image 1",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-image-1-mini": {
+      "name": "Gpt Image 1 MINI"
+    },
+    "veo-3.1": {
+      "name": "Veo 3 1",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "veo-3.1-fast": {
+      "name": "Veo 3 1 FAST",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "sora-2-pro": {
+      "name": "Sora 2 PRO",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "sora-2": {
+      "name": "Sora 2",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "kling-2.5-turbo-std": {
+      "name": "Kling 2 5 TURBO Std"
+    },
+    "wan-2.6": {
+      "name": "Wan 2 6"
+    },
+    "seedream-4.0": {
+      "name": "Seedream 4 0"
+    },
+    "kling-2.5-turbo-pro": {
+      "name": "Kling 2 5 TURBO PRO"
+    },
+    "kling-2.1-master": {
+      "name": "Kling 2 1 Master"
+    },
+    "hailuo-02": {
+      "name": "Hailuo 02"
+    },
+    "hailuo-02-standard": {
+      "name": "Hailuo 02 Standard"
+    },
+    "hailuo-02-pro": {
+      "name": "Hailuo 02 PRO"
+    },
+    "deepseek-r1-turbo-di": {
+      "name": "Deepseek R1 TURBO Di",
+      "context_window": {
+        "context_length": 32000,
+        "max_output_tokens": null
+      }
+    },
+    "hailuo-director-01": {
+      "name": "Hailuo Director 01"
+    },
+    "pixverse-v5": {
+      "name": "Pixverse V5"
+    },
+    "wan-2.5": {
+      "name": "Wan 2 5"
+    },
+    "pixverse-v4.5": {
+      "name": "Pixverse V4 5"
+    },
+    "flux-dev": {
+      "name": "Flux Dev",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "lyria-3": {
+      "name": "Lyria 3"
+    },
+    "lyria": {
+      "name": "Lyria"
+    },
+    "kling-1.6-pro": {
+      "name": "Kling 1 6 PRO"
+    },
+    "clarity-upscaler": {
+      "name": "Clarity Upscaler"
+    },
+    "topazlabs": {
+      "name": "Topazlabs",
+      "context_window": {
+        "context_length": 204,
+        "max_output_tokens": null
+      }
+    },
+    "veo-v3.1": {
+      "name": "Veo V3 1"
+    },
+    "veo-v3.1-fast": {
+      "name": "Veo V3 1 FAST"
+    },
+    "wan-2.2": {
+      "name": "Wan 2 2"
+    },
+    "ltx-2-fast": {
+      "name": "Ltx 2 FAST"
+    },
+    "ltx-2-pro": {
+      "name": "Ltx 2 PRO"
+    },
+    "veo-3": {
+      "name": "Veo 3",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "veo-3-vfast": {
+      "name": "Veo 3 Vfast"
+    },
+    "vidu": {
+      "name": "Vidu"
+    },
+    "vidu-q1": {
+      "name": "Vidu Q1"
+    },
+    "veo-3-fast": {
+      "name": "Veo 3 FAST",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "seedance-1.0-pro-fast": {
+      "name": "Seedance 1 0 PRO FAST"
+    },
+    "omnihuman": {
+      "name": "Omnihuman"
+    },
+    "grok-code-fast-1": {
+      "name": "Grok Code FAST 1",
+      "context_window": {
+        "context_length": 256000,
+        "max_output_tokens": null
+      }
+    },
+    "deep-ai-search": {
+      "name": "Deep Ai Search"
+    },
+    "kling-avatar-pro": {
+      "name": "Kling Avatar PRO"
+    },
+    "luma-photon": {
+      "name": "Luma Photon"
+    },
+    "ideogram": {
+      "name": "Ideogram",
+      "context_window": {
+        "context_length": 150,
+        "max_output_tokens": null
+      }
+    },
+    "seededit-3.0": {
+      "name": "Seededit 3 0"
+    },
+    "kling-2.1-pro": {
+      "name": "Kling 2 1 PRO"
+    },
+    "kling-2.1-std": {
+      "name": "Kling 2 1 Std"
+    },
+    "runway-gen-4-turbo": {
+      "name": "Runway Gen 4 TURBO",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "runway": {
+      "name": "Runway",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "veo-2": {
+      "name": "Veo 2",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "kling-2.0-master": {
+      "name": "Kling 2 0 Master"
+    },
+    "qwen-edit": {
+      "name": "Qwen Edit"
+    },
+    "gptzero": {
+      "name": "Gptzero"
+    },
+    "kling-pro-effects": {
+      "name": "Kling PRO Effects"
+    },
+    "hailuo-live": {
+      "name": "Hailuo Live"
+    },
+    "hailuo-ai": {
+      "name": "Hailuo Ai"
+    },
+    "veo-2-video": {
+      "name": "Veo 2 Video"
+    },
+    "wan-2.1": {
+      "name": "Wan 2 1"
+    },
+    "ideogram-v2a-turbo": {
+      "name": "Ideogram V2A TURBO",
+      "context_window": {
+        "context_length": 150,
+        "max_output_tokens": null
+      }
+    },
+    "ideogram-v2a": {
+      "name": "Ideogram V2A",
+      "context_window": {
+        "context_length": 150,
+        "max_output_tokens": null
+      }
+    },
+    "trellis-3d": {
+      "name": "Trellis 3d"
+    },
+    "flux-dev-finetuner": {
+      "name": "Flux Dev Finetuner"
+    },
+    "flux-inpaint": {
+      "name": "Flux Inpaint"
+    },
+    "flux-fill": {
+      "name": "Flux Fill"
+    },
+    "bria-eraser": {
+      "name": "Bria Eraser"
+    },
+    "kling-1.5-pro": {
+      "name": "Kling 1 5 PRO"
+    },
+    "deepreasoning": {
+      "name": "Deepreasoning"
+    },
+    "gemma-3-27b": {
+      "name": "Gemma 3 27B"
+    },
+    "mistral-small-3": {
+      "name": "Mistral Small 3",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 4096
+      }
+    },
+    "deepseek-v3-di": {
+      "name": "Deepseek V3 Di",
+      "context_window": {
+        "context_length": 64000,
+        "max_output_tokens": null
+      }
+    },
+    "deepseek-v3-turbo-di": {
+      "name": "Deepseek V3 TURBO Di",
+      "context_window": {
+        "context_length": 32000,
+        "max_output_tokens": null
+      }
+    },
+    "phi-4-di": {
+      "name": "Phi 4 Di",
+      "context_window": {
+        "context_length": 16000,
+        "max_output_tokens": null
+      }
+    },
+    "mistral-7b-v0.3-di": {
+      "name": "Mistral 7B V0 3 Di",
+      "context_window": {
+        "context_length": 32000,
+        "max_output_tokens": null
+      }
+    },
+    "liveportrait": {
+      "name": "Liveportrait"
+    },
+    "stablediffusion3-2b": {
+      "name": "Stablediffusion3 2B"
+    },
+    "mixtral8x22b-inst-fw": {
+      "name": "Mixtral8x22b Inst Fw",
+      "context_window": {
+        "context_length": 65536,
+        "max_output_tokens": null
+      }
+    },
+    "mistral-large-2": {
+      "name": "Mistral Large 2",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 4096
+      }
+    },
+    "reka-core": {
+      "name": "Reka Core",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "reka-flash": {
+      "name": "Reka FLASH",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-3.5-turbo": {
+      "name": "Gpt 3 5 TURBO",
+      "context_window": {
+        "context_length": 16384,
+        "max_output_tokens": 2048
+      }
+    },
+    "sketch-to-image": {
+      "name": "Sketch To Image"
+    },
+    "stablediffusion3.5-t": {
+      "name": "Stablediffusion3 5 T"
+    },
+    "flux-pro-1.1-t": {
+      "name": "Flux PRO 1 1 T",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "flux-schnell-t": {
+      "name": "Flux Schnell T",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "recraft-v3": {
+      "name": "Recraft V3",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "gpt-4o-aug": {
+      "name": "Gpt 4o Aug",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 8192
+      }
+    },
+    "solar-pro-2": {
+      "name": "Solar PRO 2",
+      "context_window": {
+        "context_length": 4096,
+        "max_output_tokens": 1024
+      }
+    },
+    "remove-background": {
+      "name": "Remove Background"
+    },
+    "sana-t2i": {
+      "name": "Sana T2i"
+    },
+    "tako": {
+      "name": "Tako",
+      "context_window": {
+        "context_length": 2048,
+        "max_output_tokens": null
+      }
+    },
+    "llama-3.1-8b-fp16": {
+      "name": "Llama 3 1 8B FP16",
+      "context_window": {
+        "context_length": 131000,
+        "max_output_tokens": null
+      }
+    },
+    "restyler": {
+      "name": "Restyler"
+    },
+    "qwen-2.5-7b-t": {
+      "name": "Qwen 2 5 7B T",
+      "context_window": {
+        "context_length": 32768,
+        "max_output_tokens": null
+      }
+    },
+    "python": {
+      "name": "Python",
+      "context_window": {
+        "context_length": 131000,
+        "max_output_tokens": null
+      }
+    },
+    "markitdown": {
+      "name": "Markitdown"
+    },
+    "gpt-4-turbo": {
+      "name": "Gpt 4 TURBO",
+      "context_window": {
+        "context_length": 128000,
+        "max_output_tokens": 4096
+      }
+    },
+    "flux-1-schnell-fw": {
+      "name": "Flux 1 Schnell Fw",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "flux-1-dev-fw": {
+      "name": "Flux 1 Dev Fw",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "mochi-preview": {
+      "name": "Mochi Preview"
+    },
+    "gpt-3.5-turbo-instruct": {
+      "name": "Gpt 3 5 TURBO Instruct",
+      "context_window": {
+        "context_length": 3500,
+        "max_output_tokens": 1024
+      }
+    },
+    "gpt-3.5-turbo-raw": {
+      "name": "Gpt 3 5 TURBO Raw",
+      "context_window": {
+        "context_length": 4524,
+        "max_output_tokens": 2048
+      }
+    },
+    "interpreter": {
+      "name": "Interpreter"
+    },
+    "code-saver": {
+      "name": "Code Saver"
+    },
+    "code-editor": {
+      "name": "Code Editor"
+    },
+    "gemini-3.1-flash-tts": {
+      "name": "Gemini 3 1 FLASH Tts"
+    },
+    "minimax-m2.7-fw": {
+      "name": "Minimax M2 7 Fw"
+    },
+    "kimi-k2.6": {
+      "name": "Kimi K2 6"
+    },
+    "qwen3.6-max-preview": {
+      "name": "Qwen3 6 MAX Preview"
+    },
+    "seedream-5.0-lite-el": {
+      "name": "Seedream 5 0 LITE El"
+    },
+    "seed-2.0-code": {
+      "name": "Seed 2 0 Code"
+    },
+    "mimo-v2.5": {
+      "name": "Mimo V2 5"
+    },
+    "mimo-v2.5-pro": {
+      "name": "Mimo V2 5 PRO"
+    },
+    "happyhorse-1.0-el": {
+      "name": "Happyhorse 1 0 El"
+    },
+    "deepseek-v4-pro-t": {
+      "name": "Deepseek V4 PRO T"
+    },
+    "deepseek-v4-flash-el": {
+      "name": "Deepseek V4 FLASH El"
+    },
+    "deepseek-v4-pro-el": {
+      "name": "Deepseek V4 PRO El"
+    },
+    "qwen3.6-plus-t": {
+      "name": "Qwen3 6 PLUS T"
+    },
+    "deepseek-v4-pro-e": {
+      "name": "Deepseek V4 PRO E"
+    },
+    "deepseek-v4-flash-e": {
+      "name": "Deepseek V4 FLASH E"
+    },
+    "gemma-4-26b-a4b-el": {
+      "name": "Gemma 4 26B A4b El"
+    },
+    "qwen3.5-9b-el": {
+      "name": "Qwen3 5 9B El"
+    },
+    "qwen3.5-4b-el": {
+      "name": "Qwen3 5 4B El"
+    },
+    "pearl-gemma-4-31b": {
+      "name": "Pearl Gemma 4 31B"
+    },
+    "qwen3.7-max": {
+      "name": "Qwen3 7 MAX"
+    },
+    "qwen3.7-max-t": {
+      "name": "Qwen3 7 MAX T"
+    }
+  },
+  "_syncedAt": "2026-06-01T11:03:23.103Z"
+}

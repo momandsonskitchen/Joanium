@@ -456,6 +456,15 @@ export async function fetchProviderModels(providerId, { apiKey = '', endpoint = 
     case 'novita':
       return fetchNovitaModels(apiKey);
 
+    case 'stepfun':
+      return openAICompat('https://api.stepfun.ai/v1/models', `Bearer ${apiKey}`);
+
+    case 'parasail':
+      return openAICompat('https://api.parasail.io/v1/models', `Bearer ${apiKey}`);
+
+    case 'poe':
+      return openAICompat('https://api.poe.com/v1/models', `Bearer ${apiKey}`);
+
     case 'qwen':
       return openAICompat(
         'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models',
