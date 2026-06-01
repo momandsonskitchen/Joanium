@@ -70,6 +70,27 @@ const en = {
     button: 'Update Memory',
     updating: 'Updating...',
   },
+  dataPortability: {
+    title: 'Data portability',
+    export: {
+      label: (personaName) => `Export ${personaName}`,
+      description:
+        'Save all your data — chats, agents, memory, projects, and settings — as a zip file you can restore later.',
+      button: (personaName) => `Export ${personaName}`,
+      exporting: 'Exporting...',
+      success: 'Exported successfully.',
+      failed: 'Export failed. Please try again.',
+    },
+    import: {
+      label: 'Import backup',
+      description:
+        'Restore data from a previously exported Joanium.zip. Existing data is kept — only missing items are added.',
+      button: 'Import Backup',
+      importing: 'Importing...',
+      success: 'Import complete. Your data has been merged.',
+      failed: 'Import failed. Make sure the file is a valid Joanium backup.',
+    },
+  },
   reset: {
     title: 'Danger zone',
     label: 'Reset Joanium',

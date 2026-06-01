@@ -14,6 +14,7 @@ const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound
 export function createAppSettingsPanel(strings) {
   const view = createElement('div', 'app-settings');
   const options = createElement('div', 'app-settings__options');
+  const dataSection = createElement('section', 'app-settings__data');
   const danger = createElement('section', 'app-settings__danger');
   const status = createElement('p', 'app-settings__status');
   let defaultViewDropdown = null;
@@ -56,6 +57,100 @@ export function createAppSettingsPanel(strings) {
     }
   }
 
+  /** Resolve a display name for the active persona from User.json bootstrap data. */
+  function resolvePersonaName(user) {
+    const persona = user?.activePersona;
+    if (!persona) return 'Joana';
+
+    // filename like "Joana.md" → "Joana"
+    if (typeof persona.filename === 'string') {
+      return persona.filename.replace(/\.md$/i, '');
+    }
+
+    // namespace fallback
+    if (typeof persona.namespace === 'string') return persona.namespace;
+
+    return 'Joana';
+  }
+
+  /** Build the Data Portability section and append it to `dataSection`. */
+  function buildDataSection(personaName) {
+    const dp = strings.dataPortability;
+
+    dataSection.replaceChildren();
+    dataSection.append(createElement('h3', 'app-settings__danger-title', dp.title));
+
+    // ── Export card ──────────────────────────────────────────────────────────
+    const exportRow = createElement('div', 'app-settings__dropdown-row app-settings__data-row');
+    const exportMeta = createElement('div', 'app-settings__dropdown-meta');
+    exportMeta.append(
+      createElement('span', 'app-settings__dropdown-label', dp.export.label(personaName)),
+      createElement('span', 'app-settings__dropdown-desc', dp.export.description),
+    );
+
+    const exportBtn = createElement(
+      'button',
+      'app-settings__data-btn',
+      dp.export.button(personaName),
+    );
+    exportBtn.type = 'button';
+    exportBtn.addEventListener('click', async () => {
+      if (exportBtn.disabled) return;
+      exportBtn.disabled = true;
+      exportBtn.textContent = dp.export.exporting;
+
+      try {
+        const result = await invokeIpc('data:export');
+        if (result?.ok) {
+          state.setStatus(dp.export.success, 'ok');
+        } else if (!result?.canceled) {
+          state.setStatus(dp.export.failed, 'error');
+        }
+      } catch {
+        state.setStatus(dp.export.failed, 'error');
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.textContent = dp.export.button(personaName);
+      }
+    });
+
+    exportRow.append(exportMeta, exportBtn);
+    dataSection.append(exportRow);
+
+    // ── Import card ──────────────────────────────────────────────────────────
+    const importRow = createElement('div', 'app-settings__dropdown-row app-settings__data-row');
+    const importMeta = createElement('div', 'app-settings__dropdown-meta');
+    importMeta.append(
+      createElement('span', 'app-settings__dropdown-label', dp.import.label),
+      createElement('span', 'app-settings__dropdown-desc', dp.import.description),
+    );
+
+    const importBtn = createElement('button', 'app-settings__data-btn', dp.import.button);
+    importBtn.type = 'button';
+    importBtn.addEventListener('click', async () => {
+      if (importBtn.disabled) return;
+      importBtn.disabled = true;
+      importBtn.textContent = dp.import.importing;
+
+      try {
+        const result = await invokeIpc('data:import');
+        if (result?.ok) {
+          state.setStatus(dp.import.success, 'ok');
+        } else if (!result?.canceled) {
+          state.setStatus(dp.import.failed, 'error');
+        }
+      } catch {
+        state.setStatus(dp.import.failed, 'error');
+      } finally {
+        importBtn.disabled = false;
+        importBtn.textContent = dp.import.button;
+      }
+    });
+
+    importRow.append(importMeta, importBtn);
+    dataSection.append(importRow);
+  }
+
   async function populate() {
     // Fetch app settings and provider catalog in parallel.
     const [nextSettings, bootstrap] = await Promise.all([
@@ -70,6 +165,7 @@ export function createAppSettingsPanel(strings) {
     state.setSettings(nextSettings);
     resetConfirming = false;
     options.replaceChildren();
+    dataSection.replaceChildren();
     danger.replaceChildren();
     defaultViewDropdown?.dispose();
     defaultViewDropdown = null;
@@ -113,8 +209,6 @@ export function createAppSettingsPanel(strings) {
     const userProviderDetails = bootstrap.user?.providers?.details ?? {};
     const modelOptions = buildAvailableModelOptions(providers, userProviderDetails);
 
-    // Pre-select: use the saved preference if present, otherwise fall back to
-    // the first available model so something sensible is always shown.
     const savedModelValue = encodeModelValue(state.settings.defaultModel);
     const currentModelValue = savedModelValue || (modelOptions[0]?.value ?? '');
 
@@ -165,7 +259,7 @@ export function createAppSettingsPanel(strings) {
     searchEngineRow.append(searchEngineMeta, defaultSearchEngineDropdown.element);
     options.append(searchEngineRow);
 
-    // ── Boolean toggles ───────────────────────────────────────────────────
+    // ── Boolean toggles ────────────────────────────────────────────────────
     for (const key of OPTION_KEYS) {
       const option = strings.options[key];
       const checkbox = createCheckbox({
@@ -179,6 +273,11 @@ export function createAppSettingsPanel(strings) {
       options.append(checkbox.element);
     }
 
+    // ── Data portability section ───────────────────────────────────────────
+    const personaName = resolvePersonaName(bootstrap.user);
+    buildDataSection(personaName);
+
+    // ── Danger zone ────────────────────────────────────────────────────────
     danger.append(createElement('h3', 'app-settings__danger-title', strings.reset.title));
     const resetRow = createElement('div', 'app-settings__danger-row');
     const resetMeta = createElement('div', 'app-settings__dropdown-meta');
@@ -238,7 +337,7 @@ export function createAppSettingsPanel(strings) {
     defaultSearchEngineDropdown?.dispose();
   };
 
-  view.append(options, danger, status);
+  view.append(options, dataSection, danger, status);
   void populate().catch(() => state.setStatus(strings.saveFailed, 'error'));
   return view;
 }
