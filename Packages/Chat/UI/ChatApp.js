@@ -1199,7 +1199,7 @@ export async function createChatView(
     }
 
     gitBarEl.hidden = false;
-    if (gitStatusDotEl) gitStatusDotEl.hidden = true;
+    gitStatusDotEl.hidden = true;
     gitBranchEl.textContent = '';
     gitBranchEl.hidden = true;
 
