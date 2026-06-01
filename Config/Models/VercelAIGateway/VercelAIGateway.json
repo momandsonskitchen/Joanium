@@ -1240,6 +1240,20 @@
         "image": true
       }
     },
+    "minimax/minimax-m3": {
+      "name": "MiniMax M3",
+      "description": "MiniMax-M3 is a frontier-class foundation model that unites the three capabilities defining today's frontier: a 1M-token context window, frontier coding and agentic performance, and native multimodality — the first open-weight model to deliver all three in a single system.",
+      "context_window": 1000000,
+      "max_output": 1000000,
+      "pricing": {
+        "input": 0.3,
+        "output": 1.2
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "mistral/codestral": {
       "name": "Mistral Codestral",
       "description": "Mistral's cutting-edge language model for coding released end of July 2025, Codestral specializes in low-latency, high-frequency tasks such as fill-in-the-middle (FIM), code correction and test generation.",
@@ -2213,6 +2227,19 @@
         "text": true
       }
     },
+    "stepfun/step-3.5-flash": {
+      "name": "StepFun 3.5 Flash",
+      "description": "Step 3.5 Flash is an open-source reasoning model by StepFun with 196B total parameters (11B active) using Mixture of Experts. It features a 256K context window, deep reasoning, tool calling, and agentic capabilities, achieving 97.3 on AIME 2025 and 74.4% on SWE-bench Verified.",
+      "context_window": 262114,
+      "max_output": 262114,
+      "pricing": {
+        "input": 0.09,
+        "output": 0.3
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "stepfun/step-3.7-flash": {
       "name": "Step 3.7 Flash",
       "description": "StepFun’s flagship multimodal reasoning model. Powered by a 198B-parameter / 11B-activation sparse MoE architecture, with native support for image and video understanding.",
@@ -2592,5 +2619,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-31T12:19:25.834Z"
+  "_syncedAt": "2026-06-01T05:22:17.953Z"
 }

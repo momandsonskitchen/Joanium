@@ -5,6 +5,9 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "MiniMax-M3": {
+      "name": "MiniMax M3"
+    },
     "MiniMax-M2.7": {
       "name": "MiniMax M2.7",
       "description": "Flagship model — top real-world engineering, professional office delivery, character-rich interaction (~60 tps)",
@@ -118,5 +121,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-31T12:19:14.306Z"
+  "_syncedAt": "2026-06-01T05:22:06.323Z"
 }

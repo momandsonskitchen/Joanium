@@ -37,6 +37,16 @@
         "text": true
       }
     },
+    "minimax/minimax-m3": {
+      "name": "MiniMax M3",
+      "description": "MiniMax-M3 is a multimodal foundation model from MiniMax. It supports text, image, and video inputs with text output, a 1M-token context window, and is suited for long-horizon agentic work, coding, and tool use. It is built on MiniMax Sparse Attention (MSA), which replaces full attention with KV-blo",
+      "context_window": 1000000,
+      "max_output": 131072,
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "xiaomimimo/mimo-v2.5": {
       "name": "XiaomiMiMo/MiMo-V2.5",
       "description": "mimo-v2.5, a native omni-modal model supporting text, image, video, and audio understanding, equipped with powerful agentic capabilities.",
@@ -1227,5 +1237,5 @@
       }
     }
   },
-  "_syncedAt": "2026-05-31T12:19:22.233Z"
+  "_syncedAt": "2026-06-01T05:22:14.230Z"
 }
