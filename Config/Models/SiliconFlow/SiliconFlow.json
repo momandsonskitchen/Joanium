@@ -5,6 +5,9 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "MiniMaxAI/MiniMax-M3": {
+      "name": "MiniMax M3"
+    },
     "deepseek-ai/DeepSeek-V4-Pro": {
       "name": "DeepSeek V4 PRO"
     },
@@ -242,5 +245,5 @@
       "name": "CosyVoice2 0 5B"
     }
   },
-  "_syncedAt": "2026-06-01T11:11:44.680Z"
+  "_syncedAt": "2026-06-01T13:01:27.157Z"
 }
