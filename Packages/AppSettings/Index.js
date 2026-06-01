@@ -13,6 +13,7 @@ import {
   setAutoUpdateEnabled,
   setupAutoUpdates,
 } from './Core/AutoUpdateService.js';
+import { exportData, importData } from './Core/DataPortabilityService.js';
 
 function applyLoginItemSetting(enabled) {
   app.setLoginItemSettings({
@@ -166,6 +167,15 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'app-settings:quit-app',
         handler: async () => quitApp(),
+      },
+      // ── Data portability ─────────────────────────────────────────────────
+      {
+        channel: 'data:export',
+        handler: async () => exportData(rootDirectory),
+      },
+      {
+        channel: 'data:import',
+        handler: async () => importData(rootDirectory),
       },
     ],
   };
