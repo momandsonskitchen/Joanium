@@ -1,11 +1,10 @@
 import electron from 'electron';
 import { mkdir, writeFile } from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
 import strings from '../I18n/en.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
-const { BrowserWindow, WebContentsView } = electron;
+const { BrowserWindow, WebContentsView, app } = electron;
 const browserStrings = strings.browserPreview;
 
 export const BUILTIN_BROWSER_USER_AGENT =
@@ -719,7 +718,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     const webContents = await getPageWebContents(ownerWindow);
     const image = await webContents.capturePage();
     const directory = path.join(
-      rootDirectory ? getWritableDataDirectory(rootDirectory) : os.tmpdir(),
+      rootDirectory ? getWritableDataDirectory(rootDirectory) : app.getPath('userData'),
       'Screenshots',
     );
     await mkdir(directory, { recursive: true });
