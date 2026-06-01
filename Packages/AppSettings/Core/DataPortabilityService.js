@@ -63,6 +63,7 @@ function deepMerge(current, imported) {
   ) {
     const result = { ...imported }; // start with imported so we keep its shape
     for (const key of Object.keys(current)) {
+      if (key === '__proto__' || key === 'constructor') continue;
       result[key] = deepMerge(current[key], imported[key]);
     }
     return result;
@@ -198,7 +199,12 @@ export async function importData(rootDirectory) {
     // ── Always skip these ──────────────────────────────────────────────────
     if (topLevel === 'Security.json' || topLevel === 'System.json') continue;
 
-    const destPath = path.join(dataDir, normPath);
+    const destPath = path.resolve(dataDir, normPath);
+
+    // Prevent Zip Slip / Path Traversal: ensure resolved path stays inside dataDir
+    const relative = path.relative(dataDir, destPath);
+    if (relative.startsWith('..') || path.isAbsolute(relative)) continue;
+
     const content = await zipEntry.async('nodebuffer');
 
     // ── User.json: smart merge ─────────────────────────────────────────────
@@ -209,7 +215,12 @@ export async function importData(rootDirectory) {
       } catch {
         /* no current file — start from empty */
       }
-      const importedData = JSON.parse(content.toString('utf8'));
+      let importedData;
+      try {
+        importedData = JSON.parse(content.toString('utf8'));
+      } catch {
+        continue;
+      }
       const merged = mergeUserJson(currentData, importedData);
       await mkdir(path.dirname(destPath), { recursive: true });
       await writeFile(destPath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
@@ -224,7 +235,12 @@ export async function importData(rootDirectory) {
       } catch {
         /* no current file */
       }
-      const importedData = JSON.parse(content.toString('utf8'));
+      let importedData;
+      try {
+        importedData = JSON.parse(content.toString('utf8'));
+      } catch {
+        continue;
+      }
       const merged = mergeChannelsJson(currentData, importedData);
       await mkdir(path.dirname(destPath), { recursive: true });
       await writeFile(destPath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
@@ -248,7 +264,12 @@ export async function importData(rootDirectory) {
 
       if (await fileExists(destPath)) {
         const currentText = (await readFile(destPath, 'utf8')).trimEnd();
-        if (!currentText.includes(importedText)) {
+        const alreadyPresent =
+          currentText === importedText ||
+          currentText.startsWith(`${importedText}\n`) ||
+          currentText.endsWith(`\n${importedText}`) ||
+          currentText.includes(`\n${importedText}\n`);
+        if (!alreadyPresent) {
           await writeFile(
             destPath,
             `${currentText}\n\n<!-- Imported -->\n\n${importedText}\n`,
