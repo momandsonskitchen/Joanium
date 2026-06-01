@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, readdir, stat, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, open, unlink, writeFile } from 'node:fs/promises';
 import { sanitizeMarkdownFilename } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 
@@ -228,10 +228,14 @@ export function createMemoryStateManager({ rootDirectory }) {
     await Promise.all(
       DEFAULT_MEMORY_FILES.map(async (entry) => {
         const filePath = path.join(memoriesDir, entry.filename);
+        let fh = null;
         try {
-          await stat(filePath);
+          fh = await open(filePath, 'wx');
+          await fh.writeFile(entry.content, 'utf8');
         } catch {
-          await writeFile(filePath, entry.content, 'utf8');
+          // file already exists — nothing to do
+        } finally {
+          await fh?.close();
         }
       }),
     );

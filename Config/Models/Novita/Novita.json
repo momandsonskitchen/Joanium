@@ -5,6 +5,16 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "minimax/minimax-m3": {
+      "name": "MiniMax M3",
+      "description": "MiniMax-M3 is a multimodal foundation model from MiniMax. It supports text, image, and video inputs with text output, a 1M-token context window, and is suited for long-horizon agentic work, coding, and tool use. It is built on MiniMax Sparse Attention (MSA), which replaces full attention with KV-blo",
+      "context_window": 1000000,
+      "max_output": 131072,
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "deepseek/deepseek-v4-pro": {
       "name": "DeepSeek V4 Pro",
       "description": "Novita-hosted DeepSeek flagship model for agentic coding, reasoning, and long-context professional work",
@@ -35,16 +45,6 @@
       "max_output": 65536,
       "inputs": {
         "text": true
-      }
-    },
-    "minimax/minimax-m3": {
-      "name": "MiniMax M3",
-      "description": "MiniMax-M3 is a multimodal foundation model from MiniMax. It supports text, image, and video inputs with text output, a 1M-token context window, and is suited for long-horizon agentic work, coding, and tool use. It is built on MiniMax Sparse Attention (MSA), which replaces full attention with KV-blo",
-      "context_window": 1000000,
-      "max_output": 131072,
-      "inputs": {
-        "text": true,
-        "image": true
       }
     },
     "xiaomimimo/mimo-v2.5": {
@@ -1237,5 +1237,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-01T06:35:56.533Z"
+  "_syncedAt": "2026-06-01T08:26:57.690Z"
 }
