@@ -3349,19 +3349,6 @@
         "text": true
       }
     },
-    "google/gemini-2.0-flash-lite-001": {
-      "name": "Google: Gemini 2.0 Flash Lite",
-      "description": "Gemini 2.0 Flash Lite offers a significantly faster time to first token (TTFT) compared to [Gemini Flash 1.5](/google/gemini-flash-1.5), while maintaining quality on par with larger models like [Gemini Pro 1.5](/google/gemini-pro-1.5),...",
-      "context_window": 1048576,
-      "pricing": {
-        "input": 0.08,
-        "output": 0.3
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "mistralai/mistral-saba": {
       "name": "Mistral: Saba",
       "description": "Mistral Saba is a 24B-parameter language model specifically designed for the Middle East and South Asia, delivering accurate and contextually relevant responses while maintaining efficient performance. Trained on curated regional...",
@@ -3396,19 +3383,6 @@
       },
       "inputs": {
         "text": true
-      }
-    },
-    "google/gemini-2.0-flash-001": {
-      "name": "Google: Gemini 2.0 Flash",
-      "description": "Gemini Flash 2.0 offers a significantly faster time to first token (TTFT) compared to [Gemini Flash 1.5](/google/gemini-flash-1.5), while maintaining quality on par with larger models like [Gemini Pro 1.5](/google/gemini-pro-1.5). It...",
-      "context_window": 1048576,
-      "pricing": {
-        "input": 0.1,
-        "output": 0.4
-      },
-      "inputs": {
-        "text": true,
-        "image": true
       }
     },
     "aion-labs/aion-1.0": {
@@ -4341,5 +4315,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-01T13:01:12.325Z"
+  "_syncedAt": "2026-06-01T14:21:47.923Z"
 }
