@@ -193,17 +193,28 @@ export function createDirectoryService({ rootDirectory }) {
     const projectError = requireProjectScopedPath(resolvedPath, payload);
     if (projectError) return projectError;
 
-    if (!fs.existsSync(resolvedPath) || !fs.statSync(resolvedPath).isFile()) {
+    let fd = null;
+    let beforeContent = '';
+    try {
+      fd = fs.openSync(resolvedPath, 'r+');
+      const stat = fs.fstatSync(fd);
+      if (!stat.isFile()) {
+        return { ok: false, error: `"${resolvedPath}" is not a file.` };
+      }
+      const buf = Buffer.alloc(stat.size);
+      fs.readSync(fd, buf, 0, stat.size, 0);
+      beforeContent = buf.toString('utf8');
+    } catch {
       return { ok: false, error: `"${resolvedPath}" is not a file.` };
     }
 
-    const beforeContent = fs.readFileSync(resolvedPath, 'utf8');
     const search = String(payload.search);
     const replace = String(payload.replace);
     const replaceAll = normalizeBool(payload.replaceAll ?? payload.replace_all);
     const occurrences = beforeContent.split(search).length - 1;
 
     if (occurrences <= 0) {
+      if (fd !== null) fs.closeSync(fd);
       return { ok: false, error: 'Search text was not found in the file.' };
     }
 
@@ -211,7 +222,12 @@ export function createDirectoryService({ rootDirectory }) {
       ? beforeContent.split(search).join(replace)
       : beforeContent.replace(search, replace);
 
-    fs.writeFileSync(resolvedPath, afterContent, 'utf8');
+    try {
+      fs.ftruncateSync(fd, 0);
+      fs.writeSync(fd, afterContent, 0, 'utf8');
+    } finally {
+      if (fd !== null) fs.closeSync(fd);
+    }
     return {
       ok: true,
       path: resolvedPath,
