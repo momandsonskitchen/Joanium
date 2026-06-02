@@ -157,6 +157,7 @@ export function createAgentStateManager({ rootDirectory }) {
             inputTokens: run.inputTokens ?? 0,
             outputTokens: run.outputTokens ?? 0,
             source: run.source ?? 'agent',
+            terminals: Array.isArray(run.terminals) ? run.terminals : [],
           });
         } catch {
           // Skip corrupt run logs.

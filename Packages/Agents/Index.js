@@ -4,6 +4,8 @@ import { readdir, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { BrowserWindow } from 'electron';
 import { createAgentStateManager } from './Core/AgentState.js';
 import { createAgentScheduler } from './Core/AgentScheduler.js';
+import { createReplayStore } from './Core/ReplayStore.js';
+import { createReplayIpcHandlers } from './IPC/ReplayIpc.js';
 import { sanitizeFileStem } from '../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../Shared/Storage/ResourcePaths.js';
 import { estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
@@ -16,6 +18,7 @@ import { estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 export async function createPackage({ rootDirectory }) {
   const agentStateManager = createAgentStateManager({ rootDirectory });
+  const replayStore = createReplayStore({ rootDirectory });
   const agentsDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Agents');
   const avatarsDirectory = path.join(rootDirectory, 'Assets', 'Agents');
 
@@ -217,6 +220,7 @@ export async function createPackage({ rootDirectory }) {
           finishedAt,
           fullResponse: aiResult?.text ?? '',
           thinking: aiResult?.thinking ?? '',
+          terminals: Array.isArray(aiResult?.terminals) ? aiResult.terminals : [],
           provider: aiResult?.providerLabel ?? null,
           model: aiResult?.modelLabel ?? null,
           inputTokens: estimateTokens(aiResult?.charCountIn ?? 0),
@@ -244,6 +248,8 @@ export async function createPackage({ rootDirectory }) {
     .catch((err) => console.error('[Agents] Scheduler start error:', err));
 
   // ── IPC Handlers ──────────────────────────────────────────────────────────
+
+  const replayHandlers = createReplayIpcHandlers({ replayStore, agentStateManager, runAgent });
 
   return {
     id: 'Agents',
@@ -355,6 +361,9 @@ export async function createPackage({ rootDirectory }) {
         channel: 'agents:clear-runs',
         handler: async () => agentStateManager.clearRuns(),
       },
+
+      // ── Execution Replay ─────────────────────────────────────────────────
+      ...replayHandlers,
     ],
   };
 }

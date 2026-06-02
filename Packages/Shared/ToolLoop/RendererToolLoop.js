@@ -746,6 +746,9 @@ export async function runRendererToolLoop({
   let charCountIn = 0;
   let charCountOut = 0;
   let workingMessages = [...(messages ?? [])];
+  // Collects one record per tool call so callers (e.g. AgentGateway) can
+  // persist the list and display it in the Events panel after the run ends.
+  const terminals = [];
 
   for (let depth = 0; depth <= maxToolCalls; depth += 1) {
     const request = {
@@ -792,6 +795,7 @@ export async function runRendererToolLoop({
         modelLabel,
         charCountIn,
         charCountOut,
+        terminals,
       };
     }
 
@@ -803,6 +807,7 @@ export async function runRendererToolLoop({
         modelLabel,
         charCountIn,
         charCountOut,
+        terminals,
       };
     }
 
@@ -829,6 +834,29 @@ export async function runRendererToolLoop({
       }),
     );
 
+    // Record each completed tool call so it can be persisted and shown in
+    // the Events panel even after the final clean response replaces the text.
+    for (const { action, result } of allResults) {
+      const output = [
+        result?.output,
+        result?.content,
+        result?.stdout,
+        result?.buffer,
+        result?.error,
+      ]
+        .filter(Boolean)
+        .join('\n')
+        .slice(0, 4000);
+      terminals.push({
+        command: action.tool,
+        label: action.tool,
+        status: result?.ok === false ? 'failed' : 'completed',
+        statusLabel: result?.ok === false ? 'Failed.' : 'Tool used.',
+        output: output || null,
+        error: result?.ok === false ? (result.error ?? null) : null,
+      });
+    }
+
     const modelResult = allResults
       .map(({ action, result }) =>
         action._kind === 'terminal'
@@ -851,5 +879,6 @@ export async function runRendererToolLoop({
     modelLabel,
     charCountIn,
     charCountOut,
+    terminals,
   };
 }

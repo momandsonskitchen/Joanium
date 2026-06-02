@@ -1,0 +1,556 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Execution Replay
+   Timeline viewer for agent run steps — embedded inside AgentsPanel.
+   Mounted in the right list column when the user clicks "View Replay" on
+   an agent card.
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root container ──────────────────────────────────────────────────────── */
+
+.replay {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  animation: chat-fade-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Empty / loading state ───────────────────────────────────────────────── */
+
+.replay__empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--color-chat-text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.replay__header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px 18px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 8px 24px rgba(130, 95, 65, 0.07);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+
+/* ── Title row ───────────────────────────────────────────────────────────── */
+
+.replay__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.replay__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 520;
+  letter-spacing: -0.03em;
+  color: var(--color-chat-text-title);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+
+.replay-status {
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.replay-status--success {
+  background: rgba(44, 171, 104, 0.1);
+  color: #218556;
+}
+
+.replay-status--error {
+  background: rgba(190, 70, 54, 0.09);
+  color: #b14539;
+}
+
+.replay-status--running {
+  background: rgba(var(--color-accent-rgb), 0.1);
+  color: var(--color-accent);
+  animation: events-status-running-pulse 2s ease-in-out infinite;
+}
+
+.replay-status--queued,
+.replay-status--skipped {
+  background: rgba(150, 125, 105, 0.1);
+  color: var(--color-chat-text-muted);
+}
+
+/* ── Meta chips ──────────────────────────────────────────────────────────── */
+
+.replay__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.replay-meta-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 11px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(200, 175, 155, 0.12);
+  transition: box-shadow 140ms ease;
+}
+
+.replay-meta-chip:hover {
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.16);
+}
+
+.replay-meta-chip__label {
+  font-size: 9.5px;
+  font-weight: 680;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  color: var(--color-chat-text-muted);
+  opacity: 0.75;
+}
+
+.replay-meta-chip__value {
+  font-size: 12.5px;
+  font-weight: 530;
+  letter-spacing: -0.015em;
+  color: var(--color-chat-text-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* ── Prompt summary ──────────────────────────────────────────────────────── */
+
+.replay__prompt-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(var(--color-accent-rgb), 0.04);
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.08);
+}
+
+.replay__prompt-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  opacity: 0.8;
+}
+
+.replay__prompt-text {
+  font-size: 12.5px;
+  font-weight: 440;
+  line-height: 1.55;
+  color: var(--color-chat-text-secondary);
+  letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Replay button ───────────────────────────────────────────────────────── */
+
+.replay__btn-row {
+  display: flex;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.replay__btn-replay {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 16px 0 12px;
+  border-radius: 20px;
+  border: 0;
+  background: var(--color-accent);
+  color: rgba(255, 255, 255, 0.97);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: var(--shadow-button-primary);
+  transition:
+    opacity 140ms ease,
+    transform 130ms ease,
+    box-shadow 140ms ease;
+}
+
+.replay__btn-replay:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 36px rgba(var(--color-accent-rgb), 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.replay__btn-replay:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.replay__btn-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.replay__btn-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.replay__btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  animation: agents-spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Timeline container ──────────────────────────────────────────────────── */
+
+.replay__timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 0;
+}
+
+/* ── Skeleton steps ──────────────────────────────────────────────────────── */
+
+.replay-skeleton {
+  height: 52px;
+  border-radius: 16px;
+  margin-bottom: 8px;
+  background: rgba(180, 140, 110, 0.07);
+  animation: chat-history-shimmer 1.4s ease-in-out infinite;
+}
+
+.replay-skeleton:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.replay-skeleton:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.replay-skeleton:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* ── Step node ───────────────────────────────────────────────────────────── */
+
+.replay-step {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 0;
+  position: relative;
+}
+
+/* ── Timeline track (left rail) ──────────────────────────────────────────── */
+
+.replay-step__track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 14px;
+  position: relative;
+}
+
+.replay-step__dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+  transition: box-shadow 140ms ease;
+}
+
+.replay-step__dot--tool {
+  background: rgba(var(--color-accent-rgb), 0.1);
+  color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.08);
+}
+
+.replay-step__dot--response {
+  background: rgba(44, 171, 104, 0.12);
+  color: #218556;
+  box-shadow: 0 0 0 3px rgba(44, 171, 104, 0.07);
+}
+
+details[open] ~ * .replay-step__dot--tool,
+.replay-step__details[open] ~ .replay-step__track .replay-step__dot--tool {
+  box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), 0.14);
+}
+
+.replay-step__dot-icon {
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+  color: currentColor;
+}
+
+.replay-step__dot-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Connector-branded image inside a timeline dot */
+.replay-step__dot-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Vertical connector line */
+.replay-step__line {
+  flex: 1;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--color-accent-rgb), 0.18) 0%,
+    rgba(var(--color-accent-rgb), 0.06) 100%
+  );
+  border-radius: 1px;
+  margin-top: 4px;
+  min-height: 16px;
+}
+
+/* ── Step details (<details> element) ────────────────────────────────────── */
+
+.replay-step__details {
+  margin-bottom: 8px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.52);
+  box-shadow:
+    inset 0 0 0 1px rgba(175, 139, 104, 0.1),
+    0 2px 10px rgba(130, 95, 65, 0.05);
+  overflow: hidden;
+  transition: box-shadow 140ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.replay-step__details:hover {
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.16),
+    0 4px 16px rgba(130, 95, 65, 0.07);
+}
+
+.replay-step--response .replay-step__details {
+  background: rgba(44, 171, 104, 0.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(44, 171, 104, 0.1),
+    0 2px 10px rgba(40, 155, 90, 0.04);
+}
+
+/* ── Step summary (always visible) ──────────────────────────────────────── */
+
+.replay-step__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background-color 130ms ease;
+}
+
+.replay-step__summary:hover {
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.replay-step__summary::-webkit-details-marker {
+  display: none;
+}
+
+.replay-step__summary-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.replay-step__summary-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Step index / type badge ─────────────────────────────────────────────── */
+
+.replay-badge {
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 680;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.replay-badge--tool {
+  background: rgba(var(--color-accent-rgb), 0.1);
+  color: var(--color-accent);
+}
+
+.replay-badge--response {
+  background: rgba(44, 171, 104, 0.1);
+  color: #218556;
+}
+
+/* ── Step label (tool name or "Response") ────────────────────────────────── */
+
+.replay-step__label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--color-chat-text-title);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Timestamp & duration ────────────────────────────────────────────────── */
+
+.replay-step__timestamp {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-chat-text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.replay-step__dur {
+  font-size: 11.5px;
+  font-weight: 560;
+  color: var(--color-chat-text-muted);
+  opacity: 0.72;
+  white-space: nowrap;
+}
+
+/* ── Chevron ─────────────────────────────────────────────────────────────── */
+
+.replay-step__chevron {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  color: var(--color-chat-text-muted);
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+.replay-step__chevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+.replay-step__details[open] .replay-step__chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Expanded body ───────────────────────────────────────────────────────── */
+
+.replay-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 14px 14px;
+  border-top: 1px solid rgba(170, 134, 104, 0.08);
+}
+
+/* ── Code / JSON blocks ──────────────────────────────────────────────────── */
+
+.replay-code-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.replay-code-block__label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-chat-text-muted);
+  opacity: 0.75;
+}
+
+.replay-code-block__pre {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: rgba(22, 18, 14, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.1);
+  font-family: var(--font-family);
+  font-size: 11.5px;
+  line-height: 1.65;
+  letter-spacing: 0;
+  color: var(--color-chat-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+
+.replay-code-block__notice {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 11px;
+  background: rgba(150, 125, 105, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(150, 125, 105, 0.1);
+  font-size: 11.5px;
+  color: var(--color-chat-text-muted);
+  font-style: italic;
+  letter-spacing: -0.01em;
+}

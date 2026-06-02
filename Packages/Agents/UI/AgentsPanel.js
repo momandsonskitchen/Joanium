@@ -6,6 +6,7 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
+import { createExecutionReplay } from './ExecutionReplay.js';
 import {
   buildAvailableModelOptions,
   decodeModelValue,
@@ -53,6 +54,18 @@ function buildScheduleDescription(schedule, strings) {
   }
 }
 
+function formatRelativeDate(iso) {
+  if (!iso) return '';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+}
+
 // ---------------------------------------------------------------------------
 // createAgentsPanel
 // ---------------------------------------------------------------------------
@@ -85,6 +98,17 @@ export function createAgentsPanel(strings) {
   let formHeadingRef = null;
   let modelSectionEl = null;
   let modelDropdown = null;
+
+  // ── Replay viewer state ────────────────────────────────────────────────────
+  // The right column can show either the agent list or the replay viewer.
+  // replayViewer is created once and reused across agents.
+  let listColEl = null;
+  let listContentEl = null;
+  let replayPaneEl = null;
+  let replayViewer = null;
+  let replayBackBtnEl = null;
+  let replayRunsEl = null;
+  let replayHeadingEl = null;
 
   // ── Provider loading ──────────────────────────────────────────────────────
 
@@ -139,8 +163,6 @@ export function createAgentsPanel(strings) {
     const wrap = createElement('div', 'agents-form__model-dropdown-wrap');
     wrapper.append(label, wrap);
     modelSectionEl = wrapper;
-    // Dropdown rendered once providers are loaded (rebuildModelDropdown is
-    // called at the end of loadProviders, or immediately if already cached).
     rebuildModelDropdown();
     return wrapper;
   }
@@ -165,7 +187,6 @@ export function createAgentsPanel(strings) {
 
     if (!avatarGridEl) return;
 
-    // Shuffle so the order is different every time
     availableAvatars = availableAvatars.slice().sort(() => Math.random() - 0.5);
 
     const existingTiles = avatarGridEl.querySelectorAll('.agents-form__avatar-tile--image');
@@ -201,7 +222,6 @@ export function createAgentsPanel(strings) {
       avatarGridEl.append(tile);
     }
 
-    // Default to the first avatar (random since list is shuffled)
     if (!draftAvatar && !editingAgentId && availableAvatars.length > 0) {
       draftAvatar = availableAvatars[0].filename;
     }
@@ -384,11 +404,122 @@ export function createAgentsPanel(strings) {
 
     syncAvatarTileSelection();
     syncScheduleConditionals();
-    rebuildModelDropdown(); // re-render dropdown with agent's saved model
+    rebuildModelDropdown();
     syncSaveBtn();
     syncFormChrome();
 
     panelRef?.querySelector('.agents-form__name-input')?.focus();
+  }
+
+  // ── Execution Replay pane ─────────────────────────────────────────────────
+
+  function buildReplayPane() {
+    const pane = createElement('div', 'agents-replay-pane');
+    pane.hidden = true;
+
+    // Back button + heading row
+    const topRow = createElement('div', 'agents-replay-pane__top');
+
+    replayBackBtnEl = createElement('button', 'agents-replay-pane__back');
+    replayBackBtnEl.type = 'button';
+    replayBackBtnEl.append(createIcon('arrowLeft', 'agents-replay-pane__back-icon'));
+    replayBackBtnEl.addEventListener('click', hideReplayPane);
+
+    replayHeadingEl = createElement('p', 'agents-list__heading');
+    topRow.append(replayBackBtnEl, replayHeadingEl);
+    pane.append(topRow);
+
+    // Run picker — a scrollable list of past runs for the selected agent
+    replayRunsEl = createElement('div', 'agents-replay-runs');
+    pane.append(replayRunsEl);
+
+    // Replay viewer — mounted below the run picker
+    replayViewer = createExecutionReplay(strings);
+    const viewerEl = replayViewer.build();
+    pane.append(viewerEl);
+
+    replayPaneEl = pane;
+    return pane;
+  }
+
+  async function showReplayPane(agentId, agentName) {
+    if (!listColEl || !listContentEl || !replayPaneEl) return;
+
+    replayHeadingEl.textContent = agentName;
+    replayViewer.clear();
+    replayRunsEl.replaceChildren();
+    replayRunsEl.append(createElement('div', 'agents-replay-runs__loading'));
+
+    listContentEl.hidden = true;
+    listColEl.querySelector('.agents-list__search').hidden = true;
+    listColEl.querySelector('.agents-list__heading:not(.agents-replay-pane__top *)').hidden = true;
+    replayPaneEl.hidden = false;
+
+    // Load runs for this agent
+    let allRuns;
+    try {
+      allRuns = await invokeIpc('agents:list-run-ids');
+    } catch {
+      allRuns = [];
+    }
+
+    const agentRuns = allRuns.filter((r) => r.agentId === agentId);
+    replayRunsEl.replaceChildren();
+
+    if (agentRuns.length === 0) {
+      replayRunsEl.append(createElement('p', 'agents-replay-runs__empty', strings.replay.empty));
+      return;
+    }
+
+    // Select the most recent run automatically
+    let selectedRunId = agentRuns[0].runId;
+
+    function syncRunSelection() {
+      for (const btn of replayRunsEl.querySelectorAll('.agents-replay-run-btn')) {
+        btn.classList.toggle('agents-replay-run-btn--active', btn._runId === selectedRunId);
+      }
+    }
+
+    for (const run of agentRuns) {
+      const btn = createElement('button', 'agents-replay-run-btn');
+      btn.type = 'button';
+      btn._runId = run.runId;
+
+      const statusDot = createElement(
+        'span',
+        `agents-replay-run-btn__dot agents-replay-run-btn__dot--${run.status ?? 'success'}`,
+      );
+      const dateLabel = createElement(
+        'span',
+        'agents-replay-run-btn__date',
+        formatRelativeDate(run.startedAt),
+      );
+      const statusLabel = createElement(
+        'span',
+        'agents-replay-run-btn__status',
+        strings.replay.status[run.status] ?? run.status ?? '',
+      );
+
+      btn.append(statusDot, dateLabel, statusLabel);
+      btn.addEventListener('click', () => {
+        selectedRunId = run.runId;
+        syncRunSelection();
+        void replayViewer.load(run.runId);
+      });
+      replayRunsEl.append(btn);
+    }
+
+    syncRunSelection();
+    void replayViewer.load(selectedRunId);
+  }
+
+  function hideReplayPane() {
+    if (!listColEl || !listContentEl || !replayPaneEl) return;
+    replayPaneEl.hidden = true;
+    replayViewer.clear();
+    listContentEl.hidden = false;
+    listColEl.querySelector('.agents-list__search').hidden = false;
+    listColEl.querySelector('.agents-list__heading:not(.agents-replay-pane__top *)').hidden = false;
   }
 
   // ── Card builder ───────────────────────────────────────────────────────────
@@ -408,7 +539,6 @@ export function createAgentsPanel(strings) {
     const provider = cachedProviders.find((p) => p.id === m.providerId);
     const model = provider?.models?.find((mo) => mo.id === m.modelId);
     if (provider && model) return `${provider.label} — ${model.name ?? model.id}`;
-    // Provider/model no longer in catalog — show raw ids.
     return `${m.providerId} / ${m.modelId}`;
   }
 
@@ -454,11 +584,10 @@ export function createAgentsPanel(strings) {
     // Actions
     const actions = createElement('div', 'agents-card__actions');
 
-    // Enable / Disable — pill toggle (dot slides left↔right)
+    // Enable / Disable toggle
     let isEnabled = agent.enabled !== false;
     const toggleBtn = createElement('button', 'agents-card__btn agents-card__btn--toggle');
     toggleBtn.type = 'button';
-
     const togglePill = createElement('span', 'agents-toggle');
     const toggleThumb = createElement('span', 'agents-toggle__thumb');
     togglePill.append(toggleThumb);
@@ -482,7 +611,7 @@ export function createAgentsPanel(strings) {
       }
     });
 
-    // Run — bolt icon → circular spinner when running → check when done
+    // Run — bolt → spinner → check
     const runBtn = createElement('button', 'agents-card__btn agents-card__btn--run');
     runBtn.type = 'button';
     runBtn.setAttribute('aria-label', strings.run);
@@ -509,6 +638,16 @@ export function createAgentsPanel(strings) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       runBtn.classList.remove('agents-card__btn--done');
       runBtn._isRunning = false;
+    });
+
+    // View Replay
+    const replayBtn = createElement('button', 'agents-card__btn agents-card__btn--replay');
+    replayBtn.type = 'button';
+    replayBtn.setAttribute('aria-label', strings.viewReplay);
+    replayBtn.append(createIcon('tabHistory', 'agents-card__btn-icon'));
+    replayBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      void showReplayPane(agent.id, agent.name);
     });
 
     // Edit
@@ -542,22 +681,19 @@ export function createAgentsPanel(strings) {
       await populateList(listEl, panelRef?._search.getValue().trim() ?? '');
     });
 
-    actions.append(toggleBtn, runBtn, editBtn, deleteBtn);
+    actions.append(toggleBtn, runBtn, replayBtn, editBtn, deleteBtn);
     card.append(avatarEl, body, actions);
     return card;
   }
 
   // ── populateList ───────────────────────────────────────────────────────────
 
-  let _fetchGen = 0; // incremented on every fetch; stale results are discarded
+  let _fetchGen = 0;
 
   async function populateList(listEl, query = '') {
     _fetchGen++;
     const gen = _fetchGen;
 
-    // Only reset to skeletons when the list isn't already in a loading state.
-    // This preserves the skeleton UI when the user navigates away and back
-    // while a fetch is still in-flight.
     const alreadyLoading = !!listEl.querySelector('.agents-skeleton');
     if (!alreadyLoading) {
       listEl.replaceChildren();
@@ -571,7 +707,6 @@ export function createAgentsPanel(strings) {
       agents = [];
     }
 
-    // A newer call superseded this one — discard the stale result.
     if (gen !== _fetchGen) return;
 
     const normalizedQuery = collapseWhitespace(query).toLowerCase();
@@ -695,7 +830,7 @@ export function createAgentsPanel(strings) {
         name,
         avatar,
         schedule,
-        model: draftModel, // null = use app default; { providerId, modelId } = specific
+        model: draftModel,
         prompt,
         createdAt: editingCreatedAt ?? now,
         updatedAt: now,
@@ -716,9 +851,12 @@ export function createAgentsPanel(strings) {
     formCard.append(formActions);
     formCol.append(formCard);
 
-    // ── Right: list ────────────────────────────────────────────────────────
+    // ── Right: list + replay pane ──────────────────────────────────────────
     const listCol = createElement('div', 'agents-list-col');
-    listCol.append(createElement('p', 'agents-list__heading', strings.yourAgents));
+    listColEl = listCol;
+
+    const listHeading = createElement('p', 'agents-list__heading', strings.yourAgents);
+    listCol.append(listHeading);
 
     const searchWrap = createElement('div', 'agents-list__search');
     const search = createSearchBar({
@@ -728,7 +866,11 @@ export function createAgentsPanel(strings) {
     searchWrap.append(search.element);
 
     const listContent = createElement('div', 'agents-list__content');
+    listContentEl = listContent;
     listCol.append(searchWrap, listContent);
+
+    // Replay pane — hidden until activated by a "View Replay" card button
+    listCol.append(buildReplayPane());
 
     body.append(formCol, listCol);
     panel.append(body);
@@ -743,7 +885,6 @@ export function createAgentsPanel(strings) {
     syncFormChrome();
     syncSaveBtn();
 
-    // Load async data — neither blocks the initial render
     void loadAvatars();
     void loadProviders();
 
