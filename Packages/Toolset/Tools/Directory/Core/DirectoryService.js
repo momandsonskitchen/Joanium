@@ -157,22 +157,53 @@ export function createDirectoryService({ rootDirectory }) {
     if (projectError) return projectError;
 
     const append = normalizeBool(payload.append);
-    const existed = fs.existsSync(resolvedPath);
-    const beforeContent =
-      existed && fs.statSync(resolvedPath).isFile() ? fs.readFileSync(resolvedPath, 'utf8') : '';
+    const content = payload.content ?? '';
 
-    fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
-    if (append) {
-      fs.appendFileSync(resolvedPath, payload.content ?? '', 'utf8');
-    } else {
-      fs.writeFileSync(resolvedPath, payload.content ?? '', 'utf8');
+    // --- Snapshot the existing content via a stable fd (avoids TOCTOU) --------
+    let beforeContent = '';
+    let existed = false;
+    let readFd = null;
+    try {
+      readFd = fs.openSync(resolvedPath, 'r');
+      existed = true;
+      const stat = fs.fstatSync(readFd);
+      if (stat.isFile()) {
+        const buf = Buffer.alloc(stat.size);
+        fs.readSync(readFd, buf, 0, stat.size, 0);
+        beforeContent = buf.toString('utf8');
+      }
+    } catch {
+      // File does not exist yet — beforeContent stays ''
+    } finally {
+      if (readFd !== null) fs.closeSync(readFd);
     }
 
-    const afterContent = fs.readFileSync(resolvedPath, 'utf8');
+    // --- Write via fd so the open + write are the same file reference ----------
+    fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
+    // 'a' = append/create; 'w' = truncate/create — both avoid a separate existsSync
+    const writeFd = fs.openSync(resolvedPath, append ? 'a' : 'w');
+    try {
+      fs.writeSync(writeFd, content, null, 'utf8');
+    } finally {
+      fs.closeSync(writeFd);
+    }
+
+    // --- Read back the result via a fresh fd -----------------------------------
+    let afterContent = '';
+    const verifyFd = fs.openSync(resolvedPath, 'r');
+    try {
+      const stat = fs.fstatSync(verifyFd);
+      const buf = Buffer.alloc(stat.size);
+      fs.readSync(verifyFd, buf, 0, stat.size, 0);
+      afterContent = buf.toString('utf8');
+    } finally {
+      fs.closeSync(verifyFd);
+    }
+
     return {
       ok: true,
       path: resolvedPath,
-      bytes: Buffer.byteLength(payload.content ?? '', 'utf8'),
+      bytes: Buffer.byteLength(content, 'utf8'),
       beforeContent,
       afterContent,
       created: !existed,
