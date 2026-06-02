@@ -34,7 +34,7 @@ function distributeTimestamps(startIso, finishIso, count) {
   const startMs = new Date(startIso).getTime();
   const endMs = new Date(finishIso).getTime();
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
-    return Array(count).fill(startIso ?? null);
+    return Array(count).fill(startIso);
   }
 
   const stepMs = (endMs - startMs) / count;
