@@ -6,6 +6,27 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.602.0] - 2026-06-02
+
+* chore(release): bump version to 2026.602.0
+* Bug Fixes
+* AI Model Update
+* Added Data Porting Feature
+* Updated AI Models: Added Support For Minimax M3
+* Added 3 New AI Providers: Poe, StepFun and Parasail
+* Fix: Useless conditional #55
+* Fix: Useless conditional #59
+* Fixed Superfluous trailing arguments #81
+* Added Comment To Avoid False Negatives
+* Fix: Insecure temporary file #49
+* Create codeql.yml
+* Removed CodeQL.
+* Delete .github/workflows/codacy.yml
+* Updated AI Models
+* Fix: Potential file system race condition #36
+
+---
+
 ## [2026.601.0] - 2026-06-01
 
 * chore(release): bump version to 2026.601.0
