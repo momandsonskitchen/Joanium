@@ -5,6 +5,68 @@ import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 
+// ── Connector icon map: prefix → filename in Assets/Icons/ ──────────────────
+// Mirrors TerminalPanel.js so event tool-call cards display the right logo.
+const CONNECTOR_ICON_MAP = {
+  gmail: 'Gmail',
+  drive: 'Drive',
+  calendar: 'Calendar',
+  docs: 'GoogleDocs',
+  sheets: 'GoogleSheets',
+  slides: 'Slides',
+  contacts: 'Contacts',
+  photos: 'Photos',
+  forms: 'Forms',
+  tasks: 'GoogleTasks',
+  youtube: 'Youtube',
+  google: 'Google',
+  github: 'Github',
+  gitlab: 'Gitlab',
+  notion: 'Notion',
+  slack: 'Slack',
+  discord: 'Discord',
+  telegram: 'Telegram',
+  whatsapp: 'WhatsApp',
+  spotify: 'Spotify',
+  stripe: 'Stripe',
+  supabase: 'Supabase',
+  vercel: 'Vercel',
+  netlify: 'Netlify',
+  linear: 'Linear',
+  jira: 'Jira',
+  figma: 'Figma',
+  hubspot: 'Hubspot',
+  sentry: 'Sentry',
+  cloudflare: 'Cloudflare',
+  unsplash: 'Unsplash',
+  wikipedia: 'Wikipedia',
+  wikimedia: 'Wikipedia',
+  openweather: 'OpenWeatherMap',
+  open_meteo: 'OpenMeteo',
+  coingecko: 'CoinGecko',
+  nasa: 'Nasa',
+  hackernews: 'HackerNews',
+  npm: 'Npm',
+  arxiv: 'Arxiv',
+  reddit: 'Reddit',
+  stackoverflow: 'StackOverflow',
+  itunes: 'iTunes',
+  perplexity: 'Perplexity',
+  airtable: 'Airtable',
+  todoist: 'Tasks',
+};
+
+function connectorIdFromToolName(toolName) {
+  return String(toolName ?? '')
+    .split('_')[0]
+    .toLowerCase();
+}
+
+function getConnectorIconPath(connectorId) {
+  const file = CONNECTOR_ICON_MAP[String(connectorId ?? '').toLowerCase()];
+  return file ? `../../../Assets/Icons/${file}.png` : null;
+}
+
 const FILTERS = ['all', 'channels', 'agents', 'errors'];
 
 // Converts an absolute OS file path to a file:// URL safe for <img src>.
@@ -115,6 +177,10 @@ function normalizeAgentRun(run, strings, index) {
     tokensOut: run.outputTokens ?? 0,
     streamTool: run.streamTool ?? null,
     streamDepth: run.streamDepth ?? 0,
+    // Persistent terminal/tool-call history — populated by the agent runner as
+    // each tool completes. This survives after the run finishes so tool cards
+    // remain visible in the detail pane even when the final response is shown.
+    terminals: Array.isArray(run.terminals) ? run.terminals : [],
     avatarUrl: toFileUrl(run.agentAvatarPath ?? null),
     channelKey: null,
     raw: run,
@@ -237,6 +303,7 @@ export function createEventsPanel(strings) {
 
   function selectEvent(event) {
     selectedId = event?.id ?? null;
+    lastDetailSnapshot = ''; // force detail rebuild on manual selection
     renderList();
     renderDetail(event);
   }
@@ -316,43 +383,170 @@ export function createEventsPanel(strings) {
   }
 
   // ── createToolCallCard ──────────────────────────────────────────────────
-  // Renders a single joanium-tool/terminal block as a styled card widget,
-  // matching the chat view's terminal-call design language.
+  // Renders a single tool-call block (from embedded joanium-tool code blocks
+  // in the response text) as a styled card that matches the chat UI exactly,
+  // using the same chat-terminal-call CSS classes as TerminalPanel.js.
 
   function createToolCallCard(toolName, params) {
-    const card = createElement('div', 'events-tool-call');
+    const hasOutput = params && typeof params === 'object' && Object.keys(params).length > 0;
 
-    const header = createElement('div', 'events-tool-call__header');
-    const iconWrap = createElement('span', 'events-tool-call__icon');
-    iconWrap.append(createIcon('terminal', 'events-tool-call__icon-svg'));
+    const card = hasOutput
+      ? Object.assign(document.createElement('details'), {
+          className: 'chat-terminal-call chat-terminal-call--completed',
+        })
+      : createElement('section', 'chat-terminal-call chat-terminal-call--completed');
 
-    const copy = createElement('div', 'events-tool-call__copy');
+    const header = createElement(hasOutput ? 'summary' : 'div', 'chat-terminal-call__header');
+
+    const identity = createElement('div', 'chat-terminal-call__identity');
+
+    const connectorId = connectorIdFromToolName(toolName);
+    const connectorIconPath = getConnectorIconPath(connectorId);
+    if (connectorIconPath) {
+      const img = document.createElement('img');
+      img.src = connectorIconPath;
+      img.alt = '';
+      img.className = 'chat-terminal-call__icon chat-terminal-call__icon--connector';
+      identity.append(img);
+    } else {
+      identity.append(createIcon('terminal', 'chat-terminal-call__icon'));
+    }
+
+    const copy = createElement('div', 'chat-terminal-call__copy');
     copy.append(
-      createElement('div', 'events-tool-call__label', toolName),
-      createElement('div', 'events-tool-call__sub', toolName),
+      createElement('div', 'chat-terminal-call__label', toolName),
+      createElement('div', 'chat-terminal-call__command', toolName),
     );
+    identity.append(copy);
 
-    const badge = createElement('span', 'events-tool-call__badge', strings.labels.toolUsed);
-    header.append(iconWrap, copy, badge);
-    card.append(header);
+    const statusEl = createElement('span', 'chat-terminal-call__status', strings.labels.toolUsed);
 
-    if (params && typeof params === 'object' && Object.keys(params).length > 0) {
-      const details = document.createElement('details');
-      details.className = 'events-tool-call__details';
+    header.append(identity);
 
-      const summary = createElement('summary', 'events-tool-call__summary');
-      summary.append(
-        createIcon('chevronDown', 'events-tool-call__chevron'),
-        createElement('span', '', strings.labels.parameters),
+    if (hasOutput) {
+      const trailing = createElement('div', 'chat-terminal-call__trailing');
+      trailing.append(statusEl, createIcon('chevronDown', 'chat-terminal-call__details-icon'));
+      header.append(trailing);
+      const pre = createElement(
+        'pre',
+        'chat-terminal-call__output',
+        JSON.stringify(params, null, 2),
       );
-
-      const pre = createElement('pre', 'events-tool-call__params', JSON.stringify(params, null, 2));
-
-      details.append(summary, pre);
-      card.append(details);
+      card.append(header, pre);
+    } else {
+      header.append(statusEl);
+      card.append(header);
     }
 
     return card;
+  }
+
+  // ── createAgentTerminalCard ─────────────────────────────────────────────
+  // Renders a single terminal object from the agent run's persistent
+  // run.terminals array. Uses the same chat-terminal-call classes so the
+  // cards look identical to the chat UI — and they survive after the run
+  // finishes because the data lives in the array, not in the response text.
+
+  function createAgentTerminalCard(terminal) {
+    const status = terminal.status ?? 'completed';
+    const hasOutput = Boolean(terminal.output || terminal.error);
+
+    const card = hasOutput
+      ? Object.assign(document.createElement('details'), {
+          className: `chat-terminal-call chat-terminal-call--${status}`,
+        })
+      : createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
+
+    const header = createElement(hasOutput ? 'summary' : 'div', 'chat-terminal-call__header');
+
+    const identity = createElement('div', 'chat-terminal-call__identity');
+
+    const toolName = terminal.command || terminal.tool || terminal.label || '';
+    const connectorId = connectorIdFromToolName(toolName);
+    const connectorIconPath = getConnectorIconPath(connectorId);
+    if (connectorIconPath) {
+      const img = document.createElement('img');
+      img.src = connectorIconPath;
+      img.alt = '';
+      img.className = 'chat-terminal-call__icon chat-terminal-call__icon--connector';
+      identity.append(img);
+    } else {
+      identity.append(createIcon('terminal', 'chat-terminal-call__icon'));
+    }
+
+    const copy = createElement('div', 'chat-terminal-call__copy');
+    copy.append(
+      createElement(
+        'div',
+        'chat-terminal-call__label',
+        terminal.label || toolName || strings.labels.toolUsed,
+      ),
+      createElement('div', 'chat-terminal-call__command', toolName),
+    );
+    identity.append(copy);
+
+    const statusEl = createElement(
+      'span',
+      'chat-terminal-call__status',
+      strings.status[terminal.status] ?? strings.labels.toolUsed,
+    );
+
+    header.append(identity);
+
+    if (hasOutput) {
+      const output = [terminal.output, terminal.error].filter(Boolean).join('\n\n').trim();
+      const trailing = createElement('div', 'chat-terminal-call__trailing');
+      trailing.append(statusEl, createIcon('chevronDown', 'chat-terminal-call__details-icon'));
+      header.append(trailing);
+      const pre = createElement('pre', 'chat-terminal-call__output', output);
+      card.append(header, pre);
+    } else {
+      header.append(statusEl);
+      card.append(header);
+    }
+
+    return card;
+  }
+
+  // ── buildThinkingDisclosure ───────────────────────────────────────────────
+  // Creates a collapsible reasoning block using the same chat-message__thinking
+  // classes so it inherits the purple theme and expand/collapse behaviour.
+
+  function buildThinkingDisclosure(thinkingText) {
+    const wrap = document.createElement('details');
+    wrap.className = 'chat-message__thinking';
+
+    const summary = createElement('summary', 'chat-message__thinking-summary');
+    summary.append(
+      createIcon('thinking', 'chat-message__thinking-icon'),
+      createElement('span', 'chat-message__thinking-label', strings.labels.reasoning),
+    );
+    wrap.append(summary);
+
+    const body = createElement('div', 'chat-message__thinking-body');
+    body.append(createElement('p', 'chat-message__thinking-text', String(thinkingText).trim()));
+    wrap.append(body);
+    return wrap;
+  }
+
+  // ── resolveThinking ───────────────────────────────────────────────────────
+  // Attempts to pull thinking/reasoning text from wherever the agent runner
+  // or channel handler stored it. Checks common field names so a rename on
+  // the backend side doesn't silently hide reasoning in the events pane.
+
+  function resolveThinking(raw) {
+    if (!raw || typeof raw !== 'object') return '';
+    const candidates = [
+      raw.thinking,
+      raw.thinkingText,
+      raw.reasoningText,
+      raw.reasoning,
+      raw.thinkingContent,
+    ];
+    for (const val of candidates) {
+      if (val && typeof val === 'string' && val.trim()) return val.trim();
+    }
+    return '';
   }
 
   // ── createDetailSection ───────────────────────────────────────────────────
@@ -373,6 +567,8 @@ export function createEventsPanel(strings) {
   // ── createResponseSection ─────────────────────────────────────────────────
   // Like createDetailSection but also strips and renders any inline <think>
   // blocks as a collapsible reasoning disclosure widget above the main content.
+  // Tool-call blocks embedded in the text (joanium-tool / joanium-terminal)
+  // are rendered as chat-terminal-call cards matching the chat UI.
 
   function createResponseSection(label, value, className = '') {
     if (value === null || value === undefined || String(value).trim() === '') return null;
@@ -387,21 +583,7 @@ export function createEventsPanel(strings) {
 
     // Reasoning block — only when the model emitted inline thinking.
     if (thinking) {
-      const thinkWrap = document.createElement('details');
-      thinkWrap.className = 'chat-message__thinking';
-
-      const thinkSummary = createElement('summary', 'chat-message__thinking-summary');
-      thinkSummary.append(
-        createIcon('thinking', 'chat-message__thinking-icon'),
-        createElement('span', 'chat-message__thinking-label', strings.labels.reasoning),
-      );
-      thinkWrap.append(thinkSummary);
-
-      const thinkBody = createElement('div', 'chat-message__thinking-body');
-      thinkBody.append(createElement('p', 'chat-message__thinking-text', thinking));
-      thinkWrap.append(thinkBody);
-
-      section.append(thinkWrap);
+      section.append(buildThinkingDisclosure(thinking));
     }
 
     // Main response content — text segments rendered as markdown, tool call
@@ -419,6 +601,25 @@ export function createEventsPanel(strings) {
       section.append(valueEl);
     }
 
+    return section;
+  }
+
+  // ── createTerminalsSection ────────────────────────────────────────────────
+  // Wraps an array of terminal objects (from the agent run's persistent
+  // run.terminals) into an events-detail section containing chat-terminal-call
+  // cards. Returns null when the array is empty.
+
+  function createTerminalsSection(terminals) {
+    if (!Array.isArray(terminals) || terminals.length === 0) return null;
+
+    const section = createElement('div', 'events-detail__section');
+    section.append(createElement('div', 'events-detail__section-label', strings.labels.toolUsed));
+
+    const valueEl = createElement('div', 'events-detail__tools');
+    for (const terminal of terminals) {
+      valueEl.append(createAgentTerminalCard(terminal));
+    }
+    section.append(valueEl);
     return section;
   }
 
@@ -473,34 +674,74 @@ export function createEventsPanel(strings) {
 
     detailEl.append(header, metaGrid);
 
-    const sections =
-      event.type === 'channel'
-        ? [
-            createDetailSection(strings.labels.inbound, event.primary),
-            createResponseSection(strings.labels.reply, event.secondary),
-            createDetailSection(strings.labels.error, event.error, 'events-detail__section--error'),
-          ]
-        : [
-            createDetailSection(strings.labels.prompt, event.primary),
-            event.raw?.thinking
-              ? createDetailSection(
-                  strings.labels.thinking,
-                  event.raw.thinking,
-                  'events-detail__section--thinking',
-                )
-              : null,
-            createResponseSection(
+    // ── Build content sections ───────────────────────────────────────────────
+    //
+    // For agent runs the layout is:
+    //   Prompt → Thinking → Tool calls → Response → Error
+    //
+    // "Thinking" comes from the raw run data (run.thinking / run.thinkingText /
+    // etc.) or from inline <think> tags in the response via createResponseSection.
+    //
+    // "Tool calls" are read from the persistent event.terminals array first so
+    // they survive after the run finishes. If the array is empty we fall back
+    // to parsing embedded joanium-tool blocks from the response text.
+    //
+    // For channel replies the layout is:
+    //   Inbound → Reply (with inline thinking + tool blocks) → Error
+
+    let sections;
+
+    if (event.type === 'channel') {
+      sections = [
+        createDetailSection(strings.labels.inbound, event.primary),
+        createResponseSection(strings.labels.reply, event.secondary),
+        createDetailSection(strings.labels.error, event.error, 'events-detail__section--error'),
+      ];
+    } else {
+      // Agent run — resolve thinking from the raw run object.
+      const thinkingText = resolveThinking(event.raw);
+
+      // Decide whether to render tool calls from the persistent terminals
+      // array or by parsing embedded blocks from the response text.
+      // Prefer the array so cards persist after the run completes.
+      const hasTerminals = Array.isArray(event.terminals) && event.terminals.length > 0;
+
+      sections = [
+        createDetailSection(strings.labels.prompt, event.primary),
+        // Reasoning block from stored thinking data.
+        thinkingText ? buildThinkingDisclosure(thinkingText) : null,
+        // Tool calls — persistent array takes priority over embedded blocks.
+        hasTerminals ? createTerminalsSection(event.terminals) : null,
+        // Response text.
+        // When we have a terminals array: just render the clean response text
+        // (avoids showing duplicate tool cards from embedded blocks).
+        // When we have no terminals: use createResponseSection which parses
+        // embedded joanium-tool blocks and inline <think> tags (handles
+        // streaming where the terminals array may not be populated yet).
+        hasTerminals
+          ? createDetailSection(
+              strings.labels.response,
+              event.secondary,
+              event.status === 'running' ? 'events-detail__section--live' : '',
+            )
+          : createResponseSection(
               strings.labels.response,
               event.secondary,
               event.status === 'running' ? 'events-detail__section--live' : '',
             ),
-            createDetailSection(strings.labels.error, event.error, 'events-detail__section--error'),
-          ];
+        createDetailSection(strings.labels.error, event.error, 'events-detail__section--error'),
+      ];
+    }
 
     for (const section of sections.filter(Boolean)) {
       detailEl.append(section);
     }
   }
+
+  // Snapshot of the selected event used to detect whether the detail pane
+  // actually needs to be rebuilt on the next poll.  Stored as a JSON string
+  // so a deep equality check is a single === comparison.
+  let lastDetailSnapshot = '';
 
   async function populate({ pulse = false } = {}) {
     const previousFirstId = events[0]?.id ?? null;
@@ -510,7 +751,15 @@ export function createEventsPanel(strings) {
 
     const selected = events.find((event) => event.id === selectedId) ?? events[0] ?? null;
     if (!selectedId && selected) selectedId = selected.id;
-    renderDetail(selected);
+
+    // Only rebuild the detail pane when something actually changed.  Rebuilding
+    // on every 2.5 s poll collapses any open <details> (tool cards / thinking
+    // blocks) because replaceChildren() destroys the DOM state.
+    const snapshot = selected ? JSON.stringify(selected) : '';
+    if (snapshot !== lastDetailSnapshot) {
+      lastDetailSnapshot = snapshot;
+      renderDetail(selected);
+    }
 
     if (pulse && previousFirstId && events[0]?.id !== previousFirstId) {
       liveBadge?.classList.add('events-live--pulse');
@@ -531,6 +780,7 @@ export function createEventsPanel(strings) {
       invokeIpc('channels:clear-messages').catch(() => null),
     ]);
     selectedId = null;
+    lastDetailSnapshot = '';
     await populate();
   }
 

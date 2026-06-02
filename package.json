@@ -88,5 +88,8 @@
     "privacy-first"
   ],
   "author": "Joel Jolly",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "allowScripts": {
+    "electron-winstaller@5.4.0": true
+  }
 }

@@ -46,7 +46,7 @@ const en = {
     conversation: 'Conversation',
     target: 'Target',
     externalId: 'Message ID',
-    toolUsed: 'Tool used.',
+    toolUsed: 'Tool(s) used',
     parameters: 'Parameters',
   },
   status: {
@@ -55,6 +55,8 @@ const en = {
     skipped: 'Skipped',
     running: 'Running',
     queued: 'Queued',
+    completed: 'Tool used',
+    failed: 'Failed',
   },
   types: {
     agent: 'Agent run',
