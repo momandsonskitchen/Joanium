@@ -81,9 +81,11 @@ export function deriveSteps(run) {
   const totalSteps = blocks.length + (hasResponse ? 1 : 0);
   const timestamps = distributeTimestamps(run.startedAt, run.finishedAt, totalSteps);
 
+  const startMs = run.startedAt ? new Date(run.startedAt).getTime() : null;
+  const finishMs = run.finishedAt ? new Date(run.finishedAt).getTime() : null;
   const totalMs =
-    run.startedAt && run.finishedAt
-      ? Math.max(0, new Date(run.finishedAt) - new Date(run.startedAt))
+    Number.isFinite(startMs) && Number.isFinite(finishMs)
+      ? Math.max(0, finishMs - startMs)
       : null;
 
   const perStepMs = totalSteps > 0 && totalMs !== null ? Math.round(totalMs / totalSteps) : null;
