@@ -68,6 +68,7 @@ const en = {
     replayBtn: 'Replay Execution',
     replaying: 'Queuing replay\u2026',
     replayQueued: 'Replay queued!',
+    reasonedLabel: 'Reasoning',
     stepResponse: 'Final Response',
     stepInput: 'Input',
     stepOutput: 'Output',
