@@ -46,7 +46,7 @@ const en = {
     conversation: 'Conversation',
     target: 'Target',
     externalId: 'Message ID',
-    toolUsed: 'Tool used.',
+    toolUsed: 'Tool(s) used',
     parameters: 'Parameters',
   },
   status: {
