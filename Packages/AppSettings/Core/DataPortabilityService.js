@@ -78,25 +78,32 @@ function deepMerge(current, imported) {
  * Merge imported User.json into current User.json.
  *
  * Rules:
- *  - API keys (`providers.details`) are NEVER imported — current always kept.
- *  - Connector secrets (`connectors.details`) are NEVER imported.
+ *  - API keys (`providers.details`): existing keys are never overwritten, but
+ *    keys missing from current are filled in from the import.
+ *  - Connector secrets (`connectors.details`): same gap-fill approach.
  *  - providers.selected = union of both (via deepMerge array handling).
  *  - Everything else: deepMerge — current wins on conflicts, imported fills gaps.
  *  - Future unknown keys in User.json are automatically handled without any
  *    hardcoding here.
  */
 function mergeUserJson(current = {}, imported = {}) {
-  // Deep-merge everything except the secrets we always guard
+  // Deep-merge everything except the secrets we handle manually below
   const merged = deepMerge(current, imported);
 
-  // Always restore current secrets — never let imported overwrite them
+  // API keys: import keys that don't exist in current; never overwrite existing ones
+  const currentProviderDetails = current.providers?.details ?? {};
+  const importedProviderDetails = imported.providers?.details ?? {};
   merged.providers = {
     ...merged.providers,
-    details: current.providers?.details ?? {},
+    details: { ...importedProviderDetails, ...currentProviderDetails },
   };
+
+  // Connector secrets: same gap-fill approach
+  const currentConnectorDetails = current.connectors?.details ?? {};
+  const importedConnectorDetails = imported.connectors?.details ?? {};
   merged.connectors = {
     ...merged.connectors,
-    details: current.connectors?.details ?? {},
+    details: { ...importedConnectorDetails, ...currentConnectorDetails },
   };
 
   return merged;
@@ -247,14 +254,18 @@ export async function importData(rootDirectory) {
       continue;
     }
 
-    // ── Avatar files: never overwrite the current avatar ──────────────────
+    // ── Avatar files: write only if no avatar currently exists ─────────────
     const ext = path.extname(normPath).toLowerCase();
     const base = path.basename(normPath).toLowerCase();
     if (
       base.startsWith('avatar') &&
       ['.avif', '.bmp', '.gif', '.jpeg', '.jpg', '.png', '.webp'].includes(ext)
     ) {
-      if (await fileExists(destPath)) continue;
+      if (!(await fileExists(destPath))) {
+        await mkdir(path.dirname(destPath), { recursive: true });
+        await writeFile(destPath, content);
+      }
+      continue;
     }
 
     // ── Memory .md files: append imported content if not already present ───
@@ -270,11 +281,7 @@ export async function importData(rootDirectory) {
           currentText.endsWith(`\n${importedText}`) ||
           currentText.includes(`\n${importedText}\n`);
         if (!alreadyPresent) {
-          await writeFile(
-            destPath,
-            `${currentText}\n\n<!-- Imported -->\n\n${importedText}\n`,
-            'utf8',
-          );
+          await writeFile(destPath, `${currentText}\n\n${importedText}\n`, 'utf8');
         }
       } else {
         await writeFile(destPath, `${importedText}\n`, 'utf8');
