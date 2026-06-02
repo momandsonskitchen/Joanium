@@ -42,19 +42,6 @@ const SEARCH_ENGINE_SEARCH_URLS = {
   startpage: 'https://www.startpage.com/search?q=',
 };
 
-const SEARCH_ENGINE_HOME_URLS = {
-  google: 'https://www.google.com',
-  bing: 'https://www.bing.com',
-  duckduckgo: 'https://duckduckgo.com',
-  yandex: 'https://yandex.com',
-  yahoo: 'https://search.yahoo.com',
-  brave: 'https://search.brave.com',
-  ecosia: 'https://www.ecosia.org',
-  kagi: 'https://kagi.com',
-  perplexity: 'https://www.perplexity.ai',
-  startpage: 'https://www.startpage.com',
-};
-
 /**
  * Resolves a raw search-bar query to a fully qualified URL.
  * – If it already starts with http(s)://, use it as-is.
