@@ -3134,7 +3134,6 @@ export async function createChatView(
     if (toolsetActions.length > 0) {
       const toolsetMessages = [];
       for (const action of toolsetActions) {
-        const isSubAgentAction = action.tool === 'spawn_sub_agents';
         toolsetMessageIndexes.push(messages.length + toolsetMessages.length);
         toolsetMessages.push({
           role: 'assistant',
@@ -3361,7 +3360,6 @@ export async function createChatView(
 
     for (let index = 1; index < actions.length; index += 1) {
       const action = actions[index];
-      const isSubAgentAction = action.tool === 'spawn_sub_agents';
       toolMessageIndexes.push(messages.length + additionalMessages.length);
       additionalMessages.push({
         role: 'assistant',
@@ -3647,7 +3645,6 @@ export async function createChatView(
         }
 
         if (toolsetAction) {
-          const isSubAgentAction = toolsetAction.tool === 'spawn_sub_agents';
           updateLastAssistantMessage((message) => ({
             ...message,
             role: 'assistant',
