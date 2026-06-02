@@ -859,6 +859,16 @@
         "image": true
       }
     },
+    "google/gemini-3.1-flash-image": {
+      "name": "Gemini 3.1 Flash Image (Nano Banana 2)",
+      "description": "Gemini 3.1 Flash Image is optimized for image understanding and generation and offers a balance of price and performance.",
+      "context_window": 131072,
+      "max_output": 32768,
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "google/gemini-3.1-flash-image-preview": {
       "name": "Gemini 3.1 Flash Image Preview (Nano Banana 2)",
       "description": "Gemini 3.1 Flash Image is optimized for image understanding and generation and offers a balance of price and performance.",
@@ -2633,5 +2643,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-02T04:35:57.710Z"
+  "_syncedAt": "2026-06-02T07:30:23.501Z"
 }

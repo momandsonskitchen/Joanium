@@ -2773,18 +2773,6 @@
         "image": true
       }
     },
-    "baidu/ernie-4.5-300b-a47b": {
-      "name": "Baidu: ERNIE 4.5 300B A47B ",
-      "description": "ERNIE-4.5-300B-A47B is a 300B parameter Mixture-of-Experts (MoE) language model developed by Baidu as part of the ERNIE 4.5 series. It activates 47B parameters per token and supports text generation in...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.28,
-        "output": 1.1
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "mistralai/mistral-small-3.2-24b-instruct": {
       "name": "Mistral: Mistral Small 3.2 24B",
       "description": "Mistral-Small-3.2-24B-Instruct-2506 is an updated 24B parameter model from Mistral optimized for instruction following, repetition reduction, and improved function calling. Compared to the 3.1 release, version 3.2 significantly improves accuracy on...",
@@ -4315,5 +4303,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-02T04:35:40.859Z"
+  "_syncedAt": "2026-06-02T07:29:52.704Z"
 }
