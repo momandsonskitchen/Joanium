@@ -728,7 +728,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 10px;
+  border-radius: 20px;
   border: 0;
   background: transparent;
   color: var(--color-chat-text-muted);
@@ -750,7 +750,7 @@
   width: 16px;
   height: 16px;
   display: inline-flex;
-  color: currentColor;
+  color: currentcolor;
 }
 
 .agents-replay-pane__back-icon svg {
@@ -797,7 +797,7 @@
   align-items: center;
   gap: 6px;
   padding: 0 12px;
-  border-radius: 17px;
+  border-radius: 20px;
   border: 0;
   flex-shrink: 0;
   scroll-snap-align: start;

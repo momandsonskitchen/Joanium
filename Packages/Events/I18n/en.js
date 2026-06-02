@@ -55,6 +55,8 @@ const en = {
     skipped: 'Skipped',
     running: 'Running',
     queued: 'Queued',
+    completed: 'Tool used',
+    failed: 'Failed',
   },
   types: {
     agent: 'Agent run',

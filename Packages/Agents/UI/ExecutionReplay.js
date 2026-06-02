@@ -247,13 +247,19 @@ function createStepNode(step, strings) {
     const inputBlock = createCodeBlock(strings.replay.stepInput, step.toolInput);
     if (inputBlock) body.append(inputBlock);
 
-    // Tool output is not captured in the current run log schema.
-    const outputWrap = createElement('div', 'replay-code-block');
-    outputWrap.append(createElement('div', 'replay-code-block__label', strings.replay.stepOutput));
-    outputWrap.append(
-      createElement('p', 'replay-code-block__notice', strings.replay.outputNotCaptured),
-    );
-    body.append(outputWrap);
+    if (step.toolOutput) {
+      const outputBlock = createCodeBlock(strings.replay.stepOutput, step.toolOutput);
+      if (outputBlock) body.append(outputBlock);
+    } else {
+      const outputWrap = createElement('div', 'replay-code-block');
+      outputWrap.append(
+        createElement('div', 'replay-code-block__label', strings.replay.stepOutput),
+      );
+      outputWrap.append(
+        createElement('p', 'replay-code-block__notice', strings.replay.outputNotCaptured),
+      );
+      body.append(outputWrap);
+    }
   }
 
   if (isFinalResponse && step.toolOutput) {
@@ -280,6 +286,7 @@ export function createExecutionReplay(strings) {
   let emptyEl = null;
   let currentRunId = null;
   let isReplaying = false;
+  let loadToken = 0; // incremented on each load() call to detect stale responses
 
   // ── Build skeleton DOM ───────────────────────────────────────────────────
 
@@ -420,14 +427,23 @@ export function createExecutionReplay(strings) {
     if (replayBtnSpinnerEl) replayBtnSpinnerEl.hidden = false;
     if (replayBtnLabelEl) replayBtnLabelEl.textContent = strings.replay.replaying;
 
+    let success = false;
     try {
       await invokeIpc('agents:replay-run', currentRunId);
+      success = true;
     } catch (err) {
       console.error('[ExecutionReplay] Replay failed:', err);
     }
 
-    if (replayBtnLabelEl) replayBtnLabelEl.textContent = strings.replay.replayQueued;
-    await new Promise((resolve) => setTimeout(resolve, 1800));
+    if (replayBtnLabelEl) {
+      replayBtnLabelEl.textContent = success
+        ? strings.replay.replayQueued
+        : strings.replay.replayBtn;
+    }
+
+    if (success) {
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+    }
 
     if (replayBtnEl) replayBtnEl.disabled = false;
     if (replayBtnSpinnerEl) replayBtnSpinnerEl.hidden = true;
@@ -444,15 +460,18 @@ export function createExecutionReplay(strings) {
       if (!rootEl) return;
       currentRunId = runId;
       isReplaying = false;
+      const token = ++loadToken;
       renderLoading();
       try {
         const run = await invokeIpc('agents:load-run-detail', runId);
+        if (token !== loadToken) return; // stale — a newer load() was called
         if (!run) {
           renderEmpty();
           return;
         }
         renderRun(run);
       } catch {
+        if (token !== loadToken) return;
         renderEmpty();
       }
     },

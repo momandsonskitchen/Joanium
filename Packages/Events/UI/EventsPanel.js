@@ -488,7 +488,7 @@ export function createEventsPanel(strings) {
     const statusEl = createElement(
       'span',
       'chat-terminal-call__status',
-      terminal.statusLabel ?? strings.labels.toolUsed,
+      strings.status[terminal.status] ?? strings.labels.toolUsed,
     );
 
     header.append(identity);

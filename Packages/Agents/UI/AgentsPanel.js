@@ -422,6 +422,7 @@ export function createAgentsPanel(strings) {
 
     replayBackBtnEl = createElement('button', 'agents-replay-pane__back');
     replayBackBtnEl.type = 'button';
+    replayBackBtnEl.setAttribute('aria-label', strings.cancel);
     replayBackBtnEl.append(createIcon('arrowLeft', 'agents-replay-pane__back-icon'));
     replayBackBtnEl.addEventListener('click', hideReplayPane);
 

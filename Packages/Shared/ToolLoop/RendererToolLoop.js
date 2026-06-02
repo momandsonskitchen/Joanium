@@ -837,23 +837,20 @@ export async function runRendererToolLoop({
     // Record each completed tool call so it can be persisted and shown in
     // the Events panel even after the final clean response replaces the text.
     for (const { action, result } of allResults) {
-      const output = [
-        result?.output,
-        result?.content,
-        result?.stdout,
-        result?.buffer,
-        result?.error,
-      ]
+      const failed = result?.ok === false;
+      // Keep error out of output — it is stored separately in the error field
+      // to avoid duplicating it when the UI concatenates output + error.
+      const output = [result?.output, result?.content, result?.stdout, result?.buffer]
         .filter(Boolean)
         .join('\n')
         .slice(0, 4000);
       terminals.push({
         command: action.tool,
         label: action.tool,
-        status: result?.ok === false ? 'failed' : 'completed',
-        statusLabel: result?.ok === false ? 'Failed.' : 'Tool used.',
+        // Store a status key so the UI can localise the label itself.
+        status: failed ? 'failed' : 'completed',
         output: output || null,
-        error: result?.ok === false ? (result.error ?? null) : null,
+        error: failed ? (result.error ?? null) : null,
       });
     }
 

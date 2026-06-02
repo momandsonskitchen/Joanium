@@ -88,17 +88,21 @@ export function deriveSteps(run) {
 
   const perStepMs = totalSteps > 0 && totalMs !== null ? Math.round(totalMs / totalSteps) : null;
 
-  const steps = blocks.map((block, i) => ({
-    index: i + 1,
-    type: 'tool',
-    toolName: block.toolName,
-    toolInput: block.toolInput,
-    // Tool output is not separately recorded in the current log schema.
-    // We surface null here; the UI renders it as "not captured".
-    toolOutput: null,
-    timestamp: timestamps[i],
-    durationMs: perStepMs,
-  }));
+  const steps = blocks.map((block, i) => {
+    // Use the persisted terminal record (if available) for real tool output
+    // and status. Falls back to null when terminals weren't captured.
+    const terminal = Array.isArray(run.terminals) ? (run.terminals[i] ?? null) : null;
+    return {
+      index: i + 1,
+      type: 'tool',
+      toolName: block.toolName,
+      toolInput: block.toolInput,
+      toolOutput: terminal?.output ?? null,
+      status: terminal?.status ?? 'completed',
+      timestamp: timestamps[i],
+      durationMs: perStepMs,
+    };
+  });
 
   if (hasResponse) {
     steps.push({
