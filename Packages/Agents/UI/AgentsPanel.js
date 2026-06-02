@@ -463,7 +463,7 @@ export function createAgentsPanel(strings) {
       allRuns = [];
     }
 
-    const agentRuns = allRuns.filter((r) => r.agentId === agentId);
+    const agentRuns = (Array.isArray(allRuns) ? allRuns : []).filter((r) => r.agentId === agentId);
     replayRunsEl.replaceChildren();
 
     if (agentRuns.length === 0) {
