@@ -139,11 +139,14 @@ function buildProviderRecord(providerConfiguration, rootDirectory) {
 
 let cachedCatalog = null;
 let catalogInflight = null;
+let catalogGeneration = 0;
 
 export async function readProviderCatalog(rootDirectory) {
   if (cachedCatalog) return cachedCatalog;
 
   if (catalogInflight) return catalogInflight;
+
+  const requestGeneration = catalogGeneration;
 
   catalogInflight = (async () => {
     const modelsDirectory = path.join(rootDirectory, 'Config', 'Models');
@@ -161,8 +164,10 @@ export async function readProviderCatalog(rootDirectory) {
       }),
     );
 
-    cachedCatalog = providers;
-    catalogInflight = null;
+    if (catalogGeneration === requestGeneration) {
+      cachedCatalog = providers;
+      catalogInflight = null;
+    }
     return providers;
   })();
 
@@ -170,6 +175,7 @@ export async function readProviderCatalog(rootDirectory) {
 }
 
 export function invalidateProviderCatalogCache() {
+  catalogGeneration += 1;
   cachedCatalog = null;
   catalogInflight = null;
 }
