@@ -125,7 +125,9 @@
 /* ── Options ─────────────────────────────────────────────────────────────── */
 
 .joanium-ddm-lite__option {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   border: 0;
   border-radius: 10px;
@@ -141,6 +143,22 @@
   transition:
     background-color 120ms ease,
     color 120ms ease;
+}
+
+.joanium-ddm-lite__option-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.joanium-ddm-lite__trigger-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: contain;
 }
 
 .joanium-ddm-lite__option:hover {

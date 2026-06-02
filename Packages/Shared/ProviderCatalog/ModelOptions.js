@@ -16,7 +16,7 @@ export function buildAvailableModelOptions(
     for (const model of provider.models) {
       options.push({
         value: `${provider.id}/${model.id}`,
-        label: `${provider.label} \u2014 ${model.name ?? model.id}`,
+        label: model.name ?? model.id,
         iconPath: provider.iconPath ?? null,
       });
     }

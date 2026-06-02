@@ -412,6 +412,10 @@
       "name": "Llama 3.1 70B",
       "context_window": 131072
     },
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": {
+      "name": "Llama 4 Maverick Instruct (17Bx128E) FP8",
+      "context_window": 1048576
+    },
     "meta-llama/Llama-3.2-3B": {
       "name": "Meta Llama 3.2 3B",
       "context_window": 131072
@@ -704,5 +708,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-02T07:30:03.120Z"
+  "_syncedAt": "2026-06-02T12:29:45.652Z"
 }

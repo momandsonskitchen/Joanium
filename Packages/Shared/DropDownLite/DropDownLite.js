@@ -67,6 +67,18 @@ export function createDropDownLite({
       triggerText.textContent = placeholder;
       triggerText.classList.add('joanium-ddm-lite__trigger-text--placeholder');
     }
+
+    // Show provider icon in the trigger when the selected option has one.
+    const existingIcon = trigger.querySelector('.joanium-ddm-lite__trigger-icon');
+    existingIcon?.remove();
+    if (match?.iconPath) {
+      const icon = document.createElement('img');
+      icon.className = 'joanium-ddm-lite__trigger-icon';
+      icon.src = match.iconPath;
+      icon.alt = '';
+      icon.draggable = false;
+      trigger.prepend(icon);
+    }
   }
 
   function buildPanel() {
@@ -75,8 +87,20 @@ export function createDropDownLite({
       const item = createElement('button', 'joanium-ddm-lite__option');
       item.type = 'button';
       item.setAttribute('role', 'option');
-      item.textContent = opt.label;
       item.classList.toggle('is-selected', opt.value === currentValue);
+
+      if (opt.iconPath) {
+        const icon = document.createElement('img');
+        icon.className = 'joanium-ddm-lite__option-icon';
+        icon.src = opt.iconPath;
+        icon.alt = '';
+        icon.draggable = false;
+        item.append(icon);
+      }
+
+      const labelSpan = document.createElement('span');
+      labelSpan.textContent = opt.label;
+      item.append(labelSpan);
 
       item.addEventListener('click', (e) => {
         e.stopPropagation();
