@@ -64,6 +64,12 @@
         "output": 0.9
       }
     },
+    "mistral-code-latest": {
+      "name": "Mistral Code Latest"
+    },
+    "mistral-code-fim-latest": {
+      "name": "Mistral Code Fim Latest"
+    },
     "devstral-2512": {
       "name": "devstral-2512"
     },
@@ -85,6 +91,9 @@
         "input": 0.4,
         "output": 2
       }
+    },
+    "mistral-code-agent-latest": {
+      "name": "Mistral Code Agent Latest"
     },
     "mistral-small-2603": {
       "name": "mistral-small-2603"
@@ -252,5 +261,5 @@
       "name": "voxtral-mini-tts-latest"
     }
   },
-  "_syncedAt": "2026-06-02T07:29:55.406Z"
+  "_syncedAt": "2026-06-02T12:22:42.326Z"
 }
