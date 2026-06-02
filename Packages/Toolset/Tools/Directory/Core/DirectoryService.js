@@ -246,13 +246,18 @@ export function createDirectoryService({ rootDirectory }) {
 
     const protectedReason = protectedDeleteReason(resolvedPath);
     if (protectedReason) return { ok: false, error: protectedReason };
-    if (!fs.existsSync(resolvedPath)) return { ok: false, error: 'Path does not exist.' };
 
     let beforeContent = '';
     let kind = 'other';
     let fd = null;
     try {
+      // Open by path once to get a stable file descriptor, then use only
+      // fd-based calls (fstatSync / readSync) to avoid TOCTOU race conditions.
       fd = fs.openSync(resolvedPath, 'r');
+    } catch {
+      return { ok: false, error: 'Path does not exist.' };
+    }
+    try {
       const stat = fs.fstatSync(fd);
       if (stat.isFile()) {
         kind = 'file';
@@ -267,7 +272,7 @@ export function createDirectoryService({ rootDirectory }) {
     } catch {
       // Ignore pre-delete snapshot failures.
     } finally {
-      if (fd !== null) fs.closeSync(fd);
+      fs.closeSync(fd);
     }
 
     fs.rmSync(resolvedPath, { recursive: true, force: true });
