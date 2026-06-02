@@ -313,6 +313,20 @@
         "image": true
       }
     },
+    "alibaba/qwen3.7-plus": {
+      "name": "Qwen 3.7 Plus",
+      "description": "Among the Qwen3.7 series, the cost-effective Plus model builds on its robust text capabilities while delivering a comprehensive upgrade to its vision‑language abilities, all while preserving its full‑stack agent‑level intelligence for coding, tool use, and productivity workflows.",
+      "context_window": 1000000,
+      "max_output": 64000,
+      "pricing": {
+        "input": 0.4,
+        "output": 1.6
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "amazon/nova-2-lite": {
       "name": "Nova 2 Lite",
       "description": "Nova 2 Lite is a fast, cost-effective reasoning model for everyday workloads that can process text, images, and videos to generate text.",
@@ -2619,5 +2633,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-01T14:22:06.063Z"
+  "_syncedAt": "2026-06-02T02:14:08.511Z"
 }

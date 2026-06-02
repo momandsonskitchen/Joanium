@@ -1302,13 +1302,6 @@
     "clarity-upscaler": {
       "name": "Clarity Upscaler"
     },
-    "topazlabs": {
-      "name": "Topazlabs",
-      "context_window": {
-        "context_length": 204,
-        "max_output_tokens": null
-      }
-    },
     "veo-v3.1": {
       "name": "Veo V3 1"
     },
@@ -1734,7 +1727,13 @@
     },
     "qwen3.7-max-t": {
       "name": "Qwen3 7 MAX T"
+    },
+    "grok-imgn-video-1.5": {
+      "name": "Grok Imgn Video 1 5"
+    },
+    "minimax-m3-el": {
+      "name": "Minimax M3 El"
     }
   },
-  "_syncedAt": "2026-06-01T14:22:06.753Z"
+  "_syncedAt": "2026-06-02T02:14:10.019Z"
 }
