@@ -84,9 +84,7 @@ export function deriveSteps(run) {
   const startMs = run.startedAt ? new Date(run.startedAt).getTime() : null;
   const finishMs = run.finishedAt ? new Date(run.finishedAt).getTime() : null;
   const totalMs =
-    Number.isFinite(startMs) && Number.isFinite(finishMs)
-      ? Math.max(0, finishMs - startMs)
-      : null;
+    Number.isFinite(startMs) && Number.isFinite(finishMs) ? Math.max(0, finishMs - startMs) : null;
 
   const perStepMs = totalSteps > 0 && totalMs !== null ? Math.round(totalMs / totalSteps) : null;
 
@@ -170,7 +168,11 @@ export function createReplayStore({ rootDirectory }) {
         }
       }
 
-      return results.sort((a, b) => new Date(b.startedAt ?? 0) - new Date(a.startedAt ?? 0));
+      return results.sort((a, b) => {
+        const timeA = a.startedAt ? new Date(a.startedAt).getTime() : 0;
+        const timeB = b.startedAt ? new Date(b.startedAt).getTime() : 0;
+        return (Number.isFinite(timeB) ? timeB : 0) - (Number.isFinite(timeA) ? timeA : 0);
+      });
     },
   };
 }
