@@ -1261,14 +1261,15 @@ export async function createChatView(
   }
 
   function appendGitResultMessage(label, command, result) {
-    const output =
+    const rawOutput =
       [result?.stdout, result?.stderr]
         .map((value) => String(value ?? '').trim())
         .filter(Boolean)
         .join('\n\n') ||
       result?.hint ||
       result?.error ||
-      strings.git.emptyOutput;
+      null;
+    const output = rawOutput ?? (result?.ok ? strings.git.emptyOutput : null);
 
     messages = [
       ...messages,
