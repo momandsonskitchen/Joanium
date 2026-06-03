@@ -11,6 +11,9 @@
     "deepseek-ai/DeepSeek-V4-Pro": {
       "name": "DeepSeek V4 PRO"
     },
+    "nex-agi/Nex-N2-Pro": {
+      "name": "Nex N2 PRO"
+    },
     "deepseek-ai/DeepSeek-V4-Flash": {
       "name": "DeepSeek V4 FLASH"
     },
@@ -245,5 +248,5 @@
       "name": "CosyVoice2 0 5B"
     }
   },
-  "_syncedAt": "2026-06-03T05:08:27.596Z"
+  "_syncedAt": "2026-06-03T12:32:31.837Z"
 }

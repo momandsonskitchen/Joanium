@@ -47,7 +47,7 @@ const providerIconMap = {
   deepseek: 'Deepseek.png',
   fireworks: 'Fireworks.png',
   google: 'Gemini.png',
-  githubmodels: 'GitHub.png',
+  githubmodels: 'Github.png',
   groq: 'Groq.png',
   hyperbolic: 'Hyperbolic.png',
   lambda: 'Lambda.png',

@@ -307,6 +307,9 @@
         "output": 0.02
       }
     },
+    "nvidia/nemotron-3.5-content-safety": {
+      "name": "Nemotron 3 5 Content Safety"
+    },
     "nvidia/nemotron-4-340b-instruct": {
       "name": "nvidia/nemotron-4-340b-instruct"
     },
@@ -452,5 +455,5 @@
       "name": "zyphra/zamba2-7b-instruct"
     }
   },
-  "_syncedAt": "2026-06-03T05:08:10.191Z"
+  "_syncedAt": "2026-06-03T12:32:14.589Z"
 }
