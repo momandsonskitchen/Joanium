@@ -6,6 +6,13 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.603.6] - 2026-06-03
+
+* chore(release): bump version to 2026.603.6
+* Bump electron from 42.3.0 to 42.3.2
+
+---
+
 ## [2026.603.5] - 2026-06-03
 
 * chore(release): bump version to 2026.603.5
