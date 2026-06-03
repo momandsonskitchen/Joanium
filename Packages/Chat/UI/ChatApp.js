@@ -99,6 +99,17 @@ const SHELL_FILE_MUTATION_PATTERNS = Object.freeze([
   /\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|remove|unlink|link)\b/i,
 ]);
 
+const PROTECTED_GIT_BRANCHES = new Set([
+  'main',
+  'master',
+  'develop',
+  'dev',
+  'production',
+  'prod',
+  'staging',
+  'release',
+]);
+
 export async function createChatView(
   strings,
   {
@@ -909,6 +920,14 @@ export async function createChatView(
   function ensureGitBranchPicker() {
     if (gitBranchPicker) return gitBranchPicker;
 
+    function isBranchDeletable(name) {
+      return !PROTECTED_GIT_BRANCHES.has(
+        String(name ?? '')
+          .trim()
+          .toLowerCase(),
+      );
+    }
+
     gitBranchPicker = createGitBranchPickerPanel({
       strings,
       onCreateBranch: async (branchName) => {
@@ -940,6 +959,30 @@ export async function createChatView(
             formatText(strings.git.branchSwitched, { branch: nextBranch }),
         });
       },
+      onDeleteBranch: async (branchName) => {
+        if (branchName === gitState?.branch) {
+          gitBranchPicker?.setStatus(strings.git.cannotDeleteCurrent, 'warning');
+          return;
+        }
+        if (!isBranchDeletable(branchName)) {
+          gitBranchPicker?.setStatus(
+            formatText(strings.git.cannotDeleteProtected, { branch: branchName }),
+            'warning',
+          );
+          return;
+        }
+        await runGitBranchMutation({
+          branch: branchName,
+          channel: 'terminal:git-delete-branch',
+          resultLabel: strings.git.resultLabels.deleteBranch,
+          commandLabel: strings.git.commands.deleteBranch,
+          progressText: (nextBranch) =>
+            formatText(strings.git.deletingBranch, { branch: nextBranch }),
+          successText: (nextBranch) =>
+            formatText(strings.git.branchDeleted, { branch: nextBranch }),
+        });
+      },
+      isDeleteAllowed: isBranchDeletable,
     });
 
     return gitBranchPicker;

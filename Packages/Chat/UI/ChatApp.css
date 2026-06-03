@@ -1454,6 +1454,8 @@
 }
 
 .chat-branch-picker__option {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1489,6 +1491,57 @@
   height: 14px;
   color: var(--color-accent);
   flex-shrink: 0;
+}
+
+.chat-branch-picker__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-branch-picker__delete-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  color: var(--color-chat-text-muted);
+  opacity: 0;
+  transition:
+    background-color 130ms ease,
+    color 130ms ease,
+    opacity 130ms ease,
+    transform 130ms ease;
+}
+
+.chat-branch-picker__item:hover .chat-branch-picker__delete-btn {
+  opacity: 1;
+}
+
+.chat-branch-picker__delete-btn:hover {
+  background: rgba(220, 50, 30, 0.1);
+  color: #c0392b;
+  transform: translateY(-1px);
+}
+
+.chat-branch-picker__delete-btn:disabled {
+  opacity: 0.38 !important;
+  transform: none;
+  pointer-events: none;
+}
+
+.chat-branch-picker__delete-icon {
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+  color: currentColor;
+}
+
+.chat-branch-picker__delete-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .chat-gitbar__menu {

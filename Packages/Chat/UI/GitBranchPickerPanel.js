@@ -12,7 +12,13 @@ export function orderGitBranches(branches = [], current = '') {
   );
 }
 
-export function createGitBranchPickerPanel({ strings, onCreateBranch, onCheckoutBranch }) {
+export function createGitBranchPickerPanel({
+  strings,
+  onCreateBranch,
+  onCheckoutBranch,
+  onDeleteBranch,
+  isDeleteAllowed,
+}) {
   const panel = createElement('div', 'chat-branch-picker');
   document.body.append(panel);
 
@@ -50,8 +56,10 @@ export function createGitBranchPickerPanel({ strings, onCreateBranch, onCheckout
     input.disabled = busy;
     syncCreateButton();
 
-    for (const option of list.querySelectorAll('.chat-branch-picker__option')) {
-      option.disabled = busy;
+    for (const button of list.querySelectorAll(
+      '.chat-branch-picker__option, .chat-branch-picker__delete-btn',
+    )) {
+      button.disabled = busy;
     }
   }
 
@@ -72,10 +80,12 @@ export function createGitBranchPickerPanel({ strings, onCreateBranch, onCheckout
     }
 
     for (const branch of branches) {
+      const item = createElement('div', 'chat-branch-picker__item');
+      const active = branch === current;
+
       const option = createElement('button', 'chat-branch-picker__option');
       option.type = 'button';
       option._branchName = branch;
-      const active = branch === current;
       option.classList.toggle('chat-branch-picker__option--active', active);
       option.append(createElement('span', 'chat-branch-picker__option-label', branch));
       if (active) option.append(createIcon('check', 'chat-branch-picker__check'));
@@ -83,7 +93,22 @@ export function createGitBranchPickerPanel({ strings, onCreateBranch, onCheckout
         event.stopPropagation();
         void onCheckoutBranch(branch);
       });
-      list.append(option);
+
+      item.append(option);
+
+      if (!active && onDeleteBranch && (!isDeleteAllowed || isDeleteAllowed(branch))) {
+        const deleteBtn = createElement('button', 'chat-branch-picker__delete-btn');
+        deleteBtn.type = 'button';
+        deleteBtn.setAttribute('aria-label', strings.git.deleteBranch);
+        deleteBtn.append(createIcon('trash', 'chat-branch-picker__delete-icon'));
+        deleteBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          void onDeleteBranch(branch);
+        });
+        item.append(deleteBtn);
+      }
+
+      list.append(item);
     }
 
     setBusy(busy);

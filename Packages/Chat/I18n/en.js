@@ -154,6 +154,11 @@ const en = {
     switchingBranch: 'Switching to {branch}...',
     branchCreated: 'Created and switched to {branch}.',
     branchSwitched: 'Switched to {branch}.',
+    deleteBranch: 'Delete branch',
+    deletingBranch: 'Deleting {branch}...',
+    branchDeleted: 'Deleted branch {branch}.',
+    cannotDeleteCurrent: 'Cannot delete the currently checked-out branch.',
+    cannotDeleteProtected: '"{branch}" is a protected branch and cannot be deleted.',
     emptyOutput: 'No output.',
     actions: {
       diff: 'View diff',
@@ -182,6 +187,7 @@ const en = {
       commit: 'Git commit',
       checkout: 'Git checkout',
       createBranch: 'Git branch',
+      deleteBranch: 'Git branch delete',
     },
     commands: {
       diff: 'git diff',
@@ -192,6 +198,7 @@ const en = {
       commit: 'git commit',
       checkout: 'git checkout',
       createBranch: 'git checkout -b',
+      deleteBranch: 'git branch -d',
     },
     moreActions: 'More git actions',
     cancel: 'Cancel',
