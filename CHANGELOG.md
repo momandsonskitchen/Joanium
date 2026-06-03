@@ -6,6 +6,14 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.603.5] - 2026-06-03
+
+* chore(release): bump version to 2026.603.5
+* Set version to today
+* Node Version Fix
+
+---
+
 ## [2026.603.4] - 2026-06-03
 
 * chore(release): bump version to 2026.603.4
