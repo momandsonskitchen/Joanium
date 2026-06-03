@@ -1005,7 +1005,6 @@ export async function createChatView(
 
     setGitBarBusy(true);
     setGitBranchPickerBusy(true);
-    gitBranchPicker?.setStatus(progressText(nextBranch), 'muted');
 
     try {
       const result = await invokeIpc(channel, {
@@ -1013,12 +1012,16 @@ export async function createChatView(
         branch: nextBranch,
         allowRisky: true,
       });
-      appendGitResultMessage(resultLabel, commandLabel, result);
+      appendGitResultMessage(
+        resultLabel,
+        commandLabel,
+        !result?.ok || result.exitCode !== 0
+          ? { ...result, stdout: '', stderr: '', error: null, hint: null }
+          : result,
+      );
 
       if (!result?.ok || result.exitCode !== 0) {
-        const failureText = result?.hint || result?.error || strings.git.actionFailed;
-        gitBranchPicker?.setStatus(failureText, 'warning');
-        showAttachmentNotice(failureText, 'warning');
+        gitBranchPicker?.setStatus('');
         return false;
       }
 
@@ -1028,9 +1031,7 @@ export async function createChatView(
       focusComposer();
       return true;
     } catch (error) {
-      const failureText = error?.message ?? strings.git.actionFailed;
-      gitBranchPicker?.setStatus(failureText, 'warning');
-      showAttachmentNotice(failureText, 'warning');
+      gitBranchPicker?.setStatus('');
       return false;
     } finally {
       setGitBarBusy(false);
@@ -1273,7 +1274,7 @@ export async function createChatView(
       ...messages,
       {
         role: 'assistant',
-        content: label,
+        content: '',
         terminal: {
           label,
           command,
