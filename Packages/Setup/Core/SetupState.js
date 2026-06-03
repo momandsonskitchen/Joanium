@@ -1,6 +1,5 @@
-import { pathToFileURL } from 'node:url';
-import path from 'node:path';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
+import { getResourceFileUrl } from '../../Shared/Storage/ResourcePaths.js';
 import {
   mergeUserStates,
   readUserState,
@@ -28,7 +27,7 @@ export function createSetupStateManager({ rootDirectory }) {
       return {
         state,
         providers,
-        logoPath: pathToFileURL(path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png')).href,
+        logoPath: getResourceFileUrl(rootDirectory, 'Assets', 'Logo', 'Logo.png'),
       };
     },
     async getLaunchPackageId() {

@@ -33,6 +33,12 @@ function pickRandomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
+function avatarToUrl(avatar) {
+  if (avatar?.fileUrl) return avatar.fileUrl;
+  if (avatar?.filePath) return `file://${avatar.filePath.replace(/\\/g, '/')}`;
+  return null;
+}
+
 function buildScheduleDescription(schedule, strings) {
   if (!schedule) return strings.scheduleTypes.startup;
   const time = schedule.time ?? '09:00';
@@ -202,7 +208,7 @@ export function createAgentsPanel(strings) {
       tile._avatarFilename = avatar.filename;
 
       const img = document.createElement('img');
-      img.src = `file://${avatar.filePath.replace(/\\/g, '/')}`;
+      img.src = avatarToUrl(avatar) ?? '';
       img.className = 'agents-form__avatar-img agents-form__avatar-img--loading';
       img.alt = avatar.filename;
       img.draggable = false;
@@ -528,10 +534,10 @@ export function createAgentsPanel(strings) {
   function resolveAvatarSrc(agent) {
     if (!agent.avatar) {
       const random = pickRandomItem(availableAvatars);
-      return random ? `file://${random.filePath.replace(/\\/g, '/')}` : null;
+      return avatarToUrl(random);
     }
     const found = availableAvatars.find((a) => a.filename === agent.avatar);
-    return found ? `file://${found.filePath.replace(/\\/g, '/')}` : null;
+    return avatarToUrl(found);
   }
 
   function resolveModelLabel(agent) {

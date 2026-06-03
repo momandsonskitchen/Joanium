@@ -1,7 +1,5 @@
 import path from 'node:path';
-import { readFile } from 'node:fs/promises';
-import { pathToFileURL } from 'node:url';
-import { app } from 'electron';
+import { getResourceFileUrl, readJsonResource } from '../Storage/ResourcePaths.js';
 
 const providerPalette = {
   anthropic: { tint: '#f6c59e', glow: '#ffefe0' },
@@ -95,13 +93,6 @@ function summarizeModels(models) {
   };
 }
 
-// Assets (including Icons) ship as extraResources and live at
-// process.resourcesPath in packaged builds — outside the read-only asar.
-// In dev, they sit beside the project root just like rootDirectory.
-function resolveAssetsRoot(rootDirectory) {
-  return app.isPackaged ? process.resourcesPath : rootDirectory;
-}
-
 function buildProviderRecord(providerConfiguration, rootDirectory) {
   const { models, modelCount, featuredModels, summary } = summarizeModels(
     providerConfiguration.models,
@@ -124,8 +115,7 @@ function buildProviderRecord(providerConfiguration, rootDirectory) {
     featuredModels,
     summary,
     iconPath: iconFileName
-      ? pathToFileURL(path.join(resolveAssetsRoot(rootDirectory), 'Assets', 'Icons', iconFileName))
-          .href
+      ? getResourceFileUrl(rootDirectory, 'Assets', 'Icons', iconFileName)
       : '',
     palette,
     requirements: isLocal
@@ -158,17 +148,18 @@ export async function readProviderCatalog(rootDirectory) {
   const requestGeneration = catalogGeneration;
 
   catalogInflight = (async () => {
-    const modelsDirectory = path.join(rootDirectory, 'Config', 'Models');
-    const indexPath = path.join(modelsDirectory, 'index.json');
-    const indexContents = await readFile(indexPath, 'utf8');
-    const providerFiles = JSON.parse(indexContents);
+    const providerFiles = await readJsonResource(rootDirectory, 'Config', 'Models', 'index.json');
 
     const providers = await Promise.all(
       providerFiles.map(async (fileName) => {
         const providerName = path.basename(fileName, '.json');
-        const providerPath = path.join(modelsDirectory, providerName, fileName);
-        const providerContents = await readFile(providerPath, 'utf8');
-        const providerConfiguration = JSON.parse(providerContents);
+        const providerConfiguration = await readJsonResource(
+          rootDirectory,
+          'Config',
+          'Models',
+          providerName,
+          fileName,
+        );
         return buildProviderRecord(providerConfiguration, rootDirectory);
       }),
     );

@@ -7,7 +7,11 @@ import { createAgentScheduler } from './Core/AgentScheduler.js';
 import { createReplayStore } from './Core/ReplayStore.js';
 import { createReplayIpcHandlers } from './IPC/ReplayIpc.js';
 import { sanitizeFileStem } from '../Shared/Storage/SafePath.js';
-import { getWritableDataDirectory } from '../Shared/Storage/ResourcePaths.js';
+import {
+  getResourceFileUrl,
+  getResourcePath,
+  getWritableDataDirectory,
+} from '../Shared/Storage/ResourcePaths.js';
 import { estimateTokens } from '../Shared/UsageTracker/UsageTracker.js';
 
 // ---------------------------------------------------------------------------
@@ -20,7 +24,7 @@ export async function createPackage({ rootDirectory }) {
   const agentStateManager = createAgentStateManager({ rootDirectory });
   const replayStore = createReplayStore({ rootDirectory });
   const agentsDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Agents');
-  const avatarsDirectory = path.join(rootDirectory, 'Assets', 'Agents');
+  const avatarsDirectory = getResourcePath(rootDirectory, 'Assets', 'Agents');
 
   // Image extensions we accept for avatars.
   const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']);
@@ -326,6 +330,7 @@ export async function createPackage({ rootDirectory }) {
             .map((filename) => ({
               filename,
               filePath: path.join(avatarsDirectory, filename),
+              fileUrl: getResourceFileUrl(rootDirectory, 'Assets', 'Agents', filename),
             }));
         },
       },

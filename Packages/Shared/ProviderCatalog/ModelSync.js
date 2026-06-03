@@ -21,6 +21,7 @@ import path from 'node:path';
 import { readFile, rename, writeFile } from 'node:fs/promises';
 import { app } from 'electron';
 import { fetchProviderModels } from './ModelFetcher.js';
+import { getResourcePath, readJsonResource } from '../Storage/ResourcePaths.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -54,8 +55,7 @@ function mergeModels(existingModels, liveModels) {
 
 /** Resolve the JSON file path for a given providerId from the index. */
 async function resolveProviderJsonPath(rootDirectory, providerId) {
-  const indexPath = path.join(rootDirectory, 'Config', 'Models', 'index.json');
-  const providerFiles = JSON.parse(await readFile(indexPath, 'utf8'));
+  const providerFiles = await readJsonResource(rootDirectory, 'Config', 'Models', 'index.json');
 
   const fileName = providerFiles.find(
     (f) => path.basename(f, '.json').toLowerCase() === providerId.toLowerCase(),
@@ -63,7 +63,7 @@ async function resolveProviderJsonPath(rootDirectory, providerId) {
   if (!fileName) return null;
 
   const providerName = path.basename(fileName, '.json');
-  return path.join(rootDirectory, 'Config', 'Models', providerName, fileName);
+  return getResourcePath(rootDirectory, 'Config', 'Models', providerName, fileName);
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────

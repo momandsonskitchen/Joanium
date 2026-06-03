@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { mkdir, readFile, readdir, open, unlink, writeFile } from 'node:fs/promises';
 import { sanitizeMarkdownFilename } from '../../Shared/Storage/SafePath.js';
-import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { getWritableDataDirectory, readTextResource } from '../../Shared/Storage/ResourcePaths.js';
 
 const HIDDEN_PREFIXES = ['Archive-', 'Old-', '_'];
 const DEFAULT_MAX_CONTEXT_CHARS = 24000;
@@ -386,18 +386,15 @@ export function createMemoryStateManager({ rootDirectory }) {
   }
 
   async function getExportPrompt() {
-    const promptPath = path.join(rootDirectory, 'Prompts', 'ExportProfile.md');
-    return readFile(promptPath, 'utf8');
+    return readTextResource(rootDirectory, 'Prompts', 'ExportProfile.md', { trim: false });
   }
 
   async function getTriagePrompt() {
-    const promptPath = path.join(rootDirectory, 'Prompts', 'TriageMemory.md');
-    return readFile(promptPath, 'utf8');
+    return readTextResource(rootDirectory, 'Prompts', 'TriageMemory.md', { trim: false });
   }
 
   async function getImportPrompt() {
-    const promptPath = path.join(rootDirectory, 'Prompts', 'ImportMemory.md');
-    return readFile(promptPath, 'utf8');
+    return readTextResource(rootDirectory, 'Prompts', 'ImportMemory.md', { trim: false });
   }
 
   async function deleteMemory(filename) {

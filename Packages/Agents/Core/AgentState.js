@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
-import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { getResourcePath, getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 import { readJsonDirectory } from '../Utils.js';
 
 // ---------------------------------------------------------------------------
@@ -21,7 +21,7 @@ import { readJsonDirectory } from '../Utils.js';
 export function createAgentStateManager({ rootDirectory }) {
   const agentsDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Agents');
   const runsDirectory = path.join(agentsDirectory, 'Runs');
-  const avatarsDirectory = path.join(rootDirectory, 'Assets', 'Agents');
+  const avatarsDirectory = getResourcePath(rootDirectory, 'Assets', 'Agents');
 
   async function ensureDirectory() {
     await mkdir(agentsDirectory, { recursive: true });

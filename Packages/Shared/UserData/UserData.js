@@ -1,6 +1,4 @@
-import path from 'node:path';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import { getWritableDataDirectory } from '../Storage/ResourcePaths.js';
+import { getWritableDataDirectory, readJsonFile, writeJsonFile } from '../Storage/ResourcePaths.js';
 
 // In dev, writable user data lives under Data/ in the project root.
 // When packaged, Program Files is read-only — use the OS user-data directory instead.
@@ -351,21 +349,14 @@ export function sanitizeIncomingUserState(candidateState) {
   });
 }
 
-function getUserDataFilePath(rootDirectory) {
-  return path.join(getWritableDataDirectory(rootDirectory), 'User.json');
-}
-
 export async function readUserState(rootDirectory) {
-  const userFilePath = getUserDataFilePath(rootDirectory);
-
   try {
-    const fileContents = await readFile(userFilePath, 'utf8');
-
-    if (!fileContents.trim()) {
-      return createDefaultUserState();
-    }
-
-    return sanitizeIncomingUserState(JSON.parse(fileContents));
+    const data = await readJsonFile(rootDirectory, 'User.json', 'Data', {
+      writable: true,
+      optional: true,
+      defaultValue: createDefaultUserState(),
+    });
+    return sanitizeIncomingUserState(data);
   } catch {
     return createDefaultUserState();
   }
@@ -377,11 +368,7 @@ export async function readUserState(rootDirectory) {
 let _writeQueue = Promise.resolve();
 
 async function _doWriteUserState(rootDirectory, nextState) {
-  const userFilePath = getUserDataFilePath(rootDirectory);
-  const tempFilePath = `${userFilePath}.tmp`;
-  await mkdir(path.dirname(userFilePath), { recursive: true });
-  await writeFile(tempFilePath, `${JSON.stringify(nextState, null, 2)}\n`, 'utf8');
-  await rename(tempFilePath, userFilePath);
+  await writeJsonFile(rootDirectory, 'User.json', 'Data', nextState);
   return nextState;
 }
 

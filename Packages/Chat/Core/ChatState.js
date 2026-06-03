@@ -3,10 +3,10 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { pathToFileURL } from 'node:url';
 import { app } from 'electron';
 import { readProviderCatalog } from '../../Shared/ProviderCatalog/ProviderCatalog.js';
 import { createLiveModelFilter } from '../../Shared/ProviderCatalog/LiveModelFilter.js';
+import { getResourceFileUrl, readTextResource } from '../../Shared/Storage/ResourcePaths.js';
 import {
   SUB_AGENT_TERMINAL_TOOL_NAMES,
   TERMINAL_TOOL_NAMES,
@@ -71,49 +71,50 @@ function throwIfAborted(signal) {
 
 async function readSystemPromptFile(rootDirectory) {
   try {
-    return (await readFile(path.join(rootDirectory, 'Prompts', 'System.md'), 'utf8')).trim();
+    return await readTextResource(rootDirectory, 'Prompts', 'System.md');
   } catch {
     return '';
   }
 }
 
 async function readEnhancePromptFile(rootDirectory) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', 'PromptEnhance.md'), 'utf8')).trim();
+  return readTextResource(rootDirectory, 'Prompts', 'PromptEnhance.md');
 }
 
 async function readTerminalPromptFile(rootDirectory) {
-  const template = await readFile(path.join(rootDirectory, 'Prompts', 'Terminal.md'), 'utf8');
+  const template = await readTextResource(rootDirectory, 'Prompts', 'Terminal.md', {
+    trim: false,
+  });
   return template.replace('{{TERMINAL_TOOL_NAMES}}', TERMINAL_TOOL_NAMES.join(', ')).trim();
 }
 
 async function readSubAgentPromptFile(rootDirectory) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', 'SubAgent.md'), 'utf8')).trim();
+  return readTextResource(rootDirectory, 'Prompts', 'SubAgent.md');
 }
 
 async function readSubAgentTerminalPromptFile(rootDirectory) {
-  const template = await readFile(
-    path.join(rootDirectory, 'Prompts', 'SubAgentTerminal.md'),
-    'utf8',
-  );
+  const template = await readTextResource(rootDirectory, 'Prompts', 'SubAgentTerminal.md', {
+    trim: false,
+  });
   return template
     .replace('{{SUB_AGENT_TERMINAL_TOOL_NAMES}}', SUB_AGENT_TERMINAL_TOOL_NAMES.join(', '))
     .trim();
 }
 
 async function readMemoryPromptFile(rootDirectory) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', 'Memory.md'), 'utf8')).trim();
+  return readTextResource(rootDirectory, 'Prompts', 'Memory.md');
 }
 
 async function readProjectContextPromptFile(rootDirectory) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', 'ProjectContext.md'), 'utf8')).trim();
+  return readTextResource(rootDirectory, 'Prompts', 'ProjectContext.md');
 }
 
 async function readGitCommitPromptFile(rootDirectory) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', 'GitCommit.md'), 'utf8')).trim();
+  return readTextResource(rootDirectory, 'Prompts', 'GitCommit.md');
 }
 
 async function readGitCommitDiffPromptFile(rootDirectory) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', 'GitCommitDiff.md'), 'utf8')).trim();
+  return readTextResource(rootDirectory, 'Prompts', 'GitCommitDiff.md');
 }
 
 async function buildBaseSystemPrompt(rootDirectory, user) {
@@ -1076,9 +1077,7 @@ export function createChatStateManager({ rootDirectory }) {
         readGitCommitDiffPromptFile(rootDirectory),
       ]);
 
-      const privateIconUrl = pathToFileURL(
-        path.join(rootDirectory, 'Assets', 'App', 'Private.png'),
-      ).href;
+      const privateIconUrl = getResourceFileUrl(rootDirectory, 'Assets', 'App', 'Private.png');
 
       // In packaged builds the Config/Models JSONs are frozen inside the asar
       // archive and ModelSync never runs. Use the live model filter to cross-

@@ -1,8 +1,7 @@
-import path from 'node:path';
-import { readFile } from 'node:fs/promises';
+import { readTextResource } from '../Storage/ResourcePaths.js';
 
 export async function readBundledPromptFile(rootDirectory, filename) {
-  return (await readFile(path.join(rootDirectory, 'Prompts', filename), 'utf8')).trim();
+  return readTextResource(rootDirectory, 'Prompts', filename);
 }
 
 export function formatPromptTemplate(template, values = {}) {

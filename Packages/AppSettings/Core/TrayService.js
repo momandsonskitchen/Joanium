@@ -1,12 +1,15 @@
-import path from 'node:path';
 import { app, BrowserWindow, Menu, Tray } from 'electron';
+import { getResourcePath } from '../../Shared/Storage/ResourcePaths.js';
 
 let tray = null;
 let lastWindow = null;
 
 function getTrayIconPath(rootDirectory) {
-  if (process.platform === 'win32') return path.join(rootDirectory, 'Assets', 'Logo', 'Logo.ico');
-  return path.join(rootDirectory, 'Assets', 'Logo', 'Logo.png');
+  if (process.platform === 'win32') {
+    return getResourcePath(rootDirectory, 'Assets', 'Logo', 'Logo.ico');
+  }
+
+  return getResourcePath(rootDirectory, 'Assets', 'Logo', 'Logo.png');
 }
 
 function getTargetWindow() {
