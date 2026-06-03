@@ -6,6 +6,27 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.603.0] - 2026-06-03
+
+* chore(release): bump version to 2026.603.0
+* Added Support To Delete A Branch In Git Bar
+* Fixed the message for git bar
+* Added Fix For Git Bar
+* AI Models Update
+* Removed Stale AI Model Data
+* Updated AI Models
+* Fix: Unused variable, import, function or class #60
+* Fix: Unused variable, import, function or class #63
+* Added Comment: Potential file system race condition #40
+* Added A Comment To Address The False Negative - Potential file system race condition #86
+* Fix: Potential file system race condition #43
+* Fix: Potential file system race condition #51
+* Added Logo To AI Providers
+* AI Models Update
+* Data Porting Bug Fixes: Avatar image and API Keys
+
+---
+
 ## [2026.602.0] - 2026-06-02
 
 * chore(release): bump version to 2026.602.0
