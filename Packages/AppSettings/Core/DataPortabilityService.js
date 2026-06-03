@@ -78,35 +78,114 @@ function deepMerge(current, imported) {
  * Merge imported User.json into current User.json.
  *
  * Rules:
- *  - API keys (`providers.details`): existing keys are never overwritten, but
- *    keys missing from current are filled in from the import.
+ *  - API keys (`providers.details`): per-provider, existing key values are never
+ *    overwritten but any missing provider entry is filled in from the import.
  *  - Connector secrets (`connectors.details`): same gap-fill approach.
- *  - providers.selected = union of both (via deepMerge array handling).
- *  - Everything else: deepMerge — current wins on conflicts, imported fills gaps.
- *  - Future unknown keys in User.json are automatically handled without any
- *    hardcoding here.
+ *  - providers.selected: union of both arrays (deduped).
+ *  - Scalar fields (name, dob, customInstructions, theme, appSettings, etc.):
+ *    import fills in any field that is empty/null/default in current.
+ *  - Avatar path: imported only if current has no avatar (avatarPath is null/empty).
  */
 function mergeUserJson(current = {}, imported = {}) {
-  // Deep-merge everything except the secrets we handle manually below
-  const merged = deepMerge(current, imported);
+  // ── Profile ──────────────────────────────────────────────────────────────
+  const currentProfile = current.profile ?? {};
+  const importedProfile = imported.profile ?? {};
 
-  // API keys: import keys that don't exist in current; never overwrite existing ones
+  const mergedProfile = {
+    name:
+      String(currentProfile.name ?? '').trim() || String(importedProfile.name ?? '').trim() || '',
+    // Avatar: keep current path if it exists; otherwise take imported path.
+    // Note: the file itself is handled separately in the zip loop.
+    avatarPath: currentProfile.avatarPath ?? importedProfile.avatarPath ?? null,
+    dateOfBirth: {
+      day:
+        String(currentProfile.dateOfBirth?.day ?? '').trim() ||
+        String(importedProfile.dateOfBirth?.day ?? '').trim() ||
+        '',
+      month:
+        String(currentProfile.dateOfBirth?.month ?? '').trim() ||
+        String(importedProfile.dateOfBirth?.month ?? '').trim() ||
+        '',
+      year:
+        String(currentProfile.dateOfBirth?.year ?? '').trim() ||
+        String(importedProfile.dateOfBirth?.year ?? '').trim() ||
+        '',
+    },
+  };
+
+  // ── Providers ────────────────────────────────────────────────────────────
+  // selected: union of both
+  const currentSelected = Array.isArray(current.providers?.selected)
+    ? current.providers.selected
+    : [];
+  const importedSelected = Array.isArray(imported.providers?.selected)
+    ? imported.providers.selected
+    : [];
+  const mergedSelected = [...new Set([...currentSelected, ...importedSelected])];
+
+  // details: per-provider gap-fill — never overwrite an existing entry
   const currentProviderDetails = current.providers?.details ?? {};
   const importedProviderDetails = imported.providers?.details ?? {};
-  merged.providers = {
-    ...merged.providers,
-    details: { ...importedProviderDetails, ...currentProviderDetails },
-  };
+  const mergedProviderDetails = { ...importedProviderDetails, ...currentProviderDetails };
 
-  // Connector secrets: same gap-fill approach
+  // ── Connector secrets ────────────────────────────────────────────────────
   const currentConnectorDetails = current.connectors?.details ?? {};
   const importedConnectorDetails = imported.connectors?.details ?? {};
-  merged.connectors = {
-    ...merged.connectors,
-    details: { ...importedConnectorDetails, ...currentConnectorDetails },
-  };
+  const mergedConnectorDetails = { ...importedConnectorDetails, ...currentConnectorDetails };
 
-  return merged;
+  // ── Scalar / settings fields: current wins only when it has a real value ─
+  const mergedCustomInstructions =
+    String(current.customInstructions ?? '').trim() ||
+    String(imported.customInstructions ?? '').trim() ||
+    '';
+
+  const mergedUsageModes = deepMerge(
+    Array.isArray(current.usageModes) ? current.usageModes : [],
+    Array.isArray(imported.usageModes) ? imported.usageModes : [],
+  );
+
+  // activePersona: keep current unless it's still the default placeholder
+  const DEFAULT_PERSONA_FILENAME = 'Joana.md';
+  const currentPersona = current.activePersona;
+  const importedPersona = imported.activePersona;
+  const mergedPersona =
+    currentPersona &&
+    currentPersona.namespace &&
+    currentPersona.filename &&
+    currentPersona.filename !== DEFAULT_PERSONA_FILENAME
+      ? currentPersona
+      : (importedPersona ?? currentPersona);
+
+  // theme / appSettings: deep-merge (current wins per key)
+  const mergedTheme = deepMerge(current.theme ?? {}, imported.theme ?? {});
+  const mergedAppSettings = deepMerge(current.appSettings ?? {}, imported.appSettings ?? {});
+
+  // ── Onboarding / identity fields ─────────────────────────────────────────
+  // Always keep current values for security-sensitive / machine-specific fields.
+  return {
+    // Identity / onboarding — always current
+    locale: current.locale ?? imported.locale ?? 'en',
+    consentAccepted: current.consentAccepted ?? imported.consentAccepted ?? false,
+    onboardingCompleted: current.onboardingCompleted ?? imported.onboardingCompleted ?? false,
+    completedAt: current.completedAt ?? imported.completedAt ?? null,
+    lastCompletedStep: current.lastCompletedStep ?? imported.lastCompletedStep ?? 0,
+    // Merged fields
+    profile: mergedProfile,
+    customInstructions: mergedCustomInstructions,
+    providers: {
+      selected: mergedSelected,
+      details: mergedProviderDetails,
+    },
+    connectors: {
+      details: mergedConnectorDetails,
+    },
+    usageModes: mergedUsageModes,
+    activePersona: mergedPersona,
+    // Window state is always machine-specific — never import
+    windowState: current.windowState,
+    appSettings: mergedAppSettings,
+    theme: mergedTheme,
+  };
 }
 
 /**
@@ -173,10 +252,16 @@ export async function exportData(rootDirectory) {
  *
  * Merge strategy:
  *  - Security.json / System.json → always skipped (machine-specific / sensitive)
- *  - User.json → deep merge (API keys never imported)
+ *  - User.json → explicit field merge:
+ *      API keys / connector secrets: gap-fill only (never overwrite existing)
+ *      profile (name, dob, avatar path): imported fills in empty/null values
+ *      providers.selected: union of both
+ *      customInstructions, usageModes, activePersona: imported fills blanks
+ *      theme / appSettings: current wins per key, import fills missing keys
+ *      windowState: always kept from current (machine-specific)
  *  - Channels.json → smart merge (current config wins per channel)
- *  - Avatar.* → keep current (never overwrite)
- *  - Memories/*.md → append imported content under a divider if not already present
+ *  - Avatar.* → write only if no avatar exists; fix avatarPath to local path
+ *  - Memories/*.md → skipped here; use the Memory panel's AI import flow
  *  - Everything else → copy only if the destination file does not exist yet
  */
 export async function importData(rootDirectory) {
@@ -195,6 +280,11 @@ export async function importData(rootDirectory) {
   const zip = await JSZip.loadAsync(zipBuffer);
   const dataDir = getWritableDataDirectory(rootDirectory);
   await mkdir(dataDir, { recursive: true });
+
+  // Track the avatar destination path so we can fix avatarPath in User.json
+  // after the zip loop (the imported path is always an absolute path from the
+  // source machine and would be wrong on any other install location).
+  let writtenAvatarPath = null;
 
   for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
     if (zipEntry.dir) continue;
@@ -264,28 +354,19 @@ export async function importData(rootDirectory) {
       if (!(await fileExists(destPath))) {
         await mkdir(path.dirname(destPath), { recursive: true });
         await writeFile(destPath, content);
+        writtenAvatarPath = destPath;
       }
       continue;
     }
 
-    // ── Memory .md files: append imported content if not already present ───
+    // ── Memory .md files: merge via AI import pipeline (handled separately).
+    // Raw zip-level memory merging is intentionally skipped here — the Memory
+    // panel's import flow (MemoryPanel.js → runMemoryImport) handles .md files
+    // using the AI-assisted ImportMemory prompt, which properly deduplicates
+    // and restructures content.  We simply skip .md files in the zip so we
+    // don't overwrite anything the AI import has already handled.
     if (topLevel === 'Memories' && normPath.endsWith('.md')) {
-      await mkdir(path.dirname(destPath), { recursive: true });
-      const importedText = content.toString('utf8').trim();
-
-      if (await fileExists(destPath)) {
-        const currentText = (await readFile(destPath, 'utf8')).trimEnd();
-        const alreadyPresent =
-          currentText === importedText ||
-          currentText.startsWith(`${importedText}\n`) ||
-          currentText.endsWith(`\n${importedText}`) ||
-          currentText.includes(`\n${importedText}\n`);
-        if (!alreadyPresent) {
-          await writeFile(destPath, `${currentText}\n\n${importedText}\n`, 'utf8');
-        }
-      } else {
-        await writeFile(destPath, `${importedText}\n`, 'utf8');
-      }
+      // Skip — memory files are managed by the Memory panel's import UI.
       continue;
     }
 
@@ -295,6 +376,22 @@ export async function importData(rootDirectory) {
 
     await mkdir(path.dirname(destPath), { recursive: true });
     await writeFile(destPath, content);
+  }
+
+  // If we wrote a new avatar file, patch avatarPath in User.json to point to
+  // the correct local path (the imported path was an absolute path from the
+  // source machine and is meaningless here).
+  if (writtenAvatarPath !== null) {
+    const userJsonPath = path.join(dataDir, 'User.json');
+    try {
+      const userState = JSON.parse(await readFile(userJsonPath, 'utf8'));
+      if (!userState.profile?.avatarPath) {
+        userState.profile = { ...(userState.profile ?? {}), avatarPath: writtenAvatarPath };
+        await writeFile(userJsonPath, `${JSON.stringify(userState, null, 2)}\n`, 'utf8');
+      }
+    } catch {
+      // Non-fatal: User.json may not exist yet or avatarPath was already set correctly.
+    }
   }
 
   return { ok: true };
