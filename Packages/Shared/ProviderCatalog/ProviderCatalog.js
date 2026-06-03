@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
+import { app } from 'electron';
 
 const providerPalette = {
   anthropic: { tint: '#f6c59e', glow: '#ffefe0' },
@@ -94,6 +95,13 @@ function summarizeModels(models) {
   };
 }
 
+// Assets (including Icons) ship as extraResources and live at
+// process.resourcesPath in packaged builds — outside the read-only asar.
+// In dev, they sit beside the project root just like rootDirectory.
+function resolveAssetsRoot(rootDirectory) {
+  return app.isPackaged ? process.resourcesPath : rootDirectory;
+}
+
 function buildProviderRecord(providerConfiguration, rootDirectory) {
   const { models, modelCount, featuredModels, summary } = summarizeModels(
     providerConfiguration.models,
@@ -116,7 +124,8 @@ function buildProviderRecord(providerConfiguration, rootDirectory) {
     featuredModels,
     summary,
     iconPath: iconFileName
-      ? pathToFileURL(path.join(rootDirectory, 'Assets', 'Icons', iconFileName)).href
+      ? pathToFileURL(path.join(resolveAssetsRoot(rootDirectory), 'Assets', 'Icons', iconFileName))
+          .href
       : '',
     palette,
     requirements: isLocal

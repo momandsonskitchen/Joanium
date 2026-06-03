@@ -5,6 +5,19 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "qwen/qwen3.7-plus": {
+      "name": "Qwen: Qwen3.7 Plus",
+      "description": "Qwen3.7-Plus is a cost-effective model in Alibaba's Qwen3.7 series. It supports text and image input with text output, building on the series' text capabilities with a comprehensive upgrade to its...",
+      "context_window": 1000000,
+      "pricing": {
+        "input": 0.4,
+        "output": 1.6
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "minimax/minimax-m3": {
       "name": "MiniMax: MiniMax M3",
       "description": "MiniMax-M3 is a multimodal foundation model from MiniMax. It supports text, image, and video inputs with text output, a 1M-token context window, and is suited for long-horizon agentic work, coding,...",
@@ -3858,18 +3871,6 @@
         "text": true
       }
     },
-    "cohere/command-r-plus-08-2024": {
-      "name": "Cohere: Command R+ (08-2024)",
-      "description": "command-r-plus-08-2024 is an update of the [Command R+](/models/cohere/command-r-plus) with roughly 50% higher throughput and 25% lower latencies as compared to the previous Command R+ version, while keeping the hardware footprint...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 2.5,
-        "output": 10
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "cohere/command-r-08-2024": {
       "name": "Cohere: Command R (08-2024)",
       "description": "command-r-08-2024 is an update of the [Command R](/models/cohere/command-r) with improved performance for multilingual retrieval-augmented generation (RAG) and tool use. More broadly, it is better at math, code and reasoning and...",
@@ -3877,6 +3878,18 @@
       "pricing": {
         "input": 0.15,
         "output": 0.6
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "cohere/command-r-plus-08-2024": {
+      "name": "Cohere: Command R+ (08-2024)",
+      "description": "command-r-plus-08-2024 is an update of the [Command R+](/models/cohere/command-r-plus) with roughly 50% higher throughput and 25% lower latencies as compared to the previous Command R+ version, while keeping the hardware footprint...",
+      "context_window": 128000,
+      "pricing": {
+        "input": 2.5,
+        "output": 10
       },
       "inputs": {
         "text": true
@@ -3955,18 +3968,6 @@
         "image": true
       }
     },
-    "meta-llama/llama-3.1-70b-instruct": {
-      "name": "Meta: Llama 3.1 70B Instruct",
-      "description": "Meta's latest class of model (Llama 3.1) launched with a variety of sizes & flavors. This 70B instruct-tuned version is optimized for high quality dialogue usecases. It has demonstrated strong...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.4,
-        "output": 0.4
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "meta-llama/llama-3.1-8b-instruct": {
       "name": "Meta: Llama 3.1 8B Instruct",
       "description": "Meta's latest class of model (Llama 3.1) launched with a variety of sizes & flavors. This 8B instruct-tuned version is fast and efficient. It has demonstrated strong performance compared to...",
@@ -3974,6 +3975,18 @@
       "pricing": {
         "input": 0.02,
         "output": 0.05
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "meta-llama/llama-3.1-70b-instruct": {
+      "name": "Meta: Llama 3.1 70B Instruct",
+      "description": "Meta's latest class of model (Llama 3.1) launched with a variety of sizes & flavors. This 70B instruct-tuned version is optimized for high quality dialogue usecases. It has demonstrated strong...",
+      "context_window": 131072,
+      "pricing": {
+        "input": 0.4,
+        "output": 0.4
       },
       "inputs": {
         "text": true
@@ -4079,18 +4092,6 @@
         "image": true
       }
     },
-    "meta-llama/llama-3-70b-instruct": {
-      "name": "Meta: Llama 3 70B Instruct",
-      "description": "Meta's latest class of model (Llama 3) launched with a variety of sizes & flavors. This 70B instruct-tuned version was optimized for high quality dialogue usecases. It has demonstrated strong...",
-      "context_window": 8192,
-      "pricing": {
-        "input": 0.51,
-        "output": 0.74
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "meta-llama/llama-3-8b-instruct": {
       "name": "Meta: Llama 3 8B Instruct",
       "description": "Meta's latest class of model (Llama 3) launched with a variety of sizes & flavors. This 8B instruct-tuned version was optimized for high quality dialogue usecases. It has demonstrated strong...",
@@ -4098,6 +4099,18 @@
       "pricing": {
         "input": 0.04,
         "output": 0.04
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "meta-llama/llama-3-70b-instruct": {
+      "name": "Meta: Llama 3 70B Instruct",
+      "description": "Meta's latest class of model (Llama 3) launched with a variety of sizes & flavors. This 70B instruct-tuned version was optimized for high quality dialogue usecases. It has demonstrated strong...",
+      "context_window": 8192,
+      "pricing": {
+        "input": 0.51,
+        "output": 0.74
       },
       "inputs": {
         "text": true
@@ -4290,18 +4303,6 @@
         "text": true
       }
     },
-    "openai/gpt-4": {
-      "name": "OpenAI: GPT-4",
-      "description": "OpenAI's flagship model, GPT-4 is a large-scale multimodal language model capable of solving difficult problems with greater accuracy than previous models due to its broader general knowledge and advanced reasoning...",
-      "context_window": 8191,
-      "pricing": {
-        "input": 30,
-        "output": 60
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-3.5-turbo": {
       "name": "OpenAI: GPT-3.5 Turbo",
       "description": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
@@ -4313,7 +4314,19 @@
       "inputs": {
         "text": true
       }
+    },
+    "openai/gpt-4": {
+      "name": "OpenAI: GPT-4",
+      "description": "OpenAI's flagship model, GPT-4 is a large-scale multimodal language model capable of solving difficult problems with greater accuracy than previous models due to its broader general knowledge and advanced reasoning...",
+      "context_window": 8191,
+      "pricing": {
+        "input": 30,
+        "output": 60
+      },
+      "inputs": {
+        "text": true
+      }
     }
   },
-  "_syncedAt": "2026-06-03T12:32:16.291Z"
+  "_syncedAt": "2026-06-03T13:58:28.977Z"
 }
