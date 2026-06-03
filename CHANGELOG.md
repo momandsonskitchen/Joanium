@@ -6,6 +6,14 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.603.7] - 2026-06-03
+
+* chore(release): bump version to 2026.603.7
+* Added Support For AI Provider Icons
+* AI Models Update
+
+---
+
 ## [2026.603.6] - 2026-06-03
 
 * chore(release): bump version to 2026.603.6
