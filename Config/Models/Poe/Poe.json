@@ -1733,7 +1733,10 @@
     },
     "minimax-m3-el": {
       "name": "Minimax M3 El"
+    },
+    "qwen3.7-plus": {
+      "name": "Qwen3 7 PLUS"
     }
   },
-  "_syncedAt": "2026-06-02T14:59:02.914Z"
+  "_syncedAt": "2026-06-03T03:27:55.835Z"
 }

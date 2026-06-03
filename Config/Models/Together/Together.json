@@ -133,10 +133,6 @@
       "name": "Meta Llama 3.1 70B Instruct Turbo",
       "context_window": 131072
     },
-    "zai-org/GLM-4.7": {
-      "name": "GLM 4.7 Fp8",
-      "context_window": 202752
-    },
     "Qwen/Qwen3-VL-32B-Instruct": {
       "name": "Qwen3-VL-32B-Instruct",
       "context_window": 262144
@@ -412,10 +408,6 @@
       "name": "Llama 3.1 70B",
       "context_window": 131072
     },
-    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": {
-      "name": "Llama 4 Maverick Instruct (17Bx128E) FP8",
-      "context_window": 1048576
-    },
     "meta-llama/Llama-3.2-3B": {
       "name": "Meta Llama 3.2 3B",
       "context_window": 131072
@@ -667,6 +659,14 @@
       "name": "Gemma 4 31B It Lora",
       "context_window": 262144
     },
+    "zai-org/GLM-4.7": {
+      "name": "GLM 4.7 Fp8",
+      "context_window": 202752
+    },
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP4": {
+      "name": "Llama 4 Maverick 17B 128E Instruct Nvfp4",
+      "context_window": 1048576
+    },
     "zai-org/GLM-4.7-fp4": {
       "name": "GLM 4.7 FP4",
       "context_window": 202752
@@ -708,5 +708,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-02T14:58:46.737Z"
+  "_syncedAt": "2026-06-03T03:27:41.116Z"
 }

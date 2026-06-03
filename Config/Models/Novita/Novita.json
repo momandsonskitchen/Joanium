@@ -47,6 +47,15 @@
         "text": true
       }
     },
+    "baidu/cobuddy": {
+      "name": "CoBuddy",
+      "description": "CoBuddy is a specialized code generation model developed by Baidu, engineered with targeted optimizations for Coding and AI Agent scenarios. It delivers exceptional performance, characterized by high inference throughput and ultra-low end-to-end (E2E) latency.",
+      "context_window": 131072,
+      "max_output": 65536,
+      "inputs": {
+        "text": true
+      }
+    },
     "xiaomimimo/mimo-v2.5": {
       "name": "XiaomiMiMo/MiMo-V2.5",
       "description": "mimo-v2.5, a native omni-modal model supporting text, image, video, and audio understanding, equipped with powerful agentic capabilities.",
@@ -1237,5 +1246,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-02T14:58:57.390Z"
+  "_syncedAt": "2026-06-03T03:27:51.560Z"
 }
