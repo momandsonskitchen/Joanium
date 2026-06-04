@@ -495,6 +495,16 @@
         "text": true
       }
     },
+    "nex-agi/nex-n2-pro": {
+      "name": "Nex-N2-Pro",
+      "description": "Nex-N2-Pro is Nex AGI's open-source agentic reasoning model, post-trained on Qwen3.5-397B-A17B (MoE). Its Agentic Thinking framework unifies reasoning, tool use, and environment execution for complex, long-horizon tasks like agentic coding, software engineering, and deep research. It supports a 256K",
+      "context_window": 262144,
+      "max_output": 262144,
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "zai-org/glm-ocr": {
       "name": "GLM-OCR",
       "description": "GLM-OCR is a lightweight professional OCR model with only 0.9B parameters, achieving SOTA performance with a score of 94.62 on OmniDocBench V1.5. Optimized for real-world business scenarios, it delivers high-precision recognition for handwritten text, stamps, and code documentation. The model suppor",
@@ -1246,5 +1256,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-03T15:19:15.682Z"
+  "_syncedAt": "2026-06-04T04:09:06.132Z"
 }

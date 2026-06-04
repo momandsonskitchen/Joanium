@@ -4291,18 +4291,6 @@
         "text": true
       }
     },
-    "openai/gpt-4-0314": {
-      "name": "OpenAI: GPT-4 (older v0314)",
-      "description": "GPT-4-0314 is the first version of GPT-4 released, with a context length of 8,192 tokens, and was supported until June 14. Training data: up to Sep 2021.",
-      "context_window": 8191,
-      "pricing": {
-        "input": 30,
-        "output": 60
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-3.5-turbo": {
       "name": "OpenAI: GPT-3.5 Turbo",
       "description": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
@@ -4328,5 +4316,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-03T15:18:51.402Z"
+  "_syncedAt": "2026-06-04T04:08:46.804Z"
 }
