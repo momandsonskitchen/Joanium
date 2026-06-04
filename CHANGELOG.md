@@ -6,6 +6,15 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.604.1] - 2026-06-04
+
+* chore(release): bump version to 2026.604.1
+* refactor: extract shared TerminalCallCard component and createSlugId utility
+* Introducing Bubbly Component
+* Updated AI Models
+
+---
+
 ## [2026.604.0] - 2026-06-04
 
 * chore(release): bump version to 2026.604.0
