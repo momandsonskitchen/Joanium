@@ -1,6 +1,6 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
+import { createCheckbox } from '../../Shared/Bubbly/Checkbox/Checkbox.js';
 import { createSettingsPanelState } from './Utils.js';
 
 export function createMemorySettingsPanel(strings) {

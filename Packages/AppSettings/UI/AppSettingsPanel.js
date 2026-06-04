@@ -1,7 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createCheckbox } from '../../Shared/Checkbox/Checkbox.js';
-import { createDropDown } from '../../Shared/DropDown/DropDown.js';
+import { createCheckbox } from '../../Shared/Bubbly/Checkbox/Checkbox.js';
+import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
 import {
   buildAvailableModelOptions,
   decodeModelValue,
@@ -179,10 +179,10 @@ export function createAppSettingsPanel(strings) {
       value,
       label,
     }));
-    defaultViewDropdown = createDropDown({
+    defaultViewDropdown = createDropDownLite({
       label: '',
       options: viewOptions,
-      selectedValue: state.settings.defaultView ?? 'chat',
+      value: state.settings.defaultView ?? 'chat',
       onChange: (value) => {
         void updateDefaultView(value);
       },
@@ -212,10 +212,10 @@ export function createAppSettingsPanel(strings) {
     const savedModelValue = encodeModelValue(state.settings.defaultModel);
     const currentModelValue = savedModelValue || (modelOptions[0]?.value ?? '');
 
-    defaultModelDropdown = createDropDown({
+    defaultModelDropdown = createDropDownLite({
       label: '',
       options: modelOptions,
-      selectedValue: currentModelValue,
+      value: currentModelValue,
       onChange: (value) => {
         void updateDefaultModel(value);
       },
@@ -241,10 +241,10 @@ export function createAppSettingsPanel(strings) {
     options.append(modelRow);
 
     // ── Default search engine row ──────────────────────────────────────────
-    defaultSearchEngineDropdown = createDropDown({
+    defaultSearchEngineDropdown = createDropDownLite({
       label: '',
       options: strings.defaultSearchEngine.options,
-      selectedValue: state.settings.defaultSearchEngine ?? 'google',
+      value: state.settings.defaultSearchEngine ?? 'google',
       onChange: (value) => {
         void updateDefaultSearchEngine(value);
       },

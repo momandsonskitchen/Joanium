@@ -82,30 +82,13 @@
   color: var(--color-text-secondary);
 }
 
-.app-settings__dropdown-row .joanium-dropdown {
+.app-settings__dropdown-row .joanium-ddm-lite {
   flex-shrink: 0;
-  width: 160px;
-  gap: 0;
+  width: 200px;
 }
 
-.app-settings__dropdown-row--wide .joanium-dropdown {
+.app-settings__dropdown-row--wide .joanium-ddm-lite {
   width: 300px;
-}
-
-.app-settings__dropdown-row .joanium-dropdown__label {
-  display: none;
-}
-
-.app-settings__dropdown-row .joanium-dropdown__trigger {
-  min-height: 38px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  padding: 0 14px;
-  background: rgba(255, 255, 255, 0.65);
-  box-shadow:
-    inset 0 0 0 1px var(--dropdown-color-border),
-    0 2px 8px var(--dropdown-color-shadow);
 }
 
 .app-settings__danger-row {

@@ -1,4 +1,4 @@
-import { attachCustomScrollbar } from '../CustomScrollbar/CustomScrollbar.js';
+import { attachCustomScrollbar } from '../../CustomScrollbar/CustomScrollbar.js';
 
 export function createModal({ closeLabel, width = '720px', height = '100vh' }) {
   const overlay = document.createElement('div');

@@ -1,5 +1,5 @@
 import { createElement } from '../Utils/DomUtils.js';
-import { createPortalDropdownController } from '../DropDown/PortalDropdown.js';
+import { createPortalDropdownController } from '../Bubbly/DropDown/PortalDropdown.js';
 
 // ── createDropDownLite ─────────────────────────────────────────────────────
 // A compact, inline-friendly dropdown built for settings panels and tight
