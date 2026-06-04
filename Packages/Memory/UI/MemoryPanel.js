@@ -1,9 +1,10 @@
 import { copyToClipboard, createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
-import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { createDreamPanel } from './DreamPanel.js';
 import { MEMORY_PROMPTS } from './Prompts.js';
 
 function extractJsonObject(text = '') {
@@ -109,6 +110,8 @@ export function createMemoryPanel(strings) {
   let copyPromptLabelEl = null;
   let copyPromptResetTimer = null;
   let importLoader = null;
+  let dreamPanel = null;
+  let dreamView = null;
 
   async function populateList(query = '') {
     if (!listEl) return;
@@ -221,6 +224,7 @@ export function createMemoryPanel(strings) {
       editor.disabled = true;
     }
     if (saveButton) saveButton.disabled = true;
+    showEditorView();
   }
 
   function setSaveButtonText(text) {
@@ -245,16 +249,20 @@ export function createMemoryPanel(strings) {
     if (editor) {
       editor.disabled = false;
       editor.value = activeMemory.content;
-      editor.focus();
+      requestAnimationFrame(() => {
+        editor.focus();
+        editor.setSelectionRange(0, 0);
+      });
     }
-    if (saveButton) {
-      saveButton.disabled = false;
-      setSaveButtonText(strings.save);
-    }
+
+    setSaveButtonText(strings.save);
+    if (saveButton) saveButton.disabled = true;
 
     listEl?.querySelectorAll('.chat-memory__card').forEach((card) => {
       card.classList.toggle('chat-memory__card--active', card.__memoryFilename === activeFilename);
     });
+
+    showEditorView();
   }
 
   async function saveMemory() {
@@ -286,6 +294,7 @@ export function createMemoryPanel(strings) {
 
   function showEditorView() {
     if (importView) importView.hidden = true;
+    if (dreamView) dreamView.hidden = true;
     if (editorView) editorView.hidden = false;
   }
 
@@ -301,6 +310,7 @@ export function createMemoryPanel(strings) {
   function showImportView() {
     if (!editorView || !importView) return;
     editorView.hidden = true;
+    if (dreamView) dreamView.hidden = true;
     importView.hidden = false;
     if (importTextarea) {
       importTextarea.value = '';
@@ -499,7 +509,19 @@ export function createMemoryPanel(strings) {
     importButton.append(createIcon('download', 'chat-memory__import-icon'));
     importButton.addEventListener('click', showImportView);
 
-    searchWrap.append(search.element, importButton);
+    const dreamButton = createElement('button', 'chat-memory__dream');
+    dreamButton.type = 'button';
+    dreamButton.append(createIcon('moon', 'chat-memory__dream-icon'));
+    dreamButton.addEventListener('click', () => {
+      if (editorView) editorView.hidden = true;
+      if (importView) importView.hidden = true;
+      if (dreamView) {
+        dreamView.hidden = false;
+        dreamPanel.onShow();
+      }
+    });
+
+    searchWrap.append(search.element, dreamButton, importButton);
     listEl = createElement('div', 'chat-memory__list');
     listColumn.append(searchWrap, listEl);
 
@@ -617,6 +639,19 @@ export function createMemoryPanel(strings) {
     );
 
     editorColumn.append(editorView, importView);
+
+    // ── Dream view ───────────────────────────────────────────────────────
+    dreamPanel = createDreamPanel(strings.dreams);
+    dreamView = dreamPanel.build();
+    editorColumn.append(dreamView);
+
+    // Auto-refresh dream view when cleanup finishes
+    onIpc('memory:cleanup-finished', () => {
+      if (dreamView && !dreamView.hidden) {
+        dreamPanel.onShow();
+      }
+    });
+
     body.append(listColumn, editorColumn);
     panel.append(body);
     renderEmptyEditor();

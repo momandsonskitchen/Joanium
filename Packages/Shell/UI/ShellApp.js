@@ -14,6 +14,7 @@ import { createMemoryPanel } from '../../Memory/UI/MemoryPanel.js';
 import { createTemplatesPanel } from '../../Templates/UI/TemplatesPanel.js';
 import { createAgentsPanel } from '../../Agents/UI/AgentsPanel.js';
 import { createAgentGateway } from '../../Agents/UI/AgentGateway.js';
+import { createCleanupGateway } from '../../Memory/UI/CleanupGateway.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
 import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
@@ -141,12 +142,15 @@ async function bootstrap() {
     getActivePersona: () => activePersona,
   });
 
+  const cleanupGateway = createCleanupGateway();
+
   const routeViews = new Map();
   const routeViewPromises = new Map();
   const tabElements = new Map();
   let navigationToken = 0;
   channelGateway.start();
   agentGateway.start();
+  cleanupGateway.start();
 
   const shell = createElement('main', 'chat-shell');
   const sidebar = createElement('nav', 'chat-sidebar');

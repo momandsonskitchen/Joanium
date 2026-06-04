@@ -92,11 +92,6 @@ const DEFAULT_MEMORY_FILES = [
   ],
   ['Skills.md', 'Skills', 'Practical, professional, creative, and personal skills.'],
   ['Projects.md', 'Projects', 'Active personal or professional projects and their context.'],
-  [
-    'Context.md',
-    'Current Context',
-    'Recent events, current mood, stressors, or situational awareness.',
-  ],
   ['Humor.md', 'Humor', 'The user sense of humor and humor they dislike.'],
   [
     'Food.md',

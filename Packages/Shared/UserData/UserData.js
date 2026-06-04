@@ -63,6 +63,7 @@ export function createDefaultUserState() {
       defaultModel: null,
       defaultSearchEngine: 'google',
     },
+    lastDreamt: null,
     theme: {
       mode: 'system',
       motion: 'full',
@@ -118,6 +119,7 @@ export function mergeUserStates(baseState, nextState = {}) {
       typeof nextState.appSettings === 'object'
         ? { ...baseState.appSettings, ...nextState.appSettings }
         : baseState.appSettings,
+    lastDreamt: nextState.lastDreamt !== undefined ? nextState.lastDreamt : baseState.lastDreamt,
     theme:
       nextState.theme !== undefined &&
       nextState.theme !== null &&
@@ -306,6 +308,12 @@ function sanitizeTheme(candidate) {
   };
 }
 
+function sanitizeCleanupTimestamp(candidate) {
+  if (typeof candidate !== 'string' || !candidate.trim()) return null;
+  const ms = Date.parse(candidate);
+  return Number.isFinite(ms) ? new Date(ms).toISOString() : null;
+}
+
 export function sanitizeIncomingUserState(candidateState) {
   const baseState = createDefaultUserState();
 
@@ -345,6 +353,7 @@ export function sanitizeIncomingUserState(candidateState) {
     activePersona: sanitizeActivePersona(candidateState?.activePersona),
     windowState: sanitizeWindowState(candidateState?.windowState),
     appSettings: sanitizeAppSettings(candidateState?.appSettings),
+    lastDreamt: sanitizeCleanupTimestamp(candidateState?.lastDreamt),
     theme: sanitizeTheme(candidateState?.theme),
   });
 }
