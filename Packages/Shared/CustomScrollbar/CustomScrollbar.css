@@ -95,6 +95,8 @@
 .chat-settings__main,
 .chat-skills__viewer-card,
 .chat-templates__list-col,
+.dream-panel__date-column,
+.dream-panel__detail-column,
 .md-pre {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-accent-thumb) transparent;
@@ -120,6 +122,8 @@
 .chat-settings__main::-webkit-scrollbar,
 .chat-skills__viewer-card::-webkit-scrollbar,
 .chat-templates__list-col::-webkit-scrollbar,
+.dream-panel__date-column::-webkit-scrollbar,
+.dream-panel__detail-column::-webkit-scrollbar,
 .md-pre::-webkit-scrollbar {
   width: var(--scrollbar-width);
   height: var(--scrollbar-width);
@@ -143,6 +147,8 @@
 .chat-settings__main::-webkit-scrollbar-track,
 .chat-skills__viewer-card::-webkit-scrollbar-track,
 .chat-templates__list-col::-webkit-scrollbar-track,
+.dream-panel__date-column::-webkit-scrollbar-track,
+.dream-panel__detail-column::-webkit-scrollbar-track,
 .md-pre::-webkit-scrollbar-track {
   background: var(--scrollbar-accent-track);
   border-radius: var(--radius-pill);
@@ -168,6 +174,8 @@
 .chat-settings__main::-webkit-scrollbar-thumb,
 .chat-skills__viewer-card::-webkit-scrollbar-thumb,
 .chat-templates__list-col::-webkit-scrollbar-thumb,
+.dream-panel__date-column::-webkit-scrollbar-thumb,
+.dream-panel__detail-column::-webkit-scrollbar-thumb,
 .md-pre::-webkit-scrollbar-thumb {
   border-radius: var(--radius-pill);
   background: var(--scrollbar-accent-thumb);
@@ -191,6 +199,8 @@
 .chat-settings__main::-webkit-scrollbar-thumb:hover,
 .chat-skills__viewer-card::-webkit-scrollbar-thumb:hover,
 .chat-templates__list-col::-webkit-scrollbar-thumb:hover,
+.dream-panel__date-column::-webkit-scrollbar-thumb:hover,
+.dream-panel__detail-column::-webkit-scrollbar-thumb:hover,
 .md-pre::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-accent-thumb-hover);
 }
