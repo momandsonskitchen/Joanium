@@ -2,34 +2,12 @@ import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { formatTerminalResultForModel as formatRendererTerminalResultForModel } from '../../Shared/ToolLoop/RendererToolLoop.js';
-import { getConnectorIconPathForToolName } from '../../Shared/ConnectorIcons/ConnectorIcons.js';
+import { createTerminalCallCard } from '../../Shared/TerminalCallCard/TerminalCallCard.js';
 import {
   createSubAgentOutputSection,
   createSubAgentPromptSection,
   createSubAgentTaskSection,
 } from './SubAgentSections.js';
-
-/**
- * Creates the icon element for a tool card header.
- * Uses the connector's branded image when one exists; otherwise falls back to
- * the generic terminal glyph so built-in tools look unchanged.
- *
- * @param {string} toolName  The raw tool name stored in terminal.command
- * @returns {HTMLElement}
- */
-function createToolCardIcon(toolName) {
-  const iconPath = getConnectorIconPathForToolName(toolName);
-
-  if (iconPath) {
-    const img = document.createElement('img');
-    img.src = iconPath;
-    img.alt = '';
-    img.className = 'chat-terminal-call__icon chat-terminal-call__icon--connector';
-    return img;
-  }
-
-  return createIcon('terminal', 'chat-terminal-call__icon');
-}
 
 export function getTerminalToolLabel(strings, tool) {
   return strings.terminal?.toolLabels?.[tool] ?? tool;
@@ -155,60 +133,14 @@ export function createTerminalCallElement(terminal, strings) {
 
   const status = terminal.status ?? 'running';
   const output = [terminal.output, terminal.error].filter(Boolean).join('\n\n').trim();
-  const hasOutput = Boolean(output);
-
-  // When there's output the card becomes a <details> so the header row
-  // itself is the toggle — no separate "Output" row needed.
-  const card = hasOutput
-    ? Object.assign(document.createElement('details'), {
-        className: `chat-terminal-call chat-terminal-call--${status}`,
-      })
-    : createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
-
-  // Use <summary> as header when the card is a <details>, plain <div> otherwise.
-  const header = createElement(hasOutput ? 'summary' : 'div', 'chat-terminal-call__header');
-
-  const identity = createElement('div', 'chat-terminal-call__identity');
-
-  // Use the connector's branded icon when the tool belongs to a known connector;
-  // otherwise fall back to the generic terminal glyph.
-  const icon = createToolCardIcon(terminal.command ?? '');
-
-  const copy = createElement('div', 'chat-terminal-call__copy');
-  const label = createElement(
-    'div',
-    'chat-terminal-call__label',
-    terminal.label || strings.terminal.title,
-  );
-  const command = createElement(
-    'div',
-    'chat-terminal-call__command',
-    terminal.command || terminal.summary || '',
-  );
-  copy.append(label, command);
-  identity.append(icon, copy);
-
-  const statusEl = createElement(
-    'span',
-    'chat-terminal-call__status',
-    terminal.statusLabel ?? status,
-  );
-
-  header.append(identity);
-
-  if (hasOutput) {
-    // Group status + chevron so they sit flush together on the right.
-    const trailing = createElement('div', 'chat-terminal-call__trailing');
-    trailing.append(statusEl, createIcon('chevronDown', 'chat-terminal-call__details-icon'));
-    header.append(trailing);
-    const pre = createElement('pre', 'chat-terminal-call__output', output);
-    card.append(header, pre);
-  } else {
-    header.append(statusEl);
-    card.append(header);
-  }
-
-  return card;
+  return createTerminalCallCard({
+    status,
+    iconToolName: terminal.command ?? '',
+    label: terminal.label || strings.terminal.title,
+    command: terminal.command || terminal.summary || '',
+    statusLabel: terminal.statusLabel ?? status,
+    output,
+  });
 }
 
 export function createChatTerminalPanel(strings, { onOpenChange } = {}) {

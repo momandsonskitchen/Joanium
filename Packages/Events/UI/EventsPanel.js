@@ -4,7 +4,7 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
-import { getConnectorIconPathForToolName } from '../../Shared/ConnectorIcons/ConnectorIcons.js';
+import { createTerminalCallCard } from '../../Shared/TerminalCallCard/TerminalCallCard.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 
 const FILTERS = ['all', 'channels', 'agents', 'errors'];
@@ -323,55 +323,14 @@ export function createEventsPanel(strings) {
 
   function createToolCallCard(toolName, params) {
     const hasOutput = params && typeof params === 'object' && Object.keys(params).length > 0;
-
-    const card = hasOutput
-      ? Object.assign(document.createElement('details'), {
-          className: 'chat-terminal-call chat-terminal-call--completed',
-        })
-      : createElement('section', 'chat-terminal-call chat-terminal-call--completed');
-
-    const header = createElement(hasOutput ? 'summary' : 'div', 'chat-terminal-call__header');
-
-    const identity = createElement('div', 'chat-terminal-call__identity');
-
-    const connectorIconPath = getConnectorIconPathForToolName(toolName);
-    if (connectorIconPath) {
-      const img = document.createElement('img');
-      img.src = connectorIconPath;
-      img.alt = '';
-      img.className = 'chat-terminal-call__icon chat-terminal-call__icon--connector';
-      identity.append(img);
-    } else {
-      identity.append(createIcon('terminal', 'chat-terminal-call__icon'));
-    }
-
-    const copy = createElement('div', 'chat-terminal-call__copy');
-    copy.append(
-      createElement('div', 'chat-terminal-call__label', toolName),
-      createElement('div', 'chat-terminal-call__command', toolName),
-    );
-    identity.append(copy);
-
-    const statusEl = createElement('span', 'chat-terminal-call__status', strings.labels.toolUsed);
-
-    header.append(identity);
-
-    if (hasOutput) {
-      const trailing = createElement('div', 'chat-terminal-call__trailing');
-      trailing.append(statusEl, createIcon('chevronDown', 'chat-terminal-call__details-icon'));
-      header.append(trailing);
-      const pre = createElement(
-        'pre',
-        'chat-terminal-call__output',
-        JSON.stringify(params, null, 2),
-      );
-      card.append(header, pre);
-    } else {
-      header.append(statusEl);
-      card.append(header);
-    }
-
-    return card;
+    return createTerminalCallCard({
+      status: 'completed',
+      iconToolName: toolName,
+      label: toolName,
+      command: toolName,
+      statusLabel: strings.labels.toolUsed,
+      output: hasOutput ? JSON.stringify(params, null, 2) : '',
+    });
   }
 
   // ── createAgentTerminalCard ─────────────────────────────────────────────
@@ -382,62 +341,17 @@ export function createEventsPanel(strings) {
 
   function createAgentTerminalCard(terminal) {
     const status = terminal.status ?? 'completed';
-    const hasOutput = Boolean(terminal.output || terminal.error);
-
-    const card = hasOutput
-      ? Object.assign(document.createElement('details'), {
-          className: `chat-terminal-call chat-terminal-call--${status}`,
-        })
-      : createElement('section', `chat-terminal-call chat-terminal-call--${status}`);
-
-    const header = createElement(hasOutput ? 'summary' : 'div', 'chat-terminal-call__header');
-
-    const identity = createElement('div', 'chat-terminal-call__identity');
-
     const toolName = terminal.command || terminal.tool || terminal.label || '';
-    const connectorIconPath = getConnectorIconPathForToolName(toolName);
-    if (connectorIconPath) {
-      const img = document.createElement('img');
-      img.src = connectorIconPath;
-      img.alt = '';
-      img.className = 'chat-terminal-call__icon chat-terminal-call__icon--connector';
-      identity.append(img);
-    } else {
-      identity.append(createIcon('terminal', 'chat-terminal-call__icon'));
-    }
+    const output = [terminal.output, terminal.error].filter(Boolean).join('\n\n').trim();
 
-    const copy = createElement('div', 'chat-terminal-call__copy');
-    copy.append(
-      createElement(
-        'div',
-        'chat-terminal-call__label',
-        terminal.label || toolName || strings.labels.toolUsed,
-      ),
-      createElement('div', 'chat-terminal-call__command', toolName),
-    );
-    identity.append(copy);
-
-    const statusEl = createElement(
-      'span',
-      'chat-terminal-call__status',
-      strings.status[terminal.status] ?? strings.labels.toolUsed,
-    );
-
-    header.append(identity);
-
-    if (hasOutput) {
-      const output = [terminal.output, terminal.error].filter(Boolean).join('\n\n').trim();
-      const trailing = createElement('div', 'chat-terminal-call__trailing');
-      trailing.append(statusEl, createIcon('chevronDown', 'chat-terminal-call__details-icon'));
-      header.append(trailing);
-      const pre = createElement('pre', 'chat-terminal-call__output', output);
-      card.append(header, pre);
-    } else {
-      header.append(statusEl);
-      card.append(header);
-    }
-
-    return card;
+    return createTerminalCallCard({
+      status,
+      iconToolName: toolName,
+      label: terminal.label || toolName || strings.labels.toolUsed,
+      command: toolName,
+      statusLabel: strings.status[terminal.status] ?? strings.labels.toolUsed,
+      output,
+    });
   }
 
   // ── buildThinkingDisclosure ───────────────────────────────────────────────

@@ -177,9 +177,6 @@
     "qwen3.5-omni-plus": {
       "name": "Qwen3 5 Omni PLUS"
     },
-    "mimo-v2-omni": {
-      "name": "Mimo V2 Omni"
-    },
     "gemma-4-26b-a4b": {
       "name": "Gemma 4 26B A4b"
     },
@@ -188,9 +185,6 @@
     },
     "seedance-2.0": {
       "name": "Seedance 2 0"
-    },
-    "mimo-v2-pro": {
-      "name": "Mimo V2 PRO"
     },
     "claude-opus-4.6": {
       "name": "Claude Opus 4 6",
@@ -1738,5 +1732,5 @@
       "name": "Qwen3 7 PLUS"
     }
   },
-  "_syncedAt": "2026-06-04T04:09:10.707Z"
+  "_syncedAt": "2026-06-04T05:28:52.466Z"
 }

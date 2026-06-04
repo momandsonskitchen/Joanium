@@ -1,16 +1,7 @@
-export function requireParam(params, key) {
-  const value = params[key];
-  if (null == value || ('string' === typeof value && !value.trim())) {
-    throw new Error(`Missing required param: ${key}`);
-  }
-  return 'string' === typeof value ? value.trim() : value;
-}
+import { formatGoogleDate, requireParam } from '../../../Common.js';
 
-export function formatDate(value) {
-  if (!value) return 'unknown';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
-}
+export { requireParam };
+export const formatDate = formatGoogleDate;
 
 export function formatMeetSpace(space, index = '') {
   const label = index ? `${index}. ` : '';

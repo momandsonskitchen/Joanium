@@ -219,7 +219,7 @@ export function createHistoryPanel(
         );
         if (forked?.id) {
           // Open the new fork immediately
-          await onLoadSession?.(forked.id);
+          await (onForkSession ?? onLoadSession)?.(forked.id);
         }
       } catch (err) {
         console.error('[Joanium] Failed to fork session:', err);

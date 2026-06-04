@@ -937,8 +937,6 @@ export async function createChatView(
           channel: 'terminal:git-create-branch',
           resultLabel: strings.git.resultLabels.createBranch,
           commandLabel: strings.git.commands.createBranch,
-          progressText: (nextBranch) =>
-            formatText(strings.git.creatingBranch, { branch: nextBranch }),
           successText: (nextBranch) =>
             formatText(strings.git.branchCreated, { branch: nextBranch }),
         });
@@ -954,8 +952,6 @@ export async function createChatView(
           channel: 'terminal:git-checkout-branch',
           resultLabel: strings.git.resultLabels.checkout,
           commandLabel: strings.git.commands.checkout,
-          progressText: (nextBranch) =>
-            formatText(strings.git.switchingBranch, { branch: nextBranch }),
           successText: (nextBranch) =>
             formatText(strings.git.branchSwitched, { branch: nextBranch }),
         });
@@ -977,8 +973,6 @@ export async function createChatView(
           channel: 'terminal:git-delete-branch',
           resultLabel: strings.git.resultLabels.deleteBranch,
           commandLabel: strings.git.commands.deleteBranch,
-          progressText: (nextBranch) =>
-            formatText(strings.git.deletingBranch, { branch: nextBranch }),
           successText: (nextBranch) =>
             formatText(strings.git.branchDeleted, { branch: nextBranch }),
         });
@@ -1027,14 +1021,7 @@ export async function createChatView(
     }
   }
 
-  async function runGitBranchMutation({
-    branch,
-    channel,
-    resultLabel,
-    commandLabel,
-    progressText,
-    successText,
-  }) {
+  async function runGitBranchMutation({ branch, channel, resultLabel, commandLabel, successText }) {
     const workingDir = getActiveProjectFolder();
     if (!workingDir) {
       showAttachmentNotice(strings.git.noProjectFolder, 'warning');
@@ -1074,7 +1061,7 @@ export async function createChatView(
       closeGitBranchPicker({ reset: true });
       focusComposer();
       return true;
-    } catch (error) {
+    } catch {
       gitBranchPicker?.setStatus('');
       return false;
     } finally {

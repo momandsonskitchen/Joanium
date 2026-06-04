@@ -1,5 +1,5 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -7,14 +7,7 @@ import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 
 function createTemplateId(name) {
-  const sanitized =
-    (name || 'Template')
-      .trim()
-      .replace(/[^a-zA-Z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '') || 'Template';
-  const unique = Math.random().toString(36).slice(2, 7).padEnd(5, '0');
-  return `${sanitized}-${unique}`;
+  return createSlugId(name, 'Template');
 }
 
 // ---------------------------------------------------------------------------

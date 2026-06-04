@@ -1,5 +1,5 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
@@ -19,14 +19,7 @@ import {
 // ---------------------------------------------------------------------------
 
 function createAgentId(name) {
-  const sanitized =
-    (name || 'Agent')
-      .trim()
-      .replace(/[^a-zA-Z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '') || 'Agent';
-  const unique = Math.random().toString(36).slice(2, 7).padEnd(5, '0');
-  return `${sanitized}-${unique}`;
+  return createSlugId(name, 'Agent');
 }
 
 function pickRandomItem(array) {
