@@ -1,5 +1,6 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -11,10 +12,6 @@ function formatCountdown(ms) {
   if (h > 0) return `${h}h ${m}m`;
   if (m > 0) return `${m}m ${s}s`;
   return `${s}s`;
-}
-
-function toFileUrl(filePath) {
-  return 'file:///' + filePath.replace(/\\/g, '/');
 }
 
 function makeLockSvg() {

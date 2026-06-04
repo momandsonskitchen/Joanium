@@ -1,10 +1,7 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function toFileUrl(filePath) {
-  return 'file:///' + filePath.replace(/\\/g, '/');
-}
 
 const STORAGE_KEY = 'joanium:birthday-card-shown';
 

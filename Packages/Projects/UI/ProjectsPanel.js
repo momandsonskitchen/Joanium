@@ -1,5 +1,6 @@
 import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -18,16 +19,7 @@ function createProjectId(name) {
 }
 
 function getProjectCoverUrl(coverImagePath) {
-  const normalizedPath = collapseWhitespace(coverImagePath);
-  if (!normalizedPath) return '';
-  if (normalizedPath.startsWith('file://')) return normalizedPath;
-
-  const slashPath = normalizedPath.replace(/\\/g, '/');
-  if (/^[a-zA-Z]:\//.test(slashPath)) {
-    return encodeURI(`file:///${slashPath}`);
-  }
-
-  return encodeURI(`file://${slashPath}`);
+  return toFileUrl(collapseWhitespace(coverImagePath)) ?? '';
 }
 
 // ---------------------------------------------------------------------------

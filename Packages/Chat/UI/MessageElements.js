@@ -1,5 +1,6 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown, renderInline } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createAttachmentPill } from './AttachmentPill.js';
@@ -26,10 +27,6 @@ function getInitials(name) {
   }
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return '?';
-}
-
-function toFileUrl(filePath) {
-  return 'file:///' + filePath.replace(/\\/g, '/');
 }
 
 export function createUserAvatar(userProfile) {

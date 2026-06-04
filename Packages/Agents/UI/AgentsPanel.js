@@ -1,5 +1,6 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -35,7 +36,7 @@ function pickRandomItem(array) {
 
 function avatarToUrl(avatar) {
   if (avatar?.fileUrl) return avatar.fileUrl;
-  if (avatar?.filePath) return `file://${avatar.filePath.replace(/\\/g, '/')}`;
+  if (avatar?.filePath) return toFileUrl(avatar.filePath);
   return null;
 }
 

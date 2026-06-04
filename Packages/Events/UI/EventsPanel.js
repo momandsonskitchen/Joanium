@@ -4,76 +4,10 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
-
-// ── Connector icon map: prefix → filename in Assets/Icons/ ──────────────────
-// Mirrors TerminalPanel.js so event tool-call cards display the right logo.
-const CONNECTOR_ICON_MAP = {
-  gmail: 'Gmail',
-  drive: 'Drive',
-  calendar: 'Calendar',
-  docs: 'GoogleDocs',
-  sheets: 'GoogleSheets',
-  slides: 'Slides',
-  contacts: 'Contacts',
-  photos: 'Photos',
-  forms: 'Forms',
-  tasks: 'GoogleTasks',
-  youtube: 'Youtube',
-  google: 'Google',
-  github: 'Github',
-  gitlab: 'Gitlab',
-  notion: 'Notion',
-  slack: 'Slack',
-  discord: 'Discord',
-  telegram: 'Telegram',
-  whatsapp: 'WhatsApp',
-  spotify: 'Spotify',
-  stripe: 'Stripe',
-  supabase: 'Supabase',
-  vercel: 'Vercel',
-  netlify: 'Netlify',
-  linear: 'Linear',
-  jira: 'Jira',
-  figma: 'Figma',
-  hubspot: 'Hubspot',
-  sentry: 'Sentry',
-  cloudflare: 'Cloudflare',
-  unsplash: 'Unsplash',
-  wikipedia: 'Wikipedia',
-  wikimedia: 'Wikipedia',
-  openweather: 'OpenWeatherMap',
-  open_meteo: 'OpenMeteo',
-  coingecko: 'CoinGecko',
-  nasa: 'Nasa',
-  hackernews: 'HackerNews',
-  npm: 'Npm',
-  arxiv: 'Arxiv',
-  reddit: 'Reddit',
-  stackoverflow: 'StackOverflow',
-  itunes: 'iTunes',
-  perplexity: 'Perplexity',
-  airtable: 'Airtable',
-  todoist: 'Tasks',
-};
-
-function connectorIdFromToolName(toolName) {
-  return String(toolName ?? '')
-    .split('_')[0]
-    .toLowerCase();
-}
-
-function getConnectorIconPath(connectorId) {
-  const file = CONNECTOR_ICON_MAP[String(connectorId ?? '').toLowerCase()];
-  return file ? `../../../Assets/Icons/${file}.png` : null;
-}
+import { getConnectorIconPathForToolName } from '../../Shared/ConnectorIcons/ConnectorIcons.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 
 const FILTERS = ['all', 'channels', 'agents', 'errors'];
-
-// Converts an absolute OS file path to a file:// URL safe for <img src>.
-function toFileUrl(filePath) {
-  if (!filePath) return null;
-  return `file://${String(filePath).replace(/\\/g, '/')}`;
-}
 
 function toDate(value) {
   const date = value ? new Date(value) : new Date();
@@ -400,8 +334,7 @@ export function createEventsPanel(strings) {
 
     const identity = createElement('div', 'chat-terminal-call__identity');
 
-    const connectorId = connectorIdFromToolName(toolName);
-    const connectorIconPath = getConnectorIconPath(connectorId);
+    const connectorIconPath = getConnectorIconPathForToolName(toolName);
     if (connectorIconPath) {
       const img = document.createElement('img');
       img.src = connectorIconPath;
@@ -462,8 +395,7 @@ export function createEventsPanel(strings) {
     const identity = createElement('div', 'chat-terminal-call__identity');
 
     const toolName = terminal.command || terminal.tool || terminal.label || '';
-    const connectorId = connectorIdFromToolName(toolName);
-    const connectorIconPath = getConnectorIconPath(connectorId);
+    const connectorIconPath = getConnectorIconPathForToolName(toolName);
     if (connectorIconPath) {
       const img = document.createElement('img');
       img.src = connectorIconPath;

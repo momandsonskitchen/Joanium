@@ -2,11 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
-
-// Convert an absolute filesystem path to a file:// URL that Chromium can load.
-function toFileUrl(filePath) {
-  return 'file:///' + filePath.replace(/\\/g, '/');
-}
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 
 export function createUserPanel(strings, { getProfile, onProfileSaved, onAvatarChanged }) {
   let draft = createDraft(getProfile());

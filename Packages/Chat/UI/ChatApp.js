@@ -11,6 +11,7 @@ import {
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { copyToClipboard, createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
@@ -1599,7 +1600,7 @@ export async function createChatView(
     if (projectIconEl) {
       const coverPath = collapseWhitespace(activeProject.coverImagePath);
       if (coverPath) {
-        const fileUrl = `file:///${coverPath.replace(/\\/g, '/')}`;
+        const fileUrl = toFileUrl(coverPath) ?? '';
         let imgEl = projectIconEl.querySelector('.chat-composer__project-cover');
         if (!imgEl) {
           imgEl = document.createElement('img');

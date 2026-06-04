@@ -1,6 +1,7 @@
 import strings from '../I18n/en.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { createChatView } from '../../Chat/UI/ChatApp.js';
@@ -50,11 +51,6 @@ function getInitials(name) {
   }
 
   return '?';
-}
-
-// Convert an absolute filesystem path to a file:// URL Chromium can load.
-function toFileUrl(filePath) {
-  return 'file:///' + filePath.replace(/\\/g, '/');
 }
 
 function disposeElementTree(root) {

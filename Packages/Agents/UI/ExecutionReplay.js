@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { getConnectorIconPathForToolName } from '../../Shared/ConnectorIcons/ConnectorIcons.js';
 
 // ---------------------------------------------------------------------------
 // createExecutionReplay
@@ -16,69 +17,6 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 //   - Expand / collapse per step via <details>
 //   - "Replay Execution" button that re-runs the same agent via IPC
 // ---------------------------------------------------------------------------
-
-// ── Connector icon resolution ────────────────────────────────────────────────
-// Maps a tool-name prefix → icon filename in Assets/Icons/.
-// Path is relative to the renderer entry point: Packages/Shell/UI/App.html.
-const CONNECTOR_ICON_MAP = {
-  gmail: 'Gmail',
-  drive: 'Drive',
-  calendar: 'Calendar',
-  docs: 'GoogleDocs',
-  sheets: 'GoogleSheets',
-  slides: 'Slides',
-  contacts: 'Contacts',
-  photos: 'Photos',
-  forms: 'Forms',
-  tasks: 'GoogleTasks',
-  youtube: 'Youtube',
-  google: 'Google',
-  github: 'Github',
-  gitlab: 'Gitlab',
-  notion: 'Notion',
-  slack: 'Slack',
-  discord: 'Discord',
-  telegram: 'Telegram',
-  whatsapp: 'WhatsApp',
-  spotify: 'Spotify',
-  stripe: 'Stripe',
-  supabase: 'Supabase',
-  vercel: 'Vercel',
-  netlify: 'Netlify',
-  linear: 'Linear',
-  jira: 'Jira',
-  figma: 'Figma',
-  hubspot: 'Hubspot',
-  sentry: 'Sentry',
-  cloudflare: 'Cloudflare',
-  unsplash: 'Unsplash',
-  wikipedia: 'Wikipedia',
-  openweather: 'OpenWeatherMap',
-  weather: 'OpenWeatherMap',
-  coingecko: 'CoinGecko',
-  nasa: 'Nasa',
-  hackernews: 'HackerNews',
-  npm: 'Npm',
-  arxiv: 'ArXiv',
-  reddit: 'Reddit',
-  stackoverflow: 'StackOverflow',
-  itunes: 'Itunes',
-};
-
-/**
- * Returns an icon path for a tool name if it belongs to a known connector,
- * otherwise returns null (fall back to the generic terminal SVG).
- */
-function resolveToolIconPath(toolName) {
-  if (!toolName) return null;
-  const lower = String(toolName).toLowerCase();
-  for (const [prefix, file] of Object.entries(CONNECTOR_ICON_MAP)) {
-    if (lower === prefix || lower.startsWith(`${prefix}_`)) {
-      return `../../../Assets/Icons/${file}.png`;
-    }
-  }
-  return null;
-}
 
 // ── Formatting helpers ───────────────────────────────────────────────────────
 
@@ -179,7 +117,7 @@ function createStepDot(step) {
   );
 
   if (isToolStep) {
-    const iconPath = resolveToolIconPath(step.toolName);
+    const iconPath = getConnectorIconPathForToolName(step.toolName);
     if (iconPath) {
       const img = document.createElement('img');
       img.src = iconPath;

@@ -2,57 +2,10 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
+import { getConnectorIconPath } from '../../Shared/ConnectorIcons/ConnectorIcons.js';
 import defaultStrings from '../I18n/Connectors.en.js';
 
 // ── Icon map: connector id → filename in Assets/Icons/ ──────────────────────
-const ICON_MAP = {
-  github: 'Github',
-  openweather: 'OpenWeatherMap',
-  open_meteo: 'OpenMeteo',
-  coingecko: 'CoinGecko',
-  google: 'Google',
-  gmail: 'Gmail',
-  drive: 'Drive',
-  calendar: 'Calendar',
-  notion: 'Notion',
-  slack: 'Slack',
-  discord: 'Discord',
-  telegram: 'Telegram',
-  todoist: 'Tasks',
-  spotify: 'Spotify',
-  stripe: 'Stripe',
-  supabase: 'Supabase',
-  vercel: 'Vercel',
-  netlify: 'Netlify',
-  gitlab: 'Gitlab',
-  jira: 'Jira',
-  linear: 'Linear',
-  hubspot: 'Hubspot',
-  sentry: 'Sentry',
-  figma: 'Figma',
-  unsplash: 'Unsplash',
-  wikipedia: 'Wikipedia',
-  wikimedia: 'Wikipedia',
-  nasa: 'Nasa',
-  perplexity: 'Perplexity',
-  youtube: 'Youtube',
-  whatsapp: 'WhatsApp',
-  cloudflare: 'Cloudflare',
-  hackernews: 'HackerNews',
-  airtable: 'Airtable',
-  arxiv: 'ArXiv',
-  npm: 'Npm',
-  reddit: 'Reddit',
-  stackoverflow: 'StackOverflow',
-  itunes: 'Itunes',
-};
-
-function getConnectorIconPath(connectorId) {
-  const file = ICON_MAP[connectorId?.toLowerCase()];
-  // Path is relative to Packages/Shell/UI/App.html (the renderer entry point)
-  return file ? `../../../Assets/Icons/${file}.png` : null;
-}
-
 // ────────────────────────────────────────────────────────────────────────────
 
 function createCredentialField({ fieldConfig, strings }) {
