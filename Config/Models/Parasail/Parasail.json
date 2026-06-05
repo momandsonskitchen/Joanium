@@ -229,7 +229,13 @@
     },
     "deepseek-ai/DeepSeek-V4-Flash": {
       "name": "DeepSeek V4 FLASH"
+    },
+    "parasail-mimo-v25": {
+      "name": "Parasail Mimo V25"
+    },
+    "XiaomiMiMo/MiMo-V2.5": {
+      "name": "MiMo V2 5"
     }
   },
-  "_syncedAt": "2026-06-04T11:36:22.790Z"
+  "_syncedAt": "2026-06-05T13:38:55.193Z"
 }

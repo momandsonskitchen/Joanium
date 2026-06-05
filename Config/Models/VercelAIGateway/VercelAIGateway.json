@@ -1626,6 +1626,19 @@
         "text": true
       }
     },
+    "nvidia/nemotron-3-ultra-550b-a55b": {
+      "name": "Nemotron 3 Ultra",
+      "description": "A 550B parameter (55B active) open reasoning model from NVIDIA, built for long-running agent workflows. It uses a hybrid Mamba-Transformer MoE architecture and supports a 1M token context window.",
+      "context_window": 1000000,
+      "max_output": 65000,
+      "pricing": {
+        "input": 0.6,
+        "output": 2.4
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "nvidia/nemotron-nano-12b-v2-vl": {
       "name": "Nvidia Nemotron Nano 12B V2 VL",
       "description": "The model is an auto-regressive vision language model that uses an optimized transformer architecture. The model enables multi-image reasoning and video understanding, along with strong document intelligence, visual Q&A and summarization capabilities.",
@@ -2643,5 +2656,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-04T11:36:18.440Z"
+  "_syncedAt": "2026-06-05T13:38:49.037Z"
 }

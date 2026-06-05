@@ -307,6 +307,9 @@
         "output": 0.02
       }
     },
+    "nvidia/nemotron-3-ultra-550b-a55b": {
+      "name": "Nemotron 3 ULTRA 550B A55b"
+    },
     "nvidia/nemotron-3.5-content-safety": {
       "name": "Nemotron 3 5 Content Safety"
     },
@@ -455,5 +458,5 @@
       "name": "zyphra/zamba2-7b-instruct"
     }
   },
-  "_syncedAt": "2026-06-04T11:35:55.927Z"
+  "_syncedAt": "2026-06-05T13:38:09.457Z"
 }
