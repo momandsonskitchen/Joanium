@@ -14,7 +14,7 @@
     "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
-    "@electron/fuses": "2.1.1",
+    "@electron/fuses": "2.1.2",
     "electron": "42.3.3",
     "electron-builder": "26.11.1",
     "eslint": "10.4.1",
