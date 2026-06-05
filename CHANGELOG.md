@@ -6,6 +6,18 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.605.0] - 2026-06-05
+
+* chore(release): bump version to 2026.605.0
+* Updated Scrollbar In The Dreams Panel
+* Added The Ability To Dream
+* Updated AI Models
+* AI Models Update
+* Bump electron from 42.3.2 to 42.3.3
+* AI Models Update
+
+---
+
 ## [2026.604.1] - 2026-06-04
 
 * chore(release): bump version to 2026.604.1
