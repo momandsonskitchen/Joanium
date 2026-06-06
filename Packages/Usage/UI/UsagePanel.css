@@ -430,6 +430,11 @@
   opacity: 0.75;
 }
 
+/* Right-align header labels for numeric columns to match their data cells */
+.usage-models__row--header .usage-models__col:not(:first-child) {
+  text-align: right;
+}
+
 .usage-models__col {
   font-size: 13.5px;
   font-weight: 500;
