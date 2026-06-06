@@ -1,4 +1,5 @@
 import { readUserState } from '../../Shared/UserData/UserData.js';
+import { clampInteger, optionalText } from '../../Shared/Utils/ValueUtils.js';
 
 export function requireText(value, label) {
   const text = String(value ?? '').trim();
@@ -6,14 +7,7 @@ export function requireText(value, label) {
   return text;
 }
 
-export function optionalText(value) {
-  return String(value ?? '').trim();
-}
-
-export function clampInteger(value, fallback, min, max) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.round(parsed))) : fallback;
-}
+export { clampInteger, optionalText };
 
 export function parseJsonObject(value, fallback = {}) {
   if (!value) return fallback;
@@ -110,6 +104,7 @@ function extractErrorMessage(data, text, statusText) {
     data?.detail ||
     data?.message ||
     (typeof err === 'string' ? err : null) ||
+    data?.err ||
     data?.error_description ||
     data?.errors?.[0]?.message ||
     text ||

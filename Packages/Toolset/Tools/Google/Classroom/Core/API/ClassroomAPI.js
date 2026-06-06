@@ -1,26 +1,15 @@
 import { createGoogleJsonFetch } from '../../../Core/API/GoogleApiFetch.js';
+import { appendCsvParams, googlePageSize } from '../../../Common.js';
 
 const CLASSROOM_BASE = 'https://classroom.googleapis.com/v1';
 const classroomFetch = createGoogleJsonFetch('Google Classroom');
-
-function appendCsvParams(params, key, value) {
-  String(value ?? '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .forEach((item) => params.append(key, item));
-}
-
-function pageSize(value, fallback = 25) {
-  return String(Math.min(Number(value) || fallback, 100));
-}
 
 export async function listCourses(
   creds,
   { maxResults = 25, courseStates = '', teacherId = '', studentId = '' } = {},
 ) {
   const params = new URLSearchParams({
-    pageSize: pageSize(maxResults),
+    pageSize: googlePageSize(maxResults),
   });
 
   appendCsvParams(params, 'courseStates', courseStates);
@@ -40,7 +29,7 @@ export async function listCourseWork(
   { maxResults = 25, courseWorkStates = '' } = {},
 ) {
   const params = new URLSearchParams({
-    pageSize: pageSize(maxResults),
+    pageSize: googlePageSize(maxResults),
   });
 
   appendCsvParams(params, 'courseWorkStates', courseWorkStates);
@@ -57,7 +46,7 @@ export async function listCourseWork(
 
 export async function listCourseWorkMaterials(creds, courseId, { maxResults = 25 } = {}) {
   const params = new URLSearchParams({
-    pageSize: pageSize(maxResults),
+    pageSize: googlePageSize(maxResults),
   });
 
   return (
@@ -72,7 +61,7 @@ export async function listCourseWorkMaterials(creds, courseId, { maxResults = 25
 
 export async function listStudents(creds, courseId, { maxResults = 25 } = {}) {
   const params = new URLSearchParams({
-    pageSize: pageSize(maxResults),
+    pageSize: googlePageSize(maxResults),
   });
 
   return (
@@ -87,7 +76,7 @@ export async function listStudents(creds, courseId, { maxResults = 25 } = {}) {
 
 export async function listTeachers(creds, courseId, { maxResults = 25 } = {}) {
   const params = new URLSearchParams({
-    pageSize: pageSize(maxResults),
+    pageSize: googlePageSize(maxResults),
   });
 
   return (
@@ -107,7 +96,7 @@ export async function listSubmissions(
   { maxResults = 25, states = '' } = {},
 ) {
   const params = new URLSearchParams({
-    pageSize: pageSize(maxResults),
+    pageSize: googlePageSize(maxResults),
   });
 
   appendCsvParams(params, 'states', states);

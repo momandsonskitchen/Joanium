@@ -1,10 +1,13 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
+import { createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import {
+  createSearchableListColumn,
+  populateSearchableCards,
+} from '../../Shared/PanelList/PanelList.js';
 
 function createTemplateId(name) {
   return createSlugId(name, 'Template');
@@ -35,51 +38,18 @@ export function createTemplatesPanel(strings) {
   // ── populateList ──────────────────────────────────────────────────────────
 
   async function populateList(listEl, query = '') {
-    listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'chat-templates__skeleton'));
-    }
-
-    let templates;
-    try {
-      templates = await invokeIpc('templates:list-templates');
-    } catch {
-      templates = [];
-    }
-
-    const normalizedQuery = collapseWhitespace(query).toLowerCase();
-    const filtered = normalizedQuery
-      ? templates.filter((t) => {
-          const haystack = [t.name, t.command, t.prompt]
-            .map((v) => collapseWhitespace(v).toLowerCase())
-            .join('\n');
-          return haystack.includes(normalizedQuery);
-        })
-      : templates;
-
-    listEl.replaceChildren();
-
-    if (filtered.length === 0) {
-      const empty = createElement('div', 'chat-templates__empty');
-      empty.append(
-        createElement(
-          'p',
-          'chat-templates__empty-title',
-          normalizedQuery ? strings.noResults : strings.empty,
-        ),
-        createElement(
-          'p',
-          'chat-templates__empty-hint',
-          normalizedQuery ? strings.noResultsHint : strings.emptyHint,
-        ),
-      );
-      listEl.append(empty);
-      return;
-    }
-
-    for (const template of filtered) {
-      listEl.append(buildCard(template, listEl));
-    }
+    await populateSearchableCards({
+      listEl,
+      query,
+      skeletonClassName: 'chat-templates__skeleton',
+      loadItems: () => invokeIpc('templates:list-templates'),
+      getSearchValues: (template) => [template.name, template.command, template.prompt],
+      buildCard,
+      strings,
+      emptyClassName: 'chat-templates__empty',
+      emptyTitleClassName: 'chat-templates__empty-title',
+      emptyHintClassName: 'chat-templates__empty-hint',
+    });
   }
 
   // ── buildCard ─────────────────────────────────────────────────────────────
@@ -279,18 +249,16 @@ export function createTemplatesPanel(strings) {
     formCol.append(formCard);
 
     // ── Right: list ───────────────────────────────────────────────────────
-    const listCol = createElement('div', 'chat-templates__list-col');
-    listCol.append(createElement('p', 'chat-templates__list-heading', strings.yourTemplates));
-
-    const searchWrap = createElement('div', 'chat-templates__list-search');
-    const search = createSearchBar({
-      placeholder: strings.searchPlaceholder,
-      onChange: (value) => void populateList(listContent, value.trim()),
+    const {
+      column: listCol,
+      content: listContent,
+      search,
+    } = createSearchableListColumn({
+      classPrefix: 'chat-templates',
+      heading: strings.yourTemplates,
+      searchPlaceholder: strings.searchPlaceholder,
+      onSearchChange: (value) => void populateList(listContent, value),
     });
-    searchWrap.append(search.element);
-
-    const listContent = createElement('div', 'chat-templates__list-content');
-    listCol.append(searchWrap, listContent);
 
     body.append(formCol, listCol);
     panel.append(body);

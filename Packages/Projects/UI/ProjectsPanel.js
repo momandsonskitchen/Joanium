@@ -2,10 +2,13 @@ import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import {
+  createSearchableListColumn,
+  populateSearchableCards,
+} from '../../Shared/PanelList/PanelList.js';
 
 function createProjectId(name) {
   return createSlugId(name, 'Project');
@@ -47,51 +50,18 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
   // ── populateList ──────────────────────────────────────────────────────────
 
   async function populateList(listEl, query = '') {
-    listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'chat-projects__skeleton'));
-    }
-
-    let projects;
-    try {
-      projects = await invokeIpc('projects:list-projects');
-    } catch {
-      projects = [];
-    }
-
-    const normalizedQuery = collapseWhitespace(query).toLowerCase();
-    const filteredProjects = normalizedQuery
-      ? projects.filter((project) => {
-          const haystack = [project.name, project.info]
-            .map((value) => collapseWhitespace(value).toLowerCase())
-            .join('\n');
-          return haystack.includes(normalizedQuery);
-        })
-      : projects;
-
-    listEl.replaceChildren();
-
-    if (filteredProjects.length === 0) {
-      const empty = createElement('div', 'chat-projects__empty');
-      empty.append(
-        createElement(
-          'p',
-          'chat-projects__empty-title',
-          normalizedQuery ? strings.noResults : strings.empty,
-        ),
-        createElement(
-          'p',
-          'chat-projects__empty-hint',
-          normalizedQuery ? strings.noResultsHint : strings.emptyHint,
-        ),
-      );
-      listEl.append(empty);
-      return;
-    }
-
-    for (const project of filteredProjects) {
-      listEl.append(buildCard(project, listEl));
-    }
+    await populateSearchableCards({
+      listEl,
+      query,
+      skeletonClassName: 'chat-projects__skeleton',
+      loadItems: () => invokeIpc('projects:list-projects'),
+      getSearchValues: (project) => [project.name, project.info],
+      buildCard,
+      strings,
+      emptyClassName: 'chat-projects__empty',
+      emptyTitleClassName: 'chat-projects__empty-title',
+      emptyHintClassName: 'chat-projects__empty-hint',
+    });
   }
 
   // ── buildCard ─────────────────────────────────────────────────────────────
@@ -425,18 +395,16 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     formCol.append(formCard);
 
     // ── Right: list ───────────────────────────────────────────────────────
-    const listCol = createElement('div', 'chat-projects__list-col');
-    listCol.append(createElement('p', 'chat-projects__list-heading', strings.yourProjects));
-
-    const searchWrap = createElement('div', 'chat-projects__list-search');
-    const search = createSearchBar({
-      placeholder: strings.searchPlaceholder,
-      onChange: (value) => void populateList(listContent, value.trim()),
+    const {
+      column: listCol,
+      content: listContent,
+      search,
+    } = createSearchableListColumn({
+      classPrefix: 'chat-projects',
+      heading: strings.yourProjects,
+      searchPlaceholder: strings.searchPlaceholder,
+      onSearchChange: (value) => void populateList(listContent, value),
     });
-    searchWrap.append(search.element);
-
-    const listContent = createElement('div', 'chat-projects__list-content');
-    listCol.append(searchWrap, listContent);
 
     body.append(formCol, listCol);
     panel.append(body);

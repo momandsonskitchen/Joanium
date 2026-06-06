@@ -1,32 +1,22 @@
 import {
-  buildUrl,
   formatDate,
   formatList,
+  makeConnectorRequest,
   parseCommaList,
-  requireConnectorCredentials,
   requireText,
   truncateText,
 } from '../../../Core/ConnectorHttp.js';
 
 const FIGMA_API = 'https://api.figma.com/v1';
 
-async function figmaRequest(rootDirectory, path, { method = 'GET', body, searchParams = {} } = {}) {
-  const credentials = await requireConnectorCredentials(rootDirectory, 'figma', ['token'], 'Figma');
-  const response = await fetch(buildUrl(FIGMA_API, path, searchParams), {
-    method,
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      'x-figma-token': credentials.token,
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+function createFigmaRequest(rootDirectory) {
+  return makeConnectorRequest(rootDirectory, {
+    connectorId: 'figma',
+    keys: ['token'],
+    label: 'Figma',
+    baseUrl: FIGMA_API,
+    getAuthHeaders: (credentials) => ({ 'x-figma-token': credentials.token }),
   });
-  const data = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(
-      `${response.status} ${response.statusText}: ${data?.err ?? data?.message ?? 'Figma request failed'}`,
-    );
-  return data;
 }
 
 function summarizeNode(node, depth = 0, rows = []) {
@@ -37,12 +27,14 @@ function summarizeNode(node, depth = 0, rows = []) {
 }
 
 export function createFigmaToolHandlers({ rootDirectory }) {
+  const figmaRequest = createFigmaRequest(rootDirectory);
+
   return {
     async figma_get_file(params = {}) {
       const fileKey = encodeURIComponent(
         requireText(params.file_key ?? params.fileKey, 'file_key'),
       );
-      const file = await figmaRequest(rootDirectory, `/files/${fileKey}`);
+      const file = await figmaRequest(`/files/${fileKey}`);
       return [
         `Figma file: ${file.name}`,
         `Last modified: ${formatDate(file.lastModified)}`,
@@ -58,7 +50,7 @@ export function createFigmaToolHandlers({ rootDirectory }) {
         requireText(params.file_key ?? params.fileKey, 'file_key'),
       );
       const nodeIds = parseCommaList(requireText(params.node_ids ?? params.nodeIds, 'node_ids'));
-      const data = await figmaRequest(rootDirectory, `/files/${fileKey}/nodes`, {
+      const data = await figmaRequest(`/files/${fileKey}/nodes`, {
         searchParams: { ids: nodeIds.join(',') },
       });
       return [
@@ -72,7 +64,7 @@ export function createFigmaToolHandlers({ rootDirectory }) {
       const fileKey = encodeURIComponent(
         requireText(params.file_key ?? params.fileKey, 'file_key'),
       );
-      const data = await figmaRequest(rootDirectory, `/files/${fileKey}/comments`);
+      const data = await figmaRequest(`/files/${fileKey}/comments`);
       return formatList(
         'Figma comments',
         (data.comments ?? []).map(
@@ -87,7 +79,7 @@ export function createFigmaToolHandlers({ rootDirectory }) {
         requireText(params.file_key ?? params.fileKey, 'file_key'),
       );
       const message = requireText(params.message, 'message');
-      const comment = await figmaRequest(rootDirectory, `/files/${fileKey}/comments`, {
+      const comment = await figmaRequest(`/files/${fileKey}/comments`, {
         method: 'POST',
         body: { message },
       });
@@ -98,7 +90,7 @@ export function createFigmaToolHandlers({ rootDirectory }) {
       const fileKey = encodeURIComponent(
         requireText(params.file_key ?? params.fileKey, 'file_key'),
       );
-      const data = await figmaRequest(rootDirectory, `/files/${fileKey}/versions`);
+      const data = await figmaRequest(`/files/${fileKey}/versions`);
       return formatList(
         'Figma versions',
         (data.versions ?? []).map(

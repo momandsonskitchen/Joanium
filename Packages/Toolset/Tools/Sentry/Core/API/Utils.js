@@ -1,11 +1,24 @@
-/**
- * Performs a DELETE request to the Sentry API and returns `{ deleted: true }` on success.
- * Shared by deleteIssueComment and deleteIssue to avoid duplicating the error-handling pattern.
- * @param {string} BASE - The Sentry API base URL.
- * @param {string} path - API path to DELETE.
- * @param {object} creds - Credentials with a `token` field.
- * @param {Function} headers - Function that returns auth headers.
- */
+async function sRequest(BASE, path, creds, headers, { method = 'GET', body } = {}) {
+  const res = await fetch(`${BASE}${path}`, {
+    method,
+    headers: headers(creds),
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail ?? `Sentry API error: ${res.status}`);
+  }
+  return res.json();
+}
+
+export function createSentryRequestHelpers(BASE, headers) {
+  return {
+    fetch: (path, creds) => sRequest(BASE, path, creds, headers),
+    mutate: (path, creds, method = 'PUT', body = {}) =>
+      sRequest(BASE, path, creds, headers, { method, body }),
+  };
+}
+
 export async function sDelete(BASE, path, creds, headers) {
   const res = await fetch(`${BASE}${path}`, { method: 'DELETE', headers: headers(creds) });
   if (!res.ok) {

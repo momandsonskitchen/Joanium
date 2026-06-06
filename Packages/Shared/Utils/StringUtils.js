@@ -13,6 +13,22 @@ export function createSlugId(value, fallback) {
   return `${sanitized}-${unique}`;
 }
 
+export function getNameInitials(name, fallback = '?') {
+  const parts = collapseWhitespace(name ?? '')
+    .split(' ')
+    .filter(Boolean);
+
+  if (parts.length >= 2) {
+    const firstLetter = parts[0][0].toUpperCase();
+    const lastWord = parts[parts.length - 1];
+    const secondLetter = (lastWord[1] ?? lastWord[0]).toUpperCase();
+    return `${firstLetter}${secondLetter}`;
+  }
+
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return fallback;
+}
+
 export function truncate(value, maxLength) {
   if (value.length <= maxLength) return value;
   if (maxLength <= 3) return value.slice(0, maxLength);

@@ -1,5 +1,5 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { getNameInitials } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown, renderInline } from '../../Shared/Markdown/MarkdownRenderer.js';
@@ -15,20 +15,6 @@ import { formatDuration, stripMarkdown } from './Utils.js';
 
 let activeSpeakBtn = null;
 
-function getInitials(name) {
-  const parts = collapseWhitespace(name ?? '')
-    .split(' ')
-    .filter(Boolean);
-  if (parts.length >= 2) {
-    const firstLetter = parts[0][0].toUpperCase();
-    const lastWord = parts[parts.length - 1];
-    const secondLetter = (lastWord[1] ?? lastWord[0]).toUpperCase();
-    return `${firstLetter}${secondLetter}`;
-  }
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return '?';
-}
-
 export function createUserAvatar(userProfile) {
   const avatarEl = createElement('div', 'chat-message__avatar chat-message__avatar--user');
   const path = typeof userProfile?.avatarPath === 'string' ? userProfile.avatarPath.trim() : '';
@@ -40,7 +26,7 @@ export function createUserAvatar(userProfile) {
     img.className = 'chat-message__avatar-img';
     avatarEl.append(img);
   } else {
-    const initials = getInitials(typeof userProfile?.name === 'string' ? userProfile.name : '');
+    const initials = getNameInitials(typeof userProfile?.name === 'string' ? userProfile.name : '');
     avatarEl.textContent = initials;
   }
   return avatarEl;

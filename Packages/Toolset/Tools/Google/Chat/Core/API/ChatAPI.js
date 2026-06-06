@@ -1,12 +1,11 @@
 import { createGoogleJsonFetch } from '../../../Core/API/GoogleApiFetch.js';
+import { googlePageSize, normalizeGoogleResourceName } from '../../../Common.js';
 
 const CHAT_BASE = 'https://chat.googleapis.com/v1';
 const chatFetch = createGoogleJsonFetch('Google Chat');
 
 function normalizeSpaceName(spaceName) {
-  const value = String(spaceName ?? '').trim();
-  if (!value) throw new Error('space_name is required');
-  return value.startsWith('spaces/') ? value : `spaces/${value}`;
+  return normalizeGoogleResourceName(spaceName, 'spaces', 'space_name');
 }
 
 function normalizeMessageName(messageName) {
@@ -17,7 +16,7 @@ function normalizeMessageName(messageName) {
 
 export async function listSpaces(creds, { pageSize = 25, filter = '' } = {}) {
   const params = new URLSearchParams({
-    pageSize: String(Math.min(Number(pageSize) || 25, 100)),
+    pageSize: googlePageSize(pageSize),
   });
 
   if (filter) params.set('filter', filter);
@@ -32,7 +31,7 @@ export async function listMessages(
 ) {
   const parent = normalizeSpaceName(spaceName);
   const params = new URLSearchParams({
-    pageSize: String(Math.min(Number(pageSize) || 25, 100)),
+    pageSize: googlePageSize(pageSize),
     orderBy: orderBy,
   });
 

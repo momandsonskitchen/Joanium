@@ -1,4 +1,4 @@
-import { sDelete, mapProject, mapIssue, mapEvent } from './Utils.js';
+import { createSentryRequestHelpers, sDelete, mapProject, mapIssue, mapEvent } from './Utils.js';
 
 const BASE = 'https://sentry.io/api/0';
 
@@ -6,27 +6,7 @@ function headers(creds) {
   return { Authorization: `Bearer ${creds.token}`, 'Content-Type': 'application/json' };
 }
 
-async function sFetch(path, creds) {
-  const res = await fetch(`${BASE}${path}`, { headers: headers(creds) });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail ?? `Sentry API error: ${res.status}`);
-  }
-  return res.json();
-}
-
-async function sMutate(path, creds, method = 'PUT', body = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers: headers(creds),
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail ?? `Sentry API error: ${res.status}`);
-  }
-  return res.json();
-}
+const { fetch: sFetch, mutate: sMutate } = createSentryRequestHelpers(BASE, headers);
 
 // ─── Organizations ────────────────────────────────────────────────────────────
 

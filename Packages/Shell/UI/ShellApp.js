@@ -1,6 +1,6 @@
 import strings from '../I18n/en.js';
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace, getNameInitials } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
@@ -36,23 +36,6 @@ import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 import { createSlashCommandsPanel } from '../../SlashCommands/UI/SlashCommandsPanel.js';
 import { mountBirthdayCard } from '../../User/UI/BirthdayCard.js';
-
-function getInitials(name) {
-  const parts = collapseWhitespace(name).split(' ').filter(Boolean);
-
-  if (parts.length >= 2) {
-    const firstLetter = parts[0][0].toUpperCase();
-    const lastWord = parts[parts.length - 1];
-    const secondLetter = (lastWord[1] ?? lastWord[0]).toUpperCase();
-    return `${firstLetter}${secondLetter}`;
-  }
-
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  return '?';
-}
 
 function disposeElementTree(root) {
   if (!root) {
@@ -488,13 +471,13 @@ async function bootstrap() {
         avatarInitials = createElement(
           'span',
           'chat-sidebar__avatar-initials',
-          getInitials(profile.name),
+          getNameInitials(profile.name),
         );
         sidebarAvatar.replaceChildren(avatarInitials);
         avatarImg = null;
       } else if (avatarInitials) {
         // Just updating the name initials
-        avatarInitials.textContent = getInitials(profile.name);
+        avatarInitials.textContent = getNameInitials(profile.name);
       }
     }
   }
@@ -721,7 +704,7 @@ async function bootstrap() {
     avatarInitials = createElement(
       'span',
       'chat-sidebar__avatar-initials',
-      getInitials(profile.name),
+      getNameInitials(profile.name),
     );
     sidebarAvatar.append(avatarInitials);
   }

@@ -1,8 +1,7 @@
-import path from 'node:path';
-import { appendFileSync, mkdirSync } from 'node:fs';
 import process from 'node:process';
 import { app, BrowserWindow } from 'electron';
 import electronUpdater from 'electron-updater';
+import { createTimestampedFileLogger } from '../../Shared/Debug/FileLogger.js';
 
 const CHECK_DELAY_MS = 15000;
 const UPDATE_CHANNELS = {
@@ -15,6 +14,7 @@ let autoUpdater = null;
 let initialized = false;
 let checkTimer = null;
 let logFilePath = null;
+const writeTimestampedLog = createTimestampedFileLogger(() => logFilePath);
 
 const state = {
   enabled: true,
@@ -27,16 +27,7 @@ const state = {
 };
 
 function writeLog(message, details = '') {
-  if (!logFilePath) {
-    return;
-  }
-  try {
-    mkdirSync(path.dirname(logFilePath), { recursive: true });
-    const suffix = details ? ` ${details}` : '';
-    appendFileSync(logFilePath, `[${new Date().toISOString()}] ${message}${suffix}\n`, 'utf8');
-  } catch {
-    // Update logging must never block app boot.
-  }
+  writeTimestampedLog(message, details);
 }
 
 function snapshot() {

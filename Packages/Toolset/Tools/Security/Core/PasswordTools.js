@@ -1,4 +1,5 @@
 import { randomInt } from 'node:crypto';
+import { clampInteger, toBoolean } from '../../../../Shared/Utils/ValueUtils.js';
 
 const WORDS = Object.freeze([
   'amber',
@@ -32,17 +33,6 @@ const WORDS = Object.freeze([
   'violet',
   'zenith',
 ]);
-
-function clampInteger(value, fallback, min, max) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.round(parsed))) : fallback;
-}
-
-function toBoolean(value, fallback = false) {
-  if (value === true || value === 'true' || value === 1 || value === '1') return true;
-  if (value === false || value === 'false' || value === 0 || value === '0') return false;
-  return fallback;
-}
 
 function randomFrom(charset) {
   return charset[randomInt(0, charset.length)];

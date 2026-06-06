@@ -1,40 +1,20 @@
 import {
-  buildUrl,
   clampInteger,
   formatDate,
   formatList,
-  requireConnectorCredentials,
+  makeConnectorRequest,
   requireText,
 } from '../../../Core/ConnectorHttp.js';
 
 const HUBSPOT_API = 'https://api.hubapi.com';
 
-async function hubSpotRequest(
-  rootDirectory,
-  path,
-  { method = 'GET', body, searchParams = {} } = {},
-) {
-  const credentials = await requireConnectorCredentials(
-    rootDirectory,
-    'hubspot',
-    ['token'],
-    'HubSpot',
-  );
-  const response = await fetch(buildUrl(HUBSPOT_API, path, searchParams), {
-    method,
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-      authorization: `Bearer ${credentials.token}`,
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+function createHubSpotRequest(rootDirectory) {
+  return makeConnectorRequest(rootDirectory, {
+    connectorId: 'hubspot',
+    keys: ['token'],
+    label: 'HubSpot',
+    baseUrl: HUBSPOT_API,
   });
-  const data = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new Error(
-      `${response.status} ${response.statusText}: ${data?.message ?? 'HubSpot request failed'}`,
-    );
-  return data;
 }
 
 function formatContact(contact, index = null) {
@@ -48,10 +28,12 @@ function formatContact(contact, index = null) {
 }
 
 export function createHubSpotToolHandlers({ rootDirectory }) {
+  const hubSpotRequest = createHubSpotRequest(rootDirectory);
+
   return {
     async hubspot_list_contacts(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await hubSpotRequest(rootDirectory, '/crm/v3/objects/contacts', {
+      const data = await hubSpotRequest('/crm/v3/objects/contacts', {
         searchParams: { limit, properties: 'email,firstname,lastname,company' },
       });
       return formatList('HubSpot contacts', (data.results ?? []).map(formatContact));
@@ -60,7 +42,7 @@ export function createHubSpotToolHandlers({ rootDirectory }) {
     async hubspot_search_contacts(params = {}) {
       const query = requireText(params.query, 'query');
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await hubSpotRequest(rootDirectory, '/crm/v3/objects/contacts/search', {
+      const data = await hubSpotRequest('/crm/v3/objects/contacts/search', {
         method: 'POST',
         body: {
           query,
@@ -79,7 +61,7 @@ export function createHubSpotToolHandlers({ rootDirectory }) {
         requireText(params.contact_id ?? params.contactId, 'contact_id'),
       );
       return formatContact(
-        await hubSpotRequest(rootDirectory, `/crm/v3/objects/contacts/${contactId}`, {
+        await hubSpotRequest(`/crm/v3/objects/contacts/${contactId}`, {
           searchParams: { properties: 'email,firstname,lastname,company,phone,website' },
         }),
       );
@@ -87,7 +69,7 @@ export function createHubSpotToolHandlers({ rootDirectory }) {
 
     async hubspot_create_contact(params = {}) {
       const email = requireText(params.email, 'email');
-      const contact = await hubSpotRequest(rootDirectory, '/crm/v3/objects/contacts', {
+      const contact = await hubSpotRequest('/crm/v3/objects/contacts', {
         method: 'POST',
         body: {
           properties: {
@@ -103,7 +85,7 @@ export function createHubSpotToolHandlers({ rootDirectory }) {
 
     async hubspot_list_companies(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await hubSpotRequest(rootDirectory, '/crm/v3/objects/companies', {
+      const data = await hubSpotRequest('/crm/v3/objects/companies', {
         searchParams: { limit, properties: 'name,domain,industry,city,country' },
       });
       return formatList(
@@ -117,7 +99,7 @@ export function createHubSpotToolHandlers({ rootDirectory }) {
 
     async hubspot_list_deals(params = {}) {
       const limit = clampInteger(params.limit, 10, 1, 50);
-      const data = await hubSpotRequest(rootDirectory, '/crm/v3/objects/deals', {
+      const data = await hubSpotRequest('/crm/v3/objects/deals', {
         searchParams: { limit, properties: 'dealname,amount,dealstage,pipeline,closedate' },
       });
       return formatList(

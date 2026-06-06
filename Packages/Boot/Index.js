@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { readdir, stat } from 'node:fs/promises';
-import { appendFileSync, mkdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { appendTimestampedLog } from '../Shared/Debug/FileLogger.js';
 
 async function hasEntryFile(entryPath) {
   try {
@@ -48,12 +48,6 @@ export async function loadPackageModule(registry, packageName) {
 
 export function createBootLogger(logFilePath) {
   return function writeBootLog(message, details = '') {
-    try {
-      mkdirSync(path.dirname(logFilePath), { recursive: true });
-      const suffix = details ? ` ${details}` : '';
-      appendFileSync(logFilePath, `[${new Date().toISOString()}] ${message}${suffix}\n`, 'utf8');
-    } catch {
-      // Ignore logging failures during boot diagnostics.
-    }
+    appendTimestampedLog(logFilePath, message, details);
   };
 }

@@ -1,5 +1,5 @@
-import { dialog } from 'electron';
 import { createUserStateManager } from './Core/UserState.js';
+import { pickOpenPath } from '../Shared/Electron/DialogUtils.js';
 
 export async function createPackage({ rootDirectory }) {
   const userStateManager = createUserStateManager({ rootDirectory });
@@ -27,8 +27,7 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'user:pick-avatar',
         handler: async (event) => {
-          const window = event.sender.getOwnerBrowserWindow();
-          const result = await dialog.showOpenDialog(window, {
+          return pickOpenPath(event, {
             properties: ['openFile'],
             filters: [
               {
@@ -37,7 +36,6 @@ export async function createPackage({ rootDirectory }) {
               },
             ],
           });
-          return result.canceled ? null : (result.filePaths[0] ?? null);
         },
       },
       {

@@ -104,6 +104,22 @@ function emitFileChangedEvent(result = {}) {
   );
 }
 
+async function createProjectScopedPayload(payload = {}, resolveCwd) {
+  return {
+    cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
+    enforceProjectRoot: payload.enforceProjectRoot === true,
+    projectRoot: payload.projectRoot,
+  };
+}
+
+async function createFileTransferPayload(payload = {}, resolveCwd) {
+  return {
+    source: payload.source ?? payload.src,
+    destination: payload.destination ?? payload.dest,
+    ...(await createProjectScopedPayload(payload, resolveCwd)),
+  };
+}
+
 export function parseTerminalToolRequest(text, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
   const parsed = parseJsonToolBlock(text, TERMINAL_TOOL_BLOCK_RE);
   if (!parsed) return null;
@@ -183,22 +199,37 @@ function matchAllBlocks(text, pattern) {
   return results;
 }
 
+function stripBlockMatches(rawText, blocks) {
+  let visibleContent = rawText;
+  for (const { fullMatch } of blocks) {
+    visibleContent = visibleContent.replace(fullMatch, '');
+  }
+  return visibleContent.trim();
+}
+
+function createTerminalAction(payload, normalizedTools, visibleContent) {
+  const tool = String(payload?.tool ?? '').trim();
+  return { tool, payload, unsupported: !normalizedTools.has(tool), visibleContent };
+}
+
+function createToolsetAction(payload, visibleContent) {
+  return {
+    tool: String(payload?.tool ?? '').trim(),
+    payload,
+    visibleContent,
+  };
+}
+
 export function parseAllTerminalToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOOL_SET) {
   const rawText = String(text ?? '');
   const blocks = matchAllBlocks(rawText, '```joanium-terminal\\s*([\\s\\S]*?)```');
   if (blocks.length === 0) return null;
 
   const normalized = normalizeSupportedTools(supportedTools);
-  let visibleContent = rawText;
-  for (const { fullMatch } of blocks) {
-    visibleContent = visibleContent.replace(fullMatch, '');
-  }
-  visibleContent = visibleContent.trim();
-
-  const terminalActions = blocks.map(({ payload }) => {
-    const tool = String(payload?.tool ?? '').trim();
-    return { tool, payload, unsupported: !normalized.has(tool), visibleContent };
-  });
+  const visibleContent = stripBlockMatches(rawText, blocks);
+  const terminalActions = blocks.map(({ payload }) =>
+    createTerminalAction(payload, normalized, visibleContent),
+  );
 
   return { terminalActions, visibleContent };
 }
@@ -208,17 +239,8 @@ export function parseAllToolsetToolRequests(text) {
   const blocks = matchAllBlocks(rawText, '```joanium-tool\\s*([\\s\\S]*?)```');
   if (blocks.length === 0) return null;
 
-  let visibleContent = rawText;
-  for (const { fullMatch } of blocks) {
-    visibleContent = visibleContent.replace(fullMatch, '');
-  }
-  visibleContent = visibleContent.trim();
-
-  const toolsetActions = blocks.map(({ payload }) => ({
-    tool: String(payload?.tool ?? '').trim(),
-    payload,
-    visibleContent,
-  }));
+  const visibleContent = stripBlockMatches(rawText, blocks);
+  const toolsetActions = blocks.map(({ payload }) => createToolsetAction(payload, visibleContent));
 
   return { toolsetActions, visibleContent };
 }
@@ -250,16 +272,14 @@ export function parseAllToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOO
     return { terminalActions: [], toolsetActions: [], hasTools: false, visibleContent: rawText };
   }
 
-  let visibleContent = rawText;
-  for (const { fullMatch } of [...terminalBlocks, ...toolsetBlocks, ...fallbackBlocks]) {
-    visibleContent = visibleContent.replace(fullMatch, '');
-  }
-  visibleContent = visibleContent.trim();
-
-  const terminalActions = terminalBlocks.map(({ payload }) => {
-    const tool = String(payload?.tool ?? '').trim();
-    return { tool, payload, unsupported: !normalized.has(tool), visibleContent };
-  });
+  const visibleContent = stripBlockMatches(rawText, [
+    ...terminalBlocks,
+    ...toolsetBlocks,
+    ...fallbackBlocks,
+  ]);
+  const terminalActions = terminalBlocks.map(({ payload }) =>
+    createTerminalAction(payload, normalized, visibleContent),
+  );
 
   const toolsetActions = [];
   const allToolsetPayloads = [
@@ -271,13 +291,11 @@ export function parseAllToolRequests(text, supportedTools = DEFAULT_TERMINAL_TOO
   );
 
   for (const { payload } of [...allFallbackTerminal]) {
-    const tool = String(payload?.tool ?? '').trim();
-    terminalActions.push({ tool, payload, unsupported: false, visibleContent });
+    terminalActions.push(createTerminalAction(payload, normalized, visibleContent));
   }
 
   for (const { payload } of allToolsetPayloads) {
-    const tool = String(payload?.tool ?? '').trim();
-    const action = { tool, payload, visibleContent };
+    const action = createToolsetAction(payload, visibleContent);
     const coerced = coerceToolsetTerminalRequest(action, supportedTools);
     if (coerced) {
       terminalActions.push({ ...coerced, visibleContent });
@@ -366,11 +384,9 @@ export async function executeTerminalTool(
   if (action.tool === 'write_local_file') {
     const result = await invokeIpc('terminal:write-file', {
       filePath: payload.path,
-      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
       content: payload.content,
       append: payload.append === true,
-      enforceProjectRoot: payload.enforceProjectRoot === true,
-      projectRoot: payload.projectRoot,
+      ...(await createProjectScopedPayload(payload, resolveCwd)),
     });
     emitFileChangedEvent(result);
     return result;
@@ -379,12 +395,10 @@ export async function executeTerminalTool(
   if (action.tool === 'apply_file_patch') {
     const result = await invokeIpc('terminal:apply-file-patch', {
       filePath: payload.path,
-      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
       search: payload.search,
       replace: payload.replace,
       replaceAll: payload.replace_all === true,
-      enforceProjectRoot: payload.enforceProjectRoot === true,
-      projectRoot: payload.projectRoot,
+      ...(await createProjectScopedPayload(payload, resolveCwd)),
     });
     emitFileChangedEvent(result);
     return result;
@@ -393,9 +407,7 @@ export async function executeTerminalTool(
   if (action.tool === 'delete_local_item') {
     const result = await invokeIpc('terminal:delete-item', {
       itemPath: payload.path,
-      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
-      enforceProjectRoot: payload.enforceProjectRoot === true,
-      projectRoot: payload.projectRoot,
+      ...(await createProjectScopedPayload(payload, resolveCwd)),
     });
     emitFileChangedEvent(result);
     return result;
@@ -404,30 +416,16 @@ export async function executeTerminalTool(
   if (action.tool === 'create_directory') {
     return invokeIpc('terminal:create-directory', {
       path: payload.path,
-      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
-      enforceProjectRoot: payload.enforceProjectRoot === true,
-      projectRoot: payload.projectRoot,
+      ...(await createProjectScopedPayload(payload, resolveCwd)),
     });
   }
 
   if (action.tool === 'move_local_file') {
-    return invokeIpc('terminal:move-file', {
-      source: payload.source ?? payload.src,
-      destination: payload.destination ?? payload.dest,
-      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
-      enforceProjectRoot: payload.enforceProjectRoot === true,
-      projectRoot: payload.projectRoot,
-    });
+    return invokeIpc('terminal:move-file', await createFileTransferPayload(payload, resolveCwd));
   }
 
   if (action.tool === 'copy_local_file') {
-    return invokeIpc('terminal:copy-file', {
-      source: payload.source ?? payload.src,
-      destination: payload.destination ?? payload.dest,
-      cwd: await resolveCwd(payload.working_directory ?? payload.cwd),
-      enforceProjectRoot: payload.enforceProjectRoot === true,
-      projectRoot: payload.projectRoot,
-    });
+    return invokeIpc('terminal:copy-file', await createFileTransferPayload(payload, resolveCwd));
   }
 
   if (action.tool === 'list_directory') {

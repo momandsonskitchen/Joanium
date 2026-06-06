@@ -108,7 +108,7 @@ export function createCommandService({ rootDirectory }) {
     sender.send(channel, payload);
   }
 
-  async function runCommand(payload = {}) {
+  function prepareCommandExecution(payload = {}) {
     const commandError = requireString(payload.command, 'No command provided.');
     if (commandError) return commandError;
 
@@ -121,11 +121,19 @@ export function createCommandService({ rootDirectory }) {
     }
 
     const cwd = resolveDirectory(payload.cwd, fallbackDirectory);
+    return { ok: true, command: payload.command, cwd, risk };
+  }
+
+  async function runCommand(payload = {}) {
+    const commandRequest = prepareCommandExecution(payload);
+    if (!commandRequest.ok) return commandRequest;
+
     const timeout = Math.min(
       Math.max(Number(payload.timeout) || DEFAULT_TIMEOUT, 1000),
       MAX_TIMEOUT,
     );
-    const { cmd, options } = buildExecInvocation(payload.command);
+    const { command, cwd, risk } = commandRequest;
+    const { cmd, options } = buildExecInvocation(command);
     const result = await execPromise(cmd, {
       cwd,
       timeout,
@@ -135,42 +143,26 @@ export function createCommandService({ rootDirectory }) {
 
     return {
       ...result,
-      command: payload.command,
+      command,
       cwd,
       risk,
     };
   }
 
   function spawnCommand(payload = {}, sender) {
-    const commandError = requireString(payload.command, 'No command provided.');
-    if (commandError) return commandError;
-
-    const risk = assessCommandRisk(payload.command);
-    if (risk.blocked) {
-      return { ok: false, error: 'Blocked: command matches a critical destructive pattern.', risk };
-    }
-    if (risk.requiresOptIn && !normalizeBool(payload.allowRisky)) {
-      return { ok: false, error: 'Command is high-risk and needs explicit opt-in.', risk };
-    }
-
-    const cwd = resolveDirectory(payload.cwd, fallbackDirectory);
+    const commandRequest = prepareCommandExecution(payload);
+    if (!commandRequest.ok) return commandRequest;
+    const { command, cwd, risk } = commandRequest;
     const processId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     const child =
       process.platform === 'win32'
         ? spawn(
             'powershell.exe',
-            [
-              '-NoProfile',
-              '-NonInteractive',
-              '-ExecutionPolicy',
-              'Bypass',
-              '-Command',
-              payload.command,
-            ],
+            ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', command],
             { cwd, env: { ...process.env } },
           )
-        : spawn(payload.command, {
+        : spawn(command, {
             cwd,
             shell: true,
             env: { ...process.env, FORCE_COLOR: '1' },
@@ -234,7 +226,7 @@ export function createCommandService({ rootDirectory }) {
       });
     });
 
-    return { ok: true, processId, command: payload.command, cwd, running: true, risk };
+    return { ok: true, processId, command, cwd, running: true, risk };
   }
 
   function writeProcess(processId, data) {

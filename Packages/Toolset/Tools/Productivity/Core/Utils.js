@@ -1,4 +1,10 @@
 import { parseResponseJson } from '../../../Core/ConnectorHttp.js';
+import {
+  clampInteger,
+  compactObject,
+  optionalText,
+  toBoolean,
+} from '../../../../Shared/Utils/ValueUtils.js';
 import strings from '../I18n/en.js';
 
 export function readText(value, label) {
@@ -9,25 +15,10 @@ export function readText(value, label) {
   return text;
 }
 
-export function optionalText(value) {
-  return String(value ?? '').trim();
-}
-
-export function compactObject(value = {}) {
-  return Object.fromEntries(
-    Object.entries(value).filter(([, entry]) => entry !== undefined && entry !== null),
-  );
-}
+export { compactObject, optionalText, toBoolean };
 
 export function parseLimit(value, fallback = 20, min = 1, max = 100) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.round(parsed))) : fallback;
-}
-
-export function toBoolean(value, fallback = false) {
-  if (value === true || value === 'true' || value === 1 || value === '1') return true;
-  if (value === false || value === 'false' || value === 0 || value === '0') return false;
-  return fallback;
+  return clampInteger(value, fallback, min, max);
 }
 
 export function parseObject(value, label) {

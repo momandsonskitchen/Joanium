@@ -1,6 +1,6 @@
-import { dialog } from 'electron';
 import { createProjectStateManager } from './Core/ProjectState.js';
 import { readProjectDocs, formatProjectDocsPrompt } from './Core/ProjectDocReader.js';
+import { pickOpenPath } from '../Shared/Electron/DialogUtils.js';
 
 // ---------------------------------------------------------------------------
 // Projects package — backend-only, no renderer.
@@ -32,8 +32,7 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'projects:select-cover',
         handler: async (event) => {
-          const window = event.sender.getOwnerBrowserWindow();
-          const result = await dialog.showOpenDialog(window, {
+          return pickOpenPath(event, {
             properties: ['openFile'],
             filters: [
               {
@@ -42,7 +41,6 @@ export async function createPackage({ rootDirectory }) {
               },
             ],
           });
-          return result.canceled ? null : (result.filePaths[0] ?? null);
         },
       },
       {
@@ -55,11 +53,9 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'projects:select-directory',
         handler: async (event) => {
-          const window = event.sender.getOwnerBrowserWindow();
-          const result = await dialog.showOpenDialog(window, {
+          return pickOpenPath(event, {
             properties: ['openDirectory'],
           });
-          return result.canceled ? null : (result.filePaths[0] ?? null);
         },
       },
     ],

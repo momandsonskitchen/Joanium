@@ -17,6 +17,26 @@ export function formatGoogleDate(value) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
+export function appendCsvParams(params, key, value) {
+  String(value ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .forEach((item) => params.append(key, item));
+}
+
+export function googlePageSize(value, fallback = 25, max = 100) {
+  const parsed = Number(value);
+  const size = Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : fallback;
+  return String(Math.min(size, max));
+}
+
+export function normalizeGoogleResourceName(value, prefix, paramName) {
+  const name = String(value ?? '').trim();
+  if (!name) throw new Error(`${paramName} is required`);
+  return name.startsWith(`${prefix}/`) ? name : `${prefix}/${name}`;
+}
+
 const {
   getCredentials: getGoogleCredentials,
   requireCredentials: requireGoogleCredentials,

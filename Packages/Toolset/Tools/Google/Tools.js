@@ -31,7 +31,7 @@ export {
   TASKS_TOOLS,
   YOUTUBE_TOOLS,
 };
-export const TOOL_DEFINITIONS = [
+export const GOOGLE_TOOL_GROUPS = Object.freeze([
   ADMIN_DIRECTORY_TOOLS,
   CALENDAR_TOOLS,
   CHAT_TOOLS,
@@ -47,5 +47,6 @@ export const TOOL_DEFINITIONS = [
   SLIDES_TOOLS,
   TASKS_TOOLS,
   YOUTUBE_TOOLS,
-].flat();
+]);
+export const TOOL_DEFINITIONS = GOOGLE_TOOL_GROUPS.flat();
 export default TOOL_DEFINITIONS;

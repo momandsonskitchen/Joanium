@@ -4,37 +4,18 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { formatRelativeSessionTime, getRelativeDayGroup } from '../../Shared/Utils/DateUtils.js';
 
 // ---------------------------------------------------------------------------
 // Date helpers
 // ---------------------------------------------------------------------------
 
 function getSessionGroup(isoString) {
-  const date = new Date(isoString);
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-  if (startOfDay.getTime() === startOfToday.getTime()) return 'today';
-  if (startOfDay.getTime() === startOfYesterday.getTime()) return 'yesterday';
-  return 'earlier';
+  return getRelativeDayGroup(isoString);
 }
 
 function formatSessionTime(isoString) {
-  const date = new Date(isoString);
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-  if (startOfDay.getTime() >= startOfToday.getTime()) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-  if (startOfDay.getTime() >= startOfYesterday.getTime()) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  return formatRelativeSessionTime(isoString);
 }
 
 // ---------------------------------------------------------------------------

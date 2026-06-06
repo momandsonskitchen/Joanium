@@ -1,13 +1,11 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import {
-  listNamespacedMarkdown,
-  loadNamespacedMarkdown,
-} from '../../../Shared/Markdown/MarkdownLibrary.js';
-import {
-  getBundledResourceDirectory,
-  getWritableResourceDirectory,
-} from '../../../Shared/Storage/ResourcePaths.js';
+  createNamespacedMarkdownLibrary,
+  mapNamespacedMarkdownResource,
+} from '../../../Shared/Markdown/NamespacedResourceLibrary.js';
+import { getBundledResourceDirectory } from '../../../Shared/Storage/ResourcePaths.js';
+import { clampInteger } from '../../../Shared/Utils/ValueUtils.js';
 
 const PRODUCT_KNOWLEDGE_FILENAMES = Object.freeze(['ProductKnowledge.md', 'productknowledge.md']);
 
@@ -16,15 +14,11 @@ function formatText(template, values = {}) {
 }
 
 function normalizeLimit(value, fallback = 30) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(Math.max(Math.round(parsed), 1), 100);
+  return clampInteger(value, fallback, 1, 100);
 }
 
-function skillDirectories(rootDirectory) {
-  const bundled = getBundledResourceDirectory(rootDirectory, 'Skills');
-  const writable = getWritableResourceDirectory(rootDirectory, 'Skills');
-  return [...new Set([path.resolve(bundled), path.resolve(writable)])];
+function skillLibrary(rootDirectory) {
+  return createNamespacedMarkdownLibrary({ rootDirectory, resourceName: 'Skills' });
 }
 
 function promptDirectory(rootDirectory) {
@@ -32,14 +26,12 @@ function promptDirectory(rootDirectory) {
 }
 
 function mapSkill({ id, namespace, filename, frontmatter }) {
-  return {
-    id,
-    namespace,
-    filename,
-    name: frontmatter.name || filename.replace(/\.md$/i, ''),
-    description: frontmatter.description || '',
-    trigger: frontmatter.trigger || '',
-  };
+  return mapNamespacedMarkdownResource(
+    { id, namespace, filename, frontmatter },
+    {
+      includeTrigger: true,
+    },
+  );
 }
 
 function skillMatchesQuery(skill, query) {
@@ -67,15 +59,10 @@ export async function readProductKnowledge(rootDirectory) {
 }
 
 export async function listSkills(rootDirectory, { query = '', limit = 30 } = {}) {
-  const skillsById = new Map();
+  const library = skillLibrary(rootDirectory);
+  const skills = await library.listAll(mapSkill);
 
-  for (const directory of skillDirectories(rootDirectory)) {
-    for (const skill of await listNamespacedMarkdown(directory, mapSkill)) {
-      skillsById.set(skill.id, skill);
-    }
-  }
-
-  return [...skillsById.values()]
+  return skills
     .filter((skill) => skillMatchesQuery(skill, query))
     .sort((left, right) => left.name.localeCompare(right.name))
     .slice(0, normalizeLimit(limit));
@@ -96,37 +83,16 @@ export async function readSkill(rootDirectory, { id = '', namespace = '', filena
     throw new Error('Skill id or namespace and filename are required.');
   }
 
-  let lastError = null;
-  const directories = skillDirectories(rootDirectory).reverse();
-
-  for (const directory of directories) {
-    try {
-      return await loadNamespacedMarkdown(
-        directory,
-        safeNamespace,
-        safeFilename,
-        ({
-          id: loadedId,
-          namespace: loadedNamespace,
-          filename: loadedFilename,
-          frontmatter,
-          content,
-        }) => ({
-          id: loadedId,
-          namespace: loadedNamespace,
-          filename: loadedFilename,
-          name: frontmatter.name || loadedFilename.replace(/\.md$/i, ''),
-          description: frontmatter.description || '',
-          trigger: frontmatter.trigger || '',
-          content,
-        }),
-      );
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError ?? new Error('Skill not found.');
+  return skillLibrary(rootDirectory).load(
+    safeNamespace,
+    safeFilename,
+    (entry) =>
+      mapNamespacedMarkdownResource(entry, {
+        includeContent: true,
+        includeTrigger: true,
+      }),
+    'Skill not found.',
+  );
 }
 
 export function formatSkillList(skills, strings) {
