@@ -139,33 +139,6 @@
         "image": true
       }
     },
-    "ai21-labs/ai21-jamba-1.5-large": {
-      "name": "AI21 Jamba 1.5 Large",
-      "description": "A 398B parameters (94B active) multilingual model, offering a 256K long context window, function calling, structured output, and grounded generation.",
-      "context_window": 262144,
-      "max_output": 4096,
-      "inputs": {
-        "text": true
-      }
-    },
-    "cohere/cohere-command-r-08-2024": {
-      "name": "Cohere Command R 08-2024",
-      "description": "Command R is a scalable generative model targeting RAG and Tool Use to enable production-scale AI for enterprise.",
-      "context_window": 131072,
-      "max_output": 4096,
-      "inputs": {
-        "text": true
-      }
-    },
-    "cohere/cohere-command-r-plus-08-2024": {
-      "name": "Cohere Command R+ 08-2024",
-      "description": "Command R+ is a state-of-the-art RAG-optimized model designed to tackle enterprise-grade workloads.",
-      "context_window": 131072,
-      "max_output": 4096,
-      "inputs": {
-        "text": true
-      }
-    },
     "deepseek/deepseek-r1": {
       "name": "DeepSeek-R1",
       "description": "DeepSeek-R1 excels at reasoning tasks using a step-by-step training process, such as language, scientific reasoning, and coding tasks.",
@@ -289,15 +262,6 @@
         "image": true
       }
     },
-    "microsoft/mai-ds-r1": {
-      "name": "MAI-DS-R1",
-      "description": "MAI-DS-R1 is a DeepSeek-R1 reasoning model that has been post-trained by the Microsoft AI team to fill in information gaps in the previous version of the model and improve its harm protections while maintaining R1 reasoning capabilities.",
-      "context_window": 128000,
-      "max_output": 4096,
-      "inputs": {
-        "text": true
-      }
-    },
     "microsoft/phi-4-multimodal-instruct": {
       "name": "Phi-4-multimodal-instruct",
       "description": "First small multimodal model to have 3 modality inputs (text, audio, image), excelling in quality and efficiency",
@@ -318,5 +282,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-05T13:41:26.798Z"
+  "_syncedAt": "2026-06-06T10:59:30.058Z"
 }
