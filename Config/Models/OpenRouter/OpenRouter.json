@@ -2441,19 +2441,6 @@
         "image": true
       }
     },
-    "baidu/ernie-4.5-vl-28b-a3b": {
-      "name": "Baidu: ERNIE 4.5 VL 28B A3B",
-      "description": "A powerful multimodal Mixture-of-Experts chat model featuring 28B total parameters with 3B activated per token, delivering exceptional text and vision understanding through its innovative heterogeneous MoE structure with modality-isolated routing....",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.14,
-        "output": 0.56
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "z-ai/glm-4.5v": {
       "name": "Z.ai: GLM 4.5V",
       "description": "GLM-4.5V is a vision-language foundation model for multimodal agent applications. Built on a Mixture-of-Experts (MoE) architecture with 106B parameters and 12B activated parameters, it achieves state-of-the-art results in video understanding,...",
@@ -2982,19 +2969,6 @@
       "pricing": {
         "input": 1.25,
         "output": 10
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
-    "arcee-ai/spotlight": {
-      "name": "Arcee AI: Spotlight",
-      "description": "Spotlight is a 7‑billion‑parameter vision‑language model derived from Qwen 2.5‑VL and fine‑tuned by Arcee AI for tight image‑text grounding tasks. It offers a 32 k‑token context window, enabling rich multimodal...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.18,
-        "output": 0.18
       },
       "inputs": {
         "text": true,
@@ -4232,18 +4206,6 @@
         "image": true
       }
     },
-    "openai/gpt-4-1106-preview": {
-      "name": "OpenAI: GPT-4 Turbo (older v1106)",
-      "description": "The latest GPT-4 Turbo model with vision capabilities. Vision requests can now use JSON mode and function calling.\n\nTraining data: up to April 2023.",
-      "context_window": 128000,
-      "pricing": {
-        "input": 10,
-        "output": 30
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-3.5-turbo-instruct": {
       "name": "OpenAI: GPT-3.5 Turbo Instruct",
       "description": "This model is a variant of GPT-3.5 Turbo tuned for instructional prompts and omitting chat-related optimizations. Training data: up to Sep 2021.",
@@ -4329,5 +4291,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-06T14:13:09.281Z"
+  "_syncedAt": "2026-06-06T15:14:06.070Z"
 }

@@ -2965,7 +2965,9 @@ summary.chat-terminal-call__header::marker {
   min-width: 220px;
   max-width: 300px;
   max-height: 340px;
-  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border-radius: 20px;
   padding: 8px;
   background:
@@ -2985,7 +2987,8 @@ summary.chat-terminal-call__header::marker {
 }
 
 .chat-model-picker__scroller {
-  max-height: 340px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -3037,6 +3040,7 @@ summary.chat-terminal-call__header::marker {
 }
 
 .chat-model-picker__option--active {
+  background: rgba(var(--color-accent-rgb), 0.1);
   color: var(--color-chat-text-title);
   font-weight: 650;
 }
@@ -3122,6 +3126,84 @@ summary.chat-terminal-call__header::marker {
 .chat-model-picker__health-dot--red {
   background: #ef4444;
   box-shadow: 0 0 5px rgba(239, 68, 68, 0.4);
+}
+
+/* ── Model picker — search bar ──────────────────────────────────────── */
+
+.chat-model-picker__search {
+  flex-shrink: 0;
+  padding-bottom: 6px;
+}
+
+/* Compact the shared SearchBar to fit the picker's narrower width */
+.chat-model-picker__search .joanium-search__input {
+  height: 36px;
+  font-size: 13px;
+  padding: 0 40px 0 36px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 140, 110, 0.15),
+    0 2px 8px rgba(96, 67, 47, 0.06);
+}
+
+.chat-model-picker__search .joanium-search__input:focus {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.3),
+    0 4px 12px rgba(96, 67, 47, 0.08);
+}
+
+.chat-model-picker__search .joanium-search__icon {
+  left: 12px;
+  width: 14px;
+  height: 14px;
+}
+
+.chat-model-picker__search .joanium-search__clear {
+  right: 6px;
+  width: 24px;
+  height: 24px;
+}
+
+/* Empty state — shown when no models match the query */
+.chat-model-picker__empty {
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 520;
+  color: var(--color-chat-text-muted);
+}
+
+/* ── Dark theme overrides for model picker ──────────────────────────────── */
+
+.joanium-theme-dark .chat-model-picker {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.04), transparent 50%),
+    var(--color-chat-input-surface);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.12),
+    0 20px 48px rgba(10, 4, 20, 0.5);
+}
+
+.joanium-theme-dark .chat-model-picker__group + .chat-model-picker__group {
+  border-top-color: rgba(180, 130, 220, 0.08);
+}
+
+.joanium-theme-dark .chat-model-picker__search .joanium-search__input {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.14),
+    0 2px 8px rgba(10, 4, 20, 0.2);
+}
+
+.joanium-theme-dark .chat-model-picker__search .joanium-search__input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.38),
+    0 4px 12px rgba(10, 4, 20, 0.24);
 }
 
 @keyframes health-pulse {
