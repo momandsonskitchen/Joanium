@@ -15,9 +15,12 @@ export function createDropDownLite({
   options = [],
   value = '',
   placeholder = 'Select',
+  searchable = false,
+  searchPlaceholder = 'Search…',
   onChange,
 } = {}) {
   let currentValue = value;
+  let searchQuery = '';
   let dropdownController = null;
 
   // ── Wrapper ──────────────────────────────────────────────────────────────
@@ -56,6 +59,40 @@ export function createDropDownLite({
   panel.setAttribute('role', 'listbox');
   document.body.append(panel);
 
+  // ── In-panel search (optional) ────────────────────────────────────────────
+
+  let panelSearchInput = null;
+  let optionListEl = null;
+
+  if (searchable) {
+    const searchWrap = createElement('div', 'joanium-ddm-lite__search-wrap');
+
+    panelSearchInput = document.createElement('input');
+    panelSearchInput.type = 'text';
+    panelSearchInput.className = 'joanium-ddm-lite__search-input';
+    panelSearchInput.placeholder = searchPlaceholder;
+    panelSearchInput.autocomplete = 'off';
+    panelSearchInput.spellcheck = false;
+
+    panelSearchInput.addEventListener('input', () => {
+      searchQuery = panelSearchInput.value.trim();
+      buildOptionList();
+    });
+
+    // Prevent clicks inside the search from closing the panel
+    panelSearchInput.addEventListener('click', (e) => e.stopPropagation());
+    // Prevent Escape from bubbling to the portal controller while typing
+    panelSearchInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') e.stopPropagation();
+    });
+
+    searchWrap.append(panelSearchInput);
+    panel.append(searchWrap);
+
+    optionListEl = createElement('div', 'joanium-ddm-lite__option-list');
+    panel.append(optionListEl);
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   function syncTriggerText() {
@@ -81,9 +118,23 @@ export function createDropDownLite({
     }
   }
 
-  function buildPanel() {
-    panel.replaceChildren();
-    for (const opt of options) {
+  function buildOptionList() {
+    const container = optionListEl ?? panel;
+    const q = searchQuery.toLowerCase();
+    const visible = searchQuery
+      ? options.filter((o) => o.label.toLowerCase().includes(q))
+      : options;
+
+    container.replaceChildren();
+
+    if (visible.length === 0) {
+      const empty = createElement('div', 'joanium-ddm-lite__no-results');
+      empty.textContent = 'No results';
+      container.append(empty);
+      return;
+    }
+
+    for (const opt of visible) {
       const item = createElement('button', 'joanium-ddm-lite__option');
       item.type = 'button';
       item.setAttribute('role', 'option');
@@ -106,20 +157,26 @@ export function createDropDownLite({
         e.stopPropagation();
         currentValue = opt.value;
         syncTriggerText();
-        buildPanel();
+        buildOptionList();
         dropdownController?.close();
         onChange?.(opt.value);
       });
 
-      panel.append(item);
+      container.append(item);
     }
+  }
+
+  // Alias so callers (setValue, init) still work
+  function buildPanel() {
+    buildOptionList();
   }
 
   // ── Open / close ──────────────────────────────────────────────────────────
 
   function positionPanel() {
     const rect = trigger.getBoundingClientRect();
-    const panelH = Math.min(options.length * 38 + 16, 240);
+    const searchRowH = searchable ? 44 : 0;
+    const panelH = Math.min(options.length * 38 + 16 + searchRowH, 240 + searchRowH);
     const goUp =
       window.innerHeight - rect.bottom < panelH && rect.top > window.innerHeight - rect.bottom;
 
@@ -142,6 +199,15 @@ export function createDropDownLite({
     panel,
     trigger,
     positionPanel,
+    onOpen: () => {
+      if (panelSearchInput) {
+        panelSearchInput.value = '';
+        searchQuery = '';
+        buildOptionList();
+        // Focus after the panel's open transition starts
+        requestAnimationFrame(() => panelSearchInput.focus());
+      }
+    },
   });
 
   // ── Init ──────────────────────────────────────────────────────────────────

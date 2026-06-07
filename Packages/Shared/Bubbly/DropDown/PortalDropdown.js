@@ -1,4 +1,4 @@
-export function createPortalDropdownController({ wrapper, panel, trigger, positionPanel }) {
+export function createPortalDropdownController({ wrapper, panel, trigger, positionPanel, onOpen }) {
   function isOpen() {
     return wrapper.classList.contains('is-open');
   }
@@ -8,6 +8,7 @@ export function createPortalDropdownController({ wrapper, panel, trigger, positi
     wrapper.classList.add('is-open');
     panel.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
+    onOpen?.();
   }
 
   function close() {

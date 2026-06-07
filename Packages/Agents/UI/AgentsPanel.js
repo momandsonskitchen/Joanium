@@ -148,6 +148,8 @@ export function createAgentsPanel(strings) {
     modelDropdown = createDropDownLite({
       options,
       value: selectedValue,
+      searchable: true,
+      searchPlaceholder: strings.modelSearchPlaceholder ?? 'Search models…',
       onChange: (value) => {
         draftModel = decodeModelValue(value, 'default');
       },
