@@ -104,8 +104,10 @@
     0 16px 48px var(--color-shadow, rgba(100, 70, 40, 0.14)),
     0 4px 12px var(--color-shadow, rgba(100, 70, 40, 0.06));
   max-height: 240px;
-  overflow-y: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
 
   /* Hidden state */
   opacity: 0;
@@ -178,13 +180,8 @@
   padding: 4px 6px 6px;
   border-bottom: 1px solid var(--color-border, rgba(170, 134, 104, 0.1));
   margin-bottom: 4px;
-  position: sticky;
-  top: -6px;
-  background: var(--color-chat-shell-surface, rgba(255, 252, 248, 0.96));
-  backdrop-filter: blur(16px) saturate(1.5);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  z-index: 1;
-  border-radius: 20px;
+  flex-shrink: 0;
+  border-radius: 10px 10px 0 0;
 }
 
 .joanium-ddm-lite__search-input {
@@ -223,6 +220,10 @@
 .joanium-ddm-lite__option-list {
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Empty-search state */

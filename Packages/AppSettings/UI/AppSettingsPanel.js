@@ -216,6 +216,8 @@ export function createAppSettingsPanel(strings) {
       label: '',
       options: modelOptions,
       value: currentModelValue,
+      searchable: true,
+      searchPlaceholder: strings.defaultModel.searchPlaceholder ?? 'Search models…',
       onChange: (value) => {
         void updateDefaultModel(value);
       },
