@@ -97,6 +97,7 @@
 .chat-templates__list-col,
 .dream-panel__date-column,
 .dream-panel__detail-column,
+.joanium-ddm-lite__option-list,
 .md-pre {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-accent-thumb) transparent;
@@ -124,6 +125,7 @@
 .chat-templates__list-col::-webkit-scrollbar,
 .dream-panel__date-column::-webkit-scrollbar,
 .dream-panel__detail-column::-webkit-scrollbar,
+.joanium-ddm-lite__option-list::-webkit-scrollbar,
 .md-pre::-webkit-scrollbar {
   width: var(--scrollbar-width);
   height: var(--scrollbar-width);
@@ -149,6 +151,7 @@
 .chat-templates__list-col::-webkit-scrollbar-track,
 .dream-panel__date-column::-webkit-scrollbar-track,
 .dream-panel__detail-column::-webkit-scrollbar-track,
+.joanium-ddm-lite__option-list::-webkit-scrollbar-track,
 .md-pre::-webkit-scrollbar-track {
   background: var(--scrollbar-accent-track);
   border-radius: var(--radius-pill);
@@ -176,6 +179,7 @@
 .chat-templates__list-col::-webkit-scrollbar-thumb,
 .dream-panel__date-column::-webkit-scrollbar-thumb,
 .dream-panel__detail-column::-webkit-scrollbar-thumb,
+.joanium-ddm-lite__option-list::-webkit-scrollbar-thumb,
 .md-pre::-webkit-scrollbar-thumb {
   border-radius: var(--radius-pill);
   background: var(--scrollbar-accent-thumb);
@@ -201,6 +205,7 @@
 .chat-templates__list-col::-webkit-scrollbar-thumb:hover,
 .dream-panel__date-column::-webkit-scrollbar-thumb:hover,
 .dream-panel__detail-column::-webkit-scrollbar-thumb:hover,
+.joanium-ddm-lite__option-list::-webkit-scrollbar-thumb:hover,
 .md-pre::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-accent-thumb-hover);
 }
