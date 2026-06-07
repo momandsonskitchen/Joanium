@@ -1,3 +1,4 @@
+import path from 'node:path';
 import process from 'node:process';
 import { app, BrowserWindow } from 'electron';
 import electronUpdater from 'electron-updater';
