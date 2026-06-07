@@ -6,6 +6,13 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.607.2] - 2026-06-07
+
+* chore(release): bump version to 2026.607.2
+* Auto Update Fix
+
+---
+
 ## [2026.607.1] - 2026-06-07
 
 * chore(release): bump version to 2026.607.1
