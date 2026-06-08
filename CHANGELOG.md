@@ -28,7 +28,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 ## [2026.607.1] - 2026-06-07
 
 * chore(release): bump version to 2026.607.1
-* Github Logo Fix
+* GitHub Logo Fix
 * AI Models Update
 * Added custom Scrollbar to the model selector in the Agents Panel
 
