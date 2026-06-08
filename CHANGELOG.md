@@ -6,6 +6,18 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.608.0] - 2026-06-08
+
+* chore(release): bump version to 2026.608.0
+* Added New Search Providers
+* Added Search Icons
+* AI Models Update
+* Bump electron-updater from 6.8.3 to 6.8.9
+* Bump jscpd from 4.2.4 to 5.0.4
+* Updated AI Models
+
+---
+
 ## [2026.607.2] - 2026-06-07
 
 * chore(release): bump version to 2026.607.2
