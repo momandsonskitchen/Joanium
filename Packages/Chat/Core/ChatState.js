@@ -415,11 +415,15 @@ function nodeRequest(urlString, { method = 'POST', headers = {}, body = '', sign
     });
 
     if (body) {
-      // lgtm[js/file-access-to-http] - body is a JSON-serialised API request
-      // built entirely from in-memory data (user settings, conversation history,
-      // system prompt text). File reads only populate the *prompt text* inside
-      // that JSON — no raw file bytes, paths, or credentials are forwarded.
-      req.write(body);
+      // CodeQL js/file-access-to-http: intentional and safe.
+      // `body` is always the output of JSON.stringify() on a purpose-built
+      // request object. File-sourced data enters only as string values inside
+      // that JSON — prompt text from *.md resources and a semver string from
+      // package.json. API keys are read from User.json but are placed in
+      // request *headers* (Authorization / x-api-key) by the caller, never in
+      // the body. No raw file bytes, file paths, or sensitive credentials are
+      // written here.
+      req.write(body); // codeql[js/file-access-to-http]
     }
 
     req.end();
