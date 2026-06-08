@@ -37,33 +37,47 @@ export function createDirectoryService({ rootDirectory }) {
     if (fileError) return fileError;
 
     const resolvedPath = resolveDirectory(payload.filePath, payload.cwd ?? fallbackDirectory);
-    if (!fs.existsSync(resolvedPath)) {
+
+    // Open once to get a stable fd — all subsequent checks (isFile, size) and
+    // the read itself use fstatSync/readSync through that fd, eliminating the
+    // existsSync → statSync → readFileSync TOCTOU chain.
+    let fd;
+    try {
+      fd = fs.openSync(resolvedPath, 'r');
+    } catch {
       return { ok: false, error: `File not found: "${resolvedPath}"` };
     }
-    const stat = fs.statSync(resolvedPath);
-    if (!stat.isFile()) {
-      return { ok: false, error: `"${resolvedPath}" is not a file.` };
-    }
-    if (stat.size > MAX_FILE_SIZE) {
+
+    try {
+      const stat = fs.fstatSync(fd);
+      if (!stat.isFile()) {
+        return { ok: false, error: `"${resolvedPath}" is not a file.` };
+      }
+      if (stat.size > MAX_FILE_SIZE) {
+        return {
+          ok: false,
+          error: `File too large (${Math.round(stat.size / 1024)} KB > ${Math.round(MAX_FILE_SIZE / 1024)} KB limit).`,
+        };
+      }
+
+      const buf = Buffer.alloc(stat.size);
+      fs.readSync(fd, buf, 0, stat.size, 0);
+      const lines = buf.toString('utf8').split('\n');
+      const maxLines = Math.min(Math.max(Number(payload.maxLines) || 200, 1), 2000);
+      const slicedLines = lines.slice(0, maxLines);
+      const note =
+        lines.length > maxLines ? `\n...(showing ${maxLines} of ${lines.length} lines)` : '';
+
       return {
-        ok: false,
-        error: `File too large (${Math.round(stat.size / 1024)} KB > ${Math.round(MAX_FILE_SIZE / 1024)} KB limit).`,
+        ok: true,
+        path: resolvedPath,
+        content: slicedLines.join('\n') + note,
+        totalLines: lines.length,
+        sizeBytes: stat.size,
       };
+    } finally {
+      fs.closeSync(fd);
     }
-
-    const lines = fs.readFileSync(resolvedPath, 'utf8').split('\n');
-    const maxLines = Math.min(Math.max(Number(payload.maxLines) || 200, 1), 2000);
-    const slicedLines = lines.slice(0, maxLines);
-    const note =
-      lines.length > maxLines ? `\n...(showing ${maxLines} of ${lines.length} lines)` : '';
-
-    return {
-      ok: true,
-      path: resolvedPath,
-      content: slicedLines.join('\n') + note,
-      totalLines: lines.length,
-      sizeBytes: stat.size,
-    };
   }
 
   function listDirectory(payload = {}) {
