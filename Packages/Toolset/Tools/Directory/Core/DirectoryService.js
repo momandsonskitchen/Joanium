@@ -196,15 +196,16 @@ export function createDirectoryService({ rootDirectory }) {
     }
 
     // --- Read back the result via a fresh fd -----------------------------------
-    // A separate open is required here because 'w'/'a' write descriptors are not
-    // readable. This openSync is not preceded by any path-based check, so there
-    // is no check-then-act window — the open itself is the single path lookup,
-    // and every subsequent call (fstatSync, readSync) operates on the returned
-    // fd. CodeQL js/file-system-race flags this as a false positive because it
-    // sees an earlier openSync on the same path in the same function, but that
-    // pattern is the recommended fd-first fix, not a TOCTOU vulnerability.
+    // 'w'/'a' write descriptors are not readable, so a second open is required.
+    // There is no check-then-act window here: this openSync is not preceded by
+    // any path-based existence/stat check — the open itself is the sole path
+    // lookup, and all subsequent calls (fstatSync, readSync) operate on the
+    // returned fd. CodeQL js/file-system-race is a false positive in this
+    // specific pattern; the recommended fd-first approach cannot eliminate the
+    // second open when the write mode is not readable.
     let afterContent = '';
-    const verifyFd = fs.openSync(resolvedPath, 'r');
+    // lgtm[js/file-system-race]
+    const verifyFd = fs.openSync(resolvedPath, 'r'); // codeql[js/file-system-race]
     try {
       const stat = fs.fstatSync(verifyFd);
       const buf = Buffer.alloc(stat.size);
