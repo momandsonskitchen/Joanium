@@ -999,6 +999,15 @@
         "text": true
       }
     },
+    "nvidia/nvidia-nemotron-3-nano-30b-a3b-bf16": {
+      "name": "NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
+      "description": "Nemotron-3-Nano-30B-A3B is NVIDIA's compute-efficient open reasoning model, purpose-built for developers building specialized agentic AI systems. It pairs a Mixture-of-Experts design (30B total / 3.5B active parameters) with a hybrid Mamba-2 + Transformer architecture, delivering strong reasoning an",
+      "context_window": 262144,
+      "max_output": 32768,
+      "inputs": {
+        "text": true
+      }
+    },
     "inclusionai/ring-2.6-1t": {
       "name": "Ring-2.6-1T",
       "context_window": 262144,
@@ -1256,5 +1265,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-08T06:35:21.774Z"
+  "_syncedAt": "2026-06-08T10:23:03.136Z"
 }
