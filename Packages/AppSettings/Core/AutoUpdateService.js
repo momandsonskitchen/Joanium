@@ -119,7 +119,7 @@ function scheduleCheck() {
 
 function bindUpdaterEvents() {
   autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = false;
+  autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.channel = 'latest';
 
   app.on('before-quit', () => {
@@ -181,6 +181,11 @@ function bindUpdaterEvents() {
       error: null,
     });
     broadcast(UPDATE_CHANNELS.downloaded, snapshot());
+
+    // Install immediately and silently, then re-check so we jump straight to
+    // the latest release instead of stopping one version ahead.
+    writeLog('update-downloaded:installing-now', version ?? '');
+    autoUpdater.quitAndInstall(true, true);
   });
 
   autoUpdater.on('error', (error) => {
