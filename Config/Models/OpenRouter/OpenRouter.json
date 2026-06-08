@@ -1592,18 +1592,6 @@
         "image": true
       }
     },
-    "nex-agi/deepseek-v3.1-nex-n1": {
-      "name": "Nex AGI: DeepSeek V3.1 Nex N1",
-      "description": "DeepSeek V3.1 Nex-N1 is the flagship release of the Nex-N1 series — a post-trained model designed to highlight agent autonomy, tool use, and real-world productivity. Nex-N1 demonstrates competitive performance across...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.14,
-        "output": 0.5
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "essentialai/rnj-1-instruct": {
       "name": "EssentialAI: Rnj 1 Instruct",
       "description": "Rnj-1 is an 8B-parameter, dense, open-weight model family developed by Essential AI and trained from scratch with a focus on programming, math, and scientific reasoning. The model demonstrates strong performance...",
@@ -4291,5 +4279,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-08T10:22:46.380Z"
+  "_syncedAt": "2026-06-08T13:55:01.814Z"
 }

@@ -156,9 +156,26 @@ function isRecoverable(error) {
   return RUNTIME_ERROR_PATTERNS.some((pattern) => pattern.test(message));
 }
 
+function validateFetchUrl(input) {
+  const raw = String(input ?? '');
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new Error(`Invalid URL in outbound channel request: ${raw}`);
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new Error(`Unsafe protocol in outbound channel request: ${url.protocol}`);
+  }
+  return url.href;
+}
+
 async function channelFetch(input, init) {
   try {
-    return await (typeof net?.fetch === 'function' ? net.fetch(input, init) : fetch(input, init));
+    const safeUrl = validateFetchUrl(input);
+    return await (typeof net?.fetch === 'function'
+      ? net.fetch(safeUrl, init)
+      : fetch(safeUrl, init));
   } catch (error) {
     throw attachRequestContext(error, input, init);
   }
