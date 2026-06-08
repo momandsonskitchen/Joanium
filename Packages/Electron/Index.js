@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { app, BrowserWindow, ipcMain, Menu, powerSaveBlocker } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, net, powerSaveBlocker, protocol } from 'electron';
 import { createBootLogger } from '../Boot/Index.js';
 import {
   applyWindowState,
@@ -14,6 +14,12 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 app.commandLine.appendSwitch('force-color-profile', 'srgb');
+
+// Register app:// as a privileged scheme so the renderer treats it as secure.
+// Must be called before the app 'ready' event fires.
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true } },
+]);
 
 // Disable Windows' native window occlusion tracker. Chromium uses this OS
 // signal to throttle occluded windows through a separate code path that
@@ -344,6 +350,19 @@ export async function bootElectron({ entryPackage, loadPackage }) {
 
   const launchMainWindow = async () => {
     writeBootLog('launchMainWindow:start');
+
+    // ── app:// protocol handler ─────────────────────────────────────────────
+    // Serves files from resource directories (Assets/, etc.) via a stable URL
+    // scheme that works in both dev and packed builds, avoiding the file://
+    // cross-origin restrictions Chromium enforces in packaged Electron apps.
+    protocol.handle('app', (request) => {
+      const url = new URL(request.url);
+      const host = url.hostname.charAt(0).toUpperCase() + url.hostname.slice(1);
+      const relativePath = url.pathname.replace(/^\//, '');
+      const rootDir = app.isPackaged ? process.resourcesPath : process.cwd();
+      const filePath = path.join(rootDir, host, relativePath);
+      return net.fetch('file:///' + filePath.replace(/\\/g, '/'));
+    });
 
     // ── Strip the default application menu in production ───────────────────
     // Electron ships with a built-in menu that includes accelerators for

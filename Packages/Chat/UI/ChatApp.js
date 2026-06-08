@@ -69,19 +69,7 @@ import {
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
 import { CHAT_PROMPTS } from '../Prompts/Prompts.js';
-
-const SEARCH_ENGINE_HOME_URLS = {
-  google: 'https://www.google.com',
-  bing: 'https://www.bing.com',
-  duckduckgo: 'https://duckduckgo.com',
-  yandex: 'https://yandex.com',
-  yahoo: 'https://search.yahoo.com',
-  brave: 'https://search.brave.com',
-  ecosia: 'https://www.ecosia.org',
-  kagi: 'https://kagi.com',
-  perplexity: 'https://www.perplexity.ai',
-  startpage: 'https://www.startpage.com',
-};
+import { SEARCH_ENGINE_SEARCH_URLS } from './Shared/DefaultSearchInfo.js';
 
 const MAX_TERMINAL_TOOL_CALLS = 100;
 const SUB_AGENT_TERMINAL_TOOL_SET = new Set(SUB_AGENT_TERMINAL_TOOL_NAMES);
@@ -4104,7 +4092,7 @@ export async function createChatView(
   browserBtn.append(createIcon('globe', 'chat-composer__icon'));
   browserBtn.addEventListener('click', () => {
     const engineKey = currentAppSettings?.defaultSearchEngine ?? 'google';
-    const homeUrl = SEARCH_ENGINE_HOME_URLS[engineKey] ?? 'https://www.google.com';
+    const homeUrl = SEARCH_ENGINE_SEARCH_URLS[engineKey] ?? 'https://www.google.com';
     browserPreview.showWithSearchBar(homeUrl, engineKey);
   });
   // ─────────────────────────────────────────────────────────────────────────

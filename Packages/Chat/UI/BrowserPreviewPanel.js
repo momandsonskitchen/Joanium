@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { SEARCH_ENGINE_SEARCH_URLS } from './Shared/DefaultSearchInfo.js';
 
 const DEFAULT_BROWSER_PREVIEW_STATE = Object.freeze({
   visible: false,
@@ -26,21 +27,6 @@ function browserPreviewTone(state) {
   if (state.hasPage) return 'paused';
   return 'idle';
 }
-
-// Search-query base URLs for the supported engines.
-// The value is the URL prefix to which the encoded query is appended.
-const SEARCH_ENGINE_SEARCH_URLS = {
-  google: 'https://www.google.com/search?q=',
-  bing: 'https://www.bing.com/search?q=',
-  duckduckgo: 'https://duckduckgo.com/?q=',
-  yandex: 'https://yandex.com/search/?text=',
-  yahoo: 'https://search.yahoo.com/search?p=',
-  brave: 'https://search.brave.com/search?q=',
-  ecosia: 'https://www.ecosia.org/search?q=',
-  kagi: 'https://kagi.com/search?q=',
-  perplexity: 'https://www.perplexity.ai/search?q=',
-  startpage: 'https://www.startpage.com/search?q=',
-};
 
 /**
  * Resolves a raw search-bar query to a fully qualified URL.

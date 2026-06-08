@@ -7,7 +7,7 @@ export { getWritableDataDirectory };
 
 const DEFAULT_ACTIVE_PERSONA = { namespace: 'Joanium', filename: 'Joana.md' };
 
-const VALID_SEARCH_ENGINES = new Set([
+export const VALID_SEARCH_ENGINES = new Set([
   'google',
   'bing',
   'duckduckgo',
@@ -18,6 +18,16 @@ const VALID_SEARCH_ENGINES = new Set([
   'kagi',
   'perplexity',
   'startpage',
+  'baidu',
+  'naver',
+  'qwant',
+  'swisscows',
+  'wolframalpha',
+  'ask',
+  'aol',
+  'dogpile',
+  'mojeek',
+  'you',
 ]);
 
 export function createDefaultUserState() {

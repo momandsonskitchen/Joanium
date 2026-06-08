@@ -62,7 +62,6 @@ export function createDropDownLite({
   // ── In-panel search (optional) ────────────────────────────────────────────
 
   let panelSearchInput = null;
-  let optionListEl = null;
 
   if (searchable) {
     const searchWrap = createElement('div', 'joanium-ddm-lite__search-wrap');
@@ -88,10 +87,11 @@ export function createDropDownLite({
 
     searchWrap.append(panelSearchInput);
     panel.append(searchWrap);
-
-    optionListEl = createElement('div', 'joanium-ddm-lite__option-list');
-    panel.append(optionListEl);
   }
+
+  // Always wrap options in a scrollable list so long option sets aren't clipped.
+  const optionListEl = createElement('div', 'joanium-ddm-lite__option-list');
+  panel.append(optionListEl);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ export function createDropDownLite({
   }
 
   function buildOptionList() {
-    const container = optionListEl ?? panel;
+    const container = optionListEl;
     const q = searchQuery.toLowerCase();
     const visible = searchQuery
       ? options.filter((o) => o.label.toLowerCase().includes(q))

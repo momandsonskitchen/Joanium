@@ -3,19 +3,7 @@ import {
   sanitizeDefaultModel,
   writeUserState,
 } from '../../Shared/UserData/UserData.js';
-
-const VALID_SEARCH_ENGINES = new Set([
-  'google',
-  'bing',
-  'duckduckgo',
-  'yandex',
-  'yahoo',
-  'brave',
-  'ecosia',
-  'kagi',
-  'perplexity',
-  'startpage',
-]);
+import { VALID_SEARCH_ENGINES } from '../../Shared/UserData/UserData.js';
 
 const DEFAULT_SETTINGS = Object.freeze({
   runOnStartup: false,
