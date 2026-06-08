@@ -302,7 +302,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 * chore(release): bump version to 2026.528.0
 * Auto Update Set To True
 * Auto Update Set To True By Default
-* Sets the deafult search engine properly
+* Sets the default search engine properly
 * Project Based Readme Files Are Now Preloaded
 * chore: sync model configs and add new models to providers
 * Removed the ability to switch languages
