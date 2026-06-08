@@ -39,7 +39,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 * chore(release): bump version to 2026.607.0
 * Added rounded corners in settings panel
 * Added the ability to search for ai models in settings/app/ default model
-* Added the ability search for AI Models in Agents Panel
+* Added the ability to search for AI Models in Agents Panel
 * Updated AI Models
 * Added A Search Bar To Model Picker In The Chat UI
 * Usage Panel Heading Fix
