@@ -187,7 +187,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 * AI Model Update
 * AI Models Update
 * Added New Google Connectors
-* Added 4 new AI Providers: Novita, Requesty, Github Models and Vercel
+* Added 4 new AI Providers: Novita, Requesty, GitHub Models and Vercel
 * Update README.md
 * Deepseek AI Models Update
 * Groq AI Models Update
