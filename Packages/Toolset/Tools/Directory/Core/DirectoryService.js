@@ -110,16 +110,18 @@ export function createDirectoryService({ rootDirectory }) {
 
       let raw = '';
       try {
-        // statSync + readFileSync are two separate path lookups, which CodeQL
-        // flags as a js/file-system-race (TOCTOU). In this context the pattern
-        // is intentional and safe: this is a read-only workspace scan over the
-        // user's own files, walkWorkspaceFiles already skips symlinks, and the
-        // MAX_FILE_SIZE guard is a memory safeguard, not a security boundary.
-        // No privileged action is taken between the check and the read, so
-        // there is nothing meaningful for an attacker to race against.
-        const stat = fs.statSync(filePath);
-        if (stat.size > MAX_FILE_SIZE) continue;
-        raw = fs.readFileSync(filePath, 'utf8');
+        // Open once to get a stable fd, then use fstatSync + readSync through
+        // that same fd — eliminates the statSync-then-readFileSync TOCTOU window.
+        const fd = fs.openSync(filePath, 'r');
+        try {
+          const stat = fs.fstatSync(fd);
+          if (stat.size > MAX_FILE_SIZE) continue;
+          const buf = Buffer.alloc(stat.size);
+          fs.readSync(fd, buf, 0, stat.size, 0);
+          raw = buf.toString('utf8');
+        } finally {
+          fs.closeSync(fd);
+        }
       } catch {
         continue;
       }
