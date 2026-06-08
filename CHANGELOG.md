@@ -28,7 +28,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 ## [2026.607.1] - 2026-06-07
 
 * chore(release): bump version to 2026.607.1
-* Github Logo Fix
+* GitHub Logo Fix
 * AI Models Update
 * Added custom Scrollbar to the model selector in the Agents Panel
 
@@ -39,7 +39,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 * chore(release): bump version to 2026.607.0
 * Added rounded corners in settings panel
 * Added the ability to search for ai models in settings/app/ default model
-* Added the ability search for AI Models in Agents Panel
+* Added the ability to search for AI Models in Agents Panel
 * Updated AI Models
 * Added A Search Bar To Model Picker In The Chat UI
 * Usage Panel Heading Fix
@@ -187,7 +187,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 * AI Model Update
 * AI Models Update
 * Added New Google Connectors
-* Added 4 new AI Providers: Novita, Requesty, Github Models and Vercel
+* Added 4 new AI Providers: Novita, Requesty, GitHub Models and Vercel
 * Update README.md
 * Deepseek AI Models Update
 * Groq AI Models Update
@@ -302,7 +302,7 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 * chore(release): bump version to 2026.528.0
 * Auto Update Set To True
 * Auto Update Set To True By Default
-* Sets the deafult search engine properly
+* Sets the default search engine properly
 * Project Based Readme Files Are Now Preloaded
 * chore: sync model configs and add new models to providers
 * Removed the ability to switch languages
