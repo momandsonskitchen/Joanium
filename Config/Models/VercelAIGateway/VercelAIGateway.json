@@ -733,34 +733,6 @@
         "text": true
       }
     },
-    "google/gemini-2.0-flash": {
-      "name": "Gemini 2.0 Flash",
-      "description": "Gemini 2.0 Flash delivers next-gen features and improved capabilities, including superior speed, built-in tool use, multimodal generation, and a 1M token context window.",
-      "context_window": 1048576,
-      "max_output": 8192,
-      "pricing": {
-        "input": 0.15,
-        "output": 0.6
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
-    "google/gemini-2.0-flash-lite": {
-      "name": "Gemini 2.0 Flash Lite",
-      "description": "Gemini 2.0 Flash delivers next-gen features and improved capabilities, including superior speed, built-in tool use, multimodal generation, and a 1M token context window.",
-      "context_window": 1048576,
-      "max_output": 8192,
-      "pricing": {
-        "input": 0.08,
-        "output": 0.3
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "google/gemini-2.5-flash": {
       "name": "Gemini 2.5 Flash",
       "description": "Gemini 2.5 Flash is a thinking model that offers great, well-rounded capabilities. It is designed to offer a balance between price and performance with multimodal support and a 1M token context window.",
@@ -2656,5 +2628,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-07T10:17:03.052Z"
+  "_syncedAt": "2026-06-08T06:35:25.878Z"
 }
