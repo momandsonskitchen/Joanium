@@ -76,6 +76,9 @@
     "moonshotai/Kimi-K2.5": {
       "name": "Kimi K2 5"
     },
+    "google/gemma-4-12B-it": {
+      "name": "Gemma 4 12B It"
+    },
     "google/gemma-4-26B-A4B-it": {
       "name": "Gemma 4 26B A4B It"
     },
@@ -245,5 +248,5 @@
       "name": "CosyVoice2 0 5B"
     }
   },
-  "_syncedAt": "2026-06-09T08:45:24.212Z"
+  "_syncedAt": "2026-06-09T16:39:14.259Z"
 }

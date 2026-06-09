@@ -2976,18 +2976,6 @@
         "image": true
       }
     },
-    "arcee-ai/maestro-reasoning": {
-      "name": "Arcee AI: Maestro Reasoning",
-      "description": "Maestro Reasoning is Arcee's flagship analysis model: a 32 B‑parameter derivative of Qwen 2.5‑32 B tuned with DPO and chain‑of‑thought RL for step‑by‑step logic. Compared to the earlier 7 B...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.9,
-        "output": 3.3
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "arcee-ai/virtuoso-large": {
       "name": "Arcee AI: Virtuoso Large",
       "description": "Virtuoso‑Large is Arcee's top‑tier general‑purpose LLM at 72 B parameters, tuned to tackle cross‑domain reasoning, creative writing and enterprise QA. Unlike many 70 B peers, it retains the 128 k...",
@@ -4292,5 +4280,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-09T08:45:10.134Z"
+  "_syncedAt": "2026-06-09T16:39:02.044Z"
 }
