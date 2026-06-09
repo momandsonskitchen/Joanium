@@ -113,9 +113,6 @@
     "Tongyi-MAI/Z-Image-Turbo": {
       "name": "Z Image TURBO"
     },
-    "nex-agi/DeepSeek-V3.1-Nex-N1": {
-      "name": "DeepSeek V3 1 Nex N1"
-    },
     "black-forest-labs/FLUX.2-flex": {
       "name": "FLUX 2 Flex"
     },
@@ -248,5 +245,5 @@
       "name": "CosyVoice2 0 5B"
     }
   },
-  "_syncedAt": "2026-06-09T03:23:49.420Z"
+  "_syncedAt": "2026-06-09T04:27:07.663Z"
 }

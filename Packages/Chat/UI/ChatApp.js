@@ -42,7 +42,6 @@ import {
   createUserAvatar,
   updateLastStreamingMessage,
   updateSubAgentCard,
-  resetSpeakButton,
 } from './MessageElements.js';
 import { createModelPickerPanel, getPreferredProvider } from './ModelPickerPanel.js';
 import {
@@ -120,7 +119,6 @@ export async function createChatView(
   ]);
   const view = createElement('div', 'chat-view');
   let currentAppSettings = appSettings ?? {};
-  let activeSpeakBtn = null;
   const dropOverlay = createDropZoneOverlay(strings);
   const profile = getProfile?.() ?? payload.user?.profile ?? {};
   const firstName = getFirstName(profile.name, strings.appName);
@@ -2243,8 +2241,6 @@ export async function createChatView(
     closeSlashMenu();
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      resetSpeakButton(activeSpeakBtn);
-      activeSpeakBtn = null;
     }
     fileDiffTracker?.reset();
     completedWrites = new Set();
@@ -2380,12 +2376,6 @@ export async function createChatView(
 
     hideUserTyping();
     userTypingEl = null; // rebuild fresh on next type so profile/avatar stays current
-
-    if (window.speechSynthesis && activeSpeakBtn) {
-      window.speechSynthesis.cancel();
-      resetSpeakButton(activeSpeakBtn);
-      activeSpeakBtn = null;
-    }
 
     const hasMessages = messages.length > 0 || isLoadingSession;
     const isFirstMessage = hasMessages && !prevHasMessages;
