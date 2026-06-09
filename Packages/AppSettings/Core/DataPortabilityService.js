@@ -69,8 +69,8 @@ function deepMerge(current, imported) {
     return result;
   }
 
-  // Scalars — current wins when it has a real value
-  if (current !== null && current !== undefined && current !== '') return current;
+  // Scalars — current wins when it has a real value (null/undefined already handled above)
+  if (current !== '') return current;
   return imported;
 }
 
