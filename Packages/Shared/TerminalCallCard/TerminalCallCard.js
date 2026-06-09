@@ -1,4 +1,4 @@
-import { getConnectorIconPathForToolName } from '../ConnectorIcons/ConnectorIcons.js';
+import { getConnectorIconPathForToolName } from '../Icons/ConnectorIcons/ConnectorIcons.js';
 import { createIcon } from '../Icons/Icons.js';
 import { createElement } from '../Utils/DomUtils.js';
 

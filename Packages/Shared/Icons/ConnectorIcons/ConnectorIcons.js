@@ -1,4 +1,7 @@
+import { getIconPath, iconUrl } from '../Utils.js';
+
 const CONNECTOR_ICON_FILES = Object.freeze({
+  // Connectors
   airtable: 'Airtable',
   arxiv: 'ArXiv',
   calendar: 'Calendar',
@@ -52,13 +55,8 @@ const CONNECTOR_PREFIXES = Object.keys(CONNECTOR_ICON_FILES).sort(
   (left, right) => right.length - left.length,
 );
 
-function iconUrl(iconFile) {
-  return new URL(`../../../Assets/Icons/${iconFile}.png`, import.meta.url).toString();
-}
-
 export function getConnectorIconPath(connectorId) {
-  const iconFile = CONNECTOR_ICON_FILES[String(connectorId ?? '').toLowerCase()];
-  return iconFile ? iconUrl(iconFile) : null;
+  return getIconPath(connectorId, CONNECTOR_ICON_FILES);
 }
 
 export function getConnectorIconPathForToolName(toolName) {

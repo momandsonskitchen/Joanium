@@ -1,7 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
-import { getConnectorIconPathForToolName } from '../../Shared/ConnectorIcons/ConnectorIcons.js';
+import { getConnectorIconPathForToolName } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
 
 // ---------------------------------------------------------------------------
 // createExecutionReplay

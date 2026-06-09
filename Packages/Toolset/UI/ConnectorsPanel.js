@@ -2,7 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
-import { getConnectorIconPath } from '../../Shared/ConnectorIcons/ConnectorIcons.js';
+import { getConnectorIconPath } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
 import defaultStrings from '../I18n/Connectors.en.js';
 
 // ── Icon map: connector id → filename in Assets/Icons/ ──────────────────────

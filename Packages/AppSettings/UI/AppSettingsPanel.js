@@ -7,6 +7,7 @@ import {
   decodeModelValue,
   encodeModelValue,
 } from '../../Shared/ProviderCatalog/ModelOptions.js';
+import { getSearchEngineIconPath } from '../../Shared/Icons/SearchEngineIcons/SearchEngineIcons.js';
 import { createSettingsPanelState } from './Utils.js';
 
 const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound', 'showTechFeed'];
@@ -243,9 +244,14 @@ export function createAppSettingsPanel(strings) {
     options.append(modelRow);
 
     // ── Default search engine row ──────────────────────────────────────────
+    const searchEngineOptions = strings.defaultSearchEngine.options.map((option) => ({
+      ...option,
+      iconPath: getSearchEngineIconPath(option.value),
+    }));
+
     defaultSearchEngineDropdown = createDropDownLite({
       label: '',
-      options: strings.defaultSearchEngine.options,
+      options: searchEngineOptions,
       value: state.settings.defaultSearchEngine ?? 'google',
       onChange: (value) => {
         void updateDefaultSearchEngine(value);
