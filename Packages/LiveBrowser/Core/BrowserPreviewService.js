@@ -173,7 +173,9 @@ function getFetchSite(url = '', initiator = '') {
       ? 'same-site'
       : 'cross-site';
   } catch {
-    return initiator ? 'cross-site' : 'none';
+    // initiator is guaranteed non-empty here: the early guard above already
+    // returns 'none' for any falsy value or the string 'null'.
+    return 'cross-site';
   }
 }
 
