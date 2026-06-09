@@ -6,6 +6,15 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.609.1] - 2026-06-09
+
+* chore(release): bump version to 2026.609.1
+* Fixed The Logo For Search Engine
+* Updated AI Models
+* chore(models): update model configurations and pricing
+
+---
+
 ## [2026.609.0] - 2026-06-09
 
 * chore(release): bump version to 2026.609.0
