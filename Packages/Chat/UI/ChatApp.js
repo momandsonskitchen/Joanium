@@ -1330,7 +1330,7 @@ export async function createChatView(
     if (!gitCommitMessageEl) return;
     gitCommitMessageEl.value = '';
     for (let index = 0; index < text.length; index += 1) {
-      if (!gitCommitMessageEl || gitCommitPanelEl?.hidden) return;
+      if (gitCommitPanelEl?.hidden) return;
       gitCommitMessageEl.value = text.slice(0, index + 1);
       await new Promise((resolve) => setTimeout(resolve, 8));
     }
