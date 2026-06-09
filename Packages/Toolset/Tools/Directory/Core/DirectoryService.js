@@ -201,34 +201,21 @@ export function createDirectoryService({ rootDirectory }) {
       if (readFd !== null) fs.closeSync(readFd);
     }
 
-    // --- Write via fd so the open + write are the same file reference ----------
+    // --- Write and read-back via a single fd -----------------------------------
+    // 'w+' = truncate/create + readable; 'a+' = append/create + readable.
+    // Using one fd for both the write and the read-back means there is no
+    // second path-based openSync, eliminating the TOCTOU window entirely.
     fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
-    // 'a' = append/create; 'w' = truncate/create — both avoid a separate existsSync
-    const writeFd = fs.openSync(resolvedPath, append ? 'a' : 'w');
+    const writeFd = fs.openSync(resolvedPath, append ? 'a+' : 'w+');
+    let afterContent = '';
     try {
       fs.writeSync(writeFd, content, null, 'utf8');
-    } finally {
-      fs.closeSync(writeFd);
-    }
-
-    // --- Read back the result via a fresh fd -----------------------------------
-    // 'w'/'a' write descriptors are not readable, so a second open is required.
-    // There is no check-then-act window here: this openSync is not preceded by
-    // any path-based existence/stat check — the open itself is the sole path
-    // lookup, and all subsequent calls (fstatSync, readSync) operate on the
-    // returned fd. CodeQL js/file-system-race is a false positive in this
-    // specific pattern; the recommended fd-first approach cannot eliminate the
-    // second open when the write mode is not readable.
-    let afterContent = '';
-    // lgtm[js/file-system-race]
-    const verifyFd = fs.openSync(resolvedPath, 'r'); // codeql[js/file-system-race]
-    try {
-      const stat = fs.fstatSync(verifyFd);
+      const stat = fs.fstatSync(writeFd);
       const buf = Buffer.alloc(stat.size);
-      fs.readSync(verifyFd, buf, 0, stat.size, 0);
+      fs.readSync(writeFd, buf, 0, stat.size, 0);
       afterContent = buf.toString('utf8');
     } finally {
-      fs.closeSync(verifyFd);
+      fs.closeSync(writeFd);
     }
 
     return {
