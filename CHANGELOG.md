@@ -6,6 +6,28 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.609.0] - 2026-06-09
+
+* chore(release): bump version to 2026.609.0
+* Fix: Useless conditional #58
+* Fix: Potential file system race condition #87
+* Fix: Useless conditional #56
+* Fix: Superfluous trailing arguments #75
+* Fix: Useless conditional #54
+* Updated AI Models
+* Fix: Unneeded defensive code #83
+* Fix: File data in outbound network request #47
+* Fix: File data in outbound network request #48
+* Fix: Potential file system race condition #39
+* Fix: Potential file system race condition #40
+* Fix: Potential file system race condition #86
+* Apply suggested fix to CHANGELOG.md from Copilot Autofix
+* Apply suggested fix to CHANGELOG.md from Copilot Autofix
+* Apply suggested fix to CHANGELOG.md from Copilot Autofix
+* Apply suggested fix to CHANGELOG.md from Copilot Autofix
+
+---
+
 ## [2026.608.0] - 2026-06-08
 
 * chore(release): bump version to 2026.608.0
