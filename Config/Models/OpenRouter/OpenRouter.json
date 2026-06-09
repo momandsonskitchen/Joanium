@@ -5,6 +5,19 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "nex-agi/nex-n2-pro:free": {
+      "name": "Nex AGI: Nex-N2-Pro (free)",
+      "description": "Nex-N2-Pro is an agentic mixture-of-experts model from Nex AGI, with 17B active parameters out of 397B total. Built on the Qwen3.5 architecture, it accepts text and image input and produces...",
+      "context_window": 262144,
+      "pricing": {
+        "input": 0,
+        "output": 0
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "nvidia/nemotron-3.5-content-safety:free": {
       "name": "NVIDIA: Nemotron 3.5 Content Safety (free)",
       "description": "NVIDIA Nemotron 3.5 Content Safety is a compact 4B-parameter multimodal guardrail model from NVIDIA, fine-tuned from Google Gemma-3-4B. It moderates both inputs to and responses from LLMs and VLMs, accepting...",
@@ -4279,5 +4292,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-08T13:55:01.814Z"
+  "_syncedAt": "2026-06-09T03:23:24.573Z"
 }
