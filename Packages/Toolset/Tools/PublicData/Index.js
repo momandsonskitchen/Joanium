@@ -7,7 +7,7 @@ export function createToolPackage({ rootDirectory }) {
   return {
     id: 'public-data',
     toolDefinitions: TOOL_DEFINITIONS,
-    toolHandlers: createPublicDataToolHandlers({ rootDirectory }),
+    toolHandlers: createPublicDataToolHandlers(),
     promptSections: [buildPublicDataPromptSection()],
     connectors: strings.connectors,
   };
