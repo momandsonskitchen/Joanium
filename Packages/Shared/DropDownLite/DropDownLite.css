@@ -164,7 +164,7 @@
 }
 
 .joanium-ddm-lite__option:hover {
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(var(--color-accent-rgb), 0.15);
   color: var(--color-chat-text-title);
 }
 
