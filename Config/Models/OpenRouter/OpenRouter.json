@@ -5,6 +5,32 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "~anthropic/claude-fable-latest": {
+      "name": "Anthropic: Claude Fable Latest",
+      "description": "This model always redirects to the latest model in the Claude Fable family.",
+      "context_window": 1000000,
+      "pricing": {
+        "input": 10,
+        "output": 50
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "anthropic/claude-fable-5": {
+      "name": "Anthropic: Claude Fable 5",
+      "description": "Claude Fable 5 is a Mythos-class model from Anthropic, built for autonomous knowledge work and coding. It supports text, image, and file inputs with text output, with reasoning support and...",
+      "context_window": 1000000,
+      "pricing": {
+        "input": 10,
+        "output": 50
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "nex-agi/nex-n2-pro:free": {
       "name": "Nex AGI: Nex-N2-Pro (free)",
       "description": "Nex-N2-Pro is an agentic mixture-of-experts model from Nex AGI, with 17B active parameters out of 397B total. Built on the Qwen3.5 architecture, it accepts text and image input and produces...",
@@ -751,19 +777,6 @@
       "pricing": {
         "input": 0.33,
         "output": 1.95
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
-    "z-ai/glm-5v-turbo": {
-      "name": "Z.ai: GLM 5V Turbo",
-      "description": "GLM-5V-Turbo is Z.ai’s first native multimodal agent foundation model, built for vision-based coding and agent-driven tasks. It natively handles image, video, and text inputs, excels at long-horizon planning, complex coding,...",
-      "context_window": 202752,
-      "pricing": {
-        "input": 1.2,
-        "output": 4
       },
       "inputs": {
         "text": true,
@@ -2628,18 +2641,6 @@
         "text": true
       }
     },
-    "z-ai/glm-4.5-air:free": {
-      "name": "Z.ai: GLM 4.5 Air (free)",
-      "description": "GLM-4.5-Air is the lightweight variant of our latest flagship model family, also purpose-built for agent-centric applications. Like GLM-4.5, it adopts the Mixture-of-Experts (MoE) architecture but with a more compact parameter...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "z-ai/glm-4.5-air": {
       "name": "Z.ai: GLM 4.5 Air",
       "description": "GLM-4.5-Air is the lightweight variant of our latest flagship model family, also purpose-built for agent-centric applications. Like GLM-4.5, it adopts the Mixture-of-Experts (MoE) architecture but with a more compact parameter...",
@@ -2659,18 +2660,6 @@
       "pricing": {
         "input": 0.15,
         "output": 1.5
-      },
-      "inputs": {
-        "text": true
-      }
-    },
-    "z-ai/glm-4-32b": {
-      "name": "Z.ai: GLM 4 32B ",
-      "description": "GLM 4 32B is a cost-effective foundation language model. It can efficiently perform complex tasks and has significantly enhanced capabilities in tool use, online search, and code-related intelligent tasks. It...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 0.1,
-        "output": 0.1
       },
       "inputs": {
         "text": true
@@ -4280,5 +4269,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-09T16:39:02.044Z"
+  "_syncedAt": "2026-06-10T04:29:43.926Z"
 }

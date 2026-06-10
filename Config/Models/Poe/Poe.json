@@ -12,6 +12,13 @@
         "max_output_tokens": 128000
       }
     },
+    "claude-fable-5": {
+      "name": "Claude Fable 5",
+      "context_window": {
+        "context_length": 1048576,
+        "max_output_tokens": 128000
+      }
+    },
     "claude-opus-4.8": {
       "name": "Claude Opus 4 8",
       "context_window": {
@@ -967,13 +974,6 @@
     "perplexity-pro-search": {
       "name": "Perplexity PRO Search"
     },
-    "perplexity-sonar-pro": {
-      "name": "Perplexity Sonar PRO",
-      "context_window": {
-        "context_length": 200000,
-        "max_output_tokens": null
-      }
-    },
     "perplexity-sonar-rsn-pro": {
       "name": "Perplexity Sonar Rsn PRO",
       "context_window": {
@@ -1729,5 +1729,5 @@
       "name": "Qwen3 7 PLUS"
     }
   },
-  "_syncedAt": "2026-06-09T16:39:22.668Z"
+  "_syncedAt": "2026-06-10T04:30:15.056Z"
 }
