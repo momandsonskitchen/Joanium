@@ -1727,7 +1727,14 @@
     },
     "qwen3.7-plus": {
       "name": "Qwen3 7 PLUS"
+    },
+    "perplexity-sonar-pro": {
+      "name": "Perplexity Sonar PRO",
+      "context_window": {
+        "context_length": 200000,
+        "max_output_tokens": null
+      }
     }
   },
-  "_syncedAt": "2026-06-10T16:15:34.091Z"
+  "_syncedAt": "2026-06-10T17:27:58.594Z"
 }
