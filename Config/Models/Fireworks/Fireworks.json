@@ -40,9 +40,6 @@
     "accounts/fireworks/models/kimi-k2p5": {
       "name": "Kimi K2p5"
     },
-    "accounts/gladstonemanagement/models/gladstone-qwen3-5-35b-a3b-sft-v2-cp-600": {
-      "name": "Gladstone Qwen3 5 35B A3b Sft V2 Cp 600"
-    },
     "accounts/fireworks/models/glm-5p1": {
       "name": "Glm 5p1"
     },
@@ -63,5 +60,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-10T14:01:34.080Z"
+  "_syncedAt": "2026-06-10T15:13:44.412Z"
 }
