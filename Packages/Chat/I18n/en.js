@@ -276,6 +276,10 @@ const en = {
       agent: 'Agent',
     },
   },
+  whatsNew: {
+    badge: 'New',
+    heading: "What's New",
+  },
   modelInfo: {
     infoButton: 'Model info',
     contextWindow: 'Context',

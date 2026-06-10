@@ -73,6 +73,7 @@ export function createDefaultUserState() {
       defaultModel: null,
       defaultSearchEngine: 'google',
     },
+    whatsNewSeenVersion: null,
     lastDreamt: null,
     theme: {
       mode: 'system',
@@ -129,6 +130,10 @@ export function mergeUserStates(baseState, nextState = {}) {
       typeof nextState.appSettings === 'object'
         ? { ...baseState.appSettings, ...nextState.appSettings }
         : baseState.appSettings,
+    whatsNewSeenVersion:
+      nextState.whatsNewSeenVersion !== undefined
+        ? nextState.whatsNewSeenVersion
+        : baseState.whatsNewSeenVersion,
     lastDreamt: nextState.lastDreamt !== undefined ? nextState.lastDreamt : baseState.lastDreamt,
     theme:
       nextState.theme !== undefined &&
@@ -363,6 +368,10 @@ export function sanitizeIncomingUserState(candidateState) {
     activePersona: sanitizeActivePersona(candidateState?.activePersona),
     windowState: sanitizeWindowState(candidateState?.windowState),
     appSettings: sanitizeAppSettings(candidateState?.appSettings),
+    whatsNewSeenVersion:
+      typeof candidateState?.whatsNewSeenVersion === 'string'
+        ? candidateState.whatsNewSeenVersion.trim()
+        : null,
     lastDreamt: sanitizeCleanupTimestamp(candidateState?.lastDreamt),
     theme: sanitizeTheme(candidateState?.theme),
   });

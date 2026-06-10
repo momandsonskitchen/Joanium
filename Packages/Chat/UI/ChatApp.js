@@ -34,6 +34,7 @@ import { createBrowserPreviewPanel } from './BrowserPreviewPanel.js';
 import { createTechFeedPanel } from './TechFeedPanel.js';
 import { createDiagnosticPanel, measureFetch, resolveProviderBaseUrl } from './DiagnosticPanel.js';
 import { createDropZoneOverlay } from './DropZoneOverlay.js';
+import { createWhatsNewOverlay } from './WhatsNewOverlay.js';
 import { createFileDiffTracker } from './FileDiffTracker.js';
 import { createGitBranchPickerPanel, orderGitBranches } from './GitBranchPickerPanel.js';
 import {
@@ -4461,6 +4462,27 @@ export async function createChatView(
   });
 
   scheduleMemorySync(18000);
+
+  // ── What's New overlay (shown once after update) ───────────────────────
+  void (async () => {
+    try {
+      const whatsNewData = await invokeIpc('whats-new:get');
+      if (!whatsNewData?.shouldShow) return;
+
+      const whatsNewOverlay = createWhatsNewOverlay({
+        strings,
+        version: whatsNewData.version,
+        imagePath: whatsNewData.imagePath || '',
+        entries: whatsNewData.entries ?? [],
+        onDismiss() {
+          void invokeIpc('whats-new:mark-seen', whatsNewData.version).catch(() => {});
+        },
+      });
+      view.append(whatsNewOverlay);
+    } catch {
+      // Non-fatal — the overlay is a nice-to-have.
+    }
+  })();
 
   return {
     element: view,
