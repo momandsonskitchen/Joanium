@@ -11,25 +11,6 @@
     "mistral-medium-2508": {
       "name": "mistral-medium-2508"
     },
-    "mistral-medium-latest": {
-      "name": "Mistral Medium 3.1",
-      "description": "Frontier-class multimodal model — strong coding and STEM at a fraction of Large's cost",
-      "context_window": 131000,
-      "max_output": 16384,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.4,
-        "output": 2
-      }
-    },
-    "mistral-medium": {
-      "name": "mistral-medium"
-    },
     "mistral-vibe-cli-with-tools": {
       "name": "mistral-vibe-cli-with-tools"
     },
@@ -185,6 +166,25 @@
     "ministral-14b-latest": {
       "name": "ministral-14b-latest"
     },
+    "mistral-medium-latest": {
+      "name": "Mistral Medium 3.1",
+      "description": "Frontier-class multimodal model — strong coding and STEM at a fraction of Large's cost",
+      "context_window": 131000,
+      "max_output": 16384,
+      "inputs": {
+        "text": true,
+        "image": true,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 0.4,
+        "output": 2
+      }
+    },
+    "mistral-medium": {
+      "name": "mistral-medium"
+    },
     "mistral-medium-3-5": {
       "name": "mistral-medium-3-5"
     },
@@ -196,9 +196,6 @@
     },
     "mistral-medium-2604": {
       "name": "mistral-medium-2604"
-    },
-    "mistral-medium-c21211-r0-75": {
-      "name": "mistral-medium-c21211-r0-75"
     },
     "mistral-vibe-cli-latest": {
       "name": "mistral-vibe-cli-latest"
@@ -261,5 +258,5 @@
       "name": "voxtral-mini-tts-latest"
     }
   },
-  "_syncedAt": "2026-06-10T07:22:08.538Z"
+  "_syncedAt": "2026-06-10T08:25:00.147Z"
 }

@@ -173,6 +173,7 @@ export async function createChatView(
   let activeStreamId = null;
   let modelPickerPanel = null;
   let modelPickerDispose = null;
+  let modelPickerHide = null;
   let modelPickerOpen = false;
   let terminalPanel = null;
   let scrollToBottomBtn = null;
@@ -772,9 +773,11 @@ export async function createChatView(
         // Destroy the cached picker panel so it rebuilds with the updated
         // provider list and API-key details on the next open.
         if (modelPickerPanel) {
-          closeModelPicker();
+          modelPickerDispose?.();
           modelPickerPanel = null;
           modelPickerDispose = null;
+          modelPickerHide = null;
+          modelPickerOpen = false;
         }
       })
       .catch(() => {
@@ -1650,8 +1653,10 @@ export async function createChatView(
   function closeModelPicker() {
     modelPickerPanel?.classList.remove('chat-model-picker--open');
     modelButton?.classList.remove('chat-composer__model--open');
-    modelPickerDispose?.();
-    modelPickerDispose = null;
+    // Call hide() — closes the info popover and clears active states but
+    // keeps the scrollbar, DOM nodes, and event listeners alive so the panel
+    // reopens correctly on the next click without needing a full rebuild.
+    modelPickerHide?.();
     modelPickerOpen = false;
   }
 
@@ -1702,6 +1707,7 @@ export async function createChatView(
       });
       modelPickerPanel = picker.element;
       modelPickerDispose = picker.dispose;
+      modelPickerHide = picker.hide;
     }
 
     syncPickerActiveStates();

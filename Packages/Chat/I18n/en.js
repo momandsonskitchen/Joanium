@@ -276,6 +276,20 @@ const en = {
       agent: 'Agent',
     },
   },
+  modelInfo: {
+    infoButton: 'Model info',
+    contextWindow: 'Context',
+    maxOutput: 'Max output',
+    pricing: 'Pricing',
+    inputPrice: 'Input',
+    outputPrice: 'Output',
+    perMillion: '/1M tokens',
+    supportsText: 'Text',
+    supportsImage: 'Images',
+    supportsPdf: 'PDF',
+    supportsDocx: 'Documents',
+    thinking: 'Extended thinking',
+  },
 };
 
 export default en;

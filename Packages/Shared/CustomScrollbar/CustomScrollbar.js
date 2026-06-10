@@ -132,6 +132,9 @@ export function attachCustomScrollbar(
 
   /* ── cleanup ── */
   return {
+    update() {
+      scheduleUpdate();
+    },
     dispose() {
       cancelAnimationFrame(rafId);
       scroller.removeEventListener('scroll', scheduleUpdate);
