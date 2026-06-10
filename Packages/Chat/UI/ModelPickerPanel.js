@@ -44,15 +44,37 @@ function hasModelInfo(model) {
 // ── Formatting helpers ────────────────────────────────────────────────────
 
 function formatTokenCount(n) {
-  if (!n || n <= 0) return null;
-  if (n >= 1_000_000) {
-    const v = n / 1_000_000;
+  // Normalise: some providers (e.g. Poe) store context_window as an object
+  // { context_length, max_output_tokens } instead of a plain number.
+  const num =
+    typeof n === 'object' && n !== null ? (n.context_length ?? n.max_output_tokens ?? null) : n;
+  if (!num || num <= 0) return null;
+  if (num >= 1_000_000) {
+    const v = num / 1_000_000;
     return `${Number.isInteger(v) ? v : v.toFixed(1)}M`;
   }
-  if (n >= 1_000) {
-    return `${Math.round(n / 1_000)}K`;
+  if (num >= 1_000) {
+    return `${Math.round(num / 1_000)}K`;
   }
-  return String(n);
+  return String(num);
+}
+
+// Extract a plain numeric max_output from whatever shape context_window is.
+function resolveMaxOutput(model) {
+  if (model.max_output) return model.max_output;
+  if (typeof model.context_window === 'object' && model.context_window !== null) {
+    return model.context_window.max_output_tokens ?? null;
+  }
+  return null;
+}
+
+// Extract a plain numeric context length from whatever shape context_window is.
+function resolveContextWindow(model) {
+  if (typeof model.context_window === 'number') return model.context_window;
+  if (typeof model.context_window === 'object' && model.context_window !== null) {
+    return model.context_window.context_length ?? null;
+  }
+  return null;
 }
 
 function formatPrice(dollars) {
@@ -131,7 +153,8 @@ function createModelInfoPopover() {
     // ── Context window + max output rows ──────────────────────────────────
     const rows = createElement('div', 'chat-model-info-popover__rows');
 
-    if (model.context_window) {
+    const contextWindow = resolveContextWindow(model);
+    if (contextWindow) {
       const row = createElement('div', 'chat-model-info-popover__row');
       row.append(
         createElement(
@@ -142,20 +165,21 @@ function createModelInfoPopover() {
         createElement(
           'span',
           'chat-model-info-popover__row-value',
-          `${formatTokenCount(model.context_window)} tokens`,
+          `${formatTokenCount(contextWindow)} tokens`,
         ),
       );
       rows.append(row);
     }
 
-    if (model.max_output) {
+    const maxOutput = resolveMaxOutput(model);
+    if (maxOutput) {
       const row = createElement('div', 'chat-model-info-popover__row');
       row.append(
         createElement('span', 'chat-model-info-popover__row-label', strings.modelInfo.maxOutput),
         createElement(
           'span',
           'chat-model-info-popover__row-value',
-          `${formatTokenCount(model.max_output)} tokens`,
+          `${formatTokenCount(maxOutput)} tokens`,
         ),
       );
       rows.append(row);
