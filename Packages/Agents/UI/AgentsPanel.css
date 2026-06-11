@@ -325,7 +325,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 4px 48px 40px 28px;
+  padding: 4px 16px 40px 28px;
   overflow-y: auto;
   border-left: 1px solid rgba(170, 134, 104, 0.09);
 }
@@ -880,12 +880,11 @@
 
 .agents-replay-runs {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  flex-direction: column;
   gap: 6px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
   -webkit-app-region: no-drag;
 }
 
@@ -906,14 +905,13 @@
 
 .agents-replay-run-btn {
   height: 34px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 12px;
-  border-radius: 20px;
+  border-radius: 12px;
   border: 0;
   flex-shrink: 0;
-  scroll-snap-align: start;
   background: rgba(255, 255, 255, 0.54);
   box-shadow:
     inset 0 0 0 1px rgba(175, 139, 104, 0.12),

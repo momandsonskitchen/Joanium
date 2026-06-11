@@ -432,14 +432,42 @@ export function createAgentsPanel(strings) {
     topRow.append(replayBackBtnEl, replayHeadingEl);
     pane.append(topRow);
 
+    // Create a split layout container
+    const splitLayout = createElement('div', 'agents-replay-pane__split');
+    Object.assign(splitLayout.style, {
+      display: 'flex',
+      gap: '16px',
+      flex: '1',
+      minHeight: '0', // Allows children to scroll
+      paddingTop: '8px',
+    });
+
     // Run picker — a scrollable list of past runs for the selected agent
     replayRunsEl = createElement('div', 'agents-replay-runs');
-    pane.append(replayRunsEl);
+    Object.assign(replayRunsEl.style, {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '6px',
+      width: 'max-content',
+      minWidth: '140px',
+      flexShrink: '0',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      paddingRight: '8px',
+    });
+    splitLayout.append(replayRunsEl);
 
     // Replay viewer — mounted below the run picker
+    const viewerWrap = createElement('div', 'agents-replay-pane__viewer-wrap');
+    Object.assign(viewerWrap.style, {
+      flex: '1',
+      minWidth: '0',
+    });
     replayViewer = createExecutionReplay(strings);
-    const viewerEl = replayViewer.build();
-    pane.append(viewerEl);
+    viewerWrap.append(replayViewer.build());
+    splitLayout.append(viewerWrap);
+
+    pane.append(splitLayout);
 
     replayPaneEl = pane;
     return pane;
@@ -497,13 +525,7 @@ export function createAgentsPanel(strings) {
         'agents-replay-run-btn__date',
         formatRelativeDate(run.startedAt),
       );
-      const statusLabel = createElement(
-        'span',
-        'agents-replay-run-btn__status',
-        strings.replay.status[run.status] ?? run.status ?? '',
-      );
-
-      btn.append(statusDot, dateLabel, statusLabel);
+      btn.append(statusDot, dateLabel);
       btn.addEventListener('click', () => {
         selectedRunId = run.runId;
         syncRunSelection();
