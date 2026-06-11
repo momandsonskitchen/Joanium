@@ -11,13 +11,10 @@
     "Datasets/**/*",
     "Packages/**/*",
     "!Packages/**/__tests__/**",
-    "Prompts/**/*"
+    "Prompts/**/*",
+    "CHANGELOG.md"
   ],
   "extraResources": [
-    {
-      "from": "CHANGELOG.md",
-      "to": "CHANGELOG.md"
-    },
     {
       "from": "Data",
       "to": "Data",
