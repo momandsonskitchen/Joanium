@@ -99,6 +99,8 @@ export function createSearchableListColumn({
   searchWrap.append(search.element);
 
   const content = createElement('div', `${classPrefix}__list-content`);
+  content.style.overflowY = 'auto';
+  content.style.minHeight = '0';
   const contentWrap = createElement('div', `${classPrefix}__list-wrap`);
   Object.assign(contentWrap.style, {
     flex: 1,
@@ -108,7 +110,7 @@ export function createSearchableListColumn({
     flexDirection: 'column',
   });
   contentWrap.append(content);
-  attachCustomScrollbar(contentWrap, content, { right: 4, top: 4, bottom: 4, minThumb: 24 });
+  attachCustomScrollbar(contentWrap, content, { right: -12, top: 4, bottom: 4, minThumb: 24 });
 
   column.append(searchWrap, contentWrap);
 

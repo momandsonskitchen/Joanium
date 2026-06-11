@@ -891,9 +891,9 @@ export function createAgentsPanel(strings) {
 
     const listContainer = createElement('div', 'agents-list__content-container');
     Object.assign(listContainer.style, {
-      flex: '1',
+      flex: 1,
       minWidth: '0',
-      minHeight: '0',
+      minHeight: 0,
       position: 'relative',
     });
 
@@ -907,7 +907,7 @@ export function createAgentsPanel(strings) {
 
     listContainer.append(listContent);
     attachCustomScrollbar(listContainer, listContent, {
-      right: 4,
+      right: -8,
       top: 4,
       bottom: 4,
       minThumb: 24,
