@@ -73,12 +73,11 @@ function stripToolBlocks(text) {
 export function deriveSteps(run) {
   const fullResponse = String(run.fullResponse ?? '');
   const blocks = extractToolBlocks(fullResponse);
-  const visibleText = stripToolBlocks(fullResponse);
-
   // Total step count: one per tool call + one for the final text response (if
   // any visible content exists after stripping tool blocks).
-  const hasResponse = visibleText.length > 0;
-  const totalSteps = blocks.length + (hasResponse ? 1 : 0);
+  const terminals = Array.isArray(run.terminals) ? run.terminals : [];
+  const totalSteps = Math.max(blocks.length, terminals.length);
+
   const timestamps = distributeTimestamps(run.startedAt, run.finishedAt, totalSteps);
 
   const startMs = run.startedAt ? new Date(run.startedAt).getTime() : null;
@@ -88,33 +87,28 @@ export function deriveSteps(run) {
 
   const perStepMs = totalSteps > 0 && totalMs !== null ? Math.round(totalMs / totalSteps) : null;
 
-  const steps = blocks.map((block, i) => {
-    // Use the persisted terminal record (if available) for real tool output
-    // and status. Falls back to null when terminals weren't captured.
-    const terminal = Array.isArray(run.terminals) ? (run.terminals[i] ?? null) : null;
+  const steps = Array.from({ length: totalSteps }).map((_, i) => {
+    const block = blocks[i];
+    const terminal = terminals[i];
+
+    const toolName = block?.toolName ?? terminal?.command ?? 'unknown';
+    const toolInput = block?.toolInput ?? null;
+    const toolOutput = terminal?.error ? String(terminal.error) : (terminal?.output ?? null);
+
     return {
       index: i + 1,
       type: 'tool',
-      toolName: block.toolName,
-      toolInput: block.toolInput,
-      toolOutput: terminal?.output ?? null,
-      status: terminal?.status ?? 'completed',
+      toolName,
+      toolInput,
+      toolOutput,
+      status:
+        terminal?.status === 'failed' || terminal?.status === 'error'
+          ? 'error'
+          : (terminal?.status ?? 'completed'),
       timestamp: timestamps[i],
       durationMs: perStepMs,
     };
   });
-
-  if (hasResponse) {
-    steps.push({
-      index: blocks.length + 1,
-      type: 'response',
-      toolName: null,
-      toolInput: null,
-      toolOutput: visibleText,
-      timestamp: timestamps[blocks.length] ?? run.finishedAt ?? null,
-      durationMs: perStepMs,
-    });
-  }
 
   return steps;
 }
@@ -141,7 +135,11 @@ export function createReplayStore({ rootDirectory }) {
     async loadRunDetail(runId) {
       const run = await readRunFile(runId);
       if (!run) return null;
-      return { ...run, steps: deriveSteps(run) };
+      return {
+        ...run,
+        steps: deriveSteps(run),
+        visibleResponse: stripToolBlocks(String(run.fullResponse ?? '')),
+      };
     },
 
     // Returns a list of { runId, agentId, agentName, startedAt, status }
