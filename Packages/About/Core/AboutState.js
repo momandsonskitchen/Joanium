@@ -59,7 +59,12 @@ export function createAboutStateManager({ rootDirectory }) {
         // Read and parse CHANGELOG.md for the current version's section
         let changelog = '';
         try {
-          changelog = await readFile(path.join(rootDirectory, 'CHANGELOG.md'), 'utf8');
+          // In a packaged build rootDirectory resolves inside the read-only asar
+          // archive, but Node's native fs cannot read asar paths. Electron exposes
+          // the extracted resources next to the asar via process.resourcesPath.
+          // In dev, process.resourcesPath is undefined so we fall back to rootDirectory.
+          const changelogDir = app.isPackaged ? process.resourcesPath : rootDirectory;
+          changelog = await readFile(path.join(changelogDir, 'CHANGELOG.md'), 'utf8');
         } catch {
           return { shouldShow: false };
         }
