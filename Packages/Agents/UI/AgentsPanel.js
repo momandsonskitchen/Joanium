@@ -429,35 +429,17 @@ export function createAgentsPanel(strings) {
     replayBackBtnEl.addEventListener('click', hideReplayPane);
 
     replayHeadingEl = createElement('p', 'agents-list__heading');
-    topRow.append(replayBackBtnEl, replayHeadingEl);
+
+    replayRunsEl = createElement('div', 'agents-replay-runs-wrap');
+    Object.assign(replayRunsEl.style, {
+      marginLeft: 'auto',
+      minWidth: '180px',
+    });
+
+    topRow.append(replayBackBtnEl, replayHeadingEl, replayRunsEl);
     pane.append(topRow);
 
-    // Create a split layout container
-    const splitLayout = createElement('div', 'agents-replay-pane__split');
-    Object.assign(splitLayout.style, {
-      display: 'flex',
-      gap: '16px',
-      flex: '1',
-      minHeight: '0', // Allows children to scroll
-      paddingTop: '8px',
-    });
-
-    // Run picker — a scrollable list of past runs for the selected agent
-    replayRunsEl = createElement('div', 'agents-replay-runs');
-    Object.assign(replayRunsEl.style, {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '6px',
-      width: 'max-content',
-      minWidth: '140px',
-      flexShrink: '0',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      paddingRight: '8px',
-    });
-    splitLayout.append(replayRunsEl);
-
-    // Replay viewer — mounted below the run picker
+    // Replay viewer — takes full width below the top row
     const viewerWrap = createElement('div', 'agents-replay-pane__viewer-wrap');
     Object.assign(viewerWrap.style, {
       flex: '1',
@@ -465,9 +447,8 @@ export function createAgentsPanel(strings) {
     });
     replayViewer = createExecutionReplay(strings);
     viewerWrap.append(replayViewer.build());
-    splitLayout.append(viewerWrap);
 
-    pane.append(splitLayout);
+    pane.append(viewerWrap);
 
     replayPaneEl = pane;
     return pane;
@@ -498,44 +479,46 @@ export function createAgentsPanel(strings) {
     replayRunsEl.replaceChildren();
 
     if (agentRuns.length === 0) {
-      replayRunsEl.append(createElement('p', 'agents-replay-runs__empty', strings.replay.empty));
+      const ddm = createDropDownLite({
+        placeholder: strings.replay.empty,
+        options: [],
+      });
+      ddm.element.querySelector('.joanium-ddm-lite__trigger').disabled = true;
+      replayRunsEl.append(ddm.element);
       return;
     }
 
     // Select the most recent run automatically
     let selectedRunId = agentRuns[0].runId;
+    let ddmInst = null;
 
     function syncRunSelection() {
-      for (const btn of replayRunsEl.querySelectorAll('.agents-replay-run-btn')) {
-        btn.classList.toggle('agents-replay-run-btn--active', btn._runId === selectedRunId);
-      }
+      if (ddmInst) ddmInst.setValue(selectedRunId);
+      void replayViewer.load(selectedRunId);
     }
 
-    for (const run of agentRuns) {
-      const btn = createElement('button', 'agents-replay-run-btn');
-      btn.type = 'button';
-      btn._runId = run.runId;
+    const options = agentRuns.map((run) => {
+      let emoji = '🟢';
+      if (run.status === 'failed' || run.status === 'error') emoji = '🔴';
+      else if (run.status === 'running') emoji = '🟡';
 
-      const statusDot = createElement(
-        'span',
-        `agents-replay-run-btn__dot agents-replay-run-btn__dot--${run.status ?? 'success'}`,
-      );
-      const dateLabel = createElement(
-        'span',
-        'agents-replay-run-btn__date',
-        formatRelativeDate(run.startedAt),
-      );
-      btn.append(statusDot, dateLabel);
-      btn.addEventListener('click', () => {
-        selectedRunId = run.runId;
+      return {
+        value: run.runId,
+        label: `${emoji} ${formatRelativeDate(run.startedAt)}`,
+      };
+    });
+
+    ddmInst = createDropDownLite({
+      options,
+      value: selectedRunId,
+      onChange: (newVal) => {
+        selectedRunId = newVal;
         syncRunSelection();
-        void replayViewer.load(run.runId);
-      });
-      replayRunsEl.append(btn);
-    }
+      },
+    });
 
+    replayRunsEl.append(ddmInst.element);
     syncRunSelection();
-    void replayViewer.load(selectedRunId);
   }
 
   function hideReplayPane() {
