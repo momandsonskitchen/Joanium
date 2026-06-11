@@ -1,6 +1,7 @@
 import { createElement } from '../Utils/DomUtils.js';
 import { collapseWhitespace } from '../Utils/StringUtils.js';
 import { createSearchBar } from '../SearchBar/SearchBar.js';
+import { attachCustomScrollbar } from '../CustomScrollbar/CustomScrollbar.js';
 
 function createEmptyState({
   emptyClassName,
@@ -98,7 +99,18 @@ export function createSearchableListColumn({
   searchWrap.append(search.element);
 
   const content = createElement('div', `${classPrefix}__list-content`);
-  column.append(searchWrap, content);
+  const contentWrap = createElement('div', `${classPrefix}__list-wrap`);
+  Object.assign(contentWrap.style, {
+    flex: 1,
+    minHeight: 0,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+  });
+  contentWrap.append(content);
+  attachCustomScrollbar(contentWrap, content, { right: 4, top: 4, bottom: 4, minThumb: 24 });
+
+  column.append(searchWrap, contentWrap);
 
   return { column, content, search };
 }

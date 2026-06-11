@@ -1,6 +1,7 @@
 import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
@@ -194,6 +195,17 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
 
     // ── Left: form ────────────────────────────────────────────────────────
     const formCol = createElement('div', 'chat-projects__form-col');
+    const formColWrap = createElement('div', 'chat-projects__form-col-wrap');
+    Object.assign(formColWrap.style, {
+      flex: '0 0 430px',
+      minHeight: 0,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+    formColWrap.append(formCol);
+    attachCustomScrollbar(formColWrap, formCol, { right: 4, top: 4, bottom: 4, minThumb: 24 });
+
     const formHeading = createElement(
       'p',
       'chat-projects__form-heading',
@@ -406,7 +418,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
       onSearchChange: (value) => void populateList(listContent, value),
     });
 
-    body.append(formCol, listCol);
+    body.append(formColWrap, listCol);
     panel.append(body);
 
     panel._listEl = listContent;

@@ -906,14 +906,13 @@ export function createAgentsPanel(strings) {
     });
 
     listContainer.append(listContent);
-    listCol.append(searchWrap, listContainer);
-
     attachCustomScrollbar(listContainer, listContent, {
-      right: -6,
-      top: 8,
-      bottom: 8,
+      right: 4,
+      top: 4,
+      bottom: 4,
       minThumb: 24,
     });
+    listCol.append(searchWrap, listContainer);
 
     // Replay pane — hidden until activated by a "View Replay" card button
     listCol.append(buildReplayPane());
