@@ -6,6 +6,26 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.611.5] - 2026-06-11
+
+* chore(release): bump version to 2026.611.5
+* Personas Scrollbar Fix
+* Skills Panel Scroll Fix
+* Scrollable Fix In Templates And In Agents
+* Improvered Scrollbar
+* Updated AI Models
+* Fixed the scroll issue in agents history view
+* Updated AI Models
+* Agent History View Fixes
+* Fixed The Agents History Layout
+* Updated AI Models
+* Agent History View Update
+* Updated Agent History View
+* Updated AI Models
+* Agents View Dark Theme Fix
+
+---
+
 ## [2026.611.4] - 2026-06-11
 
 * chore(release): bump version to 2026.611.4
