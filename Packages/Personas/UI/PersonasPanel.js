@@ -6,6 +6,7 @@ import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { formatPersonaName } from './Utils.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 // ---------------------------------------------------------------------------
 // Panel factory
@@ -16,6 +17,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
   let _listEl = null;
   let _search = null;
   let _viewerEl = null;
+  let _viewerContentEl = null;
 
   // ── build ────────────────────────────────────────────────────────────────
 
@@ -44,17 +46,38 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     listCard.append(searchWrap, _listEl);
     listCol.append(listCard);
 
-    // Right column — white viewer card (scrolls internally)
+    attachCustomScrollbar(listCard, _listEl, { right: 4, top: 4, bottom: 4, minThumb: 24 });
+
+    // Right column — white viewer card
     const viewerCol = createElement('div', 'chat-personas__viewer-col');
     _viewerEl = createElement('div', 'chat-personas__viewer-card');
-    _viewerEl.append(
+
+    _viewerContentEl = createElement('div', 'chat-personas__viewer-scroll-content');
+    Object.assign(_viewerContentEl.style, {
+      flex: 1,
+      overflowY: 'auto',
+      minHeight: 0,
+      padding: '24px 28px',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+
+    _viewerContentEl.append(
       createElement(
         'div',
         'chat-personas__viewer-empty',
         strings.selectPrompt ?? 'Select a persona to read its content',
       ),
     );
+    _viewerEl.append(_viewerContentEl);
     viewerCol.append(_viewerEl);
+
+    attachCustomScrollbar(_viewerEl, _viewerContentEl, {
+      right: 4,
+      top: 4,
+      bottom: 4,
+      minThumb: 24,
+    });
 
     body.append(listCol, viewerCol);
     panel.append(body);
@@ -128,7 +151,7 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
       return;
     }
 
-    _viewerEl.replaceChildren();
+    _viewerContentEl.replaceChildren();
 
     const activePersona = getActivePersona();
     const isActive = activePersona?.id === persona.id;
@@ -161,12 +184,12 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
     });
 
     header.append(headerLeft, activateBtn);
-    _viewerEl.append(header);
+    _viewerContentEl.append(header);
 
     // ── Markdown content ───────────────────────────────────────────────────
     const content = createElement('div', 'chat-personas__viewer-content');
     content.append(renderMarkdown(fullPersona.content, 'chat-personas__viewer-md'));
-    _viewerEl.append(content);
+    _viewerContentEl.append(content);
   }
 
   // ── buildCard ─────────────────────────────────────────────────────────────
