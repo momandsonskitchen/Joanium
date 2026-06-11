@@ -6,6 +6,7 @@
   "afterSign": "Scripts/Fuses.cjs",
   "files": [
     "App.js",
+    "CHANGELOG.md",
     "Assets/**/*",
     "Config/**/*",
     "Datasets/**/*",
