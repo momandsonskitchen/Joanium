@@ -15,6 +15,89 @@
   animation: chat-fade-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Dark theme overrides
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.joanium-theme-dark .replay__header {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 24px rgba(10, 4, 20, 0.22);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+}
+
+.joanium-theme-dark .replay-meta-chip {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(180, 130, 220, 0.1);
+}
+
+.joanium-theme-dark .replay-meta-chip:hover {
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.22);
+}
+
+.joanium-theme-dark .replay-status--success {
+  background: rgba(44, 171, 104, 0.15);
+  color: #4ade80;
+}
+
+.joanium-theme-dark .replay-status--error {
+  background: rgba(220, 70, 54, 0.15);
+  color: #f87171;
+}
+
+.joanium-theme-dark .replay-step__dot--response {
+  background: rgba(44, 171, 104, 0.18);
+  color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(44, 171, 104, 0.1);
+}
+
+.joanium-theme-dark .replay-step__details {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.1),
+    0 2px 10px rgba(10, 4, 20, 0.18);
+}
+
+.joanium-theme-dark .replay-step__details:hover {
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.22),
+    0 4px 16px rgba(10, 4, 20, 0.22);
+}
+
+.joanium-theme-dark .replay-step--response .replay-step__details {
+  background: rgba(44, 171, 104, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(44, 171, 104, 0.14),
+    0 2px 10px rgba(10, 4, 20, 0.14);
+}
+
+.joanium-theme-dark .replay-step__summary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.joanium-theme-dark .replay-step__body {
+  border-top-color: rgba(180, 130, 220, 0.08);
+}
+
+.joanium-theme-dark .replay-badge--response {
+  background: rgba(44, 171, 104, 0.15);
+  color: #4ade80;
+}
+
+.joanium-theme-dark .replay-code-block__pre {
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(180, 130, 220, 0.1);
+  color: var(--color-chat-text-secondary);
+}
+
+.joanium-theme-dark .replay-code-block__notice {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(180, 130, 220, 0.08);
+}
+
 /* ── Empty / loading state ───────────────────────────────────────────────── */
 
 .replay__empty {
