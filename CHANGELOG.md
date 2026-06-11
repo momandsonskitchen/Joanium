@@ -6,6 +6,14 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.611.4] - 2026-06-11
+
+* chore(release): bump version to 2026.611.4
+* About Panel Update
+* Auto Update Silent Update Has Been Disabled
+
+---
+
 ## [2026.611.3] - 2026-06-11
 
 * chore(release): bump version to 2026.611.3
