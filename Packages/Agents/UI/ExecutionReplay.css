@@ -126,28 +126,6 @@
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
 }
 
-/* ── Title row ───────────────────────────────────────────────────────────── */
-
-.replay__title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.replay__title {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 520;
-  letter-spacing: -0.03em;
-  color: var(--color-chat-text-title);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-  min-width: 0;
-}
-
 /* ── Status badge ────────────────────────────────────────────────────────── */
 
 .replay-status {

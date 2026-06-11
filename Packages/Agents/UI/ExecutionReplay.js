@@ -171,18 +171,6 @@ export function createExecutionReplay(strings) {
       }
     }
 
-    // ── Title + status row ───────────────────────────────────────────────────
-    const titleRow = createElement('div', 'replay__title-row');
-    titleRow.append(createElement('h3', 'replay__title', run.agentName || strings.replay.untitled));
-    titleRow.append(
-      createElement(
-        'span',
-        `replay-status replay-status--${run.status ?? 'success'}`,
-        strings.replay.status[run.status] ?? run.status ?? '',
-      ),
-    );
-    headerEl.append(titleRow);
-
     // ── Meta chips ───────────────────────────────────────────────────────────
     const metaRowEl = createElement('div', 'replay__meta');
     const totalMs =
@@ -205,6 +193,20 @@ export function createExecutionReplay(strings) {
     ]
       .filter(Boolean)
       .forEach((chip) => metaRowEl.append(chip));
+
+    // Append the status badge to the end of the meta row, pushed to the right
+    const statusBadge = createElement(
+      'span',
+      `replay-status replay-status--${run.status ?? 'success'}`,
+      strings.replay.status[run.status] ?? run.status ?? '',
+    );
+    Object.assign(statusBadge.style, {
+      marginLeft: 'auto',
+      alignSelf: 'flex-start',
+      marginTop: '6px',
+    });
+    metaRowEl.append(statusBadge);
+
     headerEl.append(metaRowEl);
 
     // 1. Prompt summary ───────────────────────────────────────────────────────
