@@ -44,11 +44,11 @@
 }
 
 .app-settings__status--ok {
-  color: #166534;
+  color: var(--color-success-subtle);
 }
 
 .app-settings__status--error {
-  color: #a03420;
+  color: var(--color-danger-text);
 }
 
 .app-settings__dropdown-row {
@@ -108,7 +108,7 @@
   margin-top: 2px;
   font-size: 12px;
   font-weight: 650;
-  color: #a03420;
+  color: var(--color-danger-text);
 }
 
 .app-settings__reset-btn {
@@ -116,7 +116,7 @@
   min-height: 38px;
   padding: 0 16px;
   border-radius: 18px;
-  color: #a03420;
+  color: var(--color-danger-text);
   background: rgba(255, 255, 255, 0.7);
   box-shadow: inset 0 0 0 1px rgba(160, 52, 32, 0.16);
   font-size: 13px;
@@ -135,14 +135,14 @@
 
 .app-settings__reset-btn--confirm {
   color: rgba(255, 255, 255, 0.96);
-  background: #a03420;
+  background: var(--color-danger-text);
   box-shadow:
     0 8px 18px rgba(160, 52, 32, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .app-settings__reset-btn--confirm:hover:not(:disabled) {
-  background: #842818;
+  background: color-mix(in srgb, var(--color-danger-text) 85%, #000);
 }
 
 .app-settings__reset-btn:disabled {
