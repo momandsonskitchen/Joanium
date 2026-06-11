@@ -6,6 +6,22 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.611.0] - 2026-06-11
+
+* chore(release): bump version to 2026.611.0
+* Updated AI Models
+* Updated AI Models
+* Added New Whats New Images
+* Updated AI Models
+* Added New Anthropic AI Models
+* Added Whats New Overlay
+* Updated AI Models
+* Updated AI Models
+* Updated AI Models
+* Fixed the hover over ai models
+
+---
+
 ## [2026.610.0] - 2026-06-10
 
 * chore(release): bump version to 2026.610.0
