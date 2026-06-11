@@ -216,6 +216,9 @@
 
 .agents-form-col,
 .agents-form__avatar-grid,
+.agents-list__content,
+.agents-replay-pane__viewer-wrap,
+.replay__header,
 .chat-model-picker__scroller,
 .chat-personas__list-content,
 .chat-projects__form-col,
@@ -229,6 +232,9 @@
 
 .agents-form-col::-webkit-scrollbar,
 .agents-form__avatar-grid::-webkit-scrollbar,
+.agents-list__content::-webkit-scrollbar,
+.agents-replay-pane__viewer-wrap::-webkit-scrollbar,
+.replay__header::-webkit-scrollbar,
 .chat-model-picker__scroller::-webkit-scrollbar,
 .chat-personas__list-content::-webkit-scrollbar,
 .chat-projects__form-col::-webkit-scrollbar,
