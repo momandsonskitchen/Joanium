@@ -8,6 +8,10 @@
 /* ── Root container ──────────────────────────────────────────────────────── */
 
 .replay {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -111,6 +115,9 @@
 /* ── Header ──────────────────────────────────────────────────────────────── */
 
 .replay__header {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;

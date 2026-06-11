@@ -13,6 +13,7 @@ import {
   decodeModelValue,
   encodeModelValue,
 } from '../../Shared/ProviderCatalog/ModelOptions.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -418,6 +419,10 @@ export function createAgentsPanel(strings) {
   function buildReplayPane() {
     const pane = createElement('div', 'agents-replay-pane');
     pane.hidden = true;
+    Object.assign(pane.style, {
+      flex: '1',
+      minHeight: '0',
+    });
 
     // Back button + heading row
     const topRow = createElement('div', 'agents-replay-pane__top');
@@ -439,16 +444,27 @@ export function createAgentsPanel(strings) {
     topRow.append(replayBackBtnEl, replayHeadingEl, replayRunsEl);
     pane.append(topRow);
 
-    // Replay viewer — takes full width below the top row
-    const viewerWrap = createElement('div', 'agents-replay-pane__viewer-wrap');
-    Object.assign(viewerWrap.style, {
+    // Replay viewer — wrapper to host the scrollbar properly
+    const viewerContainer = createElement('div', 'agents-replay-pane__viewer-container');
+    Object.assign(viewerContainer.style, {
       flex: '1',
       minWidth: '0',
+      minHeight: '0',
+      position: 'relative',
     });
+
+    const viewerWrap = createElement('div', 'agents-replay-pane__viewer-wrap');
+    Object.assign(viewerWrap.style, {
+      height: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+
     replayViewer = createExecutionReplay(strings);
     viewerWrap.append(replayViewer.build());
-
-    pane.append(viewerWrap);
+    viewerContainer.append(viewerWrap);
+    pane.append(viewerContainer);
 
     replayPaneEl = pane;
     return pane;
@@ -462,7 +478,7 @@ export function createAgentsPanel(strings) {
     replayRunsEl.replaceChildren();
     replayRunsEl.append(createElement('div', 'agents-replay-runs__loading'));
 
-    listContentEl.hidden = true;
+    listColEl.querySelector('.agents-list__content-container').hidden = true;
     listColEl.querySelector('.agents-list__search').hidden = true;
     listColEl.querySelector('.agents-list__heading:not(.agents-replay-pane__top *)').hidden = true;
     replayPaneEl.hidden = false;
@@ -525,7 +541,7 @@ export function createAgentsPanel(strings) {
     if (!listColEl || !listContentEl || !replayPaneEl) return;
     replayPaneEl.hidden = true;
     replayViewer.clear();
-    listContentEl.hidden = false;
+    listColEl.querySelector('.agents-list__content-container').hidden = false;
     listColEl.querySelector('.agents-list__search').hidden = false;
     listColEl.querySelector('.agents-list__heading:not(.agents-replay-pane__top *)').hidden = false;
   }
@@ -873,9 +889,31 @@ export function createAgentsPanel(strings) {
     });
     searchWrap.append(search.element);
 
+    const listContainer = createElement('div', 'agents-list__content-container');
+    Object.assign(listContainer.style, {
+      flex: '1',
+      minWidth: '0',
+      minHeight: '0',
+      position: 'relative',
+    });
+
     const listContent = createElement('div', 'agents-list__content');
     listContentEl = listContent;
-    listCol.append(searchWrap, listContent);
+    Object.assign(listContent.style, {
+      height: '100%',
+      width: '100%',
+      overflowY: 'auto',
+    });
+
+    listContainer.append(listContent);
+    listCol.append(searchWrap, listContainer);
+
+    attachCustomScrollbar(listContainer, listContent, {
+      right: -6,
+      top: 8,
+      bottom: 8,
+      minThumb: 24,
+    });
 
     // Replay pane — hidden until activated by a "View Replay" card button
     listCol.append(buildReplayPane());

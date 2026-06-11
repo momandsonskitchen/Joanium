@@ -2,6 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createTerminalCallCard } from '../../Shared/TerminalCallCard/TerminalCallCard.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 // ---------------------------------------------------------------------------
 // createExecutionReplay
@@ -116,6 +117,9 @@ export function createExecutionReplay(strings) {
     emptyEl.hidden = true;
 
     rootEl.append(headerEl, emptyEl);
+
+    attachCustomScrollbar(rootEl, headerEl, { right: 8, top: 24, bottom: 24, minThumb: 24 });
+
     renderEmpty();
     return rootEl;
   }
@@ -123,12 +127,14 @@ export function createExecutionReplay(strings) {
   // ── Render states ────────────────────────────────────────────────────────
 
   function renderEmpty() {
+    headerEl.style.display = 'none';
     headerEl.replaceChildren();
     emptyEl.hidden = false;
     emptyEl.textContent = strings.replay.empty;
   }
 
   function renderLoading() {
+    headerEl.style.display = 'none';
     headerEl.replaceChildren();
     emptyEl.hidden = false;
     emptyEl.textContent = strings.replay.loading;
@@ -136,6 +142,7 @@ export function createExecutionReplay(strings) {
 
   function renderRun(run) {
     emptyEl.hidden = true;
+    headerEl.style.display = '';
     headerEl.replaceChildren();
 
     const rawSteps = Array.isArray(run.steps) ? run.steps : [];

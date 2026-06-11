@@ -326,7 +326,6 @@
   flex-direction: column;
   gap: 0;
   padding: 4px 16px 40px 28px;
-  overflow-y: auto;
   border-left: 1px solid rgba(170, 134, 104, 0.09);
 }
 
@@ -363,8 +362,10 @@
 
 .agents-list__content {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 /* ── Skeleton loaders ────────────────────────────────────────────────────── */
