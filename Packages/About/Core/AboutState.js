@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, mkdir, appendFile } from 'node:fs/promises';
 import electron from 'electron';
 import { collectSystemInfo } from './SystemInfo.js';
 import { getResourceFileUrl } from '../../Shared/Storage/ResourcePaths.js';
@@ -47,25 +47,45 @@ export function createAboutStateManager({ rootDirectory }) {
      * if the user has already seen this version.
      */
     async getWhatsNew() {
+      const logLines = [];
+      const log = (msg) => logLines.push(`[${new Date().toISOString()}] ${msg}`);
+
       try {
         const version = app.getVersion() ?? '';
-        if (!version) return { shouldShow: false };
+        log(`version=${version} isPackaged=${app.isPackaged}`);
+        log(`rootDirectory=${rootDirectory}`);
+        if (!version) {
+          log('EXIT: no version');
+          await flushWhatsNewLog(logLines);
+          return { shouldShow: false };
+        }
 
         const userState = await readUserState(rootDirectory);
+        log(`whatsNewSeenVersion=${userState.whatsNewSeenVersion}`);
         if (userState.whatsNewSeenVersion === version) {
+          log('EXIT: already seen');
+          await flushWhatsNewLog(logLines);
           return { shouldShow: false };
         }
 
         // Read and parse CHANGELOG.md for the current version's section
         let changelog = '';
+        const changelogPath = path.join(rootDirectory, 'CHANGELOG.md');
+        log(`changelogPath=${changelogPath}`);
         try {
-          changelog = await readFile(path.join(rootDirectory, 'CHANGELOG.md'), 'utf8');
-        } catch {
+          changelog = await readFile(changelogPath, 'utf8');
+          log(`changelog read OK, length=${changelog.length}`);
+        } catch (err) {
+          log(`EXIT: changelog read FAILED: ${err?.message ?? err}`);
+          await flushWhatsNewLog(logLines);
           return { shouldShow: false };
         }
 
         const entries = parseChangelogForVersion(changelog, version);
+        log(`entries count=${entries.length} entries=${JSON.stringify(entries)}`);
         if (entries.length === 0) {
+          log('EXIT: no entries for this version');
+          await flushWhatsNewLog(logLines);
           return { shouldShow: false };
         }
 
@@ -87,13 +107,17 @@ export function createAboutStateManager({ rootDirectory }) {
           }
         }
 
+        log(`SUCCESS: shouldShow=true imagePath=${imagePath}`);
+        await flushWhatsNewLog(logLines);
         return {
           shouldShow: true,
           version,
           entries,
           imagePath,
         };
-      } catch {
+      } catch (outerErr) {
+        log(`EXIT: outer catch: ${outerErr?.message ?? outerErr}`);
+        await flushWhatsNewLog(logLines).catch(() => {});
         return { shouldShow: false };
       }
     },
@@ -141,4 +165,18 @@ function parseChangelogForVersion(changelog, version) {
 
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function flushWhatsNewLog(lines) {
+  try {
+    const logDir = path.join(app.getPath('userData'), 'Logs');
+    await mkdir(logDir, { recursive: true });
+    await appendFile(
+      path.join(logDir, 'whats-new-debug.log'),
+      lines.join('\n') + '\n---\n',
+      'utf8',
+    );
+  } catch {
+    // Best-effort logging — never block the overlay.
+  }
 }
