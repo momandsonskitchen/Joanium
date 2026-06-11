@@ -651,19 +651,6 @@
         "text": true
       }
     },
-    "moonshotai/kimi-k2.6:free": {
-      "name": "MoonshotAI: Kimi K2.6 (free)",
-      "description": "Kimi K2.6 is Moonshot AI's next-generation multimodal model, designed for long-horizon coding, coding-driven UI/UX generation, and multi-agent orchestration. It handles complex end-to-end coding tasks across Python, Rust, and Go, and...",
-      "context_window": 262144,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "moonshotai/kimi-k2.6": {
       "name": "MoonshotAI: Kimi K2.6",
       "description": "Kimi K2.6 is Moonshot AI's next-generation multimodal model, designed for long-horizon coding, coding-driven UI/UX generation, and multi-agent orchestration. It handles complex end-to-end coding tasks across Python, Rust, and Go, and...",
@@ -4269,5 +4256,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-10T17:27:34.408Z"
+  "_syncedAt": "2026-06-11T01:13:00.906Z"
 }

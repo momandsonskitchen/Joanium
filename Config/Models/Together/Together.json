@@ -671,6 +671,10 @@
       "name": "Nous Hermes 2 Mixtral 8X7B Dpo",
       "context_window": 32768
     },
+    "Qwen/Qwen3.5-35B-A3B-Lora": {
+      "name": "Qwen3.5 35B A3b LoRa",
+      "context_window": 262144
+    },
     "Qwen/Qwen2.5-1.5B": {
       "name": "Qwen2.5 1.5B",
       "context_window": 131072
@@ -720,5 +724,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-10T17:27:40.478Z"
+  "_syncedAt": "2026-06-11T01:13:09.307Z"
 }
