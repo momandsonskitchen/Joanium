@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: 'latest'
 
-      - name: Set version, tag, and create release
+      - name: Prepare version and changes
         id: prepare
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,47 +47,27 @@ jobs:
           echo "version=${VERSION}"   >> "$GITHUB_OUTPUT"
           echo "tag_name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
 
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = '${VERSION}';
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          if ! git diff --quiet package.json; then
-            git add package.json
-            git commit -m "chore(release): bump version to ${VERSION}"
-            git push origin HEAD
-          fi
-
-          git tag "${TAG_NAME}"
-          git push origin "${TAG_NAME}"
-
-          PREV_TAG="$(git describe --tags --abbrev=0 "${TAG_NAME}^" 2>/dev/null || true)"
+          PREV_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
           if [ -n "${PREV_TAG}" ]; then
-            CHANGES="$(git log "${PREV_TAG}..${TAG_NAME}" --no-merges --max-count=30 --pretty=format:'* %s' | grep -v '\[skip ci\]')"
+            CHANGES="$(git log "${PREV_TAG}..HEAD" --no-merges --max-count=30 --pretty=format:'* %s' | grep -v '\[skip ci\]')"
           else
-            CHANGES="$(git log "${TAG_NAME}" --no-merges --max-count=30 --pretty=format:'* %s' | grep -v '\[skip ci\]')"
+            CHANGES="$(git log HEAD --no-merges --max-count=30 --pretty=format:'* %s' | grep -v '\[skip ci\]')"
           fi
 
-          RELEASE_NOTES="**Change Log**
-          ${CHANGES}"
-
-          gh release create "${TAG_NAME}" \
-            --title "${VERSION}" \
-            --notes "${RELEASE_NOTES}"
-
-          # Expose CHANGES so the next step can write CHANGELOG.md directly.
-          # We can't rely on sync-changelog.yml triggering here because GitHub
-          # does not fire workflow runs for events created by GITHUB_TOKEN.
           {
             printf 'changes<<CHANGES_EOF\n'
             printf '%s\n' "${CHANGES}"
             printf 'CHANGES_EOF\n'
           } >> "$GITHUB_OUTPUT"
+
+      - name: Update package.json
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '${{ steps.prepare.outputs.version }}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
 
       - name: Update CHANGELOG.md
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -154,15 +134,32 @@ jobs:
             fs.writeFileSync('CHANGELOG.md', changelog);
             console.log(`CHANGELOG.md updated for ${version} (${dateStr})`);
 
-            await exec.exec('git', ['add', 'CHANGELOG.md']);
-            const diffResult = await exec.getExecOutput(
-              'git', ['diff', '--cached', '--quiet'],
-              { ignoreReturnCode: true }
-            );
-            if (diffResult.exitCode !== 0) {
-              await exec.exec('git', ['commit', '-m', `docs(changelog): sync ${tagName} [skip ci]`]);
-              await exec.exec('git', ['push', 'origin', 'HEAD']);
-            }
+      - name: Commit, Tag, and Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.prepare.outputs.version }}
+          TAG_NAME: ${{ steps.prepare.outputs.tag_name }}
+          CHANGES: ${{ steps.prepare.outputs.changes }}
+        shell: bash
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add package.json CHANGELOG.md
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): bump version to ${VERSION}"
+            git push origin HEAD
+          fi
+
+          git tag "${TAG_NAME}"
+          git push origin "${TAG_NAME}"
+
+          RELEASE_NOTES="**Change Log**
+          ${CHANGES}"
+
+          gh release create "${TAG_NAME}" \
+            --title "${VERSION}" \
+            --notes "${RELEASE_NOTES}"
 
   build-and-upload:
     needs: prepare-release
