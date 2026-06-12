@@ -379,6 +379,7 @@ textarea {
   display: flex;
   flex-direction: row;
   overflow: hidden;
+  position: relative;
 }
 
 .chat-settings__nav {
