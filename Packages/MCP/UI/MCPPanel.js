@@ -2,6 +2,7 @@ import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 function createServerId(name) {
   const stem =
@@ -331,6 +332,16 @@ export function createMCPPanel(strings) {
   const listHeader = createElement('div', 'mcp-content__header');
   listHeader.append(createElement('h4', 'mcp-content__title', strings.list.title));
   listEl = createElement('div', 'mcp-list');
+  const listWrap = createElement('div', 'mcp-list-wrap');
+  Object.assign(listWrap.style, {
+    flex: 1,
+    minHeight: 0,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+  });
+  listWrap.append(listEl);
+  attachCustomScrollbar(listWrap, listEl, { right: 4, top: 4, bottom: 4, minThumb: 24 });
 
   const toolsHeader = createElement('div', 'mcp-content__header mcp-content__header--tools');
   const refreshTools = createElement('button', 'mcp-content__refresh');
@@ -343,7 +354,7 @@ export function createMCPPanel(strings) {
   toolsHeader.append(createElement('h4', 'mcp-content__title', strings.tools.title), refreshTools);
   toolsEl = createElement('div', 'mcp-tools');
 
-  content.append(listHeader, listEl, toolsHeader, toolsEl);
+  content.append(listHeader, listWrap, toolsHeader, toolsEl);
   body.append(form, content);
   panel.append(body);
   syncTransportFields();

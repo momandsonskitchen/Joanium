@@ -2357,18 +2357,6 @@
         "text": true
       }
     },
-    "nvidia/nemotron-nano-9b-v2": {
-      "name": "NVIDIA: Nemotron Nano 9B V2",
-      "description": "NVIDIA-Nemotron-Nano-9B-v2 is a large language model (LLM) trained from scratch by NVIDIA, and designed as a unified model for both reasoning and non-reasoning tasks. It responds to user queries and...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.04,
-        "output": 0.16
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "moonshotai/kimi-k2-0905": {
       "name": "MoonshotAI: Kimi K2 0905",
       "description": "Kimi K2 0905 is the September update of [Kimi K2 0711](moonshotai/kimi-k2). It is a large-scale Mixture-of-Experts (MoE) language model developed by Moonshot AI, featuring 1 trillion total parameters with 32...",
@@ -4256,5 +4244,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-11T07:11:05.891Z"
+  "_syncedAt": "2026-06-12T05:10:37.807Z"
 }

@@ -253,7 +253,7 @@ export async function createPackage({ rootDirectory }) {
 
   // ── IPC Handlers ──────────────────────────────────────────────────────────
 
-  const replayHandlers = createReplayIpcHandlers({ replayStore, agentStateManager, runAgent });
+  const replayHandlers = createReplayIpcHandlers({ replayStore });
 
   return {
     id: 'Agents',

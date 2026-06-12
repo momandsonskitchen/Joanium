@@ -205,6 +205,7 @@ Owns persisted app behavior settings plus keep-awake and tray runtime side effec
 
 ## Must Follow
 
+* Always use customscrollbar from the packages/shared if your changes need to have scroll.
 * Keep your code clean and organized.
 * Dont keep unused code.
 * Put small single line prompts inside Prompts.js and longer ones inside Prompts folder

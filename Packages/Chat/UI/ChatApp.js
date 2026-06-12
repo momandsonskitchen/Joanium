@@ -3854,6 +3854,24 @@ export async function createChatView(
   }
 
   scroll = createElement('div', 'chat-stage__scroll');
+  Object.assign(scroll.style, {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+  });
+  const scrollWrap = createElement('div', 'chat-stage__scroll-wrap');
+  Object.assign(scrollWrap.style, {
+    flex: 1,
+    height: '100%',
+    minHeight: 0,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  });
+  scrollWrap.append(scroll);
+  attachCustomScrollbar(scrollWrap, scroll, { right: 4, top: 48, bottom: 4, minThumb: 24 });
+
   bottom = createElement('div', 'chat-stage__bottom');
   const rawGreeting = isBirthday
     ? getBirthdayGreeting(firstName)
@@ -4269,7 +4287,7 @@ export async function createChatView(
     }
   });
 
-  view.append(scroll, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
+  view.append(scrollWrap, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
   track = createElement('div', 'chat-thread-track');
   track.hidden = true;
   trackLabel = createElement('div', 'chat-thread-track__label');
