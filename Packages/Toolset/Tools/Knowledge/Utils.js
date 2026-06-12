@@ -6,12 +6,9 @@ import {
 } from '../../../Shared/Markdown/NamespacedResourceLibrary.js';
 import { getBundledResourceDirectory } from '../../../Shared/Storage/ResourcePaths.js';
 import { clampInteger } from '../../../Shared/Utils/ValueUtils.js';
+import { formatText } from '../../../Shared/Utils/DomUtils.js';
 
 const PRODUCT_KNOWLEDGE_FILENAMES = Object.freeze(['ProductKnowledge.md', 'productknowledge.md']);
-
-function formatText(template, values = {}) {
-  return String(template ?? '').replace(/\{(\w+)\}/g, (_match, key) => values[key] ?? '');
-}
 
 function normalizeLimit(value, fallback = 30) {
   return clampInteger(value, fallback, 1, 100);
