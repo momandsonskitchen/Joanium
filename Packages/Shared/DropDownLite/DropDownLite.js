@@ -1,6 +1,242 @@
 import { createElement } from '../Utils/DomUtils.js';
 import { createPortalDropdownController } from '../Bubbly/DropDown/PortalDropdown.js';
 
+// ── Model info helpers (shared with ModelPickerPanel) ─────────────────────
+
+function hasModelInfo(model) {
+  if (!model) return false;
+  return Boolean(
+    model.description ||
+    model.context_window ||
+    model.max_output ||
+    model.pricing ||
+    (model.inputs && Object.values(model.inputs).some(Boolean)) ||
+    model.thinking,
+  );
+}
+
+function formatTokenCount(n) {
+  const num =
+    typeof n === 'object' && n !== null ? (n.context_length ?? n.max_output_tokens ?? null) : n;
+  if (!num || num <= 0) return null;
+  if (num >= 1_000_000) {
+    const v = num / 1_000_000;
+    return `${Number.isInteger(v) ? v : v.toFixed(1)}M`;
+  }
+  if (num >= 1_000) return `${Math.round(num / 1_000)}K`;
+  return String(num);
+}
+
+function resolveContextWindow(model) {
+  if (typeof model.context_window === 'number') return model.context_window;
+  if (typeof model.context_window === 'object' && model.context_window !== null)
+    return model.context_window.context_length ?? null;
+  return null;
+}
+
+function resolveMaxOutput(model) {
+  if (model.max_output) return model.max_output;
+  if (typeof model.context_window === 'object' && model.context_window !== null)
+    return model.context_window.max_output_tokens ?? null;
+  return null;
+}
+
+function formatPrice(dollars) {
+  if (dollars === undefined || dollars === null) return null;
+  if (dollars === 0) return 'Free';
+  if (dollars < 0.001) return `${dollars.toFixed(5)}`;
+  if (dollars < 1) return `${dollars.toFixed(3)}`;
+  return `${dollars.toFixed(2)}`;
+}
+
+function createInfoIcon() {
+  const wrap = createElement('span', 'joanium-ddm-lite__info-icon');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('aria-hidden', 'true');
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', '8');
+  circle.setAttribute('cy', '8');
+  circle.setAttribute('r', '6.5');
+  circle.setAttribute('stroke', 'currentColor');
+  circle.setAttribute('stroke-width', '1.25');
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  line.setAttribute('d', 'M8 7v5');
+  line.setAttribute('stroke', 'currentColor');
+  line.setAttribute('stroke-width', '1.5');
+  line.setAttribute('stroke-linecap', 'round');
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('cx', '8');
+  dot.setAttribute('cy', '4.5');
+  dot.setAttribute('r', '0.8');
+  dot.setAttribute('fill', 'currentColor');
+  svg.append(circle, line, dot);
+  wrap.append(svg);
+  return wrap;
+}
+
+function createModelInfoPopoverDdm() {
+  const pop = createElement('div', 'chat-model-info-popover');
+  document.body.append(pop);
+  let activeValue = null;
+  let disposeListeners = null;
+
+  function build(provider, model) {
+    pop.replaceChildren();
+    // Header
+    const header = createElement('div', 'chat-model-info-popover__header');
+    if (provider?.iconPath) {
+      const img = document.createElement('img');
+      img.className = 'chat-model-info-popover__provider-icon';
+      img.src = provider.iconPath;
+      img.alt = '';
+      img.draggable = false;
+      header.append(img);
+    }
+    header.append(createElement('span', 'chat-model-info-popover__title', model.name ?? model.id));
+    pop.append(header);
+    // Description
+    if (model.description)
+      pop.append(createElement('p', 'chat-model-info-popover__desc', model.description));
+    // Context + max output
+    const rows = createElement('div', 'chat-model-info-popover__rows');
+    const ctx = resolveContextWindow(model);
+    if (ctx) {
+      const r = createElement('div', 'chat-model-info-popover__row');
+      r.append(
+        createElement('span', 'chat-model-info-popover__row-label', 'Context'),
+        createElement(
+          'span',
+          'chat-model-info-popover__row-value',
+          `${formatTokenCount(ctx)} tokens`,
+        ),
+      );
+      rows.append(r);
+    }
+    const mo = resolveMaxOutput(model);
+    if (mo) {
+      const r = createElement('div', 'chat-model-info-popover__row');
+      r.append(
+        createElement('span', 'chat-model-info-popover__row-label', 'Max output'),
+        createElement(
+          'span',
+          'chat-model-info-popover__row-value',
+          `${formatTokenCount(mo)} tokens`,
+        ),
+      );
+      rows.append(r);
+    }
+    if (rows.children.length) pop.append(rows);
+    // Pricing
+    if (model.pricing) {
+      const wrap = createElement('div', 'chat-model-info-popover__pricing-wrap');
+      wrap.append(createElement('span', 'chat-model-info-popover__section-label', 'Pricing'));
+      const grid = createElement('div', 'chat-model-info-popover__pricing-grid');
+      const inp = createElement('div', 'chat-model-info-popover__pricing-item');
+      inp.append(
+        createElement('span', 'chat-model-info-popover__pricing-kind', 'Input'),
+        createElement(
+          'span',
+          'chat-model-info-popover__pricing-amount',
+          `${formatPrice(model.pricing.input)}/1M tokens`,
+        ),
+      );
+      const out = createElement('div', 'chat-model-info-popover__pricing-item');
+      out.append(
+        createElement('span', 'chat-model-info-popover__pricing-kind', 'Output'),
+        createElement(
+          'span',
+          'chat-model-info-popover__pricing-amount',
+          `${formatPrice(model.pricing.output)}/1M tokens`,
+        ),
+      );
+      grid.append(inp, out);
+      wrap.append(grid);
+      pop.append(wrap);
+    }
+    // Capability chips
+    const inputs = model.inputs ?? {};
+    const caps = [];
+    if (inputs.text) caps.push('Text');
+    if (inputs.image) caps.push('Images');
+    if (inputs.pdf) caps.push('PDF');
+    if (inputs.docx) caps.push('Documents');
+    if (model.thinking) caps.push('Extended thinking');
+    if (caps.length) {
+      const row = createElement('div', 'chat-model-info-popover__caps');
+      for (const c of caps) row.append(createElement('span', 'chat-model-info-popover__cap', c));
+      pop.append(row);
+    }
+  }
+
+  function position(triggerEl, panelEl) {
+    const tRect = triggerEl.getBoundingClientRect();
+    const pRect = panelEl?.getBoundingClientRect();
+    const margin = 10;
+    const popW = pop.offsetWidth || 260;
+    const popH = pop.offsetHeight || 180;
+    const rightAnchor = pRect ? pRect.right : tRect.right;
+    let left;
+    if (window.innerWidth - rightAnchor - margin >= popW) {
+      left = rightAnchor + margin;
+    } else {
+      left = Math.max(margin, (pRect ? pRect.left : tRect.left) - popW - margin);
+    }
+    let top = Math.max(margin, Math.min(tRect.top, window.innerHeight - popH - margin));
+    pop.style.left = `${left}px`;
+    pop.style.top = `${top}px`;
+  }
+
+  function open(value, provider, model, triggerEl, panelEl) {
+    activeValue = value;
+    build(provider, model);
+    pop.style.cssText =
+      'transition:none; opacity:0; transform:translateX(-6px) scale(0.97); visibility:hidden; left:-9999px; top:-9999px;';
+    pop.classList.remove('chat-model-info-popover--open');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        position(triggerEl, panelEl);
+        pop.style.cssText = `left:${pop.style.left}; top:${pop.style.top};`;
+        pop.classList.add('chat-model-info-popover--open');
+      });
+    });
+    disposeListeners?.();
+    const onDocClick = (e) => {
+      if (!pop.contains(e.target) && !triggerEl.contains(e.target)) close();
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') close();
+    };
+    setTimeout(() => {
+      document.addEventListener('click', onDocClick, { capture: true });
+      document.addEventListener('keydown', onKey);
+    }, 0);
+    disposeListeners = () => {
+      document.removeEventListener('click', onDocClick, { capture: true });
+      document.removeEventListener('keydown', onKey);
+    };
+  }
+
+  function close() {
+    activeValue = null;
+    pop.classList.remove('chat-model-info-popover--open');
+    disposeListeners?.();
+    disposeListeners = null;
+  }
+
+  function isOpenFor(value) {
+    return activeValue === value;
+  }
+
+  function dispose() {
+    close();
+    pop.remove();
+  }
+
+  return { open, close, isOpenFor, dispose };
+}
+
 // ── createDropDownLite ─────────────────────────────────────────────────────
 // A compact, inline-friendly dropdown built for settings panels and tight
 // layouts. The option panel is portalled to document.body so it is never
@@ -22,6 +258,7 @@ export function createDropDownLite({
   let currentValue = value;
   let searchQuery = '';
   let dropdownController = null;
+  const infoPopover = createModelInfoPopoverDdm();
 
   // ── Wrapper ──────────────────────────────────────────────────────────────
 
@@ -151,7 +388,33 @@ export function createDropDownLite({
 
       const labelSpan = document.createElement('span');
       labelSpan.textContent = opt.label;
+      labelSpan.style.flex = '1';
       item.append(labelSpan);
+
+      // Info button — only when the option carries model metadata worth showing
+      if (opt.model && hasModelInfo(opt.model)) {
+        const infoBtn = createElement('button', 'joanium-ddm-lite__info-btn');
+        infoBtn.type = 'button';
+        infoBtn.setAttribute('aria-label', 'Model info');
+        infoBtn.append(createInfoIcon());
+
+        infoBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (infoPopover.isOpenFor(opt.value)) {
+            infoPopover.close();
+            infoBtn.classList.remove('joanium-ddm-lite__info-btn--active');
+            return;
+          }
+          // Clear any other active button
+          panel
+            .querySelectorAll('.joanium-ddm-lite__info-btn--active')
+            .forEach((b) => b.classList.remove('joanium-ddm-lite__info-btn--active'));
+          infoBtn.classList.add('joanium-ddm-lite__info-btn--active');
+          infoPopover.open(opt.value, opt.provider, opt.model, infoBtn, panel);
+        });
+
+        item.append(infoBtn);
+      }
 
       item.addEventListener('click', (e) => {
         e.stopPropagation();

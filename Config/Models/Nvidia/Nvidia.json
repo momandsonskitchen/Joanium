@@ -51,6 +51,9 @@
     "google/deplot": {
       "name": "google/deplot"
     },
+    "google/diffusiongemma-26b-a4b-it": {
+      "name": "Diffusiongemma 26B A4b It"
+    },
     "google/gemma-2-2b-it": {
       "name": "google/gemma-2-2b-it"
     },
@@ -383,22 +386,6 @@
         "output": 0.1
       }
     },
-    "qwen/qwen3-coder-480b-a35b-instruct": {
-      "name": "Qwen 3 Coder 480B A35B",
-      "description": "Alibaba's specialized coding MoE — 480B params, strong SWE performance via NVIDIA NIM",
-      "context_window": 131072,
-      "max_output": 8192,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.1,
-        "output": 0.2
-      }
-    },
     "qwen/qwen3-next-80b-a3b-instruct": {
       "name": "qwen/qwen3-next-80b-a3b-instruct"
     },
@@ -458,5 +445,5 @@
       "name": "zyphra/zamba2-7b-instruct"
     }
   },
-  "_syncedAt": "2026-06-10T08:24:57.884Z"
+  "_syncedAt": "2026-06-12T05:10:34.166Z"
 }

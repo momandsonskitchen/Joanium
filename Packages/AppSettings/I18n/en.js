@@ -22,6 +22,10 @@ const en = {
       label: 'Show tech feed',
       description: 'Show trending repositories and developer news on the welcome screen.',
     },
+    showChangelog: {
+      label: 'Show changelog on update',
+      description: 'Show the "What\'s New" in Joanium after the update to a new version.',
+    },
     autoMemoryUpdates: {
       label: 'Auto memory updates',
       description: 'Let Joanium update personal memory from completed conversations while idle.',

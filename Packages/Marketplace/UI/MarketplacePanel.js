@@ -1,5 +1,6 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -138,6 +139,16 @@ export function createMarketplacePanel(strings) {
     searchWrap.append(_search.element);
 
     _listEl = createElement('div', 'marketplace__list-content');
+    const listWrap = createElement('div', 'marketplace__list-wrap');
+    Object.assign(listWrap.style, {
+      flex: 1,
+      minHeight: 0,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+    listWrap.append(_listEl);
+    attachCustomScrollbar(listWrap, _listEl, { right: 4, top: 4, bottom: 4, minThumb: 24 });
 
     // Infinite-scroll listener on the scrollable list container
     _listEl.addEventListener('scroll', () => {
@@ -148,7 +159,7 @@ export function createMarketplacePanel(strings) {
       }
     });
 
-    listCard.append(searchWrap, _listEl);
+    listCard.append(searchWrap, listWrap);
     listCol.append(listCard);
 
     // Right column — viewer card

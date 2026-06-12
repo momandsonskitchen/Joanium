@@ -4,27 +4,15 @@
   "endpoint": "https://api.anthropic.com/v1/messages",
   "auth_header": "x-api-key",
   "models": {
+    "claude-fable-5": {
+      "name": "Claude Fable 5"
+    },
+    "claude-opus-4-8": {
+      "name": "Claude Opus 4.8"
+    },
     "claude-opus-4-7": {
       "name": "Claude Opus 4.7",
       "description": "Latest flagship — best coding, vision (2576px), and self-checking on complex multi-step tasks",
-      "context_window": 1000000,
-      "max_output": 32000,
-      "thinking": true,
-      "thinking_budget": 10000,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": true,
-        "docx": false
-      },
-      "pricing": {
-        "input": 15,
-        "output": 75
-      }
-    },
-    "claude-opus-4-6": {
-      "name": "Claude Opus 4.6",
-      "description": "Previous flagship with 1M context — still highly capable for complex reasoning and coding",
       "context_window": 1000000,
       "max_output": 32000,
       "thinking": true,
@@ -58,10 +46,10 @@
         "output": 15
       }
     },
-    "claude-opus-4-5": {
-      "name": "Claude Opus 4.5",
-      "description": "Older flagship generation — solid reasoning and multimodal capability",
-      "context_window": 200000,
+    "claude-opus-4-6": {
+      "name": "Claude Opus 4.6",
+      "description": "Previous flagship with 1M context — still highly capable for complex reasoning and coding",
+      "context_window": 1000000,
       "max_output": 32000,
       "thinking": true,
       "thinking_budget": 10000,
@@ -76,39 +64,24 @@
         "output": 75
       }
     },
-    "claude-sonnet-4-5": {
-      "name": "Claude Sonnet 4.5",
-      "description": "Previous balanced model — solid performance at a competitive price",
-      "context_window": 200000,
-      "max_output": 64000,
-      "thinking": true,
-      "thinking_budget": 8000,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": true,
-        "docx": false
-      },
-      "pricing": {
-        "input": 3,
-        "output": 15
-      }
+    "claude-opus-4-5-20251101": {
+      "name": "Claude Opus 4.5"
     },
-    "claude-haiku-4-5": {
-      "name": "Claude Haiku 4.5",
-      "description": "Fast and compact model for everyday tasks — lowest latency in the Claude 4 family",
-      "context_window": 200000,
-      "max_output": 16000,
-      "inputs": {
-        "text": true,
-        "image": true,
-        "pdf": true,
-        "docx": false
-      },
-      "pricing": {
-        "input": 0.25,
-        "output": 1.25
-      }
+    "claude-haiku-4-5-20251001": {
+      "name": "Claude Haiku 4.5"
+    },
+    "claude-sonnet-4-5-20250929": {
+      "name": "Claude Sonnet 4.5"
+    },
+    "claude-opus-4-1-20250805": {
+      "name": "Claude Opus 4.1"
+    },
+    "claude-opus-4-20250514": {
+      "name": "Claude Opus 4"
+    },
+    "claude-sonnet-4-20250514": {
+      "name": "Claude Sonnet 4"
     }
-  }
+  },
+  "_syncedAt": "2026-06-12T05:11:04.413Z"
 }

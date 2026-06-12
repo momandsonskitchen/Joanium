@@ -10,7 +10,14 @@ import {
 import { getSearchEngineIconPath } from '../../Shared/Icons/SearchEngineIcons/SearchEngineIcons.js';
 import { createSettingsPanelState } from './Utils.js';
 
-const OPTION_KEYS = ['runOnStartup', 'systemTray', 'keepAwake', 'completionSound', 'showTechFeed'];
+const OPTION_KEYS = [
+  'runOnStartup',
+  'systemTray',
+  'keepAwake',
+  'completionSound',
+  'showTechFeed',
+  'showChangelog',
+];
 
 export function createAppSettingsPanel(strings) {
   const view = createElement('div', 'app-settings');

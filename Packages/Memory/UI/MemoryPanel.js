@@ -3,6 +3,7 @@ import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { createDreamPanel } from './DreamPanel.js';
 import { MEMORY_PROMPTS } from './Prompts.js';
@@ -523,7 +524,17 @@ export function createMemoryPanel(strings) {
 
     searchWrap.append(search.element, dreamButton, importButton);
     listEl = createElement('div', 'chat-memory__list');
-    listColumn.append(searchWrap, listEl);
+    const listWrap = createElement('div', 'chat-memory__list-wrap');
+    Object.assign(listWrap.style, {
+      flex: 1,
+      minHeight: 0,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+    listWrap.append(listEl);
+    attachCustomScrollbar(listWrap, listEl, { right: 4, top: 4, bottom: 4, minThumb: 24 });
+    listColumn.append(searchWrap, listWrap);
 
     // ── Editor view ──────────────────────────────────────────────────────
     editorView = createElement('div', 'chat-memory__editor-view');

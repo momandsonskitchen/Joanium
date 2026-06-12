@@ -6,6 +6,89 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.612.0] - 2026-06-12
+
+* Release.yml Update
+
+---
+
+## [2026.611.5] - 2026-06-11
+
+* chore(release): bump version to 2026.611.5
+* Personas Scrollbar Fix
+* Skills Panel Scroll Fix
+* Scrollable Fix In Templates And In Agents
+* Improvered Scrollbar
+* Updated AI Models
+* Fixed the scroll issue in agents history view
+* Updated AI Models
+* Agent History View Fixes
+* Fixed The Agents History Layout
+* Updated AI Models
+* Agent History View Update
+* Updated Agent History View
+* Updated AI Models
+* Agents View Dark Theme Fix
+
+---
+
+## [2026.611.4] - 2026-06-11
+
+* chore(release): bump version to 2026.611.4
+* About Panel Update
+* Auto Update Silent Update Has Been Disabled
+
+---
+
+## [2026.611.3] - 2026-06-11
+
+* chore(release): bump version to 2026.611.3
+* About Panel Fix
+* Updated AI Models
+
+---
+
+## [2026.611.2] - 2026-06-11
+
+* chore(release): bump version to 2026.611.2
+* Bug Fix In About Panel
+
+---
+
+## [2026.611.1] - 2026-06-11
+
+* chore(release): bump version to 2026.611.1
+* Added ChangeLog to final build
+
+---
+
+## [2026.611.0] - 2026-06-11
+
+* chore(release): bump version to 2026.611.0
+* Updated AI Models
+* Updated AI Models
+* Added New Whats New Images
+* Updated AI Models
+* Added New Anthropic AI Models
+* Added Whats New Overlay
+* Updated AI Models
+* Updated AI Models
+* Updated AI Models
+* Fixed the hover over ai models
+
+---
+
+## [2026.610.0] - 2026-06-10
+
+* chore(release): bump version to 2026.610.0
+* Added Support For AI Model Info In Agents and in Settings Panel
+* Added Support For Null Objects In Model Files
+* Added Model Info for more info about the the ai model before switching
+* Updated AI Models
+* Updated AI Models
+
+---
+
 ## [2026.609.1] - 2026-06-09
 
 * chore(release): bump version to 2026.609.1

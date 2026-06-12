@@ -5,22 +5,6 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "accounts/fireworks/models/deepseek-v4-pro": {
-      "name": "DeepSeek V4 Pro",
-      "description": "DeepSeek's latest frontier model — strong reasoning, coding, and math at competitive pricing with 1M context",
-      "context_window": 1000000,
-      "max_output": 32768,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 1.74,
-        "output": 3.48
-      }
-    },
     "accounts/fireworks/models/kimi-k2p6": {
       "name": "Kimi K2.6",
       "description": "Moonshot AI's frontier MoE model — top-tier coding, reasoning, and agentic tasks with 262K context",
@@ -35,6 +19,22 @@
       "pricing": {
         "input": 0.95,
         "output": 4
+      }
+    },
+    "accounts/fireworks/models/deepseek-v4-pro": {
+      "name": "DeepSeek V4 Pro",
+      "description": "DeepSeek's latest frontier model — strong reasoning, coding, and math at competitive pricing with 1M context",
+      "context_window": 1000000,
+      "max_output": 32768,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 1.74,
+        "output": 3.48
       }
     },
     "accounts/fireworks/models/kimi-k2p5": {
@@ -60,5 +60,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-10T08:25:19.192Z"
+  "_syncedAt": "2026-06-12T05:10:47.958Z"
 }

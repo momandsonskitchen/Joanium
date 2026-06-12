@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS = Object.freeze({
   autoMemoryUpdates: true,
   autoUpdate: true,
   showTechFeed: true,
+  showChangelog: true,
   defaultView: 'chat',
   defaultModel: null,
   defaultSearchEngine: 'google',
@@ -27,6 +28,7 @@ function normalizeSettings(candidate = {}) {
     autoMemoryUpdates: Boolean(candidate.autoMemoryUpdates ?? DEFAULT_SETTINGS.autoMemoryUpdates),
     autoUpdate: true, // always on — not user-configurable
     showTechFeed: Boolean(candidate.showTechFeed ?? DEFAULT_SETTINGS.showTechFeed),
+    showChangelog: Boolean(candidate.showChangelog ?? DEFAULT_SETTINGS.showChangelog),
     defaultView: candidate.defaultView ?? DEFAULT_SETTINGS.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
     defaultSearchEngine: VALID_SEARCH_ENGINES.has(candidate.defaultSearchEngine)

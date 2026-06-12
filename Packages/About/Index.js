@@ -24,6 +24,14 @@ export async function createPackage({ rootDirectory }) {
           return null;
         },
       },
+      {
+        channel: 'whats-new:get',
+        handler: async () => aboutStateManager.getWhatsNew(),
+      },
+      {
+        channel: 'whats-new:mark-seen',
+        handler: async (_event, version) => aboutStateManager.markWhatsNewSeen(version),
+      },
     ],
   };
 }

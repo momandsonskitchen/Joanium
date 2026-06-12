@@ -69,10 +69,12 @@ export function createDefaultUserState() {
       autoMemoryUpdates: true,
       autoUpdate: true,
       showTechFeed: true,
+      showChangelog: true,
       defaultView: 'chat',
       defaultModel: null,
       defaultSearchEngine: 'google',
     },
+    whatsNewSeenVersion: null,
     lastDreamt: null,
     theme: {
       mode: 'system',
@@ -129,6 +131,10 @@ export function mergeUserStates(baseState, nextState = {}) {
       typeof nextState.appSettings === 'object'
         ? { ...baseState.appSettings, ...nextState.appSettings }
         : baseState.appSettings,
+    whatsNewSeenVersion:
+      nextState.whatsNewSeenVersion !== undefined
+        ? nextState.whatsNewSeenVersion
+        : baseState.whatsNewSeenVersion,
     lastDreamt: nextState.lastDreamt !== undefined ? nextState.lastDreamt : baseState.lastDreamt,
     theme:
       nextState.theme !== undefined &&
@@ -285,6 +291,7 @@ function sanitizeAppSettings(candidate) {
     ),
     autoUpdate: Boolean(candidate.autoUpdate ?? candidate.auto_update ?? defaults.autoUpdate),
     showTechFeed: Boolean(candidate.showTechFeed ?? defaults.showTechFeed),
+    showChangelog: Boolean(candidate.showChangelog ?? defaults.showChangelog),
     defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
     defaultSearchEngine: VALID_SEARCH_ENGINES.has(candidate.defaultSearchEngine)
@@ -363,6 +370,10 @@ export function sanitizeIncomingUserState(candidateState) {
     activePersona: sanitizeActivePersona(candidateState?.activePersona),
     windowState: sanitizeWindowState(candidateState?.windowState),
     appSettings: sanitizeAppSettings(candidateState?.appSettings),
+    whatsNewSeenVersion:
+      typeof candidateState?.whatsNewSeenVersion === 'string'
+        ? candidateState.whatsNewSeenVersion.trim()
+        : null,
     lastDreamt: sanitizeCleanupTimestamp(candidateState?.lastDreamt),
     theme: sanitizeTheme(candidateState?.theme),
   });

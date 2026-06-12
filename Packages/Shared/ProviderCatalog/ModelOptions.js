@@ -18,6 +18,9 @@ export function buildAvailableModelOptions(
         value: `${provider.id}/${model.id}`,
         label: model.name ?? model.id,
         iconPath: provider.iconPath ?? null,
+        // Pass through full objects so dropdowns can show model info popovers.
+        model,
+        provider,
       });
     }
   }

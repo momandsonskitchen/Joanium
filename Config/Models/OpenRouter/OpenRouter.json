@@ -651,19 +651,6 @@
         "text": true
       }
     },
-    "moonshotai/kimi-k2.6:free": {
-      "name": "MoonshotAI: Kimi K2.6 (free)",
-      "description": "Kimi K2.6 is Moonshot AI's next-generation multimodal model, designed for long-horizon coding, coding-driven UI/UX generation, and multi-agent orchestration. It handles complex end-to-end coding tasks across Python, Rust, and Go, and...",
-      "context_window": 262144,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "moonshotai/kimi-k2.6": {
       "name": "MoonshotAI: Kimi K2.6",
       "description": "Kimi K2.6 is Moonshot AI's next-generation multimodal model, designed for long-horizon coding, coding-driven UI/UX generation, and multi-agent orchestration. It handles complex end-to-end coding tasks across Python, Rust, and Go, and...",
@@ -2365,18 +2352,6 @@
       "pricing": {
         "input": 0,
         "output": 0
-      },
-      "inputs": {
-        "text": true
-      }
-    },
-    "nvidia/nemotron-nano-9b-v2": {
-      "name": "NVIDIA: Nemotron Nano 9B V2",
-      "description": "NVIDIA-Nemotron-Nano-9B-v2 is a large language model (LLM) trained from scratch by NVIDIA, and designed as a unified model for both reasoning and non-reasoning tasks. It responds to user queries and...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.04,
-        "output": 0.16
       },
       "inputs": {
         "text": true
@@ -4269,5 +4244,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-10T08:24:58.760Z"
+  "_syncedAt": "2026-06-12T05:10:37.807Z"
 }

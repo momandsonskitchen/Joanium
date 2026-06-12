@@ -4,6 +4,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { formatRelativeSessionTime, getRelativeDayGroup } from '../../Shared/Utils/DateUtils.js';
 
 // ---------------------------------------------------------------------------
@@ -385,8 +386,18 @@ export function createHistoryPanel(
 
     // Session list
     const contentEl = createElement('div', 'chat-history__content');
+    const contentWrap = createElement('div', 'chat-history__content-wrap');
+    Object.assign(contentWrap.style, {
+      flex: 1,
+      minHeight: 0,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+    contentWrap.append(contentEl);
+    attachCustomScrollbar(contentWrap, contentEl, { right: 4, top: 4, bottom: 4, minThumb: 24 });
 
-    panel.append(header, searchWrap, contentEl);
+    panel.append(header, searchWrap, contentWrap);
 
     // Expose internal refs used by the caller (ChatApp) for refresh + search clear
     panel._contentEl = contentEl;

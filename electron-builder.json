@@ -11,7 +11,8 @@
     "Datasets/**/*",
     "Packages/**/*",
     "!Packages/**/__tests__/**",
-    "Prompts/**/*"
+    "Prompts/**/*",
+    "CHANGELOG.md"
   ],
   "extraResources": [
     {

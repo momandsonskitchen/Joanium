@@ -2,6 +2,7 @@ import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 import { createTerminalCallCard } from '../../Shared/TerminalCallCard/TerminalCallCard.js';
@@ -692,7 +693,17 @@ export function createEventsPanel(strings) {
     emptyEl = createElement('div', 'events-feed__state');
     emptyEl.hidden = true;
     listEl = createElement('div', 'events-feed__list');
-    feed.append(filters, loadingEl, emptyEl, listEl);
+    const listWrap = createElement('div', 'events-feed__list-wrap');
+    Object.assign(listWrap.style, {
+      flex: 1,
+      minHeight: 0,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+    listWrap.append(listEl);
+    attachCustomScrollbar(listWrap, listEl, { right: 4, top: 4, bottom: 4, minThumb: 24 });
+    feed.append(filters, loadingEl, emptyEl, listWrap);
 
     detailEl = createElement('aside', 'events-detail');
     renderDetail(null);

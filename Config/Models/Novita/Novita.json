@@ -47,6 +47,25 @@
         "text": true
       }
     },
+    "stepfun/step-3.7-flash": {
+      "name": "Step-3.7-Flash",
+      "description": "Step-3.7-Flash is StepFun's fast reasoning model with 256K context window, three-level reasoning  effort control (low/medium/high), strong multi-step  tool calling and agent capabilities.",
+      "context_window": 262144,
+      "max_output": 256,
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "nvidia/nemotron-3-nano-30b-a3b": {
+      "name": "Nemotron 3 Nano 30B A3B",
+      "description": "Nemotron-3-Nano-30B-A3B is NVIDIA's compute-efficient, open-weight reasoning model built for agentic AI. Its Mixture-of-Experts design (30B total / 3.5B active) with a hybrid Mamba-2 + Transformer architecture delivers strong reasoning and tool use at a fraction of the compute required by comparable",
+      "context_window": 262144,
+      "max_output": 32768,
+      "inputs": {
+        "text": true
+      }
+    },
     "baidu/cobuddy": {
       "name": "CoBuddy",
       "description": "CoBuddy is a specialized code generation model developed by Baidu, engineered with targeted optimizations for Coding and AI Agent scenarios. It delivers exceptional performance, characterized by high inference throughput and ultra-low end-to-end (E2E) latency.",
@@ -999,15 +1018,6 @@
         "text": true
       }
     },
-    "nvidia/nemotron-3-nano-30b-a3b": {
-      "name": "Nemotron 3 Nano 30B A3B",
-      "description": "Nemotron-3-Nano-30B-A3B is NVIDIA's compute-efficient, open-weight reasoning model built for agentic AI. Its Mixture-of-Experts design (30B total / 3.5B active) with a hybrid Mamba-2 + Transformer architecture delivers strong reasoning and tool use at a fraction of the compute required by comparable",
-      "context_window": 262144,
-      "max_output": 32768,
-      "inputs": {
-        "text": true
-      }
-    },
     "inclusionai/ring-2.6-1t": {
       "name": "Ring-2.6-1T",
       "context_window": 262144,
@@ -1265,5 +1275,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-10T08:25:27.225Z"
+  "_syncedAt": "2026-06-12T05:12:56.767Z"
 }

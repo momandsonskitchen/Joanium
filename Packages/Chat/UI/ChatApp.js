@@ -34,6 +34,7 @@ import { createBrowserPreviewPanel } from './BrowserPreviewPanel.js';
 import { createTechFeedPanel } from './TechFeedPanel.js';
 import { createDiagnosticPanel, measureFetch, resolveProviderBaseUrl } from './DiagnosticPanel.js';
 import { createDropZoneOverlay } from './DropZoneOverlay.js';
+import { createWhatsNewOverlay } from './WhatsNewOverlay.js';
 import { createFileDiffTracker } from './FileDiffTracker.js';
 import { createGitBranchPickerPanel, orderGitBranches } from './GitBranchPickerPanel.js';
 import {
@@ -3853,6 +3854,24 @@ export async function createChatView(
   }
 
   scroll = createElement('div', 'chat-stage__scroll');
+  Object.assign(scroll.style, {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+  });
+  const scrollWrap = createElement('div', 'chat-stage__scroll-wrap');
+  Object.assign(scrollWrap.style, {
+    flex: 1,
+    height: '100%',
+    minHeight: 0,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  });
+  scrollWrap.append(scroll);
+  attachCustomScrollbar(scrollWrap, scroll, { right: 4, top: 48, bottom: 4, minThumb: 24 });
+
   bottom = createElement('div', 'chat-stage__bottom');
   const rawGreeting = isBirthday
     ? getBirthdayGreeting(firstName)
@@ -4268,7 +4287,7 @@ export async function createChatView(
     }
   });
 
-  view.append(scroll, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
+  view.append(scrollWrap, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
   track = createElement('div', 'chat-thread-track');
   track.hidden = true;
   trackLabel = createElement('div', 'chat-thread-track__label');
@@ -4461,6 +4480,27 @@ export async function createChatView(
   });
 
   scheduleMemorySync(18000);
+
+  // ── What's New overlay (shown once after update) ───────────────────────
+  void (async () => {
+    try {
+      const whatsNewData = await invokeIpc('whats-new:get');
+      if (!whatsNewData?.shouldShow) return;
+
+      const whatsNewOverlay = createWhatsNewOverlay({
+        strings,
+        version: whatsNewData.version,
+        imagePath: whatsNewData.imagePath || '',
+        entries: whatsNewData.entries ?? [],
+        onDismiss() {
+          void invokeIpc('whats-new:mark-seen', whatsNewData.version).catch(() => {});
+        },
+      });
+      view.append(whatsNewOverlay);
+    } catch {
+      // Non-fatal — the overlay is a nice-to-have.
+    }
+  })();
 
   return {
     element: view,

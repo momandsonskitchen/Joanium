@@ -9,8 +9,8 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(250, 243, 233, 0.9)),
     rgba(255, 255, 255, 0.68);
   box-shadow:
-    inset 0 0 0 1px rgba(170, 134, 104, 0.12),
-    0 14px 28px rgba(130, 95, 65, 0.08);
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.1),
+    0 14px 28px rgba(80, 35, 105, 0.08);
   -webkit-app-region: no-drag;
   animation: chat-file-diff-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -38,7 +38,7 @@
   max-height: 212px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(170, 134, 104, 0.28) transparent;
+  scrollbar-color: rgba(var(--color-accent-rgb), 0.22) transparent;
 }
 
 .chat-file-diff__card {
@@ -46,7 +46,7 @@
   overflow: hidden;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(170, 134, 104, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.1);
   transition:
     box-shadow 140ms ease,
     transform 140ms ease;
@@ -71,7 +71,7 @@
 .chat-file-diff__card--open {
   box-shadow:
     inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.2),
-    0 10px 22px rgba(130, 95, 65, 0.07);
+    0 10px 22px rgba(80, 35, 105, 0.07);
 }
 
 .chat-file-diff__card-button {
@@ -137,11 +137,11 @@
 }
 
 .chat-file-diff__count--add {
-  color: #1f9d58;
+  color: var(--color-success-text);
 }
 
 .chat-file-diff__count--remove {
-  color: #c44d34;
+  color: var(--color-danger);
 }
 
 .chat-file-diff__chevron {
@@ -158,13 +158,13 @@
 }
 
 .chat-file-diff__diff {
-  border-top: 1px solid rgba(170, 134, 104, 0.11);
-  background: rgba(250, 246, 240, 0.84);
+  border-top: 1px solid rgba(var(--color-accent-rgb), 0.09);
+  background: rgba(248, 242, 254, 0.84);
   max-height: 240px;
   overflow-y: auto;
   padding: 8px 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(170, 134, 104, 0.28) transparent;
+  scrollbar-color: rgba(var(--color-accent-rgb), 0.22) transparent;
 }
 
 .chat-file-diff__diff[hidden] {
@@ -184,12 +184,12 @@
 
 .chat-file-diff__line--add {
   background: rgba(31, 157, 88, 0.08);
-  color: #1f9d58;
+  color: var(--color-success-text);
 }
 
 .chat-file-diff__line--remove {
   background: rgba(196, 77, 52, 0.08);
-  color: #c44d34;
+  color: var(--color-danger);
 }
 
 .chat-file-diff__line--equal {
