@@ -1,8 +1,6 @@
-export const setupStepIds = ['consent', 'name', 'dob', 'providers', 'usage', 'welcome'];
+import { deepClone } from '../../Shared/Utils/ValueUtils.js';
 
-function cloneState(value) {
-  return JSON.parse(JSON.stringify(value));
-}
+export const setupStepIds = ['consent', 'name', 'dob', 'providers', 'usage', 'welcome'];
 
 function isValidDate({ day, month, year }) {
   const normalizedDay = Number.parseInt(day, 10);
@@ -123,7 +121,7 @@ export function findInitialScene(state, providersById) {
 }
 
 export function hydrateSetupState({ persistedState, providers }) {
-  const state = cloneState(persistedState);
+  const state = deepClone(persistedState);
   state.providers.details = buildProviderDetails(providers, state.providers.details);
   return state;
 }
@@ -135,8 +133,8 @@ export function serializeSetupState(state, providersById) {
     onboardingCompleted: state.onboardingCompleted,
     completedAt: state.completedAt,
     lastCompletedStep: calculateLastCompletedStep(state, providersById),
-    profile: cloneState(state.profile),
-    providers: cloneState(state.providers),
+    profile: deepClone(state.profile),
+    providers: deepClone(state.providers),
     usageModes: [...state.usageModes],
   };
 }

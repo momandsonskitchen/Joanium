@@ -1,6 +1,9 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { deepClone } from '../../Shared/Utils/ValueUtils.js';
+import { normalizeString } from '../../Shared/Utils/StringUtils.js';
+import { toIso } from '../../Shared/Utils/DateUtils.js';
 
 const DEFAULT_CHANNELS = Object.freeze({
   telegram: {
@@ -68,19 +71,6 @@ const DEFAULT_CHANNELS = Object.freeze({
 const CHANNEL_NAMES = Object.keys(DEFAULT_CHANNELS);
 const MESSAGE_LIMIT = 500;
 
-function clone(value) {
-  return JSON.parse(JSON.stringify(value));
-}
-
-function normalizeString(value) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function toIso(value, fallback = new Date().toISOString()) {
-  const date = value ? new Date(value) : new Date(fallback);
-  return Number.isNaN(date.getTime()) ? fallback : date.toISOString();
-}
-
 function createMessageId() {
   return `channel-message-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -93,7 +83,7 @@ function normalizeChannels(candidate) {
   for (const name of CHANNEL_NAMES) {
     const defaults = DEFAULT_CHANNELS[name];
     const existing = source[name] && typeof source[name] === 'object' ? source[name] : {};
-    channels[name] = { ...clone(defaults), ...existing };
+    channels[name] = { ...deepClone(defaults), ...existing };
     channels[name].enabled = Boolean(channels[name].enabled);
     channels[name].connectedAt = channels[name].connectedAt ?? null;
   }
@@ -309,7 +299,7 @@ export function createChannelStateManager({ rootDirectory }) {
     },
 
     async removeChannel(name) {
-      await updateChannel(name, () => ({ ...clone(DEFAULT_CHANNELS[name]), enabled: false }));
+      await updateChannel(name, () => ({ ...deepClone(DEFAULT_CHANNELS[name]), enabled: false }));
       return { ok: true };
     },
 

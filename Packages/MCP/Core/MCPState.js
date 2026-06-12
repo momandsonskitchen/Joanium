@@ -2,21 +2,13 @@ import path from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { createSlugId, normalizeString } from '../../Shared/Utils/StringUtils.js';
 
 const VALID_TRANSPORTS = new Set(['stdio', 'http']);
 
-function createServerId(name) {
-  const stem = sanitizeFileStem(name || 'mcp-server') || 'mcp-server';
-  return `${stem}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function sanitizeString(value) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
 function sanitizeArgs(value) {
   if (Array.isArray(value)) {
-    return value.map((item) => sanitizeString(item)).filter(Boolean);
+    return value.map((item) => normalizeString(item)).filter(Boolean);
   }
 
   if (typeof value === 'string') {
@@ -36,26 +28,26 @@ function sanitizeEnv(value) {
 
   return Object.fromEntries(
     Object.entries(value)
-      .map(([key, val]) => [sanitizeString(key), sanitizeString(val)])
+      .map(([key, val]) => [normalizeString(key), normalizeString(val)])
       .filter(([key]) => key),
   );
 }
 
 export function sanitizeServerConfig(candidate = {}) {
   const transport = VALID_TRANSPORTS.has(candidate.transport) ? candidate.transport : 'stdio';
-  const name = sanitizeString(candidate.name) || 'MCP Server';
-  const id = sanitizeFileStem(candidate.id) || createServerId(name);
+  const name = normalizeString(candidate.name) || 'MCP Server';
+  const id = sanitizeFileStem(candidate.id) || createSlugId(name, 'mcp-server');
 
   return {
     id,
     name,
     transport,
     enabled: Boolean(candidate.enabled),
-    description: sanitizeString(candidate.description),
-    command: transport === 'stdio' ? sanitizeString(candidate.command) : '',
+    description: normalizeString(candidate.description),
+    command: transport === 'stdio' ? normalizeString(candidate.command) : '',
     args: transport === 'stdio' ? sanitizeArgs(candidate.args) : [],
     env: transport === 'stdio' ? sanitizeEnv(candidate.env) : {},
-    url: transport === 'http' ? sanitizeString(candidate.url) : '',
+    url: transport === 'http' ? normalizeString(candidate.url) : '',
   };
 }
 

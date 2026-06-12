@@ -1,72 +1,10 @@
-const MAX_DIFF_LINES = 400;
-const CONTEXT_LINES = 2;
+import { escapeHtml } from '../../Shared/Utils/DomUtils.js';
+import { computeDiff } from '../../Shared/Utils/DiffUtils.js';
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+const CONTEXT_LINES = 2;
 
 function normalizePath(value = '') {
   return String(value ?? '').replace(/\\/g, '/');
-}
-
-function computeDiff(before, after) {
-  const left = before ? before.split('\n') : [];
-  const right = after ? after.split('\n') : [];
-
-  if (left.length > MAX_DIFF_LINES || right.length > MAX_DIFF_LINES) {
-    const leftSet = new Set(left);
-    const rightSet = new Set(right);
-    return {
-      ops: null,
-      added: right.filter((line) => !leftSet.has(line)).length,
-      removed: left.filter((line) => !rightSet.has(line)).length,
-      tooLarge: true,
-    };
-  }
-
-  const rows = left.length;
-  const cols = right.length;
-  const matrix = Array.from({ length: rows + 1 }, () => new Int32Array(cols + 1));
-
-  for (let row = 1; row <= rows; row += 1) {
-    for (let col = 1; col <= cols; col += 1) {
-      matrix[row][col] =
-        left[row - 1] === right[col - 1]
-          ? matrix[row - 1][col - 1] + 1
-          : Math.max(matrix[row - 1][col], matrix[row][col - 1]);
-    }
-  }
-
-  const ops = [];
-  let row = rows;
-  let col = cols;
-
-  while (row > 0 || col > 0) {
-    if (row > 0 && col > 0 && left[row - 1] === right[col - 1]) {
-      ops.push({ type: 'eq', line: left[row - 1] });
-      row -= 1;
-      col -= 1;
-    } else if (col > 0 && (row === 0 || matrix[row][col - 1] >= matrix[row - 1][col])) {
-      ops.push({ type: 'add', line: right[col - 1] });
-      col -= 1;
-    } else {
-      ops.push({ type: 'rem', line: left[row - 1] });
-      row -= 1;
-    }
-  }
-
-  ops.reverse();
-
-  return {
-    ops,
-    added: ops.filter((entry) => entry.type === 'add').length,
-    removed: ops.filter((entry) => entry.type === 'rem').length,
-    tooLarge: false,
-  };
 }
 
 function buildDiffHtml(ops) {

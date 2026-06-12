@@ -313,7 +313,7 @@ const FONT_MODES = new Set([
   'poppins',
 ]);
 
-function sanitizeTheme(candidate) {
+export function sanitizeTheme(candidate) {
   const defaults = createDefaultUserState().theme;
   if (!candidate || typeof candidate !== 'object') {
     return defaults;

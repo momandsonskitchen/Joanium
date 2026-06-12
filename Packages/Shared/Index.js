@@ -7,18 +7,33 @@ export {
   formatRelativeSessionTime,
   getRelativeDayGroup,
   startOfLocalDay,
+  toIso,
+  todayDateString,
 } from './Utils/DateUtils.js';
-export { createElement, formatText } from './Utils/DomUtils.js';
+export { createElement, escapeHtml, formatText } from './Utils/DomUtils.js';
+export { computeDiff } from './Utils/DiffUtils.js';
 export {
   collapseWhitespace,
   createSlugId,
+  extractJsonObject,
   getNameInitials,
+  normalizeString,
   truncate,
 } from './Utils/StringUtils.js';
-export { clampInteger, compactObject, optionalText, toBoolean } from './Utils/ValueUtils.js';
+export {
+  clampInteger,
+  compactObject,
+  deepClone,
+  optionalText,
+  toBoolean,
+} from './Utils/ValueUtils.js';
 export {
   createNamespacedMarkdownLibrary,
   mapNamespacedMarkdownResource,
 } from './Markdown/NamespacedResourceLibrary.js';
 export { createSearchableListColumn, populateSearchableCards } from './PanelList/PanelList.js';
 export { pickOpenPath } from './Electron/DialogUtils.js';
+export {
+  orderProvidersBySelection,
+  providerIsConfigured,
+} from './ProviderCatalog/ProviderUtils.js';

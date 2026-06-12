@@ -13,6 +13,10 @@ export function optionalText(value) {
   return String(value ?? '').trim();
 }
 
+export function deepClone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 export function toBoolean(value, fallback = false) {
   if (value === true || value === 'true' || value === 1 || value === '1') return true;
   if (value === false || value === 'false' || value === 0 || value === '0') return false;

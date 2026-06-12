@@ -10,7 +10,7 @@ import {
 } from '../../../Datasets/Messages.js';
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { copyToClipboard, createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace, extractJsonObject, truncate } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
@@ -572,16 +572,6 @@ export async function createChatView(
       includeToolsetPrompt: false,
     });
     return memoryContext;
-  }
-
-  function extractJsonObject(text = '') {
-    const source = String(text ?? '').trim();
-    const start = source.indexOf('{');
-    const end = source.lastIndexOf('}');
-    if (start < 0 || end <= start) {
-      return null;
-    }
-    return source.slice(start, end + 1);
   }
 
   function normalizeMemoryEntry(entry) {
