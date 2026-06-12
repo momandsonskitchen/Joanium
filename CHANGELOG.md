@@ -6,6 +6,12 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.612.0] - 2026-06-12
+
+* Release.yml Update
+
+---
+
 ## [2026.611.5] - 2026-06-11
 
 * chore(release): bump version to 2026.611.5
