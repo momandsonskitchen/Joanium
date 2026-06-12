@@ -15,6 +15,19 @@ export function getRelativeDayGroup(value) {
   return 'earlier';
 }
 
+export function toIso(value, fallback = Date.now()) {
+  const date = value ? new Date(value) : new Date(fallback);
+  return Number.isNaN(date.getTime()) ? new Date(fallback).toISOString() : date.toISOString();
+}
+
+export function todayDateString() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function formatRelativeSessionTime(value) {
   const date = new Date(value);
   const group = getRelativeDayGroup(value);

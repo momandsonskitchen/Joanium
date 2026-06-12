@@ -1,4 +1,5 @@
 import { formatText } from '../../Shared/Utils/DomUtils.js';
+import { toIso } from '../../Shared/Utils/DateUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import {
   createAssistantContextCache,
@@ -11,11 +12,6 @@ import { CHANNEL_PROMPTS } from './Prompts.js';
 
 const MAX_CHANNEL_TOOL_CALLS = 10;
 const CHANNEL_TERMINAL_TOOLS = new Set(TERMINAL_TOOL_NAMES);
-
-function toIso(value, fallback = Date.now()) {
-  const date = value ? new Date(value) : new Date(fallback);
-  return Number.isNaN(date.getTime()) ? new Date(fallback).toISOString() : date.toISOString();
-}
 
 async function runChannelAgent({ messages, contextCache, personaParts, isNewSession }) {
   return runAssistantPipeline({
