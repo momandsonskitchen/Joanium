@@ -69,6 +69,7 @@ export function createDefaultUserState() {
       autoMemoryUpdates: true,
       autoUpdate: true,
       showTechFeed: true,
+      showChangelog: true,
       defaultView: 'chat',
       defaultModel: null,
       defaultSearchEngine: 'google',
@@ -290,6 +291,7 @@ function sanitizeAppSettings(candidate) {
     ),
     autoUpdate: Boolean(candidate.autoUpdate ?? candidate.auto_update ?? defaults.autoUpdate),
     showTechFeed: Boolean(candidate.showTechFeed ?? defaults.showTechFeed),
+    showChangelog: Boolean(candidate.showChangelog ?? defaults.showChangelog),
     defaultView: VALID_DEFAULT_VIEWS.has(rawView) ? rawView : defaults.defaultView,
     defaultModel: sanitizeDefaultModel(candidate.defaultModel),
     defaultSearchEngine: VALID_SEARCH_ENGINES.has(candidate.defaultSearchEngine)

@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createInputBoxLite } from '../../Shared/InputBoxLite/InputBoxLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
@@ -118,6 +119,17 @@ export function createTemplatesPanel(strings) {
 
     // ── Left: form ────────────────────────────────────────────────────────
     const formCol = createElement('div', 'chat-templates__form-col');
+    const formColWrap = createElement('div', 'chat-templates__form-col-wrap');
+    Object.assign(formColWrap.style, {
+      flex: '0 0 430px',
+      minHeight: 0,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+    formColWrap.append(formCol);
+    attachCustomScrollbar(formColWrap, formCol, { right: 4, top: 4, bottom: 4, minThumb: 24 });
+
     const formHeading = createElement(
       'p',
       'chat-templates__form-heading',
@@ -260,7 +272,7 @@ export function createTemplatesPanel(strings) {
       onSearchChange: (value) => void populateList(listContent, value),
     });
 
-    body.append(formCol, listCol);
+    body.append(formColWrap, listCol);
     panel.append(body);
 
     panel._listEl = listContent;

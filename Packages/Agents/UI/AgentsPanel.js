@@ -13,6 +13,7 @@ import {
   decodeModelValue,
   encodeModelValue,
 } from '../../Shared/ProviderCatalog/ModelOptions.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -418,6 +419,10 @@ export function createAgentsPanel(strings) {
   function buildReplayPane() {
     const pane = createElement('div', 'agents-replay-pane');
     pane.hidden = true;
+    Object.assign(pane.style, {
+      flex: '1',
+      minHeight: '0',
+    });
 
     // Back button + heading row
     const topRow = createElement('div', 'agents-replay-pane__top');
@@ -429,17 +434,37 @@ export function createAgentsPanel(strings) {
     replayBackBtnEl.addEventListener('click', hideReplayPane);
 
     replayHeadingEl = createElement('p', 'agents-list__heading');
-    topRow.append(replayBackBtnEl, replayHeadingEl);
+
+    replayRunsEl = createElement('div', 'agents-replay-runs-wrap');
+    Object.assign(replayRunsEl.style, {
+      marginLeft: 'auto',
+      minWidth: '180px',
+    });
+
+    topRow.append(replayBackBtnEl, replayHeadingEl, replayRunsEl);
     pane.append(topRow);
 
-    // Run picker — a scrollable list of past runs for the selected agent
-    replayRunsEl = createElement('div', 'agents-replay-runs');
-    pane.append(replayRunsEl);
+    // Replay viewer — wrapper to host the scrollbar properly
+    const viewerContainer = createElement('div', 'agents-replay-pane__viewer-container');
+    Object.assign(viewerContainer.style, {
+      flex: '1',
+      minWidth: '0',
+      minHeight: '0',
+      position: 'relative',
+    });
 
-    // Replay viewer — mounted below the run picker
+    const viewerWrap = createElement('div', 'agents-replay-pane__viewer-wrap');
+    Object.assign(viewerWrap.style, {
+      height: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+    });
+
     replayViewer = createExecutionReplay(strings);
-    const viewerEl = replayViewer.build();
-    pane.append(viewerEl);
+    viewerWrap.append(replayViewer.build());
+    viewerContainer.append(viewerWrap);
+    pane.append(viewerContainer);
 
     replayPaneEl = pane;
     return pane;
@@ -453,7 +478,7 @@ export function createAgentsPanel(strings) {
     replayRunsEl.replaceChildren();
     replayRunsEl.append(createElement('div', 'agents-replay-runs__loading'));
 
-    listContentEl.hidden = true;
+    listColEl.querySelector('.agents-list__content-container').hidden = true;
     listColEl.querySelector('.agents-list__search').hidden = true;
     listColEl.querySelector('.agents-list__heading:not(.agents-replay-pane__top *)').hidden = true;
     replayPaneEl.hidden = false;
@@ -470,57 +495,53 @@ export function createAgentsPanel(strings) {
     replayRunsEl.replaceChildren();
 
     if (agentRuns.length === 0) {
-      replayRunsEl.append(createElement('p', 'agents-replay-runs__empty', strings.replay.empty));
+      const ddm = createDropDownLite({
+        placeholder: strings.replay.empty,
+        options: [],
+      });
+      ddm.element.querySelector('.joanium-ddm-lite__trigger').disabled = true;
+      replayRunsEl.append(ddm.element);
       return;
     }
 
     // Select the most recent run automatically
     let selectedRunId = agentRuns[0].runId;
+    let ddmInst = null;
 
     function syncRunSelection() {
-      for (const btn of replayRunsEl.querySelectorAll('.agents-replay-run-btn')) {
-        btn.classList.toggle('agents-replay-run-btn--active', btn._runId === selectedRunId);
-      }
+      if (ddmInst) ddmInst.setValue(selectedRunId);
+      void replayViewer.load(selectedRunId);
     }
 
-    for (const run of agentRuns) {
-      const btn = createElement('button', 'agents-replay-run-btn');
-      btn.type = 'button';
-      btn._runId = run.runId;
+    const options = agentRuns.map((run) => {
+      let emoji = '🟢';
+      if (run.status === 'failed' || run.status === 'error') emoji = '🔴';
+      else if (run.status === 'running') emoji = '🟡';
 
-      const statusDot = createElement(
-        'span',
-        `agents-replay-run-btn__dot agents-replay-run-btn__dot--${run.status ?? 'success'}`,
-      );
-      const dateLabel = createElement(
-        'span',
-        'agents-replay-run-btn__date',
-        formatRelativeDate(run.startedAt),
-      );
-      const statusLabel = createElement(
-        'span',
-        'agents-replay-run-btn__status',
-        strings.replay.status[run.status] ?? run.status ?? '',
-      );
+      return {
+        value: run.runId,
+        label: `${emoji} ${formatRelativeDate(run.startedAt)}`,
+      };
+    });
 
-      btn.append(statusDot, dateLabel, statusLabel);
-      btn.addEventListener('click', () => {
-        selectedRunId = run.runId;
+    ddmInst = createDropDownLite({
+      options,
+      value: selectedRunId,
+      onChange: (newVal) => {
+        selectedRunId = newVal;
         syncRunSelection();
-        void replayViewer.load(run.runId);
-      });
-      replayRunsEl.append(btn);
-    }
+      },
+    });
 
+    replayRunsEl.append(ddmInst.element);
     syncRunSelection();
-    void replayViewer.load(selectedRunId);
   }
 
   function hideReplayPane() {
     if (!listColEl || !listContentEl || !replayPaneEl) return;
     replayPaneEl.hidden = true;
     replayViewer.clear();
-    listContentEl.hidden = false;
+    listColEl.querySelector('.agents-list__content-container').hidden = false;
     listColEl.querySelector('.agents-list__search').hidden = false;
     listColEl.querySelector('.agents-list__heading:not(.agents-replay-pane__top *)').hidden = false;
   }
@@ -868,9 +889,30 @@ export function createAgentsPanel(strings) {
     });
     searchWrap.append(search.element);
 
+    const listContainer = createElement('div', 'agents-list__content-container');
+    Object.assign(listContainer.style, {
+      flex: 1,
+      minWidth: '0',
+      minHeight: 0,
+      position: 'relative',
+    });
+
     const listContent = createElement('div', 'agents-list__content');
     listContentEl = listContent;
-    listCol.append(searchWrap, listContent);
+    Object.assign(listContent.style, {
+      height: '100%',
+      width: '100%',
+      overflowY: 'auto',
+    });
+
+    listContainer.append(listContent);
+    attachCustomScrollbar(listContainer, listContent, {
+      right: -8,
+      top: 4,
+      bottom: 4,
+      minThumb: 24,
+    });
+    listCol.append(searchWrap, listContainer);
 
     // Replay pane — hidden until activated by a "View Replay" card button
     listCol.append(buildReplayPane());

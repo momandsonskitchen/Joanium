@@ -1,7 +1,8 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
-import { getConnectorIconPathForToolName } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
+import { createTerminalCallCard } from '../../Shared/TerminalCallCard/TerminalCallCard.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 
 // ---------------------------------------------------------------------------
 // createExecutionReplay
@@ -26,18 +27,6 @@ function formatDuration(ms) {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-function formatTimestamp(iso) {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-    fractionalSecondDigits: 3,
-  }).format(date);
-}
-
 function formatDate(iso) {
   if (!iso) return '';
   const date = new Date(iso);
@@ -54,10 +43,6 @@ function formatDate(iso) {
 
 // ── Small DOM helpers ────────────────────────────────────────────────────────
 
-function createBadge(text, modifier = '') {
-  return createElement('span', `replay-badge${modifier ? ` replay-badge--${modifier}` : ''}`, text);
-}
-
 function createMetaChip(label, value) {
   if (!value && value !== 0) return null;
   const chip = createElement('div', 'replay-meta-chip');
@@ -66,16 +51,6 @@ function createMetaChip(label, value) {
     createElement('span', 'replay-meta-chip__value', String(value)),
   );
   return chip;
-}
-
-function createCodeBlock(label, value) {
-  if (!value && value !== 0) return null;
-  const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-  if (!text.trim()) return null;
-  const wrap = createElement('div', 'replay-code-block');
-  wrap.append(createElement('div', 'replay-code-block__label', label));
-  wrap.append(createElement('pre', 'replay-code-block__pre', text));
-  return wrap;
 }
 
 // ── Reasoning block ──────────────────────────────────────────────────────────
@@ -102,112 +77,25 @@ function createReasoningBlock(thinkingText, strings) {
   return wrap;
 }
 
-// ── Step dot ─────────────────────────────────────────────────────────────────
+// ── Tool block ─────────────────────────────────────────────────────────────
 
-/**
- * Builds the left-rail dot for a timeline step.
- * Uses a connector <img> when the tool belongs to a known service, otherwise
- * falls back to the generic terminal SVG icon.
- */
-function createStepDot(step) {
-  const isToolStep = step.type === 'tool';
-  const dot = createElement(
-    'span',
-    `replay-step__dot${isToolStep ? ' replay-step__dot--tool' : ' replay-step__dot--response'}`,
-  );
+function createToolCard(step) {
+  const outputText = [
+    step.toolInput ? JSON.stringify(step.toolInput, null, 2) : '',
+    step.toolOutput,
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+    .trim();
 
-  if (isToolStep) {
-    const iconPath = getConnectorIconPathForToolName(step.toolName);
-    if (iconPath) {
-      const img = document.createElement('img');
-      img.src = iconPath;
-      img.alt = step.toolName ?? '';
-      img.draggable = false;
-      img.className = 'replay-step__dot-img';
-      dot.append(img);
-    } else {
-      dot.append(createIcon('terminal', 'replay-step__dot-icon'));
-    }
-  } else {
-    dot.append(createIcon('check', 'replay-step__dot-icon'));
-  }
-
-  return dot;
-}
-
-// ── Single step node ─────────────────────────────────────────────────────────
-
-function createStepNode(step, strings) {
-  const isToolStep = step.type === 'tool';
-  const isFinalResponse = step.type === 'response';
-
-  const node = createElement(
-    'div',
-    `replay-step${isFinalResponse ? ' replay-step--response' : ''}`,
-  );
-
-  // ── Left rail ──────────────────────────────────────────────────────────────
-  const track = createElement('div', 'replay-step__track');
-  track.append(createStepDot(step));
-  track.append(createElement('span', 'replay-step__line'));
-
-  // ── Details card ──────────────────────────────────────────────────────────
-  const details = document.createElement('details');
-  details.className = 'replay-step__details';
-
-  const summary = document.createElement('summary');
-  summary.className = 'replay-step__summary';
-
-  const summaryLeft = createElement('span', 'replay-step__summary-left');
-  summaryLeft.append(createBadge(String(step.index), isToolStep ? 'tool' : 'response'));
-  summaryLeft.append(
-    createElement(
-      'span',
-      'replay-step__label',
-      isToolStep ? step.toolName : strings.replay.stepResponse,
-    ),
-  );
-
-  const summaryRight = createElement('span', 'replay-step__summary-right');
-  const ts = formatTimestamp(step.timestamp);
-  if (ts) summaryRight.append(createElement('span', 'replay-step__timestamp', ts));
-  const dur = formatDuration(step.durationMs);
-  if (dur) summaryRight.append(createElement('span', 'replay-step__dur', dur));
-  summaryRight.append(createIcon('chevronDown', 'replay-step__chevron'));
-
-  summary.append(summaryLeft, summaryRight);
-  details.append(summary);
-
-  // ── Expanded body ──────────────────────────────────────────────────────────
-  const body = createElement('div', 'replay-step__body');
-
-  if (isToolStep) {
-    const inputBlock = createCodeBlock(strings.replay.stepInput, step.toolInput);
-    if (inputBlock) body.append(inputBlock);
-
-    if (step.toolOutput) {
-      const outputBlock = createCodeBlock(strings.replay.stepOutput, step.toolOutput);
-      if (outputBlock) body.append(outputBlock);
-    } else {
-      const outputWrap = createElement('div', 'replay-code-block');
-      outputWrap.append(
-        createElement('div', 'replay-code-block__label', strings.replay.stepOutput),
-      );
-      outputWrap.append(
-        createElement('p', 'replay-code-block__notice', strings.replay.outputNotCaptured),
-      );
-      body.append(outputWrap);
-    }
-  }
-
-  if (isFinalResponse && step.toolOutput) {
-    const responseBlock = createCodeBlock(strings.replay.stepOutput, step.toolOutput);
-    if (responseBlock) body.append(responseBlock);
-  }
-
-  details.append(body);
-  node.append(track, details);
-  return node;
+  return createTerminalCallCard({
+    status: step.status,
+    iconToolName: step.toolName,
+    label: step.toolName,
+    command: step.toolName,
+    statusLabel: step.status,
+    output: outputText,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -217,27 +105,21 @@ function createStepNode(step, strings) {
 export function createExecutionReplay(strings) {
   let rootEl = null;
   let headerEl = null;
-  let timelineEl = null;
-  let replayBtnEl = null;
-  let replayBtnSpinnerEl = null;
-  let replayBtnLabelEl = null;
   let emptyEl = null;
-  let currentRunId = null;
-  let isReplaying = false;
-  let loadToken = 0; // incremented on each load() call to detect stale responses
 
   // ── Build skeleton DOM ───────────────────────────────────────────────────
 
   function build() {
     rootEl = createElement('div', 'replay');
     headerEl = createElement('div', 'replay__header');
-    rootEl.append(headerEl);
 
-    timelineEl = createElement('div', 'replay__timeline');
     emptyEl = createElement('div', 'replay__empty', strings.replay.empty);
     emptyEl.hidden = true;
 
-    rootEl.append(timelineEl, emptyEl);
+    rootEl.append(headerEl, emptyEl);
+
+    attachCustomScrollbar(rootEl, headerEl, { right: 8, top: 24, bottom: 24, minThumb: 24 });
+
     renderEmpty();
     return rootEl;
   }
@@ -245,38 +127,56 @@ export function createExecutionReplay(strings) {
   // ── Render states ────────────────────────────────────────────────────────
 
   function renderEmpty() {
+    headerEl.style.display = 'none';
     headerEl.replaceChildren();
-    timelineEl.replaceChildren();
     emptyEl.hidden = false;
     emptyEl.textContent = strings.replay.empty;
   }
 
   function renderLoading() {
+    headerEl.style.display = 'none';
     headerEl.replaceChildren();
     emptyEl.hidden = false;
     emptyEl.textContent = strings.replay.loading;
-    timelineEl.replaceChildren();
-    for (let i = 0; i < 4; i++) {
-      timelineEl.append(createElement('div', 'replay-skeleton'));
-    }
   }
 
   function renderRun(run) {
-    const steps = Array.isArray(run.steps) ? run.steps : [];
-
+    emptyEl.hidden = true;
+    headerEl.style.display = '';
     headerEl.replaceChildren();
 
-    // ── Title + status row ───────────────────────────────────────────────────
-    const titleRow = createElement('div', 'replay__title-row');
-    titleRow.append(createElement('h3', 'replay__title', run.agentName || strings.replay.untitled));
-    titleRow.append(
-      createElement(
-        'span',
-        `replay-status replay-status--${run.status ?? 'success'}`,
-        strings.replay.status[run.status] ?? run.status ?? '',
-      ),
-    );
-    headerEl.append(titleRow);
+    const rawSteps = Array.isArray(run.steps) ? run.steps : [];
+    let steps = rawSteps.filter((s) => s.type !== 'response');
+
+    // ── Augment steps with terminal data ─────────────────────────────────────
+    const terminals = Array.isArray(run.terminals) ? run.terminals : [];
+    steps = steps.map((step, i) => {
+      const terminal = terminals[i];
+      if (terminal) {
+        if (!step.toolOutput && terminal.error) step.toolOutput = String(terminal.error);
+        if (terminal.status === 'failed' || terminal.status === 'error') step.status = 'error';
+      }
+      return step;
+    });
+
+    if (terminals.length > steps.length) {
+      for (let i = steps.length; i < terminals.length; i++) {
+        const terminal = terminals[i];
+        steps.push({
+          index: i + 1,
+          type: 'tool',
+          toolName: terminal.command || 'unknown',
+          toolInput: null,
+          toolOutput: terminal.error ? String(terminal.error) : (terminal.output ?? null),
+          status:
+            terminal.status === 'failed' || terminal.status === 'error'
+              ? 'error'
+              : terminal.status || 'completed',
+          timestamp: run.startedAt,
+          durationMs: null,
+        });
+      }
+    }
 
     // ── Meta chips ───────────────────────────────────────────────────────────
     const metaRowEl = createElement('div', 'replay__meta');
@@ -300,15 +200,23 @@ export function createExecutionReplay(strings) {
     ]
       .filter(Boolean)
       .forEach((chip) => metaRowEl.append(chip));
+
+    // Append the status badge to the end of the meta row, pushed to the right
+    const statusBadge = createElement(
+      'span',
+      `replay-status replay-status--${run.status ?? 'success'}`,
+      strings.replay.status[run.status] ?? run.status ?? '',
+    );
+    Object.assign(statusBadge.style, {
+      marginLeft: 'auto',
+      alignSelf: 'flex-start',
+      marginTop: '6px',
+    });
+    metaRowEl.append(statusBadge);
+
     headerEl.append(metaRowEl);
 
-    // ── Reasoning block ──────────────────────────────────────────────────────
-    // Shown only when the run captured thinking content.
-    if (run.thinking && String(run.thinking).trim()) {
-      headerEl.append(createReasoningBlock(String(run.thinking).trim(), strings));
-    }
-
-    // ── Prompt summary ───────────────────────────────────────────────────────
+    // 1. Prompt summary ───────────────────────────────────────────────────────
     if (run.prompt) {
       const promptWrap = createElement('div', 'replay__prompt-wrap');
       promptWrap.append(
@@ -318,75 +226,48 @@ export function createExecutionReplay(strings) {
       headerEl.append(promptWrap);
     }
 
-    // ── Replay button ────────────────────────────────────────────────────────
-    const btnRow = createElement('div', 'replay__btn-row');
-    replayBtnEl = createElement('button', 'replay__btn-replay');
-    replayBtnEl.type = 'button';
-
-    replayBtnSpinnerEl = createElement('span', 'replay__btn-spinner');
-    replayBtnSpinnerEl.hidden = true;
-    replayBtnLabelEl = createElement('span', 'replay__btn-label', strings.replay.replayBtn);
-
-    replayBtnEl.append(
-      createIcon('retry', 'replay__btn-icon'),
-      replayBtnSpinnerEl,
-      replayBtnLabelEl,
-    );
-    replayBtnEl.addEventListener('click', () => void handleReplay());
-    btnRow.append(replayBtnEl);
-    headerEl.append(btnRow);
-
-    // ── Timeline ─────────────────────────────────────────────────────────────
-    timelineEl.replaceChildren();
-    emptyEl.hidden = true;
-
-    if (steps.length === 0) {
-      emptyEl.hidden = false;
-      emptyEl.textContent = strings.replay.noSteps;
-      return;
+    // 2. Reasoning block ──────────────────────────────────────────────────────
+    if (run.thinking && String(run.thinking).trim()) {
+      headerEl.append(createReasoningBlock(String(run.thinking).trim(), strings));
     }
 
-    for (const step of steps) {
-      timelineEl.append(createStepNode(step, strings));
+    // 3. Tools used ───────────────────────────────────────────────────────────
+    if (steps.length > 0) {
+      const toolsContainer = createElement('div', 'replay__tools-container');
+      Object.assign(toolsContainer.style, {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        marginTop: '8px',
+      });
+
+      for (const step of steps) {
+        toolsContainer.append(createToolCard(step));
+      }
+      headerEl.append(toolsContainer);
     }
 
-    // Remove the dangling connector line from the last step.
-    const lastLine = timelineEl.querySelector('.replay-step:last-child .replay-step__line');
-    if (lastLine) lastLine.hidden = true;
-  }
-
-  // ── Replay handler ───────────────────────────────────────────────────────
-
-  async function handleReplay() {
-    if (!currentRunId || isReplaying) return;
-    isReplaying = true;
-
-    if (replayBtnEl) replayBtnEl.disabled = true;
-    if (replayBtnSpinnerEl) replayBtnSpinnerEl.hidden = false;
-    if (replayBtnLabelEl) replayBtnLabelEl.textContent = strings.replay.replaying;
-
-    let success = false;
-    try {
-      await invokeIpc('agents:replay-run', currentRunId);
-      success = true;
-    } catch (err) {
-      console.error('[ExecutionReplay] Replay failed:', err);
+    // 4. Final Response ───────────────────────────────────────────────────────
+    let finalResponseText = run.visibleResponse;
+    if (!finalResponseText && run.fullResponse) {
+      // Fallback if ReplayStore isn't parsing visibleResponse properly yet
+      const re = /```(?:joanium-tool|joanium-terminal)\s*[\s\S]*?```/gi;
+      finalResponseText = String(run.fullResponse).replace(re, '').trim();
     }
 
-    if (replayBtnLabelEl) {
-      replayBtnLabelEl.textContent = success
-        ? strings.replay.replayQueued
-        : strings.replay.replayBtn;
+    if (finalResponseText) {
+      const responseWrap = createElement('div', 'replay__response-wrap');
+      Object.assign(responseWrap.style, {
+        marginTop: '8px',
+        paddingTop: '16px',
+        borderTop: '1px solid rgba(170, 134, 104, 0.1)',
+      });
+      responseWrap.append(
+        createElement('span', 'replay__prompt-label', 'FINAL RESPONSE'),
+        createElement('div', 'replay__response-text', finalResponseText),
+      );
+      headerEl.append(responseWrap);
     }
-
-    if (success) {
-      await new Promise((resolve) => setTimeout(resolve, 1800));
-    }
-
-    if (replayBtnEl) replayBtnEl.disabled = false;
-    if (replayBtnSpinnerEl) replayBtnSpinnerEl.hidden = true;
-    if (replayBtnLabelEl) replayBtnLabelEl.textContent = strings.replay.replayBtn;
-    isReplaying = false;
   }
 
   // ── Public API ───────────────────────────────────────────────────────────
@@ -396,26 +277,20 @@ export function createExecutionReplay(strings) {
 
     async load(runId) {
       if (!rootEl) return;
-      currentRunId = runId;
-      isReplaying = false;
-      const token = ++loadToken;
       renderLoading();
       try {
         const run = await invokeIpc('agents:load-run-detail', runId);
-        if (token !== loadToken) return; // stale — a newer load() was called
         if (!run) {
           renderEmpty();
           return;
         }
         renderRun(run);
       } catch {
-        if (token !== loadToken) return;
         renderEmpty();
       }
     },
 
     clear() {
-      currentRunId = null;
       renderEmpty();
     },
   };

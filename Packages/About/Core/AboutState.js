@@ -61,6 +61,14 @@ export function createAboutStateManager({ rootDirectory }) {
         }
 
         const userState = await readUserState(rootDirectory);
+
+        // Respect the showChangelog toggle (defaults to true when absent).
+        if (userState.appSettings?.showChangelog === false) {
+          log('EXIT: changelog disabled in app settings');
+          await flushWhatsNewLog(logLines);
+          return { shouldShow: false };
+        }
+
         log(`whatsNewSeenVersion=${userState.whatsNewSeenVersion}`);
         if (userState.whatsNewSeenVersion === version) {
           log('EXIT: already seen');

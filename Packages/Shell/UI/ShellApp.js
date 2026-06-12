@@ -18,6 +18,7 @@ import { createCleanupGateway } from '../../Memory/UI/CleanupGateway.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
 import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
+import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createUsagePanel } from '../../Usage/UI/UsagePanel.js';
 import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
@@ -650,6 +651,9 @@ async function bootstrap() {
 
     nav.append(navItems);
     body.append(nav, main);
+
+    attachCustomScrollbar(body, main, { right: 8, top: 4, bottom: 4, minThumb: 24 });
+
     panel.append(header, body);
     panel._activateSubMenu = activateSubMenu;
     return panel;

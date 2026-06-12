@@ -3,7 +3,7 @@ import { createPublicDataToolHandlers } from './Executors.js';
 import { buildPublicDataPromptSection } from './Prompt.js';
 import strings from './I18n/en.js';
 
-export function createToolPackage({ rootDirectory }) {
+export function createToolPackage() {
   return {
     id: 'public-data',
     toolDefinitions: TOOL_DEFINITIONS,

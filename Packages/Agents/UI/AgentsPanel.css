@@ -325,8 +325,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 4px 48px 40px 28px;
-  overflow-y: auto;
+  padding: 4px 16px 40px 28px;
   border-left: 1px solid rgba(170, 134, 104, 0.09);
 }
 
@@ -363,8 +362,10 @@
 
 .agents-list__content {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 /* ── Skeleton loaders ────────────────────────────────────────────────────── */
@@ -391,6 +392,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
+  flex-shrink: 0;
   margin-bottom: 8px;
   padding: 12px 12px 12px 14px;
   border-radius: 20px;
@@ -704,6 +706,99 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Dark theme overrides
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Left column form card ───────────────────────────────────────────────── */
+
+.joanium-theme-dark .agents-form__card {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 28px rgba(10, 4, 20, 0.22);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+}
+
+.joanium-theme-dark .agents-form__schedule-type-btn {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: var(--color-chat-text-secondary);
+}
+
+.joanium-theme-dark .agents-form__schedule-type-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-chat-text-title);
+}
+
+.joanium-theme-dark .agents-form__day-btn {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(180, 130, 220, 0.1);
+  color: var(--color-chat-text-secondary);
+}
+
+.joanium-theme-dark .agents-form__day-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-chat-text-title);
+}
+
+.joanium-theme-dark .agents-form__avatar-tile {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.1),
+    0 2px 8px rgba(10, 4, 20, 0.18);
+}
+
+.joanium-theme-dark .agents-form__avatar-tile:hover {
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.18),
+    0 6px 18px rgba(10, 4, 20, 0.22);
+}
+
+/* ── Right column divider ────────────────────────────────────────────────── */
+
+.joanium-theme-dark .agents-list-col {
+  border-left-color: rgba(180, 130, 220, 0.08);
+}
+
+.joanium-theme-dark .agents-list__search .joanium-search__input {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 130, 220, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 4px 14px rgba(10, 4, 20, 0.14);
+}
+
+.joanium-theme-dark .agents-list__search .joanium-search__input:focus {
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 6px 22px rgba(10, 4, 20, 0.2);
+}
+
+/* ── Agent cards ─────────────────────────────────────────────────────────── */
+
+.joanium-theme-dark .agents-card__btn--danger:hover {
+  background: rgba(220, 60, 40, 0.12);
+  color: #f87171;
+}
+
+/* ── Toggle pill ─────────────────────────────────────────────────────────── */
+
+.joanium-theme-dark .agents-toggle {
+  background: rgba(180, 130, 220, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(180, 130, 220, 0.12);
+}
+
+.joanium-theme-dark .agents-card__btn--toggle-off .agents-toggle {
+  background: rgba(180, 130, 220, 0.12);
+}
+
 /* ── Execution Replay pane ───────────────────────────────────────────────── */
 
 .agents-replay-pane {
@@ -764,106 +859,3 @@
 }
 
 /* ── Run picker — horizontal scrolling pill strip ────────────────────────── */
-
-.agents-replay-runs {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 6px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 4px;
-  -webkit-app-region: no-drag;
-}
-
-.agents-replay-runs__loading {
-  height: 34px;
-  width: 120px;
-  border-radius: 17px;
-  background: rgba(180, 140, 110, 0.07);
-  animation: chat-history-shimmer 1.4s ease-in-out infinite;
-}
-
-.agents-replay-runs__empty {
-  margin: 0;
-  font-size: 12.5px;
-  color: var(--color-chat-text-muted);
-  padding: 8px 2px;
-}
-
-.agents-replay-run-btn {
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 12px;
-  border-radius: 20px;
-  border: 0;
-  flex-shrink: 0;
-  scroll-snap-align: start;
-  background: rgba(255, 255, 255, 0.54);
-  box-shadow:
-    inset 0 0 0 1px rgba(175, 139, 104, 0.12),
-    0 2px 6px rgba(130, 95, 65, 0.05);
-  cursor: pointer;
-  transition:
-    background-color 130ms ease,
-    box-shadow 130ms ease,
-    transform 120ms ease;
-  -webkit-app-region: no-drag;
-}
-
-.agents-replay-run-btn:hover {
-  background: rgba(255, 255, 255, 0.82);
-  transform: translateY(-1px);
-}
-
-.agents-replay-run-btn--active {
-  background: rgba(var(--color-accent-rgb), 0.1);
-  box-shadow:
-    inset 0 0 0 1.5px rgba(var(--color-accent-rgb), 0.28),
-    0 2px 8px rgba(var(--color-accent-rgb), 0.1);
-}
-
-/* Status dot inside each run button */
-
-.agents-replay-run-btn__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.agents-replay-run-btn__dot--success {
-  background: #34c774;
-}
-
-.agents-replay-run-btn__dot--error {
-  background: #e05242;
-}
-
-.agents-replay-run-btn__dot--running {
-  background: var(--color-accent);
-  animation: events-dot-breathe 1.6s ease-in-out infinite;
-}
-
-.agents-replay-run-btn__dot--queued,
-.agents-replay-run-btn__dot--skipped {
-  background: rgba(150, 125, 105, 0.4);
-}
-
-.agents-replay-run-btn__date {
-  font-size: 12px;
-  font-weight: 560;
-  letter-spacing: -0.01em;
-  color: var(--color-chat-text-secondary);
-  white-space: nowrap;
-}
-
-.agents-replay-run-btn__status {
-  font-size: 11px;
-  font-weight: 620;
-  color: var(--color-chat-text-muted);
-  white-space: nowrap;
-  opacity: 0.72;
-}
