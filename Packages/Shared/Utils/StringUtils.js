@@ -48,3 +48,7 @@ export function extractJsonObject(text = '') {
 export function normalizeString(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
+
+export function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
