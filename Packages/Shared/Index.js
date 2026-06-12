@@ -10,11 +10,12 @@ export {
   toIso,
   todayDateString,
 } from './Utils/DateUtils.js';
-export { createElement, escapeHtml, formatText } from './Utils/DomUtils.js';
+export { createElement, escapeHtml, formatText, makeEditableTextarea } from './Utils/DomUtils.js';
 export { computeDiff } from './Utils/DiffUtils.js';
 export {
   collapseWhitespace,
   createSlugId,
+  escapeRegex,
   extractJsonObject,
   getNameInitials,
   normalizeString,
@@ -24,6 +25,7 @@ export {
   clampInteger,
   compactObject,
   deepClone,
+  formatBytes,
   optionalText,
   toBoolean,
 } from './Utils/ValueUtils.js';
@@ -37,3 +39,5 @@ export {
   orderProvidersBySelection,
   providerIsConfigured,
 } from './ProviderCatalog/ProviderUtils.js';
+export { createEnqueue } from './Utils/AsyncUtils.js';
+export { readJsonDirectory } from './Storage/JsonDirectory.js';

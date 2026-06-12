@@ -1,23 +1,7 @@
 import { formatText } from '../../Shared/Utils/DomUtils.js';
+import { formatBytes } from '../../Shared/Utils/ValueUtils.js';
 
-export function formatBytes(bytes) {
-  const value = Number(bytes) || 0;
-  if (value <= 0) {
-    return '';
-  }
-
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let nextValue = value;
-  let unitIndex = 0;
-
-  while (nextValue >= 1024 && unitIndex < units.length - 1) {
-    nextValue /= 1024;
-    unitIndex += 1;
-  }
-
-  const decimals = nextValue >= 10 || unitIndex === 0 ? 0 : 1;
-  return `${nextValue.toFixed(decimals)} ${units[unitIndex]}`;
-}
+export { formatBytes };
 
 export function formatTransferProgress(progress, strings) {
   if (!progress) {

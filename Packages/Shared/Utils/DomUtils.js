@@ -31,6 +31,12 @@ export function copyToClipboard(text) {
   return Promise.resolve();
 }
 
+export function makeEditableTextarea(textarea) {
+  textarea.style.webkitUserSelect = 'text';
+  textarea.style.userSelect = 'text';
+  textarea.style.cursor = 'text';
+}
+
 function copyWithExecCommand(text) {
   const textarea = document.createElement('textarea');
   textarea.value = text;

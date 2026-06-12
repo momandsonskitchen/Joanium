@@ -1,4 +1,4 @@
-import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { createElement, makeEditableTextarea } from '../../Shared/Utils/DomUtils.js';
 import { createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
@@ -168,9 +168,7 @@ export function createTemplatesPanel(strings) {
     promptTextarea.className = 'chat-templates__prompt-textarea';
     promptTextarea.placeholder = strings.promptPlaceholder;
     promptTextarea.rows = 6;
-    promptTextarea.style.webkitUserSelect = 'text';
-    promptTextarea.style.userSelect = 'text';
-    promptTextarea.style.cursor = 'text';
+    makeEditableTextarea(promptTextarea);
     promptTextarea.addEventListener('input', (e) => {
       draftTemplatePrompt = e.target.value;
       syncTemplateSaveBtn();
