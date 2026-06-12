@@ -22,10 +22,12 @@ const CONNECTOR_ICON_FILES = Object.freeze({
   itunes: 'Itunes',
   jira: 'Jira',
   linear: 'Linear',
+  mattermost: 'MatterMost',
   nasa: 'Nasa',
   netlify: 'Netlify',
   notion: 'Notion',
   npm: 'Npm',
+  ntfy: 'Ntfy',
   open_meteo: 'OpenMeteo',
   openweather: 'OpenWeatherMap',
   perplexity: 'Perplexity',
@@ -49,6 +51,7 @@ const CONNECTOR_ICON_FILES = Object.freeze({
   wikimedia: 'Wikipedia',
   wikipedia: 'Wikipedia',
   youtube: 'Youtube',
+  zulip: 'Zulip',
 });
 
 const CONNECTOR_PREFIXES = Object.keys(CONNECTOR_ICON_FILES).sort(

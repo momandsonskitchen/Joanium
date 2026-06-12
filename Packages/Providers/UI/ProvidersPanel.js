@@ -194,7 +194,7 @@ export function createProvidersPanel(strings) {
     const expandBtn = createElement('button', 'providers-card__expand');
     expandBtn.type = 'button';
     expandBtn.setAttribute('aria-label', strings.expand);
-    expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
+    expandBtn.append(createIcon('chevronDownSmall', 'providers-card__expand-icon'));
 
     header.append(badge, titleWrap, status, expandBtn);
 

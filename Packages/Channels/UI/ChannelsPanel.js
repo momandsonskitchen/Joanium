@@ -2,6 +2,7 @@ import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
+import { getConnectorIconPath } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
 
 const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack', 'zulip', 'mattermost', 'ntfy'];
 
@@ -40,19 +41,6 @@ function createSecretField({ label, placeholder, strings }) {
   holder.append(field.input, toggle);
   field.wrap.append(holder);
   return field;
-}
-
-function getChannelIconPath(channelName) {
-  const names = {
-    telegram: 'Telegram',
-    whatsapp: 'WhatsApp',
-    discord: 'Discord',
-    slack: 'Slack',
-    mattermost: 'MatterMost',
-    zulip: 'Zulip',
-    ntfy: 'Ntfy',
-  };
-  return names[channelName] ? `../../../Assets/Icons/${names[channelName]}.png` : null;
 }
 
 export function createChannelsPanel(strings) {
@@ -561,7 +549,7 @@ export function createChannelsPanel(strings) {
     // ── Header (always visible) ──────────────────────────────────────────────
     const header = createElement('div', 'channels-card__header');
     const badge = createElement('div', 'channels-card__badge');
-    const iconPath = getChannelIconPath(channelName);
+    const iconPath = getConnectorIconPath(channelName);
     if (iconPath) {
       const badgeImg = document.createElement('img');
       badgeImg.src = iconPath;
@@ -591,7 +579,7 @@ export function createChannelsPanel(strings) {
     const expandBtn = createElement('button', 'channels-card__expand');
     expandBtn.type = 'button';
     expandBtn.setAttribute('aria-label', strings.common.expand);
-    expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
+    expandBtn.append(createIcon('chevronDownSmall', 'channels-card__expand-icon'));
 
     header.append(badge, titleWrap, toggleWrap, expandBtn);
 

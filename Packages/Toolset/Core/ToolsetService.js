@@ -11,6 +11,8 @@ import {
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 import { summarizeToolDefinitions, withTimeout } from './Utils.js';
 import { formatPromptTemplate } from '../../Shared/Utils/PromptUtils.js';
+import { clampInteger, toBoolean } from '../../Shared/Utils/ValueUtils.js';
+import { escapeHtml } from '../../Shared/Utils/DomUtils.js';
 
 const HASH_ALGORITHMS = new Set(['sha1', 'sha256', 'sha384', 'sha512']);
 const DEFAULT_TOOL_TIMEOUT_MS = 30000;
@@ -130,11 +132,6 @@ const TRACKING_PARAMS = new Set([
 ]);
 const GEOHASH_BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 
-function clampInteger(value, fallback, min, max) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.round(parsed))) : fallback;
-}
-
 function requireInteger(value, label = 'amount') {
   if (value == null || String(value).trim?.() === '')
     throw new Error(`Missing required parameter: ${label}.`);
@@ -157,12 +154,6 @@ function formatNumber(value, precision = 6) {
   return Number(value.toFixed(precision)).toLocaleString('en-US', {
     maximumFractionDigits: precision,
   });
-}
-
-function toBoolean(value, fallback = false) {
-  if (value === true || value === 'true' || value === 1 || value === '1') return true;
-  if (value === false || value === 'false' || value === 0 || value === '0') return false;
-  return fallback;
 }
 
 function startOfLocalDay(value) {
@@ -1610,14 +1601,6 @@ function urlToMarkdownLink(params) {
   const label = String(params.label ?? url.hostname).trim() || url.hostname;
   const escapedLabel = label.replaceAll('[', '\\[').replaceAll(']', '\\]');
   return ['Markdown Link', '', `[${escapedLabel}](${input})`].join('\n');
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
 }
 
 function urlToHtmlLink(params) {
