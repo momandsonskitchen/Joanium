@@ -694,13 +694,6 @@
         "max_output_tokens": 64000
       }
     },
-    "claude-opus-4": {
-      "name": "Claude Opus 4",
-      "context_window": {
-        "context_length": 192512,
-        "max_output_tokens": 28672
-      }
-    },
     "o4-mini": {
       "name": "O4 MINI",
       "context_window": {
@@ -1727,7 +1720,13 @@
         "context_length": 200000,
         "max_output_tokens": null
       }
+    },
+    "minimax-m3-n": {
+      "name": "Minimax M3 N"
+    },
+    "kimi-k2.7-code": {
+      "name": "Kimi K2 7 Code"
     }
   },
-  "_syncedAt": "2026-06-12T10:27:51.951Z"
+  "_syncedAt": "2026-06-12T15:52:00.956Z"
 }

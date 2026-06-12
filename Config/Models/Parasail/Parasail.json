@@ -92,33 +92,6 @@
     "Qwen/Qwen3-VL-8B-Instruct": {
       "name": "Qwen3 VL 8B Instruct"
     },
-    "parasail-deepseek-v32": {
-      "name": "Parasail Deepseek V32"
-    },
-    "deepseek-ai/DeepSeek-V3.2": {
-      "name": "DeepSeek V3 2"
-    },
-    "deepseek-chat": {
-      "name": "Deepseek Chat"
-    },
-    "parasail-glm47": {
-      "name": "Parasail Glm47"
-    },
-    "zai-org/GLM-4.7": {
-      "name": "GLM 4 7"
-    },
-    "zai-org/GLM-4.7-FP8": {
-      "name": "GLM 4 7 FP8"
-    },
-    "parasail-kimi-k25": {
-      "name": "Parasail Kimi K25"
-    },
-    "moonshotai/Kimi-K2.5": {
-      "name": "Kimi K2 5"
-    },
-    "moonshotai/kimi-k2.5": {
-      "name": "Kimi K2 5"
-    },
     "parasail-qwen3-coder-next": {
       "name": "Parasail Qwen3 Coder Next"
     },
@@ -238,7 +211,13 @@
     },
     "parasail-nemotron-3-ultra-550b-nvfp4": {
       "name": "Parasail Nemotron 3 ULTRA 550B Nvfp4"
+    },
+    "parasail-minimax-m3": {
+      "name": "Parasail Minimax M3"
+    },
+    "MiniMaxAI/Minimax-M3": {
+      "name": "Minimax M3"
     }
   },
-  "_syncedAt": "2026-06-12T10:27:54.563Z"
+  "_syncedAt": "2026-06-12T15:52:04.987Z"
 }

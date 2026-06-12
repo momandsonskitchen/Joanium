@@ -1506,19 +1506,6 @@
         "text": true
       }
     },
-    "moonshotai/kimi-k2-thinking-turbo": {
-      "name": "Kimi K2 Thinking Turbo",
-      "description": "High-speed version of kimi-k2-thinking, suitable for scenarios requiring both deep reasoning and extremely fast responses",
-      "context_window": 262114,
-      "max_output": 262114,
-      "pricing": {
-        "input": 1.15,
-        "output": 8
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "moonshotai/kimi-k2.5": {
       "name": "Kimi K2.5",
       "description": "kimi-k2.5 is Kimi's most versatile model to date, featuring a native multimodal architecture that supports both visual and text input, thinking and non-thinking modes, and dialogue and agent tasks.",
@@ -1538,6 +1525,20 @@
       "description": "Kimi K2.6 demonstrates particularly strong performance in long-horizon coding tasks and produces professional-grade design with code and vision.",
       "context_window": 262000,
       "max_output": 262000,
+      "pricing": {
+        "input": 0.95,
+        "output": 4
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "moonshotai/kimi-k2.7-code": {
+      "name": "Kimi K2.7 Code",
+      "description": "Kimi-K2.7-Code is a coding model from Moonshot AI. It has  improved coding & agent performance over K2.6, more reasoning efficiency with less overthinking, and improved instruction following for long-horizon coding.",
+      "context_window": 256000,
+      "max_output": 32768,
       "pricing": {
         "input": 0.95,
         "output": 4
@@ -2629,5 +2630,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-12T10:27:50.668Z"
+  "_syncedAt": "2026-06-12T15:51:55.651Z"
 }
