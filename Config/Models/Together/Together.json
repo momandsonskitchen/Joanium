@@ -5,6 +5,10 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "MiniMaxAI/MiniMax-M3": {
+      "name": "MiniMax M3",
+      "context_window": 524288
+    },
     "deepseek-ai/DeepSeek-V4-Pro": {
       "name": "Deepseek V4 Pro",
       "context_window": 512000
@@ -724,5 +728,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-12T15:51:21.119Z"
+  "_syncedAt": "2026-06-13T03:41:16.565Z"
 }

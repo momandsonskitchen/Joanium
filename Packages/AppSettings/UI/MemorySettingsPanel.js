@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createCheckbox } from '../../Shared/Bubbly/Checkbox/Checkbox.js';
+import { EVENTS, dispatchEvent } from '../../Shared/Events/RendererEvents.js';
 import { createSettingsPanelState } from './Utils.js';
 
 export function createMemorySettingsPanel(strings) {
@@ -56,7 +57,7 @@ export function createMemorySettingsPanel(strings) {
     memoryBtn.type = 'button';
     memoryBtn.addEventListener('click', () => {
       clearMemorySyncWait();
-      window.dispatchEvent(new CustomEvent('joanium:trigger-memory-sync'));
+      dispatchEvent(EVENTS.TRIGGER_MEMORY_SYNC);
       memoryBtn.disabled = true;
       memoryBtn.textContent = strings.updateMemory.updating;
 
@@ -71,9 +72,9 @@ export function createMemorySettingsPanel(strings) {
         clearMemorySyncWait();
         resetMemoryButton();
       };
-      window.addEventListener('joanium:memory-sync', onSyncEnd);
+      window.addEventListener(EVENTS.MEMORY_SYNC, onSyncEnd);
       memorySyncCleanup = () => {
-        window.removeEventListener('joanium:memory-sync', onSyncEnd);
+        window.removeEventListener(EVENTS.MEMORY_SYNC, onSyncEnd);
         clearTimeout(fallbackTimer);
       };
       fallbackTimer = setTimeout(() => {
@@ -91,9 +92,9 @@ export function createMemorySettingsPanel(strings) {
       state.setSettings(event.detail ?? state.settings);
       memoryCard.hidden = Boolean(state.settings?.autoMemoryUpdates);
     };
-    window.addEventListener('joanium:app-settings-changed', onSettingsChanged);
+    window.addEventListener(EVENTS.APP_SETTINGS_CHANGED, onSettingsChanged);
     removeSettingsChangeListener = () => {
-      window.removeEventListener('joanium:app-settings-changed', onSettingsChanged);
+      window.removeEventListener(EVENTS.APP_SETTINGS_CHANGED, onSettingsChanged);
     };
   }
 

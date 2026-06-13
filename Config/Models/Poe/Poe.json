@@ -687,13 +687,6 @@
     "deepseek-v3.1-n": {
       "name": "Deepseek V3 1 N"
     },
-    "claude-sonnet-4": {
-      "name": "Claude Sonnet 4",
-      "context_window": {
-        "context_length": 983040,
-        "max_output_tokens": 64000
-      }
-    },
     "o4-mini": {
       "name": "O4 MINI",
       "context_window": {
@@ -1726,7 +1719,10 @@
     },
     "kimi-k2.7-code": {
       "name": "Kimi K2 7 Code"
+    },
+    "kimi-k2.7-code-el": {
+      "name": "Kimi K2 7 Code El"
     }
   },
-  "_syncedAt": "2026-06-12T15:52:00.956Z"
+  "_syncedAt": "2026-06-13T03:41:32.152Z"
 }
