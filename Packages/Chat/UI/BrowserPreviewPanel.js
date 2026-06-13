@@ -305,7 +305,7 @@ export function createBrowserPreviewPanel(
       deleteBtn.setAttribute('aria-label', strings.historyDelete ?? 'Delete');
       deleteBtn.append(createIcon('close', 'browser-preview__history-delete-icon'));
       info.append(itemTitle, itemUrl);
-      item.append(favicon, info, itemTime, deleteBtn);
+      item.append(favicon, info, itemTime, whoAvatar, deleteBtn);
 
       item.addEventListener('click', () => {
         void invokeIpc('browser-preview:load-url', entry.url, entry.who).catch(() => {});

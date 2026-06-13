@@ -903,11 +903,6 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       }
     },
 
-    resumeHistoryView() {
-      if (!view || !visible) return;
-      attach();
-    },
-
     // Restore the native view after the history overlay is closed.
     resumeHistoryView() {
       if (!view || !visible) return;

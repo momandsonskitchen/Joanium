@@ -37,16 +37,6 @@ function buildFileRegistry(catalog = []) {
   return catalog.map((entry) => `- ${entry.filename}: ${entry.description}`).join('\n');
 }
 
-function buildFileContentBlock(catalog = []) {
-  if (!Array.isArray(catalog) || catalog.length === 0) return '(none)';
-  return catalog
-    .map((entry) => {
-      const content = String(entry.content ?? '').trim();
-      return [`--- ${entry.filename} ---`, content].join('\n');
-    })
-    .join('\n\n');
-}
-
 function resolveImportModel(bootstrap, settings) {
   const providers = Array.isArray(bootstrap?.providers) ? bootstrap.providers : [];
   const details = bootstrap?.user?.providers?.details ?? {};
