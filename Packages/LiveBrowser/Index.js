@@ -26,7 +26,12 @@ export async function createPackage({ rootDirectory }) {
       },
       {
         channel: 'browser-preview:load-url',
-        handler: async (event, url) => browserPreviewService.loadUrl(url, ownerWindow(event)),
+        handler: async (event, url, who, skipHistory) =>
+          browserPreviewService.loadUrl(url, {
+            ownerWindow: ownerWindow(event),
+            who: who ?? 'user',
+            skipHistory: Boolean(skipHistory),
+          }),
       },
       {
         channel: 'browser-preview:set-visible',
@@ -41,6 +46,14 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'browser-preview:hide',
         handler: async () => browserPreviewService.hide(),
+      },
+      {
+        channel: 'browser-preview:hide-native-view',
+        handler: async () => browserPreviewService.pauseHistoryView(),
+      },
+      {
+        channel: 'browser-preview:show-native-view',
+        handler: async () => browserPreviewService.resumeHistoryView(),
       },
       {
         channel: 'browser-preview:go-back',
@@ -68,6 +81,18 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'browser-preview:close',
         handler: async () => browserPreviewService.close(),
+      },
+      {
+        channel: 'browser-preview:get-history',
+        handler: async () => browserPreviewService.getHistory(),
+      },
+      {
+        channel: 'browser-preview:clear-history',
+        handler: async () => browserPreviewService.clearHistory(),
+      },
+      {
+        channel: 'browser-preview:delete-history-entry',
+        handler: async (_event, timestamp) => browserPreviewService.deleteHistoryEntry(timestamp),
       },
       {
         channel: 'browser-preview:execute-tool',

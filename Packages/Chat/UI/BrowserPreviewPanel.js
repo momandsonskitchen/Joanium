@@ -1,7 +1,11 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
+import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
+import { getNameInitials } from '../../Shared/Utils/StringUtils.js';
 import { SEARCH_ENGINE_SEARCH_URLS } from './Shared/DefaultSearchInfo.js';
+
+const AI_LOGO_URL = new URL('../../../Assets/Logo/Logo.png', import.meta.url).href;
 
 const DEFAULT_BROWSER_PREVIEW_STATE = Object.freeze({
   visible: false,
@@ -42,7 +46,10 @@ function resolveSearchQuery(query, searchBaseUrl = SEARCH_ENGINE_SEARCH_URLS.goo
   return `${searchBaseUrl}${encodeURIComponent(trimmed)}`;
 }
 
-export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) {
+export function createBrowserPreviewPanel(
+  strings,
+  { onVisibilityChange, onHistoryChange, getProfile } = {},
+) {
   let currentState = normalizeBrowserPreviewState();
   let disposeStateListener = null;
   let animationFrameId = 0;
@@ -87,7 +94,11 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
   backButton.append(createIcon('arrowLeft', 'browser-preview__control-icon'));
   forwardButton.append(createIcon('arrowRight', 'browser-preview__control-icon'));
   reloadButton.append(createIcon('retry', 'browser-preview__control-icon'));
-  navControls.append(backButton, forwardButton, reloadButton);
+  const historyButton = createElement('button', 'browser-preview__control');
+  historyButton.type = 'button';
+  historyButton.setAttribute('aria-label', strings.history ?? 'History');
+  historyButton.append(createIcon('tabHistory', 'browser-preview__control-icon'));
+  navControls.append(backButton, forwardButton, reloadButton, historyButton);
 
   // ── Close button sits on the far RIGHT ───────────────────────────────────
   const closeButton = createElement('button', 'browser-preview__control browser-preview__close');
@@ -129,9 +140,8 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
   function submitSearch() {
     const resolved = resolveSearchQuery(searchInput.value, activeSearchBaseUrl);
     if (!resolved) return;
-    // Update the input to the resolved URL so the user can see what was navigated to.
     searchInput.value = resolved;
-    void invokeIpc('browser-preview:load-url', resolved).catch(() => {});
+    void invokeIpc('browser-preview:load-url', resolved, 'user').catch(() => {});
   }
 
   searchInput.addEventListener('focus', () => {
@@ -181,7 +191,170 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
     createElement('strong', 'browser-preview__empty-title', strings.emptyTitle),
     createElement('span', 'browser-preview__empty-copy', strings.emptyCopy),
   );
-  mount.append(viewport, empty);
+
+  // ── History panel ────────────────────────────────────────────────────────
+  const historyPanel = createElement('div', 'browser-preview__history');
+  historyPanel.hidden = true;
+
+  const historyHeader = createElement('div', 'browser-preview__history-header');
+  const historyTitle = createElement(
+    'span',
+    'browser-preview__history-title',
+    strings.historyTitle ?? 'Browsing History',
+  );
+  const historyClearBtn = createElement(
+    'button',
+    'browser-preview__control browser-preview__history-clear',
+  );
+  historyClearBtn.type = 'button';
+  historyClearBtn.textContent = strings.historyClearAll ?? 'Clear all';
+  const historyCloseBtn = createElement(
+    'button',
+    'browser-preview__control browser-preview__history-close',
+  );
+  historyCloseBtn.type = 'button';
+  historyCloseBtn.setAttribute('aria-label', strings.close);
+  historyCloseBtn.append(createIcon('close', 'browser-preview__control-icon'));
+  historyHeader.append(historyTitle, historyClearBtn, historyCloseBtn);
+
+  const historyList = createElement('div', 'browser-preview__history-list');
+  historyPanel.append(historyHeader, historyList);
+
+  function createWhoAvatar(who) {
+    const avatarEl = createElement('div', 'browser-preview__history-who');
+    const profile = getProfile?.();
+    if (who === 'user') {
+      const avatarPath = typeof profile?.avatarPath === 'string' ? profile.avatarPath.trim() : '';
+      if (avatarPath) {
+        const img = document.createElement('img');
+        img.src = toFileUrl(avatarPath);
+        img.alt = '';
+        img.draggable = false;
+        img.className = 'browser-preview__history-who-img';
+        avatarEl.append(img);
+      } else {
+        const initials = getNameInitials(typeof profile?.name === 'string' ? profile.name : '');
+        avatarEl.textContent = initials;
+      }
+    } else {
+      const img = document.createElement('img');
+      img.src = AI_LOGO_URL;
+      img.alt = '';
+      img.draggable = false;
+      img.className = 'browser-preview__history-who-img';
+      avatarEl.append(img);
+    }
+    return avatarEl;
+  }
+
+  function createFavicon(url) {
+    const faviconEl = createElement('div', 'browser-preview__history-favicon');
+    try {
+      const hostname = new URL(url).hostname;
+      const img = document.createElement('img');
+      img.src = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
+      img.alt = '';
+      img.draggable = false;
+      img.className = 'browser-preview__history-favicon-img';
+      img.addEventListener('error', () => {
+        faviconEl.replaceChildren(createIcon('globe', 'browser-preview__history-favicon-icon'));
+      });
+      faviconEl.append(img);
+    } catch {
+      faviconEl.append(createIcon('globe', 'browser-preview__history-favicon-icon'));
+    }
+    return faviconEl;
+  }
+
+  function formatHistoryTime(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderHistoryList(entries) {
+    historyList.replaceChildren();
+    if (!entries || entries.length === 0) {
+      const emptyMsg = createElement(
+        'div',
+        'browser-preview__history-empty',
+        strings.historyEmpty ?? 'No browsing history yet.',
+      );
+      historyList.append(emptyMsg);
+      return;
+    }
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const entry = entries[i];
+      const item = createElement('div', 'browser-preview__history-item');
+
+      const favicon = createFavicon(entry.url);
+      const info = createElement('div', 'browser-preview__history-info');
+      const itemTitle = createElement(
+        'span',
+        'browser-preview__history-item-title',
+        entry.title || entry.url,
+      );
+      const itemUrl = createElement('span', 'browser-preview__history-item-url', entry.url);
+      const itemTime = createElement(
+        'span',
+        'browser-preview__history-item-time',
+        formatHistoryTime(entry.timestamp),
+      );
+      const whoAvatar = createWhoAvatar(entry.who);
+      const deleteBtn = createElement('button', 'browser-preview__history-delete');
+      deleteBtn.type = 'button';
+      deleteBtn.setAttribute('aria-label', strings.historyDelete ?? 'Delete');
+      deleteBtn.append(createIcon('close', 'browser-preview__history-delete-icon'));
+      info.append(itemTitle, itemUrl);
+      item.append(favicon, info, itemTime, deleteBtn);
+
+      item.addEventListener('click', () => {
+        void invokeIpc('browser-preview:load-url', entry.url, entry.who).catch(() => {});
+        toggleHistoryPanel(false);
+      });
+
+      deleteBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        void invokeIpc('browser-preview:delete-history-entry', entry.timestamp)
+          .then(() => invokeIpc('browser-preview:get-history'))
+          .then((entries) => renderHistoryList(entries))
+          .catch(() => {});
+      });
+
+      historyList.append(item);
+    }
+  }
+
+  let historyPanelVisible = false;
+
+  function toggleHistoryPanel(forceState) {
+    historyPanelVisible = forceState ?? !historyPanelVisible;
+    historyPanel.hidden = !historyPanelVisible;
+    mount.classList.toggle('browser-preview__mount--history-open', historyPanelVisible);
+    onHistoryChange?.(historyPanelVisible);
+
+    // The native WebContentsView is rendered on top of all renderer DOM,
+    // so we must hide it while the history panel is visible.
+    if (historyPanelVisible) {
+      void invokeIpc('browser-preview:hide-native-view').catch(() => {});
+      void invokeIpc('browser-preview:get-history')
+        .then((entries) => renderHistoryList(entries))
+        .catch(() => renderHistoryList([]));
+    } else {
+      void invokeIpc('browser-preview:show-native-view').catch(() => {});
+    }
+  }
+
+  historyButton.addEventListener('click', () => toggleHistoryPanel());
+  historyClearBtn.addEventListener('click', () => {
+    void invokeIpc('browser-preview:clear-history')
+      .then(() => invokeIpc('browser-preview:get-history'))
+      .then((entries) => renderHistoryList(entries))
+      .catch(() => {});
+  });
+  historyCloseBtn.addEventListener('click', () => toggleHistoryPanel(false));
+  // ────────────────────────────────────────────────────────────────────────
+
+  mount.append(viewport, empty, historyPanel);
   panel.append(header, statusRow, mount);
 
   function setTone(tone) {
@@ -286,6 +459,10 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
   }
 
   backButton.addEventListener('click', () => {
+    if (historyPanelVisible) {
+      toggleHistoryPanel(false);
+      return;
+    }
     void invokeIpc('browser-preview:go-back');
   });
   forwardButton.addEventListener('click', () => {
@@ -375,7 +552,7 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
 
       // Navigate to the home URL immediately so the main process makes the
       // BrowserView visible before the first state event arrives.
-      void invokeIpc('browser-preview:load-url', homeUrl)
+      void invokeIpc('browser-preview:load-url', homeUrl, 'user', true)
         .catch(() => {})
         .finally(() => {
           suppressAutoClose = false;

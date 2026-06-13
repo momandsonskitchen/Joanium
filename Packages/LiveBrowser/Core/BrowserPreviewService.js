@@ -1,5 +1,5 @@
 import electron from 'electron';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import strings from '../I18n/en.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
@@ -292,6 +292,55 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
   let loading = false;
   let resizeHandler = null;
   let sessionConfigured = false;
+  let browsingHistory = null;
+  let pendingHistoryWho = 'ai';
+  let skipNextHistory = false;
+
+  function getHistoryPath() {
+    const now = new Date();
+    const year = String(now.getFullYear());
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return path.join(
+      rootDirectory ? getWritableDataDirectory(rootDirectory) : app.getPath('userData'),
+      'Browsing',
+      year,
+      month,
+      `${day}.json`,
+    );
+  }
+
+  async function ensureHistoryLoaded() {
+    if (browsingHistory !== null) return;
+    try {
+      const filePath = getHistoryPath();
+      const raw = await readFile(filePath, 'utf8');
+      browsingHistory = JSON.parse(raw);
+    } catch {
+      browsingHistory = [];
+    }
+  }
+
+  async function saveHistoryToDisk() {
+    if (browsingHistory === null) return;
+    const filePath = getHistoryPath();
+    await mkdir(path.dirname(filePath), { recursive: true });
+    await writeFile(filePath, JSON.stringify(browsingHistory, null, 2), 'utf8');
+  }
+
+  function recordHistory(url, title, who = 'user') {
+    if (skipNextHistory) {
+      skipNextHistory = false;
+      return;
+    }
+    if (browsingHistory === null) {
+      browsingHistory = [];
+    }
+    const last = browsingHistory[browsingHistory.length - 1];
+    if (last && last.url === url) return;
+    browsingHistory.push({ url, title: title || url, timestamp: Date.now(), who });
+    saveHistoryToDisk().catch(() => {});
+  }
 
   function getFallbackBounds() {
     const targetWindow = windowRef ?? BrowserWindow.getAllWindows()[0] ?? null;
@@ -405,6 +454,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
 
     webContents.on('did-navigate', (_event, nextUrl) => {
       url = nextUrl || url;
+      recordHistory(url, title, pendingHistoryWho);
       emitState();
     });
 
@@ -473,8 +523,10 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     return webContents;
   }
 
-  async function loadUrl(input, { referrer = '' } = {}) {
+  async function loadUrl(input, { referrer = '', who = 'ai', skipHistory = false } = {}) {
     const nextUrl = normalizeUrl(input);
+    pendingHistoryWho = who;
+    if (skipHistory) skipNextHistory = true;
     const webContents = await ensureView();
     url = nextUrl;
     visible = true;
@@ -806,9 +858,9 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     getState,
     executeTool,
 
-    async loadUrl(input, ownerWindow = null) {
+    async loadUrl(input, { ownerWindow = null, who = 'ai', skipHistory = false } = {}) {
       if (ownerWindow) attachToWindow(ownerWindow);
-      return loadUrl(input);
+      return loadUrl(input, { who, skipHistory });
     },
 
     setHostBounds(bounds, ownerWindow = null) {
@@ -839,6 +891,29 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       return getState();
     },
 
+    // Temporarily hide the native view for the history overlay.
+    // Saves the current bounds so we can restore them without losing position.
+    // Does NOT change `visible` or emit state to the renderer.
+    pauseHistoryView() {
+      if (!view) return;
+      view.setVisible(false);
+      if (viewAttached && windowRef && !windowRef.isDestroyed()) {
+        windowRef.contentView.removeChildView(view);
+        viewAttached = false;
+      }
+    },
+
+    resumeHistoryView() {
+      if (!view || !visible) return;
+      attach();
+    },
+
+    // Restore the native view after the history overlay is closed.
+    resumeHistoryView() {
+      if (!view || !visible) return;
+      attach();
+    },
+
     // Called by the Shell when the user leaves the chat panel.
     // The WebContentsView is removed from the compositor so it stops painting,
     // but the WebContents stays alive — the AI can still read and interact with
@@ -862,6 +937,23 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
     goForward,
 
     reload,
+
+    async getHistory() {
+      await ensureHistoryLoaded();
+      return browsingHistory ?? [];
+    },
+
+    async clearHistory() {
+      browsingHistory = [];
+      await saveHistoryToDisk();
+    },
+
+    async deleteHistoryEntry(timestamp) {
+      await ensureHistoryLoaded();
+      if (!browsingHistory) return;
+      browsingHistory = browsingHistory.filter((e) => e.timestamp !== timestamp);
+      await saveHistoryToDisk();
+    },
 
     async close() {
       visible = false;

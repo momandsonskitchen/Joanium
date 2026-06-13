@@ -54,6 +54,11 @@ const en = {
     close: 'Close preview',
     emptyTitle: 'No browser page yet',
     emptyCopy: 'Open a URL here, or let browser tools show their work in this panel.',
+    history: 'History',
+    historyTitle: 'Browsing History',
+    historyEmpty: 'No browsing history yet.',
+    historyClearAll: 'Clear all',
+    historyDelete: 'Delete',
   },
   terminal: {
     close: 'Close terminal',

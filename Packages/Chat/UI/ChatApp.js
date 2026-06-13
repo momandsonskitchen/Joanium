@@ -4238,6 +4238,10 @@ export async function createChatView(
         browserBtn.classList.toggle('chat-composer__icon-button--active', visible);
       }
     },
+    onHistoryChange: (open) => {
+      view.classList.toggle('chat-view--browser-history', open);
+    },
+    getProfile: () => getProfile?.() ?? profile,
   });
 
   terminalPanel = createChatTerminalPanel(strings, {
