@@ -6,6 +6,25 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.613.0] - 2026-06-13
+
+* Code Refactor
+* Updated AI Models
+* Updated AI Models
+* Code Cleanup
+* Updated AI Models
+* Code Cleanup
+* Created a shared escapeRegex function and used it all across
+* Code CleanUp
+* Created a shared formatText function and used it all across
+* Updated AI Models
+* Created a shared toIso function and used all across
+* Chore(deps-dev): Bump jscpd from 5.0.7 to 5.0.8
+* Added New Whats New Images
+* AI Models Update
+
+---
+
 ## [2026.612.0] - 2026-06-12
 
 * Release.yml Update
