@@ -4241,7 +4241,6 @@ export async function createChatView(
     onHistoryChange: (open) => {
       view.classList.toggle('chat-view--browser-history', open);
     },
-    getProfile: () => getProfile?.() ?? profile,
   });
 
   terminalPanel = createChatTerminalPanel(strings, {

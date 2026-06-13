@@ -1,11 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
-import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
-import { getNameInitials } from '../../Shared/Utils/StringUtils.js';
 import { SEARCH_ENGINE_SEARCH_URLS } from './Shared/DefaultSearchInfo.js';
-
-const AI_LOGO_URL = new URL('../../../Assets/Logo/Logo.png', import.meta.url).href;
 
 const DEFAULT_BROWSER_PREVIEW_STATE = Object.freeze({
   visible: false,
@@ -46,10 +42,7 @@ function resolveSearchQuery(query, searchBaseUrl = SEARCH_ENGINE_SEARCH_URLS.goo
   return `${searchBaseUrl}${encodeURIComponent(trimmed)}`;
 }
 
-export function createBrowserPreviewPanel(
-  strings,
-  { onVisibilityChange, onHistoryChange, getProfile } = {},
-) {
+export function createBrowserPreviewPanel(strings, { onVisibilityChange, onHistoryChange } = {}) {
   let currentState = normalizeBrowserPreviewState();
   let disposeStateListener = null;
   let animationFrameId = 0;
@@ -220,33 +213,6 @@ export function createBrowserPreviewPanel(
   const historyList = createElement('div', 'browser-preview__history-list');
   historyPanel.append(historyHeader, historyList);
 
-  function createWhoAvatar(who) {
-    const avatarEl = createElement('div', 'browser-preview__history-who');
-    const profile = getProfile?.();
-    if (who === 'user') {
-      const avatarPath = typeof profile?.avatarPath === 'string' ? profile.avatarPath.trim() : '';
-      if (avatarPath) {
-        const img = document.createElement('img');
-        img.src = toFileUrl(avatarPath);
-        img.alt = '';
-        img.draggable = false;
-        img.className = 'browser-preview__history-who-img';
-        avatarEl.append(img);
-      } else {
-        const initials = getNameInitials(typeof profile?.name === 'string' ? profile.name : '');
-        avatarEl.textContent = initials;
-      }
-    } else {
-      const img = document.createElement('img');
-      img.src = AI_LOGO_URL;
-      img.alt = '';
-      img.draggable = false;
-      img.className = 'browser-preview__history-who-img';
-      avatarEl.append(img);
-    }
-    return avatarEl;
-  }
-
   function createFavicon(url) {
     const faviconEl = createElement('div', 'browser-preview__history-favicon');
     try {
@@ -299,13 +265,12 @@ export function createBrowserPreviewPanel(
         'browser-preview__history-item-time',
         formatHistoryTime(entry.timestamp),
       );
-      const whoAvatar = createWhoAvatar(entry.who);
       const deleteBtn = createElement('button', 'browser-preview__history-delete');
       deleteBtn.type = 'button';
       deleteBtn.setAttribute('aria-label', strings.historyDelete ?? 'Delete');
       deleteBtn.append(createIcon('close', 'browser-preview__history-delete-icon'));
       info.append(itemTitle, itemUrl);
-      item.append(favicon, info, itemTime, whoAvatar, deleteBtn);
+      item.append(favicon, info, itemTime, deleteBtn);
 
       item.addEventListener('click', () => {
         void invokeIpc('browser-preview:load-url', entry.url, entry.who).catch(() => {});
