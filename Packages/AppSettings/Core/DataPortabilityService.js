@@ -3,6 +3,7 @@ import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import JSZip from 'jszip';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { createDefaultUserState } from '../../Shared/UserData/UserData.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -13,6 +14,11 @@ async function fileExists(filePath) {
   } catch {
     return false;
   }
+}
+
+function isInsideDirectory(directory, filePath) {
+  const relative = path.relative(directory, filePath);
+  return Boolean(relative) && !relative.startsWith('..') && !path.isAbsolute(relative);
 }
 
 /** Recursively add an entire directory into the zip under `zipFolder`. */
@@ -74,6 +80,144 @@ function deepMerge(current, imported) {
   return imported;
 }
 
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isEmptyValue(value) {
+  if (value === null || value === undefined) return true;
+  if (typeof value === 'string') return value.trim() === '';
+  if (Array.isArray(value)) return value.length === 0;
+  if (isPlainObject(value)) return Object.keys(value).length === 0;
+  return false;
+}
+
+function valueEquals(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function mergeArray(current = [], imported = []) {
+  const seen = new Set();
+  const result = [];
+
+  for (const item of [...current, ...imported]) {
+    const key = JSON.stringify(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(item);
+  }
+
+  return result;
+}
+
+function mergeDefaultAware(current, imported, defaults) {
+  if (imported === undefined) return current;
+  if (current === undefined || current === null) return imported;
+
+  if (Array.isArray(current) || Array.isArray(imported)) {
+    return mergeArray(
+      Array.isArray(current) ? current : [],
+      Array.isArray(imported) ? imported : [],
+    );
+  }
+
+  if (isPlainObject(current) && isPlainObject(imported)) {
+    const result = {};
+    const keys = new Set([...Object.keys(imported), ...Object.keys(current)]);
+
+    for (const key of keys) {
+      if (key === '__proto__' || key === 'constructor') continue;
+      result[key] = mergeDefaultAware(current[key], imported[key], defaults?.[key]);
+    }
+
+    return result;
+  }
+
+  if (isEmptyValue(current)) return imported;
+  if (defaults !== undefined && valueEquals(current, defaults)) return imported;
+  return current;
+}
+
+function mergeSecretDetails(current = {}, imported = {}) {
+  const result = {};
+  const keys = new Set([...Object.keys(imported), ...Object.keys(current)]);
+
+  for (const key of keys) {
+    if (key === '__proto__' || key === 'constructor') continue;
+    const currentDetails = isPlainObject(current[key]) ? current[key] : {};
+    const importedDetails = isPlainObject(imported[key]) ? imported[key] : {};
+    const detailKeys = new Set([...Object.keys(importedDetails), ...Object.keys(currentDetails)]);
+    const mergedDetails = {};
+
+    for (const detailKey of detailKeys) {
+      if (detailKey === '__proto__' || detailKey === 'constructor') continue;
+      const currentValue = currentDetails[detailKey];
+      mergedDetails[detailKey] = isEmptyValue(currentValue)
+        ? importedDetails[detailKey]
+        : currentValue;
+    }
+
+    result[key] = mergedDetails;
+  }
+
+  return result;
+}
+
+function markdownBody(content = '') {
+  const lines = String(content).replace(/\r\n/g, '\n').trim().split('\n');
+  if (lines[0]?.trim().startsWith('#')) lines.shift();
+  return lines.join('\n').trim();
+}
+
+function markdownHeading(content = '', fallback = '# Memory') {
+  const firstLine = String(content).replace(/\r\n/g, '\n').trim().split('\n')[0]?.trim();
+  return firstLine?.startsWith('#') ? firstLine : fallback;
+}
+
+function normalizeMarkdownLine(line = '') {
+  return String(line)
+    .toLowerCase()
+    .replace(/^\s*[-*]\s+/, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function mergeMarkdown(current = '', imported = '', filename = 'Memory.md') {
+  const importedText = String(imported).replace(/\r\n/g, '\n').trim();
+  const currentText = String(current).replace(/\r\n/g, '\n').trim();
+
+  if (!importedText) return currentText ? `${currentText}\n` : '';
+  if (!markdownBody(currentText)) return `${importedText}\n`;
+  if (!markdownBody(importedText)) return `${currentText}\n`;
+
+  const heading = markdownHeading(
+    currentText,
+    markdownHeading(importedText, `# ${filename.replace(/\.md$/i, '')}`),
+  );
+  const seen = new Set();
+  const mergedLines = [];
+
+  for (const source of [markdownBody(currentText), markdownBody(importedText)]) {
+    for (const rawLine of source.split('\n')) {
+      const line = rawLine.trimEnd();
+      const normalized = normalizeMarkdownLine(line);
+
+      if (normalized) {
+        if (seen.has(normalized)) continue;
+        seen.add(normalized);
+      }
+
+      mergedLines.push(line);
+    }
+  }
+
+  return `${heading}\n\n${mergedLines
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()}\n`;
+}
+
 /**
  * Merge imported User.json into current User.json.
  *
@@ -87,31 +231,14 @@ function deepMerge(current, imported) {
  *  - Avatar path: imported only if current has no avatar (avatarPath is null/empty).
  */
 function mergeUserJson(current = {}, imported = {}) {
+  const defaults = createDefaultUserState();
+  const base = mergeDefaultAware(current, imported, defaults);
+
   // ── Profile ──────────────────────────────────────────────────────────────
   const currentProfile = current.profile ?? {};
   const importedProfile = imported.profile ?? {};
 
-  const mergedProfile = {
-    name:
-      String(currentProfile.name ?? '').trim() || String(importedProfile.name ?? '').trim() || '',
-    // Avatar: keep current path if it exists; otherwise take imported path.
-    // Note: the file itself is handled separately in the zip loop.
-    avatarPath: currentProfile.avatarPath ?? importedProfile.avatarPath ?? null,
-    dateOfBirth: {
-      day:
-        String(currentProfile.dateOfBirth?.day ?? '').trim() ||
-        String(importedProfile.dateOfBirth?.day ?? '').trim() ||
-        '',
-      month:
-        String(currentProfile.dateOfBirth?.month ?? '').trim() ||
-        String(importedProfile.dateOfBirth?.month ?? '').trim() ||
-        '',
-      year:
-        String(currentProfile.dateOfBirth?.year ?? '').trim() ||
-        String(importedProfile.dateOfBirth?.year ?? '').trim() ||
-        '',
-    },
-  };
+  const mergedProfile = mergeDefaultAware(currentProfile, importedProfile, defaults.profile);
 
   // ── Providers ────────────────────────────────────────────────────────────
   // selected: union of both
@@ -123,21 +250,25 @@ function mergeUserJson(current = {}, imported = {}) {
     : [];
   const mergedSelected = [...new Set([...currentSelected, ...importedSelected])];
 
-  // details: per-provider gap-fill — never overwrite an existing entry
+  // details: per-provider, per-field gap-fill.
   const currentProviderDetails = current.providers?.details ?? {};
   const importedProviderDetails = imported.providers?.details ?? {};
-  const mergedProviderDetails = { ...importedProviderDetails, ...currentProviderDetails };
+  const mergedProviderDetails = mergeSecretDetails(currentProviderDetails, importedProviderDetails);
 
   // ── Connector secrets ────────────────────────────────────────────────────
   const currentConnectorDetails = current.connectors?.details ?? {};
   const importedConnectorDetails = imported.connectors?.details ?? {};
-  const mergedConnectorDetails = { ...importedConnectorDetails, ...currentConnectorDetails };
+  const mergedConnectorDetails = mergeSecretDetails(
+    currentConnectorDetails,
+    importedConnectorDetails,
+  );
 
   // ── Scalar / settings fields: current wins only when it has a real value ─
-  const mergedCustomInstructions =
-    String(current.customInstructions ?? '').trim() ||
-    String(imported.customInstructions ?? '').trim() ||
-    '';
+  const mergedCustomInstructions = mergeDefaultAware(
+    current.customInstructions,
+    imported.customInstructions,
+    defaults.customInstructions,
+  );
 
   const mergedUsageModes = deepMerge(
     Array.isArray(current.usageModes) ? current.usageModes : [],
@@ -156,19 +287,34 @@ function mergeUserJson(current = {}, imported = {}) {
       ? currentPersona
       : (importedPersona ?? currentPersona);
 
-  // theme / appSettings: deep-merge (current wins per key)
-  const mergedTheme = deepMerge(current.theme ?? {}, imported.theme ?? {});
-  const mergedAppSettings = deepMerge(current.appSettings ?? {}, imported.appSettings ?? {});
+  // theme / appSettings: defaults do not block restored backup values.
+  const mergedTheme = mergeDefaultAware(current.theme ?? {}, imported.theme ?? {}, defaults.theme);
+  const mergedAppSettings = mergeDefaultAware(
+    current.appSettings ?? {},
+    imported.appSettings ?? {},
+    defaults.appSettings,
+  );
 
   // ── Onboarding / identity fields ─────────────────────────────────────────
-  // Always keep current values for security-sensitive / machine-specific fields.
   return {
-    // Identity / onboarding — always current
-    locale: current.locale ?? imported.locale ?? 'en',
-    consentAccepted: current.consentAccepted ?? imported.consentAccepted ?? false,
-    onboardingCompleted: current.onboardingCompleted ?? imported.onboardingCompleted ?? false,
-    completedAt: current.completedAt ?? imported.completedAt ?? null,
-    lastCompletedStep: current.lastCompletedStep ?? imported.lastCompletedStep ?? 0,
+    ...base,
+    locale: mergeDefaultAware(current.locale, imported.locale, defaults.locale),
+    consentAccepted: mergeDefaultAware(
+      current.consentAccepted,
+      imported.consentAccepted,
+      defaults.consentAccepted,
+    ),
+    onboardingCompleted: mergeDefaultAware(
+      current.onboardingCompleted,
+      imported.onboardingCompleted,
+      defaults.onboardingCompleted,
+    ),
+    completedAt: mergeDefaultAware(current.completedAt, imported.completedAt, defaults.completedAt),
+    lastCompletedStep: mergeDefaultAware(
+      current.lastCompletedStep,
+      imported.lastCompletedStep,
+      defaults.lastCompletedStep,
+    ),
     // Merged fields
     profile: mergedProfile,
     customInstructions: mergedCustomInstructions,
@@ -182,19 +328,25 @@ function mergeUserJson(current = {}, imported = {}) {
     usageModes: mergedUsageModes,
     activePersona: mergedPersona,
     // Window state is always machine-specific — never import
-    windowState: current.windowState,
+    windowState: current.windowState ?? defaults.windowState,
     appSettings: mergedAppSettings,
     theme: mergedTheme,
+    whatsNewSeenVersion: mergeDefaultAware(
+      current.whatsNewSeenVersion,
+      imported.whatsNewSeenVersion,
+      defaults.whatsNewSeenVersion,
+    ),
+    lastDreamt: mergeDefaultAware(current.lastDreamt, imported.lastDreamt, defaults.lastDreamt),
   };
 }
 
 /**
  * Merge imported Channels.json into current.
- * Uses deepMerge so current config wins on every conflict while any new
- * channel keys from the import are preserved.
+ * Uses deepMerge with imported data as the winner because this is a backup
+ * restore path and default local channel config should not block credentials.
  */
 function mergeChannelsJson(current = {}, imported = {}) {
-  return deepMerge(current, imported);
+  return deepMerge(imported, current);
 }
 
 // ── Export ────────────────────────────────────────────────────────────────────
@@ -251,18 +403,19 @@ export async function exportData(rootDirectory) {
  * Prompt the user to pick a Joanium.zip and merge it into the current Data.
  *
  * Merge strategy:
- *  - Security.json / System.json → always skipped (machine-specific / sensitive)
+ *  - System.json → always skipped (machine-specific)
+ *  - Security.json → restored only when current security is not enabled
  *  - User.json → explicit field merge:
  *      API keys / connector secrets: gap-fill only (never overwrite existing)
  *      profile (name, dob, avatar path): imported fills in empty/null values
  *      providers.selected: union of both
  *      customInstructions, usageModes, activePersona: imported fills blanks
- *      theme / appSettings: current wins per key, import fills missing keys
+ *      theme / appSettings: current wins only when it differs from defaults
  *      windowState: always kept from current (machine-specific)
  *  - Channels.json → smart merge (current config wins per channel)
  *  - Avatar.* → write only if no avatar exists; fix avatarPath to local path
- *  - Memories/*.md → skipped here; use the Memory panel's AI import flow
- *  - Everything else → copy only if the destination file does not exist yet
+ *  - Memories/*.md → markdown merge, default placeholders do not block import
+ *  - Everything else → restore the backed-up file
  */
 export async function importData(rootDirectory) {
   const ownerWindow = BrowserWindow.getAllWindows()[0] ?? null;
@@ -294,7 +447,7 @@ export async function importData(rootDirectory) {
     const topLevel = normPath.split('/')[0];
 
     // ── Always skip these ──────────────────────────────────────────────────
-    if (topLevel === 'Security.json' || topLevel === 'System.json') continue;
+    if (topLevel === 'System.json') continue;
 
     const destPath = path.resolve(dataDir, normPath);
 
@@ -303,6 +456,37 @@ export async function importData(rootDirectory) {
     if (relative.startsWith('..') || path.isAbsolute(relative)) continue;
 
     const content = await zipEntry.async('nodebuffer');
+
+    // Security.json: restore app-lock settings only when the current install
+    // is not already protected, so an import cannot silently replace the
+    // active local password.
+    if (normPath === 'Security.json') {
+      let currentSecurity = {};
+      try {
+        currentSecurity = JSON.parse(await readFile(destPath, 'utf8'));
+      } catch {
+        /* no current security file */
+      }
+
+      if (currentSecurity?.enabled) continue;
+
+      let importedSecurity;
+      try {
+        importedSecurity = JSON.parse(content.toString('utf8'));
+      } catch {
+        continue;
+      }
+
+      const restoredSecurity = {
+        ...importedSecurity,
+        failedPasswordAttempts: 0,
+        lockedUntil: null,
+      };
+
+      await mkdir(path.dirname(destPath), { recursive: true });
+      await writeFile(destPath, `${JSON.stringify(restoredSecurity, null, 2)}\n`, 'utf8');
+      continue;
+    }
 
     // ── User.json: smart merge ─────────────────────────────────────────────
     if (normPath === 'User.json') {
@@ -354,26 +538,27 @@ export async function importData(rootDirectory) {
       if (!(await fileExists(destPath))) {
         await mkdir(path.dirname(destPath), { recursive: true });
         await writeFile(destPath, content);
-        writtenAvatarPath = destPath;
       }
+      writtenAvatarPath = destPath;
       continue;
     }
 
-    // ── Memory .md files: merge via AI import pipeline (handled separately).
-    // Raw zip-level memory merging is intentionally skipped here — the Memory
-    // panel's import flow (MemoryPanel.js → runMemoryImport) handles .md files
-    // using the AI-assisted ImportMemory prompt, which properly deduplicates
-    // and restructures content.  We simply skip .md files in the zip so we
-    // don't overwrite anything the AI import has already handled.
+    // ── Memory .md files: restore the actual backed-up memory files.
     if (topLevel === 'Memories' && normPath.endsWith('.md')) {
-      // Skip — memory files are managed by the Memory panel's import UI.
+      const currentContent = await readFile(destPath, 'utf8').catch(() => '');
+      const mergedContent = mergeMarkdown(
+        currentContent,
+        content.toString('utf8'),
+        path.basename(normPath),
+      );
+
+      await mkdir(path.dirname(destPath), { recursive: true });
+      await writeFile(destPath, mergedContent, 'utf8');
       continue;
     }
 
-    // ── Everything else: add only if file doesn't already exist ───────────
+    // ── Everything else: restore the backed-up file.
     // Chats, Agents, Projects, Templates, ChannelMessages, Usage, etc.
-    if (await fileExists(destPath)) continue;
-
     await mkdir(path.dirname(destPath), { recursive: true });
     await writeFile(destPath, content);
   }
@@ -385,7 +570,8 @@ export async function importData(rootDirectory) {
     const userJsonPath = path.join(dataDir, 'User.json');
     try {
       const userState = JSON.parse(await readFile(userJsonPath, 'utf8'));
-      if (!userState.profile?.avatarPath) {
+      const avatarPath = String(userState.profile?.avatarPath ?? '').trim();
+      if (!avatarPath || !isInsideDirectory(dataDir, avatarPath)) {
         userState.profile = { ...(userState.profile ?? {}), avatarPath: writtenAvatarPath };
         await writeFile(userJsonPath, `${JSON.stringify(userState, null, 2)}\n`, 'utf8');
       }

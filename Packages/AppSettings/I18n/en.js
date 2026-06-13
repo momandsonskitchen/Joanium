@@ -98,7 +98,7 @@ const en = {
     import: {
       label: 'Import backup',
       description:
-        'Restore data from a previously exported Joanium.zip. Existing data is kept — only missing items are added.',
+        'Restore data from a previously exported Joanium.zip. Backed-up files are restored and profile settings are merged.',
       button: 'Import Backup',
       importing: 'Importing...',
       success: 'Import complete. Your data has been merged.',
