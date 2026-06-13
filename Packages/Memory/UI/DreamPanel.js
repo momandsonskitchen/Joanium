@@ -1,52 +1,10 @@
-import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
+import { createElement, escapeHtml, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { computeDiff } from '../../Shared/Utils/DiffUtils.js';
 
-// ── Lightweight line diff (LCS) ──────────────────────────────────────────────
+// ── Diff rendering ───────────────────────────────────────────────────────
 
 const CONTEXT_LINES = 2;
-
-function computeLineDiff(before, after) {
-  const left = (before || '').replace(/\r\n/g, '\n').split('\n');
-  const right = (after || '').replace(/\r\n/g, '\n').split('\n');
-  const rows = left.length;
-  const cols = right.length;
-  const matrix = Array.from({ length: rows + 1 }, () => new Int32Array(cols + 1));
-
-  for (let r = 1; r <= rows; r += 1) {
-    for (let c = 1; c <= cols; c += 1) {
-      matrix[r][c] =
-        left[r - 1] === right[c - 1]
-          ? matrix[r - 1][c - 1] + 1
-          : Math.max(matrix[r - 1][c], matrix[r][c - 1]);
-    }
-  }
-
-  const ops = [];
-  let r = rows;
-  let c = cols;
-  while (r > 0 || c > 0) {
-    if (r > 0 && c > 0 && left[r - 1] === right[c - 1]) {
-      ops.push({ type: 'eq', line: left[r - 1] });
-      r -= 1;
-      c -= 1;
-    } else if (c > 0 && (r === 0 || matrix[r][c - 1] >= matrix[r - 1][c])) {
-      ops.push({ type: 'add', line: right[c - 1] });
-      c -= 1;
-    } else {
-      ops.push({ type: 'rem', line: left[r - 1] });
-      r -= 1;
-    }
-  }
-  ops.reverse();
-  return ops;
-}
-
-function escapeHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
 
 function buildDiffHtml(ops) {
   if (!ops || ops.length === 0) return '';
@@ -141,9 +99,10 @@ export function createDreamPanel(strings) {
 
     // Diff block (if before/after data exists)
     if (change.before != null && change.after != null) {
-      const ops = computeLineDiff(change.before, change.after);
-      const added = ops.filter((o) => o.type === 'add').length;
-      const removed = ops.filter((o) => o.type === 'rem').length;
+      const diff = computeDiff(change.before, change.after);
+      const ops = diff.ops ?? [];
+      const added = diff.added;
+      const removed = diff.removed;
       const diffHtml = buildDiffHtml(ops);
 
       if (diffHtml) {

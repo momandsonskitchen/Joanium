@@ -10,10 +10,11 @@ import {
 } from '../../../Datasets/Messages.js';
 import { getRandomSuggestions } from '../../../Datasets/Suggestions.js';
 import { copyToClipboard, createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace, truncate } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace, extractJsonObject, truncate } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
+import { EVENTS, dispatchEvent } from '../../Shared/Events/RendererEvents.js';
 import { parseThinkingFromText } from '../../Shared/Markdown/ThinkingParser.js';
 import { normalizeSubAgentTasks } from '../../Shared/SubAgents/SubAgentTasks.js';
 import {
@@ -574,16 +575,6 @@ export async function createChatView(
     return memoryContext;
   }
 
-  function extractJsonObject(text = '') {
-    const source = String(text ?? '').trim();
-    const start = source.indexOf('{');
-    const end = source.lastIndexOf('}');
-    if (start < 0 || end <= start) {
-      return null;
-    }
-    return source.slice(start, end + 1);
-  }
-
   function normalizeMemoryEntry(entry) {
     if (!entry || typeof entry !== 'object') {
       return null;
@@ -660,13 +651,11 @@ export async function createChatView(
   }
 
   function showMemorySyncIndicator(label) {
-    window.dispatchEvent(
-      new CustomEvent('joanium:memory-sync', { detail: { active: true, message: label } }),
-    );
+    dispatchEvent(EVENTS.MEMORY_SYNC, { active: true, message: label });
   }
 
   function hideMemorySyncIndicator() {
-    window.dispatchEvent(new CustomEvent('joanium:memory-sync', { detail: { active: false } }));
+    dispatchEvent(EVENTS.MEMORY_SYNC, { active: false });
   }
 
   function cancelScheduledMemorySync() {
@@ -758,7 +747,7 @@ export async function createChatView(
     }
   }
 
-  window.addEventListener('joanium:connectors-changed', () => {
+  window.addEventListener(EVENTS.CONNECTORS_CHANGED, () => {
     resetAssistantContextCache(assistantContextCache);
   });
 
@@ -766,7 +755,7 @@ export async function createChatView(
   // The initial payload (providers + user details incl. API keys) is fetched once
   // at boot and cached — without this refresh, newly-saved API keys are invisible
   // to the model picker, so the provider never appears as selectable.
-  window.addEventListener('joanium:providers-changed', () => {
+  window.addEventListener(EVENTS.PROVIDERS_CHANGED, () => {
     invokeIpc('chat:bootstrap')
       .then((freshPayload) => {
         payload.providers = freshPayload.providers;
@@ -2008,7 +1997,7 @@ export async function createChatView(
               .then((state) => invokeIpc('themes:save', { motion: state?.motion ?? 'full', mode }))
               .catch(() => invokeIpc('themes:save', { mode, motion: 'full' }).catch(() => {}));
             // Notify any open panels (e.g. ThemePanel) so their UI stays in sync.
-            window.dispatchEvent(new CustomEvent('joanium:theme-changed', { detail: { mode } }));
+            dispatchEvent(EVENTS.THEME_CHANGED, { mode });
             focusComposer();
           }
           break;
@@ -4439,7 +4428,7 @@ export async function createChatView(
     }
   }
 
-  window.addEventListener('joanium:app-settings-changed', (event) => {
+  window.addEventListener(EVENTS.APP_SETTINGS_CHANGED, (event) => {
     currentAppSettings = event.detail ?? currentAppSettings;
     // Always honour an explicit change from settings — it means the user
     // intentionally picked a model there, so override any in-chat selection.
@@ -4475,7 +4464,7 @@ export async function createChatView(
   });
 
   // Manual memory sync trigger fired from AppSettingsPanel when auto-update is off.
-  window.addEventListener('joanium:trigger-memory-sync', () => {
+  window.addEventListener(EVENTS.TRIGGER_MEMORY_SYNC, () => {
     void processPendingMemorySyncs({ force: true });
   });
 

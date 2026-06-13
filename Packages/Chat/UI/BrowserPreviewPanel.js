@@ -1,6 +1,6 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
 import { SEARCH_ENGINE_SEARCH_URLS } from './Shared/DefaultSearchInfo.js';
 
 const DEFAULT_BROWSER_PREVIEW_STATE = Object.freeze({
@@ -103,7 +103,7 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
 
   // Security / site-type indicator icon (lock, globe, etc.)
   const omniboxIcon = createElement('span', 'browser-preview__omnibox-icon');
-  omniboxIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+  omniboxIcon.innerHTML = iconMarkup.lock;
 
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
@@ -251,14 +251,14 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
       const isHttps = currentState.url.startsWith('https://');
       const isHttp = currentState.url.startsWith('http://');
       if (isHttps) {
-        omniboxIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+        omniboxIcon.innerHTML = iconMarkup.lock;
         omniboxIcon.className =
           'browser-preview__omnibox-icon browser-preview__omnibox-icon--secure';
       } else if (isHttp) {
-        omniboxIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+        omniboxIcon.innerHTML = iconMarkup.warning;
         omniboxIcon.className = 'browser-preview__omnibox-icon browser-preview__omnibox-icon--warn';
       } else {
-        omniboxIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`;
+        omniboxIcon.innerHTML = iconMarkup.search;
         omniboxIcon.className = 'browser-preview__omnibox-icon';
       }
     }

@@ -7,18 +7,41 @@ export {
   formatRelativeSessionTime,
   getRelativeDayGroup,
   startOfLocalDay,
+  toIso,
+  todayDateString,
 } from './Utils/DateUtils.js';
-export { createElement, formatText } from './Utils/DomUtils.js';
+export { createElement, escapeHtml, formatText, makeEditableTextarea } from './Utils/DomUtils.js';
+export { computeDiff } from './Utils/DiffUtils.js';
 export {
   collapseWhitespace,
   createSlugId,
+  escapeRegex,
+  extractJsonObject,
   getNameInitials,
+  normalizeString,
   truncate,
 } from './Utils/StringUtils.js';
-export { clampInteger, compactObject, optionalText, toBoolean } from './Utils/ValueUtils.js';
+export {
+  clampInteger,
+  compactObject,
+  deepClone,
+  formatBytes,
+  optionalText,
+  toBoolean,
+} from './Utils/ValueUtils.js';
 export {
   createNamespacedMarkdownLibrary,
   mapNamespacedMarkdownResource,
 } from './Markdown/NamespacedResourceLibrary.js';
 export { createSearchableListColumn, populateSearchableCards } from './PanelList/PanelList.js';
 export { pickOpenPath } from './Electron/DialogUtils.js';
+export {
+  orderProvidersBySelection,
+  providerIsConfigured,
+} from './ProviderCatalog/ProviderUtils.js';
+export { createEnqueue } from './Utils/AsyncUtils.js';
+export { readJsonDirectory } from './Storage/JsonDirectory.js';
+export { getTrayIconPath } from './Storage/ResourcePaths.js';
+export { createProviderIcon } from './Icons/Icons.js';
+export { createSecretField } from './UI/SecretField.js';
+export { EVENTS, dispatchEvent } from './Events/RendererEvents.js';

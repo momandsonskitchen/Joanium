@@ -1,4 +1,5 @@
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { EVENTS } from '../../Shared/Events/RendererEvents.js';
 import {
   createAssistantContextCache,
   runAssistantPipeline,
@@ -149,7 +150,7 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       started = true;
 
       setupStreamListeners();
-      window.addEventListener('joanium:connectors-changed', handleConnectorsChanged);
+      window.addEventListener(EVENTS.CONNECTORS_CHANGED, handleConnectorsChanged);
 
       dispose = onIpc('agents:run-with-tools', (payload) => {
         void processRun(payload);
@@ -165,7 +166,7 @@ export function createAgentGateway(strings, { chatStrings = {}, getActivePersona
       dispose = null;
       started = false;
       teardownStreamListeners();
-      window.removeEventListener('joanium:connectors-changed', handleConnectorsChanged);
+      window.removeEventListener(EVENTS.CONNECTORS_CHANGED, handleConnectorsChanged);
     },
   };
 }

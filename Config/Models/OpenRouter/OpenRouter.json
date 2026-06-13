@@ -5,6 +5,19 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "moonshotai/kimi-k2.7-code": {
+      "name": "MoonshotAI: Kimi K2.7 Code",
+      "description": "MoonshotAI: Kimi K2.7 Code is a coding-focused model in Moonshot AI's Kimi K2 family, built to complete end-to-end programming tasks reliably over long contexts. It uses a native multimodal mixture-of-experts...",
+      "context_window": 262144,
+      "pricing": {
+        "input": 0.95,
+        "output": 4
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "~anthropic/claude-fable-latest": {
       "name": "Anthropic: Claude Fable Latest",
       "description": "This model always redirects to the latest model in the Claude Fable family.",
@@ -3338,18 +3351,6 @@
         "text": true
       }
     },
-    "meta-llama/llama-guard-3-8b": {
-      "name": "Llama Guard 3 8B",
-      "description": "Llama Guard 3 is a Llama-3.1-8B pretrained model, fine-tuned for content safety classification. Similar to previous versions, it can be used to classify content in both LLM inputs (prompt classification)...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.48,
-        "output": 0.03
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/o3-mini-high": {
       "name": "OpenAI: o3 Mini High",
       "description": "OpenAI o3-mini-high is the same model as [o3-mini](/openai/o3-mini) with reasoning_effort set to high. o3-mini is a cost-efficient language model optimized for STEM reasoning tasks, particularly excelling in science, mathematics, and...",
@@ -4244,5 +4245,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-12T07:24:38.999Z"
+  "_syncedAt": "2026-06-13T04:42:35.047Z"
 }

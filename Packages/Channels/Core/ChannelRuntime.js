@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { BrowserWindow, net } from 'electron';
 import { isConfigured } from './ChannelState.js';
+import { toIso } from '../../Shared/Utils/DateUtils.js';
 
 const CHANNEL_LABELS = Object.freeze({
   telegram: 'Telegram',
@@ -34,11 +35,6 @@ function splitIntoChunks(value, maxLength) {
     chunks.push(text.slice(index, index + maxLength));
   }
   return chunks;
-}
-
-function toIso(value, fallback = Date.now()) {
-  const date = value ? new Date(value) : new Date(fallback);
-  return Number.isNaN(date.getTime()) ? new Date(fallback).toISOString() : date.toISOString();
 }
 
 function sanitizeRequestTarget(input) {

@@ -1,4 +1,4 @@
-import { formatText, createElement } from '../../Shared/Utils/DomUtils.js';
+import { formatText, createElement, makeEditableTextarea } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
@@ -299,9 +299,7 @@ export function createProjectsPanel(strings, { onOpenProject, getActiveProject }
     infoTextarea.className = 'chat-projects__info-textarea';
     infoTextarea.placeholder = strings.infoPlaceholder;
     infoTextarea.rows = 5;
-    infoTextarea.style.webkitUserSelect = 'text';
-    infoTextarea.style.userSelect = 'text';
-    infoTextarea.style.cursor = 'text';
+    makeEditableTextarea(infoTextarea);
     infoTextarea.addEventListener('input', (e) => {
       draftInfo = e.target.value;
     });

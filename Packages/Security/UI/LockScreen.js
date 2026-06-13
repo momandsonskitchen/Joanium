@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
+import { createIcon } from '../../Shared/Icons/Icons.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -12,21 +13,6 @@ function formatCountdown(ms) {
   if (h > 0) return `${h}h ${m}m`;
   if (m > 0) return `${m}m ${s}s`;
   return `${s}s`;
-}
-
-function makeLockSvg() {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('stroke-width', '1.7');
-  svg.setAttribute('stroke-linecap', 'round');
-  svg.setAttribute('stroke-linejoin', 'round');
-  svg.innerHTML = `
-    <rect x="3" y="11" width="18" height="11" rx="2"/>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-  `;
-  return svg;
 }
 
 /** Shakes an input to signal a wrong attempt — restarts cleanly if re-triggered. */
@@ -65,7 +51,7 @@ export function mountLockScreen(strings, initialStatus) {
         avatar.append(img);
       } else {
         avatar.classList.remove('lock-screen__avatar--photo');
-        avatar.append(makeLockSvg());
+        avatar.append(createIcon('lock', 'lock-screen__avatar-icon'));
       }
     }
 

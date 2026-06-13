@@ -1,7 +1,10 @@
 import { formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { formatBytes } from '../../Shared/Utils/ValueUtils.js';
 import { ATTACHMENT_CONTEXT_PROMPTS, LIVE_BROWSER_CONTEXT_PROMPTS } from '../Prompts/Prompts.js';
+
+export { formatBytes };
 
 export function getFirstName(name, fallback) {
   const normalized = collapseWhitespace(name);
@@ -114,13 +117,6 @@ export function generateSessionId() {
   const date = new Date();
   const pad = (value, length = 2) => String(value).padStart(length, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}-${pad(date.getMilliseconds(), 3)}`;
-}
-
-export function formatBytes(bytes = 0) {
-  if (!Number.isFinite(bytes) || bytes <= 0) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
 export function formatDuration(ms) {

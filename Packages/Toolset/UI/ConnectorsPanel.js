@@ -1,37 +1,23 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createIcon, createProviderIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
 import { getConnectorIconPath } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
+import { createSecretField } from '../../Shared/UI/SecretField.js';
+import { EVENTS, dispatchEvent } from '../../Shared/Events/RendererEvents.js';
 import defaultStrings from '../I18n/Connectors.en.js';
 
 // ── Icon map: connector id → filename in Assets/Icons/ ──────────────────────
 // ────────────────────────────────────────────────────────────────────────────
 
-function createCredentialField({ fieldConfig, strings }) {
-  const field = createElement('label', 'connectors-field');
-  const label = createElement('span', 'connectors-field__label', fieldConfig.label);
-  const holder = createElement('div', 'connectors-field__secret');
-  const input = document.createElement('input');
-  input.type = fieldConfig.type === 'text' ? 'text' : 'password';
-  input.className = 'connectors-field__input';
-  input.placeholder = fieldConfig.placeholder ?? '';
-  input.autocomplete = 'off';
-  input.spellcheck = false;
-
-  const toggle = createElement('button', 'connectors-field__toggle');
-  toggle.type = 'button';
-  toggle.setAttribute('aria-label', strings.show);
-  toggle.append(createIcon('eye', 'connectors-field__toggle-icon'));
-  toggle.addEventListener('click', () => {
-    const hidden = input.type === 'password';
-    input.type = hidden ? 'text' : 'password';
-    toggle.setAttribute('aria-label', hidden ? strings.hide : strings.show);
+function createConnectorSecretField({ fieldConfig, strings }) {
+  return createSecretField({
+    label: fieldConfig.label,
+    placeholder: fieldConfig.placeholder,
+    strings: { show: strings.show, hide: strings.hide },
+    className: 'connectors',
+    type: fieldConfig.type === 'text' ? 'text' : 'password',
   });
-
-  holder.append(input, toggle);
-  field.append(label, holder);
-  return { field, input };
 }
 
 function getConnectorFields(connector) {
@@ -62,12 +48,11 @@ function createConnectorBadge(connector) {
   const badge = createElement('div', 'connectors-card__badge');
   const iconPath = getConnectorIconPath(connector.id);
 
-  if (iconPath) {
-    const img = document.createElement('img');
-    img.src = iconPath;
-    img.alt = '';
-    img.className = 'connectors-card__badge-img';
-    badge.append(img);
+  const badgeIcon = createProviderIcon(iconPath, {
+    className: 'connectors-card__badge-img',
+  });
+  if (badgeIcon) {
+    badge.append(badgeIcon);
   } else {
     badge.append(createIcon('globe', 'connectors-card__badge-icon'));
   }
@@ -184,7 +169,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
       });
       setCardState(updated);
       setFeedback(connector.id, strings.connectedFeedback, 'success');
-      window.dispatchEvent(new CustomEvent('joanium:connectors-changed'));
+      dispatchEvent(EVENTS.CONNECTORS_CHANGED);
     } catch (error) {
       setFeedback(connector.id, error?.message ?? strings.saveFailed, 'error');
     } finally {
@@ -205,7 +190,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
       }
       setCardState({ ...connector, configured: connector.optional, credentialSaved: false });
       setFeedback(connector.id, strings.disconnectedFeedback, 'info');
-      window.dispatchEvent(new CustomEvent('joanium:connectors-changed'));
+      dispatchEvent(EVENTS.CONNECTORS_CHANGED);
     } catch (error) {
       setFeedback(connector.id, error?.message ?? strings.disconnectFailed, 'error');
     }
@@ -222,7 +207,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
     const expandBtn = createElement('button', 'connectors-card__expand');
     expandBtn.type = 'button';
     expandBtn.setAttribute('aria-label', strings.expand);
-    expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
+    expandBtn.append(createIcon('chevronDownSmall', 'connectors-card__expand-icon'));
 
     header.append(
       createConnectorBadge(connector),
@@ -237,7 +222,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
 
     const inputs = new Map();
     const fields = getVisibleFields(connector).map((fieldConfig) => {
-      const { field, input } = createCredentialField({ fieldConfig, strings });
+      const { field, input } = createConnectorSecretField({ fieldConfig, strings });
       inputs.set(fieldConfig.key, input);
       return field;
     });
@@ -269,7 +254,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
           const updated = await invokeIpc(connector.oauthChannel, validation.credentials);
           setCardState(updated);
           setFeedback(connector.id, strings.connectedFeedback, 'success');
-          window.dispatchEvent(new CustomEvent('joanium:connectors-changed'));
+          dispatchEvent(EVENTS.CONNECTORS_CHANGED);
         } catch (error) {
           setFeedback(connector.id, error?.message ?? strings.oauthFailed, 'error');
         } finally {

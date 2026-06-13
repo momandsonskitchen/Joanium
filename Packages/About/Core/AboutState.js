@@ -4,6 +4,7 @@ import electron from 'electron';
 import { collectSystemInfo } from './SystemInfo.js';
 import { getResourceFileUrl } from '../../Shared/Storage/ResourcePaths.js';
 import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
+import { escapeRegex } from '../../Shared/Utils/StringUtils.js';
 
 const { app } = electron;
 
@@ -169,10 +170,6 @@ function parseChangelogForVersion(changelog, version) {
   }
 
   return entries;
-}
-
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 async function flushWhatsNewLog(lines) {

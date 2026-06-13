@@ -2,18 +2,14 @@ import path from 'node:path';
 import { copyFile, mkdir, unlink } from 'node:fs/promises';
 import { mergeUserStates, readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { createEnqueue } from '../../Shared/Utils/AsyncUtils.js';
 
 const AVATAR_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.avif'];
 
 export function createUserStateManager({ rootDirectory }) {
   // Serialise all read-modify-write operations through a promise chain so
   // concurrent IPC calls never race on the same .tmp file.
-  let writeQueue = Promise.resolve();
-
-  function enqueue(fn) {
-    writeQueue = writeQueue.then(fn, fn);
-    return writeQueue;
-  }
+  const enqueue = createEnqueue();
 
   return {
     async getProfile() {

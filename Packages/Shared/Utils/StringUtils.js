@@ -34,3 +34,21 @@ export function truncate(value, maxLength) {
   if (maxLength <= 3) return value.slice(0, maxLength);
   return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 }
+
+export function extractJsonObject(text = '') {
+  const source = String(text ?? '').trim();
+  const start = source.indexOf('{');
+  const end = source.lastIndexOf('}');
+  if (start < 0 || end <= start) {
+    return null;
+  }
+  return source.slice(start, end + 1);
+}
+
+export function normalizeString(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+export function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

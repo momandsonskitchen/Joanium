@@ -1,19 +1,17 @@
 import { copyToClipboard, createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace, extractJsonObject } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
+import {
+  orderProvidersBySelection,
+  providerIsConfigured,
+} from '../../Shared/ProviderCatalog/ProviderUtils.js';
 import { createDreamPanel } from './DreamPanel.js';
 import { MEMORY_PROMPTS } from './Prompts.js';
-
-function extractJsonObject(text = '') {
-  const source = String(text ?? '').trim();
-  const start = source.indexOf('{');
-  const end = source.lastIndexOf('}');
-  return start < 0 || end <= start ? null : source.slice(start, end + 1);
-}
 
 function normalizeMemoryEntry(entry) {
   if (!entry || typeof entry !== 'object') return null;
@@ -39,6 +37,36 @@ function buildFileRegistry(catalog = []) {
   return catalog.map((entry) => `- ${entry.filename}: ${entry.description}`).join('\n');
 }
 
+function buildFileContentBlock(catalog = []) {
+  if (!Array.isArray(catalog) || catalog.length === 0) return '(none)';
+  return catalog
+    .map((entry) => {
+      const content = String(entry.content ?? '').trim();
+      return [`--- ${entry.filename} ---`, content].join('\n');
+    })
+    .join('\n\n');
+}
+
+function resolveImportModel(bootstrap, settings) {
+  const providers = Array.isArray(bootstrap?.providers) ? bootstrap.providers : [];
+  const details = bootstrap?.user?.providers?.details ?? {};
+  const ordered = orderProvidersBySelection(bootstrap?.user, providers);
+
+  if (settings?.defaultModel?.providerId && settings?.defaultModel?.modelId) {
+    const provider = ordered.find((p) => p.id === settings.defaultModel.providerId);
+    const model = provider?.models?.find((entry) => entry.id === settings.defaultModel.modelId);
+    if (provider && model && providerIsConfigured(provider, details[provider.id])) {
+      return settings.defaultModel;
+    }
+  }
+
+  const provider = ordered.find((entry) => providerIsConfigured(entry, details[entry.id]));
+
+  return provider?.models?.[0]?.id
+    ? { providerId: provider.id, modelId: provider.models[0].id }
+    : null;
+}
+
 // Only non-empty files, capped per file so the prompt stays fast.
 const EXISTING_CONTENT_PER_FILE_LIMIT = 600;
 
@@ -55,40 +83,6 @@ function buildExistingContentBlock(catalog = [], emptyLabel) {
       return [`--- ${entry.filename} ---`, content].join('\n');
     })
     .join('\n\n');
-}
-
-function providerIsConfigured(provider, details = {}) {
-  const endpoint = String(details.endpoint ?? provider.endpoint ?? '').trim();
-  if (!endpoint) return false;
-  if (provider.requiresApiKey && !String(details.apiKey ?? '').trim()) return false;
-  return Boolean(provider.models?.[0]?.id);
-}
-
-function resolveImportModel(bootstrap, settings) {
-  const providers = Array.isArray(bootstrap?.providers) ? bootstrap.providers : [];
-  const selectedIds = Array.isArray(bootstrap?.user?.providers?.selected)
-    ? bootstrap.user.providers.selected
-    : [];
-  const details = bootstrap?.user?.providers?.details ?? {};
-  const byId = new Map(providers.map((provider) => [provider.id, provider]));
-
-  if (settings?.defaultModel?.providerId && settings?.defaultModel?.modelId) {
-    const provider = byId.get(settings.defaultModel.providerId);
-    const model = provider?.models?.find((entry) => entry.id === settings.defaultModel.modelId);
-    if (provider && model && providerIsConfigured(provider, details[provider.id])) {
-      return settings.defaultModel;
-    }
-  }
-
-  const ordered = [
-    ...selectedIds.map((id) => byId.get(id)).filter(Boolean),
-    ...providers.filter((provider) => !selectedIds.includes(provider.id)),
-  ];
-  const provider = ordered.find((entry) => providerIsConfigured(entry, details[entry.id]));
-
-  return provider?.models?.[0]?.id
-    ? { providerId: provider.id, modelId: provider.models[0].id }
-    : null;
 }
 
 export function createMemoryPanel(strings) {
@@ -624,21 +618,13 @@ export function createMemoryPanel(strings) {
     // ── Import loader overlay ────────────────────────────────────────────────
     importLoader = createElement('div', 'chat-memory__import-loader');
     importLoader.hidden = true;
-    const loaderInner = createElement(
-      'div',
-      'logo-loader logo-loader--infinite logo-loader--inline',
-    );
-    const loaderGlow = createElement('div', 'logo-loader__glow');
-    const loaderWrap = createElement('div', 'logo-loader__wrap');
-    const loaderImg = document.createElement('img');
-    loaderImg.className = 'logo-loader__img';
-    loaderImg.src = '../../../Assets/Logo/Logo.png';
-    loaderImg.alt = '';
-    loaderImg.style.width = '80px';
-    loaderImg.style.height = '80px';
-    loaderWrap.append(loaderImg);
-    loaderInner.append(loaderGlow, loaderWrap);
-    importLoader.append(loaderInner);
+    const { element: logoLoader } = createLogoLoader({
+      logoPath: new URL('../../../Assets/Logo/Logo.png', import.meta.url).href,
+      infinite: true,
+      inline: true,
+      size: 80,
+    });
+    importLoader.append(logoLoader);
 
     importView.append(
       importHeader,

@@ -6,16 +6,12 @@ import {
   sanitizeIncomingUserState,
   writeUserState,
 } from '../../Shared/UserData/UserData.js';
+import { createEnqueue } from '../../Shared/Utils/AsyncUtils.js';
 
 export function createSetupStateManager({ rootDirectory }) {
   // Serialise all writes through a promise chain so concurrent draft saves
   // and the final complete() call never race on the same .tmp file.
-  let writeQueue = Promise.resolve();
-
-  function enqueue(fn) {
-    writeQueue = writeQueue.then(fn, fn);
-    return writeQueue;
-  }
+  const enqueue = createEnqueue();
 
   return {
     async getBootstrapPayload() {

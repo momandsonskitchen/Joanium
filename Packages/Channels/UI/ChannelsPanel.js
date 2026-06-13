@@ -1,7 +1,9 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createIcon, createProviderIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
+import { getConnectorIconPath } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
+import { createSecretField } from '../../Shared/UI/SecretField.js';
 
 const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack', 'zulip', 'mattermost', 'ntfy'];
 
@@ -21,38 +23,8 @@ function createField({ label, placeholder, type = 'text', multiline = false }) {
   return { wrap, input };
 }
 
-function createSecretField({ label, placeholder, strings }) {
-  const field = createField({ label, placeholder, type: 'password' });
-  const holder = createElement('div', 'channels-field__secret');
-  const toggle = createElement('button', 'channels-field__secret-toggle');
-  toggle.type = 'button';
-  toggle.setAttribute('aria-label', strings.common.show);
-  toggle.append(createIcon('eye', 'channels-field__secret-icon'));
-  field.input.classList.add('channels-field__input--secret');
-
-  toggle.addEventListener('click', () => {
-    const isHidden = field.input.type === 'password';
-    field.input.type = isHidden ? 'text' : 'password';
-    toggle.setAttribute('aria-label', isHidden ? strings.common.hide : strings.common.show);
-  });
-
-  field.input.remove();
-  holder.append(field.input, toggle);
-  field.wrap.append(holder);
-  return field;
-}
-
-function getChannelIconPath(channelName) {
-  const names = {
-    telegram: 'Telegram',
-    whatsapp: 'WhatsApp',
-    discord: 'Discord',
-    slack: 'Slack',
-    mattermost: 'MatterMost',
-    zulip: 'Zulip',
-    ntfy: 'Ntfy',
-  };
-  return names[channelName] ? `../../../Assets/Icons/${names[channelName]}.png` : null;
+function createChannelSecretField({ label, placeholder, strings }) {
+  return createSecretField({ label, placeholder, strings, className: 'channels' });
 }
 
 export function createChannelsPanel(strings) {
@@ -561,13 +533,12 @@ export function createChannelsPanel(strings) {
     // ── Header (always visible) ──────────────────────────────────────────────
     const header = createElement('div', 'channels-card__header');
     const badge = createElement('div', 'channels-card__badge');
-    const iconPath = getChannelIconPath(channelName);
-    if (iconPath) {
-      const badgeImg = document.createElement('img');
-      badgeImg.src = iconPath;
-      badgeImg.alt = '';
-      badgeImg.className = 'channels-card__badge-img';
-      badge.append(badgeImg);
+    const iconPath = getConnectorIconPath(channelName);
+    const badgeIcon = createProviderIcon(iconPath, {
+      className: 'channels-card__badge-img',
+    });
+    if (badgeIcon) {
+      badge.append(badgeIcon);
     } else {
       badge.append(createIcon('globe', 'channels-card__badge-icon'));
     }
@@ -591,7 +562,7 @@ export function createChannelsPanel(strings) {
     const expandBtn = createElement('button', 'channels-card__expand');
     expandBtn.type = 'button';
     expandBtn.setAttribute('aria-label', strings.common.expand);
-    expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
+    expandBtn.append(createIcon('chevronDownSmall', 'channels-card__expand-icon'));
 
     header.append(badge, titleWrap, toggleWrap, expandBtn);
 
@@ -606,7 +577,7 @@ export function createChannelsPanel(strings) {
     const placeholders = {};
 
     if (channelName === 'telegram') {
-      const botToken = createSecretField({
+      const botToken = createChannelSecretField({
         label: strings.fields.botToken,
         placeholder: strings.placeholders.telegramToken,
         strings,
@@ -619,12 +590,12 @@ export function createChannelsPanel(strings) {
 
     if (channelName === 'whatsapp') {
       const row = createElement('div', 'channels-card__field-row');
-      const accountSid = createSecretField({
+      const accountSid = createChannelSecretField({
         label: strings.fields.accountSid,
         placeholder: strings.placeholders.whatsappSid,
         strings,
       });
-      const authToken = createSecretField({
+      const authToken = createChannelSecretField({
         label: strings.fields.authToken,
         placeholder: strings.placeholders.whatsappToken,
         strings,
@@ -649,7 +620,7 @@ export function createChannelsPanel(strings) {
 
     if (channelName === 'discord' || channelName === 'slack') {
       const row = createElement('div', 'channels-card__field-row');
-      const botToken = createSecretField({
+      const botToken = createChannelSecretField({
         label: strings.fields.botToken,
         placeholder:
           channelName === 'discord'
@@ -686,7 +657,7 @@ export function createChannelsPanel(strings) {
         label: strings.fields.email,
         placeholder: strings.placeholders.zulipEmail,
       });
-      const apiKey = createSecretField({
+      const apiKey = createChannelSecretField({
         label: strings.fields.apiKey,
         placeholder: strings.placeholders.zulipApiKey,
         strings,
@@ -724,7 +695,7 @@ export function createChannelsPanel(strings) {
         label: strings.fields.channelId,
         placeholder: strings.placeholders.mattermostChannel,
       });
-      const accessToken = createSecretField({
+      const accessToken = createChannelSecretField({
         label: strings.fields.accessToken,
         placeholder: strings.placeholders.mattermostToken,
         strings,

@@ -1,3 +1,5 @@
+import { clampInteger } from '../../../../Shared/Utils/ValueUtils.js';
+
 const DEFAULT_HEADERS = Object.freeze({
   accept: 'application/json',
   'user-agent': 'Joanium/2026 Toolset',
@@ -878,11 +880,6 @@ export const PUBLIC_DATA_TOOL_DEFINITIONS = [
     limit: { type: 'number', required: false, description: 'Result count, default 10, max 20.' },
   }),
 ];
-
-function clampInteger(value, fallback, min, max) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.round(parsed))) : fallback;
-}
 
 function requireText(params, key) {
   const value = String(params?.[key] ?? '').trim();

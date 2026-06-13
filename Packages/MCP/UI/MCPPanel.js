@@ -1,17 +1,8 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
-
-function createServerId(name) {
-  const stem =
-    String(name || 'mcp-server')
-      .replace(/[^a-zA-Z0-9_-]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '') || 'mcp-server';
-  return `${stem}-${Math.random().toString(36).slice(2, 8)}`;
-}
 
 function createField(label, placeholder, { multiline = false } = {}) {
   const wrap = createElement('label', 'mcp-field');
@@ -140,7 +131,7 @@ export function createMCPPanel(strings) {
 
     try {
       const payload = {
-        id: editingId ?? createServerId(name),
+        id: editingId ?? createSlugId(name, 'mcp-server'),
         name,
         description: collapseWhitespace(descriptionField.input.value),
         transport,

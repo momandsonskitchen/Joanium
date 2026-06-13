@@ -4,6 +4,7 @@ import { collapseWhitespace, getNameInitials } from '../../Shared/Utils/StringUt
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
+import { EVENTS } from '../../Shared/Events/RendererEvents.js';
 import { createChatView } from '../../Chat/UI/ChatApp.js';
 import { createHistoryPanel } from '../../History/UI/HistoryPanel.js';
 import { createChannelsPanel } from '../../Channels/UI/ChannelsPanel.js';
@@ -728,7 +729,7 @@ async function bootstrap() {
   root.replaceChildren(shell);
 
   // ── Memory sync indicator ─────────────────────────────────────────────────
-  // Listens for joanium:memory-sync events dispatched by ChatApp. When active,
+  // Listens for EVENTS.MEMORY_SYNC events dispatched by ChatApp. When active,
   // adds a primary-color dot to the memory tab and swaps its aria-label to the sync
   // message so the existing CSS ::after tooltip shows the message on hover.
   {
@@ -736,7 +737,7 @@ async function bootstrap() {
     let memoryTabOriginalLabel = memoryTab?.getAttribute('aria-label') ?? '';
     let memorySyncDot = null;
 
-    window.addEventListener('joanium:memory-sync', (event) => {
+    window.addEventListener(EVENTS.MEMORY_SYNC, (event) => {
       if (!memoryTab) return;
       const { active, message } = event.detail ?? {};
       if (active) {

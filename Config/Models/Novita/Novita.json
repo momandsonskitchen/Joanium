@@ -47,6 +47,16 @@
         "text": true
       }
     },
+    "moonshotai/kimi-k2.7-code": {
+      "name": "Kimi K2.7 Code",
+      "description": "Kimi K2.7 Code is MoonshotAI's strongest coding & agentic model — a 1T-parameter MoE (32B activated) , 256K context and interleaved thinking with multi-step tool calling. It delivers major gains on long-horizon coding tasks while cutting thinking-token usage by ~30% vs K2.6, and accepts text, image ",
+      "context_window": 262144,
+      "max_output": 262144,
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "stepfun/step-3.7-flash": {
       "name": "Step-3.7-Flash",
       "description": "Step-3.7-Flash is StepFun's fast reasoning model with 256K context window, three-level reasoning  effort control (low/medium/high), strong multi-step  tool calling and agent capabilities.",
@@ -1275,5 +1285,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-12T07:24:58.054Z"
+  "_syncedAt": "2026-06-13T04:42:49.397Z"
 }

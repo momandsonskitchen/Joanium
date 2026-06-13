@@ -5,14 +5,8 @@ import path from 'node:path';
 import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 import { readTextResource, getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
-
-function extractJsonObject(text = '') {
-  const source = String(text ?? '').trim();
-  const start = source.indexOf('{');
-  const end = source.lastIndexOf('}');
-  if (start < 0 || end <= start) return null;
-  return source.slice(start, end + 1);
-}
+import { extractJsonObject } from '../../Shared/Utils/StringUtils.js';
+import { todayDateString } from '../../Shared/Utils/DateUtils.js';
 
 function buildCatalogText(catalog) {
   return catalog
@@ -32,14 +26,6 @@ function normalizeEntry(entry) {
   const content = String(entry.content ?? '').trim();
   const summary = String(entry.summary ?? '').trim();
   return filename && content ? { filename, content, summary } : null;
-}
-
-function todayDateString() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;

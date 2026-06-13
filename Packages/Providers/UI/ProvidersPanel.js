@@ -1,34 +1,9 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
-import { createIcon } from '../../Shared/Icons/Icons.js';
+import { createIcon, createProviderIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
-
-function createSecretField({ label, placeholder, strings }) {
-  const wrap = createElement('label', 'providers-field');
-  const labelEl = createElement('span', 'providers-field__label', label);
-  const holder = createElement('div', 'providers-field__secret');
-  const input = document.createElement('input');
-  input.type = 'password';
-  input.className = 'providers-field__input providers-field__input--secret';
-  input.placeholder = placeholder;
-  input.autocomplete = 'off';
-  input.spellcheck = false;
-
-  const toggle = createElement('button', 'providers-field__secret-toggle');
-  toggle.type = 'button';
-  toggle.setAttribute('aria-label', strings.show ?? 'Show');
-  toggle.append(createIcon('eye', 'providers-field__secret-icon'));
-
-  toggle.addEventListener('click', () => {
-    const hidden = input.type === 'password';
-    input.type = hidden ? 'text' : 'password';
-    toggle.setAttribute('aria-label', hidden ? (strings.hide ?? 'Hide') : (strings.show ?? 'Show'));
-  });
-
-  holder.append(input, toggle);
-  wrap.append(labelEl, holder);
-  return { wrap, input };
-}
+import { createSecretField } from '../../Shared/UI/SecretField.js';
+import { EVENTS, dispatchEvent } from '../../Shared/Events/RendererEvents.js';
 
 function createTextField({ label, placeholder }) {
   const wrap = createElement('label', 'providers-field');
@@ -126,7 +101,7 @@ export function createProvidersPanel(strings) {
       setCardState(providerId, saved);
       refreshDisconnectGuards();
       setFeedback(providerId, strings.connected_feedback, 'success');
-      window.dispatchEvent(new CustomEvent('joanium:providers-changed'));
+      dispatchEvent(EVENTS.PROVIDERS_CHANGED);
     } catch (error) {
       setFeedback(providerId, error?.message ?? strings.saveFailed, 'error');
     } finally {
@@ -147,7 +122,7 @@ export function createProvidersPanel(strings) {
       setCardState(providerId, { configured: false });
       refreshDisconnectGuards();
       setFeedback(providerId, strings.disconnected_feedback, 'info');
-      window.dispatchEvent(new CustomEvent('joanium:providers-changed'));
+      dispatchEvent(EVENTS.PROVIDERS_CHANGED);
     } catch (error) {
       const message =
         error?.message === 'last_provider'
@@ -167,12 +142,11 @@ export function createProvidersPanel(strings) {
     badge.style.setProperty('--provider-tint', provider.palette?.tint ?? '#d0b4a2');
     badge.style.setProperty('--provider-glow', provider.palette?.glow ?? '#f7ede7');
 
-    if (provider.iconPath) {
-      const img = document.createElement('img');
-      img.src = provider.iconPath;
-      img.alt = '';
-      img.className = 'providers-card__badge-img';
-      badge.append(img);
+    const badgeIcon = createProviderIcon(provider.iconPath, {
+      className: 'providers-card__badge-img',
+    });
+    if (badgeIcon) {
+      badge.append(badgeIcon);
     }
 
     const titleWrap = createElement('div', 'providers-card__title-wrap');
@@ -194,7 +168,7 @@ export function createProvidersPanel(strings) {
     const expandBtn = createElement('button', 'providers-card__expand');
     expandBtn.type = 'button';
     expandBtn.setAttribute('aria-label', strings.expand);
-    expandBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>`;
+    expandBtn.append(createIcon('chevronDownSmall', 'providers-card__expand-icon'));
 
     header.append(badge, titleWrap, status, expandBtn);
 
@@ -210,6 +184,7 @@ export function createProvidersPanel(strings) {
         label: strings.apiKeyLabel,
         placeholder: strings.apiKeyPlaceholder,
         strings,
+        className: 'providers',
       });
       apiKeyInput = field.input;
       bodyInner.append(field.wrap);

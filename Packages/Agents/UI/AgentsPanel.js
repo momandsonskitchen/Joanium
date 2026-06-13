@@ -1,4 +1,4 @@
-import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
+import { createElement, formatText, makeEditableTextarea } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace, createSlugId } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
@@ -811,9 +811,7 @@ export function createAgentsPanel(strings) {
     promptTextarea.className = 'agents-form__prompt-textarea';
     promptTextarea.placeholder = strings.promptPlaceholder;
     promptTextarea.rows = 5;
-    promptTextarea.style.webkitUserSelect = 'text';
-    promptTextarea.style.userSelect = 'text';
-    promptTextarea.style.cursor = 'text';
+    makeEditableTextarea(promptTextarea);
     promptTextarea.addEventListener('input', (e) => {
       draftPrompt = e.target.value;
       syncSaveBtn();

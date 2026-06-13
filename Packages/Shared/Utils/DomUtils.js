@@ -12,6 +12,14 @@ export function createElement(tagName, className, text = '') {
   return element;
 }
 
+export function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export function copyToClipboard(text) {
   const value = String(text ?? '');
 
@@ -21,6 +29,12 @@ export function copyToClipboard(text) {
 
   copyWithExecCommand(value);
   return Promise.resolve();
+}
+
+export function makeEditableTextarea(textarea) {
+  textarea.style.webkitUserSelect = 'text';
+  textarea.style.userSelect = 'text';
+  textarea.style.cursor = 'text';
 }
 
 function copyWithExecCommand(text) {

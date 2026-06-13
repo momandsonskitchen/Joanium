@@ -13,6 +13,7 @@ import {
 } from '../../Shared/ToolLoop/TerminalToolNames.js';
 import { readUserState, sanitizeDefaultModel } from '../../Shared/UserData/UserData.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
+import { orderProvidersBySelection } from '../../Shared/ProviderCatalog/ProviderUtils.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 import { CHAT_PROMPTS } from '../Prompts/Prompts.js';
 
@@ -202,33 +203,6 @@ function sanitizeConversationMessages(candidateMessages) {
   return alternating;
 }
 
-function buildProviderOrder(user, providers) {
-  const selectedProviderIds = Array.isArray(user?.providers?.selected)
-    ? user.providers.selected
-    : [];
-  const providersById = new Map(providers.map((provider) => [provider.id, provider]));
-  const orderedProviders = [];
-  const seen = new Set();
-
-  for (const providerId of selectedProviderIds) {
-    const provider = providersById.get(providerId);
-
-    if (provider && !seen.has(provider.id)) {
-      orderedProviders.push(provider);
-      seen.add(provider.id);
-    }
-  }
-
-  for (const provider of providers) {
-    if (!seen.has(provider.id)) {
-      orderedProviders.push(provider);
-      seen.add(provider.id);
-    }
-  }
-
-  return orderedProviders;
-}
-
 function resolveProviderDetails(user, provider) {
   return user?.providers?.details?.[provider.id] ?? {};
 }
@@ -269,7 +243,7 @@ function canUseProvider(user, provider) {
 }
 
 function resolveActiveProvider(user, providers) {
-  const orderedProviders = buildProviderOrder(user, providers);
+  const orderedProviders = orderProvidersBySelection(user, providers);
   return (
     orderedProviders.find((provider) => canUseProvider(user, provider)) ??
     orderedProviders[0] ??

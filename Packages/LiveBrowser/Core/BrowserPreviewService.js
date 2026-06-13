@@ -3,6 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import strings from '../I18n/en.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { formatText } from '../../Shared/Utils/DomUtils.js';
 
 const { BrowserWindow, WebContentsView, app } = electron;
 const browserStrings = strings.browserPreview;
@@ -146,10 +147,6 @@ function normalizeUrl(input) {
   if (!raw) throw new Error(browserStrings.errors.urlRequired);
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) || raw.startsWith('file://')) return raw;
   return `https://${raw}`;
-}
-
-function formatText(template, replacements = {}) {
-  return String(template).replace(/\{([^}]+)\}/g, (_, key) => replacements[key] ?? '');
 }
 
 function getRegistrableDomain(hostname = '') {

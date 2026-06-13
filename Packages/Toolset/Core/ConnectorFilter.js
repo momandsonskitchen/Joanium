@@ -1,8 +1,5 @@
 import { TOOLSET_PROMPTS } from './Prompts.js';
-
-function formatText(template, values = {}) {
-  return String(template ?? '').replace(/\{(\w+)\}/g, (_match, key) => values[key] ?? '');
-}
+import { formatText } from '../../Shared/Utils/DomUtils.js';
 
 // Maps tool category names to their parent connector ID.
 // Needed for connectors (like Google Workspace) where a single connector
