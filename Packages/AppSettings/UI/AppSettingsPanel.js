@@ -8,6 +8,7 @@ import {
   encodeModelValue,
 } from '../../Shared/ProviderCatalog/ModelOptions.js';
 import { getSearchEngineIconPath } from '../../Shared/Icons/SearchEngineIcons/SearchEngineIcons.js';
+import { EVENTS } from '../../Shared/Events/RendererEvents.js';
 import { createSettingsPanelState } from './Utils.js';
 
 const OPTION_KEYS = [
@@ -335,9 +336,9 @@ export function createAppSettingsPanel(strings) {
     danger.append(resetRow);
 
     if (!removeSettingsChangeListener) {
-      window.addEventListener('joanium:app-settings-changed', handleSettingsChanged);
+      window.addEventListener(EVENTS.APP_SETTINGS_CHANGED, handleSettingsChanged);
       removeSettingsChangeListener = () => {
-        window.removeEventListener('joanium:app-settings-changed', handleSettingsChanged);
+        window.removeEventListener(EVENTS.APP_SETTINGS_CHANGED, handleSettingsChanged);
       };
     }
   }

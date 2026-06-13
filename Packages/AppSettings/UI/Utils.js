@@ -1,4 +1,5 @@
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { EVENTS, dispatchEvent } from '../../Shared/Events/RendererEvents.js';
 
 export function createSettingsStatus(status) {
   let clearTimer = null;
@@ -18,7 +19,7 @@ export function createSettingsStatus(status) {
 
 export async function saveAppSettingsPatch(patch, { strings, setStatus, onSaved }) {
   const settings = await invokeIpc('app-settings:save', patch);
-  window.dispatchEvent(new CustomEvent('joanium:app-settings-changed', { detail: settings }));
+  dispatchEvent(EVENTS.APP_SETTINGS_CHANGED, settings);
   onSaved?.(settings);
   setStatus(strings.saved);
   return settings;

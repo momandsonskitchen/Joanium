@@ -1,6 +1,7 @@
 import { formatText } from '../../Shared/Utils/DomUtils.js';
 import { toIso } from '../../Shared/Utils/DateUtils.js';
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { EVENTS } from '../../Shared/Events/RendererEvents.js';
 import {
   createAssistantContextCache,
   runAssistantPipeline,
@@ -130,7 +131,7 @@ export function createChannelGateway(
     start() {
       if (started) return;
       started = true;
-      window.addEventListener('joanium:connectors-changed', handleConnectorsChanged);
+      window.addEventListener(EVENTS.CONNECTORS_CHANGED, handleConnectorsChanged);
       dispose = onIpc('channels:incoming', (payload) => {
         chain = chain.catch(() => {}).then(() => processIncoming(payload));
       });
@@ -140,7 +141,7 @@ export function createChannelGateway(
       dispose?.();
       dispose = null;
       started = false;
-      window.removeEventListener('joanium:connectors-changed', handleConnectorsChanged);
+      window.removeEventListener(EVENTS.CONNECTORS_CHANGED, handleConnectorsChanged);
     },
   };
 }

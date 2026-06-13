@@ -5,6 +5,7 @@ import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { createLogoLoader } from '../../Shared/LogoLoader/LogoLoader.js';
 import {
   orderProvidersBySelection,
   providerIsConfigured,
@@ -617,21 +618,13 @@ export function createMemoryPanel(strings) {
     // ── Import loader overlay ────────────────────────────────────────────────
     importLoader = createElement('div', 'chat-memory__import-loader');
     importLoader.hidden = true;
-    const loaderInner = createElement(
-      'div',
-      'logo-loader logo-loader--infinite logo-loader--inline',
-    );
-    const loaderGlow = createElement('div', 'logo-loader__glow');
-    const loaderWrap = createElement('div', 'logo-loader__wrap');
-    const loaderImg = document.createElement('img');
-    loaderImg.className = 'logo-loader__img';
-    loaderImg.src = '../../../Assets/Logo/Logo.png';
-    loaderImg.alt = '';
-    loaderImg.style.width = '80px';
-    loaderImg.style.height = '80px';
-    loaderWrap.append(loaderImg);
-    loaderInner.append(loaderGlow, loaderWrap);
-    importLoader.append(loaderInner);
+    const { element: logoLoader } = createLogoLoader({
+      logoPath: new URL('../../../Assets/Logo/Logo.png', import.meta.url).href,
+      infinite: true,
+      inline: true,
+      size: 80,
+    });
+    importLoader.append(logoLoader);
 
     importView.append(
       importHeader,

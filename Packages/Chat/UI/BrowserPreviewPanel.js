@@ -103,7 +103,7 @@ export function createBrowserPreviewPanel(strings, { onVisibilityChange } = {}) 
 
   // Security / site-type indicator icon (lock, globe, etc.)
   const omniboxIcon = createElement('span', 'browser-preview__omnibox-icon');
-  omniboxIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+  omniboxIcon.innerHTML = iconMarkup.lock;
 
   const searchInput = document.createElement('input');
   searchInput.type = 'text';

@@ -1,16 +1,8 @@
 import { app, BrowserWindow, Menu, Tray } from 'electron';
-import { getResourcePath } from '../../Shared/Storage/ResourcePaths.js';
+import { getTrayIconPath } from '../../Shared/Storage/ResourcePaths.js';
 
 let tray = null;
 let lastWindow = null;
-
-function getTrayIconPath(rootDirectory) {
-  if (process.platform === 'win32') {
-    return getResourcePath(rootDirectory, 'Assets', 'Logo', 'Logo.ico');
-  }
-
-  return getResourcePath(rootDirectory, 'Assets', 'Logo', 'Logo.png');
-}
 
 function getTargetWindow() {
   return lastWindow && !lastWindow.isDestroyed()

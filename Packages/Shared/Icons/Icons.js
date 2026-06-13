@@ -500,3 +500,13 @@ export function createIcon(name, className = '') {
   icon.innerHTML = iconMarkup[name] ?? '';
   return icon;
 }
+
+export function createProviderIcon(iconPath, { className = '', alt = '', draggable = false } = {}) {
+  if (!iconPath) return null;
+  const img = document.createElement('img');
+  img.className = className;
+  img.src = iconPath;
+  img.alt = alt;
+  img.draggable = draggable;
+  return img;
+}

@@ -1,4 +1,5 @@
 import { invokeIpc, onIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { EVENTS, dispatchEvent } from '../../Shared/Events/RendererEvents.js';
 
 export function createCleanupGateway() {
   let started = false;
@@ -6,11 +7,7 @@ export function createCleanupGateway() {
 
   async function processRequest({ id, prompt, modeInstruction, label }) {
     if (label) {
-      window.dispatchEvent(
-        new CustomEvent('joanium:memory-sync', {
-          detail: { active: true, message: label },
-        }),
-      );
+      dispatchEvent(EVENTS.MEMORY_SYNC, { active: true, message: label });
     }
 
     try {
@@ -34,11 +31,7 @@ export function createCleanupGateway() {
       }).catch(() => {});
     } finally {
       if (label) {
-        window.dispatchEvent(
-          new CustomEvent('joanium:memory-sync', {
-            detail: { active: false },
-          }),
-        );
+        dispatchEvent(EVENTS.MEMORY_SYNC, { active: false });
       }
     }
   }
