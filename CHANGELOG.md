@@ -6,6 +6,21 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.614.0] - 2026-06-14
+
+* Added AI Leaderboard
+* Updated AI Models
+* Updated AI Models
+* Removed Who in browser history
+* AI Models Update
+* fix: resolve three CodeQL unused/duplicate variable alerts
+* Added Browsing History
+* Updated AI Models
+* Updated AI Models
+* Updated AI Models
+
+---
+
 ## [2026.613.1] - 2026-06-13
 
 * Import/ Export Issue Fix
