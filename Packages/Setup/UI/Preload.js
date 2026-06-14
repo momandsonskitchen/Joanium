@@ -4,5 +4,6 @@ contextBridge.exposeInMainWorld('JoaniumSetup', {
   bootstrap: () => ipcRenderer.invoke('setup:bootstrap'),
   saveDraft: (draftState) => ipcRenderer.invoke('setup:save-draft', draftState),
   complete: (completedState) => ipcRenderer.invoke('setup:complete', completedState),
+  importBackup: (zipFilePath) => ipcRenderer.invoke('setup:import-backup', zipFilePath),
   openPackage: (packageId) => ipcRenderer.invoke('app:navigate', packageId),
 });

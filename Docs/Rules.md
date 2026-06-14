@@ -89,6 +89,10 @@ If a file has helper functions supporting main logic, they go in `Utils.js` alon
 
 Always update the docs if you make any major changes.
 
+### 9. Test
+
+Always test your changes.
+
 ---
 
 ## Code Style

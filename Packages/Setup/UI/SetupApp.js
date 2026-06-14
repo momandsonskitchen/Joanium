@@ -110,6 +110,7 @@ async function bootstrap() {
   let providerScroller = null;
   let currentDobDropDown = null;
   let currentScrollbar = null;
+  let isImporting = false;
 
   const root = document.getElementById('app');
   const modal = createModal({ closeLabel: strings.common.close });
@@ -208,6 +209,38 @@ async function bootstrap() {
     }
   }
 
+  async function handleImportFile() {
+    isImporting = true;
+    runtimeError = '';
+    render();
+
+    try {
+      const result = await window.JoaniumSetup.importBackup();
+
+      if (result.canceled) {
+        isImporting = false;
+        render();
+        return;
+      }
+
+      if (!result.ok) {
+        isImporting = false;
+        runtimeError = strings.origin.importFailed;
+        render();
+        return;
+      }
+
+      window.clearTimeout(autoSaveTimer);
+      autoSaveTimer = 0;
+
+      await window.JoaniumSetup.openPackage('Shell');
+    } catch {
+      isImporting = false;
+      runtimeError = strings.origin.importFailed;
+      render();
+    }
+  }
+
   function getStageMessage() {
     if (runtimeError) {
       return `Could not update ${runtimeError}.`;
@@ -281,6 +314,64 @@ async function bootstrap() {
     );
 
     stage.append(checkboxEl, links);
+    return stage;
+  }
+
+  function renderOriginScene() {
+    const stage = createElement('section', 'setup-stage');
+    stage.append(
+      createElement('h1', 'setup-stage__title', strings.origin.title),
+      createElement('p', 'setup-stage__description', strings.origin.description),
+    );
+
+    const grid = createElement('div', 'setup-origin-grid');
+
+    const freshCard = createElement(
+      'article',
+      `setup-origin-card${isImporting ? ' setup-origin-card--disabled' : ''}`,
+    );
+    const freshIcon = createElement('span', 'setup-origin-card__icon');
+    freshIcon.textContent = '\u2728';
+    const freshContent = createElement('div', 'setup-origin-card__content');
+    freshContent.append(
+      createElement('h3', 'setup-origin-card__title', strings.origin.freshLabel),
+      createElement('p', 'setup-origin-card__description', strings.origin.freshDescription),
+    );
+    freshCard.append(freshIcon, freshContent);
+    freshCard.addEventListener('click', () => {
+      if (isImporting) return;
+      goNext();
+    });
+
+    const importCard = createElement(
+      'article',
+      `setup-origin-card${isImporting ? ' setup-origin-card--disabled' : ''}`,
+    );
+    const importIcon = createElement('span', 'setup-origin-card__icon');
+    importIcon.textContent = '\uD83D\uDCC1';
+    const importContent = createElement('div', 'setup-origin-card__content');
+    importContent.append(
+      createElement('h3', 'setup-origin-card__title', strings.origin.importLabel),
+      createElement('p', 'setup-origin-card__description', strings.origin.importDescription),
+    );
+
+    if (isImporting) {
+      const importingLabel = createElement(
+        'p',
+        'setup-origin-card__importing',
+        strings.origin.importing,
+      );
+      importContent.append(importingLabel);
+    }
+
+    importCard.append(importIcon, importContent);
+    importCard.addEventListener('click', () => {
+      if (isImporting) return;
+      handleImportFile();
+    });
+
+    grid.append(freshCard, importCard);
+    stage.append(grid);
     return stage;
   }
 
@@ -595,6 +686,10 @@ async function bootstrap() {
       return renderConsentScene();
     }
 
+    if (scene === 'origin') {
+      return renderOriginScene();
+    }
+
     if (scene === 'name') {
       return renderNameScene();
     }
@@ -619,6 +714,12 @@ async function bootstrap() {
 
     if (message) {
       stage.append(createElement('div', 'setup-stage__message', message));
+    }
+
+    const isOriginStep = scene === 'origin';
+
+    if (isOriginStep && !isImporting) {
+      return;
     }
 
     const actions = createElement('div', 'setup-stage__actions');

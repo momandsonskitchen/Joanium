@@ -19,6 +19,18 @@ const en = {
       usage: 'Pick at least one way you plan to use Joanium.',
     },
   },
+  origin: {
+    title: 'Start fresh or pick up where you left off?',
+    description:
+      'If you have a previous Joanium backup, you can import it to restore your profile, providers, and settings instantly.',
+    freshLabel: 'Start fresh',
+    freshDescription: 'Set up Joanium from scratch with a clean profile.',
+    importLabel: 'Import previous setup',
+    importDescription: 'Restore your profile, providers, and settings from a Joanium backup.',
+    importButton: 'Choose backup',
+    importing: 'Importing your data\u2026',
+    importFailed: 'Could not import backup. Make sure it is a valid Joanium zip file.',
+  },
   consent: {
     eyebrow: 'Personal AI, without the setup mess',
     title: 'Set up Joanium in a minute',

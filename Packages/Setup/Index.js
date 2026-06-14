@@ -33,6 +33,10 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, completedState) =>
           setupStateManager.completeOnboarding(completedState),
       },
+      {
+        channel: 'setup:import-backup',
+        handler: async () => setupStateManager.importBackup(),
+      },
     ],
   };
 }

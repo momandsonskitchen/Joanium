@@ -1,6 +1,6 @@
 import { deepClone } from '../../Shared/Utils/ValueUtils.js';
 
-export const setupStepIds = ['consent', 'name', 'dob', 'providers', 'usage', 'welcome'];
+export const setupStepIds = ['consent', 'origin', 'name', 'dob', 'providers', 'usage', 'welcome'];
 
 function isValidDate({ day, month, year }) {
   const normalizedDay = Number.parseInt(day, 10);
@@ -63,6 +63,10 @@ function buildProviderDetails(providers, persistedDetails = {}) {
 export function validateStep(stepId, state, providersById) {
   if (stepId === 'consent') {
     return state.consentAccepted;
+  }
+
+  if (stepId === 'origin') {
+    return true;
   }
 
   if (stepId === 'name') {
