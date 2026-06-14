@@ -137,7 +137,8 @@ function processModels(raw) {
       if (ai !== null) return -1;
       if (bi !== null) return 1;
       return a.name.localeCompare(b.name);
-    });
+    })
+    .map((m, idx) => ({ ...m, rank: idx + 1 }));
 }
 
 async function fetchModels() {
@@ -337,16 +338,11 @@ export function createLeaderboardPanel(strings) {
       populateViewer(model);
     });
 
-    const rank = createElement('span', 'chat-leaderboard__card-rank');
-    if (model.intelligence !== null) {
-      rank.textContent = model.intelligence.toFixed(0);
-      if (model.intelligence >= 55) rank.classList.add('chat-leaderboard__card-rank--top');
-      else if (model.intelligence >= 40) rank.classList.add('chat-leaderboard__card-rank--mid');
-    } else {
-      rank.textContent = '—';
-      rank.classList.add('chat-leaderboard__card-rank--none');
-    }
+    // ── Left: rank number (permanent intelligence rank) ────────────────────
+    const rankEl = createElement('span', 'chat-leaderboard__card-rank');
+    rankEl.textContent = String(model.rank);
 
+    // ── Middle: name + meta ────────────────────────────────────────────────
     const body = createElement('div', 'chat-leaderboard__card-body');
     body.append(createElement('span', 'chat-leaderboard__card-name', model.name));
 
@@ -361,11 +357,39 @@ export function createLeaderboardPanel(strings) {
     meta.append(createElement('span', 'chat-leaderboard__card-price', priceText));
     body.append(meta);
 
-    card.append(rank, body);
+    // ── Right: intelligence score ──────────────────────────────────────────
+    const scoreEl = createElement('span', 'chat-leaderboard__card-score');
+    if (model.intelligence !== null) {
+      scoreEl.textContent = model.intelligence.toFixed(0);
+      if (model.intelligence >= 55) scoreEl.classList.add('chat-leaderboard__card-score--top');
+      else if (model.intelligence >= 40) scoreEl.classList.add('chat-leaderboard__card-score--mid');
+      else scoreEl.classList.add('chat-leaderboard__card-score--low');
+    } else {
+      scoreEl.textContent = '—';
+      scoreEl.classList.add('chat-leaderboard__card-score--none');
+    }
+
+    card.append(rankEl, body, scoreEl);
     return card;
   }
 
   // ── Viewer ──────────────────────────────────────────────────────────────
+
+  function createCopyBtn(text) {
+    const btn = createElement('button', 'lb-copy-btn');
+    btn.type = 'button';
+    btn.innerHTML =
+      '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13"' +
+      ' height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>' +
+      '</svg>';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(text).catch(() => {});
+      btn.style.color = 'var(--color-accent)';
+      setTimeout(() => (btn.style.color = ''), 1200);
+    });
+    return btn;
+  }
 
   function populateViewer(model) {
     if (!_viewerContentEl) return;
@@ -384,13 +408,17 @@ export function createLeaderboardPanel(strings) {
       scorePill.textContent = model.intelligence.toFixed(1);
       nameRow.append(scorePill);
     }
+    if (model.provider) {
+      nameRow.append(createElement('span', 'lb-provider-badge', model.provider));
+    }
     headerLeft.append(nameRow);
 
+    const idRow = createElement('div', 'lb-viewer-header__id-row');
+    const idChip = createElement('span', 'lb-model-id-chip', model.slug);
+    idRow.append(idChip, createCopyBtn(model.slug));
+    headerLeft.append(idRow);
+
     const metaRow = createElement('div', 'lb-viewer-meta');
-    if (model.provider) {
-      metaRow.append(createElement('span', 'lb-viewer-meta__value', model.provider));
-      metaRow.append(createSep());
-    }
     metaRow.append(
       createElement('span', 'lb-viewer-meta__value', formatContext(model.contextLength) + ' ctx'),
     );
@@ -409,6 +437,12 @@ export function createLeaderboardPanel(strings) {
     headerLeft.append(metaRow);
     header.append(headerLeft);
     _viewerContentEl.append(header);
+
+    if (model.expirationDate) {
+      const warn = createElement('div', 'lb-deprecation-warn');
+      warn.textContent = `Deprecating ${formatDate(model.expirationDate) ?? model.expirationDate}`;
+      _viewerContentEl.append(warn);
+    }
 
     // ── Description ────────────────────────────────────────────────────────
     if (model.description) {
@@ -446,10 +480,28 @@ export function createLeaderboardPanel(strings) {
     // ── Quick stats ────────────────────────────────────────────────────────
     {
       const section = createSection(strings.model.capabilities);
+
+      if (model.inputModalities && model.inputModalities.length > 0) {
+        section.append(createElement('div', 'lb-section__sublabel', 'Input'));
+        const row = createElement('div', 'lb-modality-row');
+        for (const mod of model.inputModalities) {
+          row.append(createElement('span', 'lb-modality-chip', mod));
+        }
+        section.append(row);
+      }
+
+      if (model.outputModalities && model.outputModalities.length > 0) {
+        section.append(createElement('div', 'lb-section__sublabel', 'Output'));
+        const row = createElement('div', 'lb-modality-row');
+        for (const mod of model.outputModalities) {
+          row.append(createElement('span', 'lb-modality-chip', mod));
+        }
+        section.append(row);
+      }
+
       const grid = createElement('div', 'lb-stats-grid');
       grid.append(
         createStatTile(strings.model.context, formatContext(model.contextLength) + ' tokens'),
-        createStatTile(strings.model.modality, model.modality),
       );
       if (model.maxOutput)
         grid.append(
@@ -557,14 +609,19 @@ export function createLeaderboardPanel(strings) {
   function createPriceTile(label, perToken) {
     const tile = createElement('div', 'lb-price-tile');
     const isFree = !perToken || perToken === '0';
-    tile.append(
-      createElement('span', 'lb-price-tile__label', label),
-      createElement(
-        'span',
-        `lb-price-tile__value${isFree ? ' lb-price-tile__value--free' : ''}`,
-        isFree ? 'Free' : formatPrice(perToken),
-      ),
+    const valueEl = createElement(
+      'span',
+      `lb-price-tile__value${isFree ? ' lb-price-tile__value--free' : ''}`,
     );
+    if (isFree) {
+      valueEl.textContent = 'Free';
+    } else {
+      valueEl.append(
+        document.createTextNode(formatPrice(perToken)),
+        createElement('span', 'lb-price-tile__unit', ' / 1M tokens'),
+      );
+    }
+    tile.append(createElement('span', 'lb-price-tile__label', label), valueEl);
     return tile;
   }
 
