@@ -329,9 +329,6 @@ export async function bootElectron({ entryPackage, loadPackage }) {
 
   app.on('window-all-closed', () => {
     writeBootLog('app:window-all-closed');
-    if (globalThis.JoaniumRuntime?.shouldStayResident?.()) {
-      return;
-    }
     if (process.platform !== 'darwin') {
       app.quit();
     }

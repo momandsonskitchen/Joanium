@@ -178,10 +178,3 @@ export async function writeJsonResource(rootDirectory, resourceName, fileName, d
 export async function writeJsonFile(rootDirectory, fileName, resourceName, data, options = {}) {
   return writeJsonResource(rootDirectory, resourceName, fileName, data, options);
 }
-
-export function getTrayIconPath(rootDirectory) {
-  if (process.platform === 'win32') {
-    return getResourcePath(rootDirectory, 'Assets', 'Logo', 'Logo.ico');
-  }
-  return getResourcePath(rootDirectory, 'Assets', 'Logo', 'Logo.png');
-}

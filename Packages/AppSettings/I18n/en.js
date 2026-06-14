@@ -6,10 +6,6 @@ const en = {
       label: 'Open at login',
       description: 'Start Joanium automatically when you sign in.',
     },
-    systemTray: {
-      label: 'Keep in system tray',
-      description: 'Keep Joanium running after the last window is closed.',
-    },
     keepAwake: {
       label: 'Keep awake',
       description: 'Prevent the app process from being suspended while Joanium is running.',

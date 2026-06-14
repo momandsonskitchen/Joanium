@@ -5,7 +5,7 @@ import process from 'node:process';
 import { getWritableDataDirectory } from '../Shared/Storage/ResourcePaths.js';
 import { createAppSettingsStateManager } from './Core/AppSettingsState.js';
 import { isKeepAwakeActive, startKeepAwake, stopKeepAwake } from './Core/PowerService.js';
-import { disableTray, enableTray, isTrayActive, rememberWindow } from './Core/TrayService.js';
+
 import {
   checkForAppUpdates,
   getAutoUpdateState,
@@ -26,7 +26,6 @@ function runtimeStatus(settings) {
   return {
     ...settings,
     keepAwakeActive: isKeepAwakeActive(),
-    trayActive: isTrayActive(),
     autoUpdateState: getAutoUpdateState(),
   };
 }
@@ -99,23 +98,10 @@ export async function createPackage({ rootDirectory }) {
     if (settings.keepAwake) startKeepAwake();
     else stopKeepAwake();
 
-    if (settings.systemTray) enableTray(rootDirectory, windowRef);
-    else disableTray();
-
     setAutoUpdateEnabled(true);
 
     return runtimeStatus(settings);
   }
-
-  globalThis.JoaniumRuntime = {
-    ...(globalThis.JoaniumRuntime ?? {}),
-    shouldStayResident: () => Boolean(cachedSettings.systemTray && isTrayActive()),
-  };
-
-  app.on('browser-window-created', (_event, windowRef) => {
-    rememberWindow(windowRef);
-    if (cachedSettings.systemTray) enableTray(rootDirectory, windowRef);
-  });
 
   app
     .whenReady()

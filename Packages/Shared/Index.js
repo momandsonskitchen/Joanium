@@ -41,7 +41,6 @@ export {
 } from './ProviderCatalog/ProviderUtils.js';
 export { createEnqueue } from './Utils/AsyncUtils.js';
 export { readJsonDirectory } from './Storage/JsonDirectory.js';
-export { getTrayIconPath } from './Storage/ResourcePaths.js';
 export { createProviderIcon } from './Icons/Icons.js';
 export { createSecretField } from './UI/SecretField.js';
 export { EVENTS, dispatchEvent } from './Events/RendererEvents.js';

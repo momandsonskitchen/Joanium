@@ -7,7 +7,6 @@ import { VALID_SEARCH_ENGINES } from '../../Shared/UserData/UserData.js';
 
 const DEFAULT_SETTINGS = Object.freeze({
   runOnStartup: false,
-  systemTray: false,
   keepAwake: false,
   completionSound: true,
   autoMemoryUpdates: true,
@@ -22,7 +21,6 @@ const DEFAULT_SETTINGS = Object.freeze({
 function normalizeSettings(candidate = {}) {
   return {
     runOnStartup: Boolean(candidate.runOnStartup ?? DEFAULT_SETTINGS.runOnStartup),
-    systemTray: Boolean(candidate.systemTray ?? DEFAULT_SETTINGS.systemTray),
     keepAwake: Boolean(candidate.keepAwake ?? DEFAULT_SETTINGS.keepAwake),
     completionSound: Boolean(candidate.completionSound ?? DEFAULT_SETTINGS.completionSound),
     autoMemoryUpdates: Boolean(candidate.autoMemoryUpdates ?? DEFAULT_SETTINGS.autoMemoryUpdates),

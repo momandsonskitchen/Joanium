@@ -13,7 +13,6 @@ import { createSettingsPanelState } from './Utils.js';
 
 const OPTION_KEYS = [
   'runOnStartup',
-  'systemTray',
   'keepAwake',
   'completionSound',
   'showTechFeed',

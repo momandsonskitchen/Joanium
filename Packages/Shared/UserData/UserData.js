@@ -63,7 +63,6 @@ export function createDefaultUserState() {
     },
     appSettings: {
       runOnStartup: false,
-      systemTray: false,
       keepAwake: false,
       completionSound: true,
       autoMemoryUpdates: true,
@@ -281,7 +280,6 @@ function sanitizeAppSettings(candidate) {
     runOnStartup: Boolean(
       candidate.runOnStartup ?? candidate.run_on_startup ?? defaults.runOnStartup,
     ),
-    systemTray: Boolean(candidate.systemTray ?? candidate.system_tray ?? defaults.systemTray),
     keepAwake: Boolean(candidate.keepAwake ?? candidate.keep_awake ?? defaults.keepAwake),
     completionSound: Boolean(
       candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound,
