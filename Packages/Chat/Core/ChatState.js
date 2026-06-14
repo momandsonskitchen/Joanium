@@ -1056,6 +1056,7 @@ export function createChatStateManager({ rootDirectory }) {
       ]);
 
       const privateIconUrl = getResourceFileUrl(rootDirectory, 'Assets', 'App', 'Private.png');
+      const trophyUrl = getResourceFileUrl(rootDirectory, 'Assets', 'App', 'Trophy.png');
 
       // In packaged builds the Config/Models JSONs are frozen inside the asar
       // archive and ModelSync never runs. Use the live model filter to cross-
@@ -1076,6 +1077,7 @@ export function createChatStateManager({ rootDirectory }) {
         gitCommitPrompt,
         gitCommitDiffPrompt,
         privateIconUrl,
+        trophyUrl,
       };
     },
     // Streaming entry point — resolves once the stream ends (or rejects on error).

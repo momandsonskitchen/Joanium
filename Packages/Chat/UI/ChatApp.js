@@ -4282,7 +4282,12 @@ export async function createChatView(
   const leaderboardBtn = createElement('button', 'chat-leaderboard-btn');
   leaderboardBtn.type = 'button';
   leaderboardBtn.setAttribute('aria-label', 'Leaderboard');
-  leaderboardBtn.append(createIcon('tabLeaderboard', 'chat-leaderboard-btn__icon'));
+  const leaderboardBtnIcon = document.createElement('img');
+  leaderboardBtnIcon.src = payload.trophyUrl ?? '';
+  leaderboardBtnIcon.alt = '';
+  leaderboardBtnIcon.draggable = false;
+  leaderboardBtnIcon.className = 'chat-leaderboard-btn__icon';
+  leaderboardBtn.append(leaderboardBtnIcon);
   leaderboardBtn.addEventListener('click', () => {
     void onNavigate?.('leaderboard');
   });
