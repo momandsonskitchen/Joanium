@@ -1069,6 +1069,21 @@ html.joanium-theme-dark .chat-private-btn:hover {
   color: var(--color-chat-text-title);
 }
 
+html.joanium-theme-dark .chat-leaderboard-btn {
+  background: rgba(40, 32, 50, 0.88);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+html.joanium-theme-dark .chat-leaderboard-btn:hover {
+  background: rgba(52, 44, 64, 0.98);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 6px 18px rgba(0, 0, 0, 0.28);
+  color: var(--color-chat-text-title);
+}
+
 html.joanium-theme-dark .chat-thread-track::before {
   background: rgba(255, 255, 255, 0.1);
 }

@@ -4279,7 +4279,22 @@ export async function createChatView(
     }
   });
 
-  view.append(scrollWrap, bottom, browserPreview.element, terminalPanel.build(), privateBtn);
+  const leaderboardBtn = createElement('button', 'chat-leaderboard-btn');
+  leaderboardBtn.type = 'button';
+  leaderboardBtn.setAttribute('aria-label', 'Leaderboard');
+  leaderboardBtn.append(createIcon('tabLeaderboard', 'chat-leaderboard-btn__icon'));
+  leaderboardBtn.addEventListener('click', () => {
+    void onNavigate?.('leaderboard');
+  });
+
+  view.append(
+    scrollWrap,
+    bottom,
+    browserPreview.element,
+    terminalPanel.build(),
+    privateBtn,
+    leaderboardBtn,
+  );
   track = createElement('div', 'chat-thread-track');
   track.hidden = true;
   trackLabel = createElement('div', 'chat-thread-track__label');

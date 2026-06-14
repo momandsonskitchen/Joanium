@@ -6,6 +6,7 @@ import agents from '../../Agents/I18n/en.js';
 import skills from '../../Skills/I18n/en.js';
 import personas from '../../Personas/I18n/en.js';
 import marketplace from '../../Marketplace/I18n/en.js';
+import leaderboard from '../../Leaderboard/I18n/en.js';
 import user from '../../User/I18n/en.js';
 import about from '../../About/I18n/en.js';
 import appSettings from '../../AppSettings/I18n/en.js';
@@ -70,6 +71,7 @@ const en = {
       skills: 'Skills',
       personas: 'Personas',
       marketplace: 'Marketplace',
+      leaderboard: 'Leaderboard',
       usage: 'Usage',
       settings: 'Settings',
       lock: 'Lock app',
@@ -92,6 +94,7 @@ const en = {
   skills,
   personas,
   marketplace,
+  leaderboard,
   user,
   about,
   appSettings,

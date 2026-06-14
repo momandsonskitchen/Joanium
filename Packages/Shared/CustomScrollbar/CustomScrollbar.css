@@ -177,6 +177,8 @@
 .chat-projects__form-col,
 .chat-skills__list-content,
 .chat-templates__form-col,
+.chat-leaderboard__list-content,
+.chat-leaderboard__viewer-scroll-content,
 .usage-content__scroller,
 .chat-settings__nav,
 .joanium-provider-picker__viewport {
@@ -203,6 +205,8 @@
 .chat-skills__viewer-scroll-content::-webkit-scrollbar,
 .chat-skills__list-content::-webkit-scrollbar,
 .chat-templates__form-col::-webkit-scrollbar,
+.chat-leaderboard__list-content::-webkit-scrollbar,
+.chat-leaderboard__viewer-scroll-content::-webkit-scrollbar,
 .chat-settings__main::-webkit-scrollbar,
 .usage-content__scroller::-webkit-scrollbar,
 .chat-settings__nav::-webkit-scrollbar,

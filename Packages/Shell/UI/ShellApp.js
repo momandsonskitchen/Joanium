@@ -19,6 +19,7 @@ import { createCleanupGateway } from '../../Memory/UI/CleanupGateway.js';
 import { createSkillsPanel } from '../../Skills/UI/SkillsPanel.js';
 import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
+import { createLeaderboardPanel } from '../../Leaderboard/UI/LeaderboardPanel.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createUsagePanel } from '../../Usage/UI/UsagePanel.js';
 import { createUserPanel } from '../../User/UI/UserPanel.js';
@@ -334,6 +335,14 @@ async function bootstrap() {
       icon: 'tabMarketplace',
       create: async () => {
         return mountSearchListPanel(createMarketplacePanel(strings.marketplace));
+      },
+    },
+    {
+      id: 'leaderboard',
+      icon: 'tabLeaderboard',
+      hideTab: true,
+      create: async () => {
+        return mountSearchListPanel(createLeaderboardPanel(strings.leaderboard));
       },
     },
     {
@@ -663,6 +672,7 @@ async function bootstrap() {
   sidebarTabs.append(tabIndicator);
 
   for (const route of routeDefinitions) {
+    if (route.hideTab) continue;
     const isActive = route.id === activeRouteId;
     const tab = createElement(
       'button',
