@@ -5,6 +5,18 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "openrouter/fusion": {
+      "name": "OpenRouter: Fusion",
+      "description": "Fusion turns your prompt into a small multi-model deliberation. A panel of expert models (see below) analyzes your prompt in parallel with web search and web fetch enabled, then a...",
+      "context_window": 128000,
+      "pricing": {
+        "input": -1000000,
+        "output": -1000000
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "moonshotai/kimi-k2.7-code": {
       "name": "MoonshotAI: Kimi K2.7 Code",
       "description": "MoonshotAI: Kimi K2.7 Code is a coding-focused model in Moonshot AI's Kimi K2 family, built to complete end-to-end programming tasks reliably over long contexts. It uses a native multimodal mixture-of-experts...",
@@ -208,18 +220,6 @@
       "inputs": {
         "text": true,
         "image": true
-      }
-    },
-    "openrouter/fusion": {
-      "name": "OpenRouter: Fusion",
-      "description": "Fusion turns your prompt into a small multi-model deliberation. A panel of expert models (see below) analyzes your prompt in parallel with web search and web fetch enabled, then a...",
-      "context_window": 128000,
-      "pricing": {
-        "input": -1000000,
-        "output": -1000000
-      },
-      "inputs": {
-        "text": true
       }
     },
     "perceptron/perceptron-mk1": {
@@ -4245,5 +4245,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-13T16:20:58.843Z"
+  "_syncedAt": "2026-06-14T03:37:20.041Z"
 }
