@@ -3,6 +3,7 @@ import { getTrayIconPath } from '../../Shared/Storage/ResourcePaths.js';
 
 let tray = null;
 let lastWindow = null;
+let closeHandlerAttached = new WeakSet();
 
 function getTargetWindow() {
   return lastWindow && !lastWindow.isDestroyed()
@@ -18,9 +19,24 @@ function showWindow() {
   target.focus();
 }
 
+function onWindowClose(event) {
+  if (tray && !tray.isDestroyed()) {
+    event.preventDefault();
+    const win = event.sender;
+    if (win && !win.isDestroyed()) {
+      win.hide();
+    }
+    return;
+  }
+}
+
 export function rememberWindow(windowRef) {
   if (windowRef && !windowRef.isDestroyed()) {
     lastWindow = windowRef;
+    if (!closeHandlerAttached.has(windowRef)) {
+      windowRef.on('close', onWindowClose);
+      closeHandlerAttached.add(windowRef);
+    }
   }
 }
 
