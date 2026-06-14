@@ -85,6 +85,10 @@ const packages = discoverPackages(packagesDirectory);
 
 If a file has helper functions supporting main logic, they go in `Utils.js` alongside it.
 
+### 8. Update Docs
+
+Always update the docs if you make any major changes.
+
 ---
 
 ## Code Style

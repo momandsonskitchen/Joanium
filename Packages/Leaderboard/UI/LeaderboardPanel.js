@@ -1,8 +1,9 @@
-import { createElement } from '../../Shared/Utils/DomUtils.js';
+import { createElement, copyToClipboard } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { iconMarkup } from '../../Shared/Icons/Icons.js';
 
 const API_URL = 'https://openrouter.ai/api/v1/models';
 const CACHE_TTL_MS = 10 * 60 * 1000;
@@ -378,15 +379,16 @@ export function createLeaderboardPanel(strings) {
   function createCopyBtn(text) {
     const btn = createElement('button', 'lb-copy-btn');
     btn.type = 'button';
-    btn.innerHTML =
-      '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13"' +
-      ' height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>' +
-      '</svg>';
+    btn.innerHTML = iconMarkup.copy;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      navigator.clipboard.writeText(text).catch(() => {});
+      copyToClipboard(text);
+      btn.innerHTML = iconMarkup.check;
       btn.style.color = 'var(--color-accent)';
-      setTimeout(() => (btn.style.color = ''), 1200);
+      setTimeout(() => {
+        btn.innerHTML = iconMarkup.copy;
+        btn.style.color = '';
+      }, 1200);
     });
     return btn;
   }
