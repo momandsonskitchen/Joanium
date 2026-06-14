@@ -182,7 +182,7 @@ The projects view behaves like a native workspace browser with searchable projec
 ### Other
 
 - Browser Preview (Electron browser view with AI tools)
-- App Settings (persisted behavior, keep-awake, tray, auto-update)
+- App Settings (persisted behavior, keep-awake, auto-update)
 - Window State (persisted bounds and maximized/fullscreen restore)
 - Memory (long-term personal memory with auto-updates)
 - Scheduled Agents (background execution with full tool access)

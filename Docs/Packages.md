@@ -724,14 +724,12 @@ Application settings with runtime side effects. The most complex settings packag
 
 - `Core/AppSettingsState.js` — Settings persistence
 - `Core/PowerService.js` — Keep-awake
-- `Core/TrayService.js` — System tray
 - `Core/AutoUpdateService.js` — electron-updater
 - `Core/DataPortabilityService.js` — ZIP export/import
 
 ### Runtime Side Effects
 
 - Keep-awake mode
-- System tray behavior
 - Auto-update checks
 - Run-on-startup (`app.setLoginItemSettings`)
 - App reset (deletes user data, relaunches)
