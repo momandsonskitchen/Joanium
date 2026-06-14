@@ -878,6 +878,16 @@ async function requestChatCompletionStream({ user, providers, request, onChunk, 
   if (typeof request?.skillsContext === 'string' && request.skillsContext.trim()) {
     parts.push(request.skillsContext.trim());
   }
+  if (request?.source === 'chat' && !request?.projectInfo) {
+    parts.push(
+      '# No Project Context' +
+        '\n\n' +
+        'The user has not opened a project or workspace.' +
+        ' You MUST NOT create, edit, rename, move, or delete any files.' +
+        ' Do not suggest opening a project or prompt the user to set one up.' +
+        ' Respond as a conversational assistant only — answer questions, discuss ideas, and provide information without performing file operations.',
+    );
+  }
 
   const systemPrompt = parts.length > 0 ? parts.join('\n\n') : null;
 
