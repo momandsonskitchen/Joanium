@@ -111,17 +111,6 @@
 
 * `.github/workflows/Release.yml` — manual trigger (`workflow_dispatch`) that versions, tags, creates a GitHub release, then fans out to three parallel jobs: Windows (NSIS installer), macOS (DMG), Linux (AppImage). Each job calls `electron-builder --publish always` with `GH_TOKEN`.
 
-## Design language
-
-* All buttons should have rounded corners (20px).
-* Should follow material 3 expressive design.
-* I need a clean and very premium looking UI.
-* Should match the current app design language.
-* Setup/onboarding controls use the shared Bubbly UI entry point:
-  `Packages/Shared/Bubbly/Index.js` and `Packages/Shared/Bubbly/Bubbly.css`. Add or
-  re-export setup-facing shared controls there instead of creating one-off inputs,
-  dropdowns, buttons, selectors, or loaders inside `Packages/Setup`.
-
 ## Packages/AppSettings
 
 Owns persisted app behavior settings plus keep-awake and tray runtime side effects. Shell mounts its settings panel and routes each nav item to the correct sub-panel. The settings panel is a modal overlay with a left-side nav and a right-side content area.
