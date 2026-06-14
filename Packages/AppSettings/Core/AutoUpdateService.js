@@ -122,13 +122,6 @@ function bindUpdaterEvents() {
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.channel = 'latest';
 
-  app.on('before-quit', () => {
-    if (state.downloaded && autoUpdater) {
-      writeLog('before-quit:installing-update');
-      autoUpdater.quitAndInstall(true, false);
-    }
-  });
-
   autoUpdater.on('checking-for-update', () => {
     writeLog('checking-for-update');
     setState({ status: 'checking', error: null });
