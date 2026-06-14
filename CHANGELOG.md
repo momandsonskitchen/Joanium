@@ -6,6 +6,15 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.614.1] - 2026-06-14
+
+* Updated The Logo For Private And For Leaderboard
+* Auto Update Fix
+* Updated AI Models
+* Improvered the UI of Leaderboard
+
+---
+
 ## [2026.614.0] - 2026-06-14
 
 * Added AI Leaderboard
