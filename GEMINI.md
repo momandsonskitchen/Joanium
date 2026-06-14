@@ -1,6 +1,6 @@
-# Joanium — Claude Code Instructions
+# Joanium — Gemini CLI Instructions
 
-This file is read by Claude Code automatically. It gives Claude the project context, rules, and conventions needed to contribute correctly.
+This file gives Gemini CLI the project context, rules, and conventions needed to contribute correctly.
 
 ---
 
