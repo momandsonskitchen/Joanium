@@ -6,6 +6,16 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.614.2] - 2026-06-14
+
+* Updated Trayservice
+* Updated The Copy Icon In The Leaderboard
+* Updated Docs
+* Removed Unused Variables
+* Updated Docs
+
+---
+
 ## [2026.614.1] - 2026-06-14
 
 * Updated The Logo For Private And For Leaderboard
