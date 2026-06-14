@@ -4,6 +4,7 @@ const en = {
       copy: 'Copy',
       copied: 'Copied!',
       download: 'Download',
+      preview: 'Preview',
     },
   },
 };

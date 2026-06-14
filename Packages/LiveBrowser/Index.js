@@ -34,6 +34,14 @@ export async function createPackage({ rootDirectory }) {
           }),
       },
       {
+        channel: 'browser-preview:load-html',
+        handler: async (event, html, who) =>
+          browserPreviewService.loadHtml(html, {
+            ownerWindow: ownerWindow(event),
+            who: who ?? 'user',
+          }),
+      },
+      {
         channel: 'browser-preview:set-visible',
         handler: async (event, visible) =>
           browserPreviewService.setVisible(visible, ownerWindow(event)),

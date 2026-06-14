@@ -15,6 +15,7 @@
  */
 
 import { iconMarkup } from '../Icons/Icons.js';
+import { invokeIpc } from '../Ipc/RendererIpc.js';
 import strings from '../I18n/en.js';
 
 const codeBlockStrings = strings.markdown.codeBlock;
@@ -353,7 +354,20 @@ function buildDom(blocks) {
           URL.revokeObjectURL(url);
         });
 
-        actions.append(copyBtn, dlBtn);
+        const btns = [copyBtn, dlBtn];
+        if (block.lang?.toLowerCase() === 'html') {
+          const previewBtn = document.createElement('button');
+          previewBtn.className = 'md-codeblock__btn';
+          previewBtn.type = 'button';
+          previewBtn.innerHTML = `${iconMarkup.eye}<span></span>`;
+          previewBtn.querySelector('span').textContent = codeBlockStrings.preview;
+          previewBtn.addEventListener('click', () => {
+            void invokeIpc('browser-preview:load-html', block.code, 'user').catch(() => {});
+          });
+          btns.push(previewBtn);
+        }
+
+        actions.append(...btns);
         header.append(actions);
         wrap.append(header);
 

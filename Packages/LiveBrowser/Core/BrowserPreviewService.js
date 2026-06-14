@@ -863,6 +863,22 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       return loadUrl(input, { who, skipHistory });
     },
 
+    async loadHtml(html, { ownerWindow = null, who = 'ai' } = {}) {
+      if (ownerWindow) attachToWindow(ownerWindow);
+      pendingHistoryWho = who;
+      const webContents = await ensureView();
+      url = 'about:blank';
+      visible = true;
+      status = 'Previewing HTML';
+      attach();
+      emitState();
+      const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+      await webContents.loadURL(dataUrl, {
+        userAgent: BUILTIN_BROWSER_USER_AGENT,
+      });
+      return getState();
+    },
+
     setHostBounds(bounds, ownerWindow = null) {
       if (ownerWindow) attachToWindow(ownerWindow);
       hostBounds = normalizeBounds(bounds);
