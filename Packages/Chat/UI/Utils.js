@@ -146,7 +146,7 @@ export function toAttachmentSummary(attachment) {
   };
 }
 
-export function buildAttachmentContext(strings, attachments) {
+function buildAttachmentContext(strings, attachments) {
   // Images are sent as multimodal content blocks - exclude them from text context.
   const textAttachments = attachments.filter((a) => a.kind !== 'image' && a.text);
   if (!textAttachments.length) return '';
@@ -172,7 +172,7 @@ export function buildModelContent(strings, prompt, attachments) {
   return [prompt, attachmentContext].filter(Boolean).join('\n\n');
 }
 
-export function buildLiveBrowserContext(strings, state = {}) {
+function buildLiveBrowserContext(strings, state = {}) {
   if (!state?.hasPage || !state.url) return '';
 
   const browserContext = LIVE_BROWSER_CONTEXT_PROMPTS;

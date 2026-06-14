@@ -1683,7 +1683,6 @@ export async function createChatView(
           activeProvider = provider;
           activeModel = model;
           activeModelLabel = model.name ?? model.id;
-          _userOverrodeModel = true;
           const labelEl = triggerButton.querySelector('.chat-composer__model-label');
           if (labelEl) labelEl.textContent = activeModelLabel;
           const providerIconEl = triggerButton.querySelector('.chat-composer__model-provider-icon');
@@ -2254,11 +2253,10 @@ export async function createChatView(
     if (!track || !trackLabel || !thread || !scroll) return;
 
     const userMsgs = Array.from(thread.querySelectorAll('.chat-message--user'));
-    const toShow = userMsgs;
 
     track.querySelectorAll('.chat-thread-track__dot').forEach((d) => d.remove());
 
-    if (toShow.length < 2) {
+    if (userMsgs.length < 2) {
       track.hidden = true;
       trackLabel.hidden = true;
       return;
@@ -2267,7 +2265,7 @@ export async function createChatView(
     track.hidden = false;
     const totalH = scroll.scrollHeight;
 
-    for (const msgEl of toShow) {
+    for (const msgEl of userMsgs) {
       const dot = createElement('button', 'chat-thread-track__dot');
       dot.type = 'button';
       const pct = totalH > 0 ? (msgEl.offsetTop / totalH) * 100 : 0;
@@ -2501,9 +2499,9 @@ export async function createChatView(
     }
     if (assistantGroup) renderGroups.push({ type: 'assistant', items: assistantGroup });
 
-    const _providerIconByLabel = new Map(payload.providers.map((p) => [p.label, p.iconPath ?? '']));
+    const providerIconByLabel = new Map(payload.providers.map((p) => [p.label, p.iconPath ?? '']));
     const getProviderIcon = (message) =>
-      (message.providerLabel ? (_providerIconByLabel.get(message.providerLabel) ?? '') : '') ||
+      (message.providerLabel ? (providerIconByLabel.get(message.providerLabel) ?? '') : '') ||
       activeProvider?.iconPath ||
       '';
 
@@ -4420,8 +4418,6 @@ export async function createChatView(
   // When the user saves a new default model, update the active provider/model
   // and the composer button label so the UI stays in sync without requiring a
   // full reload. The flag is kept for future policy decisions around in-chat picks.
-  let _userOverrodeModel = Boolean(appSettings?.defaultModel);
-
   function applyDefaultModelFromSettings(settings) {
     const dm = settings?.defaultModel;
     const dmProvider = dm?.providerId
@@ -4453,9 +4449,6 @@ export async function createChatView(
 
   window.addEventListener(EVENTS.APP_SETTINGS_CHANGED, (event) => {
     currentAppSettings = event.detail ?? currentAppSettings;
-    // Always honour an explicit change from settings — it means the user
-    // intentionally picked a model there, so override any in-chat selection.
-    _userOverrodeModel = false;
     applyDefaultModelFromSettings(event.detail);
     if (currentAppSettings?.autoMemoryUpdates === false) {
       cancelScheduledMemorySync();
