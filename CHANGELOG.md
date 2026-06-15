@@ -6,6 +6,21 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.615.0] - 2026-06-15
+
+* Improved AI Execution
+* Added Preview button To Markdow Render
+* Updated the prompt for file related changes
+* Updated AI Models
+* Updated Docs
+* Updated AI Models
+* Added the ability to import data during setup process
+* Updated AI Models
+* Removed Tray Service
+* Updated AI Models
+
+---
+
 ## [2026.614.2] - 2026-06-14
 
 * Updated Trayservice

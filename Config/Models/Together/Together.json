@@ -105,6 +105,10 @@
       "name": "Qwen3.6 Plus",
       "context_window": 1000000
     },
+    "Qwen/Qwen3.7-Plus": {
+      "name": "Qwen3.7 Plus",
+      "context_window": 1000000
+    },
     "Qwen/Qwen3-VL-32B-Instruct": {
       "name": "Qwen3-VL-32B-Instruct",
       "context_window": 262144
@@ -544,10 +548,6 @@
       "name": "Qwen3 14B",
       "context_window": 2048
     },
-    "moonshotai/Kimi-K2.5-fp4": {
-      "name": "Kimi K2.5 FP4",
-      "context_window": 262144
-    },
     "Qwen/Qwen2.5-72B-Instruct-Turbo": {
       "name": "Qwen 2.5 72B Turbo",
       "description": "Alibaba's Qwen 2.5 72B — strong at math, coding, and multilingual tasks with a 128K context window",
@@ -671,6 +671,10 @@
       "name": "Nvidia Nemotron 3 Nano 30B A3b Bf16",
       "context_window": 262144
     },
+    "moonshotai/Kimi-K2.5-fp4": {
+      "name": "Kimi K2.5 FP4",
+      "context_window": 262144
+    },
     "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP4": {
       "name": "Llama 4 Maverick 17B 128E Instruct Nvfp4",
       "context_window": 1048576
@@ -732,5 +736,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-15T02:24:38.813Z"
+  "_syncedAt": "2026-06-15T15:40:58.362Z"
 }

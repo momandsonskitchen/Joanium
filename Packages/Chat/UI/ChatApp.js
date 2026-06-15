@@ -1022,7 +1022,7 @@ export async function createChatView(
         branch: nextBranch,
         allowRisky: true,
       });
-      appendGitResultMessage(
+      await appendGitResultMessage(
         resultLabel,
         commandLabel,
         !result?.ok || result.exitCode !== 0
@@ -1270,7 +1270,7 @@ export async function createChatView(
     }
   }
 
-  function appendGitResultMessage(label, command, result) {
+  async function appendGitResultMessage(label, command, result) {
     const rawOutput =
       [result?.stdout, result?.stderr]
         .map((value) => String(value ?? '').trim())
@@ -1300,7 +1300,7 @@ export async function createChatView(
 
     renderThread();
     scheduleScrollToBottom();
-    void saveCurrentSession();
+    await saveCurrentSession();
   }
 
   function normalizeGeneratedCommitMessage(text = '') {
@@ -1428,7 +1428,7 @@ export async function createChatView(
         allowRisky: true,
       });
       clearTimeout(hooksTimer);
-      appendGitResultMessage(
+      await appendGitResultMessage(
         strings.git.resultLabels.commit,
         strings.git.commands.commit,
         commitResult,
@@ -1449,7 +1449,7 @@ export async function createChatView(
           workingDir,
           allowRisky: true,
         });
-        appendGitResultMessage(
+        await appendGitResultMessage(
           strings.git.resultLabels.push,
           strings.git.commands.push,
           followUpResult,
@@ -1461,7 +1461,7 @@ export async function createChatView(
           workingDir,
           allowRisky: true,
         });
-        appendGitResultMessage(
+        await appendGitResultMessage(
           strings.git.resultLabels.sync,
           strings.git.commands.sync,
           followUpResult,
@@ -1518,7 +1518,7 @@ export async function createChatView(
         workingDir,
         allowRisky: action === 'pull' || action === 'push' || action === 'sync',
       });
-      appendGitResultMessage(
+      await appendGitResultMessage(
         strings.git.resultLabels[action],
         strings.git.commands[action],
         result,
@@ -2080,7 +2080,7 @@ export async function createChatView(
     return false;
   }
 
-  function stopStream() {
+  async function stopStream() {
     generationToken += 1;
     clearTimeout(diagTimer);
     diagTimer = null;
@@ -2107,7 +2107,7 @@ export async function createChatView(
     accText = '';
     accThinking = '';
     isSending = false;
-    void saveCurrentSession();
+    await saveCurrentSession();
     syncComposer();
     renderThread();
   }
@@ -3558,7 +3558,7 @@ export async function createChatView(
     );
 
     streamDisposers.push(
-      onIpc('chat:stream-done', (meta) => {
+      onIpc('chat:stream-done', async (meta) => {
         if (!isCurrentStreamEvent(meta)) return;
         // Cancel any pending rAF — we are about to do a final authoritative
         // render that supersedes any in-flight streaming frame.
@@ -3601,7 +3601,7 @@ export async function createChatView(
             modelLabel: meta?.modelLabel ?? activeModelLabel,
           }));
           isSending = false;
-          void saveCurrentSession();
+          await saveCurrentSession();
           void playCompletionSound(generationStartTime);
           syncComposer();
           renderThread();
@@ -3633,7 +3633,7 @@ export async function createChatView(
 
           if (terminalAction.unsupported) {
             isSending = false;
-            void saveCurrentSession();
+            await saveCurrentSession();
             void playCompletionSound(generationStartTime);
             syncComposer();
             return;
@@ -3691,7 +3691,7 @@ export async function createChatView(
           modelLabel: meta?.modelLabel ?? activeModelLabel,
         }));
         isSending = false;
-        void saveCurrentSession();
+        await saveCurrentSession();
         void playCompletionSound(generationStartTime);
         syncComposer();
         renderThread();
@@ -4144,9 +4144,9 @@ export async function createChatView(
   const sendLabel = createElement('span', 'chat-composer__send-label');
   sendLabel.hidden = true;
   sendButton.append(createIcon('send', 'chat-composer__send-icon'), sendLabel);
-  sendButton.addEventListener('click', () => {
+  sendButton.addEventListener('click', async () => {
     if (isSending) {
-      stopStream();
+      await stopStream();
     } else {
       void submitPrompt();
     }
