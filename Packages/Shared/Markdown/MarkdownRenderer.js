@@ -16,6 +16,7 @@
 
 import { iconMarkup } from '../Icons/Icons.js';
 import { invokeIpc } from '../Ipc/RendererIpc.js';
+import { copyToClipboard } from '../Utils/DomUtils.js';
 import strings from '../I18n/en.js';
 
 const codeBlockStrings = strings.markdown.codeBlock;
@@ -300,17 +301,14 @@ function buildDom(blocks) {
         const copyLabel = copyBtn.querySelector('span');
         copyLabel.textContent = codeBlockStrings.copy;
         copyBtn.addEventListener('click', () => {
-          navigator.clipboard
-            .writeText(block.code)
-            .then(() => {
-              copyLabel.textContent = codeBlockStrings.copied;
-              copyBtn.classList.add('md-codeblock__btn--success');
-              setTimeout(() => {
-                copyLabel.textContent = codeBlockStrings.copy;
-                copyBtn.classList.remove('md-codeblock__btn--success');
-              }, 1800);
-            })
-            .catch(() => {});
+          copyToClipboard(block.code).then(() => {
+            copyLabel.textContent = codeBlockStrings.copied;
+            copyBtn.classList.add('md-codeblock__btn--success');
+            setTimeout(() => {
+              copyLabel.textContent = codeBlockStrings.copy;
+              copyBtn.classList.remove('md-codeblock__btn--success');
+            }, 1800);
+          });
         });
 
         // Download button
