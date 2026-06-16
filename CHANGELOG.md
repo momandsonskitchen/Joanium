@@ -6,6 +6,18 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.616.0] - 2026-06-16
+
+* Updated AI Models
+* Chore(deps-dev): Bump form-data
+* Chore(deps): Bump tmp in the npm_and_yarn group across 1 directory
+* Fixed Chat History Duplicate Issue
+* Updated AI Models
+* Chore(deps-dev): Bump jscpd from 5.0.8 to 5.0.9
+* Chore(deps-dev): Bump eslint from 10.4.1 to 10.5.0
+
+---
+
 ## [2026.615.0] - 2026-06-15
 
 * Improved AI Execution
