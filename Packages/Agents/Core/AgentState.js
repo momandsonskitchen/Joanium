@@ -1,8 +1,13 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
+import { mkdir, readFile, readdir, unlink, rm } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getResourcePath, getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { readJsonDirectory } from '../Utils.js';
+import {
+  listJsonDirectory,
+  readJsonFile,
+  writeJsonFile,
+} from '../../Shared/Storage/JsonFileStore.js';
+import { sortByDate } from '../../Shared/Utils/DateUtils.js';
 
 // ---------------------------------------------------------------------------
 // AgentState — CRUD for user-defined scheduled agents.
@@ -56,12 +61,12 @@ export function createAgentStateManager({ rootDirectory }) {
         updatedAt: now,
         lastRunAt: agent.lastRunAt ?? null,
       };
-      await writeFile(agentFilePath(safeId), `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+      await writeJsonFile(agentFilePath(safeId), record);
       return record;
     },
 
     async listAgents() {
-      const agents = await readJsonDirectory(agentsDirectory, (data) => ({
+      const agents = await listJsonDirectory(agentsDirectory, (data) => ({
         id: data.id,
         name: data.name,
         avatar: data.avatar ?? null,
@@ -74,10 +79,7 @@ export function createAgentStateManager({ rootDirectory }) {
         lastRunAt: data.lastRunAt ?? null,
       }));
 
-      return agents.sort(
-        (a, b) =>
-          new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0),
-      );
+      return sortByDate(agents, 'updatedAt', 'createdAt');
     },
 
     async loadAgent(id) {
@@ -91,11 +93,11 @@ export function createAgentStateManager({ rootDirectory }) {
 
     async markAgentRun(id) {
       try {
-        const raw = await readFile(agentFilePath(id), 'utf8');
-        const record = JSON.parse(raw);
+        const record = await readJsonFile(agentFilePath(id));
+        if (!record) return null;
         record.lastRunAt = new Date().toISOString();
         record.updatedAt = record.lastRunAt;
-        await writeFile(agentFilePath(id), `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+        await writeJsonFile(agentFilePath(id), record);
         return record;
       } catch {
         return null;
@@ -164,10 +166,7 @@ export function createAgentStateManager({ rootDirectory }) {
         }
       }
 
-      return runs.sort(
-        (a, b) =>
-          new Date(b.startedAt ?? b.finishedAt ?? 0) - new Date(a.startedAt ?? a.finishedAt ?? 0),
-      );
+      return sortByDate(runs, 'startedAt', 'finishedAt');
     },
 
     async clearRuns() {
@@ -194,8 +193,8 @@ export function createAgentStateManager({ rootDirectory }) {
         if (!file.endsWith('.json')) continue;
         const filePath = path.join(runsDirectory, file);
         try {
-          const raw = await readFile(filePath, 'utf8');
-          const run = JSON.parse(raw);
+          const run = await readJsonFile(filePath);
+          if (!run) continue;
 
           if (run.status !== 'running' && run.status !== 'queued') continue;
 
@@ -211,7 +210,7 @@ export function createAgentStateManager({ rootDirectory }) {
             error: reason,
           };
 
-          await writeFile(filePath, `${JSON.stringify(recovered, null, 2)}\n`, 'utf8');
+          await writeJsonFile(filePath, recovered);
         } catch {
           // Skip corrupt or unreadable run files.
         }

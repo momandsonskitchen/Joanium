@@ -1,6 +1,10 @@
 import path from 'node:path';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../Storage/ResourcePaths.js';
+import {
+  readJsonFile as readJsonFileShared,
+  writeJsonFile as writeJsonFileShared,
+} from '../Storage/JsonFileStore.js';
 
 // ---------------------------------------------------------------------------
 // Token estimation
@@ -143,20 +147,8 @@ function sanitizeRawStore(raw) {
 // File I/O helpers
 // ---------------------------------------------------------------------------
 
-async function readJsonFile(filePath) {
-  try {
-    const contents = await readFile(filePath, 'utf8');
-    if (!contents.trim()) return null;
-    return JSON.parse(contents);
-  } catch {
-    return null;
-  }
-}
-
-async function writeJsonFile(filePath, data) {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
-}
+const readJsonFile = readJsonFileShared;
+const writeJsonFile = writeJsonFileShared;
 
 // ---------------------------------------------------------------------------
 // Read all monthly Daily.json files across the year/month tree.

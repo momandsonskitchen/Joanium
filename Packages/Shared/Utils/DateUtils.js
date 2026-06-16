@@ -36,3 +36,21 @@ export function formatRelativeSessionTime(value) {
   }
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
+
+/**
+ * Sorts an array of objects by date fields (most recent first).
+ * Checks updatedAt, createdAt, and any additional fields in order.
+ */
+export function sortByDate(items, ...dateFields) {
+  const fields = dateFields.length > 0 ? dateFields : ['updatedAt', 'createdAt'];
+  return [...items].sort((a, b) => {
+    for (const field of fields) {
+      const aVal = a?.[field];
+      const bVal = b?.[field];
+      if (aVal && bVal) return new Date(bVal) - new Date(aVal);
+      if (aVal) return -1;
+      if (bVal) return 1;
+    }
+    return 0;
+  });
+}

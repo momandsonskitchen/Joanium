@@ -18,10 +18,11 @@
  */
 
 import path from 'node:path';
-import { readFile, rename, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { app } from 'electron';
 import { fetchProviderModels } from './ModelFetcher.js';
 import { getResourcePath, readJsonResource } from '../Storage/ResourcePaths.js';
+import { writeJsonFile } from '../Storage/JsonFileStore.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -92,9 +93,7 @@ export async function syncProvider(rootDirectory, providerId, credentials) {
       _syncedAt: new Date().toISOString(),
     };
 
-    const tmp = `${jsonPath}.tmp`;
-    await writeFile(tmp, `${JSON.stringify(updated, null, 2)}\n`, 'utf8');
-    await rename(tmp, jsonPath);
+    await writeJsonFile(jsonPath, updated);
   } catch {
     // Silently ignore — never crash the app over model sync
   }

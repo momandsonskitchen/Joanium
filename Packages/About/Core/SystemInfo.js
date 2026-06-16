@@ -1,7 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { readJsonFile, writeJsonFile } from '../../Shared/Storage/JsonFileStore.js';
 
 function resolveOsName(platform) {
   if (platform === 'darwin') return 'macOS';
@@ -24,17 +24,11 @@ function getSystemInfoFile(rootDirectory) {
 
 async function persistSystemInfo(rootDirectory, info) {
   const filePath = getSystemInfoFile(rootDirectory);
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(info, null, 2)}\n`, 'utf8');
+  await writeJsonFile(filePath, info);
 }
 
 export async function readCachedSystemInfo(rootDirectory) {
-  try {
-    const raw = await readFile(getSystemInfoFile(rootDirectory), 'utf8');
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return readJsonFile(getSystemInfoFile(rootDirectory));
 }
 
 export async function collectSystemInfo(rootDirectory) {

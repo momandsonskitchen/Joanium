@@ -2,6 +2,8 @@ import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink, rm, copyFile } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
+import { sortByDate } from '../../Shared/Utils/DateUtils.js';
 
 export function createProjectStateManager({ rootDirectory }) {
   const projectsDirectory = path.join(getWritableDataDirectory(rootDirectory), 'Projects');
@@ -47,7 +49,8 @@ export function createProjectStateManager({ rootDirectory }) {
       }
 
       const filePath = path.join(projectDir, 'Index.json');
-      await writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+      await mkdir(path.dirname(filePath), { recursive: true });
+      await writeFile(filePath, serializeJson(record), 'utf8');
       return record;
     },
 
@@ -90,10 +93,7 @@ export function createProjectStateManager({ rootDirectory }) {
         }
       }
 
-      return projects.sort(
-        (a, b) =>
-          new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0),
-      );
+      return sortByDate(projects, 'updatedAt', 'createdAt');
     },
 
     async loadProject(id) {

@@ -6,6 +6,7 @@ export { appendTimestampedLog, createTimestampedFileLogger } from './Debug/FileL
 export {
   formatRelativeSessionTime,
   getRelativeDayGroup,
+  sortByDate,
   startOfLocalDay,
   toIso,
   todayDateString,
@@ -41,6 +42,14 @@ export {
 } from './ProviderCatalog/ProviderUtils.js';
 export { createEnqueue } from './Utils/AsyncUtils.js';
 export { readJsonDirectory } from './Storage/JsonDirectory.js';
+export {
+  deleteJsonFile,
+  jsonFilePath,
+  listJsonDirectory,
+  readJsonFile,
+  serializeJson,
+  writeJsonFile,
+} from './Storage/JsonFileStore.js';
 export { createProviderIcon } from './Icons/Icons.js';
 export { createSecretField } from './UI/SecretField.js';
 export { EVENTS, dispatchEvent } from './Events/RendererEvents.js';

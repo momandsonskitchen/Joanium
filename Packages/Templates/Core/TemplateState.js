@@ -1,7 +1,14 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
-import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
+import {
+  deleteJsonFile,
+  jsonFilePath,
+  listJsonDirectory,
+  readJsonFile,
+  writeJsonFile,
+} from '../../Shared/Storage/JsonFileStore.js';
+import { sortByDate } from '../../Shared/Utils/DateUtils.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 
 // ---------------------------------------------------------------------------
 // TemplateState — CRUD for user-defined prompt templates.
@@ -18,8 +25,6 @@ export function createTemplateStateManager({ rootDirectory }) {
       const safeId = sanitizeFileStem(template.id);
       if (!safeId) return null;
 
-      await mkdir(templatesDirectory, { recursive: true });
-      const filePath = path.join(templatesDirectory, `${safeId}.json`);
       const now = new Date().toISOString();
       const record = {
         id: safeId,
@@ -29,57 +34,36 @@ export function createTemplateStateManager({ rootDirectory }) {
         createdAt: template.createdAt ?? now,
         updatedAt: now,
       };
-      await writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+
+      const filePath = jsonFilePath(templatesDirectory, safeId);
+      await writeJsonFile(filePath, record);
       return record;
     },
 
     async listTemplates() {
-      let files;
-      try {
-        files = await readdir(templatesDirectory);
-      } catch {
-        return [];
-      }
+      const templates = await listJsonDirectory(templatesDirectory, (data) => ({
+        id: data.id,
+        name: data.name,
+        command: data.command,
+        prompt: data.prompt,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      }));
 
-      const templates = [];
-
-      for (const file of files) {
-        if (!file.endsWith('.json')) continue;
-        try {
-          const raw = await readFile(path.join(templatesDirectory, file), 'utf8');
-          const template = JSON.parse(raw);
-          templates.push({
-            id: template.id,
-            name: template.name,
-            command: template.command,
-            prompt: template.prompt,
-            createdAt: template.createdAt,
-            updatedAt: template.updatedAt,
-          });
-        } catch {
-          // Skip corrupt or unreadable files silently.
-        }
-      }
-
-      return templates.sort(
-        (a, b) =>
-          new Date(b.updatedAt ?? b.createdAt ?? 0) - new Date(a.updatedAt ?? a.createdAt ?? 0),
-      );
+      return sortByDate(templates, 'updatedAt', 'createdAt');
     },
 
     async loadTemplate(id) {
       const safeId = sanitizeFileStem(id);
       if (!safeId) throw new Error('A valid template id is required.');
-      const filePath = path.join(templatesDirectory, `${safeId}.json`);
-      const raw = await readFile(filePath, 'utf8');
-      return JSON.parse(raw);
+      const filePath = jsonFilePath(templatesDirectory, safeId);
+      const template = await readJsonFile(filePath);
+      if (!template) throw new Error('Template not found.');
+      return template;
     },
 
     async deleteTemplate(id) {
-      const safeId = sanitizeFileStem(id);
-      if (!safeId) throw new Error('A valid template id is required.');
-      const filePath = path.join(templatesDirectory, `${safeId}.json`);
-      await unlink(filePath);
+      await deleteJsonFile(templatesDirectory, id);
     },
   };
 }

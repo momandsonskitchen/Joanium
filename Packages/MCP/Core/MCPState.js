@@ -1,7 +1,7 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { readJsonFile, writeJsonFile } from '../../Shared/Storage/JsonFileStore.js';
 import { createSlugId, normalizeString } from '../../Shared/Utils/StringUtils.js';
 
 const VALID_TRANSPORTS = new Set(['stdio', 'http']);
@@ -55,23 +55,13 @@ export function createMCPStateManager({ rootDirectory }) {
   const serversFilePath = path.join(getWritableDataDirectory(rootDirectory), 'MCPServers.json');
 
   async function readServers() {
-    try {
-      const raw = await readFile(serversFilePath, 'utf8');
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed?.servers) ? parsed.servers.map(sanitizeServerConfig) : [];
-    } catch {
-      return [];
-    }
+    const data = await readJsonFile(serversFilePath, { defaultValue: { servers: [] } });
+    return Array.isArray(data?.servers) ? data.servers.map(sanitizeServerConfig) : [];
   }
 
   async function writeServers(servers) {
     const safeServers = Array.isArray(servers) ? servers.map(sanitizeServerConfig) : [];
-    await mkdir(path.dirname(serversFilePath), { recursive: true });
-    await writeFile(
-      serversFilePath,
-      `${JSON.stringify({ servers: safeServers }, null, 2)}\n`,
-      'utf8',
-    );
+    await writeJsonFile(serversFilePath, { servers: safeServers });
     return safeServers;
   }
 
