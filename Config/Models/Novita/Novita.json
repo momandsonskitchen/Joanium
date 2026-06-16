@@ -57,6 +57,15 @@
         "text": true
       }
     },
+    "zai-org/glm-5.2": {
+      "name": "GLM 5.2",
+      "description": "GLM-5.2 is Z.AI's latest flagship model, meticulously engineered for long-horizon autonomous tasks. Capable of working continuously on a single assignment for up to 8 hours, it autonomously manages the entire workflow—from initial planning and execution to iterative optimization and the delivery of ",
+      "context_window": 1048576,
+      "max_output": 163840,
+      "inputs": {
+        "text": true
+      }
+    },
     "stepfun/step-3.7-flash": {
       "name": "Step-3.7-Flash",
       "description": "Step-3.7-Flash is StepFun's fast reasoning model with 256K context window, three-level reasoning  effort control (low/medium/high), strong multi-step  tool calling and agent capabilities.",
@@ -1285,5 +1294,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-16T04:56:53.588Z"
+  "_syncedAt": "2026-06-16T14:01:21.330Z"
 }
