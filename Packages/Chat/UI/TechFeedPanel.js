@@ -1,5 +1,6 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
+import { getConnectorIconPath } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
 
 const HN_API = 'https://hacker-news.firebaseio.com/v0';
 const HN_TOP_STORIES = `${HN_API}/topstories.json`;
@@ -79,7 +80,7 @@ async function fetchHackerNews(strings) {
       title: item.title,
       description: safeHostname(item.url),
       url: item.url,
-      image: '../../../Assets/Icons/HackerNews.png',
+      image: getConnectorIconPath('hackernews'),
       meta: joinMeta(strings, [
         formatMeta(strings, 'points', { count: formatCount(item.score) }),
         formatMeta(strings, 'comments', { count: formatCount(item.descendants) }),
