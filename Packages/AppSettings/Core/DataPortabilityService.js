@@ -3,6 +3,7 @@ import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import JSZip from 'jszip';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
 import { createDefaultUserState } from '../../Shared/UserData/UserData.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -484,7 +485,7 @@ export async function importData(rootDirectory) {
       };
 
       await mkdir(path.dirname(destPath), { recursive: true });
-      await writeFile(destPath, `${JSON.stringify(restoredSecurity, null, 2)}\n`, 'utf8');
+      await writeFile(destPath, serializeJson(restoredSecurity), 'utf8');
       continue;
     }
 
@@ -504,7 +505,7 @@ export async function importData(rootDirectory) {
       }
       const merged = mergeUserJson(currentData, importedData);
       await mkdir(path.dirname(destPath), { recursive: true });
-      await writeFile(destPath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
+      await writeFile(destPath, serializeJson(merged), 'utf8');
       continue;
     }
 
@@ -524,7 +525,7 @@ export async function importData(rootDirectory) {
       }
       const merged = mergeChannelsJson(currentData, importedData);
       await mkdir(path.dirname(destPath), { recursive: true });
-      await writeFile(destPath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
+      await writeFile(destPath, serializeJson(merged), 'utf8');
       continue;
     }
 
@@ -573,7 +574,7 @@ export async function importData(rootDirectory) {
       const avatarPath = String(userState.profile?.avatarPath ?? '').trim();
       if (!avatarPath || !isInsideDirectory(dataDir, avatarPath)) {
         userState.profile = { ...(userState.profile ?? {}), avatarPath: writtenAvatarPath };
-        await writeFile(userJsonPath, `${JSON.stringify(userState, null, 2)}\n`, 'utf8');
+        await writeFile(userJsonPath, serializeJson(userState), 'utf8');
       }
     } catch {
       // Non-fatal: User.json may not exist yet or avatarPath was already set correctly.

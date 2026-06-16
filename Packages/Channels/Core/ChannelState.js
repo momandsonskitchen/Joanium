@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
 import { deepClone } from '../../Shared/Utils/ValueUtils.js';
 import { normalizeString } from '../../Shared/Utils/StringUtils.js';
 import { toIso } from '../../Shared/Utils/DateUtils.js';
@@ -203,11 +204,7 @@ export function createChannelStateManager({ rootDirectory }) {
 
   async function writeChannels(data) {
     await mkdir(path.dirname(channelsFilePath), { recursive: true });
-    await writeFile(
-      channelsFilePath,
-      `${JSON.stringify(normalizeChannels(data), null, 2)}\n`,
-      'utf8',
-    );
+    await writeFile(channelsFilePath, serializeJson(normalizeChannels(data)), 'utf8');
   }
 
   async function readChannelMessages(channelName) {
@@ -331,7 +328,7 @@ export function createChannelStateManager({ rootDirectory }) {
 
       const dateStr = new Date(normalized.timestamp).toISOString().replace(/[:.]/g, '-');
       const filePath = path.join(dir, `${dateStr}.json`);
-      await writeFile(filePath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
+      await writeFile(filePath, serializeJson(normalized), 'utf8');
 
       return normalized;
     },

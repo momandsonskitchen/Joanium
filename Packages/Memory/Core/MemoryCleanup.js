@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 import { readTextResource, getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 import { extractJsonObject } from '../../Shared/Utils/StringUtils.js';
 import { todayDateString } from '../../Shared/Utils/DateUtils.js';
@@ -133,7 +134,7 @@ export function createMemoryCleanupService({
     }
 
     existing.push(dreamEntry);
-    await writeFile(dreamFile, JSON.stringify(existing, null, 2) + '\n', 'utf8');
+    await writeFile(dreamFile, serializeJson(existing), 'utf8');
   }
 
   async function listDreams() {

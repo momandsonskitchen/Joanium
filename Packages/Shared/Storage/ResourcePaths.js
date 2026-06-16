@@ -2,6 +2,7 @@ import path from 'node:path';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { app } from 'electron';
+import { serializeJson } from './JsonFileStore.js';
 
 const EXTRA_RESOURCE_ROOTS = new Set(['Data', 'Personas', 'Skills']);
 
@@ -169,7 +170,7 @@ export async function writeJsonResource(rootDirectory, resourceName, fileName, d
   const tempFilePath = `${filePath}.tmp`;
 
   await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(tempFilePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+  await writeFile(tempFilePath, serializeJson(data), 'utf8');
   await rename(tempFilePath, filePath);
 
   return filePath;

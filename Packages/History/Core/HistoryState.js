@@ -3,6 +3,7 @@ import path from 'node:path';
 import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
 
 // ---------------------------------------------------------------------------
 // createHistoryStateManager
@@ -97,7 +98,7 @@ export function createHistoryStateManager({ rootDirectory }) {
     };
 
     const record = withPersonalMemoryState(merged, existing);
-    await writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+    await writeFile(filePath, serializeJson(record), 'utf8');
     return record;
   }
 
@@ -153,7 +154,7 @@ export function createHistoryStateManager({ rootDirectory }) {
             const record = await readSessionFile(filePath);
             record.forkedFromId = null;
             record.forkedFromTitle = null;
-            await writeFile(filePath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+            await writeFile(filePath, serializeJson(record), 'utf8');
           } catch {
             // Best-effort — ignore write failures.
           }
@@ -199,7 +200,7 @@ export function createHistoryStateManager({ rootDirectory }) {
     const session = await readSessionFile(filePath);
     session.title = String(newTitle).trim() || session.title;
     session.updatedAt = new Date().toISOString();
-    await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
+    await writeFile(filePath, serializeJson(session), 'utf8');
     return session;
   }
 
@@ -207,7 +208,7 @@ export function createHistoryStateManager({ rootDirectory }) {
     const filePath = getSessionFilePath(id, projectId);
     const session = await readSessionFile(filePath);
     session.pinned = Boolean(pinned);
-    await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
+    await writeFile(filePath, serializeJson(session), 'utf8');
     return session;
   }
 
@@ -272,7 +273,7 @@ export function createHistoryStateManager({ rootDirectory }) {
     session.personalMemoryPending = false;
     session.personalMemorySyncedAt = new Date().toISOString();
     session.personalMemorySyncedFingerprint = nextFingerprint;
-    await writeFile(filePath, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
+    await writeFile(filePath, serializeJson(session), 'utf8');
     return session;
   }
 
