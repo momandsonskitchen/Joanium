@@ -38,7 +38,6 @@ export function createMemoryCleanupService({
 }) {
   let started = false;
   let running = false;
-  let initialTimer = null;
   const pendingRequests = new Map();
 
   // Renderer-ready gate
@@ -222,7 +221,7 @@ export function createMemoryCleanupService({
 
   // ── Main cleanup orchestrator ───────────────────────────────────────────
 
-  async function runCleanup() {
+  async function runCleanup({ force = false } = {}) {
     if (running) {
       debugLog('MemoryCleanup', 'Skipped -- already running.');
       return;
@@ -238,6 +237,11 @@ export function createMemoryCleanupService({
     const user = await readUserState(rootDirectory);
     if (!user.appSettings?.defaultModel) {
       debugLog('MemoryCleanup', 'Skipped -- no default model configured.');
+      return;
+    }
+
+    if (!force && user.appSettings?.autoMemoryUpdates === false) {
+      debugLog('MemoryCleanup', 'Skipped -- auto memory updates is disabled.');
       return;
     }
 
@@ -310,18 +314,11 @@ export function createMemoryCleanupService({
     start() {
       if (started) return;
       started = true;
-      debugLog('MemoryCleanup', 'Service started -- will check in 30 seconds.');
-      initialTimer = setTimeout(() => {
-        runCleanup().catch((err) => {
-          debugLog('MemoryCleanup', 'Uncaught error in runCleanup:', err);
-        });
-      }, 30_000);
+      debugLog('MemoryCleanup', 'Service started.');
     },
 
     stop() {
       started = false;
-      if (initialTimer) clearTimeout(initialTimer);
-      initialTimer = null;
       debugLog('MemoryCleanup', 'Service stopped.');
     },
 

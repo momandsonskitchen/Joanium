@@ -70,7 +70,7 @@ export async function createPackage({ rootDirectory }) {
       },
       {
         channel: 'memory:run-cleanup',
-        handler: async () => cleanupService.runCleanup(),
+        handler: async () => cleanupService.runCleanup({ force: true }),
       },
       {
         channel: 'memory:list-dreams',

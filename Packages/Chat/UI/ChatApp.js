@@ -741,6 +741,7 @@ export async function createChatView(
     } finally {
       memorySyncRunning = false;
       hideMemorySyncIndicator();
+      invokeIpc('memory:run-cleanup').catch(() => {});
       if (!isSending) {
         scheduleMemorySync(90000);
       }
