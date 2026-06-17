@@ -6,6 +6,18 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.617.0] - 2026-06-17
+
+* feat: enhance memory cleanup service with forced cleanup option
+* feat: update model configurations across multiple providers
+* Updtaed AI Models
+* refactor: replace file read/write operations with JSON utility functions
+* Reused HackerNews Image
+* Created a shared function called - serializeJson
+* Updated AI Models
+
+---
+
 ## [2026.616.0] - 2026-06-16
 
 * Updated AI Models
