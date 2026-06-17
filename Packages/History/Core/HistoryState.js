@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import path from 'node:path';
-import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
+import { mkdir, readdir, unlink } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
+import { createUniqueId } from '../../Shared/Utils/StringUtils.js';
 
 // ---------------------------------------------------------------------------
 // createHistoryStateManager
@@ -61,8 +62,8 @@ export function createHistoryStateManager({ rootDirectory }) {
   }
 
   async function readSessionFile(filePath) {
-    const raw = await readFile(filePath, 'utf8');
-    return JSON.parse(raw);
+    const fileState = createSingleFileState(filePath, {});
+    return fileState.read();
   }
 
   async function readExistingSession(filePath) {
@@ -98,7 +99,8 @@ export function createHistoryStateManager({ rootDirectory }) {
     };
 
     const record = withPersonalMemoryState(merged, existing);
-    await writeFile(filePath, serializeJson(record), 'utf8');
+    const fileState = createSingleFileState(filePath, {});
+    await fileState.write(record);
     return record;
   }
 
@@ -154,7 +156,8 @@ export function createHistoryStateManager({ rootDirectory }) {
             const record = await readSessionFile(filePath);
             record.forkedFromId = null;
             record.forkedFromTitle = null;
-            await writeFile(filePath, serializeJson(record), 'utf8');
+            const fileState = createSingleFileState(filePath, {});
+            await fileState.write(record);
           } catch {
             // Best-effort — ignore write failures.
           }
@@ -200,7 +203,8 @@ export function createHistoryStateManager({ rootDirectory }) {
     const session = await readSessionFile(filePath);
     session.title = String(newTitle).trim() || session.title;
     session.updatedAt = new Date().toISOString();
-    await writeFile(filePath, serializeJson(session), 'utf8');
+    const fileState = createSingleFileState(filePath, {});
+    await fileState.write(session);
     return session;
   }
 
@@ -208,7 +212,8 @@ export function createHistoryStateManager({ rootDirectory }) {
     const filePath = getSessionFilePath(id, projectId);
     const session = await readSessionFile(filePath);
     session.pinned = Boolean(pinned);
-    await writeFile(filePath, serializeJson(session), 'utf8');
+    const fileState = createSingleFileState(filePath, {});
+    await fileState.write(session);
     return session;
   }
 
@@ -273,7 +278,8 @@ export function createHistoryStateManager({ rootDirectory }) {
     session.personalMemoryPending = false;
     session.personalMemorySyncedAt = new Date().toISOString();
     session.personalMemorySyncedFingerprint = nextFingerprint;
-    await writeFile(filePath, serializeJson(session), 'utf8');
+    const fileState = createSingleFileState(filePath, {});
+    await fileState.write(session);
     return session;
   }
 
@@ -298,7 +304,7 @@ export function createHistoryStateManager({ rootDirectory }) {
 
     const forkedMessages = allMessages.slice(0, clampedIndex);
     const now = new Date().toISOString();
-    const newId = `fork-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const newId = `fork-${createUniqueId()}`;
 
     const forked = {
       ...source,

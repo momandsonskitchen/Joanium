@@ -1,8 +1,8 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile, readdir, unlink, rm, copyFile } from 'node:fs/promises';
+import { mkdir, readdir, unlink, rm, copyFile } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
 import { sortByDate } from '../../Shared/Utils/DateUtils.js';
 
 export function createProjectStateManager({ rootDirectory }) {
@@ -49,8 +49,8 @@ export function createProjectStateManager({ rootDirectory }) {
       }
 
       const filePath = path.join(projectDir, 'Index.json');
-      await mkdir(path.dirname(filePath), { recursive: true });
-      await writeFile(filePath, serializeJson(record), 'utf8');
+      const fileState = createSingleFileState(filePath, {});
+      await fileState.write(record);
       return record;
     },
 
@@ -75,8 +75,8 @@ export function createProjectStateManager({ rootDirectory }) {
         }
 
         try {
-          const raw = await readFile(projectPath, 'utf8');
-          const project = JSON.parse(raw);
+          const fileState = createSingleFileState(projectPath, {});
+          const project = await fileState.read();
           projects.push({
             id: project.id,
             name: project.name,
@@ -101,12 +101,12 @@ export function createProjectStateManager({ rootDirectory }) {
       if (!safeId) throw new Error('A valid project id is required.');
       const newPath = path.join(projectsDirectory, safeId, 'Index.json');
       try {
-        const raw = await readFile(newPath, 'utf8');
-        return JSON.parse(raw);
+        const fileState = createSingleFileState(newPath, {});
+        return fileState.read();
       } catch {
         const oldPath = path.join(projectsDirectory, `${safeId}.json`);
-        const raw = await readFile(oldPath, 'utf8');
-        return JSON.parse(raw);
+        const fileState = createSingleFileState(oldPath, {});
+        return fileState.read();
       }
     },
 

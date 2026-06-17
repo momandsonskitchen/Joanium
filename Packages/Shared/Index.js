@@ -16,6 +16,7 @@ export { computeDiff } from './Utils/DiffUtils.js';
 export {
   collapseWhitespace,
   createSlugId,
+  createUniqueId,
   escapeRegex,
   extractJsonObject,
   getNameInitials,
@@ -52,4 +53,5 @@ export {
 } from './Storage/JsonFileStore.js';
 export { createProviderIcon } from './Icons/Icons.js';
 export { createSecretField } from './UI/SecretField.js';
+export { createSingleFileState } from './Storage/SingleFileState.js';
 export { EVENTS, dispatchEvent } from './Events/RendererEvents.js';

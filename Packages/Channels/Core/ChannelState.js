@@ -1,9 +1,9 @@
 import path from 'node:path';
-import { mkdir, readFile, writeFile, readdir, unlink, rm } from 'node:fs/promises';
+import { readdir, unlink, rm } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
 import { deepClone } from '../../Shared/Utils/ValueUtils.js';
-import { normalizeString } from '../../Shared/Utils/StringUtils.js';
+import { createUniqueId, normalizeString } from '../../Shared/Utils/StringUtils.js';
 import { toIso } from '../../Shared/Utils/DateUtils.js';
 
 const DEFAULT_CHANNELS = Object.freeze({
@@ -73,7 +73,7 @@ const CHANNEL_NAMES = Object.keys(DEFAULT_CHANNELS);
 const MESSAGE_LIMIT = 500;
 
 function createMessageId() {
-  return `channel-message-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `channel-message-${createUniqueId()}`;
 }
 
 function normalizeChannels(candidate) {
@@ -192,19 +192,15 @@ export function createChannelStateManager({ rootDirectory }) {
   const dataDirectory = getWritableDataDirectory(rootDirectory);
   const channelsFilePath = path.join(dataDirectory, 'Channels.json');
   const messagesRootDir = path.join(dataDirectory, 'ChannelMessages');
+  const fileState = createSingleFileState(channelsFilePath, normalizeChannels(null));
 
   async function readChannels() {
-    try {
-      const raw = await readFile(channelsFilePath, 'utf8');
-      return normalizeChannels(JSON.parse(raw));
-    } catch {
-      return normalizeChannels(null);
-    }
+    const raw = await fileState.read();
+    return normalizeChannels(raw);
   }
 
   async function writeChannels(data) {
-    await mkdir(path.dirname(channelsFilePath), { recursive: true });
-    await writeFile(channelsFilePath, serializeJson(normalizeChannels(data)), 'utf8');
+    await fileState.write(normalizeChannels(data));
   }
 
   async function readChannelMessages(channelName) {
@@ -219,8 +215,8 @@ export function createChannelStateManager({ rootDirectory }) {
 
       for (const file of jsonFiles.slice(0, MESSAGE_LIMIT)) {
         try {
-          const raw = await readFile(path.join(dir, file), 'utf8');
-          const parsed = JSON.parse(raw);
+          const fileState = createSingleFileState(path.join(dir, file), {});
+          const parsed = await fileState.read();
           messages.push(sanitizeMessage(parsed));
         } catch {
           // Skip unreadable files
@@ -324,11 +320,10 @@ export function createChannelStateManager({ rootDirectory }) {
       }
 
       const dir = path.join(messagesRootDir, channelName);
-      await mkdir(dir, { recursive: true });
-
       const dateStr = new Date(normalized.timestamp).toISOString().replace(/[:.]/g, '-');
       const filePath = path.join(dir, `${dateStr}.json`);
-      await writeFile(filePath, serializeJson(normalized), 'utf8');
+      const fileState = createSingleFileState(filePath, {});
+      await fileState.write(normalized);
 
       return normalized;
     },
@@ -342,8 +337,8 @@ export function createChannelStateManager({ rootDirectory }) {
           for (const file of files) {
             if (!file.endsWith('.json')) continue;
             try {
-              const raw = await readFile(path.join(dir, file), 'utf8');
-              const parsed = JSON.parse(raw);
+              const fileState = createSingleFileState(path.join(dir, file), {});
+              const parsed = await fileState.read();
               if (parsed.id === safeId) {
                 await unlink(path.join(dir, file));
                 return { ok: true };

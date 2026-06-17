@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { readJsonFile, writeJsonFile } from '../../Shared/Storage/JsonFileStore.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
 import { createSlugId, normalizeString } from '../../Shared/Utils/StringUtils.js';
 
 const VALID_TRANSPORTS = new Set(['stdio', 'http']);
@@ -53,15 +53,16 @@ export function sanitizeServerConfig(candidate = {}) {
 
 export function createMCPStateManager({ rootDirectory }) {
   const serversFilePath = path.join(getWritableDataDirectory(rootDirectory), 'MCPServers.json');
+  const fileState = createSingleFileState(serversFilePath, { servers: [] });
 
   async function readServers() {
-    const data = await readJsonFile(serversFilePath, { defaultValue: { servers: [] } });
+    const data = await fileState.read();
     return Array.isArray(data?.servers) ? data.servers.map(sanitizeServerConfig) : [];
   }
 
   async function writeServers(servers) {
     const safeServers = Array.isArray(servers) ? servers.map(sanitizeServerConfig) : [];
-    await writeJsonFile(serversFilePath, { servers: safeServers });
+    await fileState.write({ servers: safeServers });
     return safeServers;
   }
 

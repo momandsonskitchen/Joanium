@@ -1,10 +1,10 @@
 import { BrowserWindow } from 'electron';
 import { randomUUID } from 'node:crypto';
-import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 import { readTextResource, getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 import { extractJsonObject } from '../../Shared/Utils/StringUtils.js';
 import { todayDateString } from '../../Shared/Utils/DateUtils.js';
@@ -122,19 +122,11 @@ export function createMemoryCleanupService({
     const dreamDir = path.join(getDreamsDirectory(), dateStr);
     const dreamFile = path.join(dreamDir, 'Dream.json');
 
-    await mkdir(dreamDir, { recursive: true });
-
-    let existing = [];
-    try {
-      const raw = await readFile(dreamFile, 'utf8');
-      const parsed = JSON.parse(raw);
-      existing = Array.isArray(parsed) ? parsed : [parsed];
-    } catch {
-      // File doesn't exist yet or is invalid — start fresh
-    }
-
-    existing.push(dreamEntry);
-    await writeFile(dreamFile, serializeJson(existing), 'utf8');
+    const fileState = createSingleFileState(dreamFile, []);
+    const existing = await fileState.read();
+    const entries = Array.isArray(existing) ? existing : [];
+    entries.push(dreamEntry);
+    await fileState.write(entries);
   }
 
   async function listDreams() {
@@ -155,13 +147,9 @@ export function createMemoryCleanupService({
 
   async function readDream(dateStr) {
     const dreamFile = path.join(getDreamsDirectory(), dateStr, 'Dream.json');
-    try {
-      const raw = await readFile(dreamFile, 'utf8');
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [parsed];
-    } catch {
-      return [];
-    }
+    const fileState = createSingleFileState(dreamFile, []);
+    const data = await fileState.read();
+    return Array.isArray(data) ? data : [data];
   }
 
   // ── Cleanup phases ──────────────────────────────────────────────────────

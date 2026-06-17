@@ -52,3 +52,7 @@ export function normalizeString(value) {
 export function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+export function createUniqueId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}

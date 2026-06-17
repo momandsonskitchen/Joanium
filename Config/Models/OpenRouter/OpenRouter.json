@@ -5,6 +5,18 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "z-ai/glm-5.2": {
+      "name": "Z.ai: GLM 5.2",
+      "description": "GLM-5.2 is Z.ai’s flagship model for the era of long-horizon tasks. With a truly usable 1M-token context window, it can handle project-level engineering context, execute long-running tasks more reliably, follow...",
+      "context_window": 1048576,
+      "pricing": {
+        "input": 1.4,
+        "output": 4.4
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "openrouter/fusion": {
       "name": "OpenRouter: Fusion",
       "description": "Fusion turns your prompt into a small multi-model deliberation. A panel of expert models (see below) analyzes your prompt in parallel with web search and web fetch enabled, then a...",
@@ -4233,5 +4245,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-16T14:00:55.899Z"
+  "_syncedAt": "2026-06-17T05:07:44.910Z"
 }

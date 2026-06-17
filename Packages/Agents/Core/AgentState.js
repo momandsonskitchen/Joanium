@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, readdir, unlink, rm } from 'node:fs/promises';
+import { mkdir, readdir, unlink, rm } from 'node:fs/promises';
 import { sanitizeFileStem } from '../../Shared/Storage/SafePath.js';
 import { getResourcePath, getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 import {
@@ -8,6 +8,7 @@ import {
   writeJsonFile,
 } from '../../Shared/Storage/JsonFileStore.js';
 import { sortByDate } from '../../Shared/Utils/DateUtils.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
 
 // ---------------------------------------------------------------------------
 // AgentState — CRUD for user-defined scheduled agents.
@@ -83,8 +84,8 @@ export function createAgentStateManager({ rootDirectory }) {
     },
 
     async loadAgent(id) {
-      const raw = await readFile(agentFilePath(id), 'utf8');
-      return JSON.parse(raw);
+      const fileState = createSingleFileState(agentFilePath(id), {});
+      return fileState.read();
     },
 
     async deleteAgent(id) {
@@ -119,8 +120,8 @@ export function createAgentStateManager({ rootDirectory }) {
         for (const agentFile of agentFiles) {
           if (!agentFile.endsWith('.json')) continue;
           try {
-            const raw = await readFile(path.join(agentsDirectory, agentFile), 'utf8');
-            const agent = JSON.parse(raw);
+            const fileState = createSingleFileState(path.join(agentsDirectory, agentFile), {});
+            const agent = await fileState.read();
             if (agent.id && agent.avatar) {
               agentAvatarMap.set(agent.id, agent.avatar);
             }
@@ -137,8 +138,8 @@ export function createAgentStateManager({ rootDirectory }) {
       for (const file of files) {
         if (!file.endsWith('.json')) continue;
         try {
-          const raw = await readFile(path.join(runsDirectory, file), 'utf8');
-          const run = JSON.parse(raw);
+          const fileState = createSingleFileState(path.join(runsDirectory, file), {});
+          const run = await fileState.read();
           const avatarFilename = agentAvatarMap.get(run.agentId) ?? run.agentAvatar ?? null;
           runs.push({
             id: run.id ?? file.replace(/\.json$/i, ''),

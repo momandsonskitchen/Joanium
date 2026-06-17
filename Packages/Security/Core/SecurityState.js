@@ -1,8 +1,7 @@
-import path from 'node:path';
 import { randomBytes, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
+import path from 'node:path';
 
 // ── Crypto constants ────────────────────────────────────────────────────────
 // 210,000 PBKDF2-SHA512 iterations — matches OWASP 2024 recommendation.
@@ -77,21 +76,9 @@ function createDefaultSecurity() {
 
 export function createSecurityStateManager({ rootDirectory }) {
   const securityFilePath = path.join(getWritableDataDirectory(rootDirectory), 'Security.json');
-
-  async function readSecurity() {
-    try {
-      const raw = await readFile(securityFilePath, 'utf8');
-      return { ...createDefaultSecurity(), ...JSON.parse(raw) };
-    } catch {
-      return createDefaultSecurity();
-    }
-  }
-
-  async function writeSecurity(securityState) {
-    await mkdir(path.dirname(securityFilePath), { recursive: true });
-    await writeFile(securityFilePath, serializeJson(securityState), 'utf8');
-    return securityState;
-  }
+  const state = createSingleFileState(securityFilePath, createDefaultSecurity());
+  const readSecurity = state.read;
+  const writeSecurity = state.write;
 
   return {
     async getStatus() {

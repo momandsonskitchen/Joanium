@@ -1,6 +1,7 @@
 import path from 'node:path';
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
+import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
 
 // ---------------------------------------------------------------------------
 // ReplayStore — derives step-level execution detail from a saved run log.
@@ -126,8 +127,8 @@ export function createReplayStore({ rootDirectory }) {
     // sanitization by AgentState, but we validate anyway).
     if (!runId || /[/\\]/.test(runId)) return null;
     const filePath = path.join(runsDir, `${runId}.json`);
-    const raw = await readFile(filePath, 'utf8');
-    return JSON.parse(raw);
+    const fileState = createSingleFileState(filePath, {});
+    return fileState.read();
   }
 
   return {
@@ -156,8 +157,8 @@ export function createReplayStore({ rootDirectory }) {
       for (const file of files) {
         if (!file.endsWith('.json')) continue;
         try {
-          const raw = await readFile(path.join(runsDir, file), 'utf8');
-          const run = JSON.parse(raw);
+          const fileState = createSingleFileState(path.join(runsDir, file), {});
+          const run = await fileState.read();
           results.push({
             runId: run.id ?? file.replace(/\.json$/, ''),
             agentId: run.agentId ?? '',
