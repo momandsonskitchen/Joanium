@@ -229,7 +229,16 @@
     },
     "parasail-gpt-oss-120b-fast": {
       "name": "Parasail Gpt OSS 120B FAST"
+    },
+    "parasail-glm-52": {
+      "name": "Parasail Glm 52"
+    },
+    "zai-org/GLM-5.2": {
+      "name": "GLM 5 2"
+    },
+    "zai-org/GLM-5.2-FP8": {
+      "name": "GLM 5 2 FP8"
     }
   },
-  "_syncedAt": "2026-06-16T14:01:35.155Z"
+  "_syncedAt": "2026-06-17T03:32:11.161Z"
 }

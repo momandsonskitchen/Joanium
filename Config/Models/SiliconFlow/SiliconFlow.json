@@ -5,6 +5,9 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "zai-org/GLM-5.2": {
+      "name": "GLM 5 2"
+    },
     "moonshotai/Kimi-K2.7-Code": {
       "name": "Kimi K2 7 Code"
     },
@@ -248,5 +251,5 @@
       "name": "CosyVoice2 0 5B"
     }
   },
-  "_syncedAt": "2026-06-16T14:01:14.578Z"
+  "_syncedAt": "2026-06-17T03:31:55.519Z"
 }

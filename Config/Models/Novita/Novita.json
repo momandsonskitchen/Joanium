@@ -5,6 +5,15 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "zai-org/glm-5.2": {
+      "name": "GLM 5.2",
+      "description": "GLM-5.2 is Z.AI's latest flagship model, meticulously engineered for long-horizon autonomous tasks. Capable of working continuously on a single assignment for up to 8 hours, it autonomously manages the entire workflow—from initial planning and execution to iterative optimization and the delivery of ",
+      "context_window": 1048576,
+      "max_output": 163840,
+      "inputs": {
+        "text": true
+      }
+    },
     "moonshotai/kimi-k2.7-code": {
       "name": "Kimi K2.7 Code",
       "description": "Kimi K2.7 Code is MoonshotAI's strongest coding & agentic model — a 1T-parameter MoE (32B activated) , 256K context and interleaved thinking with multi-step tool calling. It delivers major gains on long-horizon coding tasks while cutting thinking-token usage by ~30% vs K2.6, and accepts text, image ",
@@ -53,15 +62,6 @@
       "description": "We introduce DeepSeek-V3.2, a next-generation foundation model designed to unify high computational efficiency with state-of-the-art reasoning and agentic performance. DeepSeek-V3.2 is built upon three core technical breakthroughs:\n\n• DeepSeek Sparse Attention (DSA):\nA new highly efficient attention",
       "context_window": 163840,
       "max_output": 65536,
-      "inputs": {
-        "text": true
-      }
-    },
-    "zai-org/glm-5.2": {
-      "name": "GLM 5.2",
-      "description": "GLM-5.2 is Z.AI's latest flagship model, meticulously engineered for long-horizon autonomous tasks. Capable of working continuously on a single assignment for up to 8 hours, it autonomously manages the entire workflow—from initial planning and execution to iterative optimization and the delivery of ",
-      "context_window": 1048576,
-      "max_output": 163840,
       "inputs": {
         "text": true
       }
@@ -1294,5 +1294,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-16T14:01:21.330Z"
+  "_syncedAt": "2026-06-17T03:32:00.262Z"
 }

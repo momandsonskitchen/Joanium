@@ -1725,7 +1725,10 @@
     },
     "minimax-m3-t": {
       "name": "Minimax M3 T"
+    },
+    "glm-5.2": {
+      "name": "Glm 5 2"
     }
   },
-  "_syncedAt": "2026-06-16T14:01:31.686Z"
+  "_syncedAt": "2026-06-17T03:32:07.788Z"
 }
