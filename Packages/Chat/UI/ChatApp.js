@@ -2211,9 +2211,7 @@ export async function createChatView(
       composer.classList.toggle('chat-composer--enhancing', isEnhancing);
     }
 
-    if (composerField) {
-      composerField.disabled = isEnhancing;
-    }
+    composerField.disabled = isEnhancing;
   }
 
   function focusComposer() {
