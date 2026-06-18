@@ -6,6 +6,19 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.618.0] - 2026-06-18
+
+* Updated AI Models
+* feat: add channel constants and refactor channel handling in UI components
+* Chore(deps-dev): Bump jscpd from 5.0.9 to 5.0.10
+* Updated AI Models
+* Updated AI Models
+* Fix: Useless conditional #57
+* Chore(deps-dev): Bump electron from 42.4.0 to 42.4.1
+* Chore(deps-dev): Bump markdownlint-cli from 0.48.0 to 0.49.0
+
+---
+
 ## [2026.617.0] - 2026-06-17
 
 * feat: enhance memory cleanup service with forced cleanup option
