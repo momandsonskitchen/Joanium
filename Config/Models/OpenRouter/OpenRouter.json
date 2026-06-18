@@ -5,6 +5,44 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "google/gemini-3.1-flash-image": {
+      "name": "Google: Nano Banana 2 (Gemini 3.1 Flash Image)",
+      "description": "Gemini 3.1 Flash Image, a.k.a. \"Nano Banana 2,\" is Google’s latest state of the art image generation and editing model, delivering Pro-level visual quality at Flash speed. It combines advanced...",
+      "context_window": 131072,
+      "pricing": {
+        "input": 0.5,
+        "output": 3
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "google/gemini-3-pro-image": {
+      "name": "Google: Nano Banana Pro (Gemini 3 Pro Image)",
+      "description": "Nano Banana Pro is Google’s most advanced image-generation and editing model, built on Gemini 3 Pro. It extends the original Nano Banana with significantly improved multimodal reasoning, real-world grounding, and...",
+      "context_window": 65536,
+      "pricing": {
+        "input": 2,
+        "output": 12
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "cohere/north-mini-code:free": {
+      "name": "Cohere: North Mini Code (free)",
+      "description": "North Mini Code is Cohere's first agentic coding model and the debut of its North family. A sparse mixture-of-experts model with 30B total parameters and 3B active, it is optimized...",
+      "context_window": 256000,
+      "pricing": {
+        "input": 0,
+        "output": 0
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "z-ai/glm-5.2": {
       "name": "Z.ai: GLM 5.2",
       "description": "GLM-5.2 is Z.ai’s flagship model for the era of long-horizon tasks. With a truly usable 1M-token context window, it can handle project-level engineering context, execute long-running tasks more reliably, follow...",
@@ -1516,18 +1554,6 @@
       "inputs": {
         "text": true,
         "image": true
-      }
-    },
-    "xiaomi/mimo-v2-flash": {
-      "name": "Xiaomi: MiMo-V2-Flash",
-      "description": "MiMo-V2-Flash is an open-source foundation language model developed by Xiaomi. It is a Mixture-of-Experts model with 309B total parameters and 15B active parameters, adopting hybrid attention architecture. MiMo-V2-Flash supports a...",
-      "context_window": 262144,
-      "pricing": {
-        "input": 0.1,
-        "output": 0.3
-      },
-      "inputs": {
-        "text": true
       }
     },
     "nvidia/nemotron-3-nano-30b-a3b:free": {
@@ -4245,5 +4271,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-17T10:43:16.153Z"
+  "_syncedAt": "2026-06-18T06:58:29.612Z"
 }
