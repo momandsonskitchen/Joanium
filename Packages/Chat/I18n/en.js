@@ -22,7 +22,6 @@ const en = {
     responseError: 'Unable to get a response right now.',
     workedFor: 'Worked for {duration}',
     privateToggle: 'Toggle private chat',
-    privateLabel: 'Private',
     scrollToBottom: 'Scroll to bottom',
   },
   diag: {

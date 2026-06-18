@@ -4249,19 +4249,18 @@ export async function createChatView(
   const privateBtn = createElement('button', 'chat-private-btn');
   privateBtn.type = 'button';
   privateBtn.setAttribute('aria-label', strings.composer.privateToggle);
+  privateBtn.setAttribute('aria-pressed', 'false');
   const privateBtnIcon = document.createElement('img');
   privateBtnIcon.src = payload.privateIconUrl ?? '';
   privateBtnIcon.alt = '';
   privateBtnIcon.draggable = false;
   privateBtnIcon.className = 'chat-private-btn__icon';
-  privateBtn.append(
-    privateBtnIcon,
-    createElement('span', 'chat-private-btn__label', strings.composer.privateLabel),
-  );
+  privateBtn.append(privateBtnIcon);
   const originalGreeting = greeting;
   privateBtn.addEventListener('click', () => {
     isPrivate = !isPrivate;
     privateBtn.classList.toggle('chat-private-btn--active', isPrivate);
+    privateBtn.setAttribute('aria-pressed', String(isPrivate));
     if (title && messages.length === 0) {
       if (isPrivate) {
         title.textContent = getPrivateGreeting(firstName).replace(/\s(\S+\s*)$/, '\u00A0$1');
