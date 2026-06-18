@@ -52,6 +52,14 @@ export {
   writeJsonFile,
 } from './Storage/JsonFileStore.js';
 export { createProviderIcon } from './Icons/Icons.js';
+export {
+  formatPrice,
+  formatTokenCount,
+  hasModelInfo,
+  resolveContextWindow,
+  resolveMaxOutput,
+} from './Utils/ModelInfoUtils.js';
+export { CHANNEL_NAMES } from './Utils/ChannelConstants.js';
 export { createSecretField } from './UI/SecretField.js';
 export { createSingleFileState } from './Storage/SingleFileState.js';
 export { EVENTS, dispatchEvent } from './Events/RendererEvents.js';

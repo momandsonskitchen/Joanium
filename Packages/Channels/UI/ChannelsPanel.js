@@ -4,8 +4,7 @@ import { createIcon, createProviderIcon } from '../../Shared/Icons/Icons.js';
 import { createTwoColGrid } from '../../Shared/TwoColGrid/TwoColGrid.js';
 import { getConnectorIconPath } from '../../Shared/Icons/ConnectorIcons/ConnectorIcons.js';
 import { createSecretField } from '../../Shared/UI/SecretField.js';
-
-const CHANNEL_ORDER = ['telegram', 'whatsapp', 'discord', 'slack', 'zulip', 'mattermost', 'ntfy'];
+import { CHANNEL_NAMES } from '../../Shared/Utils/ChannelConstants.js';
 
 function createField({ label, placeholder, type = 'text', multiline = false }) {
   const wrap = createElement('label', 'channels-field');
@@ -798,7 +797,7 @@ export function createChannelsPanel(strings) {
 
   async function populate() {
     const channels = await invokeIpc('channels:list');
-    for (const channelName of CHANNEL_ORDER) {
+    for (const channelName of CHANNEL_NAMES) {
       setCardState(channelName, channels[channelName] ?? {});
     }
   }
@@ -809,7 +808,7 @@ export function createChannelsPanel(strings) {
 
     const body = createElement('div', 'channels__body');
     cardsWrap = createTwoColGrid();
-    for (const channelName of CHANNEL_ORDER) {
+    for (const channelName of CHANNEL_NAMES) {
       cardsWrap.append(createChannelCard(channelName));
     }
     body.append(cardsWrap.el);

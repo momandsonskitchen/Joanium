@@ -1,6 +1,7 @@
 import { createChannelStateManager } from './Core/ChannelState.js';
 import { createChannelRuntime } from './Core/ChannelRuntime.js';
 import { getResourcePath } from '../Shared/Storage/ResourcePaths.js';
+import { CHANNEL_NAMES } from '../Shared/Utils/ChannelConstants.js';
 
 function resolveCredentialValue(incoming, saved) {
   return typeof incoming === 'string' && incoming.trim() ? incoming.trim() : (saved ?? '');
@@ -25,15 +26,21 @@ export async function createPackage({ rootDirectory }) {
       {
         channel: 'channels:icon-paths',
         handler: async () => {
-          return {
-            telegram: getResourcePath(rootDirectory, 'Assets', 'Icons', 'Telegram.png'),
-            whatsapp: getResourcePath(rootDirectory, 'Assets', 'Icons', 'WhatsApp.png'),
-            discord: getResourcePath(rootDirectory, 'Assets', 'Icons', 'Discord.png'),
-            slack: getResourcePath(rootDirectory, 'Assets', 'Icons', 'Slack.png'),
-            mattermost: getResourcePath(rootDirectory, 'Assets', 'Icons', 'MatterMost.png'),
-            zulip: getResourcePath(rootDirectory, 'Assets', 'Icons', 'Zulip.png'),
-            ntfy: getResourcePath(rootDirectory, 'Assets', 'Icons', 'Ntfy.png'),
+          const iconMap = {
+            telegram: 'Telegram.png',
+            whatsapp: 'WhatsApp.png',
+            discord: 'Discord.png',
+            slack: 'Slack.png',
+            mattermost: 'MatterMost.png',
+            zulip: 'Zulip.png',
+            ntfy: 'Ntfy.png',
           };
+          return Object.fromEntries(
+            CHANNEL_NAMES.map((name) => [
+              name,
+              getResourcePath(rootDirectory, 'Assets', 'Icons', iconMap[name]),
+            ]),
+          );
         },
       },
       {
