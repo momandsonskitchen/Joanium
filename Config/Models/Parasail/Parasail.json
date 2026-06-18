@@ -209,9 +209,6 @@
     "XiaomiMiMo/MiMo-V2.5": {
       "name": "MiMo V2 5"
     },
-    "parasail-nemotron-3-ultra-550b-nvfp4": {
-      "name": "Parasail Nemotron 3 ULTRA 550B Nvfp4"
-    },
     "parasail-minimax-m3": {
       "name": "Parasail Minimax M3"
     },
@@ -240,5 +237,5 @@
       "name": "GLM 5 2 FP8"
     }
   },
-  "_syncedAt": "2026-06-17T10:43:44.110Z"
+  "_syncedAt": "2026-06-18T12:59:56.292Z"
 }

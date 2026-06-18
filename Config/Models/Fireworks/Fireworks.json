@@ -5,6 +5,9 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "accounts/fireworks/models/glm-5p2": {
+      "name": "Glm 5p2"
+    },
     "accounts/fireworks/models/kimi-k2p6": {
       "name": "Kimi K2.6",
       "description": "Moonshot AI's frontier MoE model — top-tier coding, reasoning, and agentic tasks with 262K context",
@@ -60,5 +63,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-18T06:58:44.399Z"
+  "_syncedAt": "2026-06-18T12:59:30.963Z"
 }
