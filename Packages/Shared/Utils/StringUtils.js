@@ -30,9 +30,10 @@ export function getNameInitials(name, fallback = '?') {
 }
 
 export function truncate(value, maxLength) {
-  if (value.length <= maxLength) return value;
-  if (maxLength <= 3) return value.slice(0, maxLength);
-  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
+  const text = String(value ?? '');
+  if (text.length <= maxLength) return text;
+  if (maxLength <= 3) return text.slice(0, maxLength);
+  return `${text.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
 export function extractJsonObject(text = '') {
@@ -50,7 +51,7 @@ export function normalizeString(value) {
 }
 
 export function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(str ?? '').replace(/[.*+?^${}()|[\]\\]/g, (match) => `\\${match}`);
 }
 
 export function createUniqueId() {

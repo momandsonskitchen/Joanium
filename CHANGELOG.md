@@ -6,6 +6,12 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.619.1] - 2026-06-19
+
+* Fixed empty message crashes
+
+---
+
 ## [2026.619.0] - 2026-06-19
 
 * Package Json Update
