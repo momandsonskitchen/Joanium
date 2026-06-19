@@ -398,6 +398,18 @@
         "text": true
       }
     },
+    "poolside/laguna-xs.2": {
+      "name": "Poolside: Laguna XS.2",
+      "description": "Laguna XS.2 is the second-generation model in the XS size class from [Poolside](https://poolside.ai/), their efficient coding agent series. It combines tool calling and reasoning capabilities with a compact footprint, offering...",
+      "context_window": 262144,
+      "pricing": {
+        "input": 0.1,
+        "output": 0.2
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "poolside/laguna-m.1:free": {
       "name": "Poolside: Laguna M.1 (free)",
       "description": "Laguna M.1 is the flagship coding agent model from [Poolside](https://poolside.ai), optimized for complex software engineering tasks. Designed for agentic coding workflows, it supports tool calling and reasoning, with a 128K...",
@@ -405,6 +417,18 @@
       "pricing": {
         "input": 0,
         "output": 0
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "poolside/laguna-m.1": {
+      "name": "Poolside: Laguna M.1",
+      "description": "Laguna M.1 is the flagship coding agent model from [Poolside](https://poolside.ai/), optimized for complex software engineering tasks. Designed for agentic coding workflows, it supports tool calling and reasoning, with a 256K...",
+      "context_window": 262144,
+      "pricing": {
+        "input": 0.2,
+        "output": 0.4
       },
       "inputs": {
         "text": true
@@ -4271,5 +4295,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-18T14:06:17.604Z"
+  "_syncedAt": "2026-06-19T05:48:25.583Z"
 }

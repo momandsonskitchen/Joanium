@@ -128,12 +128,6 @@
     "Qwen/Qwen3.5-35B-A3B-FP8": {
       "name": "Qwen3 5 35B A3B FP8"
     },
-    "parasail-skyfall-31b-v42": {
-      "name": "Parasail Skyfall 31B V42"
-    },
-    "TheDrummer/Skyfall-31B-v4.2": {
-      "name": "Skyfall 31B V4 2"
-    },
     "parasail-gemma-4-31b-it": {
       "name": "Parasail Gemma 4 31B It"
     },
@@ -237,5 +231,5 @@
       "name": "GLM 5 2 FP8"
     }
   },
-  "_syncedAt": "2026-06-18T14:06:41.088Z"
+  "_syncedAt": "2026-06-19T05:48:48.668Z"
 }

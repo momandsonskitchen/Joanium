@@ -1728,7 +1728,13 @@
     },
     "glm-5.2": {
       "name": "Glm 5 2"
+    },
+    "glm-5.2-el": {
+      "name": "Glm 5 2 El"
+    },
+    "kling-3.0-turbo": {
+      "name": "Kling 3 0 TURBO"
     }
   },
-  "_syncedAt": "2026-06-18T14:06:38.048Z"
+  "_syncedAt": "2026-06-19T05:48:45.747Z"
 }
