@@ -6,6 +6,12 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.619.2] - 2026-06-19
+
+* fix: ensure proper string handling in truncate and escapeRegex functions
+
+---
+
 ## [2026.619.1] - 2026-06-19
 
 * Fixed empty message crashes
