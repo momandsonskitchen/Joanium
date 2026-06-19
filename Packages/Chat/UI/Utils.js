@@ -108,6 +108,7 @@ export function stripEmptyCodeFences(text) {
 }
 
 export function sanitizeAssistantVisibleContent(text) {
+  if (!text) return '';
   return stripEmptyCodeFences(stripNativeToolCalls(stripToolCallBlocks(text)))
     .replace(/\n{3,}/g, '\n\n')
     .trim();
