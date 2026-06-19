@@ -15,6 +15,224 @@ const CHROME_CLIENT_HINTS = '"Not(A:Brand";v="99", "Google Chrome";v="134", "Chr
 const NAVIGATION_ACCEPT =
   'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8';
 
+const ERROR_MESSAGES = [
+  {
+    title: 'Oops! The internet took a nap.',
+    sub: 'Even AI assistants need Wi-Fi. We checked — the signal is on a coffee break.',
+  },
+  {
+    title: '404: Internet Not Found',
+    sub: 'We looked everywhere. Under the desk, behind the router, inside the cloud. Nothing.',
+  },
+  {
+    title: 'Houston, we have a problem.',
+    sub: 'The network is MIA. If this were a sci-fi movie, this is the part where the music gets dramatic.',
+  },
+  {
+    title: 'The Wi-Fi has left the chat.',
+    sub: 'It said something about "needing space" and walked out. We\'re giving it a moment.',
+  },
+  {
+    title: 'No signal? No problem.',
+    sub: "Well, actually... there is a problem. A pretty big one. But we're staying positive.",
+  },
+  {
+    title: "Connection: it's not you, it's the internet.",
+    sub: 'The tubes are clogged. The packets are lost. The DNS is having an existential crisis.',
+  },
+  {
+    title: 'The internet is playing hide and seek.',
+    sub: "It's really good at this game. We've been looking for 5 minutes now.",
+  },
+  {
+    title: "Surprise! You're offline.",
+    sub: "We know, we know — in 2026 this shouldn't happen. Yet here we are.",
+  },
+  {
+    title: 'The network pulled a vanishing act.',
+    sub: 'No smoke, no mirrors — just... no internet. Presto change-o.',
+  },
+  {
+    title: 'Looks like the cables are on strike.',
+    sub: "They're demanding better bandwidth and shorter ping times. Solidarity.",
+  },
+  {
+    title: 'Error: vibes not found.',
+    sub: "The internet is having a moment. Give it a sec — it'll be back with better energy.",
+  },
+  {
+    title: 'This page is on a digital vacation.',
+    sub: 'It went to a place with no internet. Relatable, honestly.',
+  },
+];
+
+function generateErrorPageHtml(errorCode = 0, errorDescription = 'Unknown', failedUrl = '') {
+  const msg = ERROR_MESSAGES[Math.floor(Math.random() * ERROR_MESSAGES.length)];
+  const displayUrl = failedUrl && failedUrl !== 'about:blank' ? failedUrl : '';
+  const displayUrlHtml = displayUrl
+    ? `<div class="error-url">${displayUrl.length > 60 ? displayUrl.slice(0, 60) + '...' : displayUrl}</div>`
+    : '';
+  const errorCodeHtml = errorCode
+    ? `<div class="error-code">Error code: ${errorCode} &middot; ${errorDescription}</div>`
+    : '';
+  const retryTarget = displayUrl ? displayUrl.replace(/'/g, "\\'") : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joanium — Offline</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a0e28 0%, #160c22 50%, #1e1030 100%);
+    color: #f0e8ff;
+    overflow: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: absolute;
+    top: -20%; left: -20%;
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(200, 116, 217, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: absolute;
+    bottom: -20%; right: -20%;
+    width: 50%; height: 50%;
+    background: radial-gradient(circle, rgba(180, 100, 200, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .container {
+    text-align: center;
+    padding: 48px 40px;
+    max-width: 520px;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .error-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.25;
+    background: linear-gradient(135deg, #f0e8ff 0%, #cc7de0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .error-sub {
+    font-size: 15px;
+    color: rgba(210, 185, 240, 0.72);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .error-url {
+    display: inline-block;
+    font-size: 12px;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    color: rgba(204, 125, 224, 0.7);
+    background: rgba(204, 125, 224, 0.08);
+    border: 1px solid rgba(204, 125, 224, 0.14);
+    border-radius: 10px;
+    padding: 8px 16px;
+    margin-bottom: 20px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .error-code {
+    font-size: 11px;
+    color: rgba(190, 160, 220, 0.45);
+    margin-bottom: 16px;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+
+  .retry-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #c874d9 0%, #a855c7 100%);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 8px 28px rgba(200, 116, 217, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    font-family: inherit;
+    letter-spacing: 0.2px;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 36px rgba(200, 116, 217, 0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+
+  .retry-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .retry-btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  .retry-btn:hover svg {
+    transform: rotate(180deg);
+  }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="error-title">${msg.title}</h1>
+    <p class="error-sub">${msg.sub}</p>
+    ${displayUrlHtml}
+    ${errorCodeHtml}
+    <button class="retry-btn" onclick="${retryTarget ? `window.location.href='${retryTarget}'` : 'window.location.reload()'}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      Try Again
+    </button>
+  </div>
+</body>
+</html>`;
+}
+
 export const LIVE_BROWSER_TOOL_NAMES = Object.freeze([
   'browser_navigate',
   'browser_get_state',
@@ -474,12 +692,22 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
           description: errorDescription,
         });
         emitState();
+        view.setBackgroundColor('#1a0e28');
+        const errorHtml = generateErrorPageHtml(errorCode, errorDescription, validatedUrl);
+        const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(errorHtml)}`;
+        webContents.loadURL(dataUrl).catch(() => {});
       },
     );
 
     webContents.on('render-process-gone', () => {
       loading = false;
       status = browserStrings.status.processEnded;
+      emitState();
+    });
+
+    webContents.on('unresponsive', () => {
+      loading = false;
+      status = 'Page is not responding';
       emitState();
     });
 
