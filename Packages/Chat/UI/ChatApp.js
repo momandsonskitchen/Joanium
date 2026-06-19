@@ -69,6 +69,7 @@ import {
 } from './CompletionSound.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
+import { isOnline } from '../../Shared/OfflineMonitor/OfflineMonitor.js';
 import { CHAT_PROMPTS } from '../Prompts/Prompts.js';
 import { SEARCH_ENGINE_SEARCH_URLS } from './Shared/DefaultSearchInfo.js';
 
@@ -307,6 +308,8 @@ export async function createChatView(
   let gitBusy = false;
   let gitAiBusy = false;
   let modelButton = null;
+  let contextViz = null;
+  let contextVizVisible = false;
 
   function scheduleTerminalProcessRender() {
     if (terminalProcessRenderFrame) return;
@@ -319,6 +322,41 @@ export async function createChatView(
   function appendTerminalCardOutput(currentOutput, nextText) {
     const output = `${String(currentOutput ?? '')}${String(nextText ?? '')}`;
     return output.length > 96000 ? output.slice(output.length - 96000) : output;
+  }
+
+  function formatVisibleToolOutput(value) {
+    if (value == null) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+      return String(value);
+    }
+
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
+
+  function refreshContextVisualizer() {
+    if (!contextViz || !contextVizVisible) return;
+
+    const systemPrompt = document.querySelector('.chat-system-prompt')?.textContent ?? '';
+    contextViz.update({
+      systemPrompt,
+      model: activeModel,
+      conversation:
+        messages?.filter((message) => !message.pending && !message.streaming && !message.empty) ??
+        [],
+    });
+  }
+
+  function isLocalProvider(provider) {
+    return provider?.type === 'local' || provider?.requiresApiKey === false;
+  }
+
+  function shouldShortCircuitOffline() {
+    return !isOnline() && !isLocalProvider(activeProvider);
   }
 
   function updateTerminalProcessCard(processId, updater) {
@@ -790,6 +828,7 @@ export async function createChatView(
         }
       : null;
     syncActiveProjectPill();
+    refreshContextVisualizer();
     const nextRoot = collapseWhitespace(activeProject?.folderPath ?? activeProject?.rootPath);
     if (previousRoot !== nextRoot) {
       fileDiffTracker?.reset();
@@ -1691,6 +1730,7 @@ export async function createChatView(
             providerIconEl.src = provider.iconPath ?? '';
             providerIconEl.hidden = !provider.iconPath;
           }
+          refreshContextVisualizer();
           syncPickerActiveStates();
           closeModelPicker();
         },
@@ -2364,6 +2404,7 @@ export async function createChatView(
 
   function renderThread() {
     if (!thread || !title || !composer || !scroll || !bottom) return;
+    refreshContextVisualizer();
 
     const currentProfile = getProfile?.() ?? profile;
 
@@ -3026,7 +3067,7 @@ export async function createChatView(
     if (result?.content) parts.push(result.content);
     if (result?.processId) parts.push(`Process id: ${result.processId}`);
     if (result?.buffer) parts.push(result.buffer);
-    return parts.join('\n\n').trim();
+    return parts.map(formatVisibleToolOutput).join('\n\n').trim();
   }
 
   async function continueAfterTerminalTool(
@@ -3186,7 +3227,7 @@ export async function createChatView(
             ...(message.terminal ?? {}),
             status: ok ? 'completed' : 'failed',
             statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
-            output: result?.output ?? result?.error ?? '',
+            output: formatVisibleToolOutput(result?.output ?? result?.error ?? ''),
           },
         }));
       }
@@ -3321,7 +3362,7 @@ export async function createChatView(
           ...(message.terminal ?? {}),
           status: subAgentOk ? 'completed' : 'failed',
           statusLabel: subAgentOk ? strings.tools.subAgentsComplete : strings.tools.subAgentsFailed,
-          output: subAgentResult?.output ?? subAgentResult?.error ?? '',
+          output: formatVisibleToolOutput(subAgentResult?.output ?? subAgentResult?.error ?? ''),
           subAgents: currentSubAgents,
         },
       }));
@@ -3413,7 +3454,7 @@ export async function createChatView(
           ...(message.terminal ?? {}),
           status: ok ? 'completed' : 'failed',
           statusLabel: ok ? strings.tools.completedTool : strings.tools.failedTool,
-          output: result?.output ?? result?.error ?? '',
+          output: formatVisibleToolOutput(result?.output ?? result?.error ?? ''),
         },
       }));
     }
@@ -3463,6 +3504,30 @@ export async function createChatView(
     runToken,
     generationStartTime,
   }) {
+    if (shouldShortCircuitOffline()) {
+      if (runToken !== generationToken) return;
+      removeStreamListeners();
+      clearTimeout(diagTimer);
+      diagTimer = null;
+      diagPanel?.hide();
+      updateLastAssistantMessage(() => ({
+        role: 'assistant',
+        content: strings.composer.offlineResponse,
+        thinking: '',
+        streaming: false,
+        error: true,
+        providerLabel: activeProvider?.label ?? 'AI',
+        modelLabel: activeModelLabel,
+      }));
+      isSending = false;
+      accText = '';
+      accThinking = '';
+      await saveCurrentSession();
+      syncComposer();
+      renderThread();
+      return;
+    }
+
     removeStreamListeners();
     const streamId = createStreamId(runToken);
     activeStreamId = streamId;
@@ -3820,6 +3885,32 @@ export async function createChatView(
 
     draftValue = '';
     pendingAttachments = [];
+    if (shouldShortCircuitOffline()) {
+      messages = [
+        ...messages.slice(0, -1),
+        {
+          role: 'assistant',
+          content: strings.composer.offlineResponse,
+          thinking: '',
+          streaming: false,
+          error: true,
+          providerLabel: activeProvider?.label ?? 'AI',
+          modelLabel: activeModelLabel,
+        },
+      ];
+      isSending = false;
+      accText = '';
+      accThinking = '';
+      userScrolledUp = false;
+      closeSlashMenu();
+      renderPendingAttachments();
+      syncComposer();
+      renderThread();
+      focusComposer();
+      await saveCurrentSession();
+      return;
+    }
+
     isSending = true;
     accText = '';
     accThinking = '';
@@ -3898,6 +3989,7 @@ export async function createChatView(
   projectPill.hidden = true;
   fileDiffPanel = createElement('section', 'chat-file-diff');
   fileDiffPanel.hidden = true;
+
   const projectMainEl = createElement('div', 'chat-composer__project-main');
   projectIconEl = createElement('span', 'chat-composer__project-icon');
   projectIconEl.append(createIcon('tabProjects', 'chat-composer__project-icon-glyph'));
@@ -4099,6 +4191,27 @@ export async function createChatView(
   // ─────────────────────────────────────────────────────────────────────────
 
   composerActions.append(attachBtn, enhanceBtn, terminalBtn, browserBtn);
+
+  const contextVizBtn = createElement('button', 'chat-composer__icon-button');
+  contextVizBtn.type = 'button';
+  contextVizBtn.setAttribute('aria-label', strings.composer.contextWindow);
+  contextVizBtn.append(createIcon('info', 'chat-composer__icon'));
+  contextVizBtn.addEventListener('click', async () => {
+    contextVizVisible = !contextVizVisible;
+    if (contextVizVisible && !contextViz) {
+      const { createContextVisualizer: createCV } =
+        await import('../../Shared/ContextVisualizer/ContextVisualizer.js');
+      contextViz = createCV();
+      composer.parentElement?.insertBefore(contextViz.element, composer);
+    }
+    if (contextViz) {
+      contextViz.element.hidden = !contextVizVisible;
+      if (contextVizVisible) {
+        refreshContextVisualizer();
+      }
+    }
+  });
+  composerActions.append(contextVizBtn);
 
   const composerSubmit = createElement('div', 'chat-composer__submit');
   gitBranchButton = createElement('button', 'chat-composer__branch');

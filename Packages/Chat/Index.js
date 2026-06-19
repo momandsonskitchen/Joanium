@@ -1,5 +1,6 @@
 import { dialog } from 'electron';
 import { createChatStateManager } from './Core/ChatState.js';
+import strings from './I18n/en.js';
 import {
   getSupportedAttachmentExtensions,
   getImageAttachmentExtensions,
@@ -11,6 +12,33 @@ export async function createPackage({ rootDirectory }) {
   const chatStateManager = createChatStateManager({ rootDirectory });
   const usageTracker = createUsageTracker({ rootDirectory });
   const activeStreams = new Map();
+  const networkErrorCodes = new Set([
+    'ECONNRESET',
+    'ECONNREFUSED',
+    'ENOTFOUND',
+    'EPIPE',
+    'ETIMEDOUT',
+    'EAI_AGAIN',
+    'ENETUNREACH',
+  ]);
+  const localProviderIds = new Set(['lmstudio', 'ollama']);
+
+  function formatStreamError(error, request = {}) {
+    const message = String(error?.message ?? error ?? '');
+    if (
+      networkErrorCodes.has(error?.code) ||
+      /\b(?:ENOTFOUND|EAI_AGAIN|ENETUNREACH)\b/.test(message)
+    ) {
+      const providerId = String(request?.providerId ?? '').trim();
+      if (localProviderIds.has(providerId)) {
+        return strings.composer.localProviderError;
+      }
+
+      return strings.composer.networkError;
+    }
+
+    return message || strings.composer.responseError;
+  }
 
   function sendIfAlive(event, channel, payload) {
     if (!event.sender.isDestroyed()) {
@@ -58,7 +86,7 @@ export async function createPackage({ rootDirectory }) {
     };
     const sendError = (error) => {
       if (isCanceled()) return;
-      sendIfAlive(event, channels.error, decorate({ message: error?.message ?? String(error) }));
+      sendIfAlive(event, channels.error, decorate({ message: formatStreamError(error, request) }));
     };
 
     chatStateManager

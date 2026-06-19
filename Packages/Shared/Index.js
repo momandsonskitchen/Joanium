@@ -63,3 +63,11 @@ export { CHANNEL_NAMES } from './Utils/ChannelConstants.js';
 export { createSecretField } from './UI/SecretField.js';
 export { createSingleFileState } from './Storage/SingleFileState.js';
 export { EVENTS, dispatchEvent } from './Events/RendererEvents.js';
+export {
+  initOfflineMonitor,
+  destroyOfflineMonitor,
+  isOnline,
+  onNetworkChange,
+  getNetworkStatus,
+} from './OfflineMonitor/OfflineMonitor.js';
+export { createContextVisualizer } from './ContextVisualizer/ContextVisualizer.js';
