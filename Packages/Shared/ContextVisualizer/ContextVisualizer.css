@@ -1,0 +1,80 @@
+.context-viz {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: min(100%, 260px);
+  margin: 0 auto 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-button-ghost);
+  color: var(--color-text-secondary);
+  animation: context-viz-in var(--transition-slow) var(--transition-spring) both;
+}
+
+.context-viz__label {
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context-viz__track {
+  position: relative;
+  flex: 0 0 62px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: rgba(var(--color-accent-rgb), 0.1);
+  overflow: hidden;
+}
+
+.context-viz__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transition:
+    width 0.3s ease,
+    background 0.3s ease;
+}
+
+.context-viz__bar--healthy,
+.context-viz__bar--moderate {
+  background: var(--color-accent);
+}
+
+.context-viz__bar--warning {
+  background: var(--color-warning);
+}
+
+.context-viz__bar--critical {
+  background: var(--color-danger);
+}
+
+.joanium-theme-dark .context-viz {
+  background: var(--color-surface);
+}
+
+@keyframes context-viz-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .context-viz {
+    max-width: calc(100% - 24px);
+  }
+}

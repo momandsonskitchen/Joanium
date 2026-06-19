@@ -138,6 +138,9 @@ async function bootstrap() {
   agentGateway.start();
   cleanupGateway.start();
 
+  const { initOfflineMonitor } = await import('../../Shared/OfflineMonitor/OfflineMonitor.js');
+  initOfflineMonitor();
+
   const shell = createElement('main', 'chat-shell');
   const sidebar = createElement('nav', 'chat-sidebar');
   const sidebarTabs = createElement('div', 'chat-sidebar__tabs');

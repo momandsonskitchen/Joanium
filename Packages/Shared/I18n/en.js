@@ -1,4 +1,10 @@
 const en = {
+  contextVisualizer: {
+    title: 'Context window',
+  },
+  offlineMonitor: {
+    offline: 'Offline mode',
+  },
   markdown: {
     codeBlock: {
       copy: 'Copy',

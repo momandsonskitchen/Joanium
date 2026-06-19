@@ -336,6 +336,20 @@ export function resolveTerminalTimeout(payload = {}) {
   return undefined;
 }
 
+function formatToolValue(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+}
+
 export async function executeTerminalTool(
   action,
   { resolveCwd = resolveDefaultTerminalCwd, unsupportedError } = {},
@@ -631,13 +645,13 @@ export function formatTerminalResultForModel(
         : `Exit code: ${result.exitCode}`,
     );
   }
-  if (result?.hint) lines.push(`Hint:\n${result.hint}`);
-  if (result?.category) lines.push(`Category: ${result.category}`);
-  if (result?.current) lines.push(`Current branch: ${result.current}`);
+  if (result?.hint) lines.push(`Hint:\n${formatToolValue(result.hint)}`);
+  if (result?.category) lines.push(`Category: ${formatToolValue(result.category)}`);
+  if (result?.current) lines.push(`Current branch: ${formatToolValue(result.current)}`);
   if (Array.isArray(result?.branches)) lines.push(`Branches:\n${result.branches.join('\n')}`);
-  if (result?.error) lines.push(`${errorLabel}:\n${result.error}`);
-  if (result?.stdout) lines.push(`STDOUT:\n${result.stdout}`);
-  if (result?.stderr) lines.push(`STDERR:\n${result.stderr}`);
+  if (result?.error) lines.push(`${errorLabel}:\n${formatToolValue(result.error)}`);
+  if (result?.stdout) lines.push(`STDOUT:\n${formatToolValue(result.stdout)}`);
+  if (result?.stderr) lines.push(`STDERR:\n${formatToolValue(result.stderr)}`);
   if (result?.summary) lines.push(`Summary:\n${JSON.stringify(result.summary, null, 2)}`);
   if (Array.isArray(result?.matches)) {
     lines.push(`Matches:\n${JSON.stringify(result.matches, null, 2)}`);
@@ -645,9 +659,9 @@ export function formatTerminalResultForModel(
   if (Array.isArray(result?.entries)) {
     lines.push(`Entries:\n${JSON.stringify(result.entries, null, 2)}`);
   }
-  if (result?.content) lines.push(`Content:\n${result.content}`);
-  if (result?.output) lines.push(`Output:\n${result.output}`);
-  if (result?.buffer) lines.push(`Output buffer:\n${result.buffer}`);
+  if (result?.content) lines.push(`Content:\n${formatToolValue(result.content)}`);
+  if (result?.output) lines.push(`Output:\n${formatToolValue(result.output)}`);
+  if (result?.buffer) lines.push(`Output buffer:\n${formatToolValue(result.buffer)}`);
 
   if (lines.length === 2) {
     lines.push(JSON.stringify(result ?? {}, null, 2));
@@ -659,8 +673,8 @@ export function formatTerminalResultForModel(
 export function formatToolsetResultForModel(action, result) {
   const lines = ['Built-in tool result', `Tool: ${action?.tool || 'unknown'}`];
 
-  if (result?.output) lines.push(`Output:\n${result.output}`);
-  if (result?.error) lines.push(`Error:\n${result.error}`);
+  if (result?.output) lines.push(`Output:\n${formatToolValue(result.output)}`);
+  if (result?.error) lines.push(`Error:\n${formatToolValue(result.error)}`);
   if (!result?.output && !result?.error) lines.push(JSON.stringify(result ?? {}, null, 2));
   return lines.join('\n\n');
 }
@@ -840,6 +854,7 @@ export async function runRendererToolLoop({
       // to avoid duplicating it when the UI concatenates output + error.
       const output = [result?.output, result?.content, result?.stdout, result?.buffer]
         .filter(Boolean)
+        .map(formatToolValue)
         .join('\n')
         .slice(0, 4000);
       terminals.push({

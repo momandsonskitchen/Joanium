@@ -1,0 +1,102 @@
+.offline-indicator {
+  position: fixed;
+  top: max(30px, calc(env(safe-area-inset-top) + 22px));
+  left: 50%;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  backdrop-filter: blur(24px) saturate(1.45);
+  -webkit-backdrop-filter: blur(24px) saturate(1.45);
+  box-shadow: var(--shadow-card);
+  color: var(--color-warning-subtle);
+  font-size: 12px;
+  font-weight: 680;
+  letter-spacing: 0;
+  line-height: 1;
+  pointer-events: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  animation: offline-fade-in 0.28s var(--transition-spring) both;
+}
+
+.offline-indicator--online {
+  animation: offline-fade-out 0.22s ease both;
+}
+
+.offline-indicator__icon {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-warning);
+  box-shadow: 0 0 0 5px rgba(var(--color-warning-rgb), 0.12);
+}
+
+.offline-indicator__icon::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  border: 1px solid rgba(var(--color-warning-rgb), 0.28);
+  animation: offline-pulse 1.8s ease-in-out infinite;
+}
+
+.offline-indicator--online .offline-indicator__icon {
+  background: var(--color-success);
+  box-shadow: 0 0 0 5px rgba(var(--color-success-rgb), 0.12);
+}
+
+.offline-indicator--online .offline-indicator__icon::after {
+  border-color: rgba(var(--color-success-rgb), 0.28);
+}
+
+.offline-indicator__text {
+  color: currentColor;
+}
+
+.joanium-theme-dark .offline-indicator {
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-card);
+}
+
+@keyframes offline-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes offline-fade-out {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px) scale(0.98);
+  }
+}
+
+@keyframes offline-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.84);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
