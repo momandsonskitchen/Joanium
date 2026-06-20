@@ -6,6 +6,19 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.620.1] - 2026-06-20
+
+* connector panel fix
+* Updated AI Models
+* feat: implement deepMerge utility function and update imports across services
+* refactor: streamline provider icon creation in multiple panels
+* feat: Refactor provider icon handling across multiple components
+* Updated AI Models
+* feat: Implement clipboard management tools and enhance window control features
+* Updated AI Models
+
+---
+
 ## [2026.620.0] - 2026-06-20
 
 * Updated AI Models
