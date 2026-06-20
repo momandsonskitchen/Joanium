@@ -6,6 +6,14 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.620.0] - 2026-06-20
+
+* Updated AI Models
+* feat: add custom error pages for offline scenarios in live browser preview
+* Chore(deps-dev): Bump undici
+
+---
+
 ## [2026.619.2] - 2026-06-19
 
 * fix: ensure proper string handling in truncate and escapeRegex functions
