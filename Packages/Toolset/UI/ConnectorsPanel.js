@@ -222,7 +222,7 @@ export function createConnectorsPanel(strings = defaultStrings) {
 
     const inputs = new Map();
     const fields = getVisibleFields(connector).map((fieldConfig) => {
-      const { field, input } = createConnectorSecretField({ fieldConfig, strings });
+      const { wrap: field, input } = createConnectorSecretField({ fieldConfig, strings });
       inputs.set(fieldConfig.key, input);
       return field;
     });
