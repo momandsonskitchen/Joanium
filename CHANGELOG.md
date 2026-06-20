@@ -6,6 +6,15 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.620.2] - 2026-06-20
+
+* feat: add KNOWN_DATA_ENTRIES for consistent data
+* Export Issue Fixed In Mac OS
+* History title rename fix
+* AI Models Update
+
+---
+
 ## [2026.620.1] - 2026-06-20
 
 * connector panel fix
