@@ -4095,18 +4095,6 @@
         "text": true
       }
     },
-    "meta-llama/llama-3-70b-instruct": {
-      "name": "Meta: Llama 3 70B Instruct",
-      "description": "Meta's latest class of model (Llama 3) launched with a variety of sizes & flavors. This 70B instruct-tuned version was optimized for high quality dialogue usecases. It has demonstrated strong...",
-      "context_window": 8192,
-      "pricing": {
-        "input": 0.51,
-        "output": 0.74
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "mistralai/mixtral-8x22b-instruct": {
       "name": "Mistral: Mixtral 8x22B Instruct",
       "description": "Mistral's official instruct fine-tuned version of [Mixtral 8x22B](/models/mistralai/mixtral-8x22b). It uses 39B active parameters out of 141B, offering unparalleled cost efficiency for its size. Its strengths include: - strong math, coding,...",
@@ -4295,5 +4283,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-19T12:27:49.628Z"
+  "_syncedAt": "2026-06-20T05:02:45.590Z"
 }
