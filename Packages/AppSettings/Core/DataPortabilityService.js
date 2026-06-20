@@ -325,20 +325,55 @@ export async function exportData(rootDirectory) {
   const dataDir = getWritableDataDirectory(rootDirectory);
   const zip = new JSZip();
 
-  // Walk every entry at the top level of Data and add it
-  let topEntries;
-  try {
-    topEntries = await readdir(dataDir, { withFileTypes: true });
-  } catch {
-    return { ok: false, error: 'Cannot read Data directory.' };
-  }
+  // In packed mode, getWritableDataDirectory returns app.getPath('userData')
+  // which also holds Electron‑internal files (Preferences, Local Storage,
+  // Cache, etc.).  These are often locked and must not be exported.
+  // Restrict the export to the known app-data entries only.
+  const EXPORT_ENTRIES = [
+    'Agents',
+    'Avatar.avif',
+    'Avatar.bmp',
+    'Avatar.gif',
+    'Avatar.jpeg',
+    'Avatar.jpg',
+    'Avatar.png',
+    'Avatar.webp',
+    'Browsing',
+    'ChannelMessages',
+    'Channels.json',
+    'Chats',
+    'Dreams',
+    'Memories',
+    'Models',
+    'MCPServers.json',
+    'Projects',
+    'Screenshots',
+    'Security.json',
+    'System.json',
+    'Templates',
+    'Usage',
+    'Usage.json',
+    'User.json',
+  ];
 
-  for (const entry of topEntries) {
-    const fullPath = path.join(dataDir, entry.name);
-    if (entry.isDirectory()) {
-      await addDirectoryToZip(zip, fullPath, entry.name);
-    } else if (entry.isFile()) {
-      zip.file(entry.name, await readFile(fullPath));
+  for (const name of EXPORT_ENTRIES) {
+    const fullPath = path.join(dataDir, name);
+    let entryStat;
+    try {
+      entryStat = await stat(fullPath);
+    } catch {
+      continue; // entry does not exist — skip
+    }
+
+    try {
+      if (entryStat.isDirectory()) {
+        await addDirectoryToZip(zip, fullPath, name);
+      } else if (entryStat.isFile()) {
+        zip.file(name, await readFile(fullPath));
+      }
+    } catch (err) {
+      // Non-fatal: skip files that are locked or unreadable.
+      console.warn(`[Joanium] Export: skipping ${name}:`, err.message);
     }
   }
 
