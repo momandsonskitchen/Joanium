@@ -1,5 +1,6 @@
 import { createElement } from '../Utils/DomUtils.js';
 import { createPortalDropdownController } from '../Bubbly/DropDown/PortalDropdown.js';
+import { createProviderIcon } from '../Icons/Icons.js';
 import {
   formatPrice,
   formatTokenCount,
@@ -46,11 +47,9 @@ function createModelInfoPopoverDdm() {
     // Header
     const header = createElement('div', 'chat-model-info-popover__header');
     if (provider?.iconPath) {
-      const img = document.createElement('img');
-      img.className = 'chat-model-info-popover__provider-icon';
-      img.src = provider.iconPath;
-      img.alt = '';
-      img.draggable = false;
+      const img = createProviderIcon(provider.iconPath, {
+        className: 'chat-model-info-popover__provider-icon',
+      });
       header.append(img);
     }
     header.append(createElement('span', 'chat-model-info-popover__title', model.name ?? model.id));
@@ -305,11 +304,9 @@ export function createDropDownLite({
     const existingIcon = trigger.querySelector('.joanium-ddm-lite__trigger-icon');
     existingIcon?.remove();
     if (match?.iconPath) {
-      const icon = document.createElement('img');
-      icon.className = 'joanium-ddm-lite__trigger-icon';
-      icon.src = match.iconPath;
-      icon.alt = '';
-      icon.draggable = false;
+      const icon = createProviderIcon(match.iconPath, {
+        className: 'joanium-ddm-lite__trigger-icon',
+      });
       trigger.prepend(icon);
     }
   }
@@ -337,11 +334,9 @@ export function createDropDownLite({
       item.classList.toggle('is-selected', opt.value === currentValue);
 
       if (opt.iconPath) {
-        const icon = document.createElement('img');
-        icon.className = 'joanium-ddm-lite__option-icon';
-        icon.src = opt.iconPath;
-        icon.alt = '';
-        icon.draggable = false;
+        const icon = createProviderIcon(opt.iconPath, {
+          className: 'joanium-ddm-lite__option-icon',
+        });
         item.append(icon);
       }
 

@@ -1,4 +1,5 @@
 import { createPortalDropdownController } from './PortalDropdown.js';
+import { createProviderIcon } from '../../Icons/Icons.js';
 
 export function createDropDown({ label, options, selectedValue, placeholder, focusKey, onChange }) {
   const wrapper = document.createElement('div');
@@ -51,11 +52,9 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
     const existingIcon = trigger.querySelector('.joanium-dropdown__trigger-icon');
     existingIcon?.remove();
     if (match?.iconPath) {
-      const icon = document.createElement('img');
-      icon.className = 'joanium-dropdown__trigger-icon';
-      icon.src = match.iconPath;
-      icon.alt = '';
-      icon.draggable = false;
+      const icon = createProviderIcon(match.iconPath, {
+        className: 'joanium-dropdown__trigger-icon',
+      });
       trigger.prepend(icon);
     }
   }
@@ -71,11 +70,9 @@ export function createDropDown({ label, options, selectedValue, placeholder, foc
       item.classList.toggle('is-selected', option.value === currentValue);
 
       if (option.iconPath) {
-        const icon = document.createElement('img');
-        icon.className = 'joanium-dropdown__option-icon';
-        icon.src = option.iconPath;
-        icon.alt = '';
-        icon.draggable = false;
+        const icon = createProviderIcon(option.iconPath, {
+          className: 'joanium-dropdown__option-icon',
+        });
         item.append(icon);
       }
 

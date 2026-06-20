@@ -1,3 +1,5 @@
+import { createProviderIcon } from '../Icons/Icons.js';
+
 function createProviderTile({ provider, selectedIds, onToggle }) {
   const card = document.createElement('button');
   card.type = 'button';
@@ -6,20 +8,19 @@ function createProviderTile({ provider, selectedIds, onToggle }) {
 
   const icon =
     provider.iconPath && provider.iconPath.trim()
-      ? document.createElement('img')
-      : document.createElement('span');
-
-  if (icon instanceof HTMLImageElement) {
-    icon.className = 'joanium-provider-tile__icon-image';
-    icon.src = provider.iconPath;
-    icon.alt = provider.label;
-  } else {
-    icon.className = 'joanium-provider-tile__icon-fallback';
-    icon.textContent = String(provider.label ?? '')
-      .trim()
-      .charAt(0)
-      .toUpperCase();
-  }
+      ? createProviderIcon(provider.iconPath, {
+          className: 'joanium-provider-tile__icon-image',
+          alt: provider.label,
+        })
+      : (() => {
+          const fallback = document.createElement('span');
+          fallback.className = 'joanium-provider-tile__icon-fallback';
+          fallback.textContent = String(provider.label ?? '')
+            .trim()
+            .charAt(0)
+            .toUpperCase();
+          return fallback;
+        })();
 
   const name = document.createElement('span');
   name.className = 'joanium-provider-tile__name';

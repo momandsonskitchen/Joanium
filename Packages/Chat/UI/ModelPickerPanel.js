@@ -1,6 +1,7 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
 import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { createProviderIcon } from '../../Shared/Icons/Icons.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import {
   orderProvidersBySelection,
@@ -80,11 +81,9 @@ function createModelInfoPopover() {
     // ── Header: provider icon + model name ────────────────────────────────
     const header = createElement('div', 'chat-model-info-popover__header');
     if (provider.iconPath) {
-      const img = document.createElement('img');
-      img.className = 'chat-model-info-popover__provider-icon';
-      img.src = provider.iconPath;
-      img.alt = '';
-      img.draggable = false;
+      const img = createProviderIcon(provider.iconPath, {
+        className: 'chat-model-info-popover__provider-icon',
+      });
       header.append(img);
     }
     header.append(createElement('span', 'chat-model-info-popover__title', model.name ?? model.id));

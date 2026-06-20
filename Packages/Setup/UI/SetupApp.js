@@ -15,6 +15,7 @@ import {
   createProviderScroller,
   createTagSelector,
 } from '../../Shared/Bubbly/Index.js';
+import { createProviderIcon } from '../../Shared/Icons/Icons.js';
 import {
   calculateLastCompletedStep,
   findInitialScene,
@@ -73,10 +74,10 @@ function restoreFocusState(container, focusState) {
 function createProviderIdentity(provider, strings) {
   const identity = createElement('div', 'setup-provider-detail-card__identity');
   const iconWrap = createElement('span', 'setup-provider-detail-card__icon');
-  const iconImage = document.createElement('img');
-  iconImage.className = 'setup-provider-detail-card__icon-image';
-  iconImage.src = provider.iconPath;
-  iconImage.alt = `${provider.label} icon`;
+  const iconImage = createProviderIcon(provider.iconPath, {
+    className: 'setup-provider-detail-card__icon-image',
+    alt: `${provider.label} icon`,
+  });
   iconWrap.append(iconImage);
 
   const textWrap = createElement('div', 'setup-provider-detail-card__copy');

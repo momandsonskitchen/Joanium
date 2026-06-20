@@ -1,7 +1,7 @@
 import { createElement, formatText } from '../../Shared/Utils/DomUtils.js';
 import { getNameInitials } from '../../Shared/Utils/StringUtils.js';
 import { toFileUrl } from '../../Shared/Utils/UrlUtils.js';
-import { createIcon, iconMarkup } from '../../Shared/Icons/Icons.js';
+import { createIcon, iconMarkup, createProviderIcon } from '../../Shared/Icons/Icons.js';
 import { renderMarkdown, renderInline } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createAttachmentPill } from './AttachmentPill.js';
 import { createTerminalCallElement } from './TerminalPanel.js';
@@ -450,10 +450,7 @@ export function createAssistantGroupElement(
   const iconPath = typeof getProviderIcon === 'function' ? getProviderIcon(firstMessage) : '';
   const avatarEl = createElement('div', 'chat-message__avatar chat-message__avatar--provider');
   if (iconPath) {
-    const img = document.createElement('img');
-    img.src = iconPath;
-    img.alt = firstMessage.providerLabel ?? 'AI';
-    img.draggable = false;
+    const img = createProviderIcon(iconPath, { alt: firstMessage.providerLabel ?? 'AI' });
     avatarEl.append(img);
   } else {
     avatarEl.textContent = '✦';
