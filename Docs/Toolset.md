@@ -25,7 +25,7 @@ Toolset Package
 │   ├── en.js                   (tool strings)
 │   └── Connectors.en.js        (connector strings)
 ├── Tools/
-│   └── <ToolName>/             (28 tool packages)
+│   └── <ToolName>/             (27 local tool packages)
 └── Catalogue.js                (dynamic fuzzy-matching catalogue)
 ```
 
@@ -45,6 +45,11 @@ Tools/<ToolName>/
 ├── I18n/          ← Tool-specific strings
 └── UI/            ← Tool-specific UI (optional, rarely used)
 ```
+
+AI-facing prompt text, tool descriptions, parameter descriptions, and tool schemas must not live
+in `I18n/`. Put prompt sections in `Prompt.js`; put tool definitions in `Tools.js` or, for large
+tool lists, `Core/Chat/Tools.js` re-exported by `Tools.js`. Keep `I18n/` for user-facing UI text,
+connector labels, and runtime result/error strings.
 
 ### Tool Package Exports
 
@@ -87,20 +92,19 @@ Discovery returns:
 
 ---
 
-## Tool Packages (28)
+## Tool Packages (27)
 
 | Package | Description |
 |---|---|
 | Cloudflare | Cloudflare API tools |
 | Command | Local command execution |
-| Core | Core tool infrastructure |
+| ComputerUse | OS-level screen, mouse, keyboard, clipboard, and window tools |
 | Directory | Workspace inspection |
 | Figma | Figma design tools |
 | Git | Git operations |
 | GitHub | GitHub API tools |
 | GitLab | GitLab API tools |
 | Google | Google API tools |
-| GoogleWorkspace | Gmail, Drive, Calendar, Sheets, Docs, etc. |
 | HubSpot | HubSpot CRM tools |
 | Jira | Jira project management |
 | Knowledge | Knowledge base tools |
@@ -119,6 +123,16 @@ Discovery returns:
 | Supabase | Supabase database tools |
 | Unsplash | Unsplash image search |
 | Vercel | Vercel deployment tools |
+
+---
+
+## Computer Use Tools
+
+`ComputerUse` provides local OS interaction tools for screenshots, display/cursor inspection, mouse
+movement, clicking, dragging, scrolling, keyboard input, clipboard inspection and editing, window
+focus/state/bounds control, opening local targets, and short waits between UI actions. These are
+local tools, not connector tools, so their tool definitions must not set connector-gated
+`category` values.
 
 ---
 

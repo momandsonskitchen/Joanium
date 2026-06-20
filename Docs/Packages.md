@@ -181,12 +181,12 @@ Discovers, manages, and executes AI-callable tools. Handles connector credential
 - `Core/ConnectorFilter.js` — Filters tools by connector availability
 - `Core/GoogleOAuth.js` — Google OAuth 2.0 flow
 - `Catalogue.js` — Dynamic fuzzy-matching catalogue
-- `Tools/` — 28 tool packages
+- `Tools/` — 27 local tool packages
 - `UI/ConnectorsPanel.js` — Connector settings UI
 
-### Tool Packages (28)
+### Tool Packages (27)
 
-Cloudflare, Command, Core, Directory, Figma, Git, GitHub, GitLab, Google, GoogleWorkspace, HubSpot, Jira, Knowledge, Linear, Location, Netlify, Notion, OpenWeather, Productivity, PublicData, Security, Sentry, Spotify, Stripe, SubAgents, Supabase, Unsplash, Vercel
+Cloudflare, Command, ComputerUse, Directory, Figma, Git, GitHub, GitLab, Google, HubSpot, Jira, Knowledge, Linear, Location, Netlify, Notion, OpenWeather, Productivity, PublicData, Security, Sentry, Spotify, Stripe, SubAgents, Supabase, Unsplash, Vercel
 
 ### Built-in Tools (in ToolsetService.js)
 

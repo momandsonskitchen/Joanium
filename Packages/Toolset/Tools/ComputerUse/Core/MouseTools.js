@@ -190,3 +190,89 @@ export async function computerScroll(direction = 'up', amount = 3) {
     };
   }
 }
+
+async function windowsDrag(startX, startY, endX, endY, durationMs = 500) {
+  requireWindows();
+  const steps = 12;
+  const stepDelay = Math.max(10, Math.round(durationMs / steps));
+  const psScript = `
+    Add-Type -AssemblyName System.Windows.Forms
+    $type = Add-Type -MemberDefinition '
+      [DllImport("user32.dll")] public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, IntPtr dwExtraInfo);
+    ' -Name "MouseDragSimulator" -Namespace "Win32" -PassThru
+    [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(${roundCoordinate(startX)}, ${roundCoordinate(startY)})
+    Start-Sleep -Milliseconds 50
+    $type::mouse_event(0x02, 0, 0, 0, [IntPtr]::Zero)
+    for ($i = 1; $i -le ${steps}; $i++) {
+      $x = ${roundCoordinate(startX)} + (($i / ${steps}) * (${roundCoordinate(endX)} - ${roundCoordinate(startX)}))
+      $y = ${roundCoordinate(startY)} + (($i / ${steps}) * (${roundCoordinate(endY)} - ${roundCoordinate(startY)}))
+      [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point([int][math]::Round($x), [int][math]::Round($y))
+      Start-Sleep -Milliseconds ${stepDelay}
+    }
+    $type::mouse_event(0x04, 0, 0, 0, [IntPtr]::Zero)
+  `;
+
+  await runPowerShell(psScript, Math.max(3000, durationMs + 2000));
+}
+
+async function macosDrag(startX, startY, endX, endY) {
+  requireMacOS();
+  const osascript = `
+    tell application "System Events"
+      drag from {${roundCoordinate(startX)}, ${roundCoordinate(startY)}} to {${roundCoordinate(endX)}, ${roundCoordinate(endY)}}
+    end tell
+  `;
+
+  await runAppleScript(osascript, 5000);
+}
+
+async function linuxDrag(startX, startY, endX, endY, durationMs = 500) {
+  await runCommand(
+    'xdotool',
+    [
+      'mousemove',
+      String(roundCoordinate(startX)),
+      String(roundCoordinate(startY)),
+      'mousedown',
+      '1',
+      'mousemove',
+      '--sync',
+      '--duration',
+      String(Math.max(0, Math.round(durationMs))),
+      String(roundCoordinate(endX)),
+      String(roundCoordinate(endY)),
+      'mouseup',
+      '1',
+    ],
+    Math.max(3000, durationMs + 2000),
+  );
+}
+
+export async function computerDrag(startX, startY, endX, endY, durationMs = 500) {
+  try {
+    const platform = getPlatform();
+    if (platform === 'win32') {
+      await windowsDrag(startX, startY, endX, endY, durationMs);
+    } else if (platform === 'darwin') {
+      await macosDrag(startX, startY, endX, endY);
+    } else if (platform === 'linux') {
+      await linuxDrag(startX, startY, endX, endY, durationMs);
+    } else {
+      return { ok: false, error: strings.errors.platformNotSupported };
+    }
+
+    return {
+      ok: true,
+      output: strings.output.dragged
+        .replace('{startX}', String(roundCoordinate(startX)))
+        .replace('{startY}', String(roundCoordinate(startY)))
+        .replace('{endX}', String(roundCoordinate(endX)))
+        .replace('{endY}', String(roundCoordinate(endY))),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: strings.errors.dragFailed.replace('{error}', formatError(error)),
+    };
+  }
+}

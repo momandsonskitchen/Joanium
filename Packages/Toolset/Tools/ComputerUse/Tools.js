@@ -1,4 +1,5 @@
-import strings from './I18n/en.js';
+import { COMPUTER_USE_TOOLS } from './Core/Chat/Tools.js';
 
-export const TOOL_DEFINITIONS = strings.tools;
+export { COMPUTER_USE_TOOLS };
+export const TOOL_DEFINITIONS = COMPUTER_USE_TOOLS;
 export default TOOL_DEFINITIONS;

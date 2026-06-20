@@ -45,7 +45,25 @@ import { t } from '../I18n/Index.js';
 element.textContent = t('settings');
 ```
 
-### 4. No HTML Attributes That Expose the DOM
+### 4. No AI Prompts or Tool Schemas in I18n
+
+`I18n/` is only for user-facing UI text and runtime messages. AI-facing prompt text, tool
+descriptions, parameter descriptions, and tool schemas must live in `Prompt.js`, `Tools.js`, or
+`Core/Chat/Tools.js` depending on the package pattern.
+
+```js
+// WRONG
+const strings = {
+  tools: [{ name: 'service_action', description: 'AI-facing tool description.' }],
+};
+
+// RIGHT
+export const SERVICE_TOOLS = [
+  { name: 'service_action', description: 'AI-facing tool description.' },
+];
+```
+
+### 5. No HTML Attributes That Expose the DOM
 
 No `data-*` attributes, no `title` attributes (triggers native browser tooltip â€” looks wrong in a desktop app).
 
@@ -57,7 +75,7 @@ No `data-*` attributes, no `title` attributes (triggers native browser tooltip â
 <div class="item">
 ```
 
-### 5. Index.js Is the Only Public Entry
+### 6. Index.js Is the Only Public Entry
 
 Every package has an `Index.js`. It is the only public entry point. Nothing outside a package imports its inner files (`Core/`, `UI/`, `IPC/`).
 
@@ -69,7 +87,7 @@ import { something } from '../Chat/Core/ChatState.js';
 import ChatPackage from '../Chat/Index.js';
 ```
 
-### 6. Auto-Discovery, Never Hardcoding
+### 7. Auto-Discovery, Never Hardcoding
 
 Packages are discovered dynamically. Do not hardcode package names in the bootstrap or registry.
 
@@ -81,15 +99,15 @@ const packages = ['Chat', 'Memory', 'Toolset'];
 const packages = discoverPackages(packagesDirectory);
 ```
 
-### 7. Helpers Go in Utils.js
+### 8. Helpers Go in Utils.js
 
 If a file has helper functions supporting main logic, they go in `Utils.js` alongside it.
 
-### 8. Update Docs
+### 9. Update Docs
 
 Always update the docs if you make any major changes.
 
-### 9. Test
+### 10. Test
 
 Always test your changes.
 

@@ -85,3 +85,19 @@ export async function getScreenInfo() {
     };
   }
 }
+
+export async function getCursorPosition() {
+  try {
+    const point = screen.getCursorScreenPoint();
+
+    return {
+      ok: true,
+      output: toJsonOutput(point),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: strings.errors.cursorPositionFailed.replace('{error}', formatError(error)),
+    };
+  }
+}

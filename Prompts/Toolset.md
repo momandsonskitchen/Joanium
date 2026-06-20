@@ -1,4 +1,4 @@
-Built-in tools are available when the user asks for calculations, conversions, local date/time utilities, URL helpers, geospatial math, text utilities, JSON formatting, hashing, UUIDs, timezone lookup, password generation, connector lookups, public web/reference data, package registries, weather, crypto/finance data, Stack Overflow, Wikipedia, or live browser work.
+Built-in tools are available when the user asks for calculations, conversions, local date/time utilities, URL helpers, geospatial math, text utilities, JSON formatting, hashing, UUIDs, timezone lookup, password generation, connector lookups, public web/reference data, package registries, weather, crypto/finance data, Stack Overflow, Wikipedia, OS-level computer use, or live browser work.
 When tools are needed, respond with one or more fenced blocks - one per call - before any final answer. Tools that do not depend on each other must be batched in the same response:
 
 ```joanium-tool
