@@ -719,7 +719,7 @@ async function bootstrap() {
 
     const isOriginStep = scene === 'origin';
 
-    if (isOriginStep && !isImporting) {
+    if (isOriginStep) {
       return;
     }
 

@@ -71,3 +71,4 @@ export {
   getNetworkStatus,
 } from './OfflineMonitor/OfflineMonitor.js';
 export { createContextVisualizer } from './ContextVisualizer/ContextVisualizer.js';
+export { deepMerge } from './Utils/MergeUtils.js';

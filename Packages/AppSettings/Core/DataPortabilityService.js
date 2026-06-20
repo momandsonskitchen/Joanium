@@ -5,6 +5,7 @@ import JSZip from 'jszip';
 import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
 import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
 import { createDefaultUserState } from '../../Shared/UserData/UserData.js';
+import { deepMerge } from '../../Shared/Utils/MergeUtils.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -44,42 +45,6 @@ async function addDirectoryToZip(zip, dirPath, zipFolder) {
 }
 
 // ── Merge helpers ─────────────────────────────────────────────────────────────
-
-/**
- * Deep merge two plain objects. `current` wins on every scalar conflict.
- * Arrays are handled specially: if both sides are arrays they are unioned
- * (deduped by JSON identity). Objects are recursed into.
- */
-function deepMerge(current, imported) {
-  if (current === null || current === undefined) return imported;
-  if (imported === null || imported === undefined) return current;
-
-  // Both are arrays → dedupe union (JSON identity)
-  if (Array.isArray(current) && Array.isArray(imported)) {
-    const seen = new Set(current.map((v) => JSON.stringify(v)));
-    const extras = imported.filter((v) => !seen.has(JSON.stringify(v)));
-    return [...current, ...extras];
-  }
-
-  // Both are plain objects → recurse
-  if (
-    typeof current === 'object' &&
-    typeof imported === 'object' &&
-    !Array.isArray(current) &&
-    !Array.isArray(imported)
-  ) {
-    const result = { ...imported }; // start with imported so we keep its shape
-    for (const key of Object.keys(current)) {
-      if (key === '__proto__' || key === 'constructor') continue;
-      result[key] = deepMerge(current[key], imported[key]);
-    }
-    return result;
-  }
-
-  // Scalars — current wins when it has a real value (null/undefined already handled above)
-  if (current !== '') return current;
-  return imported;
-}
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
