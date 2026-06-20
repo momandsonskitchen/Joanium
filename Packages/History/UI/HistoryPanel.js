@@ -73,6 +73,7 @@ export function createHistoryPanel(
     const blurHandler = () => void finish(true);
     input.addEventListener('blur', blurHandler);
     input.addEventListener('keydown', (e) => {
+      e.stopPropagation(); // Prevent keys from reaching the parent <button>
       if (e.key === 'Enter') {
         e.preventDefault();
         void finish(true);
@@ -82,6 +83,11 @@ export function createHistoryPanel(
         void finish(false);
       }
     });
+    // The input lives inside a <button>. Browsers fire a native click on
+    // <button> elements when space‑keyup occurs, which would navigate into
+    // the chat. Block that by stopping propagation of keyup and click.
+    input.addEventListener('keyup', (e) => e.stopPropagation());
+    input.addEventListener('click', (e) => e.stopPropagation());
 
     titleEl.replaceWith(input);
     input.focus();
@@ -94,8 +100,19 @@ export function createHistoryPanel(
     const card = createElement('div', 'chat-history__card');
 
     // Body — main click target
-    const body = createElement('button', 'chat-history__card-body');
-    body.type = 'button';
+    const body = createElement('div', 'chat-history__card-body');
+    body.setAttribute('role', 'button');
+    body.setAttribute('tabindex', '0');
+    body.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        void onLoadSession?.(session.id);
+      } else if (e.key === ' ') {
+        if (e.target.closest('.chat-history__card-title-input')) return;
+        e.preventDefault();
+        void onLoadSession?.(session.id);
+      }
+    });
 
     const msgCount = session.messageCount ?? 0;
     const msgLabel =
@@ -156,7 +173,11 @@ export function createHistoryPanel(
     }
 
     body.append(titleEl, metaEl);
-    body.addEventListener('click', () => void onLoadSession?.(session.id));
+    body.addEventListener('click', (e) => {
+      // Don't navigate if the user is interacting with the rename input
+      if (e.target.closest('.chat-history__card-title-input')) return;
+      void onLoadSession?.(session.id);
+    });
 
     // Actions — visible on hover
     const actions = createElement('div', 'chat-history__card-actions');
