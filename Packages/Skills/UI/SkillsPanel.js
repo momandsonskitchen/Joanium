@@ -1,11 +1,11 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
 import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { populateSearchableCards } from '../../Shared/PanelList/PanelList.js';
 
 export function createSkillsPanel(strings) {
   let panel = null;
@@ -82,47 +82,18 @@ export function createSkillsPanel(strings) {
   }
 
   async function populateList(listEl, query = '') {
-    listEl.replaceChildren();
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'chat-skills__skeleton'));
-    }
-
-    let skills;
-    try {
-      skills = await invokeIpc('skills:list-skills');
-    } catch {
-      skills = [];
-    }
-
-    const q = collapseWhitespace(query).toLowerCase();
-    const filtered = q
-      ? skills.filter(
-          (s) =>
-            collapseWhitespace(s.name).toLowerCase().includes(q) ||
-            collapseWhitespace(s.description).toLowerCase().includes(q) ||
-            collapseWhitespace(s.namespace).toLowerCase().includes(q),
-        )
-      : skills;
-
-    listEl.replaceChildren();
-
-    if (filtered.length === 0) {
-      const empty = createElement('div', 'chat-skills__empty');
-      empty.append(
-        createElement('p', 'chat-skills__empty-title', q ? strings.noResults : strings.empty),
-        createElement(
-          'p',
-          'chat-skills__empty-hint',
-          q ? strings.noResultsHint : strings.emptyHint,
-        ),
-      );
-      listEl.append(empty);
-      return;
-    }
-
-    for (const skill of filtered) {
-      listEl.append(buildCard(skill, listEl));
-    }
+    await populateSearchableCards({
+      listEl,
+      query,
+      skeletonClassName: 'chat-skills__skeleton',
+      loadItems: () => invokeIpc('skills:list-skills'),
+      getSearchValues: (s) => [s.name, s.description, s.namespace],
+      buildCard,
+      strings,
+      emptyClassName: 'chat-skills__empty',
+      emptyTitleClassName: 'chat-skills__empty-title',
+      emptyHintClassName: 'chat-skills__empty-hint',
+    });
   }
 
   async function populateViewer(skill) {

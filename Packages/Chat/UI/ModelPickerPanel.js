@@ -333,12 +333,12 @@ export function createModelPickerPanel({ providers, userProviderDetails, strings
 
       // Provider icon
       if (provider.iconPath) {
-        const providerIcon = document.createElement('img');
-        providerIcon.className = 'chat-model-picker__option-provider-icon';
-        providerIcon.src = provider.iconPath;
-        providerIcon.alt = provider.label ?? '';
-        providerIcon.draggable = false;
-        option.append(providerIcon);
+        option.append(
+          createProviderIcon(provider.iconPath, {
+            className: 'chat-model-picker__option-provider-icon',
+            alt: provider.label ?? '',
+          }),
+        );
       }
 
       // Model name label

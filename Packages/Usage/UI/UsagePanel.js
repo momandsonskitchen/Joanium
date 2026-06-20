@@ -3,6 +3,7 @@ import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { createDropDownLite } from '../../Shared/DropDownLite/DropDownLite.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
+import { createProviderIcon } from '../../Shared/Icons/Icons.js';
 
 // ─── Formatting helpers ────────────────────────────────────────────────────
 
@@ -620,12 +621,11 @@ function buildModelTable(strings, models) {
 
     const providerRow = createElement('div', 'usage-models__provider-row');
     if (model.providerIconPath) {
-      const providerIcon = document.createElement('img');
-      providerIcon.className = 'usage-models__provider-icon';
-      providerIcon.src = model.providerIconPath;
-      providerIcon.alt = '';
-      providerIcon.draggable = false;
-      providerRow.append(providerIcon);
+      providerRow.append(
+        createProviderIcon(model.providerIconPath, {
+          className: 'usage-models__provider-icon',
+        }),
+      );
     }
     providerRow.append(
       createElement('span', 'usage-models__model-provider', model.providerLabel || ''),

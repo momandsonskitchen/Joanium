@@ -1,5 +1,4 @@
 import { createElement } from '../../Shared/Utils/DomUtils.js';
-import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { renderMarkdown } from '../../Shared/Markdown/MarkdownRenderer.js';
@@ -7,6 +6,7 @@ import { createIcon } from '../../Shared/Icons/Icons.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { formatPersonaName } from './Utils.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { populateSearchableCards } from '../../Shared/PanelList/PanelList.js';
 
 // ---------------------------------------------------------------------------
 // Panel factory
@@ -93,49 +93,18 @@ export function createPersonasPanel(strings, { getActivePersona, onActivatePerso
   // ── populateList ─────────────────────────────────────────────────────────
 
   async function populateList(listEl, query = '') {
-    listEl.replaceChildren();
-
-    // Show skeletons while loading
-    for (let i = 0; i < 3; i++) {
-      listEl.append(createElement('div', 'chat-personas__skeleton'));
-    }
-
-    let personas;
-    try {
-      personas = await invokeIpc('personas:list-personas');
-    } catch {
-      personas = [];
-    }
-
-    const q = collapseWhitespace(query).toLowerCase();
-    const filtered = q
-      ? personas.filter(
-          (p) =>
-            collapseWhitespace(p.name).toLowerCase().includes(q) ||
-            collapseWhitespace(p.description).toLowerCase().includes(q) ||
-            collapseWhitespace(p.namespace).toLowerCase().includes(q),
-        )
-      : personas;
-
-    listEl.replaceChildren();
-
-    if (filtered.length === 0) {
-      const empty = createElement('div', 'chat-personas__empty');
-      empty.append(
-        createElement('p', 'chat-personas__empty-title', q ? strings.noResults : strings.empty),
-        createElement(
-          'p',
-          'chat-personas__empty-hint',
-          q ? strings.noResultsHint : strings.emptyHint,
-        ),
-      );
-      listEl.append(empty);
-      return;
-    }
-
-    for (const persona of filtered) {
-      listEl.append(buildCard(persona, listEl));
-    }
+    await populateSearchableCards({
+      listEl,
+      query,
+      skeletonClassName: 'chat-personas__skeleton',
+      loadItems: () => invokeIpc('personas:list-personas'),
+      getSearchValues: (p) => [p.name, p.description, p.namespace],
+      buildCard,
+      strings,
+      emptyClassName: 'chat-personas__empty',
+      emptyTitleClassName: 'chat-personas__empty-title',
+      emptyHintClassName: 'chat-personas__empty-hint',
+    });
   }
 
   // ── populateViewer ───────────────────────────────────────────────────────
