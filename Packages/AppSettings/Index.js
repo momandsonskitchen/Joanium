@@ -34,30 +34,7 @@ function ownerWindow(event) {
   return event?.sender?.getOwnerBrowserWindow?.() ?? BrowserWindow.getAllWindows()[0] ?? null;
 }
 
-const RESET_DATA_ENTRIES = [
-  'Agents',
-  'Avatar.avif',
-  'Avatar.bmp',
-  'Avatar.gif',
-  'Avatar.jpeg',
-  'Avatar.jpg',
-  'Avatar.png',
-  'Avatar.webp',
-  'ChannelMessages',
-  'Channels.json',
-  'Chats',
-  'Logs',
-  'MCPServers.json',
-  'Memories',
-  'Models',
-  'Projects',
-  'Screenshots',
-  'Security.json',
-  'System.json',
-  'Templates',
-  'Usage.json',
-  'User.json',
-];
+import { KNOWN_DATA_ENTRIES } from '../Shared/Storage/DataEntries.js';
 
 function restartApp(delayMs = 120) {
   setTimeout(() => {
@@ -79,8 +56,8 @@ function quitApp(delayMs = 120) {
 async function resetAppData(rootDirectory) {
   const dataDirectory = getWritableDataDirectory(rootDirectory);
 
-  await Promise.all(
-    RESET_DATA_ENTRIES.map((entry) =>
+  await Promise.allSettled(
+    KNOWN_DATA_ENTRIES.map((entry) =>
       rm(path.join(dataDirectory, entry), { recursive: true, force: true }),
     ),
   );

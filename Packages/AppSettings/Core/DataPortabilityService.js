@@ -6,6 +6,7 @@ import { getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js'
 import { serializeJson } from '../../Shared/Storage/JsonFileStore.js';
 import { createDefaultUserState } from '../../Shared/UserData/UserData.js';
 import { deepMerge } from '../../Shared/Utils/MergeUtils.js';
+import { KNOWN_DATA_ENTRIES } from '../../Shared/Storage/DataEntries.js';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -36,10 +37,14 @@ async function addDirectoryToZip(zip, dirPath, zipFolder) {
     const fullPath = path.join(dirPath, entry.name);
     const zipPath = `${zipFolder}/${entry.name}`;
 
-    if (entry.isDirectory()) {
-      await addDirectoryToZip(zip, fullPath, zipPath);
-    } else if (entry.isFile()) {
-      zip.file(zipPath, await readFile(fullPath));
+    try {
+      if (entry.isDirectory()) {
+        await addDirectoryToZip(zip, fullPath, zipPath);
+      } else if (entry.isFile()) {
+        zip.file(zipPath, await readFile(fullPath));
+      }
+    } catch (err) {
+      console.warn(`[Joanium] Export: skipping ${zipPath}:`, err.message);
     }
   }
 }
@@ -329,34 +334,7 @@ export async function exportData(rootDirectory) {
   // which also holds Electron‑internal files (Preferences, Local Storage,
   // Cache, etc.).  These are often locked and must not be exported.
   // Restrict the export to the known app-data entries only.
-  const EXPORT_ENTRIES = [
-    'Agents',
-    'Avatar.avif',
-    'Avatar.bmp',
-    'Avatar.gif',
-    'Avatar.jpeg',
-    'Avatar.jpg',
-    'Avatar.png',
-    'Avatar.webp',
-    'Browsing',
-    'ChannelMessages',
-    'Channels.json',
-    'Chats',
-    'Dreams',
-    'Memories',
-    'Models',
-    'MCPServers.json',
-    'Projects',
-    'Screenshots',
-    'Security.json',
-    'System.json',
-    'Templates',
-    'Usage',
-    'Usage.json',
-    'User.json',
-  ];
-
-  for (const name of EXPORT_ENTRIES) {
+  for (const name of KNOWN_DATA_ENTRIES) {
     const fullPath = path.join(dataDir, name);
     let entryStat;
     try {
@@ -450,118 +428,125 @@ export async function importData(rootDirectory) {
     // ── Always skip these ──────────────────────────────────────────────────
     if (topLevel === 'System.json') continue;
 
+    // ── Only import known data entries to avoid restoring Electron internals
+    if (!KNOWN_DATA_ENTRIES.includes(topLevel)) continue;
+
     const destPath = path.resolve(dataDir, normPath);
 
     // Prevent Zip Slip / Path Traversal: ensure resolved path stays inside dataDir
     const relative = path.relative(dataDir, destPath);
     if (relative.startsWith('..') || path.isAbsolute(relative)) continue;
 
-    const content = await zipEntry.async('nodebuffer');
+    try {
+      const content = await zipEntry.async('nodebuffer');
 
-    // Security.json: restore app-lock settings only when the current install
-    // is not already protected, so an import cannot silently replace the
-    // active local password.
-    if (normPath === 'Security.json') {
-      let currentSecurity = {};
-      try {
-        currentSecurity = JSON.parse(await readFile(destPath, 'utf8'));
-      } catch {
-        /* no current security file */
-      }
+      // Security.json: restore app-lock settings only when the current install
+      // is not already protected, so an import cannot silently replace the
+      // active local password.
+      if (normPath === 'Security.json') {
+        let currentSecurity = {};
+        try {
+          currentSecurity = JSON.parse(await readFile(destPath, 'utf8'));
+        } catch {
+          /* no current security file */
+        }
 
-      if (currentSecurity?.enabled) continue;
+        if (currentSecurity?.enabled) continue;
 
-      let importedSecurity;
-      try {
-        importedSecurity = JSON.parse(content.toString('utf8'));
-      } catch {
-        continue;
-      }
+        let importedSecurity;
+        try {
+          importedSecurity = JSON.parse(content.toString('utf8'));
+        } catch {
+          continue;
+        }
 
-      const restoredSecurity = {
-        ...importedSecurity,
-        failedPasswordAttempts: 0,
-        lockedUntil: null,
-      };
+        const restoredSecurity = {
+          ...importedSecurity,
+          failedPasswordAttempts: 0,
+          lockedUntil: null,
+        };
 
-      await mkdir(path.dirname(destPath), { recursive: true });
-      await writeFile(destPath, serializeJson(restoredSecurity), 'utf8');
-      continue;
-    }
-
-    // ── User.json: smart merge ─────────────────────────────────────────────
-    if (normPath === 'User.json') {
-      let currentData = {};
-      try {
-        currentData = JSON.parse(await readFile(destPath, 'utf8'));
-      } catch {
-        /* no current file — start from empty */
-      }
-      let importedData;
-      try {
-        importedData = JSON.parse(content.toString('utf8'));
-      } catch {
-        continue;
-      }
-      const merged = mergeUserJson(currentData, importedData);
-      await mkdir(path.dirname(destPath), { recursive: true });
-      await writeFile(destPath, serializeJson(merged), 'utf8');
-      continue;
-    }
-
-    // ── Channels.json: smart merge ─────────────────────────────────────────
-    if (normPath === 'Channels.json') {
-      let currentData = {};
-      try {
-        currentData = JSON.parse(await readFile(destPath, 'utf8'));
-      } catch {
-        /* no current file */
-      }
-      let importedData;
-      try {
-        importedData = JSON.parse(content.toString('utf8'));
-      } catch {
-        continue;
-      }
-      const merged = mergeChannelsJson(currentData, importedData);
-      await mkdir(path.dirname(destPath), { recursive: true });
-      await writeFile(destPath, serializeJson(merged), 'utf8');
-      continue;
-    }
-
-    // ── Avatar files: write only if no avatar currently exists ─────────────
-    const ext = path.extname(normPath).toLowerCase();
-    const base = path.basename(normPath).toLowerCase();
-    if (
-      base.startsWith('avatar') &&
-      ['.avif', '.bmp', '.gif', '.jpeg', '.jpg', '.png', '.webp'].includes(ext)
-    ) {
-      if (!(await fileExists(destPath))) {
         await mkdir(path.dirname(destPath), { recursive: true });
-        await writeFile(destPath, content);
+        await writeFile(destPath, serializeJson(restoredSecurity), 'utf8');
+        continue;
       }
-      writtenAvatarPath = destPath;
-      continue;
-    }
 
-    // ── Memory .md files: restore the actual backed-up memory files.
-    if (topLevel === 'Memories' && normPath.endsWith('.md')) {
-      const currentContent = await readFile(destPath, 'utf8').catch(() => '');
-      const mergedContent = mergeMarkdown(
-        currentContent,
-        content.toString('utf8'),
-        path.basename(normPath),
-      );
+      // ── User.json: smart merge ─────────────────────────────────────────────
+      if (normPath === 'User.json') {
+        let currentData = {};
+        try {
+          currentData = JSON.parse(await readFile(destPath, 'utf8'));
+        } catch {
+          /* no current file — start from empty */
+        }
+        let importedData;
+        try {
+          importedData = JSON.parse(content.toString('utf8'));
+        } catch {
+          continue;
+        }
+        const merged = mergeUserJson(currentData, importedData);
+        await mkdir(path.dirname(destPath), { recursive: true });
+        await writeFile(destPath, serializeJson(merged), 'utf8');
+        continue;
+      }
 
+      // ── Channels.json: smart merge ─────────────────────────────────────────
+      if (normPath === 'Channels.json') {
+        let currentData = {};
+        try {
+          currentData = JSON.parse(await readFile(destPath, 'utf8'));
+        } catch {
+          /* no current file */
+        }
+        let importedData;
+        try {
+          importedData = JSON.parse(content.toString('utf8'));
+        } catch {
+          continue;
+        }
+        const merged = mergeChannelsJson(currentData, importedData);
+        await mkdir(path.dirname(destPath), { recursive: true });
+        await writeFile(destPath, serializeJson(merged), 'utf8');
+        continue;
+      }
+
+      // ── Avatar files: write only if no avatar currently exists ─────────────
+      const ext = path.extname(normPath).toLowerCase();
+      const base = path.basename(normPath).toLowerCase();
+      if (
+        base.startsWith('avatar') &&
+        ['.avif', '.bmp', '.gif', '.jpeg', '.jpg', '.png', '.webp'].includes(ext)
+      ) {
+        if (!(await fileExists(destPath))) {
+          await mkdir(path.dirname(destPath), { recursive: true });
+          await writeFile(destPath, content);
+        }
+        writtenAvatarPath = destPath;
+        continue;
+      }
+
+      // ── Memory .md files: restore the actual backed-up memory files.
+      if (topLevel === 'Memories' && normPath.endsWith('.md')) {
+        const currentContent = await readFile(destPath, 'utf8').catch(() => '');
+        const mergedContent = mergeMarkdown(
+          currentContent,
+          content.toString('utf8'),
+          path.basename(normPath),
+        );
+
+        await mkdir(path.dirname(destPath), { recursive: true });
+        await writeFile(destPath, mergedContent, 'utf8');
+        continue;
+      }
+
+      // ── Everything else: restore the backed-up file.
+      // Chats, Agents, Projects, Templates, ChannelMessages, Usage, etc.
       await mkdir(path.dirname(destPath), { recursive: true });
-      await writeFile(destPath, mergedContent, 'utf8');
-      continue;
+      await writeFile(destPath, content);
+    } catch (err) {
+      console.warn(`[Joanium] Import: skipping ${normPath}:`, err.message);
     }
-
-    // ── Everything else: restore the backed-up file.
-    // Chats, Agents, Projects, Templates, ChannelMessages, Usage, etc.
-    await mkdir(path.dirname(destPath), { recursive: true });
-    await writeFile(destPath, content);
   }
 
   // If we wrote a new avatar file, patch avatarPath in User.json to point to
