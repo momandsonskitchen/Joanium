@@ -685,6 +685,7 @@ export function createBrowserPreviewService({ rootDirectory } = {}) {
       'did-fail-load',
       (_event, errorCode, errorDescription, validatedUrl, isMainFrame) => {
         if (!isMainFrame) return;
+        if (errorCode === -3) return;
         loading = false;
         url = validatedUrl || url;
         status = formatText(browserStrings.status.loadFailed, {
