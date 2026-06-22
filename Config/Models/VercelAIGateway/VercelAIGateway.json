@@ -2238,6 +2238,20 @@
         "text": true
       }
     },
+    "sakana/fugu-ultra": {
+      "name": "Fugu Ultra",
+      "description": "Fugu Ultra coordinates a deeper pool of expert agents to maximize answer quality on hard, high-stakes problems. Fugu Ultra focuses on maximizing performance, for a higher cost. It routes between one to three agents, depending on the problem.",
+      "context_window": 1000000,
+      "max_output": 1000000,
+      "pricing": {
+        "input": 5,
+        "output": 30
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "stepfun/step-3.5-flash": {
       "name": "StepFun 3.5 Flash",
       "description": "Step 3.5 Flash is an open-source reasoning model by StepFun with 196B total parameters (11B active) using Mixture of Experts. It features a 256K context window, deep reasoning, tool calling, and agentic capabilities, achieving 97.3 on AIME 2025 and 74.4% on SWE-bench Verified.",
@@ -2643,5 +2657,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-22T02:23:31.278Z"
+  "_syncedAt": "2026-06-22T08:44:19.784Z"
 }

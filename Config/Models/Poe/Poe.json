@@ -591,8 +591,8 @@
         "max_output_tokens": null
       }
     },
-    "qwen-3-next-80b-think": {
-      "name": "Qwen 3 Next 80B Think"
+    "qwen3-next-80b-think": {
+      "name": "Qwen3 Next 80B Think"
     },
     "qwen3-next-80b": {
       "name": "Qwen3 Next 80B"
@@ -675,14 +675,14 @@
     "amazon-nova-canvas": {
       "name": "Amazon Nova Canvas"
     },
-    "kimi-k2": {
-      "name": "Kimi K2"
+    "kimi-k2-instruct-n": {
+      "name": "Kimi K2 Instruct N"
     },
     "pika-v1.5-effects": {
       "name": "Pika V1 5 Effects"
     },
-    "glm-4.5": {
-      "name": "Glm 4 5"
+    "glm-4.5-n": {
+      "name": "Glm 4 5 N"
     },
     "deepseek-v3.1-n": {
       "name": "Deepseek V3 1 N"
@@ -1736,5 +1736,5 @@
       "name": "Kling 3 0 TURBO"
     }
   },
-  "_syncedAt": "2026-06-22T02:23:32.303Z"
+  "_syncedAt": "2026-06-22T08:44:20.743Z"
 }
