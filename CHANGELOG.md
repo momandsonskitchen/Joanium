@@ -6,6 +6,17 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.622.0] - 2026-06-22
+
+* Updated AI Models
+* fix: ignore ERR_ABORTED in live browser did-fail-load to prevent cascading navigation abort
+* Updated AI Models
+* Updated AI Models
+* Updated AI Models
+* Removed Unused Test Files
+
+---
+
 ## [2026.620.2] - 2026-06-20
 
 * feat: add KNOWN_DATA_ENTRIES for consistent data
