@@ -119,6 +119,19 @@
         "image": true
       }
     },
+    "nex-agi/nex-n2-pro": {
+      "name": "Nex AGI: Nex-N2-Pro",
+      "description": "Nex-N2-Pro is an agentic mixture-of-experts model from Nex AGI, with 17B active parameters out of 397B total. Built on the Qwen3.5 architecture, it accepts text and image input and produces...",
+      "context_window": 262144,
+      "pricing": {
+        "input": 0.5,
+        "output": 2.5
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "nvidia/nemotron-3.5-content-safety:free": {
       "name": "NVIDIA: Nemotron 3.5 Content Safety (free)",
       "description": "NVIDIA Nemotron 3.5 Content Safety is a compact 4B-parameter multimodal guardrail model from NVIDIA, fine-tuned from Google Gemma-3-4B. It moderates both inputs to and responses from LLMs and VLMs, accepting...",
@@ -3752,19 +3765,6 @@
         "text": true
       }
     },
-    "anthropic/claude-3.5-haiku": {
-      "name": "Anthropic: Claude 3.5 Haiku",
-      "description": "Claude 3.5 Haiku features offers enhanced capabilities in speed, coding accuracy, and tool use. Engineered to excel in real-time applications, it delivers quick response times that are essential for dynamic...",
-      "context_window": 200000,
-      "pricing": {
-        "input": 0.8,
-        "output": 4
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "anthracite-org/magnum-v4-72b": {
       "name": "Magnum v4 72B",
       "description": "This is a series of models designed to replicate the prose quality of the Claude 3 models, specifically Sonnet(https://openrouter.ai/anthropic/claude-3.5-sonnet) and Opus(https://openrouter.ai/anthropic/claude-3-opus).\n\nThe model is fine-tuned on top of [Qwen2.5 72B](https://openrouter.ai/qwen/qwen-",
@@ -4283,5 +4283,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-21T13:16:09.581Z"
+  "_syncedAt": "2026-06-22T02:23:12.647Z"
 }
