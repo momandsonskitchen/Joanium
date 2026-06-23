@@ -229,6 +229,14 @@
   color: var(--color-chat-text-secondary);
 }
 
+.chat-leaderboard__card-provider-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
 /* ── Skeleton ─────────────────────────────────────────────────────────────── */
 
 .chat-leaderboard__skeleton {
@@ -763,6 +771,7 @@
 .lb-provider-badge {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   background: rgba(var(--color-accent-rgb), 0.08);
@@ -771,6 +780,14 @@
   font-weight: 620;
   letter-spacing: 0.01em;
   flex-shrink: 0;
+}
+
+.lb-provider-badge__icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 /* ── Deprecation warning ──────────────────────────────────────────────────── */

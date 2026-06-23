@@ -3,13 +3,42 @@ import { collapseWhitespace } from '../../Shared/Utils/StringUtils.js';
 import { createSearchBar } from '../../Shared/SearchBar/SearchBar.js';
 import { createPanelHeader } from '../../Shared/PanelHeader/PanelHeader.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
-import { iconMarkup } from '../../Shared/Icons/Icons.js';
+import { iconMarkup, createProviderIcon } from '../../Shared/Icons/Icons.js';
+import { invokeIpc } from '../../Shared/Ipc/RendererIpc.js';
 
 const API_URL = 'https://openrouter.ai/api/v1/models';
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
 let cachedModels = null;
 let cacheTimestamp = 0;
+
+let providerIconMap = null;
+let providerIconMapPromise = null;
+
+async function loadProviderIconMap() {
+  if (providerIconMap) return providerIconMap;
+  if (providerIconMapPromise) return providerIconMapPromise;
+  providerIconMapPromise = (async () => {
+    try {
+      const catalog = await invokeIpc('providers:list-catalog');
+      const map = new Map();
+      for (const p of catalog) {
+        if (p.id && p.iconPath) map.set(p.id, p.iconPath);
+      }
+      providerIconMap = map;
+      return map;
+    } catch {
+      providerIconMap = new Map();
+      return providerIconMap;
+    }
+  })();
+  return providerIconMapPromise;
+}
+
+function getProviderIconPath(providerId) {
+  if (!providerId || !providerIconMap) return null;
+  return providerIconMap.get(providerId.toLowerCase()) ?? null;
+}
 
 function formatPrice(perToken) {
   if (!perToken || perToken === '0') return 'Free';
@@ -284,6 +313,7 @@ export function createLeaderboardPanel(strings) {
     }
 
     try {
+      await loadProviderIconMap();
       allModels = await fetchModels();
     } catch (err) {
       listEl.replaceChildren();
@@ -349,6 +379,15 @@ export function createLeaderboardPanel(strings) {
 
     const meta = createElement('div', 'chat-leaderboard__card-meta');
     if (model.provider) {
+      const providerIcon = getProviderIconPath(model.provider);
+      if (providerIcon) {
+        meta.append(
+          createProviderIcon(providerIcon, {
+            className: 'chat-leaderboard__card-provider-icon',
+            alt: model.provider,
+          }),
+        );
+      }
       meta.append(createElement('span', 'chat-leaderboard__card-provider', model.provider));
     }
     meta.append(
@@ -411,7 +450,18 @@ export function createLeaderboardPanel(strings) {
       nameRow.append(scorePill);
     }
     if (model.provider) {
-      nameRow.append(createElement('span', 'lb-provider-badge', model.provider));
+      const providerIcon = getProviderIconPath(model.provider);
+      const badge = createElement('span', 'lb-provider-badge');
+      if (providerIcon) {
+        badge.append(
+          createProviderIcon(providerIcon, {
+            className: 'lb-provider-badge__icon',
+            alt: model.provider,
+          }),
+        );
+      }
+      badge.append(model.provider);
+      nameRow.append(badge);
     }
     headerLeft.append(nameRow);
 
