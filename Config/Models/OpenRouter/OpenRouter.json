@@ -106,19 +106,6 @@
         "image": true
       }
     },
-    "nex-agi/nex-n2-pro:free": {
-      "name": "Nex AGI: Nex-N2-Pro (free)",
-      "description": "Nex-N2-Pro is an agentic mixture-of-experts model from Nex AGI, with 17B active parameters out of 397B total. Built on the Qwen3.5 architecture, it accepts text and image input and produces...",
-      "context_window": 262144,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "nex-agi/nex-n2-pro": {
       "name": "Nex AGI: Nex-N2-Pro",
       "description": "Nex-N2-Pro is an agentic mixture-of-experts model from Nex AGI, with 17B active parameters out of 397B total. Built on the Qwen3.5 architecture, it accepts text and image input and produces...",
@@ -864,6 +851,19 @@
       "pricing": {
         "input": 0.33,
         "output": 1.95
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "z-ai/glm-5v-turbo": {
+      "name": "Z.ai: GLM 5V Turbo",
+      "description": "GLM-5V-Turbo is Z.ai’s first native multimodal agent foundation model, built for vision-based coding and agent-driven tasks. It natively handles image, video, and text inputs, excels at long-horizon planning, complex coding,...",
+      "context_window": 202752,
+      "pricing": {
+        "input": 1.2,
+        "output": 4
       },
       "inputs": {
         "text": true,
@@ -4283,5 +4283,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-22T08:43:56.046Z"
+  "_syncedAt": "2026-06-23T05:51:12.335Z"
 }

@@ -543,9 +543,6 @@
         "max_output_tokens": null
       }
     },
-    "glm-5-t": {
-      "name": "Glm 5 T"
-    },
     "gpt-5": {
       "name": "Gpt 5",
       "context_window": {
@@ -1734,7 +1731,10 @@
     },
     "kling-3.0-turbo": {
       "name": "Kling 3 0 TURBO"
+    },
+    "happyhorse-1.1": {
+      "name": "Happyhorse 1 1"
     }
   },
-  "_syncedAt": "2026-06-22T08:44:20.743Z"
+  "_syncedAt": "2026-06-23T05:51:34.866Z"
 }

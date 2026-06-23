@@ -140,6 +140,15 @@
     "google/gemma-4-31b-it": {
       "name": "Gemma 4 31B It"
     },
+    "parasail-trinity-large-thinking": {
+      "name": "Parasail Trinity Large Thinking"
+    },
+    "arcee-ai/Trinity-Large-Thinking": {
+      "name": "Trinity Large Thinking"
+    },
+    "arcee-ai/Trinity-Large-Thinking-FP8-Block": {
+      "name": "Trinity Large Thinking FP8 Block"
+    },
     "parasail-gemma-4-26b-a4b-it": {
       "name": "Parasail Gemma 4 26B A4b It"
     },
@@ -222,5 +231,5 @@
       "name": "GLM 5 2 FP8"
     }
   },
-  "_syncedAt": "2026-06-22T08:44:23.319Z"
+  "_syncedAt": "2026-06-23T05:51:37.457Z"
 }

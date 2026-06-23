@@ -543,16 +543,6 @@
         "image": true
       }
     },
-    "zai-org/glm-ocr": {
-      "name": "GLM-OCR",
-      "description": "GLM-OCR is a lightweight professional OCR model with only 0.9B parameters, achieving SOTA performance with a score of 94.62 on OmniDocBench V1.5. Optimized for real-world business scenarios, it delivers high-precision recognition for handwritten text, stamps, and code documentation. The model suppor",
-      "context_window": 32000,
-      "max_output": 32000,
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "deepseek/deepseek-v3.1": {
       "name": "DeepSeek V3.1",
       "description": "DeepSeek-V3.1 is a hybrid model that supports both thinking mode and non-thinking mode.DeepSeek-V3.1 is post-trained on the top of DeepSeek-V3.1-Base, which is built upon the original V3 base checkpoint through a two-phase long context extension approach, following the methodology outlined in the or",
@@ -1294,5 +1284,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-22T08:44:15.678Z"
+  "_syncedAt": "2026-06-23T05:51:30.820Z"
 }

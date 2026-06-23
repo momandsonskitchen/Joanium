@@ -61,10 +61,6 @@
       "name": "OpenAI GPT-OSS 20B",
       "context_window": 131072
     },
-    "zai-org/GLM-5": {
-      "name": "GLM 5 Fp4",
-      "context_window": 202752
-    },
     "Qwen/Qwen3.5-9B": {
       "name": "Qwen3.5 9B FP8",
       "context_window": 262144
@@ -113,17 +109,61 @@
       "name": "Qwen3.7 Plus",
       "context_window": 1000000
     },
-    "Qwen/Qwen3-VL-32B-Instruct": {
-      "name": "Qwen3-VL-32B-Instruct",
-      "context_window": 262144
+    "zai-org/GLM-5": {
+      "name": "GLM 5 Fp4",
+      "context_window": 202752
     },
-    "Qwen/Qwen3-Next-80B-A3B-Thinking": {
-      "name": "Qwen3 Next 80B A3b Thinking",
-      "context_window": 262144
+    "MiniMaxAI/MiniMax-M1-40k": {
+      "name": "Minimax M1 40K",
+      "context_window": 1048576
     },
-    "google/gemma-2-9b-it": {
-      "name": "Gemma 2 9B It",
-      "context_window": 8192
+    "MiniMaxAI/MiniMax-M1-80k": {
+      "name": "Minimax M1 80K",
+      "context_window": 1048576
+    },
+    "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO": {
+      "name": "Nous Hermes 2 Mixtral 8X7B Dpo",
+      "context_window": 32768
+    },
+    "Qwen/QwQ-32B": {
+      "name": "Qwen QwQ-32B",
+      "context_window": 131072
+    },
+    "Qwen/Qwen2-1.5B": {
+      "name": "Qwen 2 (1.5B)",
+      "context_window": 32768
+    },
+    "Qwen/Qwen2-72B": {
+      "name": "Qwen 2 (72B)",
+      "context_window": 32768
+    },
+    "Qwen/Qwen2-72B-Instruct": {
+      "name": "Qwen2 72B Instruct",
+      "context_window": 32768
+    },
+    "Qwen/Qwen2-VL-72B-Instruct": {
+      "name": "Qwen2-VL (72B) Instruct",
+      "context_window": 32768
+    },
+    "Qwen/Qwen2.5-1.5B": {
+      "name": "Qwen2.5 1.5B",
+      "context_window": 131072
+    },
+    "Qwen/Qwen2.5-1.5B-Instruct": {
+      "name": "Qwen2.5 1.5B Instruct",
+      "context_window": 32768
+    },
+    "Qwen/Qwen2.5-14B": {
+      "name": "Qwen2.5 14B",
+      "context_window": 131072
+    },
+    "Qwen/Qwen2.5-14B-Instruct": {
+      "name": "Qwen 2.5 14B Instruct",
+      "context_window": 32768
+    },
+    "Qwen/Qwen2.5-32B": {
+      "name": "Qwen2.5 32B",
+      "context_window": 131072
     },
     "google/gemma-4-E4B-it": {
       "name": "Gemma 4 E4B-it",
@@ -137,6 +177,10 @@
       "name": "nim/meta/llama-3.1-8b-instruct",
       "context_window": 16384
     },
+    "Qwen/Qwen2.5-32B-Instruct": {
+      "name": "Qwen2.5 32B Instruct",
+      "context_window": 32768
+    },
     "nim/nv-mistralai/mistral-nemo-12b-instruct": {
       "name": "nim/nv-mistralai/mistral-nemo-12b-instruct",
       "context_window": 16384
@@ -145,80 +189,137 @@
       "name": "nim/nvidia/llama-3.1-nemotron-70b-instruct",
       "context_window": 16384
     },
-    "deepseek-ai/deepseek-coder-33b-instruct": {
-      "name": "Deepseek Coder 33B Instruct",
-      "context_window": 16384
+    "Qwen/Qwen2.5-72B-Instruct": {
+      "name": "Qwen2.5 72B Instruct",
+      "context_window": 32768
     },
-    "arcee-ai/trinity-mini": {
-      "name": "Trinity Mini",
-      "context_window": 128000
+    "Qwen/Qwen2.5-72B-Instruct-Turbo": {
+      "name": "Qwen 2.5 72B Turbo",
+      "description": "Alibaba's Qwen 2.5 72B — strong at math, coding, and multilingual tasks with a 128K context window",
+      "context_window": 128000,
+      "max_output": 4096,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 1.2,
+        "output": 1.2
+      }
+    },
+    "Qwen/Qwen2.5-7B": {
+      "name": "Qwen2.5 7B",
+      "context_window": 131072
+    },
+    "Qwen/Qwen2.5-Coder-32B-Instruct": {
+      "name": "Qwen 2.5 Coder 32B Instruct",
+      "context_window": 16384
     },
     "Qwen/Qwen2.5-VL-72B-Instruct": {
       "name": "Qwen2.5-VL (72B) Instruct",
       "context_window": 32768
     },
-    "meta-llama/Llama-2-7b-chat-hf": {
-      "name": "meta-llama/Llama-2-7b-chat-hf",
-      "context_window": 4096
+    "Qwen/Qwen3-0.6B": {
+      "name": "Qwen3 0.6B",
+      "context_window": 40960
     },
-    "Qwen/Qwen3.6-35B-A3B-FP8": {
-      "name": "Qwen3.6 35B A3b Fp8",
+    "Qwen/Qwen3-0.6B-Base": {
+      "name": "Qwen3 0.6B Base",
+      "context_window": 32768
+    },
+    "Qwen/Qwen3-1.7B": {
+      "name": "Qwen3 1.7B",
+      "context_window": 40960
+    },
+    "Qwen/Qwen3-1.7B-Base": {
+      "name": "Qwen3 1.7B Base",
+      "context_window": 32768
+    },
+    "Qwen/Qwen3-14B": {
+      "name": "Qwen3 14B",
+      "context_window": 2048
+    },
+    "Qwen/Qwen3-14B-Base": {
+      "name": "Qwen3 14B Base",
+      "context_window": 32768
+    },
+    "Qwen/Qwen3-235B-A22B-Instruct-2507-FP8": {
+      "name": "Qwen3 235B A22b Instruct 2507 Fp8",
       "context_window": 262144
     },
-    "google/gemma-3-270m-it": {
-      "name": "Gemma 3 270M It",
+    "Qwen/Qwen3-30B-A3B-Base": {
+      "name": "Qwen3 30B A3b Base",
       "context_window": 32768
     },
-    "meta-llama/Meta-Llama-3-70B-Instruct-Turbo": {
-      "name": "Meta Llama 3 70B Instruct Turbo",
-      "context_window": 8192
+    "Qwen/Qwen3-30B-A3B-Instruct-2507-Lora": {
+      "name": "Qwen3 30B A3B Instruct 2507 Lora",
+      "context_window": 262144
     },
-    "mistralai/Mistral-7B-Instruct-v0.3": {
-      "name": "Mistral (7B) Instruct v0.3",
+    "Qwen/Qwen3-32B": {
+      "name": "Qwen3 32B",
+      "context_window": 40960
+    },
+    "Qwen/Qwen3-4B-Base": {
+      "name": "Qwen3 4B Base",
       "context_window": 32768
     },
-    "mistralai/Mixtral-8x7B-Instruct-v0.1": {
-      "name": "Mixtral-8x7B Instruct v0.1",
-      "context_window": 32768
-    },
-    "allenai/Molmo-7B-D-0924": {
-      "name": "Molmo 7B D 0924",
-      "context_window": 4096
-    },
-    "google/gemma-3-27b-it-lora": {
-      "name": "Gemma 3 27B It Lora"
-    },
-    "deepseek-ai/DeepSeek-R1-0528": {
-      "name": "DeepSeek R1 0528 NVFP4",
-      "context_window": 163840
-    },
-    "zai-org/GLM-4.7-fp4": {
-      "name": "GLM 4.7 FP4",
-      "context_window": 202752
-    },
-    "Qwen/Qwen2-VL-72B-Instruct": {
-      "name": "Qwen2-VL (72B) Instruct",
-      "context_window": 32768
-    },
-    "Qwen/Qwen2.5-32B": {
-      "name": "Qwen2.5 32B",
-      "context_window": 131072
+    "Qwen/Qwen3-4B-Instruct-2507": {
+      "name": "Qwen3 4B Instruct 2507",
+      "context_window": 262144
     },
     "Hcompany/Holo3-35B-A3B": {
       "name": "Holo3 35B A3b",
       "context_window": 262144
     },
-    "Qwen/Qwen3-Coder-30B-A3B-Instruct": {
-      "name": "Qwen3 Coder 30B A3b Instruct",
+    "Qwen/Qwen3-8B": {
+      "name": "Qwen3 8B",
+      "context_window": 40960
+    },
+    "Qwen/Qwen3-8B-Base": {
+      "name": "Qwen3 8B Base",
+      "context_window": 32768
+    },
+    "Qwen/Qwen3-8B-Lora": {
+      "name": "Qwen3 8B Lora",
+      "context_window": 40960
+    },
+    "Qwen/Qwen3-Coder-Next-FP8": {
+      "name": "Qwen3 Coder Next Fp8",
       "context_window": 262144
     },
-    "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo": {
-      "name": "Meta Llama 3.1 70B Instruct Turbo",
+    "Qwen/Qwen3-Next-80B-A3B-Instruct": {
+      "name": "Qwen3 Next 80B A3b Instruct",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8": {
+      "name": "Qwen3 Next 80B A3b Instruct Fp8",
+      "context_window": 0
+    },
+    "Qwen/Qwen3-Next-80B-A3B-Thinking": {
+      "name": "Qwen3 Next 80B A3b Thinking",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3-VL-235B-A22B-Instruct-FP8": {
+      "name": "Qwen3-VL-235B-A22B-Instruct-FP8",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3-VL-32B-Instruct": {
+      "name": "Qwen3-VL-32B-Instruct",
+      "context_window": 262144
+    },
+    "agentica-org/DeepCoder-14B-Preview": {
+      "name": "Deepcoder 14B Preview",
       "context_window": 131072
     },
-    "meta-llama/Llama-4-Scout-17B-16E-Instruct-FP8-Lora": {
-      "name": "Llama 4 Scout 17B 16E Instruct Fp8 Lora",
-      "context_window": 10485760
+    "allenai/Molmo-7B-D-0924": {
+      "name": "Molmo 7B D 0924",
+      "context_window": 4096
+    },
+    "arcee-ai/trinity-mini": {
+      "name": "Trinity Mini",
+      "context_window": 128000
     },
     "deepcogito/cogito-v1-preview-llama-70B": {
       "name": "Cogito V1 Preview Llama 70B",
@@ -226,30 +327,6 @@
     },
     "deepcogito/cogito-v1-preview-llama-70B-Turbo": {
       "name": "Cogito V1 Preview Llama 70B Turbo",
-      "context_window": 131072
-    },
-    "Qwen/Qwen3-VL-8B-Instruct": {
-      "name": "Qwen3-VL-8B-Instruct",
-      "context_window": 262144
-    },
-    "mistralai/Mistral-Small-24B-Instruct-2501": {
-      "name": "Mistral Small (24B) Instruct 25.01",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3-4B-Base": {
-      "name": "Qwen3 4B Base",
-      "context_window": 32768
-    },
-    "Qwen/Qwen2-1.5B": {
-      "name": "Qwen 2 (1.5B)",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3-0.6B-Base": {
-      "name": "Qwen3 0.6B Base",
-      "context_window": 32768
-    },
-    "meta-llama/Llama-3.3-70B-Instruct": {
-      "name": "meta-llama/Llama-3.3-70B-Instruct",
       "context_window": 131072
     },
     "deepcogito/cogito-v1-preview-llama-8B": {
@@ -268,6 +345,10 @@
       "name": "Deepseek OCR 2",
       "context_window": 8192
     },
+    "deepseek-ai/DeepSeek-R1-0528": {
+      "name": "DeepSeek R1 0528 NVFP4",
+      "context_window": 163840
+    },
     "deepseek-ai/DeepSeek-R1-Distill-Llama-70B": {
       "name": "DeepSeek R1 Distill Llama 70B",
       "context_window": 131072
@@ -280,157 +361,56 @@
       "name": "DeepSeek R1 Distill Qwen 14B",
       "context_window": 131072
     },
-    "google/gemma-3-4b-it": {
-      "name": "Gemma 3 4b it",
-      "context_window": 65536
-    },
     "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B": {
       "name": "DeepSeek R1 Distill Qwen 7B",
       "context_window": 131072
     },
-    "mistralai/Mixtral-8x7B-Instruct-v0.1-FP8-Lora": {
-      "name": "Mixtral 8x7B Instruct V0.1 FP8 Lora",
+    "deepseek-ai/DeepSeek-V3.1": {
+      "name": "Deepseek V3.1 NVFP4",
+      "context_window": 131072
+    },
+    "deepseek-ai/deepseek-coder-33b-instruct": {
+      "name": "Deepseek Coder 33B Instruct",
+      "context_window": 16384
+    },
+    "google/gemma-2-27b-it": {
+      "name": "Gemma-2 Instruct (27B)",
+      "context_window": 8192
+    },
+    "google/gemma-2-9b-it": {
+      "name": "Gemma 2 9B It",
+      "context_window": 8192
+    },
+    "google/gemma-3-1b-pt": {
+      "name": "Gemma 3 1B Pt",
+      "context_window": 32768
+    },
+    "google/gemma-3-270m-it": {
+      "name": "Gemma 3 270M It",
       "context_window": 32768
     },
     "google/gemma-3-27b-it": {
       "name": "Gemma 3 27B It",
       "context_window": 65536
     },
-    "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8": {
-      "name": "Nvidia Nemotron 3 Super 120B A12b Fp8",
+    "google/gemma-3-27b-it-lora": {
+      "name": "Gemma 3 27B It Lora"
+    },
+    "google/gemma-4-31B-it-lora": {
+      "name": "Gemma 4 31B It Lora",
       "context_window": 262144
     },
-    "zai-org/GLM-4.5-Air-FP8": {
-      "name": "Glm 4.5 Air Fp8",
+    "google/medgemma-27b-text-it": {
+      "name": "Medgemma 27B Text It",
       "context_window": 131072
     },
-    "Qwen/Qwen2-72B": {
-      "name": "Qwen 2 (72B)",
-      "context_window": 32768
+    "meta-llama/Llama-2-7b-chat-hf": {
+      "name": "meta-llama/Llama-2-7b-chat-hf",
+      "context_window": 4096
     },
-    "Qwen/Qwen3-Next-80B-A3B-Instruct": {
-      "name": "Qwen3 Next 80B A3b Instruct",
-      "context_window": 262144
-    },
-    "agentica-org/DeepCoder-14B-Preview": {
-      "name": "Deepcoder 14B Preview",
-      "context_window": 131072
-    },
-    "Qwen/QwQ-32B": {
-      "name": "Qwen QwQ-32B",
-      "context_window": 131072
-    },
-    "Qwen/Qwen2.5-1.5B-Instruct": {
-      "name": "Qwen2.5 1.5B Instruct",
-      "context_window": 32768
-    },
-    "Qwen/Qwen2.5-14B": {
-      "name": "Qwen2.5 14B",
-      "context_window": 131072
-    },
-    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning-fp8": {
-      "name": "Nemotron 3 Nano Omni 30B A3b Reasoning Fp8",
-      "context_window": 131072
-    },
-    "MiniMaxAI/MiniMax-M2.5-FP4": {
-      "name": "MiniMax M2.5 FP4",
+    "meta-llama/Llama-3-8b-chat-hf": {
+      "name": "Meta Llama 3 8B Instruct Reference",
       "context_window": 8192
-    },
-    "Qwen/Qwen2.5-3B-Instruct": {
-      "name": "Qwen2.5 3B Instruct",
-      "context_window": 32768
-    },
-    "Qwen/Qwen2.5-72B": {
-      "name": "Qwen2.5 72B",
-      "context_window": 131072
-    },
-    "Qwen/Qwen2.5-7B": {
-      "name": "Qwen2.5 7B",
-      "context_window": 131072
-    },
-    "Qwen/Qwen2.5-7B-Instruct": {
-      "name": "Qwen2.5 7B Instruct",
-      "context_window": 32768
-    },
-    "Qwen/Qwen2.5-Coder-32B-Instruct": {
-      "name": "Qwen 2.5 Coder 32B Instruct",
-      "context_window": 16384
-    },
-    "Qwen/Qwen3-0.6B": {
-      "name": "Qwen3 0.6B",
-      "context_window": 40960
-    },
-    "Qwen/Qwen3-1.7B": {
-      "name": "Qwen3 1.7B",
-      "context_window": 40960
-    },
-    "Qwen/Qwen3-1.7B-Base": {
-      "name": "Qwen3 1.7B Base",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3-14B-Base": {
-      "name": "Qwen3 14B Base",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3-30B-A3B-Base": {
-      "name": "Qwen3 30B A3b Base",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3-8B": {
-      "name": "Qwen3 8B",
-      "context_window": 40960
-    },
-    "Qwen/Qwen3-8B-Base": {
-      "name": "Qwen3 8B Base",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3-Next-80B-A3B-Instruct-FP8": {
-      "name": "Qwen3 Next 80B A3b Instruct Fp8",
-      "context_window": 0
-    },
-    "Qwen/Qwen3-VL-235B-A22B-Instruct-FP8": {
-      "name": "Qwen3-VL-235B-A22B-Instruct-FP8",
-      "context_window": 262144
-    },
-    "google/gemma-2b-it": {
-      "name": "Gemma 2B It",
-      "context_window": 8192
-    },
-    "mistralai/Mistral-7B-Instruct-v0.1": {
-      "name": "Mistral (7B) Instruct v0.1",
-      "context_window": 32768
-    },
-    "togethercomputer/meta-llama-3.1-8B-Instruct-AWQ-INT4": {
-      "name": "Meta Llama 3.1 8B Instruct Awq Int4",
-      "context_window": 131072
-    },
-    "zai-org/GLM-4.5V": {
-      "name": "GLM 4.5V",
-      "context_window": 65536
-    },
-    "zai-org/GLM-4.6": {
-      "name": "GLM 4.6 Fp8",
-      "context_window": 202752
-    },
-    "zai-org/GLM-OCR": {
-      "name": "GLM OCR",
-      "context_window": 131072
-    },
-    "Qwen/Qwen3-30B-A3B-Instruct-2507-Lora": {
-      "name": "Qwen3 30B A3B Instruct 2507 Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3-4B-Instruct-2507": {
-      "name": "Qwen3 4B Instruct 2507",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3-8B-Lora": {
-      "name": "Qwen3 8B Lora",
-      "context_window": 40960
-    },
-    "Qwen/Qwen2.5-14B-Instruct": {
-      "name": "Qwen 2.5 14B Instruct",
-      "context_window": 32768
     },
     "meta-llama/Llama-3.1-405B-Instruct": {
       "name": "Meta Llama 3.1 405B Instruct",
@@ -440,21 +420,53 @@
       "name": "Meta Llama 3.2 1B Instruct",
       "context_window": 131072
     },
-    "google/gemma-3-1b-it": {
-      "name": "Gemma 3 1b it",
-      "context_window": 32768
+    "meta-llama/Llama-3.2-3B-Instruct": {
+      "name": "Meta Llama 3.2 3B Instruct",
+      "context_window": 131072
+    },
+    "meta-llama/Llama-3.3-70B-Instruct": {
+      "name": "meta-llama/Llama-3.3-70B-Instruct",
+      "context_window": 131072
+    },
+    "meta-llama/Llama-3.3-70B-Instruct-FP8-Lora": {
+      "name": "Llama 3.3 70B Instruct FP8 Lora",
+      "context_window": 131072
     },
     "meta-llama/Llama-4-Scout-17B-16E": {
       "name": "Llama 4 Scout (17Bx16E)",
       "context_window": 262144
     },
+    "meta-llama/Llama-4-Scout-17B-16E-Instruct-FP8-Lora": {
+      "name": "Llama 4 Scout 17B 16E Instruct Fp8 Lora",
+      "context_window": 10485760
+    },
+    "meta-llama/Meta-Llama-3-70B-Instruct-Turbo": {
+      "name": "Meta Llama 3 70B Instruct Turbo",
+      "context_window": 8192
+    },
     "meta-llama/Meta-Llama-3-8B-Instruct": {
       "name": "Meta Llama 3 8B Instruct",
       "context_window": 8192
     },
+    "meta-llama/Meta-Llama-3.1-8B": {
+      "name": "Meta Llama 3.1 8B",
+      "context_window": 16384
+    },
     "mistralai/Devstral-Small-2505": {
       "name": "Devstral Small 2505",
       "context_window": 131072
+    },
+    "mistralai/Ministral-3-14B-Instruct-2512": {
+      "name": "Ministral 3 14B Instruct 2512",
+      "context_window": 262144
+    },
+    "mistralai/Mistral-7B-Instruct-v0.1": {
+      "name": "Mistral (7B) Instruct v0.1",
+      "context_window": 32768
+    },
+    "mistralai/Mistral-Small-24B-Instruct-2501": {
+      "name": "Mistral Small (24B) Instruct 25.01",
+      "context_window": 32768
     },
     "mistralai/Mixtral-8x22B-Instruct-v0.1": {
       "name": "Mixtral 8x22B",
@@ -472,13 +484,33 @@
         "output": 1.2
       }
     },
+    "mistralai/Mixtral-8x7B-Instruct-v0.1": {
+      "name": "Mixtral-8x7B Instruct v0.1",
+      "context_window": 32768
+    },
+    "mistralai/Mixtral-8x7B-Instruct-v0.1-FP8-Lora": {
+      "name": "Mixtral 8x7B Instruct V0.1 FP8 Lora",
+      "context_window": 32768
+    },
+    "moonshotai/Kimi-K2.5-fp4": {
+      "name": "Kimi K2.5 FP4",
+      "context_window": 262144
+    },
     "nim/meta/llama-3.2-11b-vision-instruct": {
       "name": "nim/meta/llama-3.2-11b-vision-instruct",
+      "context_window": 16384
+    },
+    "nim/nvidia/llama-3.3-nemotron-super-49b-v1": {
+      "name": "nim/nvidia/llama-3.3-nemotron-super-49b-v1",
       "context_window": 16384
     },
     "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF": {
       "name": "Llama 3.1 Nemotron 70B Instruct HF",
       "context_window": 32768
+    },
+    "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8": {
+      "name": "Nvidia Nemotron 3 Super 120B A12b Fp8",
+      "context_window": 262144
     },
     "nvidia/NVIDIA-Nemotron-Nano-9B-v2": {
       "name": "Nvidia Nemotron Nano 9B V2",
@@ -492,101 +524,77 @@
       "name": "EssentialAI Rnj-1 Instruct",
       "context_window": 32768
     },
-    "meta-llama/Meta-Llama-3.1-8B": {
-      "name": "Meta Llama 3.1 8B",
-      "context_window": 16384
-    },
-    "Qwen/Qwen3-Coder-Next-FP8": {
-      "name": "Qwen3 Coder Next Fp8",
-      "context_window": 262144
-    },
-    "meta-llama/Llama-3.3-70B-Instruct-FP8-Lora": {
-      "name": "Llama 3.3 70B Instruct FP8 Lora",
+    "togethercomputer/meta-llama-3.1-8B-Instruct-AWQ-INT4": {
+      "name": "Meta Llama 3.1 8B Instruct Awq Int4",
       "context_window": 131072
     },
-    "nim/nvidia/llama-3.3-nemotron-super-49b-v1": {
-      "name": "nim/nvidia/llama-3.3-nemotron-super-49b-v1",
-      "context_window": 16384
-    },
-    "MiniMaxAI/MiniMax-M1-40k": {
-      "name": "Minimax M1 40K",
-      "context_window": 1048576
-    },
-    "MiniMaxAI/MiniMax-M1-80k": {
-      "name": "Minimax M1 80K",
-      "context_window": 1048576
-    },
-    "Qwen/Qwen3-32B": {
-      "name": "Qwen3 32B",
-      "context_window": 40960
-    },
-    "meta-llama/Llama-3.2-1B": {
-      "name": "Llama 3.2 1B",
+    "zai-org/GLM-4.5-Air-FP8": {
+      "name": "Glm 4.5 Air Fp8",
       "context_window": 131072
     },
-    "Qwen/Qwen2.5-72B-Instruct": {
-      "name": "Qwen2.5 72B Instruct",
-      "context_window": 32768
+    "zai-org/GLM-4.5V": {
+      "name": "GLM 4.5V",
+      "context_window": 65536
     },
-    "meta-llama/Llama-3.2-3B-Instruct": {
-      "name": "Meta Llama 3.2 3B Instruct",
-      "context_window": 131072
+    "zai-org/GLM-4.6": {
+      "name": "GLM 4.6 Fp8",
+      "context_window": 202752
     },
-    "google/gemma-3-1b-pt": {
-      "name": "Gemma 3 1B Pt",
-      "context_window": 32768
-    },
-    "Qwen/Qwen2.5-32B-Instruct": {
-      "name": "Qwen2.5 32B Instruct",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3-235B-A22B-Instruct-2507-FP8": {
-      "name": "Qwen3 235B A22b Instruct 2507 Fp8",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3-14B": {
-      "name": "Qwen3 14B",
-      "context_window": 2048
-    },
-    "Qwen/Qwen2.5-72B-Instruct-Turbo": {
-      "name": "Qwen 2.5 72B Turbo",
-      "description": "Alibaba's Qwen 2.5 72B — strong at math, coding, and multilingual tasks with a 128K context window",
-      "context_window": 128000,
-      "max_output": 4096,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 1.2,
-        "output": 1.2
-      }
-    },
-    "deepseek-ai/DeepSeek-V3.1": {
-      "name": "Deepseek V3.1 NVFP4",
-      "context_window": 131072
-    },
-    "google/gemma-4-31B-it-lora": {
-      "name": "Gemma 4 31B It Lora",
-      "context_window": 262144
+    "zai-org/GLM-4.7": {
+      "name": "GLM 4.7 Fp8",
+      "context_window": 202752
     },
     "zai-org/GLM-4.7-FP8": {
       "name": "Glm 4.7 Fp8",
+      "context_window": 202752
+    },
+    "zai-org/GLM-4.7-fp4": {
+      "name": "GLM 4.7 FP4",
       "context_window": 202752
     },
     "zai-org/GLM-5-FP4": {
       "name": "GLM 5 Fp4",
       "context_window": 202752
     },
-    "google/gemma-2-27b-it": {
-      "name": "Gemma-2 Instruct (27B)",
+    "zai-org/GLM-OCR": {
+      "name": "GLM OCR",
+      "context_window": 131072
+    },
+    "Qwen/Qwen3-Coder-30B-A3B-Instruct": {
+      "name": "Qwen3 Coder 30B A3b Instruct",
+      "context_window": 262144
+    },
+    "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo": {
+      "name": "Meta Llama 3.1 70B Instruct Turbo",
+      "context_window": 131072
+    },
+    "Qwen/Qwen3-VL-8B-Instruct": {
+      "name": "Qwen3-VL-8B-Instruct",
+      "context_window": 262144
+    },
+    "google/gemma-3-4b-it": {
+      "name": "Gemma 3 4b it",
+      "context_window": 65536
+    },
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning-fp8": {
+      "name": "Nemotron 3 Nano Omni 30B A3b Reasoning Fp8",
+      "context_window": 131072
+    },
+    "MiniMaxAI/MiniMax-M2.5-FP4": {
+      "name": "MiniMax M2.5 FP4",
       "context_window": 8192
     },
-    "meta-llama/Llama-3-8b-chat-hf": {
-      "name": "Meta Llama 3 8B Instruct Reference",
+    "google/gemma-2b-it": {
+      "name": "Gemma 2B It",
       "context_window": 8192
+    },
+    "google/gemma-3-1b-it": {
+      "name": "Gemma 3 1b it",
+      "context_window": 32768
+    },
+    "meta-llama/Llama-3.2-1B": {
+      "name": "Llama 3.2 1B",
+      "context_window": 131072
     },
     "google/gemma-3-270m-it-lora": {
       "name": "Gemma 3 270M It Lora",
@@ -614,6 +622,50 @@
     "mistralai/Mistral-7B-v0.1": {
       "name": "Mistral 7B v0.1",
       "context_window": 32768
+    },
+    "Qwen/Qwen3.5-35B-A3B-Base-Lora": {
+      "name": "Qwen3.5 35B A3B Base Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-0.8B-Lora": {
+      "name": "Qwen3.5 0.8B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-2B-Lora": {
+      "name": "Qwen3.5 2B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-4B-Lora": {
+      "name": "Qwen3.5 4B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-9B-Lora": {
+      "name": "Qwen3.5 9B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-27B-Lora": {
+      "name": "Qwen3.5 27B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-35B-A3B-Lora": {
+      "name": "Qwen3.5 35B A3b LoRa",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-122B-A10B-Lora": {
+      "name": "Qwen3.5 122B A10B Lora",
+      "context_window": 8192
+    },
+    "Qwen/Qwen3.5-397B-A17B-Lora": {
+      "name": "Qwen3.5 397B A17B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.6-27B-Lora": {
+      "name": "Qwen3.6 27B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.6-35B-A3B-Lora": {
+      "name": "Qwen3.6 35B A3B Lora",
+      "context_window": 262144
     },
     "meta-llama/Llama-3.1-405B": {
       "name": "Llama 3.1 405B",
@@ -671,53 +723,41 @@
       "name": "Gemma 4 26B A4b It",
       "context_window": 262144
     },
+    "Qwen/Qwen3.6-35B-A3B-FP8": {
+      "name": "Qwen3.6 35B A3b Fp8",
+      "context_window": 262144
+    },
+    "mistralai/Mistral-7B-Instruct-v0.3": {
+      "name": "Mistral (7B) Instruct v0.3",
+      "context_window": 32768
+    },
     "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16": {
       "name": "Nvidia Nemotron 3 Nano 30B A3b Bf16",
       "context_window": 262144
     },
-    "moonshotai/Kimi-K2.5-fp4": {
-      "name": "Kimi K2.5 FP4",
-      "context_window": 262144
+    "Qwen/Qwen2.5-3B-Instruct": {
+      "name": "Qwen2.5 3B Instruct",
+      "context_window": 32768
+    },
+    "Qwen/Qwen2.5-72B": {
+      "name": "Qwen2.5 72B",
+      "context_window": 131072
+    },
+    "Qwen/Qwen2.5-7B-Instruct": {
+      "name": "Qwen2.5 7B Instruct",
+      "context_window": 32768
     },
     "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP4": {
       "name": "Llama 4 Maverick 17B 128E Instruct Nvfp4",
       "context_window": 1048576
     },
-    "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO": {
-      "name": "Nous Hermes 2 Mixtral 8X7B Dpo",
-      "context_window": 32768
-    },
-    "Qwen/Qwen3.5-35B-A3B-Lora": {
-      "name": "Qwen3.5 35B A3b LoRa",
-      "context_window": 262144
-    },
-    "Qwen/Qwen2.5-1.5B": {
-      "name": "Qwen2.5 1.5B",
-      "context_window": 131072
-    },
     "Qwen/Qwen3.5-9B-FP8": {
       "name": "Qwen3.5 9B Fp8",
-      "context_window": 262144
-    },
-    "mistralai/Ministral-3-14B-Instruct-2512": {
-      "name": "Ministral 3 14B Instruct 2512",
       "context_window": 262144
     },
     "nim/mistralai/mixtral-8x7b-instruct-v01": {
       "name": "nim/mistralai/mixtral-8x7b-instruct-v01",
       "context_window": 16384
-    },
-    "google/medgemma-27b-text-it": {
-      "name": "Medgemma 27B Text It",
-      "context_window": 131072
-    },
-    "Qwen/Qwen2-72B-Instruct": {
-      "name": "Qwen2 72B Instruct",
-      "context_window": 32768
-    },
-    "zai-org/GLM-4.7": {
-      "name": "GLM 4.7 Fp8",
-      "context_window": 202752
     },
     "meta-llama/Llama-4-Scout-17B-16E-Instruct": {
       "name": "Llama 4 Scout",
@@ -740,5 +780,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-22T08:44:03.304Z"
+  "_syncedAt": "2026-06-23T05:51:18.762Z"
 }
