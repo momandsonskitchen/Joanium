@@ -6,6 +6,17 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.623.0] - 2026-06-23
+
+* Improved Leaderboard
+* Added more project doc fles
+* Updated AI Models
+* Added AI Provider Logo In The Leaderboard Panel
+* Updated AI Models
+* Updated AI Models
+
+---
+
 ## [2026.622.0] - 2026-06-22
 
 * Updated AI Models
