@@ -18,6 +18,7 @@ import { readFile, readdir } from 'node:fs/promises';
 //   .windsurfrules — Windsurf AI rules and conventions
 //   .clinerules   — Cline AI rules and conventions
 //   codex.md      — OpenAI Codex instructions
+//   hermes.md     — Hermes-specific instructions
 // ---------------------------------------------------------------------------
 
 const PROJECT_DOC_FILES = [
@@ -30,6 +31,7 @@ const PROJECT_DOC_FILES = [
   '.windsurfrules',
   '.clinerules',
   'codex.md',
+  'hermes.md',
 ];
 
 /**

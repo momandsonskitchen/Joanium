@@ -101,10 +101,6 @@ function processModels(raw) {
     .map((m) => {
       const aa = m.benchmarks?.artificial_analysis;
       const arena = m.benchmarks?.design_arena;
-      const bestArena =
-        arena && arena.length > 0
-          ? arena.reduce((a, b) => (b.elo > a.elo ? b : a), arena[0])
-          : null;
 
       const params = m.supported_parameters ?? [];
       const caps = [];
@@ -151,7 +147,6 @@ function processModels(raw) {
         caps,
         supportedParams: params,
         arena,
-        bestArena,
         knowledgeCutoff: m.knowledge_cutoff ?? null,
         expirationDate: m.expiration_date ?? null,
         created: m.created ?? null,
@@ -393,8 +388,14 @@ export function createLeaderboardPanel(strings) {
     meta.append(
       createElement('span', 'chat-leaderboard__card-context', formatContext(model.contextLength)),
     );
-    const priceText = model.isFree ? 'Free' : formatPrice(model.promptPrice);
-    meta.append(createElement('span', 'chat-leaderboard__card-price', priceText));
+    if (model.isFree) {
+      meta.append(createElement('span', 'chat-leaderboard__card-free', strings.model.free));
+    } else {
+      meta.append(
+        createElement('span', 'chat-leaderboard__card-price', formatPrice(model.promptPrice)),
+      );
+    }
+
     body.append(meta);
 
     // ── Right: intelligence score ──────────────────────────────────────────
@@ -484,7 +485,7 @@ export function createLeaderboardPanel(strings) {
     );
     if (model.isModerated) {
       metaRow.append(createSep());
-      metaRow.append(createElement('span', 'lb-viewer-meta__moderated', 'Moderated'));
+      metaRow.append(createElement('span', 'lb-viewer-meta__moderated', strings.model.moderation));
     }
     headerLeft.append(metaRow);
     header.append(headerLeft);
@@ -499,8 +500,7 @@ export function createLeaderboardPanel(strings) {
     // ── Description ────────────────────────────────────────────────────────
     if (model.description) {
       const desc = createElement('p', 'lb-viewer-desc');
-      desc.textContent =
-        model.description.length > 280 ? model.description.slice(0, 280) + '…' : model.description;
+      desc.textContent = model.description;
       _viewerContentEl.append(desc);
     }
 
@@ -529,7 +529,7 @@ export function createLeaderboardPanel(strings) {
       _viewerContentEl.append(section);
     }
 
-    // ── Quick stats ────────────────────────────────────────────────────────
+    // ── Overview ───────────────────────────────────────────────────────────
     {
       const section = createSection(strings.model.capabilities);
 
@@ -559,13 +559,26 @@ export function createLeaderboardPanel(strings) {
         grid.append(
           createStatTile(strings.model.maxOutput, formatContext(model.maxOutput) + ' tokens'),
         );
-      if (model.tokenizer) grid.append(createStatTile('Tokenizer', model.tokenizer));
-      if (model.knowledgeCutoff) grid.append(createStatTile('Knowledge', model.knowledgeCutoff));
+      if (model.knowledgeCutoff)
+        grid.append(createStatTile(strings.model.knowledgeCutoff, model.knowledgeCutoff));
       if (model.created) {
         const d = formatDate(model.created);
-        if (d) grid.append(createStatTile('Released', d));
+        if (d) grid.append(createStatTile(strings.model.released, d));
       }
-      if (model.huggingFaceId) grid.append(createStatTile('HuggingFace', model.huggingFaceId));
+      section.append(grid);
+      _viewerContentEl.append(section);
+    }
+
+    // ── Model Details ──────────────────────────────────────────────────────
+    {
+      const section = createSection(strings.model.details);
+      const grid = createElement('div', 'lb-stats-grid');
+      if (model.tokenizer) grid.append(createStatTile(strings.model.tokenizer, model.tokenizer));
+      if (model.instructType)
+        grid.append(createStatTile(strings.model.instructType, model.instructType));
+      grid.append(createStatTile(strings.model.apiId, model.slug));
+      if (model.huggingFaceId)
+        grid.append(createStatTile(strings.model.huggingFace, model.huggingFaceId));
       section.append(grid);
       _viewerContentEl.append(section);
     }
@@ -580,11 +593,16 @@ export function createLeaderboardPanel(strings) {
       );
       if (model.cacheReadPrice)
         grid.append(createPriceTile(strings.model.cacheRead, model.cacheReadPrice));
-      if (model.cacheWritePrice) grid.append(createPriceTile('Cache Write', model.cacheWritePrice));
-      if (model.reasoningPrice) grid.append(createPriceTile('Reasoning', model.reasoningPrice));
-      if (model.webSearchPrice) grid.append(createPriceTile('Web Search', model.webSearchPrice));
-      if (model.imagePrice) grid.append(createPriceTile('Image Input', model.imagePrice));
-      if (model.audioPrice) grid.append(createPriceTile('Audio Input', model.audioPrice));
+      if (model.cacheWritePrice)
+        grid.append(createPriceTile(strings.model.cacheWrite, model.cacheWritePrice));
+      if (model.reasoningPrice)
+        grid.append(createPriceTile(strings.model.reasoning, model.reasoningPrice));
+      if (model.webSearchPrice)
+        grid.append(createPriceTile(strings.model.webSearch, model.webSearchPrice));
+      if (model.imagePrice)
+        grid.append(createPriceTile(strings.model.imageInput, model.imagePrice));
+      if (model.audioPrice)
+        grid.append(createPriceTile(strings.model.audioInput, model.audioPrice));
       section.append(grid);
       _viewerContentEl.append(section);
     }
@@ -611,6 +629,35 @@ export function createLeaderboardPanel(strings) {
       }
       section.append(tagRow);
       _viewerContentEl.append(section);
+    }
+
+    // ── Similar Models ─────────────────────────────────────────────────────
+    if (model.provider) {
+      const similar = allModels
+        .filter((m) => m.provider === model.provider && m.id !== model.id)
+        .slice(0, 6);
+      if (similar.length > 0) {
+        const section = createSection(strings.model.similarModels);
+        const subTitle = createElement('div', 'lb-section__sublabel');
+        subTitle.textContent = strings.model.fromSameProvider.replace('{provider}', model.provider);
+        section.append(subTitle);
+        const list = createElement('div', 'lb-similar-list');
+        for (const m of similar) {
+          const item = createElement('div', 'lb-similar-item');
+          item.addEventListener('click', () => populateViewer(m));
+          const name = createElement('span', 'lb-similar-item__name', m.name);
+          const scoreText = createElement('span', 'lb-similar-item__score');
+          if (m.intelligence !== null) {
+            scoreText.textContent = m.intelligence.toFixed(0);
+          } else {
+            scoreText.textContent = '—';
+          }
+          item.append(name, scoreText);
+          list.append(item);
+        }
+        section.append(list);
+        _viewerContentEl.append(section);
+      }
     }
 
     // ── Attribution ────────────────────────────────────────────────────────

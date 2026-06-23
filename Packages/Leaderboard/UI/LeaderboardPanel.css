@@ -237,6 +237,18 @@
   object-fit: contain;
 }
 
+.chat-leaderboard__card-free {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(var(--color-success-rgb, 33, 133, 86), 0.12);
+  color: var(--color-success, #218556);
+  letter-spacing: 0.01em;
+}
+
 /* ── Skeleton ─────────────────────────────────────────────────────────────── */
 
 .chat-leaderboard__skeleton {
@@ -849,6 +861,43 @@
   letter-spacing: 0;
 }
 
+/* ── Similar models ───────────────────────────────────────────────────────── */
+
+.lb-similar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lb-similar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-surface);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+  -webkit-app-region: no-drag;
+}
+
+.lb-similar-item:hover {
+  background: var(--color-surface);
+}
+
+.lb-similar-item__name {
+  font-size: 12.5px;
+  font-weight: 580;
+  color: var(--color-chat-text-title);
+}
+
+.lb-similar-item__score {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    DARK MODE
    ════════════════════════════════════════════════════════════════════════════ */
@@ -914,6 +963,15 @@ html.joanium-theme-dark .lb-pill {
 
 html.joanium-theme-dark .lb-param-tag {
   background: rgba(255, 255, 255, 0.06);
+}
+
+html.joanium-theme-dark .lb-similar-item {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+html.joanium-theme-dark .lb-similar-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 html.joanium-theme-dark .lb-viewer-header {
