@@ -239,12 +239,6 @@
     "mistral-ocr-latest": {
       "name": "mistral-ocr-latest"
     },
-    "mistral-ocr-3-0": {
-      "name": "Mistral Ocr 3 0"
-    },
-    "mistral-ocr-3": {
-      "name": "Mistral Ocr 3"
-    },
     "voxtral-mini-2602": {
       "name": "voxtral-mini-2602"
     },
@@ -264,5 +258,5 @@
       "name": "voxtral-mini-tts-latest"
     }
   },
-  "_syncedAt": "2026-06-23T07:33:37.343Z"
+  "_syncedAt": "2026-06-23T09:56:56.266Z"
 }
