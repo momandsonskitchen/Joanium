@@ -9,14 +9,28 @@ import { readFile, readdir } from 'node:fs/promises';
 // context about the project without the user having to manually attach files.
 //
 // Files injected (matched case-insensitively):
-//   readme.md   — project overview and usage
-//   agents.md   — agent definitions and behaviours
-//   claude.md   — Claude-specific instructions
-//   gemini.md   — Gemini-specific instructions
-//   design.md   — design decisions and architecture notes
+//   readme.md     — project overview and usage
+//   agents.md     — agent definitions and behaviours
+//   claude.md     — Claude-specific instructions
+//   gemini.md     — Gemini-specific instructions
+//   design.md     — design decisions and architecture notes
+//   .cursorrules  — Cursor AI rules and conventions
+//   .windsurfrules — Windsurf AI rules and conventions
+//   .clinerules   — Cline AI rules and conventions
+//   codex.md      — OpenAI Codex instructions
 // ---------------------------------------------------------------------------
 
-const PROJECT_DOC_FILES = ['readme.md', 'agents.md', 'claude.md', 'gemini.md', 'design.md'];
+const PROJECT_DOC_FILES = [
+  'readme.md',
+  'agents.md',
+  'claude.md',
+  'gemini.md',
+  'design.md',
+  '.cursorrules',
+  '.windsurfrules',
+  '.clinerules',
+  'codex.md',
+];
 
 /**
  * Reads available project doc files from the given folder.
