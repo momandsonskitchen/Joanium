@@ -2642,6 +2642,19 @@
         "text": true
       }
     },
+    "zai/glm-5.2-fast": {
+      "name": "GLM 5.2 Fast",
+      "description": "GLM-5.2 delivers powerful coding capabilities, usable 1M-context support, and continued strengths in long-horizon tasks.",
+      "context_window": 1000000,
+      "max_output": 128000,
+      "pricing": {
+        "input": 3,
+        "output": 10.25
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "zai/glm-5v-turbo": {
       "name": "GLM 5V Turbo",
       "description": "GLM-5V-Turbo is Z.AI’s first multimodal coding foundation model, built for vision-based coding tasks. It can natively process multimodal inputs such as images, video, and text, while also excelling at long-horizon planning, complex coding, and action execution. Deeply optimized for agent workflows, ",
@@ -2657,5 +2670,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-23T11:53:47.348Z"
+  "_syncedAt": "2026-06-24T04:24:18.991Z"
 }
