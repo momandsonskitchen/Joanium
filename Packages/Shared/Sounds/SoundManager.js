@@ -1,15 +1,25 @@
 import { invokeIpc } from '../Ipc/RendererIpc.js';
 
-const volume = 1; // By default, play at full volume. This can be adjusted later if needed.
 const SOUNDS = {
-  'sidebar-click': { file: '../../../Assets/Sounds/SidebarClick.mp3', volume },
-  completion: { file: '../../../Assets/Sounds/Notification.mp3', volume },
+  'sidebar-click': { file: '../../../Assets/Sounds/SidebarClick.mp3', volume: 1 },
+  completion: { file: '../../../Assets/Sounds/Notification.mp3', volume: 1 },
 };
 
 const MIN_DURATION_MS = 3000;
 
 const cache = new Map();
 let completionAborted = false;
+let soundEffectsEnabled = true;
+
+async function refreshSoundEffectsSetting() {
+  try {
+    const settings = await invokeIpc('app-settings:get');
+    soundEffectsEnabled = settings?.soundEffects !== false;
+  } catch {
+    soundEffectsEnabled = true;
+  }
+  return soundEffectsEnabled;
+}
 
 function ensure(name) {
   if (cache.has(name)) return cache.get(name);
@@ -30,9 +40,11 @@ function ensure(name) {
 
 export function initSounds() {
   for (const name of Object.keys(SOUNDS)) ensure(name);
+  void refreshSoundEffectsSetting();
 }
 
-export function play(name) {
+export async function play(name) {
+  if (!(await refreshSoundEffectsSetting())) return;
   const s = ensure(name);
   if (!s) return;
   s.currentTime = 0;
@@ -43,21 +55,15 @@ export function markCompletionAborted() {
   completionAborted = true;
 }
 
-async function isCompletionEnabled() {
-  try {
-    const settings = await invokeIpc('app-settings:get');
-    return settings?.completionSound !== false;
-  } catch {
-    return true;
-  }
-}
-
 export async function playCompletion(startTimeMs) {
   const wasAborted = completionAborted;
   completionAborted = false;
 
   if (wasAborted || Date.now() - startTimeMs < MIN_DURATION_MS) return;
-  if (!(await isCompletionEnabled())) return;
+  if (!(await refreshSoundEffectsSetting())) return;
 
-  play('completion');
+  const s = ensure('completion');
+  if (!s) return;
+  s.currentTime = 0;
+  void s.play().catch(() => {});
 }

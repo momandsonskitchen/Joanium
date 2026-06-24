@@ -687,7 +687,7 @@ async function bootstrap() {
     tab.setAttribute('aria-label', strings.tabs[route.id]);
     tab.append(createIcon(route.icon, 'chat-sidebar__tab-icon'));
     tab.addEventListener('click', () => {
-      play('sidebar-click');
+      void play('sidebar-click');
 
       if (route.id === activeRouteId && isSettingsOpen()) {
         void showRoute(route.id);
@@ -732,7 +732,7 @@ async function bootstrap() {
   }
 
   sidebarAvatar.addEventListener('click', () => {
-    play('sidebar-click');
+    void play('sidebar-click');
 
     if (settingsPanel && !settingsPanel.hidden) {
       void showRoute(activeRouteId);

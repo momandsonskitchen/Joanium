@@ -10,9 +10,9 @@ const en = {
       label: 'Keep awake',
       description: 'Prevent the app process from being suspended while Joanium is running.',
     },
-    completionSound: {
-      label: 'Completion sound',
-      description: 'Play a sound when a response finishes.',
+    soundEffects: {
+      label: 'App sound effects',
+      description: 'Play sound effects throughout the app.',
     },
     showTechFeed: {
       label: 'Show tech feed',
