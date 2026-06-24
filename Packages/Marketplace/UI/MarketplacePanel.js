@@ -456,20 +456,17 @@ export function createMarketplacePanel(strings) {
     header.append(installBtn);
     _viewerEl.append(header);
 
-    // Trigger / personality tag
-    const tagValue =
-      _activeType === 'personas'
-        ? (detail.personality ?? detail.meta?.personality ?? '')
-        : (detail.trigger ?? detail.meta?.trigger ?? '');
-
-    if (tagValue) {
-      const tagRow = createElement('div', 'marketplace__viewer-tag-row');
-      const tagLabel = _activeType === 'personas' ? strings.personality : strings.trigger;
-      tagRow.append(
-        createElement('span', 'marketplace__viewer-tag-label', tagLabel),
-        createElement('span', 'marketplace__viewer-tag-value', tagValue),
-      );
-      _viewerEl.append(tagRow);
+    // Personality tag (personas only)
+    if (_activeType === 'personas') {
+      const tagValue = detail.personality ?? detail.meta?.personality ?? '';
+      if (tagValue) {
+        const tagRow = createElement('div', 'marketplace__viewer-tag-row');
+        tagRow.append(
+          createElement('span', 'marketplace__viewer-tag-label', strings.personality),
+          createElement('span', 'marketplace__viewer-tag-value', tagValue),
+        );
+        _viewerEl.append(tagRow);
+      }
     }
 
     // Description / excerpt

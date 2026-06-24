@@ -124,18 +124,6 @@ export function createSkillsPanel(strings) {
     header.append(headerLeft);
     _viewerContentEl.append(header);
 
-    // ── Trigger meta ───────────────────────────────────────────────────────────
-    if (fullSkill.trigger) {
-      const meta = createElement('div', 'chat-skills__viewer-meta');
-      const trigger = createElement('div', 'chat-skills__viewer-trigger');
-      trigger.append(
-        createElement('span', 'chat-skills__viewer-trigger-label', strings.trigger),
-        createElement('span', 'chat-skills__viewer-trigger-value', fullSkill.trigger),
-      );
-      meta.append(trigger);
-      _viewerContentEl.append(meta);
-    }
-
     // ── Markdown content ───────────────────────────────────────────────────
     const content = createElement('div', 'chat-skills__viewer-content');
     content.append(renderMarkdown(fullSkill.content, 'chat-skills__viewer-md'));
