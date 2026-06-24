@@ -21,6 +21,7 @@ import { createPersonasPanel } from '../../Personas/UI/PersonasPanel.js';
 import { createMarketplacePanel } from '../../Marketplace/UI/MarketplacePanel.js';
 import { createLeaderboardPanel } from '../../Leaderboard/UI/LeaderboardPanel.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
+import { initSounds, play } from '../../Shared/Sounds/SoundManager.js';
 import { createUsagePanel } from '../../Usage/UI/UsagePanel.js';
 import { createUserPanel } from '../../User/UI/UserPanel.js';
 import { createAboutPanel } from '../../About/UI/AboutPanel.js';
@@ -137,6 +138,7 @@ async function bootstrap() {
   channelGateway.start();
   agentGateway.start();
   cleanupGateway.start();
+  initSounds();
 
   const { initOfflineMonitor } = await import('../../Shared/OfflineMonitor/OfflineMonitor.js');
   initOfflineMonitor();
@@ -685,6 +687,8 @@ async function bootstrap() {
     tab.setAttribute('aria-label', strings.tabs[route.id]);
     tab.append(createIcon(route.icon, 'chat-sidebar__tab-icon'));
     tab.addEventListener('click', () => {
+      play('sidebar-click');
+
       if (route.id === activeRouteId && isSettingsOpen()) {
         void showRoute(route.id);
         return;
@@ -728,6 +732,8 @@ async function bootstrap() {
   }
 
   sidebarAvatar.addEventListener('click', () => {
+    play('sidebar-click');
+
     if (settingsPanel && !settingsPanel.hidden) {
       void showRoute(activeRouteId);
     } else {
