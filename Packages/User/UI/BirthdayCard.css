@@ -274,3 +274,33 @@
       var(--shadow-chat-dock-emphasis);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Dark theme overrides
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.joanium-theme-dark .birthday-overlay {
+  background: rgba(20, 12, 32, 0.65);
+}
+
+.joanium-theme-dark .birthday-card {
+  background: rgba(30, 16, 46, 0.88);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 12px rgba(10, 4, 20, 0.2),
+    0 20px 48px rgba(10, 4, 20, 0.35),
+    0 48px 80px rgba(10, 4, 20, 0.25);
+}
+
+.joanium-theme-dark .birthday-dismiss-btn {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 2px 6px rgba(var(--color-accent-rgb), 0.15);
+}
+
+.joanium-theme-dark .birthday-dismiss-btn:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 14px rgba(var(--color-accent-rgb), 0.22);
+}
