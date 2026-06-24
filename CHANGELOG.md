@@ -6,6 +6,17 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.624.0] - 2026-06-24
+
+* Added Styles For Dark Mode For Birthday Card
+* Updated AI Models
+* Chore(deps-dev): Bump lint-staged from 17.0.7 to 17.0.8
+* Chore(deps-dev): Bump electron from 42.4.1 to 42.5.0
+* Removed Triggers Section In Skills and Marketplace Panel
+* Updated AI Models
+
+---
+
 ## [2026.623.0] - 2026-06-23
 
 * Improved Leaderboard
