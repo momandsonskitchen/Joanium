@@ -7,8 +7,8 @@ function ownerWindow(event) {
   return event?.sender?.getOwnerBrowserWindow?.() ?? null;
 }
 
-export function createToolPackage({ rootDirectory } = {}) {
-  const commandService = createCommandService({ rootDirectory });
+export function createToolPackage() {
+  const commandService = createCommandService();
 
   return {
     id: 'command',

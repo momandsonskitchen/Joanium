@@ -87,8 +87,8 @@ export function assessCommandRisk(command = '') {
   };
 }
 
-export function createCommandService({ rootDirectory }) {
-  const fallbackDirectory = rootDirectory || process.cwd();
+export function createCommandService() {
+  const fallbackDirectory = os.homedir();
   const activeProcesses = new Map();
   const processBuffers = new Map();
 
