@@ -423,7 +423,14 @@ export function updateSubAgentCard(threadEl, subAgents, strings) {
 export function createAssistantGroupElement(
   items,
   strings,
-  { onCopy, onRetry, onContinue, isGenerating = false, getProviderIcon } = {},
+  {
+    onCopy,
+    onRetry,
+    onContinue,
+    isGenerating = false,
+    getProviderIcon,
+    isGroupResponse = false,
+  } = {},
 ) {
   const lastMessage = items[items.length - 1].message;
   const firstMessage = items[0].message;
@@ -438,6 +445,7 @@ export function createAssistantGroupElement(
       isStreaming ? 'chat-message--streaming' : '',
       lastMessage.error ? 'chat-message--error' : '',
       lastMessage.stopped ? 'chat-message--stopped' : '',
+      isGroupResponse ? 'chat-message--group-response' : '',
     ]
       .filter(Boolean)
       .join(' '),
@@ -513,11 +521,30 @@ export function createAssistantGroupElement(
   row.append(avatarEl, contentEl);
   article.append(row);
 
-  // Action buttons — only after the entire response is complete and no generation is in flight
+  // Action buttons — for group responses, show as soon as this message is done.
+  // For normal responses, wait until all generation is complete.
+  const groupDone = isGroupResponse && !isStreaming;
+  const normalDone = !isGroupResponse && !isGenerating;
   if (
-    !isStreaming &&
+    groupDone &&
     !needsContinuation &&
-    !isGenerating &&
+    typeof onCopy === 'function' &&
+    typeof onRetry === 'function'
+  ) {
+    const onSpeak = (btn) => speakText(lastMessage.content, btn);
+    article.append(
+      createMessageActions({
+        onCopy,
+        onRetry,
+        onSpeak,
+        durationMs: lastMessage.durationMs,
+        modelLabel: lastMessage.modelLabel,
+        strings,
+      }),
+    );
+  } else if (
+    normalDone &&
+    !needsContinuation &&
     typeof onCopy === 'function' &&
     typeof onRetry === 'function'
   ) {
