@@ -93,10 +93,6 @@
       "name": "LFM2-24B-A2B",
       "context_window": 32768
     },
-    "essentialai/rnj-1-instruct": {
-      "name": "EssentialAI Rnj-1 Instruct",
-      "context_window": 32768
-    },
     "deepcogito/cogito-v2-1-671b": {
       "name": "Cogito v2.1 671B",
       "context_window": 163840
@@ -780,5 +776,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-23T11:53:32.621Z"
+  "_syncedAt": "2026-06-25T02:16:40.480Z"
 }

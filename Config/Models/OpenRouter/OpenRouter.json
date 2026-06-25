@@ -3875,18 +3875,6 @@
         "text": true
       }
     },
-    "cohere/command-r-plus-08-2024": {
-      "name": "Cohere: Command R+ (08-2024)",
-      "description": "command-r-plus-08-2024 is an update of the [Command R+](/models/cohere/command-r-plus) with roughly 50% higher throughput and 25% lower latencies as compared to the previous Command R+ version, while keeping the hardware footprint...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 2.5,
-        "output": 10
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "cohere/command-r-08-2024": {
       "name": "Cohere: Command R (08-2024)",
       "description": "command-r-08-2024 is an update of the [Command R](/models/cohere/command-r) with improved performance for multilingual retrieval-augmented generation (RAG) and tool use. More broadly, it is better at math, code and reasoning and...",
@@ -3894,6 +3882,18 @@
       "pricing": {
         "input": 0.15,
         "output": 0.6
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "cohere/command-r-plus-08-2024": {
+      "name": "Cohere: Command R+ (08-2024)",
+      "description": "command-r-plus-08-2024 is an update of the [Command R+](/models/cohere/command-r-plus) with roughly 50% higher throughput and 25% lower latencies as compared to the previous Command R+ version, while keeping the hardware footprint...",
+      "context_window": 128000,
+      "pricing": {
+        "input": 2.5,
+        "output": 10
       },
       "inputs": {
         "text": true
@@ -4008,8 +4008,8 @@
         "text": true
       }
     },
-    "openai/gpt-4o-mini-2024-07-18": {
-      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
+    "openai/gpt-4o-mini": {
+      "name": "OpenAI: GPT-4o-mini",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -4021,8 +4021,8 @@
         "image": true
       }
     },
-    "openai/gpt-4o-mini": {
-      "name": "OpenAI: GPT-4o-mini",
+    "openai/gpt-4o-mini-2024-07-18": {
+      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -4247,18 +4247,6 @@
         "text": true
       }
     },
-    "openai/gpt-4": {
-      "name": "OpenAI: GPT-4",
-      "description": "OpenAI's flagship model, GPT-4 is a large-scale multimodal language model capable of solving difficult problems with greater accuracy than previous models due to its broader general knowledge and advanced reasoning...",
-      "context_window": 8191,
-      "pricing": {
-        "input": 30,
-        "output": 60
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-3.5-turbo": {
       "name": "OpenAI: GPT-3.5 Turbo",
       "description": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
@@ -4270,7 +4258,19 @@
       "inputs": {
         "text": true
       }
+    },
+    "openai/gpt-4": {
+      "name": "OpenAI: GPT-4",
+      "description": "OpenAI's flagship model, GPT-4 is a large-scale multimodal language model capable of solving difficult problems with greater accuracy than previous models due to its broader general knowledge and advanced reasoning...",
+      "context_window": 8191,
+      "pricing": {
+        "input": 30,
+        "output": 60
+      },
+      "inputs": {
+        "text": true
+      }
     }
   },
-  "_syncedAt": "2026-06-24T13:49:02.005Z"
+  "_syncedAt": "2026-06-25T02:16:33.218Z"
 }
