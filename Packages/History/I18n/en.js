@@ -21,6 +21,12 @@ const en = {
   deleteChat: 'Delete',
   deleteAll: 'Delete All',
   deleteAllConfirm: 'Confirm?',
+  share: 'Export',
+  exportJson: 'JSON',
+  exportXml: 'XML',
+  exportMarkdown: 'Markdown',
+  exportPlainText: 'Plain Text',
+  exportHtml: 'HTML',
 };
 
 export default en;

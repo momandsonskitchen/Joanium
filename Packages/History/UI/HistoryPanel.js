@@ -8,6 +8,153 @@ import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScroll
 import { formatRelativeSessionTime, getRelativeDayGroup } from '../../Shared/Utils/DateUtils.js';
 
 // ---------------------------------------------------------------------------
+// Export format helpers
+// ---------------------------------------------------------------------------
+
+function escapeXml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatAsJson(session) {
+  return JSON.stringify(session, null, 2);
+}
+
+function formatAsXml(session) {
+  const lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<chat>'];
+  lines.push(`  <title>${escapeXml(session.title || '')}</title>`);
+  lines.push(`  <id>${escapeXml(session.id || '')}</id>`);
+  lines.push(`  <createdAt>${escapeXml(session.createdAt || '')}</createdAt>`);
+  lines.push(`  <updatedAt>${escapeXml(session.updatedAt || '')}</updatedAt>`);
+  lines.push('  <messages>');
+  for (const msg of session.messages || []) {
+    lines.push('    <message>');
+    lines.push(`      <role>${escapeXml(msg.role || '')}</role>`);
+    lines.push(`      <content>${escapeXml(msg.content || '')}</content>`);
+    if (msg.thinking) lines.push(`      <thinking>${escapeXml(msg.thinking)}</thinking>`);
+    if (msg.modelLabel) lines.push(`      <model>${escapeXml(msg.modelLabel)}</model>`);
+    if (msg.providerLabel) lines.push(`      <provider>${escapeXml(msg.providerLabel)}</provider>`);
+    lines.push('    </message>');
+  }
+  lines.push('  </messages>');
+  lines.push('</chat>');
+  return lines.join('\n');
+}
+
+function formatAsMarkdown(session) {
+  const lines = [`# ${session.title || 'Chat'}`, ''];
+  lines.push(`*Exported from Joanium — ${session.updatedAt || ''}*`, '');
+  for (const msg of session.messages || []) {
+    const role = msg.role === 'user' ? '**You**' : `**${msg.modelLabel || 'Assistant'}**`;
+    lines.push(`### ${role}`, '', msg.content || '', '');
+    if (msg.thinking) {
+      lines.push('<details><summary>Thinking</summary>', '', msg.thinking, '', '</details>', '');
+    }
+  }
+  return lines.join('\n');
+}
+
+function formatAsPlainText(session) {
+  const lines = [session.title || 'Chat', '='.repeat((session.title || 'Chat').length), ''];
+  for (const msg of session.messages || []) {
+    const role = msg.role === 'user' ? 'You' : msg.modelLabel || 'Assistant';
+    lines.push(`[${role}]`, msg.content || '', '');
+  }
+  return lines.join('\n');
+}
+
+function formatAsHtml(session) {
+  const lines = [
+    '<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head>',
+    '  <meta charset="UTF-8">',
+    `  <title>${escapeHtml(session.title || 'Chat')}</title>`,
+    '  <style>',
+    '    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }',
+    '    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }',
+    '    .meta { color: #888; font-size: 0.85rem; margin-bottom: 2rem; }',
+    '    .msg { margin-bottom: 1.25rem; }',
+    '    .msg-user { background: #f0f0f0; border-radius: 8px; padding: 0.75rem 1rem; }',
+    '    .msg-assistant { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0.75rem 1rem; }',
+    '    .role { font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: #666; margin-bottom: 0.25rem; }',
+    '    .content { white-space: pre-wrap; line-height: 1.5; }',
+    '    details { margin-top: 0.5rem; font-size: 0.9rem; color: #555; }',
+    '  </style>',
+    '</head>',
+    '<body>',
+    `  <h1>${escapeHtml(session.title || 'Chat')}</h1>`,
+    `  <div class="meta">Exported from Joanium — ${escapeHtml(session.updatedAt || '')}</div>`,
+  ];
+  for (const msg of session.messages || []) {
+    const roleLabel = msg.role === 'user' ? 'You' : msg.modelLabel || 'Assistant';
+    const cls = msg.role === 'user' ? 'msg-user' : 'msg-assistant';
+    lines.push(`  <div class="msg ${cls}">`);
+    lines.push(`    <div class="role">${escapeHtml(roleLabel)}</div>`);
+    lines.push(`    <div class="content">${escapeHtml(msg.content || '')}</div>`);
+    if (msg.thinking) {
+      lines.push('    <details><summary>Thinking</summary>');
+      lines.push(`      <div class="content">${escapeHtml(msg.thinking)}</div>`);
+      lines.push('    </details>');
+    }
+    lines.push('  </div>');
+  }
+  lines.push('</body>', '</html>');
+  return lines.join('\n');
+}
+
+const EXPORT_FORMATS = [
+  {
+    key: 'json',
+    labelKey: 'exportJson',
+    icon: 'fileJson',
+    ext: '.json',
+    mime: 'application/json',
+    format: formatAsJson,
+  },
+  {
+    key: 'xml',
+    labelKey: 'exportXml',
+    icon: 'fileXml',
+    ext: '.xml',
+    mime: 'application/xml',
+    format: formatAsXml,
+  },
+  {
+    key: 'markdown',
+    labelKey: 'exportMarkdown',
+    icon: 'fileMd',
+    ext: '.md',
+    mime: 'text/markdown',
+    format: formatAsMarkdown,
+  },
+  {
+    key: 'plaintext',
+    labelKey: 'exportPlainText',
+    icon: 'fileText',
+    ext: '.txt',
+    mime: 'text/plain',
+    format: formatAsPlainText,
+  },
+  {
+    key: 'html',
+    labelKey: 'exportHtml',
+    icon: 'fileHtml',
+    ext: '.html',
+    mime: 'text/html',
+    format: formatAsHtml,
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Date helpers
 // ---------------------------------------------------------------------------
 
@@ -43,6 +190,127 @@ export function createHistoryPanel(
   strings,
   { onNewChat, onLoadSession, onForkSession, getCurrentSessionId, getActiveProject } = {},
 ) {
+  // ── Export popup (singleton) ────────────────────────────────────────────
+
+  const exportPopup = createElement('div', 'chat-history__export-popup');
+  document.body.append(exportPopup);
+  let exportDisposeListeners = null;
+
+  function closeExportPopup() {
+    exportPopup.classList.remove('chat-history__export-popup--open');
+    exportDisposeListeners?.();
+    exportDisposeListeners = null;
+  }
+
+  function openExportPopup(session, triggerEl) {
+    exportPopup.replaceChildren();
+
+    const header = createElement('div', 'chat-history__export-popup__header');
+    header.append(createIcon('share', 'chat-history__export-popup__header-icon'));
+    header.append(createElement('span', 'chat-history__export-popup__title', strings.share));
+    exportPopup.append(header);
+
+    const formatList = createElement('div', 'chat-history__export-popup__formats');
+
+    for (const fmt of EXPORT_FORMATS) {
+      const btn = createElement('button', 'chat-history__export-popup__format-btn');
+      btn.type = 'button';
+      btn.append(createIcon(fmt.icon, 'chat-history__export-popup__format-icon'));
+      btn.append(
+        createElement('span', 'chat-history__export-popup__format-label', strings[fmt.labelKey]),
+      );
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportSession(session, fmt);
+        closeExportPopup();
+      });
+      formatList.append(btn);
+    }
+
+    exportPopup.append(formatList);
+
+    // Position relative to trigger
+    const rect = triggerEl.getBoundingClientRect();
+    const margin = 8;
+    exportPopup.style.cssText =
+      'transition:none; opacity:0; visibility:hidden; left:-9999px; top:-9999px;';
+    exportPopup.classList.remove('chat-history__export-popup--open');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const popupW = exportPopup.offsetWidth || 180;
+        const popupH = exportPopup.offsetHeight || 200;
+        let left = rect.right + margin;
+        if (left + popupW > window.innerWidth - margin) {
+          left = rect.left - popupW - margin;
+        }
+        left = Math.max(margin, left);
+        let top = rect.top;
+        top = Math.max(margin, Math.min(top, window.innerHeight - popupH - margin));
+
+        exportPopup.style.cssText = `left:${left}px; top:${top}px;`;
+        exportPopup.classList.add('chat-history__export-popup--open');
+      });
+    });
+
+    // Dismiss listeners
+    disposeExportListeners();
+    const onDocClick = (e) => {
+      if (!exportPopup.contains(e.target) && !triggerEl.contains(e.target)) {
+        closeExportPopup();
+      }
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') closeExportPopup();
+    };
+    setTimeout(() => {
+      document.addEventListener('click', onDocClick, { capture: true });
+      document.addEventListener('keydown', onKey);
+    }, 0);
+    exportDisposeListeners = () => {
+      document.removeEventListener('click', onDocClick, { capture: true });
+      document.removeEventListener('keydown', onKey);
+    };
+  }
+
+  function disposeExportListeners() {
+    exportDisposeListeners?.();
+    exportDisposeListeners = null;
+  }
+
+  // ── Export session to file ─────────────────────────────────────────────
+
+  function triggerDownload(content, filename, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportSession(session, fmt) {
+    try {
+      const fullSession = await invokeIpc(
+        'history:load-session',
+        session.id,
+        getActiveProject?.()?.id,
+      );
+      if (!fullSession) return;
+      const content = fmt.format(fullSession);
+      const safeTitle = (fullSession.title || 'chat')
+        .replace(/[^a-zA-Z0-9-_ ]/g, '')
+        .trim()
+        .replace(/\s+/g, '_');
+      triggerDownload(content, `${safeTitle}${fmt.ext}`, fmt.mime);
+    } catch (err) {
+      console.error('[Joanium] Failed to export session:', err);
+    }
+  }
+
   // ── Session card — inline rename helper ────────────────────────────────
 
   function startInlineRename(session, titleEl, contentEl, query) {
@@ -240,6 +508,16 @@ export function createHistoryPanel(
       startInlineRename(session, titleEl, contentEl, query);
     });
 
+    // Export
+    const exportBtn = createElement('button', 'chat-history__card-btn');
+    exportBtn.type = 'button';
+    exportBtn.setAttribute('aria-label', strings.share);
+    exportBtn.append(createIcon('share', 'chat-history__card-btn-icon'));
+    exportBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openExportPopup(session, exportBtn);
+    });
+
     // Delete
     const deleteBtn = createElement(
       'button',
@@ -262,7 +540,7 @@ export function createHistoryPanel(
       await populateList(contentEl, query);
     });
 
-    actions.append(pinBtn, forkBtn, renameBtn, deleteBtn);
+    actions.append(pinBtn, forkBtn, renameBtn, exportBtn, deleteBtn);
     card.append(body, actions);
     return card;
   }
