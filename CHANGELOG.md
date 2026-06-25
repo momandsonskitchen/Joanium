@@ -6,6 +6,16 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.625.0] - 2026-06-25
+
+* Updated AI Models
+* Ability to enable/disable sound effects
+* Added sound effect for click in the sidebar
+* Updated AI Models
+* Chore(deps-dev): Bump jscpd from 5.0.10 to 5.0.11
+
+---
+
 ## [2026.624.0] - 2026-06-24
 
 * Added Styles For Dark Mode For Birthday Card
