@@ -524,7 +524,7 @@ export function createAssistantGroupElement(
   // Action buttons — for group responses, show as soon as this message is done.
   // For normal responses, wait until all generation is complete.
   const groupDone = isGroupResponse && !isStreaming;
-  const normalDone = !isGroupResponse && !isGenerating;
+  const normalDone = !isGroupResponse && !isStreaming;
   if (
     groupDone &&
     !needsContinuation &&
