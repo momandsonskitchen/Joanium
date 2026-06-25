@@ -8,7 +8,7 @@ import { VALID_SEARCH_ENGINES } from '../../Shared/UserData/UserData.js';
 const DEFAULT_SETTINGS = Object.freeze({
   runOnStartup: false,
   keepAwake: false,
-  completionSound: true,
+  soundEffects: true,
   autoMemoryUpdates: true,
   autoUpdate: true,
   showTechFeed: true,
@@ -22,7 +22,7 @@ function normalizeSettings(candidate = {}) {
   return {
     runOnStartup: Boolean(candidate.runOnStartup ?? DEFAULT_SETTINGS.runOnStartup),
     keepAwake: Boolean(candidate.keepAwake ?? DEFAULT_SETTINGS.keepAwake),
-    completionSound: Boolean(candidate.completionSound ?? DEFAULT_SETTINGS.completionSound),
+    soundEffects: Boolean(candidate.soundEffects ?? DEFAULT_SETTINGS.soundEffects),
     autoMemoryUpdates: Boolean(candidate.autoMemoryUpdates ?? DEFAULT_SETTINGS.autoMemoryUpdates),
     autoUpdate: true, // always on — not user-configurable
     showTechFeed: Boolean(candidate.showTechFeed ?? DEFAULT_SETTINGS.showTechFeed),

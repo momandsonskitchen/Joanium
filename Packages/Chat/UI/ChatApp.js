@@ -63,10 +63,10 @@ import {
   toAttachmentSummary,
 } from './Utils.js';
 import {
-  initCompletionSound,
-  markCompletionSoundAborted,
-  playCompletionSound,
-} from './CompletionSound.js';
+  initSounds,
+  markCompletionAborted,
+  playCompletion,
+} from '../../Shared/Sounds/SoundManager.js';
 import { attachCustomScrollbar } from '../../Shared/CustomScrollbar/CustomScrollbar.js';
 import { iconMarkup } from '../../Shared/Icons/Icons.js';
 import { isOnline } from '../../Shared/OfflineMonitor/OfflineMonitor.js';
@@ -114,7 +114,7 @@ export async function createChatView(
     onLockApp,
   } = {},
 ) {
-  initCompletionSound();
+  initSounds();
 
   const [payload, appSettings] = await Promise.all([
     invokeIpc('chat:bootstrap'),
@@ -2126,7 +2126,7 @@ export async function createChatView(
     clearTimeout(diagTimer);
     diagTimer = null;
     diagPanel?.hide();
-    markCompletionSoundAborted();
+    markCompletionAborted();
     cancelActiveStream();
     removeStreamListeners();
     const stoppedNote = strings.composer.generationStopped;
@@ -3666,7 +3666,7 @@ export async function createChatView(
           }));
           isSending = false;
           await saveCurrentSession();
-          void playCompletionSound(generationStartTime);
+          void playCompletion(generationStartTime);
           syncComposer();
           renderThread();
           return;
@@ -3698,7 +3698,7 @@ export async function createChatView(
           if (terminalAction.unsupported) {
             isSending = false;
             await saveCurrentSession();
-            void playCompletionSound(generationStartTime);
+            void playCompletion(generationStartTime);
             syncComposer();
             return;
           }
@@ -3756,7 +3756,7 @@ export async function createChatView(
         }));
         isSending = false;
         await saveCurrentSession();
-        void playCompletionSound(generationStartTime);
+        void playCompletion(generationStartTime);
         syncComposer();
         renderThread();
       }),

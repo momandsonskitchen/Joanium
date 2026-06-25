@@ -64,7 +64,7 @@ export function createDefaultUserState() {
     appSettings: {
       runOnStartup: false,
       keepAwake: false,
-      completionSound: true,
+      soundEffects: true,
       autoMemoryUpdates: true,
       autoUpdate: true,
       showTechFeed: true,
@@ -281,8 +281,8 @@ function sanitizeAppSettings(candidate) {
       candidate.runOnStartup ?? candidate.run_on_startup ?? defaults.runOnStartup,
     ),
     keepAwake: Boolean(candidate.keepAwake ?? candidate.keep_awake ?? defaults.keepAwake),
-    completionSound: Boolean(
-      candidate.completionSound ?? candidate.completion_sound ?? defaults.completionSound,
+    soundEffects: Boolean(
+      candidate.soundEffects ?? candidate.sound_effects ?? defaults.soundEffects,
     ),
     autoMemoryUpdates: Boolean(
       candidate.autoMemoryUpdates ?? candidate.auto_memory_updates ?? defaults.autoMemoryUpdates,
