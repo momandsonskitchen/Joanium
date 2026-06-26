@@ -106,8 +106,6 @@ const productivityStrings = {
     },
   ],
   labels: {
-    baseId: 'base_id',
-    content: 'content',
     fields: 'fields',
     query: 'query',
     table: 'table',
@@ -127,15 +125,12 @@ const productivityStrings = {
     todoistClosed: 'Todoist task completed',
     todoistCreated: 'Todoist task created.',
     todoistTasks: 'Todoist tasks',
-    chat: 'Chat',
     created: 'Created',
     due: 'Due',
     emptyObject: '{}',
     id: 'ID',
-    name: 'Name',
     notAvailable: 'n/a',
     project: 'Project',
-    timestamp: 'Timestamp',
   },
 };
 
