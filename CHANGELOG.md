@@ -6,6 +6,18 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.626.0] - 2026-06-26
+
+* Fix: To show action buttons even when streaming text.
+* Fixed the terminal path issue
+* Added the ability to export per chat conversation
+* Updated AI Models
+* Updated AI Models
+* Updated AI Models
+* Updated AI Models
+
+---
+
 ## [2026.625.0] - 2026-06-25
 
 * Updated AI Models
