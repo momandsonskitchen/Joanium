@@ -5,9 +5,6 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "step-tts-2": {
-      "name": "Step Tts 2"
-    },
     "step-3.5-flash": {
       "name": "Step 3.5 Flash",
       "description": "Efficient StepFun MoE model for reasoning, tool use, coding, and chat",
@@ -30,15 +27,6 @@
         "docx": false
       }
     },
-    "stepaudio-2.5-tts": {
-      "name": "Stepaudio 2 5 Tts"
-    },
-    "stepaudio-2.5-asr": {
-      "name": "Stepaudio 2 5 Asr"
-    },
-    "step-image-edit-2": {
-      "name": "Step Image Edit 2"
-    },
     "step-3.7-flash": {
       "name": "Step 3.7 Flash",
       "description": "Current StepFun flash model for agentic, coding, multimodal, and reasoning workflows",
@@ -51,5 +39,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-25T14:55:06.988Z"
+  "_syncedAt": "2026-06-26T09:38:01.925Z"
 }

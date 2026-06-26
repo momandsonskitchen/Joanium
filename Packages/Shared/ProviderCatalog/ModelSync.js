@@ -28,6 +28,23 @@ import { writeJsonFile } from '../Storage/JsonFileStore.js';
 
 const SYNC_TTL_MS = 60 * 60 * 1000; // 1 hour
 
+// Known image/audio/video model slug patterns that don't support chat completions.
+const nonChatPatterns = [
+  /flux/i,
+  /stable-diffusion/i,
+  /sdxl/i,
+  /playground/i,
+  /kandinsky/i,
+  /dall-e/i,
+  /whisper/i,
+  /tts/i,
+  /speech/i,
+  /audio/i,
+  /video/i,
+  /image-/i,
+  /-image/i,
+];
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function isSyncStale(providerConfig) {
@@ -45,10 +62,16 @@ function isSyncStale(providerConfig) {
 function mergeModels(existingModels, liveModels) {
   const merged = {};
   for (const { id, name, ...apiMeta } of liveModels) {
+    if (nonChatPatterns.some((re) => re.test(id))) continue;
     if (existingModels[id]) {
       merged[id] = existingModels[id];
     } else {
       merged[id] = Object.keys(apiMeta).length > 0 ? { name, ...apiMeta } : { name };
+    }
+  }
+  for (const [id, model] of Object.entries(existingModels)) {
+    if (!merged[id] && !nonChatPatterns.some((re) => re.test(id))) {
+      merged[id] = model;
     }
   }
   return merged;

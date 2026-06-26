@@ -83,9 +83,6 @@
     "openai/gpt-oss-20b": {
       "name": "Gpt OSS 20B"
     },
-    "parasail-resemble-tts-en": {
-      "name": "Parasail Resemble Tts En"
-    },
     "parasail-qwen3vl-8b-instruct": {
       "name": "Parasail Qwen3vl 8B Instruct"
     },
@@ -231,5 +228,5 @@
       "name": "GLM 5 2 FP8"
     }
   },
-  "_syncedAt": "2026-06-25T14:55:09.841Z"
+  "_syncedAt": "2026-06-26T09:38:04.412Z"
 }
