@@ -40,20 +40,6 @@
         "max_output_tokens": null
       }
     },
-    "gpt-5.5": {
-      "name": "Gpt 5 5",
-      "context_window": {
-        "context_length": 400000,
-        "max_output_tokens": 128000
-      }
-    },
-    "gpt-5.5-pro": {
-      "name": "Gpt 5 5 PRO",
-      "context_window": {
-        "context_length": 400000,
-        "max_output_tokens": 128000
-      }
-    },
     "gemini-3.5-flash": {
       "name": "Gemini 3 5 FLASH",
       "context_window": {
@@ -1742,5 +1728,5 @@
       "name": "Seedance 2 0 MINI"
     }
   },
-  "_syncedAt": "2026-06-25T14:55:05.610Z"
+  "_syncedAt": "2026-06-26T06:24:53.718Z"
 }
