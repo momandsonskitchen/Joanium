@@ -33,13 +33,6 @@
         "max_output_tokens": null
       }
     },
-    "gpt-image-2": {
-      "name": "Gpt Image 2",
-      "context_window": {
-        "context_length": 128000,
-        "max_output_tokens": null
-      }
-    },
     "gemini-3.5-flash": {
       "name": "Gemini 3 5 FLASH",
       "context_window": {
@@ -208,17 +201,11 @@
     "gemma-4-31b-n": {
       "name": "Gemma 4 31B N"
     },
-    "grok-imagine-image": {
-      "name": "Grok Imagine Image"
-    },
     "kimi-k2.5-fw": {
       "name": "Kimi K2 5 Fw"
     },
     "seed-2.0-pro": {
       "name": "Seed 2 0 PRO"
-    },
-    "minimax-speech-2.8": {
-      "name": "Minimax Speech 2 8"
     },
     "manus": {
       "name": "Manus"
@@ -263,13 +250,6 @@
     },
     "qwen3-max-thinking": {
       "name": "Qwen3 MAX Thinking"
-    },
-    "grok-imagine-video": {
-      "name": "Grok Imagine Video",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
     },
     "claude-sonnet-4.5": {
       "name": "Claude Sonnet 4 5",
@@ -334,21 +314,11 @@
         "max_output_tokens": null
       }
     },
-    "gpt-image-1.5": {
-      "name": "Gpt Image 1 5",
-      "context_window": {
-        "context_length": 128000,
-        "max_output_tokens": null
-      }
-    },
     "claude-code": {
       "name": "Claude Code"
     },
     "minimax-m2.1": {
       "name": "Minimax M2 1"
-    },
-    "qwen-image-2.0": {
-      "name": "Qwen Image 2 0"
     },
     "perplexity-adv-deep-research": {
       "name": "Perplexity Adv Deep Research"
@@ -359,20 +329,8 @@
     "perplexity-search": {
       "name": "Perplexity Search"
     },
-    "wan2.7-image": {
-      "name": "Wan2 7 Image"
-    },
-    "qwen-image-2-pro": {
-      "name": "Qwen Image 2 PRO"
-    },
     "pixverse-v5.6": {
       "name": "Pixverse V5 6"
-    },
-    "moss-video-and-audio": {
-      "name": "Moss Video And Audio"
-    },
-    "qwen-image-2": {
-      "name": "Qwen Image 2"
     },
     "wan-2.7": {
       "name": "Wan 2 7"
@@ -452,17 +410,8 @@
         "max_output_tokens": null
       }
     },
-    "gpt-audio-mini": {
-      "name": "Gpt Audio MINI"
-    },
-    "gpt-audio-1.5": {
-      "name": "Gpt Audio 1 5"
-    },
     "glm-4.7-n": {
       "name": "Glm 4 7 N"
-    },
-    "gpt-audio": {
-      "name": "Gpt Audio"
     },
     "gpt-5.1": {
       "name": "Gpt 5 1",
@@ -605,27 +554,12 @@
     "minimax-m2": {
       "name": "Minimax M2"
     },
-    "hunyuan-image-3": {
-      "name": "Hunyuan Image 3"
-    },
-    "kling-image-o1": {
-      "name": "Kling Image O1"
-    },
     "kling-2.6-pro": {
       "name": "Kling 2 6 PRO",
       "context_window": {
         "context_length": 256,
         "max_output_tokens": null
       }
-    },
-    "flux-2-pro": {
-      "name": "Flux 2 PRO"
-    },
-    "flux-2-flex": {
-      "name": "Flux 2 Flex"
-    },
-    "flux-2-dev": {
-      "name": "Flux 2 Dev"
     },
     "mistral-medium-3.1": {
       "name": "Mistral Medium 3 1"
@@ -826,9 +760,6 @@
         "max_output_tokens": 100000
       }
     },
-    "cartesia-ink-whisper": {
-      "name": "Cartesia Ink Whisper"
-    },
     "gpt-4o-mini": {
       "name": "Gpt 4o MINI",
       "context_window": {
@@ -950,13 +881,6 @@
         "max_output_tokens": null
       }
     },
-    "flux-pro-1.1-ultra": {
-      "name": "Flux PRO 1 1 ULTRA",
-      "context_window": {
-        "context_length": 250,
-        "max_output_tokens": null
-      }
-    },
     "mistral-small-3.1": {
       "name": "Mistral Small 3 1"
     },
@@ -973,18 +897,6 @@
         "max_output_tokens": null
       }
     },
-    "whisper-v3-large-t": {
-      "name": "Whisper V3 Large T"
-    },
-    "stable-audio-2.5": {
-      "name": "Stable Audio 2 5"
-    },
-    "stable-audio-2.0": {
-      "name": "Stable Audio 2 0"
-    },
-    "hailuo-speech-02": {
-      "name": "Hailuo Speech 02"
-    },
     "elevenlabs-v2.5-turbo": {
       "name": "Elevenlabs V2 5 TURBO",
       "context_window": {
@@ -992,32 +904,8 @@
         "max_output_tokens": null
       }
     },
-    "gemini-2.5-flash-tts": {
-      "name": "Gemini 2 5 FLASH Tts"
-    },
-    "gemini-2.5-pro-tts": {
-      "name": "Gemini 2 5 PRO Tts"
-    },
-    "orpheus-tts": {
-      "name": "Orpheus Tts"
-    },
     "deepgram-nova-3": {
       "name": "Deepgram Nova 3"
-    },
-    "unreal-speech-tts": {
-      "name": "Unreal Speech Tts"
-    },
-    "flux-2-max": {
-      "name": "Flux 2 MAX"
-    },
-    "z-image-lightning": {
-      "name": "Z Image Lightning"
-    },
-    "flux-2-klein-4b-base": {
-      "name": "Flux 2 Klein 4B Base"
-    },
-    "flux-2-klein-9b-base": {
-      "name": "Flux 2 Klein 9B Base"
     },
     "imagen-4-ultra": {
       "name": "Imagen 4 ULTRA",
@@ -1033,9 +921,6 @@
         "max_output_tokens": null
       }
     },
-    "flux-2-klein-4b": {
-      "name": "Flux 2 Klein 4B"
-    },
     "imagen-4": {
       "name": "Imagen 4",
       "context_window": {
@@ -1049,36 +934,8 @@
     "dreamina-3.1": {
       "name": "Dreamina 3 1"
     },
-    "qwen-image": {
-      "name": "Qwen Image"
-    },
-    "qwen-image-20b": {
-      "name": "Qwen Image 20B"
-    },
     "svi-2.0-pro": {
       "name": "Svi 2 0 PRO"
-    },
-    "hunyuan-video-1.5": {
-      "name": "Hunyuan Video 1 5"
-    },
-    "flux-2-flash": {
-      "name": "Flux 2 FLASH"
-    },
-    "flux-2-turbo": {
-      "name": "Flux 2 TURBO",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
-    "flux-kontext-max": {
-      "name": "Flux Kontext MAX"
-    },
-    "flux-kontext-pro": {
-      "name": "Flux Kontext PRO"
-    },
-    "flux-krea": {
-      "name": "Flux Krea"
     },
     "imagen-3": {
       "name": "Imagen 3",
@@ -1116,23 +973,6 @@
         "max_output_tokens": null
       }
     },
-    "flux-dev-di": {
-      "name": "Flux Dev Di"
-    },
-    "flux-schnell-di": {
-      "name": "Flux Schnell Di",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
-    "flux-pro-1.1": {
-      "name": "Flux PRO 1 1",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
     "luma-photon-flash": {
       "name": "Luma Photon FLASH"
     },
@@ -1147,23 +987,6 @@
     },
     "glm-4.7-fw": {
       "name": "Glm 4 7 Fw"
-    },
-    "flux-schnell": {
-      "name": "Flux Schnell",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
-    "gpt-image-1": {
-      "name": "Gpt Image 1",
-      "context_window": {
-        "context_length": 128000,
-        "max_output_tokens": null
-      }
-    },
-    "gpt-image-1-mini": {
-      "name": "Gpt Image 1 MINI"
     },
     "veo-3.1": {
       "name": "Veo 3 1",
@@ -1235,13 +1058,6 @@
     },
     "pixverse-v4.5": {
       "name": "Pixverse V4 5"
-    },
-    "flux-dev": {
-      "name": "Flux Dev",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
     },
     "lyria-3": {
       "name": "Lyria 3"
@@ -1370,9 +1186,6 @@
     "hailuo-ai": {
       "name": "Hailuo Ai"
     },
-    "veo-2-video": {
-      "name": "Veo 2 Video"
-    },
     "wan-2.1": {
       "name": "Wan 2 1"
     },
@@ -1392,15 +1205,6 @@
     },
     "trellis-3d": {
       "name": "Trellis 3d"
-    },
-    "flux-dev-finetuner": {
-      "name": "Flux Dev Finetuner"
-    },
-    "flux-inpaint": {
-      "name": "Flux Inpaint"
-    },
-    "flux-fill": {
-      "name": "Flux Fill"
     },
     "bria-eraser": {
       "name": "Bria Eraser"
@@ -1490,25 +1294,8 @@
         "max_output_tokens": 2048
       }
     },
-    "sketch-to-image": {
-      "name": "Sketch To Image"
-    },
     "stablediffusion3.5-t": {
       "name": "Stablediffusion3 5 T"
-    },
-    "flux-pro-1.1-t": {
-      "name": "Flux PRO 1 1 T",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
-    "flux-schnell-t": {
-      "name": "Flux Schnell T",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
     },
     "recraft-v3": {
       "name": "Recraft V3",
@@ -1578,20 +1365,6 @@
         "max_output_tokens": 4096
       }
     },
-    "flux-1-schnell-fw": {
-      "name": "Flux 1 Schnell Fw",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
-    "flux-1-dev-fw": {
-      "name": "Flux 1 Dev Fw",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
     "mochi-preview": {
       "name": "Mochi Preview"
     },
@@ -1617,9 +1390,6 @@
     },
     "code-editor": {
       "name": "Code Editor"
-    },
-    "gemini-3.1-flash-tts": {
-      "name": "Gemini 3 1 FLASH Tts"
     },
     "minimax-m2.7-fw": {
       "name": "Minimax M2 7 Fw"
@@ -1681,9 +1451,6 @@
     "qwen3.7-max-t": {
       "name": "Qwen3 7 MAX T"
     },
-    "grok-imgn-video-1.5": {
-      "name": "Grok Imgn Video 1 5"
-    },
     "minimax-m3-el": {
       "name": "Minimax M3 El"
     },
@@ -1728,5 +1495,5 @@
       "name": "Seedance 2 0 MINI"
     }
   },
-  "_syncedAt": "2026-06-26T06:24:53.718Z"
+  "_syncedAt": "2026-06-26T09:38:00.101Z"
 }

@@ -747,19 +747,6 @@
         "image": true
       }
     },
-    "google/gemini-2.5-flash-image": {
-      "name": "Nano Banana (Gemini 2.5 Flash Image)",
-      "description": "Nano Banana (Gemini 2.5 Flash Image) is Google's first fully hybrid reasoning model, letting developers turn thinking on or off and set thinking budgets to balance quality, cost, and latency. Upgraded for rapid creative workflows, it can generate interleaved text and images and supports conversation",
-      "context_window": 32768,
-      "max_output": 65536,
-      "pricing": {
-        "input": 0.3,
-        "output": 2.5
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "google/gemini-2.5-flash-lite": {
       "name": "Gemini 2.5 Flash Lite",
       "description": "Gemini 2.5 Flash-Lite is a balanced, low-latency model with configurable thinking budgets and tool connectivity (e.g., Google Search grounding and code execution). It supports multimodal input and offers a 1M-token context window.",
@@ -804,19 +791,6 @@
         "output": 3
       }
     },
-    "google/gemini-3-pro-image": {
-      "name": "Nano Banana Pro (Gemini 3 Pro Image)",
-      "description": "Nano Banana Pro (Gemini 3 Pro Image) builds on Nano Banana's generation capabilities into a new era of studio-quality, functional design to help you create and edit high-fidelity, production-ready visuals with unparalleled precision and control. Improvements include enhanced world knowledge and reas",
-      "context_window": 65536,
-      "max_output": 32768,
-      "pricing": {
-        "input": 2,
-        "output": 12
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "google/gemini-3-pro-preview": {
       "name": "Gemini 3 Pro Preview",
       "description": "This model improves upon Gemini 2.5 Pro and is catered towards challenging tasks, especially those involving complex reasoning or agentic workflows. Improvements highlighted include use cases for coding, multi-step function calling, planning, reasoning, deep knowledge tasks, and instruction followin",
@@ -825,30 +799,6 @@
       "pricing": {
         "input": 2,
         "output": 12
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
-    "google/gemini-3.1-flash-image": {
-      "name": "Gemini 3.1 Flash Image (Nano Banana 2)",
-      "description": "Gemini 3.1 Flash Image is optimized for image understanding and generation and offers a balance of price and performance.",
-      "context_window": 131072,
-      "max_output": 32768,
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
-    "google/gemini-3.1-flash-image-preview": {
-      "name": "Gemini 3.1 Flash Image Preview (Nano Banana 2)",
-      "description": "Gemini 3.1 Flash Image is optimized for image understanding and generation and offers a balance of price and performance.",
-      "context_window": 131072,
-      "max_output": 32768,
-      "pricing": {
-        "input": 0.5,
-        "output": 3
       },
       "inputs": {
         "text": true,
@@ -2670,5 +2620,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-26T06:24:52.851Z"
+  "_syncedAt": "2026-06-26T09:37:58.979Z"
 }

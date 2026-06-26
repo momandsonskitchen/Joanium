@@ -58,16 +58,6 @@
       "context_window": 1048576,
       "max_output": 8192
     },
-    "gemini-2.5-flash-preview-tts": {
-      "name": "Gemini 2.5 Flash Preview TTS",
-      "context_window": 8192,
-      "max_output": 16384
-    },
-    "gemini-2.5-pro-preview-tts": {
-      "name": "Gemini 2.5 Pro Preview TTS",
-      "context_window": 8192,
-      "max_output": 16384
-    },
     "gemma-4-26b-a4b-it": {
       "name": "Gemma 4 26B A4B IT",
       "context_window": 262144,
@@ -109,11 +99,6 @@
         "output": 0.4
       }
     },
-    "gemini-2.5-flash-image": {
-      "name": "Nano Banana",
-      "context_window": 32768,
-      "max_output": 32768
-    },
     "gemini-3-pro-preview": {
       "name": "Gemini 3 Pro Preview",
       "context_window": 1048576,
@@ -144,30 +129,10 @@
       "context_window": 1048576,
       "max_output": 65536
     },
-    "gemini-3-pro-image-preview": {
-      "name": "Nano Banana Pro",
-      "context_window": 131072,
-      "max_output": 32768
-    },
-    "gemini-3-pro-image": {
-      "name": "Nano Banana Pro",
-      "context_window": 131072,
-      "max_output": 32768
-    },
     "nano-banana-pro-preview": {
       "name": "Nano Banana Pro",
       "context_window": 131072,
       "max_output": 32768
-    },
-    "gemini-3.1-flash-image-preview": {
-      "name": "Nano Banana 2",
-      "context_window": 65536,
-      "max_output": 65536
-    },
-    "gemini-3.1-flash-image": {
-      "name": "Nano Banana 2",
-      "context_window": 65536,
-      "max_output": 65536
     },
     "gemini-3.5-flash": {
       "name": "Gemini 3.5 Flash",
@@ -183,11 +148,6 @@
       "name": "Lyria 3 Pro Preview",
       "context_window": 1048576,
       "max_output": 65536
-    },
-    "gemini-3.1-flash-tts-preview": {
-      "name": "Gemini 3.1 Flash TTS Preview",
-      "context_window": 8192,
-      "max_output": 16384
     },
     "gemini-robotics-er-1.5-preview": {
       "name": "Gemini Robotics-ER 1.5 Preview",
@@ -225,5 +185,5 @@
       "max_output": 65536
     }
   },
-  "_syncedAt": "2026-06-26T06:24:27.559Z"
+  "_syncedAt": "2026-06-26T09:37:18.234Z"
 }
