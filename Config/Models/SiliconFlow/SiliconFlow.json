@@ -116,15 +116,6 @@
     "deepseek-ai/DeepSeek-R1": {
       "name": "DeepSeek R1"
     },
-    "Tongyi-MAI/Z-Image-Turbo": {
-      "name": "Z Image TURBO"
-    },
-    "black-forest-labs/FLUX.2-flex": {
-      "name": "FLUX 2 Flex"
-    },
-    "black-forest-labs/FLUX.2-pro": {
-      "name": "FLUX 2 PRO"
-    },
     "Qwen/Qwen3-VL-32B-Instruct": {
       "name": "Qwen3 VL 32B Instruct"
     },
@@ -164,12 +155,6 @@
     },
     "inclusionAI/Ling-flash-2.0": {
       "name": "Ling FLASH 2 0"
-    },
-    "Qwen/Qwen-Image": {
-      "name": "Qwen Image"
-    },
-    "Qwen/Qwen-Image-Edit": {
-      "name": "Qwen Image Edit"
     },
     "Qwen/Qwen3-Coder-30B-A3B-Instruct": {
       "name": "Qwen3 Coder 30B A3B Instruct"
@@ -214,42 +199,12 @@
     "Qwen/Qwen3-Embedding-0.6B": {
       "name": "Qwen3 Embedding 0 6B"
     },
-    "black-forest-labs/FLUX.1-Kontext-pro": {
-      "name": "FLUX 1 Kontext PRO"
-    },
-    "black-forest-labs/FLUX.1-Kontext-max": {
-      "name": "FLUX 1 Kontext MAX"
-    },
-    "black-forest-labs/FLUX-1.1-pro-Ultra": {
-      "name": "FLUX 1 1 PRO ULTRA"
-    },
-    "black-forest-labs/FLUX-1.1-pro": {
-      "name": "FLUX 1 1 PRO"
-    },
-    "black-forest-labs/FLUX.1-Kontext-dev": {
-      "name": "FLUX 1 Kontext Dev"
-    },
     "Qwen/Qwen2.5-72B-Instruct": {
       "name": "Qwen2 5 72B Instruct"
     },
     "Qwen/Qwen2.5-7B-Instruct": {
       "name": "Qwen2 5 7B Instruct"
-    },
-    "IndexTeam/IndexTTS-2": {
-      "name": "IndexTTS 2"
-    },
-    "black-forest-labs/FLUX.1-schnell": {
-      "name": "FLUX 1 Schnell"
-    },
-    "black-forest-labs/FLUX.1-dev": {
-      "name": "FLUX 1 Dev"
-    },
-    "fishaudio/fish-speech-1.5": {
-      "name": "Fish Speech 1 5"
-    },
-    "FunAudioLLM/CosyVoice2-0.5B": {
-      "name": "CosyVoice2 0 5B"
     }
   },
-  "_syncedAt": "2026-06-25T14:54:53.849Z"
+  "_syncedAt": "2026-06-26T09:37:40.697Z"
 }
