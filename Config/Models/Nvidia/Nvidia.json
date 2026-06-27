@@ -222,9 +222,6 @@
     "nv-mistralai/mistral-nemo-12b-instruct": {
       "name": "nv-mistralai/mistral-nemo-12b-instruct"
     },
-    "nvidia/ai-synthetic-video-detector": {
-      "name": "nvidia/ai-synthetic-video-detector"
-    },
     "nvidia/cosmos-reason2-8b": {
       "name": "nvidia/cosmos-reason2-8b"
     },
@@ -448,5 +445,5 @@
       "name": "zyphra/zamba2-7b-instruct"
     }
   },
-  "_syncedAt": "2026-06-26T06:24:21.062Z"
+  "_syncedAt": "2026-06-27T02:04:06.192Z"
 }

@@ -570,9 +570,6 @@
     "exa-search": {
       "name": "Exa Search"
     },
-    "exa-research": {
-      "name": "Exa Research"
-    },
     "nova-lite-2": {
       "name": "Nova LITE 2"
     },
@@ -928,9 +925,6 @@
         "max_output_tokens": null
       }
     },
-    "phoenix-1.0": {
-      "name": "Phoenix 1 0"
-    },
     "dreamina-3.1": {
       "name": "Dreamina 3 1"
     },
@@ -1086,13 +1080,6 @@
     "ltx-2-pro": {
       "name": "Ltx 2 PRO"
     },
-    "veo-3": {
-      "name": "Veo 3",
-      "context_window": {
-        "context_length": 480,
-        "max_output_tokens": null
-      }
-    },
     "veo-3-vfast": {
       "name": "Veo 3 Vfast"
     },
@@ -1101,13 +1088,6 @@
     },
     "vidu-q1": {
       "name": "Vidu Q1"
-    },
-    "veo-3-fast": {
-      "name": "Veo 3 FAST",
-      "context_window": {
-        "context_length": 480,
-        "max_output_tokens": null
-      }
     },
     "seedance-1.0-pro-fast": {
       "name": "Seedance 1 0 PRO FAST"
@@ -1158,13 +1138,6 @@
       "name": "Runway",
       "context_window": {
         "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
-    "veo-2": {
-      "name": "Veo 2",
-      "context_window": {
-        "context_length": 480,
         "max_output_tokens": null
       }
     },
@@ -1493,7 +1466,34 @@
     },
     "seedance-2.0-mini": {
       "name": "Seedance 2 0 MINI"
+    },
+    "exa-research": {
+      "name": "Exa Research"
+    },
+    "phoenix-1.0": {
+      "name": "Phoenix 1 0"
+    },
+    "veo-3": {
+      "name": "Veo 3",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "veo-3-fast": {
+      "name": "Veo 3 FAST",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "veo-2": {
+      "name": "Veo 2",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
     }
   },
-  "_syncedAt": "2026-06-26T09:38:00.101Z"
+  "_syncedAt": "2026-06-27T02:04:26.220Z"
 }

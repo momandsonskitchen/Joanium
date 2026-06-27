@@ -5,9 +5,6 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "accounts/fireworks/models/glm-5p1": {
-      "name": "Glm 5p1"
-    },
     "accounts/fireworks/models/gpt-oss-120b": {
       "name": "GPT OSS 120B",
       "description": "OpenAI's open-weight 120B model — blazing-fast inference on Fireworks, outperforms many proprietary models",
@@ -40,6 +37,15 @@
         "output": 4
       }
     },
+    "accounts/fireworks/models/kimi-k2p5": {
+      "name": "Kimi K2p5"
+    },
+    "accounts/fireworks/models/glm-5p2": {
+      "name": "Glm 5p2"
+    },
+    "accounts/fireworks/models/glm-5p1": {
+      "name": "Glm 5p1"
+    },
     "accounts/fireworks/models/deepseek-v4-pro": {
       "name": "DeepSeek V4 Pro",
       "description": "DeepSeek's latest frontier model — strong reasoning, coding, and math at competitive pricing with 1M context",
@@ -55,13 +61,7 @@
         "input": 1.74,
         "output": 3.48
       }
-    },
-    "accounts/fireworks/models/kimi-k2p5": {
-      "name": "Kimi K2p5"
-    },
-    "accounts/fireworks/models/glm-5p2": {
-      "name": "Glm 5p2"
     }
   },
-  "_syncedAt": "2026-06-20T15:17:00.700Z"
+  "_syncedAt": "2026-06-27T02:04:14.817Z"
 }
