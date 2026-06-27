@@ -5,6 +5,22 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "accounts/fireworks/models/deepseek-v4-pro": {
+      "name": "DeepSeek V4 Pro",
+      "description": "DeepSeek's latest frontier model — strong reasoning, coding, and math at competitive pricing with 1M context",
+      "context_window": 1000000,
+      "max_output": 32768,
+      "inputs": {
+        "text": true,
+        "image": false,
+        "pdf": false,
+        "docx": false
+      },
+      "pricing": {
+        "input": 1.74,
+        "output": 3.48
+      }
+    },
     "accounts/fireworks/models/glm-5p1": {
       "name": "Glm 5p1"
     },
@@ -22,22 +38,6 @@
       "pricing": {
         "input": 0.15,
         "output": 0.6
-      }
-    },
-    "accounts/fireworks/models/deepseek-v4-pro": {
-      "name": "DeepSeek V4 Pro",
-      "description": "DeepSeek's latest frontier model — strong reasoning, coding, and math at competitive pricing with 1M context",
-      "context_window": 1000000,
-      "max_output": 32768,
-      "inputs": {
-        "text": true,
-        "image": false,
-        "pdf": false,
-        "docx": false
-      },
-      "pricing": {
-        "input": 1.74,
-        "output": 3.48
       }
     },
     "accounts/fireworks/models/kimi-k2p6": {
@@ -63,5 +63,5 @@
       "name": "Glm 5p2"
     }
   },
-  "_syncedAt": "2026-06-27T03:04:47.106Z"
+  "_syncedAt": "2026-06-27T07:08:49.569Z"
 }

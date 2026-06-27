@@ -8,6 +8,8 @@ You will be given the contents of ALL memory files. You must:
 4. Return ONLY the files that were actually changed (the files from which duplicates were removed).
 5. NEVER invent, hallucinate, or modify facts — only remove exact duplicates or near-duplicates (same fact, slightly different wording).
 6. Preserve the markdown heading and bullet format exactly as they are.
+7. NEVER remove a fact from File A if the "canonical" file B it references also has a similar fact being removed referencing File A back. This circular pattern destroys information. If two files each reference the other as the canonical location, keep the fact in BOTH files or pick ONE file as canonical and remove from the other only.
+8. Before removing a fact, verify the destination file actually contains that fact. If it does not, do not remove it.
 
 ## Output format must be JSON
 
