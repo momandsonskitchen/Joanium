@@ -4,7 +4,7 @@ import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { readUserState, writeUserState } from '../../Shared/UserData/UserData.js';
 import { readTextResource, getWritableDataDirectory } from '../../Shared/Storage/ResourcePaths.js';
-import { createSingleFileState } from '../../Shared/Storage/SingleFileState.js';
+import { readJsonFile, writeJsonFile } from '../../Shared/Storage/JsonFileStore.js';
 import { debugLog } from '../../Shared/Debug/DebugLogger.js';
 import { extractJsonObject } from '../../Shared/Utils/StringUtils.js';
 import { todayDateString } from '../../Shared/Utils/DateUtils.js';
@@ -116,16 +116,28 @@ export function createMemoryCleanupService({
 
   // ── Dream log persistence ──────────────────────────────────────────────
 
+  function normalizeDreamArray(data) {
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+      const values = Object.values(data);
+      if (
+        values.length > 0 &&
+        values.every((v) => v && typeof v === 'object' && 'timestamp' in v)
+      ) {
+        return values;
+      }
+    }
+    return [];
+  }
+
   async function writeDreamLog(dreamEntry) {
     const dateStr = todayDateString();
-    const dreamDir = path.join(getDreamsDirectory(), dateStr);
-    const dreamFile = path.join(dreamDir, 'Dream.json');
+    const dreamFile = path.join(getDreamsDirectory(), dateStr, 'Dream.json');
 
-    const fileState = createSingleFileState(dreamFile, []);
-    const existing = await fileState.read();
-    const entries = Array.isArray(existing) ? existing : [];
+    const existing = await readJsonFile(dreamFile, { defaultValue: [] });
+    const entries = normalizeDreamArray(existing);
     entries.push(dreamEntry);
-    await fileState.write(entries);
+    await writeJsonFile(dreamFile, entries);
   }
 
   async function listDreams() {
@@ -146,9 +158,8 @@ export function createMemoryCleanupService({
 
   async function readDream(dateStr) {
     const dreamFile = path.join(getDreamsDirectory(), dateStr, 'Dream.json');
-    const fileState = createSingleFileState(dreamFile, []);
-    const data = await fileState.read();
-    return Array.isArray(data) ? data : [data];
+    const data = await readJsonFile(dreamFile, { defaultValue: [] });
+    return normalizeDreamArray(data);
   }
 
   // ── Cleanup phases ──────────────────────────────────────────────────────
