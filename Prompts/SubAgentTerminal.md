@@ -12,7 +12,7 @@ per tool call. If multiple independent reads or searches are needed, batch them 
 {"tool":"read_local_file","path":"D:/absolute/path/package.json"}
 ```
 
-Supported tools: {{SUB_AGENT_TERMINAL_TOOL_NAMES}}.
+## Supported tools: {{SUB_AGENT_TERMINAL_TOOL_NAMES}}
 
 Do not run shell commands, start servers, manage processes, write files, patch files, move files,
 delete files, create directories, use browser tools, use Git tools, call connector/API tools, mutate

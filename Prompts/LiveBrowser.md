@@ -1,6 +1,6 @@
-Browser tools (browser_navigate, browser_get_state, browser_snapshot, browser_get_text, browser_click, browser_type, browser_press_key, browser_scroll, browser_back, browser_forward, browser_refresh, browser_screenshot) are ALWAYS sequential - one tool call per response, never batched.
+* Browser tools (browser_navigate, browser_get_state, browser_snapshot, browser_get_text, browser_click, browser_type, browser_press_key, browser_scroll, browser_back, browser_forward, browser_refresh, browser_screenshot) are ALWAYS sequential - one tool call per response, never batched.
 
-RULES (strictly enforced):
+## RULES (strictly enforced)
 
 1. NEVER include more than one browser tool in the same response. Each browser tool must be its own standalone response.
 2. If no live browser page is already open, call browser_navigate first and wait for its result before calling any other browser tool.

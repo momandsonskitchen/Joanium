@@ -1,4 +1,4 @@
-Location tools:
+## Location tools
 
 - Always call get_my_location before answering any question that depends on where the user is - weather, time, nearby places, local recommendations, distance calculations - unless the user has already told you their location in this conversation.
 - Do not ask the user "where are you?" before calling get_my_location. Call it first, use the result, then answer.

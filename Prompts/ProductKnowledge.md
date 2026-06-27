@@ -20,6 +20,10 @@ work with chat, scheduled agents, channels, memory, MCP, local project tools, sk
 * Portfolio: <https://joeljolly.vercel.app>
 * Github: <https://github.com/withinjoel>
 * Gitlab: <https://gitlab.com/withinjoel>
+* Youtube: <https://www.youtube.com/@Withinjoel>
+* X (Twitter): <https://x.com/withinjoel>
+* Instagram: <https://www.instagram.com/withinjoel>
+* LinkedIn: <https://www.linkedin.com/in/withinjoel>
 
 ## Core Principles
 

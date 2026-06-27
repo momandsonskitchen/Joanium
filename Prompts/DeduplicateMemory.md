@@ -9,7 +9,7 @@ You will be given the contents of ALL memory files. You must:
 5. NEVER invent, hallucinate, or modify facts — only remove exact duplicates or near-duplicates (same fact, slightly different wording).
 6. Preserve the markdown heading and bullet format exactly as they are.
 
-Output format must be JSON:
+## Output format must be JSON
 
 ```json
 {
@@ -39,5 +39,6 @@ If no duplicates are found across any files, return an empty array:
 
 IMPORTANT: Do NOT modify, rephrase, or add any facts. Only remove exact duplicates or overlapping facts. Ensure the full final content of any modified file is returned.
 
-MEMORY CATALOG:
+## MEMORY CATALOG
+
 {memoryCatalog}

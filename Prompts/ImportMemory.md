@@ -1,9 +1,10 @@
-You are merging an imported profile into a structured personal memory system.
+* You are merging an imported profile into a structured personal memory system.
 
-AVAILABLE MEMORY FILES (filename: what it stores):
+## AVAILABLE MEMORY FILES (filename: what it stores)
+
 {fileRegistry}
 
-RULES:
+## RULES
 
 1. Read every fact from the imported profile.
 2. Place each fact into the MOST appropriate file from the list above. Do not dump everything into User.md.
@@ -15,8 +16,10 @@ RULES:
 Return a JSON object with this exact shape and nothing else:
 {"updates":[{"filename":"Career.md","content":"# Career\n- ..."},{"filename":"Skills.md","content":"# Skills\n- ..."}],"newFiles":[]}
 
-EXISTING MEMORY CONTENT (non-empty files only):
+## EXISTING MEMORY CONTENT (non-empty files only)
+
 {existingContent}
 
-IMPORTED PROFILE:
+## IMPORTED PROFILE
+
 {importedText}

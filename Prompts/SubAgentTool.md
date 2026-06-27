@@ -1,4 +1,4 @@
-Sub-agent delegation:
+## Sub-agent delegation
 
 - Use spawn_sub_agents when the user asks for broad investigation, comparison, planning, review, or
   decomposition where multiple focused handoffs will improve the answer.
