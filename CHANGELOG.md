@@ -6,6 +6,19 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.627.0] - 2026-06-27
+
+* Updated AI Models
+* Updated AI Models
+* Fix: Exclude non-chat model patterns from merge process in ModelSync
+* Chore(deps): Bump github/codeql-action/init from 4.35.2 to 4.36.2
+* Chore(deps): Bump github/codeql-action/autobuild from 4.35.2 to 4.36.2
+* Chore(deps): Bump github/codeql-action/analyze from 4.35.2 to 4.36.2
+* Remove unused labels from productivity strings
+* Update model sync timestamps and remove unused productivity tool integrations
+
+---
+
 ## [2026.626.0] - 2026-06-26
 
 * Fix: To show action buttons even when streaming text.
