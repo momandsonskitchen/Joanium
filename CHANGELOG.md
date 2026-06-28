@@ -6,6 +6,14 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.628.0] - 2026-06-28
+
+* Updated AI Models
+* Updated AI Models
+* Deduplicate Memory Prompt Update
+
+---
+
 ## [2026.627.2] - 2026-06-27
 
 * Updated Memory Sync Prompt
