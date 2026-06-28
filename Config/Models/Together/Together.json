@@ -619,48 +619,8 @@
       "name": "Mistral 7B v0.1",
       "context_window": 32768
     },
-    "Qwen/Qwen3.5-35B-A3B-Base-Lora": {
-      "name": "Qwen3.5 35B A3B Base Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.5-0.8B-Lora": {
-      "name": "Qwen3.5 0.8B Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.5-2B-Lora": {
-      "name": "Qwen3.5 2B Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.5-4B-Lora": {
-      "name": "Qwen3.5 4B Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.5-9B-Lora": {
-      "name": "Qwen3.5 9B Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.5-27B-Lora": {
-      "name": "Qwen3.5 27B Lora",
-      "context_window": 262144
-    },
     "Qwen/Qwen3.5-35B-A3B-Lora": {
       "name": "Qwen3.5 35B A3b LoRa",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.5-122B-A10B-Lora": {
-      "name": "Qwen3.5 122B A10B Lora",
-      "context_window": 8192
-    },
-    "Qwen/Qwen3.5-397B-A17B-Lora": {
-      "name": "Qwen3.5 397B A17B Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.6-27B-Lora": {
-      "name": "Qwen3.6 27B Lora",
-      "context_window": 262144
-    },
-    "Qwen/Qwen3.6-35B-A3B-Lora": {
-      "name": "Qwen3.6 35B A3B Lora",
       "context_window": 262144
     },
     "meta-llama/Llama-3.1-405B": {
@@ -774,7 +734,47 @@
     "Qwen/Qwen3.5-35B-A3B": {
       "name": "Qwen3.5 35B A3b",
       "context_window": 262144
+    },
+    "Qwen/Qwen3.5-35B-A3B-Base-Lora": {
+      "name": "Qwen3.5 35B A3B Base Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-0.8B-Lora": {
+      "name": "Qwen3.5 0.8B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-2B-Lora": {
+      "name": "Qwen3.5 2B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-4B-Lora": {
+      "name": "Qwen3.5 4B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-9B-Lora": {
+      "name": "Qwen3.5 9B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-27B-Lora": {
+      "name": "Qwen3.5 27B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-122B-A10B-Lora": {
+      "name": "Qwen3.5 122B A10B Lora",
+      "context_window": 8192
+    },
+    "Qwen/Qwen3.5-397B-A17B-Lora": {
+      "name": "Qwen3.5 397B A17B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.6-27B-Lora": {
+      "name": "Qwen3.6 27B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.6-35B-A3B-Lora": {
+      "name": "Qwen3.6 35B A3B Lora",
+      "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-27T11:12:09.312Z"
+  "_syncedAt": "2026-06-28T03:42:54.460Z"
 }

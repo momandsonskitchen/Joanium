@@ -221,6 +221,12 @@
     "zai-org/GLM-5.2-FP8": {
       "name": "GLM 5 2 FP8"
     },
+    "parasail-glm-52-nvfp4": {
+      "name": "Parasail Glm 52 Nvfp4"
+    },
+    "nvidia/GLM-5.2-NVFP4": {
+      "name": "GLM 5 2 NVFP4"
+    },
     "parasail-skyfall-36b-v2-fp8": {
       "name": "Parasail Skyfall 36B V2 FP8"
     },
@@ -228,5 +234,5 @@
       "name": "Skyfall 36B V2"
     }
   },
-  "_syncedAt": "2026-06-27T11:12:27.017Z"
+  "_syncedAt": "2026-06-28T03:43:13.116Z"
 }
