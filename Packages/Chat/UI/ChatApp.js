@@ -516,7 +516,7 @@ export async function createChatView(
     void invokeIpc('chat:cancel-stream', { streamId }).catch(() => {});
   }
 
-  async function saveCurrentSession() {
+  async function saveCurrentSession({ bumpUpdatedAt = true } = {}) {
     if (isPrivate) return;
     if (!sessionId || messages.length === 0) return;
     const firstUser = messages.find((message) => message.role === 'user');
@@ -541,6 +541,7 @@ export async function createChatView(
           terminal,
           providerLabel,
           modelLabel,
+          starred,
         }) => {
           const safeContent =
             role === 'assistant' ? sanitizeAssistantVisibleContent(content) : content;
@@ -554,6 +555,7 @@ export async function createChatView(
           if (terminal) entry.terminal = terminal;
           if (providerLabel && role === 'assistant') entry.providerLabel = providerLabel;
           if (modelLabel && role === 'assistant') entry.modelLabel = modelLabel;
+          if (starred) entry.starred = true;
           return entry;
         },
       )
@@ -563,7 +565,10 @@ export async function createChatView(
       id: sessionId,
       title: truncate(collapseWhitespace(firstUser.content), 60),
       createdAt: sessionCreatedAt ?? now,
-      updatedAt: now,
+      // Only bump updatedAt when content is actually changing (not for metadata
+      // operations like starring a message that shouldn't move the session to
+      // the top of the history list or change its date-group label).
+      ...(bumpUpdatedAt ? { updatedAt: now } : {}),
       messages: sessionMessages,
     };
 
@@ -1661,6 +1666,7 @@ export async function createChatView(
             thinking: sanitizeAssistantVisibleContent(message.thinking ?? ''),
             providerLabel: typeof message.providerLabel === 'string' ? message.providerLabel : '',
             modelLabel: typeof message.modelLabel === 'string' ? message.modelLabel : '',
+            starred: message.starred === true,
             streaming: false,
           };
         })
@@ -2566,9 +2572,20 @@ export async function createChatView(
               imageAttachments: userMessage.imageAttachments ?? [],
             });
           };
+          const onStar = (starBtn) => {
+            const newStarred = !messages[index].starred;
+            messages[index].starred = newStarred;
+            // Toggle state directly on the existing DOM elements — no full re-render needed.
+            starBtn?.classList.toggle('chat-message__action-button--starred', newStarred);
+            starBtn
+              ?.closest('.chat-message')
+              ?.classList.toggle('chat-message--starred', newStarred);
+            void saveCurrentSession({ bumpUpdatedAt: false });
+          };
           return createMessageElement(message, strings, {
             onCopy,
             onRetry,
+            onStar,
             userProfile: currentProfile,
           });
         }
@@ -2607,11 +2624,22 @@ export async function createChatView(
               void continueAssistantResponse(continuationItem.index);
             }
           : undefined;
+        const onStar = (starBtn) => {
+          const newState = !lastMessage.starred;
+          for (const { message } of group.items) {
+            message.starred = newState;
+          }
+          // Toggle state directly on the existing DOM elements — no full re-render needed.
+          starBtn?.classList.toggle('chat-message__action-button--starred', newState);
+          starBtn?.closest('.chat-message')?.classList.toggle('chat-message--starred', newState);
+          void saveCurrentSession({ bumpUpdatedAt: false });
+        };
 
         return createAssistantGroupElement(group.items, strings, {
           onCopy,
           onRetry,
           onContinue,
+          onStar,
           isGenerating: isSending,
           getProviderIcon,
         });

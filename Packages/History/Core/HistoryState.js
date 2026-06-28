@@ -84,16 +84,24 @@ export function createHistoryStateManager({ rootDirectory }) {
     const filePath = path.join(targetDir, `${safeId}.json`);
     const existing = await readExistingSession(filePath);
 
-    // Preserve fork provenance from disk — saveCurrentSession in ChatApp only
-    // sends the base session fields (id, title, messages, …) and has no
-    // knowledge of forkedFromId/forkedFromTitle.  Without this guard the first
-    // auto-save after opening a fork would silently wipe the badge metadata.
+    // Preserve metadata that saveCurrentSession in ChatApp never sends:
+    //   • fork provenance (forkedFromId/forkedFromTitle) — a fork badge would
+    //     disappear on the first auto-save after opening the fork.
+    //   • pinned — pinning is managed independently; auto-saves must not wipe it.
     const forkedFromId = session.forkedFromId ?? existing?.forkedFromId ?? null;
     const forkedFromTitle = session.forkedFromTitle ?? existing?.forkedFromTitle ?? null;
+    // Only carry the existing pinned state when the incoming payload omits it.
+    const pinned = session.pinned !== undefined ? session.pinned : (existing?.pinned ?? false);
+    // When the renderer omits updatedAt (e.g. star-only saves that set
+    // bumpUpdatedAt:false), fall back to whatever is already on disk so the
+    // session keeps its original timestamp and stays in the correct date group.
+    const updatedAt = session.updatedAt ?? existing?.updatedAt ?? null;
 
     const merged = {
       ...session,
       id: safeId,
+      pinned,
+      ...(updatedAt != null ? { updatedAt } : {}),
       ...(forkedFromId != null ? { forkedFromId } : {}),
       ...(forkedFromTitle != null ? { forkedFromTitle } : {}),
     };

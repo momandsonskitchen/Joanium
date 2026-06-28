@@ -876,6 +876,28 @@
   animation: chat-speak-pulse 1.4s ease-in-out infinite;
 }
 
+.chat-message__action-button--starred {
+  color: var(--color-accent, #a855f7);
+}
+
+.chat-message__action-button--starred .chat-message__action-icon {
+  color: var(--color-accent, #a855f7);
+  filter: drop-shadow(0 0 3px rgba(var(--color-accent-rgb, 168, 85, 247), 0.4));
+}
+
+/* Starred bubble — assistant messages */
+.chat-message--starred .chat-message__bubble {
+  background: rgba(var(--color-accent-rgb, 168, 85, 247), 0.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--color-accent-rgb, 168, 85, 247), 0.18),
+    0 1px 3px rgba(var(--color-accent-rgb, 168, 85, 247), 0.08);
+}
+
+/* Starred bubble — user messages (slightly stronger tint) */
+.chat-message--starred .chat-message__row .chat-message__bubble {
+  background: rgba(var(--color-accent-rgb, 168, 85, 247), 0.12);
+}
+
 @keyframes chat-speak-pulse {
   0%,
   100% {

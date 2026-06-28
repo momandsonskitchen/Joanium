@@ -71,7 +71,16 @@ function speakText(rawText, btn) {
   window.speechSynthesis.speak(utterance);
 }
 
-function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, modelLabel, strings }) {
+function createMessageActions({
+  onCopy,
+  onRetry,
+  onSpeak,
+  onStar,
+  starred,
+  durationMs,
+  modelLabel,
+  strings,
+}) {
   const actions = createElement('div', 'chat-message__actions');
 
   const copyBtn = createElement('button', 'chat-message__action-button');
@@ -93,6 +102,16 @@ function createMessageActions({ onCopy, onRetry, onSpeak, durationMs, modelLabel
   retryBtn.append(createIcon('retry', 'chat-message__action-icon'));
   retryBtn.addEventListener('click', onRetry);
   actions.append(copyBtn, retryBtn);
+
+  if (typeof onStar === 'function') {
+    const starBtn = createElement('button', 'chat-message__action-button');
+    starBtn.type = 'button';
+    starBtn.classList.add('chat-message__action-button--star');
+    if (starred) starBtn.classList.add('chat-message__action-button--starred');
+    starBtn.append(createIcon('star', 'chat-message__action-icon'));
+    starBtn.addEventListener('click', () => onStar(starBtn));
+    actions.append(starBtn);
+  }
 
   if (typeof onSpeak === 'function') {
     const speakBtn = createElement('button', 'chat-message__action-button');
@@ -142,7 +161,7 @@ function createContinuationElement(strings, onContinue) {
 export function createMessageElement(
   message,
   strings,
-  { onCopy, onRetry, onContinue, userProfile } = {},
+  { onCopy, onRetry, onContinue, onStar, userProfile } = {},
 ) {
   const article = createElement(
     'article',
@@ -152,6 +171,7 @@ export function createMessageElement(
       message.streaming ? 'chat-message--streaming' : '',
       message.error ? 'chat-message--error' : '',
       message.stopped ? 'chat-message--stopped' : '',
+      message.starred ? 'chat-message--starred' : '',
     ]
       .filter(Boolean)
       .join(' '),
@@ -213,7 +233,9 @@ export function createMessageElement(
   ) {
     const onSpeak =
       message.role === 'assistant' ? (btn) => speakText(message.content, btn) : undefined;
-    article.append(createMessageActions({ onCopy, onRetry, onSpeak }));
+    article.append(
+      createMessageActions({ onCopy, onRetry, onSpeak, onStar, starred: message.starred }),
+    );
   }
 
   return article;
@@ -427,6 +449,7 @@ export function createAssistantGroupElement(
     onCopy,
     onRetry,
     onContinue,
+    onStar,
     isGenerating = false,
     getProviderIcon,
     isGroupResponse = false,
@@ -446,6 +469,7 @@ export function createAssistantGroupElement(
       lastMessage.error ? 'chat-message--error' : '',
       lastMessage.stopped ? 'chat-message--stopped' : '',
       isGroupResponse ? 'chat-message--group-response' : '',
+      lastMessage.starred ? 'chat-message--starred' : '',
     ]
       .filter(Boolean)
       .join(' '),
@@ -537,6 +561,8 @@ export function createAssistantGroupElement(
         onCopy,
         onRetry,
         onSpeak,
+        onStar,
+        starred: lastMessage.starred,
         durationMs: lastMessage.durationMs,
         modelLabel: lastMessage.modelLabel,
         strings,
@@ -554,6 +580,8 @@ export function createAssistantGroupElement(
         onCopy,
         onRetry,
         onSpeak,
+        onStar,
+        starred: lastMessage.starred,
         durationMs: lastMessage.durationMs,
         modelLabel: lastMessage.modelLabel,
         strings,
