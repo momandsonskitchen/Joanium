@@ -703,6 +703,14 @@
       "name": "Qwen2.5 7B Instruct",
       "context_window": 32768
     },
+    "Qwen/Qwen3.6-35B-A3B-Lora": {
+      "name": "Qwen3.6 35B A3B Lora",
+      "context_window": 262144
+    },
+    "Qwen/Qwen3.5-2B-Lora": {
+      "name": "Qwen3.5 2B Lora",
+      "context_window": 262144
+    },
     "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP4": {
       "name": "Llama 4 Maverick 17B 128E Instruct Nvfp4",
       "context_window": 1048576
@@ -743,10 +751,6 @@
       "name": "Qwen3.5 0.8B Lora",
       "context_window": 262144
     },
-    "Qwen/Qwen3.5-2B-Lora": {
-      "name": "Qwen3.5 2B Lora",
-      "context_window": 262144
-    },
     "Qwen/Qwen3.5-4B-Lora": {
       "name": "Qwen3.5 4B Lora",
       "context_window": 262144
@@ -770,11 +774,7 @@
     "Qwen/Qwen3.6-27B-Lora": {
       "name": "Qwen3.6 27B Lora",
       "context_window": 262144
-    },
-    "Qwen/Qwen3.6-35B-A3B-Lora": {
-      "name": "Qwen3.6 35B A3B Lora",
-      "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-29T07:37:48.546Z"
+  "_syncedAt": "2026-06-29T11:26:32.203Z"
 }
