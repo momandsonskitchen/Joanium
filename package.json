@@ -17,14 +17,14 @@
     "@electron/fuses": "2.1.2",
     "electron": "42.5.0",
     "electron-builder": "26.11.1",
-    "eslint": "10.5.0",
+    "eslint": "10.6.0",
     "eslint-plugin-unused-imports": "^4.1.4",
     "fast-check": "^4.8.0",
     "husky": "9.1.7",
     "jscpd": "5.0.11",
     "lint-staged": "17.0.8",
     "markdownlint-cli": "0.49.0",
-    "prettier": "3.8.4"
+    "prettier": "3.9.1"
   },
   "overrides": {
     "glob": ">=10.5.0",
