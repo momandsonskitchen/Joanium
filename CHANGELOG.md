@@ -6,6 +6,15 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.629.0] - 2026-06-29
+
+* Updated AI Models
+* Added The Ability To Star A Message
+* Updated AI Models
+* Updated AI Models
+
+---
+
 ## [2026.628.0] - 2026-06-28
 
 * Updated AI Models
