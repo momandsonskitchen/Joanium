@@ -6,6 +6,17 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.630.0] - 2026-06-30
+
+* Updated AI Models
+* Updated AI Models
+* Downscaled App Logo
+* Chore(deps-dev): Bump eslint from 10.5.0 to 10.6.0
+* Chore(deps-dev): Bump prettier from 3.8.4 to 3.9.1
+* Updated AI Models
+
+---
+
 ## [2026.629.0] - 2026-06-29
 
 * Updated AI Models
