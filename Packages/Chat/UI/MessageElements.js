@@ -78,6 +78,7 @@ function createMessageActions({
   onStar,
   starred,
   durationMs,
+  avgTps,
   modelLabel,
   strings,
 }) {
@@ -128,6 +129,11 @@ function createMessageActions({
       formatText(strings.composer.workedFor, { duration: formatDuration(durationMs) }),
     );
     actions.append(durationEl);
+  }
+
+  if (avgTps > 0) {
+    const tpsEl = createElement('span', 'chat-message__avg-tps', `${avgTps} Avg T/s`);
+    actions.append(tpsEl);
   }
 
   if (modelLabel) {
@@ -241,11 +247,22 @@ export function createMessageElement(
   return article;
 }
 
-export function updateLastStreamingMessage(threadEl, { content, thinking }) {
+export function updateLastStreamingMessage(threadEl, { content, thinking, tps }) {
   const lastEl = Array.from(threadEl?.children ?? [])
     .reverse()
     .find((element) => element.classList.contains('chat-message--assistant'));
   if (!lastEl) return;
+
+  // Live tokens-per-second badge — appears only during streaming.
+  if (tps != null) {
+    let speedEl = lastEl.querySelector('.chat-message__stream-speed');
+    if (!speedEl) {
+      speedEl = document.createElement('div');
+      speedEl.className = 'chat-message__stream-speed';
+      lastEl.append(speedEl);
+    }
+    speedEl.textContent = `${tps} t/s`;
+  }
 
   // Target the LAST thinking/bubble element — works for both single-turn and
   // grouped multi-turn articles where tool loop iterations are merged into one.
@@ -564,6 +581,7 @@ export function createAssistantGroupElement(
         onStar,
         starred: lastMessage.starred,
         durationMs: lastMessage.durationMs,
+        avgTps: lastMessage.avgTps,
         modelLabel: lastMessage.modelLabel,
         strings,
       }),
@@ -583,6 +601,7 @@ export function createAssistantGroupElement(
         onStar,
         starred: lastMessage.starred,
         durationMs: lastMessage.durationMs,
+        avgTps: lastMessage.avgTps,
         modelLabel: lastMessage.modelLabel,
         strings,
       }),

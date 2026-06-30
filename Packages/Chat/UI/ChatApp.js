@@ -3639,9 +3639,18 @@ export async function createChatView(
             const { content: displayContent, thinking: inlineThinking } =
               parseThinkingFromText(accText);
             const displayThinking = accThinking || inlineThinking;
+            // Estimate live tokens/sec: approximate 1 token ≈ 4 chars, show
+            // once at least 1 second has elapsed and a few chars accumulated.
+            const elapsedSec = (Date.now() - generationStartTime) / 1000;
+            const approxTokens = accText.length / 4;
+            const liveTps =
+              elapsedSec >= 1 && approxTokens > 0
+                ? String(Math.round(approxTokens / elapsedSec))
+                : null;
             updateLastStreamingMessage(thread, {
               content: sanitizeAssistantVisibleContent(displayContent),
               thinking: sanitizeAssistantVisibleContent(displayThinking),
+              tps: liveTps,
             });
             scheduleScrollToBottom();
           });
@@ -3771,6 +3780,15 @@ export async function createChatView(
         const finalContent = sanitizeAssistantVisibleContent(parsedContent);
         const finalThinking = sanitizeAssistantVisibleContent(accThinking || inlineThinking);
         const needsContinuation = !finalContent && Boolean(finalThinking);
+        const durationMs = Date.now() - generationStartTime;
+        // Compute average tokens/sec for the completed response.
+        // Approximate: 1 token ≈ 4 chars. Round to 1 decimal place.
+        const durationSec = durationMs / 1000;
+        const totalApproxTokens = accText.length / 4;
+        const avgTps =
+          durationSec > 0 && totalApproxTokens > 0
+            ? Math.round((totalApproxTokens / durationSec) * 10) / 10
+            : 0;
         updateLastAssistantMessage(() => ({
           role: 'assistant',
           content: needsContinuation ? '' : finalContent || strings.composer.emptyResponse,
@@ -3778,7 +3796,8 @@ export async function createChatView(
           streaming: false,
           empty: !finalContent,
           needsContinuation,
-          durationMs: Date.now() - generationStartTime,
+          durationMs,
+          avgTps,
           providerLabel: meta?.providerLabel ?? activeProvider?.label ?? 'AI',
           modelLabel: meta?.modelLabel ?? activeModelLabel,
         }));
