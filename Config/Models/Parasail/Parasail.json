@@ -17,6 +17,12 @@
     "Qwen/Qwen2.5-VL-72B-Instruct": {
       "name": "Qwen2 5 VL 72B Instruct"
     },
+    "parasail-skyfall-36b-v2-fp8": {
+      "name": "Parasail Skyfall 36B V2 FP8"
+    },
+    "TheDrummer/Skyfall-36B-v2": {
+      "name": "Skyfall 36B V2"
+    },
     "parasail-gemma3-27b-it": {
       "name": "Parasail Gemma3 27B It"
     },
@@ -226,13 +232,7 @@
     },
     "nvidia/GLM-5.2-NVFP4": {
       "name": "GLM 5 2 NVFP4"
-    },
-    "parasail-skyfall-36b-v2-fp8": {
-      "name": "Parasail Skyfall 36B V2 FP8"
-    },
-    "TheDrummer/Skyfall-36B-v2": {
-      "name": "Skyfall 36B V2"
     }
   },
-  "_syncedAt": "2026-06-29T11:27:00.942Z"
+  "_syncedAt": "2026-06-30T12:38:48.435Z"
 }

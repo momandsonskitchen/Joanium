@@ -179,9 +179,6 @@
         "max_output_tokens": 64000
       }
     },
-    "qwen3.5-397b-a17b-t": {
-      "name": "Qwen3 5 397B A17b T"
-    },
     "seed-2.0-mini": {
       "name": "Seed 2 0 MINI"
     },
@@ -881,9 +878,6 @@
     "mistral-small-3.1": {
       "name": "Mistral Small 3 1"
     },
-    "sonic-3.0": {
-      "name": "Sonic 3 0"
-    },
     "hailuo-music-v1.5": {
       "name": "Hailuo Music V1 5"
     },
@@ -1467,6 +1461,12 @@
     "seedance-2.0-mini": {
       "name": "Seedance 2 0 MINI"
     },
+    "qwen3.5-397b-a17b-t": {
+      "name": "Qwen3 5 397B A17b T"
+    },
+    "sonic-3.0": {
+      "name": "Sonic 3 0"
+    },
     "exa-research": {
       "name": "Exa Research"
     },
@@ -1495,5 +1495,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-29T11:26:57.456Z"
+  "_syncedAt": "2026-06-30T12:38:45.097Z"
 }

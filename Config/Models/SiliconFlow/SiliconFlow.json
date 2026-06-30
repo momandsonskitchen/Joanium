@@ -5,6 +5,9 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "meituan-longcat/LongCat-2.0": {
+      "name": "LongCat 2 0"
+    },
     "zai-org/GLM-5.2": {
       "name": "GLM 5 2"
     },
@@ -206,5 +209,5 @@
       "name": "Qwen2 5 7B Instruct"
     }
   },
-  "_syncedAt": "2026-06-29T11:26:42.175Z"
+  "_syncedAt": "2026-06-30T12:38:33.756Z"
 }

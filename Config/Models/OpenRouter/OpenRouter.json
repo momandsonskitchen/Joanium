@@ -348,18 +348,6 @@
         "image": true
       }
     },
-    "openrouter/owl-alpha": {
-      "name": "Owl Alpha",
-      "description": "Owl Alpha is a high-performance foundation model designed for agentic workloads. Natively supports tool use, and long-context tasks, with strong performance in code generation, automated workflows, and complex instruction execution....",
-      "context_window": 1048756,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {
       "name": "NVIDIA: Nemotron 3 Nano Omni (free)",
       "description": "NVIDIA Nemotron™ 3 Nano Omni is a 30B-A3B open multimodal model designed to function as a perception and context sub-agent in enterprise agent systems. It accepts text, image, video, and...",
@@ -732,19 +720,6 @@
       "pricing": {
         "input": 5,
         "output": 25
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
-    "anthropic/claude-opus-4.6-fast": {
-      "name": "Anthropic: Claude Opus 4.6 (Fast)",
-      "description": "Fast-mode variant of [Opus 4.6](/anthropic/claude-opus-4.6) - identical capabilities with higher output speed at premium 6x pricing.\n\nLearn more in Anthropic's docs: https://platform.claude.com/docs/en/build-with-claude/fast-mode",
-      "context_window": 1000000,
-      "pricing": {
-        "input": 30,
-        "output": 150
       },
       "inputs": {
         "text": true,
@@ -3686,6 +3661,18 @@
         "text": true
       }
     },
+    "meta-llama/llama-3.2-1b-instruct": {
+      "name": "Meta: Llama 3.2 1B Instruct",
+      "description": "Llama 3.2 1B is a 1-billion-parameter language model focused on efficiently performing natural language tasks, such as summarization, dialogue, and multilingual text analysis. Its smaller size allows it to operate...",
+      "context_window": 131072,
+      "pricing": {
+        "input": 0.03,
+        "output": 0.2
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "meta-llama/llama-3.2-3b-instruct:free": {
       "name": "Meta: Llama 3.2 3B Instruct (free)",
       "description": "Llama 3.2 3B is a 3-billion-parameter multilingual large language model, optimized for advanced natural language processing tasks like dialogue generation, reasoning, and summarization. Designed with the latest transformer architecture, it...",
@@ -3705,18 +3692,6 @@
       "pricing": {
         "input": 0.05,
         "output": 0.34
-      },
-      "inputs": {
-        "text": true
-      }
-    },
-    "meta-llama/llama-3.2-1b-instruct": {
-      "name": "Meta: Llama 3.2 1B Instruct",
-      "description": "Llama 3.2 1B is a 1-billion-parameter language model focused on efficiently performing natural language tasks, such as summarization, dialogue, and multilingual text analysis. Its smaller size allows it to operate...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.03,
-        "output": 0.2
       },
       "inputs": {
         "text": true
@@ -3880,8 +3855,8 @@
         "text": true
       }
     },
-    "openai/gpt-4o-mini": {
-      "name": "OpenAI: GPT-4o-mini",
+    "openai/gpt-4o-mini-2024-07-18": {
+      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -3893,8 +3868,8 @@
         "image": true
       }
     },
-    "openai/gpt-4o-mini-2024-07-18": {
-      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
+    "openai/gpt-4o-mini": {
+      "name": "OpenAI: GPT-4o-mini",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -4022,18 +3997,6 @@
         "output": 1.5
       }
     },
-    "openai/gpt-4-turbo-preview": {
-      "name": "OpenAI: GPT-4 Turbo Preview",
-      "description": "The preview GPT-4 model with improved instruction following, JSON mode, reproducible outputs, parallel function calling, and more. Training data: up to Dec 2023. **Note:** heavily rate limited by OpenAI while...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 10,
-        "output": 30
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-3.5-turbo-0613": {
       "name": "OpenAI: GPT-3.5 Turbo (older v0613)",
       "description": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
@@ -4041,6 +4004,18 @@
       "pricing": {
         "input": 1,
         "output": 2
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "openai/gpt-4-turbo-preview": {
+      "name": "OpenAI: GPT-4 Turbo Preview",
+      "description": "The preview GPT-4 model with improved instruction following, JSON mode, reproducible outputs, parallel function calling, and more. Training data: up to Dec 2023. **Note:** heavily rate limited by OpenAI while...",
+      "context_window": 128000,
+      "pricing": {
+        "input": 10,
+        "output": 30
       },
       "inputs": {
         "text": true
@@ -4142,7 +4117,32 @@
       "inputs": {
         "text": true
       }
+    },
+    "openrouter/owl-alpha": {
+      "name": "Owl Alpha",
+      "description": "Owl Alpha is a high-performance foundation model designed for agentic workloads. Natively supports tool use, and long-context tasks, with strong performance in code generation, automated workflows, and complex instruction execution....",
+      "context_window": 1048756,
+      "pricing": {
+        "input": 0,
+        "output": 0
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "anthropic/claude-opus-4.6-fast": {
+      "name": "Anthropic: Claude Opus 4.6 (Fast)",
+      "description": "Fast-mode variant of [Opus 4.6](/anthropic/claude-opus-4.6) - identical capabilities with higher output speed at premium 6x pricing.\n\nLearn more in Anthropic's docs: https://platform.claude.com/docs/en/build-with-claude/fast-mode",
+      "context_window": 1000000,
+      "pricing": {
+        "input": 30,
+        "output": 150
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
     }
   },
-  "_syncedAt": "2026-06-29T10:54:49.966Z"
+  "_syncedAt": "2026-06-30T12:38:19.306Z"
 }

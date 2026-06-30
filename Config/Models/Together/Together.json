@@ -41,10 +41,6 @@
       "name": "Qwen3.7 Max",
       "context_window": 1000000
     },
-    "Qwen/Qwen3.5-397B-A17B": {
-      "name": "Qwen3.5 397B A17b",
-      "context_window": 262144
-    },
     "google/gemma-4-31B-it": {
       "name": "Gemma 4 31B-it FP8",
       "context_window": 262144
@@ -104,6 +100,10 @@
     "Qwen/Qwen3.7-Plus": {
       "name": "Qwen3.7 Plus",
       "context_window": 1000000
+    },
+    "Qwen/Qwen3.5-397B-A17B": {
+      "name": "Qwen3.5 397B A17b",
+      "context_window": 262144
     },
     "zai-org/GLM-5": {
       "name": "GLM 5 Fp4",
@@ -776,5 +776,5 @@
       "context_window": 262144
     }
   },
-  "_syncedAt": "2026-06-29T11:26:32.203Z"
+  "_syncedAt": "2026-06-30T12:38:26.061Z"
 }

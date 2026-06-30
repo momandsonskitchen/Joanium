@@ -26,6 +26,7 @@ export function createShortcutsPanel(strings) {
         { label: strings.items.personas, combo: ['Ctrl', 'Shift', 'P'] },
         { label: strings.items.marketplace, combo: ['Ctrl', 'M'] },
         { label: strings.items.usage, combo: ['Ctrl', 'U'] },
+        { label: strings.items.switchModel, combo: ['Ctrl', 'Shift', 'B'] },
         { label: strings.items.settings, combo: ['Ctrl', ','] },
       ],
     },

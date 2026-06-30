@@ -123,8 +123,11 @@
     "voxtral-small-latest": {
       "name": "voxtral-small-latest"
     },
-    "labs-leanstral-2603": {
-      "name": "labs-leanstral-2603"
+    "labs-leanstral-1-5-1": {
+      "name": "Labs Leanstral 1 5 1"
+    },
+    "labs-leanstral-1-5": {
+      "name": "Labs Leanstral 1 5"
     },
     "mistral-large-2512": {
       "name": "mistral-large-2512"
@@ -227,12 +230,6 @@
     "mistral-moderation-2603": {
       "name": "mistral-moderation-2603"
     },
-    "mistral-moderation-2411": {
-      "name": "mistral-moderation-2411"
-    },
-    "mistral-moderation-latest": {
-      "name": "mistral-moderation-latest"
-    },
     "mistral-ocr-2512": {
       "name": "mistral-ocr-2512"
     },
@@ -262,7 +259,16 @@
     },
     "voxtral-mini-realtime-latest": {
       "name": "voxtral-mini-realtime-latest"
+    },
+    "labs-leanstral-2603": {
+      "name": "labs-leanstral-2603"
+    },
+    "mistral-moderation-2411": {
+      "name": "mistral-moderation-2411"
+    },
+    "mistral-moderation-latest": {
+      "name": "mistral-moderation-latest"
     }
   },
-  "_syncedAt": "2026-06-29T11:26:25.915Z"
+  "_syncedAt": "2026-06-30T12:38:20.982Z"
 }
