@@ -6,6 +6,17 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.701.0] - 2026-07-01
+
+* Updated AI Models
+* Added Token Speed Under AI's Response
+* Updated AI Models
+* Chore(deps-dev): Bump electron from 42.5.0 to 42.5.1
+* Chore(deps-dev): Bump @electron/fuses from 2.1.2 to 2.1.3
+* Chore(deps-dev): Bump prettier from 3.9.1 to 3.9.4
+
+---
+
 ## [2026.630.0] - 2026-06-30
 
 * Updated AI Models
