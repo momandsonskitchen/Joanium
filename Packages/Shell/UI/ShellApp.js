@@ -40,6 +40,7 @@ import { registerShortcuts } from './Shortcuts.js';
 import { createShortcutsPanel } from './ShortcutsPanel.js';
 import { createSlashCommandsPanel } from '../../SlashCommands/UI/SlashCommandsPanel.js';
 import { mountBirthdayCard } from '../../User/UI/BirthdayCard.js';
+import { createSpotlightSearch } from '../../Shared/Spotlight/SpotlightSearch.js';
 
 function disposeElementTree(root) {
   if (!root) {
@@ -847,6 +848,260 @@ async function bootstrap() {
   // Arm the auto-lock timer now that the shell is fully rendered.
   void autoLockTimer.refresh();
 
+  // ── Spotlight search ────────────────────────────────────────────────
+  // Global Ctrl+F / Cmd+F universal search overlay.
+  const spotlightProviders = [
+    {
+      id: 'conversations',
+      label: 'Conversations',
+      search: async (query) => {
+        try {
+          const sessions = await invokeIpc(
+            'history:search-sessions',
+            query,
+            activeProject?.id ?? null,
+          );
+          return (Array.isArray(sessions) ? sessions : []).slice(0, 8).map((s) => ({
+            id: s.id,
+            label: s.title || 'Untitled conversation',
+            hint: s.snippet
+              ? s.snippet.slice(0, 50)
+              : s.updatedAt
+                ? new Date(s.updatedAt).toLocaleDateString()
+                : '',
+            onSelect: async () => {
+              const chat = await ensureChatView();
+              await chat.loadSession(s.id);
+              await showRoute('chat');
+              chat.focusComposer();
+            },
+          }));
+        } catch {
+          return [];
+        }
+      },
+    },
+    {
+      id: 'current-chat',
+      label: 'Current Chat',
+      search: async (query) => {
+        const chatEl = routeViews.get('chat')?.element;
+        if (!chatEl || chatEl.hidden) return [];
+        const q = query.toLowerCase();
+        const bubbles = chatEl.querySelectorAll('.chat-message__bubble');
+        const results = [];
+        for (const bubble of bubbles) {
+          const text = bubble.textContent ?? '';
+          if (text.toLowerCase().includes(q)) {
+            const idx = text.toLowerCase().indexOf(q);
+            const start = Math.max(0, idx - 30);
+            const end = Math.min(text.length, idx + q.length + 50);
+            let snippet = text.slice(start, end).trim();
+            if (start > 0) snippet = `\u2026${snippet}`;
+            if (end < text.length) snippet = `${snippet}\u2026`;
+            const msgEl = bubble.closest('.chat-message');
+            const isUser = msgEl?.classList.contains('chat-message--user');
+            results.push({
+              id: `chat-${results.length}`,
+              label: snippet,
+              hint: isUser ? 'You' : 'Assistant',
+              onSelect: () => {
+                msgEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                msgEl?.classList.add('chat-message--highlighted');
+                setTimeout(() => msgEl?.classList.remove('chat-message--highlighted'), 2000);
+              },
+            });
+          }
+        }
+        return results.slice(0, 6);
+      },
+    },
+    {
+      id: 'memory',
+      label: 'Memory',
+      search: async (query) => {
+        try {
+          const list = await invokeIpc('memory:list');
+          const q = query.toLowerCase();
+          return (Array.isArray(list) ? list : [])
+            .filter(
+              (m) =>
+                String(m.filename ?? m.name ?? '')
+                  .toLowerCase()
+                  .includes(q) ||
+                String(m.content ?? '')
+                  .toLowerCase()
+                  .includes(q),
+            )
+            .slice(0, 6)
+            .map((m) => ({
+              id: m.filename ?? m.name,
+              label: m.filename ?? m.name ?? 'Memory',
+              hint: 'Memory',
+              onSelect: () => {
+                void showRoute('memory');
+              },
+            }));
+        } catch {
+          return [];
+        }
+      },
+    },
+    {
+      id: 'templates',
+      label: 'Templates',
+      search: async (query) => {
+        try {
+          const list = await invokeIpc('templates:list-templates');
+          const q = query.toLowerCase();
+          return (Array.isArray(list) ? list : [])
+            .filter(
+              (t) =>
+                String(t.name ?? '')
+                  .toLowerCase()
+                  .includes(q) ||
+                String(t.prompt ?? '')
+                  .toLowerCase()
+                  .includes(q),
+            )
+            .slice(0, 6)
+            .map((t) => ({
+              id: t.id ?? t.name,
+              label: t.name ?? 'Template',
+              hint: 'Template',
+              onSelect: () => {
+                void showRoute('templates');
+              },
+            }));
+        } catch {
+          return [];
+        }
+      },
+    },
+    {
+      id: 'skills',
+      label: 'Skills',
+      search: async (query) => {
+        try {
+          const list = await invokeIpc('skills:list-skills');
+          const q = query.toLowerCase();
+          return (Array.isArray(list) ? list : [])
+            .filter((s) =>
+              String(s.name ?? '')
+                .toLowerCase()
+                .includes(q),
+            )
+            .slice(0, 6)
+            .map((s) => ({
+              id: s.filename ?? s.name,
+              label: s.name ?? 'Skill',
+              hint: 'Skill',
+              onSelect: () => {
+                void showRoute('skills');
+              },
+            }));
+        } catch {
+          return [];
+        }
+      },
+    },
+    {
+      id: 'personas',
+      label: 'Personas',
+      search: async (query) => {
+        try {
+          const list = await invokeIpc('personas:list-personas');
+          const q = query.toLowerCase();
+          return (Array.isArray(list) ? list : [])
+            .filter((p) =>
+              String(p.name ?? '')
+                .toLowerCase()
+                .includes(q),
+            )
+            .slice(0, 6)
+            .map((p) => ({
+              id: p.filename ?? p.name,
+              label: p.name ?? 'Persona',
+              hint: 'Persona',
+              onSelect: () => {
+                void showRoute('personas');
+              },
+            }));
+        } catch {
+          return [];
+        }
+      },
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      search: async (query) => {
+        const pages = [
+          { id: 'user', label: 'User Profile' },
+          { id: 'app', label: 'App Settings' },
+          { id: 'memory', label: 'Memory Settings' },
+          { id: 'channels', label: 'Channels' },
+          { id: 'connectors', label: 'Connectors' },
+          { id: 'providers', label: 'Providers' },
+          { id: 'appearance', label: 'Appearance' },
+          { id: 'mcp', label: 'MCP Servers' },
+          { id: 'shortcuts', label: 'Keyboard Shortcuts' },
+          { id: 'slashCommands', label: 'Slash Commands' },
+          { id: 'security', label: 'Security' },
+          { id: 'about', label: 'About' },
+        ];
+        const q = query.toLowerCase();
+        return pages
+          .filter((p) => p.label.toLowerCase().includes(q))
+          .slice(0, 6)
+          .map((p) => ({
+            id: `settings-${p.id}`,
+            label: p.label,
+            hint: 'Settings',
+            onSelect: () => {
+              void showSettingsPanel(p.id);
+            },
+          }));
+      },
+    },
+    {
+      id: 'navigate',
+      label: 'Navigation',
+      search: async (query) => {
+        const routes = [
+          { id: 'chat', label: 'Chat' },
+          { id: 'history', label: 'Chat History' },
+          { id: 'projects', label: 'Projects' },
+          { id: 'memory', label: 'Memory' },
+          { id: 'templates', label: 'Templates' },
+          { id: 'agents', label: 'Agents' },
+          { id: 'skills', label: 'Skills' },
+          { id: 'personas', label: 'Personas' },
+          { id: 'marketplace', label: 'Marketplace' },
+          { id: 'events', label: 'Events' },
+          { id: 'usage', label: 'Usage' },
+        ];
+        const q = query.toLowerCase();
+        return routes
+          .filter((r) => r.label.toLowerCase().includes(q))
+          .slice(0, 5)
+          .map((r) => ({
+            id: `nav-${r.id}`,
+            label: r.label,
+            hint: 'Navigate',
+            onSelect: () => {
+              void showRoute(r.id);
+            },
+          }));
+      },
+    },
+  ];
+
+  const spotlight = createSpotlightSearch({
+    providers: spotlightProviders,
+  });
+  document.body.append(spotlight.element);
+
   // ── Keyboard shortcuts ────────────────────────────────────────────────────
   // Registered after the initial route is shown so all route creators exist.
   // Ctrl+key and Ctrl+Shift+key combos fire regardless of focus so they work
@@ -951,6 +1206,13 @@ async function bootstrap() {
       combo: { ctrl: true, shift: true, key: 'l' },
       handler: () => {
         void showSettingsPanel('channels');
+      },
+    },
+    {
+      id: 'spotlight',
+      combo: { ctrl: true, key: 'f' },
+      handler: () => {
+        spotlight.toggle();
       },
     },
   ]);

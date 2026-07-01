@@ -72,3 +72,4 @@ export {
 } from './OfflineMonitor/OfflineMonitor.js';
 export { createContextVisualizer } from './ContextVisualizer/ContextVisualizer.js';
 export { deepMerge } from './Utils/MergeUtils.js';
+export { createSpotlightSearch } from './Spotlight/SpotlightSearch.js';

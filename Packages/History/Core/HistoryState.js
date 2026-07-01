@@ -335,6 +335,56 @@ export function createHistoryStateManager({ rootDirectory }) {
     return saveSession(forked);
   }
 
+  async function searchSessions(query, projectId) {
+    const sessions = await listSessions(projectId);
+    const q = String(query ?? '')
+      .toLowerCase()
+      .trim();
+    if (!q) return sessions.slice(0, 20);
+
+    const results = [];
+    for (const session of sessions) {
+      if (results.length >= 20) break;
+
+      if (
+        String(session.title ?? '')
+          .toLowerCase()
+          .includes(q)
+      ) {
+        results.push({ ...session, matchType: 'title' });
+        continue;
+      }
+
+      try {
+        const full = await loadSession(session.id, projectId);
+        const messages = Array.isArray(full?.messages) ? full.messages : [];
+        for (const msg of messages) {
+          const content = String(msg.content ?? msg.modelContent ?? '').toLowerCase();
+          if (content.includes(q)) {
+            const snippet = extractSnippet(content, q);
+            results.push({ ...session, matchType: 'content', snippet });
+            break;
+          }
+        }
+      } catch {
+        // Skip unreadable sessions
+      }
+    }
+
+    return results;
+  }
+
+  function extractSnippet(text, query) {
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx < 0) return text.slice(0, 120);
+    const start = Math.max(0, idx - 40);
+    const end = Math.min(text.length, idx + query.length + 80);
+    let snippet = text.slice(start, end).trim();
+    if (start > 0) snippet = `\u2026${snippet}`;
+    if (end < text.length) snippet = `${snippet}\u2026`;
+    return snippet;
+  }
+
   return {
     saveSession,
     listSessions,
@@ -346,5 +396,6 @@ export function createHistoryStateManager({ rootDirectory }) {
     listPendingMemorySessions,
     markMemorySynced,
     forkSession,
+    searchSessions,
   };
 }

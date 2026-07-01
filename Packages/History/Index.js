@@ -49,6 +49,11 @@ export async function createPackage({ rootDirectory }) {
         handler: async (_event, id, upToMessageIndex, projectId) =>
           historyStateManager.forkSession(id, upToMessageIndex, projectId),
       },
+      {
+        channel: 'history:search-sessions',
+        handler: async (_event, query, projectId) =>
+          historyStateManager.searchSessions(query, projectId),
+      },
     ],
   };
 }

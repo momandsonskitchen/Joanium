@@ -75,6 +75,8 @@ const en = {
       usage: 'Usage',
       settings: 'Settings',
       lock: 'Lock app',
+      search: 'Search conversation',
+      switchModel: 'Switch model',
     },
   },
   chat,
