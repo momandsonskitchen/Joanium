@@ -139,6 +139,11 @@
       "context_window": 1048576,
       "max_output": 65536
     },
+    "gemini-omni-flash-preview": {
+      "name": "Gemini Omni Flash Preview",
+      "context_window": 131072,
+      "max_output": 65536
+    },
     "lyria-3-clip-preview": {
       "name": "Lyria 3 Clip Preview",
       "context_window": 1048576,
@@ -185,5 +190,5 @@
       "max_output": 65536
     }
   },
-  "_syncedAt": "2026-06-30T12:38:21.857Z"
+  "_syncedAt": "2026-07-01T07:42:29.306Z"
 }

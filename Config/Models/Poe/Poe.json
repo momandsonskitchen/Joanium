@@ -12,6 +12,9 @@
         "max_output_tokens": 128000
       }
     },
+    "claude-sonnet-5": {
+      "name": "Claude Sonnet 5"
+    },
     "claude-opus-4.8": {
       "name": "Claude Opus 4 8",
       "context_window": {
@@ -19,11 +22,11 @@
         "max_output_tokens": 128000
       }
     },
-    "claude-opus-4.7": {
-      "name": "Claude Opus 4 7",
+    "nano-banana-2-lite": {
+      "name": "Nano Banana 2 LITE",
       "context_window": {
-        "context_length": 1048576,
-        "max_output_tokens": 128000
+        "context_length": 65536,
+        "max_output_tokens": null
       }
     },
     "nano-banana-2": {
@@ -81,6 +84,13 @@
       "name": "Gpt 5 4 PRO",
       "context_window": {
         "context_length": 1050000,
+        "max_output_tokens": 128000
+      }
+    },
+    "claude-opus-4.7": {
+      "name": "Claude Opus 4 7",
+      "context_window": {
+        "context_length": 1048576,
         "max_output_tokens": 128000
       }
     },
@@ -191,9 +201,6 @@
     },
     "qwen3.5-397b-a17b": {
       "name": "Qwen3 5 397B A17b"
-    },
-    "mimo-v2-flash-el": {
-      "name": "Mimo V2 FLASH El"
     },
     "gemma-4-31b-n": {
       "name": "Gemma 4 31B N"
@@ -362,9 +369,6 @@
         "context_length": 256,
         "max_output_tokens": null
       }
-    },
-    "kling-v3": {
-      "name": "Kling V3"
     },
     "gemini-2.5-pro": {
       "name": "Gemini 2 5 PRO",
@@ -1461,6 +1465,12 @@
     "seedance-2.0-mini": {
       "name": "Seedance 2 0 MINI"
     },
+    "mimo-v2-flash-el": {
+      "name": "Mimo V2 FLASH El"
+    },
+    "kling-v3": {
+      "name": "Kling V3"
+    },
     "qwen3.5-397b-a17b-t": {
       "name": "Qwen3 5 397B A17b T"
     },
@@ -1495,5 +1505,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-30T12:38:45.097Z"
+  "_syncedAt": "2026-07-01T07:42:53.580Z"
 }

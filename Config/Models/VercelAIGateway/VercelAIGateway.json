@@ -550,6 +550,20 @@
         "output": 15
       }
     },
+    "anthropic/claude-sonnet-5": {
+      "name": "Claude Sonnet 5",
+      "description": "Sonnet 5 is an upgrade to Sonnet 4.6, with gains across agentic coding and professional work. It builds on the strengths of previous Sonnet models, bringing top-tier intelligence at Sonnet pricing for coding, agents, and everyday professional work at scale.",
+      "context_window": 1000000,
+      "max_output": 128000,
+      "pricing": {
+        "input": 2,
+        "output": 10
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "arcee-ai/trinity-large-preview": {
       "name": "Trinity Large Preview",
       "description": "Trinity Large (Preview) is a 400B-parameter (13B active) sparse mixture-of-experts language model, engineered to scale model capacity while maintaining inference efficiency over long contexts, with strong performance in reasoning-heavy workloads including math, coding-related tasks, and multi-step a",
@@ -2620,5 +2634,5 @@
       }
     }
   },
-  "_syncedAt": "2026-06-30T12:38:42.693Z"
+  "_syncedAt": "2026-07-01T07:42:51.914Z"
 }
