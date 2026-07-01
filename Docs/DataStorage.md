@@ -29,30 +29,51 @@ Data/
 
 ## User.json
 
-Stores user profile and settings:
+Stores user profile, providers, connectors, and settings:
 
 ```json
 {
-  "name": "User Name",
-  "dateOfBirth": "2000-01-01",
   "locale": "en",
-  "defaultView": "chat",
-  "assistantLanguage": "en",
-  "activePersona": "Joana",
-  "customInstructions": "Custom behavior hints...",
-  "theme": {
-    "mode": "dark",
-    "reducedMotion": false,
-    "font": "default"
+  "consentAccepted": true,
+  "onboardingCompleted": true,
+  "profile": {
+    "name": "User Name",
+    "avatarPath": "...",
+    "dateOfBirth": { "day": "11", "month": "05", "year": "2002" }
   },
+  "customInstructions": "...",
+  "providers": {
+    "selected": ["openai", "anthropic", "..."],
+    "details": {
+      "openai": { "apiKey": "sk-..." },
+      "ollama": { "endpoint": "http://127.0.0.1:11434/..." }
+    }
+  },
+  "connectors": {
+    "details": {
+      "github": { "token": "ghp_..." },
+      "google": { "clientId": "...", "clientSecret": "...", "refreshToken": "..." }
+    }
+  },
+  "activePersona": { "namespace": "Joanium", "filename": "Joana.md" },
   "appSettings": {
     "runOnStartup": false,
-    "systemTray": false,
     "keepAwake": false,
-    "completionSound": true,
+    "soundEffects": true,
     "autoMemoryUpdates": true,
-    "autoUpdate": true
-  }
+    "autoUpdate": true,
+    "showTechFeed": true,
+    "showChangelog": true,
+    "defaultView": "chat",
+    "defaultModel": { "providerId": "openai", "modelId": "gpt-4o" },
+    "defaultSearchEngine": "yahoo"
+  },
+  "theme": {
+    "mode": "dark",
+    "motion": "full",
+    "font": "system"
+  },
+  "windowState": { "bounds": { "width": 1530, "height": 817 }, "isMaximized": true }
 }
 ```
 

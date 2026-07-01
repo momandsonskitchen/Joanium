@@ -13,11 +13,28 @@
 export * as Bubbly from './Bubbly/Index.js';
 export * as AssistantPipeline from './AssistantRuntime/AssistantPipeline.js';
 export * as DebugLogger from './Debug/DebugLogger.js';
+export { appendTimestampedLog, createTimestampedFileLogger } from './Debug/FileLogger.js';
 export { createEnqueue } from './Utils/AsyncUtils.js';
 export { readJsonDirectory } from './Storage/JsonDirectory.js';
+export {
+  deleteJsonFile, jsonFilePath, listJsonDirectory,
+  readJsonFile, serializeJson, writeJsonFile,
+} from './Storage/JsonFileStore.js';
+export { createSingleFileState } from './Storage/SingleFileState.js';
 export { getTrayIconPath } from './Storage/ResourcePaths.js';
 export { EVENTS, dispatchEvent } from './Events/RendererEvents.js';
-// ... and more
+export { orderProvidersBySelection, providerIsConfigured } from './ProviderCatalog/ProviderUtils.js';
+export { createProviderIcon } from './Icons/Icons.js';
+export { createSecretField } from './UI/SecretField.js';
+export { createSearchableListColumn, populateSearchableCards } from './PanelList/PanelList.js';
+export { pickOpenPath } from './Electron/DialogUtils.js';
+export { CHANNEL_NAMES } from './Utils/ChannelConstants.js';
+export { deepMerge } from './Utils/MergeUtils.js';
+export { createContextVisualizer } from './ContextVisualizer/ContextVisualizer.js';
+export { createSpotlightSearch } from './Spotlight/SpotlightSearch.js';
+export { initOfflineMonitor, destroyOfflineMonitor, isOnline, onNetworkChange, getNetworkStatus } from './OfflineMonitor/OfflineMonitor.js';
+// ... and more utility re-exports from DateUtils, DomUtils, DiffUtils,
+// StringUtils, ValueUtils, ModelInfoUtils, NamespacedResourceLibrary
 ```
 
 ---
@@ -45,7 +62,7 @@ The pipeline loads memory, terminal tool prompts, Toolset prompts, persona conte
 **Path**: `Shared/Debug/`
 
 - `DebugLogger.js` — Debug-mode logging (activates via `--debug` flag or `JOANIUM_DEBUG=1`)
-- `FileLogger.js` — Timestamped file-append logger
+- `FileLogger.js` — Timestamped file-append logger (`appendTimestampedLog`, `createTimestampedFileLogger`)
 
 Debug logging sanitizes secrets and writes to `Build/Logs/debug.log`.
 
@@ -148,7 +165,7 @@ Also re-exports:
 
 **Path**: `Shared/UserData/`
 
-- `UserData.js` — 411-line user state management. Defines `createDefaultUserState()`, `readUserState()`, `writeUserState()` with serialized write queue. Full sanitization of incoming state.
+- `UserData.js` — 409-line user state management. Defines `createDefaultUserState()`, `readUserState()`, `writeUserState()` with serialized write queue. Full sanitization of incoming state.
 
 ### UsageTracker
 
@@ -161,6 +178,44 @@ Also re-exports:
 **Path**: `Shared/Icons/`
 
 - `createProviderIcon()` — Creates provider icon elements
+
+### TerminalCallCard
+
+**Path**: `Shared/TerminalCallCard/`
+
+- `TerminalCallCard.js` — Terminal output display card component
+
+### OfflineMonitor
+
+**Path**: `Shared/OfflineMonitor/`
+
+- `OfflineMonitor.js` — Network connectivity monitoring: `initOfflineMonitor`, `destroyOfflineMonitor`, `isOnline`, `onNetworkChange`, `getNetworkStatus`
+
+### ContextVisualizer
+
+**Path**: `Shared/ContextVisualizer/`
+
+- `ContextVisualizer.js` — Creates context visualization elements
+
+### Spotlight
+
+**Path**: `Shared/Spotlight/`
+
+- `SpotlightSearch.js` — Spotlight-style search functionality
+
+### Electron
+
+**Path**: `Shared/Electron/`
+
+- `DialogUtils.js` — `pickOpenPath()` for native file/folder picker dialogs
+
+### Utils (additional)
+
+**Path**: `Shared/Utils/`
+
+- `ModelInfoUtils.js` — `formatPrice`, `formatTokenCount`, `hasModelInfo`, `resolveContextWindow`, `resolveMaxOutput`
+- `ChannelConstants.js` — `CHANNEL_NAMES` constant array
+- `MergeUtils.js` — `deepMerge` for deep object merging
 
 ### UI Components
 

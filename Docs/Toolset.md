@@ -25,7 +25,7 @@ Toolset Package
 │   ├── en.js                   (tool strings)
 │   └── Connectors.en.js        (connector strings)
 ├── Tools/
-│   └── <ToolName>/             (27 local tool packages)
+│   └── <ToolName>/             (26 local tool packages)
 └── Catalogue.js                (dynamic fuzzy-matching catalogue)
 ```
 
@@ -92,7 +92,7 @@ Discovery returns:
 
 ---
 
-## Tool Packages (27)
+## Tool Packages (26)
 
 | Package | Description |
 |---|---|
@@ -115,7 +115,6 @@ Discovery returns:
 | OpenWeather | Weather data tools |
 | Productivity | Productivity tools |
 | PublicData | Wikipedia, Stack Overflow, npm, weather, etc. |
-| Security | Security utilities |
 | Sentry | Sentry error tracking |
 | Spotify | Spotify API tools |
 | Stripe | Stripe payment tools |

@@ -23,7 +23,7 @@ Channels Package
 | Channel | Protocol |
 |---|---|
 | Telegram | Bot API |
-| WhatsApp | WhatsApp Web |
+| WhatsApp | Twilio API |
 | Discord | Discord Bot API |
 | Slack | Slack API |
 | Mattermost | Mattermost API |
@@ -140,12 +140,12 @@ Messages are stored in `Data/ChannelMessages/` for history and reference.
 `channels:validate` checks credentials per channel type:
 
 - Telegram: Verify bot token
-- Discord: Verify bot token
-- Slack: Verify bot token and app credentials
-- WhatsApp: Verify connection
-- Mattermost: Verify URL and credentials
-- Zulip: Verify email and API key
-- ntfy: Verify topic
+- WhatsApp: Verify Twilio accountSid and auth token
+- Discord: Verify bot token and channel ID
+- Slack: Verify bot token and channel ID
+- Zulip: Verify site URL, bot email, API key, and stream
+- Mattermost: Verify site URL, access token, and channel ID
+- ntfy: Verify site URL and topic
 
 ---
 

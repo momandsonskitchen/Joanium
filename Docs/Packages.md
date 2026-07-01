@@ -115,7 +115,7 @@ Dynamically resolves ALL other packages (except Boot, Electron, LiveBrowser, Set
 
 The ONLY package other packages may import from. Contains 27+ public modules.
 
-See [SharedLibrary.md](SharedLibrary.md) for full details.
+See [SharedLibrary.md](SharedLibrary.md) and [AssistantPipeline.md](AssistantPipeline.md) for full details.
 
 ---
 
@@ -151,6 +151,8 @@ Core conversation engine. Builds AI system prompts, handles streaming completion
 - `UI/` (19 files) — ChatApp.js, MessageElements.js, ThinkingBlock.js, TerminalPanel.js, SubAgentSections.js, ModelPickerPanel.js, AttachmentPill.js, BrowserPreviewPanel.js, DropZoneOverlay.js, FileDiffTracker.js, GitBranchPickerPanel.js, TechFeedPanel.js, DiagnosticPanel.js, CompletionSound.js, WhatsNewOverlay.js, Utils.js, Shared/
 - `Prompts/Prompts.js` — Chat-specific prompt templates
 
+See [ChatUI.md](ChatUI.md) and [Prompts.md](Prompts.md) for full details.
+
 ---
 
 ## Toolset
@@ -179,20 +181,25 @@ Discovers, manages, and executes AI-callable tools. Handles connector credential
 - `Core/ToolDiscovery.js` — Auto-discovers tool packages
 - `Core/ConnectorState.js` — Persists connector credentials
 - `Core/ConnectorFilter.js` — Filters tools by connector availability
+- `Core/ConnectorCatalog.js` — Connector metadata normalization
+- `Core/ConnectorHttp.js` — HTTP client for connector API calls
+- `Core/ConnectorToolAdapter.js` — Bridges connector executor code to tool system
 - `Core/GoogleOAuth.js` — Google OAuth 2.0 flow
 - `Catalogue.js` — Dynamic fuzzy-matching catalogue
 - `Tools/` — 27 local tool packages
 - `UI/ConnectorsPanel.js` — Connector settings UI
 
-### Tool Packages (27)
+### Tool Packages (26)
 
-Cloudflare, Command, ComputerUse, Directory, Figma, Git, GitHub, GitLab, Google, HubSpot, Jira, Knowledge, Linear, Location, Netlify, Notion, OpenWeather, Productivity, PublicData, Security, Sentry, Spotify, Stripe, SubAgents, Supabase, Unsplash, Vercel
+Cloudflare, Command, ComputerUse, Directory, Figma, Git, GitHub, GitLab, Google, HubSpot, Jira, Knowledge, Linear, Location, Netlify, Notion, OpenWeather, Productivity, PublicData, Sentry, Spotify, Stripe, SubAgents, Supabase, Unsplash, Vercel
+
+See [ComputerUse.md](ComputerUse.md) and [SubAgents.md](SubAgents.md) for details on specific tool packages.
 
 ### Built-in Tools (in ToolsetService.js)
 
 Calculations, unit conversion, date/time, URL parsing, geospatial math, timezone lookup, UUID generation, hashing, Base64, JSON formatting, text transforms, text stats, password generation, zodiac, weather, and more.
 
-See [Toolset.md](Toolset.md) for full details.
+See [Toolset.md](Toolset.md) and [TerminalTools.md](TerminalTools.md) for full details.
 
 ---
 
@@ -300,6 +307,8 @@ Uses the same renderer-delegated tool loop as Channels:
 3. Resolves back via `agents:tool-reply` IPC handler
 4. 30-minute timeout per agent
 
+See [AgentInternals.md](AgentInternals.md) for full details.
+
 ---
 
 ## Channels
@@ -309,7 +318,7 @@ Uses the same renderer-delegated tool loop as Channels:
 
 Multi-platform messaging gateway. Supports Telegram, WhatsApp, Discord, Slack, Mattermost, Zulip, ntfy.
 
-### Public API (`Index.js`, 198 lines)
+### Public API (`Index.js`, 205 lines)
 
 **IPC Handlers** (12 channels):
 
@@ -357,6 +366,8 @@ Manages Model Context Protocol server connections.
 - `Core/MCPRegistry.js` — Manages stdio/SSE connections
 - `UI/` — MCP server UI
 - `I18n/` — MCP strings
+
+See [MCP.md](MCP.md) for full details.
 
 ---
 
@@ -459,6 +470,8 @@ Password protection and app lock.
 ### Internal
 
 - `Core/SecurityState.js` — Security configuration
+
+See [Security.md](Security.md) for full details.
 
 ---
 
@@ -607,6 +620,8 @@ Slash command registry for chat input.
 - `Core/SlashRegistry.js` — Command registry
 - Modes include 101 personas from `Prompts/Modes/`
 
+See [SlashCommands.md](SlashCommands.md) for full details.
+
 ---
 
 ## Events
@@ -682,6 +697,8 @@ Dual export pattern:
 - `Core/BrowserPreviewService.js` — Browser view management
 - `Core/BrowserRuntime.js` — Browser runtime
 
+See [LiveBrowser.md](LiveBrowser.md) for full details.
+
 ---
 
 ## Marketplace
@@ -708,7 +725,7 @@ Installs marketplace items (skills, personas).
 
 Application settings with runtime side effects. The most complex settings package.
 
-### Public API (`Index.js`, 182 lines)
+### Public API (`Index.js`, 145 lines)
 
 **IPC Handlers** (10 channels):
 
@@ -733,3 +750,5 @@ Application settings with runtime side effects. The most complex settings packag
 - Auto-update checks
 - Run-on-startup (`app.setLoginItemSettings`)
 - App reset (deletes user data, relaunches)
+
+See [AppSettings.md](AppSettings.md) for full details.

@@ -210,6 +210,6 @@ try {
 
 `app-settings:get`, `app-settings:save`, `auto-update:get-state`, `auto-update:check`, `auto-update:install`, `app-settings:reset-app`, `app-settings:restart-app`, `app-settings:quit-app`, `data:export`, `data:import`
 
-### LiveBrowser (17 channels)
+### LiveBrowser (18 channels)
 
-`browser-preview:get-state`, `browser-preview:load-url`, `browser-preview:set-visible`, `browser-preview:set-bounds`, `browser-preview:hide`, `browser-preview:hide-native-view`, `browser-preview:show-native-view`, `browser-preview:go-back`, `browser-preview:go-forward`, `browser-preview:reload`, `browser-preview:pause`, `browser-preview:resume`, `browser-preview:close`, `browser-preview:get-history`, `browser-preview:clear-history`, `browser-preview:delete-history-entry`, `browser-preview:execute-tool`
+`browser-preview:get-state`, `browser-preview:load-url`, `browser-preview:load-html`, `browser-preview:set-visible`, `browser-preview:set-bounds`, `browser-preview:hide`, `browser-preview:hide-native-view`, `browser-preview:show-native-view`, `browser-preview:go-back`, `browser-preview:go-forward`, `browser-preview:reload`, `browser-preview:pause`, `browser-preview:resume`, `browser-preview:close`, `browser-preview:get-history`, `browser-preview:clear-history`, `browser-preview:delete-history-entry`, `browser-preview:execute-tool`
