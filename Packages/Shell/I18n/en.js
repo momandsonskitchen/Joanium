@@ -75,7 +75,7 @@ const en = {
       usage: 'Usage',
       settings: 'Settings',
       lock: 'Lock app',
-      search: 'Search conversation',
+      search: 'Spotlight search',
       switchModel: 'Switch model',
     },
   },
