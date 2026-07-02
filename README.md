@@ -152,6 +152,16 @@ Share it. Tweet it. Tell your developer friends who are still copy-pasting conte
 
 ---
 
+## License
+
+Joanium is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md) —
+free for personal, educational, and noncommercial use.
+
+Commercial use requires a separate paid license. Contact **Joel Jolly** at
+**joaniumhere@gmail.com** to arrange one.
+
+---
+
 <p align="center">
   <a href="https://joeljolly.vercel.app">
     <img width="1942" height="809" alt="Footer" src="https://github.com/user-attachments/assets/8f951b1c-24f7-4e97-a921-3711f19fa4b6" />
