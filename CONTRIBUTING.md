@@ -74,4 +74,4 @@ refactor: simplify package bootstrap logic
 
 ## License
 
-By contributing, you agree your contributions will be licensed under the [Apache 2.0 License](LICENSE.md).
+By contributing, you agree your contributions will be licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
