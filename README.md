@@ -106,7 +106,7 @@ Look, it's 2026. There are a *lot* of AI agents. Here's the honest breakdown:
 | Real integrations (Drive, Gmail…) | ✅ | ❌ | ⚠️ | ❌ | ⚠️ | ❌ |
 | Messaging channels (Slack, Discord…) | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Long-term memory | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ cloud |
-| Open source | ✅ Apache 2.0 | ❌ | ❌ | ✅ | ✅ MIT | ⚠️ |
+| Open source | ✅ PolyForm Noncommercial | ❌ | ❌ | ✅ | ✅ MIT | ⚠️ |
 | Free (bring your own key) | ✅ | ❌ | ❌ | ✅ | ✅ | ⚠️ |
 
 > **tl;dr** — Codex and Claude Code are coding agents for the terminal. Hermes lives in the cloud. OpenClaw handles chat. Joanium is the only one that's a full desktop app, multi-model, offline-capable, open source, integrates with your real work tools, *and* talks to your messaging apps. Different category.
