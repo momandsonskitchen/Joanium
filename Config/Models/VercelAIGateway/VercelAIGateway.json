@@ -408,6 +408,20 @@
         "image": true
       }
     },
+    "anthropic/claude-fable-5": {
+      "name": "Claude Fable 5",
+      "description": "Claude Fable 5 is a Mythos-class model with robust safeguards. It can handle long-running, complex, and asynchronous tasks where previous models would have needed more frequent check-ins.",
+      "context_window": 1000000,
+      "max_output": 128000,
+      "pricing": {
+        "input": 10,
+        "output": 50
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
     "anthropic/claude-haiku-4.5": {
       "name": "Claude Haiku 4.5",
       "description": "Claude Haiku 4.5 matches Sonnet 4's performance on coding, computer use, and agent tasks at substantially lower cost and faster speeds. It delivers near-frontier performance and Claude’s unique character at a price point that works for scaled sub-agent deployments, free tier products, and intelligen",
@@ -2634,5 +2648,5 @@
       }
     }
   },
-  "_syncedAt": "2026-07-01T13:17:53.159Z"
+  "_syncedAt": "2026-07-02T08:06:56.613Z"
 }

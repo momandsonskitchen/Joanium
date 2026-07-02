@@ -12,15 +12,8 @@
         "max_output_tokens": 128000
       }
     },
-    "claude-sonnet-5": {
-      "name": "Claude Sonnet 5"
-    },
-    "claude-opus-4.8": {
-      "name": "Claude Opus 4 8",
-      "context_window": {
-        "context_length": 1048576,
-        "max_output_tokens": 128000
-      }
+    "gemini-omni-flash": {
+      "name": "Gemini Omni FLASH"
     },
     "nano-banana-2-lite": {
       "name": "Nano Banana 2 LITE",
@@ -29,11 +22,11 @@
         "max_output_tokens": null
       }
     },
-    "nano-banana-2": {
-      "name": "Nano Banana 2",
+    "claude-opus-4.8": {
+      "name": "Claude Opus 4 8",
       "context_window": {
-        "context_length": 65536,
-        "max_output_tokens": null
+        "context_length": 1048576,
+        "max_output_tokens": 128000
       }
     },
     "gemini-3.5-flash": {
@@ -41,6 +34,13 @@
       "context_window": {
         "context_length": 1048576,
         "max_output_tokens": 65536
+      }
+    },
+    "nano-banana-2": {
+      "name": "Nano Banana 2",
+      "context_window": {
+        "context_length": 65536,
+        "max_output_tokens": null
       }
     },
     "grok-4.3": {
@@ -909,20 +909,6 @@
         "max_output_tokens": null
       }
     },
-    "imagen-4-fast": {
-      "name": "Imagen 4 FAST",
-      "context_window": {
-        "context_length": 480,
-        "max_output_tokens": null
-      }
-    },
-    "imagen-4": {
-      "name": "Imagen 4",
-      "context_window": {
-        "context_length": 480,
-        "max_output_tokens": null
-      }
-    },
     "dreamina-3.1": {
       "name": "Dreamina 3 1"
     },
@@ -967,9 +953,6 @@
     },
     "luma-photon-flash": {
       "name": "Luma Photon FLASH"
-    },
-    "hidream-i1-full": {
-      "name": "Hidream I1 Full"
     },
     "retro-diffusion-core": {
       "name": "Retro Diffusion Core"
@@ -1125,20 +1108,6 @@
     "kling-2.1-std": {
       "name": "Kling 2 1 Std"
     },
-    "runway-gen-4-turbo": {
-      "name": "Runway Gen 4 TURBO",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
-    "runway": {
-      "name": "Runway",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
     "kling-2.0-master": {
       "name": "Kling 2 0 Master"
     },
@@ -1156,9 +1125,6 @@
     },
     "hailuo-ai": {
       "name": "Hailuo Ai"
-    },
-    "wan-2.1": {
-      "name": "Wan 2 1"
     },
     "ideogram-v2a-turbo": {
       "name": "Ideogram V2A TURBO",
@@ -1268,13 +1234,6 @@
     "stablediffusion3.5-t": {
       "name": "Stablediffusion3 5 T"
     },
-    "recraft-v3": {
-      "name": "Recraft V3",
-      "context_window": {
-        "context_length": 256,
-        "max_output_tokens": null
-      }
-    },
     "gpt-4o-aug": {
       "name": "Gpt 4o Aug",
       "context_window": {
@@ -1291,9 +1250,6 @@
     },
     "remove-background": {
       "name": "Remove Background"
-    },
-    "sana-t2i": {
-      "name": "Sana T2i"
     },
     "tako": {
       "name": "Tako",
@@ -1465,6 +1421,53 @@
     "seedance-2.0-mini": {
       "name": "Seedance 2 0 MINI"
     },
+    "claude-sonnet-5": {
+      "name": "Claude Sonnet 5"
+    },
+    "imagen-4-fast": {
+      "name": "Imagen 4 FAST",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "imagen-4": {
+      "name": "Imagen 4",
+      "context_window": {
+        "context_length": 480,
+        "max_output_tokens": null
+      }
+    },
+    "hidream-i1-full": {
+      "name": "Hidream I1 Full"
+    },
+    "runway-gen-4-turbo": {
+      "name": "Runway Gen 4 TURBO",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "runway": {
+      "name": "Runway",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "wan-2.1": {
+      "name": "Wan 2 1"
+    },
+    "recraft-v3": {
+      "name": "Recraft V3",
+      "context_window": {
+        "context_length": 256,
+        "max_output_tokens": null
+      }
+    },
+    "sana-t2i": {
+      "name": "Sana T2i"
+    },
     "mimo-v2-flash-el": {
       "name": "Mimo V2 FLASH El"
     },
@@ -1505,5 +1508,5 @@
       }
     }
   },
-  "_syncedAt": "2026-07-01T13:17:54.753Z"
+  "_syncedAt": "2026-07-02T08:06:57.384Z"
 }
