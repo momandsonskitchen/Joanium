@@ -6,6 +6,17 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.702.0] - 2026-07-02
+
+* Updated Docs
+* Updated AI Models
+* Updated AI Models
+* Added Spotlight Search
+* Updated AI Models
+* Chore(deps-dev): Bump electron from 42.5.1 to 43.0.0
+
+---
+
 ## [2026.701.0] - 2026-07-01
 
 * Updated AI Models
