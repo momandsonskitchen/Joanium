@@ -670,6 +670,13 @@
   line-height: 1.55;
   white-space: pre-wrap;
   min-width: 0;
+  max-width: 100%;
+}
+
+/* Override inherited pre-wrap so the table wrapper can scroll horizontally
+   instead of growing the bubble past its max-width. */
+.chat-message__bubble .md-table-wrap {
+  white-space: normal;
 }
 
 .chat-message--user .chat-message__bubble {

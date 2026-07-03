@@ -270,6 +270,59 @@
   border-color: var(--color-accent);
 }
 
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+
+.md-table-wrap {
+  margin: 12px 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.08);
+}
+
+.md-table-wrap:last-child {
+  margin-bottom: 0;
+}
+
+.md-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.md-th {
+  padding: 8px 14px;
+  font-weight: 620;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--color-chat-text-title);
+  background: rgba(100, 55, 120, 0.04);
+  border-bottom: 1px solid rgba(var(--color-accent-rgb), 0.08);
+  text-align: left;
+}
+
+.md-td {
+  padding: 7px 14px;
+  color: var(--color-chat-text-secondary);
+  border-bottom: 1px solid rgba(var(--color-accent-rgb), 0.05);
+  text-align: left;
+}
+
+.md-table tbody tr:nth-child(even) {
+  background: rgba(100, 55, 120, 0.02);
+}
+
+.md-table tbody tr:last-child .md-td {
+  border-bottom: none;
+}
+
+.md-table thead tr:last-child th {
+  border-bottom: 1px solid rgba(var(--color-accent-rgb), 0.1);
+}
+
 /* ── Bold / Italic passthrough ──────────────────────────────────────────── */
 
 .md-root strong {
