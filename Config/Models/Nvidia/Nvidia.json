@@ -438,6 +438,9 @@
     "writer/palmyra-med-70b-32k": {
       "name": "writer/palmyra-med-70b-32k"
     },
+    "z-ai/glm-5.2": {
+      "name": "Glm 5 2"
+    },
     "zyphra/zamba2-7b-instruct": {
       "name": "zyphra/zamba2-7b-instruct"
     },
@@ -445,5 +448,5 @@
       "name": "z-ai/glm-5.1"
     }
   },
-  "_syncedAt": "2026-07-02T10:36:53.402Z"
+  "_syncedAt": "2026-07-03T13:35:23.011Z"
 }

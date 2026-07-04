@@ -5,7 +5,8 @@
  *
  * Supported syntax:
  *   Blocks  : headings (h1–h6), paragraphs, fenced code blocks,
- *             blockquotes, unordered lists, ordered lists, horizontal rules.
+ *             blockquotes, unordered lists, ordered lists, horizontal rules,
+ *             GFM tables (with column alignment).
  *   Inlines : **bold**, *italic*, `code`, [label](url).
  *
  * Usage:
@@ -211,20 +212,23 @@ function parseBlocks(lines) {
     }
 
     // ── Table  | col | col | separator row ─────────────────────────────
-    // A table starts with a pipe-leading line whose NEXT line is a GFM
-    // separator (only pipes, dashes, colons, and spaces).
-    if (/^\|/.test(line) && i + 1 < lines.length && /^\|?[\s|:*-]+\|?\s*$/.test(lines[i + 1])) {
+    // A table starts with a line containing a pipe whose NEXT line is a
+    // GFM separator row (only pipes, dashes, colons, and spaces).
+    const separatorRe = /^\|?[\s|:*-]+\|?\s*$/;
+    if (line.includes('|') && i + 1 < lines.length && separatorRe.test(lines[i + 1])) {
       const headers = parseTableRow(line);
-      i++; // consume separator
-      const alignments = parseTableAlignments(lines[i]);
-      i++;
-      const rows = [];
-      while (i < lines.length && /^\|/.test(lines[i]) && lines[i].trim() !== '') {
-        rows.push(parseTableRow(lines[i]));
+      if (headers.length >= 2) {
+        i++; // consume separator
+        const alignments = parseTableAlignments(lines[i]);
         i++;
+        const rows = [];
+        while (i < lines.length && lines[i].includes('|') && lines[i].trim() !== '') {
+          rows.push(parseTableRow(lines[i]));
+          i++;
+        }
+        blocks.push({ type: 'table', headers, alignments, rows });
+        continue;
       }
-      blocks.push({ type: 'table', headers, alignments, rows });
-      continue;
     }
 
     // ── Paragraph ──────────────────────────────────────────────────────
@@ -277,6 +281,16 @@ function buildDom(blocks) {
       }
 
       case 'codeblock': {
+        // When the language is "markdown", render the content as actual markdown
+        // instead of displaying it as raw code. AI models sometimes wrap their
+        // entire markdown output inside ```markdown fences.
+        const rawLang = (block.lang || '').toLowerCase();
+        if (rawLang === 'markdown' || rawLang === 'md') {
+          const mdContent = renderMarkdown(block.code);
+          frag.append(mdContent);
+          break;
+        }
+
         const wrap = document.createElement('div');
         wrap.className = 'md-codeblock';
 
@@ -286,8 +300,9 @@ function buildDom(blocks) {
 
         const langLabel = document.createElement('span');
         langLabel.className = 'md-codeblock__lang';
-        const rawLang = block.lang || 'text';
-        langLabel.textContent = rawLang.charAt(0).toUpperCase() + rawLang.slice(1).toLowerCase();
+        langLabel.textContent =
+          (block.lang || 'text').charAt(0).toUpperCase() +
+          (block.lang || 'text').slice(1).toLowerCase();
         header.append(langLabel);
 
         const actions = document.createElement('div');

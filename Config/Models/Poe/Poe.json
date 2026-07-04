@@ -1003,9 +1003,6 @@
     "kling-2.5-turbo-pro": {
       "name": "Kling 2 5 TURBO PRO"
     },
-    "kling-2.1-master": {
-      "name": "Kling 2 1 Master"
-    },
     "hailuo-02": {
       "name": "Hailuo 02"
     },
@@ -1040,9 +1037,6 @@
     "lyria": {
       "name": "Lyria"
     },
-    "kling-1.6-pro": {
-      "name": "Kling 1 6 PRO"
-    },
     "clarity-upscaler": {
       "name": "Clarity Upscaler"
     },
@@ -1051,9 +1045,6 @@
     },
     "veo-v3.1-fast": {
       "name": "Veo V3 1 FAST"
-    },
-    "wan-2.2": {
-      "name": "Wan 2 2"
     },
     "ltx-2-fast": {
       "name": "Ltx 2 FAST"
@@ -1066,9 +1057,6 @@
     },
     "vidu": {
       "name": "Vidu"
-    },
-    "vidu-q1": {
-      "name": "Vidu Q1"
     },
     "seedance-1.0-pro-fast": {
       "name": "Seedance 1 0 PRO FAST"
@@ -1091,13 +1079,6 @@
     },
     "luma-photon": {
       "name": "Luma Photon"
-    },
-    "ideogram": {
-      "name": "Ideogram",
-      "context_window": {
-        "context_length": 150,
-        "max_output_tokens": null
-      }
     },
     "seededit-3.0": {
       "name": "Seededit 3 0"
@@ -1125,13 +1106,6 @@
     },
     "hailuo-ai": {
       "name": "Hailuo Ai"
-    },
-    "ideogram-v2a-turbo": {
-      "name": "Ideogram V2A TURBO",
-      "context_window": {
-        "context_length": 150,
-        "max_output_tokens": null
-      }
     },
     "ideogram-v2a": {
       "name": "Ideogram V2A",
@@ -1230,9 +1204,6 @@
         "context_length": 16384,
         "max_output_tokens": 2048
       }
-    },
-    "stablediffusion3.5-t": {
-      "name": "Stablediffusion3 5 T"
     },
     "gpt-4o-aug": {
       "name": "Gpt 4o Aug",
@@ -1421,6 +1392,35 @@
     "seedance-2.0-mini": {
       "name": "Seedance 2 0 MINI"
     },
+    "kling-2.1-master": {
+      "name": "Kling 2 1 Master"
+    },
+    "kling-1.6-pro": {
+      "name": "Kling 1 6 PRO"
+    },
+    "wan-2.2": {
+      "name": "Wan 2 2"
+    },
+    "vidu-q1": {
+      "name": "Vidu Q1"
+    },
+    "ideogram": {
+      "name": "Ideogram",
+      "context_window": {
+        "context_length": 150,
+        "max_output_tokens": null
+      }
+    },
+    "ideogram-v2a-turbo": {
+      "name": "Ideogram V2A TURBO",
+      "context_window": {
+        "context_length": 150,
+        "max_output_tokens": null
+      }
+    },
+    "stablediffusion3.5-t": {
+      "name": "Stablediffusion3 5 T"
+    },
     "claude-sonnet-5": {
       "name": "Claude Sonnet 5"
     },
@@ -1508,5 +1508,5 @@
       }
     }
   },
-  "_syncedAt": "2026-07-02T10:37:20.767Z"
+  "_syncedAt": "2026-07-03T13:35:47.200Z"
 }
