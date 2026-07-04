@@ -5,6 +5,30 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
+    "poolside/laguna-xs-2.1:free": {
+      "name": "Poolside: Laguna XS 2.1 (free)",
+      "description": "Laguna XS 2.1 is the latest coding agent model in the 33B-A3B category from [Poolside](https://poolside.ai/) and a step forward from their Laguna XS.2 model (released in April 2026). It combines...",
+      "context_window": 262144,
+      "pricing": {
+        "input": 0,
+        "output": 0
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "poolside/laguna-xs-2.1": {
+      "name": "Poolside: Laguna XS 2.1",
+      "description": "Laguna XS 2.1 is the latest coding agent model in the 33B-A3B category from [Poolside](https://poolside.ai/) and a step forward from their Laguna XS.2 model (released in April 2026). It combines...",
+      "context_window": 262144,
+      "pricing": {
+        "input": 0.06,
+        "output": 0.12
+      },
+      "inputs": {
+        "text": true
+      }
+    },
     "anthropic/claude-sonnet-5": {
       "name": "Anthropic: Claude Sonnet 5",
       "description": "Sonnet 5 is Anthropic's most capable Sonnet-class model, with frontier performance across coding, agents, and professional work. It supports adaptive thinking with selectable reasoning effort levels (low, medium, high, max,...",
@@ -3626,9 +3650,9 @@
         "text": true
       }
     },
-    "inflection/inflection-3-pi": {
-      "name": "Inflection: Inflection 3 Pi",
-      "description": "Inflection 3 Pi powers Inflection's [Pi](https://pi.ai) chatbot, including backstory, emotional intelligence, productivity, and safety. It has access to recent news, and excels in scenarios like customer support and roleplay. Pi...",
+    "inflection/inflection-3-productivity": {
+      "name": "Inflection: Inflection 3 Productivity",
+      "description": "Inflection 3 Productivity is optimized for following instructions. It is better for tasks requiring JSON output or precise adherence to provided guidelines. It has access to recent news. For emotional...",
       "context_window": 8000,
       "pricing": {
         "input": 2.5,
@@ -3638,9 +3662,9 @@
         "text": true
       }
     },
-    "inflection/inflection-3-productivity": {
-      "name": "Inflection: Inflection 3 Productivity",
-      "description": "Inflection 3 Productivity is optimized for following instructions. It is better for tasks requiring JSON output or precise adherence to provided guidelines. It has access to recent news. For emotional...",
+    "inflection/inflection-3-pi": {
+      "name": "Inflection: Inflection 3 Pi",
+      "description": "Inflection 3 Pi powers Inflection's [Pi](https://pi.ai) chatbot, including backstory, emotional intelligence, productivity, and safety. It has access to recent news, and excels in scenarios like customer support and roleplay. Pi...",
       "context_window": 8000,
       "pricing": {
         "input": 2.5,
@@ -3657,6 +3681,30 @@
       "pricing": {
         "input": 0.17,
         "output": 0.43
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "meta-llama/llama-3.2-3b-instruct:free": {
+      "name": "Meta: Llama 3.2 3B Instruct (free)",
+      "description": "Llama 3.2 3B is a 3-billion-parameter multilingual large language model, optimized for advanced natural language processing tasks like dialogue generation, reasoning, and summarization. Designed with the latest transformer architecture, it...",
+      "context_window": 131072,
+      "pricing": {
+        "input": 0,
+        "output": 0
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "meta-llama/llama-3.2-3b-instruct": {
+      "name": "Meta: Llama 3.2 3B Instruct",
+      "description": "Llama 3.2 3B is a 3-billion-parameter multilingual large language model, optimized for advanced natural language processing tasks like dialogue generation, reasoning, and summarization. Designed with the latest transformer architecture, it...",
+      "context_window": 131072,
+      "pricing": {
+        "input": 0.05,
+        "output": 0.34
       },
       "inputs": {
         "text": true
@@ -3685,30 +3733,6 @@
       "inputs": {
         "text": true,
         "image": true
-      }
-    },
-    "meta-llama/llama-3.2-3b-instruct:free": {
-      "name": "Meta: Llama 3.2 3B Instruct (free)",
-      "description": "Llama 3.2 3B is a 3-billion-parameter multilingual large language model, optimized for advanced natural language processing tasks like dialogue generation, reasoning, and summarization. Designed with the latest transformer architecture, it...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0,
-        "output": 0
-      },
-      "inputs": {
-        "text": true
-      }
-    },
-    "meta-llama/llama-3.2-3b-instruct": {
-      "name": "Meta: Llama 3.2 3B Instruct",
-      "description": "Llama 3.2 3B is a 3-billion-parameter multilingual large language model, optimized for advanced natural language processing tasks like dialogue generation, reasoning, and summarization. Designed with the latest transformer architecture, it...",
-      "context_window": 131072,
-      "pricing": {
-        "input": 0.05,
-        "output": 0.34
-      },
-      "inputs": {
-        "text": true
       }
     },
     "qwen/qwen-2.5-72b-instruct": {
@@ -3856,8 +3880,8 @@
         "text": true
       }
     },
-    "openai/gpt-4o-mini-2024-07-18": {
-      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
+    "openai/gpt-4o-mini": {
+      "name": "OpenAI: GPT-4o-mini",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -3869,8 +3893,8 @@
         "image": true
       }
     },
-    "openai/gpt-4o-mini": {
-      "name": "OpenAI: GPT-4o-mini",
+    "openai/gpt-4o-mini-2024-07-18": {
+      "name": "OpenAI: GPT-4o-mini (2024-07-18)",
       "description": "GPT-4o mini is OpenAI's newest model after [GPT-4 Omni](/models/openai/gpt-4o), supporting both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable...",
       "context_window": 128000,
       "pricing": {
@@ -3894,19 +3918,6 @@
         "text": true
       }
     },
-    "openai/gpt-4o-2024-05-13": {
-      "name": "OpenAI: GPT-4o (2024-05-13)",
-      "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as...",
-      "context_window": 128000,
-      "pricing": {
-        "input": 5,
-        "output": 15
-      },
-      "inputs": {
-        "text": true,
-        "image": true
-      }
-    },
     "openai/gpt-4o": {
       "name": "OpenAI: GPT-4o",
       "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as...",
@@ -3914,6 +3925,19 @@
       "pricing": {
         "input": 2.5,
         "output": 10
+      },
+      "inputs": {
+        "text": true,
+        "image": true
+      }
+    },
+    "openai/gpt-4o-2024-05-13": {
+      "name": "OpenAI: GPT-4o (2024-05-13)",
+      "description": "GPT-4o (\"o\" for \"omni\") is OpenAI's latest AI model, supporting both text and image inputs with text outputs. It maintains the intelligence level of [GPT-4 Turbo](/models/openai/gpt-4-turbo) while being twice as...",
+      "context_window": 128000,
+      "pricing": {
+        "input": 5,
+        "output": 15
       },
       "inputs": {
         "text": true,
@@ -4095,18 +4119,6 @@
         "text": true
       }
     },
-    "openai/gpt-3.5-turbo": {
-      "name": "OpenAI: GPT-3.5 Turbo",
-      "description": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
-      "context_window": 16385,
-      "pricing": {
-        "input": 0.5,
-        "output": 1.5
-      },
-      "inputs": {
-        "text": true
-      }
-    },
     "openai/gpt-4": {
       "name": "OpenAI: GPT-4",
       "description": "OpenAI's flagship model, GPT-4 is a large-scale multimodal language model capable of solving difficult problems with greater accuracy than previous models due to its broader general knowledge and advanced reasoning...",
@@ -4114,6 +4126,18 @@
       "pricing": {
         "input": 30,
         "output": 60
+      },
+      "inputs": {
+        "text": true
+      }
+    },
+    "openai/gpt-3.5-turbo": {
+      "name": "OpenAI: GPT-3.5 Turbo",
+      "description": "GPT-3.5 Turbo is OpenAI's fastest model. It can understand and generate natural language or code, and is optimized for chat and traditional completion tasks.\n\nTraining data up to Sep 2021.",
+      "context_window": 16385,
+      "pricing": {
+        "input": 0.5,
+        "output": 1.5
       },
       "inputs": {
         "text": true
@@ -4157,5 +4181,5 @@
       }
     }
   },
-  "_syncedAt": "2026-07-02T09:25:01.882Z"
+  "_syncedAt": "2026-07-03T13:35:24.912Z"
 }

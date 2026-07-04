@@ -5,9 +5,6 @@
   "auth_header": "Authorization",
   "auth_prefix": "Bearer ",
   "models": {
-    "accounts/fireworks/models/glm-5p1": {
-      "name": "Glm 5p1"
-    },
     "accounts/fireworks/models/gpt-oss-120b": {
       "name": "GPT OSS 120B",
       "description": "OpenAI's open-weight 120B model — blazing-fast inference on Fireworks, outperforms many proprietary models",
@@ -23,6 +20,9 @@
         "input": 0.15,
         "output": 0.6
       }
+    },
+    "accounts/fireworks/models/glm-5p1": {
+      "name": "Glm 5p1"
     },
     "accounts/fireworks/models/deepseek-v4-pro": {
       "name": "DeepSeek V4 Pro",
@@ -63,5 +63,5 @@
       "name": "Glm 5p2"
     }
   },
-  "_syncedAt": "2026-07-02T09:25:10.298Z"
+  "_syncedAt": "2026-07-03T13:35:33.926Z"
 }

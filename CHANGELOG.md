@@ -6,6 +6,14 @@ Versions use `YYYY.MMDD.PATCH` (e.g. `2026.511.0`).
 
 ---
 
+## [2026.703.0] - 2026-07-03
+
+* Update model sync timestamps and enhance Markdown rendering
+* Updated AI Models
+* Chore(deps): Bump github/codeql-action/autobuild from 4.36.2 to 4.36.3
+
+---
+
 ## [2026.702.1] - 2026-07-02
 
 * Readme Update
